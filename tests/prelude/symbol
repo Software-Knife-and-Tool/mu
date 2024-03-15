@@ -1,0 +1,3 @@
+(mu:type-of (prelude:keyword "abcd"))	:keyword
+(prelude:type-of (prelude:keyword "abcd"))	keyword
+(prelude:type-of (prelude:gensym))	symbol

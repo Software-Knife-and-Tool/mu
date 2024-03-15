@@ -1,0 +1,20 @@
+(mu:type-of prelude:close)	:func
+(mu:type-of prelude:get-output-stream-string)	:func
+(mu:type-of prelude:make-string-stream)	:func
+(mu:type-of prelude:open)	:func
+(mu:type-of prelude:with-open-stream)	:func
+(mu:type-of prelude:read)	:func
+(mu:type-of prelude:read-byte)	:func
+(mu:type-of prelude:read-char)	:func
+(mu:type-of prelude:unread-char)	:func
+(mu:type-of prelude:write)	:func
+(mu:type-of prelude:write-byte)	:func
+(mu:write 1 () mu:std-out)	11
+(mu:write (mu:fx-add 1 2) () mu:std-out)	33
+(mu:write (prelude:string= "" "") () mu:std-out)	:t:t
+(mu:write (prelude:string= "" "1") () mu:std-out)	:nil:nil
+(mu:write (prelude:string= "1" "1") () mu:std-out)	:t:t
+(mu:write (prelude:string= "123" "1") () mu:std-out)	:nil:nil
+(mu:write (prelude:string= "" "ci") () mu:std-out)	:nil:nil
+(mu:write (prelude:string= "ci" "") () mu:std-out)	:nil:nil
+(mu:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () mu:std-out)	f#\f

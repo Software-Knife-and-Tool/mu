@@ -1,0 +1,37 @@
+(mu:type-of (mu:eval (prelude:read (mu:open :string :input "`,mu:fx-add") () ())))	:func
+(mu:type-of (mu:eval (prelude:read (mu:open :string :input "`,mu:version") () ())))	:vector
+(mu:eval (prelude:read (mu:open :string :input "`\"abc\"") () ()))	"abc"
+(mu:eval (prelude:read (mu:open :string :input "`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
+(mu:eval (prelude:read (mu:open :string :input "`#\\a") () ()))	#\a
+(mu:eval (prelude:read (mu:open :string :input "`mu:std-out") () ()))	mu:std-out
+(mu:eval (prelude:read (mu:open :string :input "`1234") () ()))	1234
+(mu:eval (prelude:read (mu:open :string :input "`(,(mu:cons 'satisfies ()))") () ()))	((satisfies))
+(mu:eval (prelude:read (mu:open :string :input "`(\"abc\")") () ()))	("abc")
+(mu:eval (prelude:read (mu:open :string :input "`(#(:t 1 2 3))") () ()))	(#(:t 1 2 3))
+(mu:eval (prelude:read (mu:open :string :input "`(#\\a)") () ()))	(#\a)
+(mu:eval (prelude:read (mu:open :string :input "`(())") () ()))	(:nil)
+(mu:eval (prelude:read (mu:open :string :input "`((1234) 1234 symbol)") () ()))	((1234) 1234 symbol)
+(mu:eval (prelude:read (mu:open :string :input "`((a b) c)") () ()))	((a b) c)
+(mu:eval (prelude:read (mu:open :string :input "`()") () ()))	:nil
+(mu:eval (prelude:read (mu:open :string :input "`(,(mu:fx-add 1 2))") () ()))	(3)
+(mu:eval (prelude:read (mu:open :string :input "`(,1 (2) 3)") () ()))	(1 (2) 3)
+(mu:eval (prelude:read (mu:open :string :input "`(,1234 ,@'(a b c))") () ()))	(1234 a b c)
+(mu:eval (prelude:read (mu:open :string :input "`(,@'(a b c))") () ()))	(a b c)
+(mu:eval (prelude:read (mu:open :string :input "`(,@(mu:fx-add 1 2))")) () ())	3
+(mu:eval (prelude:read (mu:open :string :input "`(0 ,@'(a b c) 1)") () ()))	(0 a b c 1)
+(mu:eval (prelude:read (mu:open :string :input "`(1 2 ,@3)") () ()))	(1 2 . 3)
+(mu:eval (prelude:read (mu:open :string :input "`(1 2 3)") () ()))	(1 2 3)
+(mu:eval (prelude:read (mu:open :string :input "`(1.0 b (2))") () ()))	(1.0000 b (2))
+(mu:eval (prelude:read (mu:open :string :input "`(1234 symbol)") () ()))	(1234 symbol)
+(mu:eval (prelude:read (mu:open :string :input "`(1234)") () ()))	(1234)
+(mu:eval (prelude:read (mu:open :string :input "`(a b c)") () ()))	(a b c)
+(mu:eval (prelude:read (mu:open :string :input "`,(mu:fx-add 1 2)") () ()))	3
+(mu:eval (prelude:read (mu:open :string :input "`,(mu:type-of 'symbol)") () ()))	:symbol
+(mu:eval (prelude:read (mu:open :string :input "`,1234") () ()))	1234
+(mu:eval (prelude:read (mu:open :string :input "`,`\"abc\"") () ()))	"abc"
+(mu:eval (prelude:read (mu:open :string :input "`,`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
+(mu:eval (prelude:read (mu:open :string :input "`,`#\\a") () ()))	#\a
+(mu:eval (prelude:read (mu:open :string :input "`,`mu:std-out") () ()))	mu:std-out
+(mu:eval (prelude:read (mu:open :string :input "`,`1234") () ()))	1234
+(mu:eval (prelude:read (mu:open :string :input "`,`(1234)") () ()))	(1234)
+(mu:eval (prelude:read (mu:open :string :input "``1234") () ()))	`1234

@@ -1,0 +1,12 @@
+(mu:boundp 'mu:foo)	:nil
+(mu:boundp 'mu:foo)	:nil
+(mu:boundp 'mu:std-in)	mu:std-in
+(mu:sy-name 'mu:std-in)	"std-in"
+(mu:sy-ns 'mu:std-in)	:mu
+(mu:sy-ns 'std-in)	:nil
+(mu:sy-ns :std-in)	:keyword
+(mu:sy-ns ())	:nil
+(mu:sy-ns :nil)	:nil
+(mu:sy-val 'mu:std-in)	#<stream: id: 0 type: std-in dir: :input state: open>
+(mu:keyword "abcde")	:abcde
+(mu:symbol "abcde")	abcde

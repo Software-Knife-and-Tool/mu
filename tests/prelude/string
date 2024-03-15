@@ -1,0 +1,20 @@
+(mu:type-of prelude:schar)	:func
+(mu:type-of prelude:string=)	:func
+(mu:type-of prelude:string)	:func
+(mu:type-of prelude:string-append)	:func
+(mu:type-of prelude:substr)	:func
+(prelude:string-append '("abc" "123"))	"abc123"
+(prelude:string-append '("" "abc"))	"abc"
+(prelude:string-append '("abc" ""))	"abc"
+(prelude:string-append '("" ""))	""
+(prelude:string= "abc" "abc")	:t
+(prelude:string= "abd" "abc")	:nil
+(prelude:stringp "abc")	:t
+(prelude:stringp 1)	:nil
+(prelude:string-find #\a "abc")	#\a
+(prelude:string-find #\d "abc")	:nil
+(prelude:string-position #\a "abc")	0
+(prelude:string-position #\d "abc")	:nil
+(prelude:substr "abc" 0 0)	"a"
+(prelude:substr "abc" 0 1)	"ab"
+(prelude:substr "abc" 1 3)	"bc"

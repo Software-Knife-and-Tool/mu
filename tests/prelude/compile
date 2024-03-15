@@ -1,0 +1,22 @@
+(mu:eq :func (mu:type-of prelude:compile))	:t
+(mu:eq :func (mu:type-of (prelude:compile '(lambda () 1))))	:t
+(mu:eq :func (mu:type-of (prelude:compile '(lambda (a b) b))))	:t
+(mu:eq :func (mu:type-of (prelude:compile '(lambda (a) "hoo"))))	:t
+(mu:eq :func (mu:type-of (prelude:compile '(lambda (a) a))))	:t
+(mu:eval (prelude:compile '(if :t :t ())))	:t
+(mu:eval (prelude:compile '(if () () :t)))	:t
+(mu:eval (prelude:compile '(if :t () :t)))	:nil
+(mu:eval (prelude:compile '(if () :t ())))	:nil
+(mu:eval (prelude:compile '(if :t :t ())))	:t
+(mu:eval (prelude:compile '(if :t :t :t)))	:t
+(mu:eval (prelude:compile '(if () ())))	:nil
+(mu:eval (prelude:compile '(if () :t)))	:nil
+(mu:eval (prelude:compile '(if :t ())))	:nil
+(mu:eval (prelude:compile '(if :t :t)))	:t
+(mu:eval (prelude:compile '(if () (mu:fx-add 0 1) (mu:fx-add 0 0))))	0
+(mu:eval (prelude:compile '(if :t (mu:fx-add 0 1) (mu:fx-add 0 0))))	1
+(mu:eval (prelude:compile '(if (prelude:null ()) (mu:fx-add 0 1) (mu:fx-add 0 0))))	1
+(mu:eval (prelude:compile '(if (prelude:not (prelude:null :t)) (mu:fx-add 0 1) (mu:fx-add 0 0))))	1
+(mu:eval (prelude:compile '(if (prelude:null ()) (mu:fx-add 0 1) (prelude:write "should not eval" () ()))))	1
+(mu:eval (prelude:compile '(if (prelude:null :t) (prelude:write "should not eval" () ()) (mu:fx-add 0 0))))	0
+(mu:eval (prelude:compile '((:lambda (fn) (prelude:apply (:lambda (fn) (mu:eq :func (mu:type-of fn))) `(,fn))) mu:eq)))	:t

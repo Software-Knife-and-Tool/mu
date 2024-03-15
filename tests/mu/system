@@ -1,0 +1,13 @@
+(mu:type-of mu:exit)	:func
+(mu:type-of mu:getcwd)	:func
+(mu:type-of mu:getpid)	:func
+(mu:type-of mu:proc-tm)	:func
+(mu:type-of mu:spawn)	:func
+(mu:type-of mu:sys-tm)	:func
+(mu:type-of mu:sysinfo)	:func
+(mu:type-of mu:uname)	:func
+(mu:type-of (mu:getcwd))	:vector
+(mu:type-of (mu:getpid))	:fixnum
+(mu:type-of (mu:proc-tm))	:fixnum
+(mu:type-of (mu:sys-tm))	:fixnum
+(mu:type-of (mu:uname))	:struct

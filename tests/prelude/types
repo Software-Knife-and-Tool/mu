@@ -1,0 +1,43 @@
+(mu:type-of prelude:define-type)	:func
+(mu:type-of prelude:%prelude-type-p)	:func
+(mu:type-of prelude:type-of)	:func
+(mu:type-of (mu:eval (prelude:compile '((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%make-type "test" '((:v . 2))))))))	:struct
+(prelude:type-of (mu:eval (prelude:compile '((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%make-type "test" '((:v . 2))))))))	test
+((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%type-ref :v (prelude:%make-type "test" '((:v . 2))))))	(:v . 2)
+(prelude:typep '(1 2) :cons)	:t
+(prelude:typep 1 :fixnum)	:t
+(prelude:typep (mu:struct :struct ()) :struct)	:t
+(prelude:typep "abc" :vector)	:t
+(prelude:typep #(:t 1 2 3) :vector)	:t
+(prelude:typep mu:std-in :stream)	:t
+(prelude:typep #\a :char)	:t
+(prelude:typep 1.024e23 :float)	:t
+(prelude:typep :foo :keyword)	:t
+(prelude:typep 'foo :symbol)	:t
+(prelude:typep () :null)	:t
+(prelude:typep () 'symbol)	:t
+(prelude:typep () '(satisfies prelude:null))	:t
+(prelude:typep 1 '(satisfies prelude:fixnump))	:t
+(prelude:typep 1024e23 '(satisfies prelude:floatp))	:t
+(prelude:typep '(1 2 3) '(satisfies prelude:consp))	:t
+(prelude:typep #(:t 1 2 3) '(satisfies prelude:vectorp))	:t
+(prelude:typep #\a '(satisfies prelude:charp))	:t
+(prelude:typep () '(not symbol))	:nil
+(prelude:typep () '(and))	:t
+(prelude:typep () '(and (satisfies prelude:null)))	:t
+(prelude:typep () '(and :null (satisfies prelude:null)))	:t
+(prelude:typep () '(or))	:nil
+(prelude:typep () '(or (satisfies prelude:null)))	:t
+(prelude:typep () '(or :null (satisfies prelude:null)))	:t
+(prelude:typep prelude:1+ 'function)	:t
+(prelude:typep 1234 'number)	:t
+(prelude:typep 1.024 'number)	:t
+(prelude:typep 1234 'integer)	:t
+(prelude:typep #(:t 1 2 3) 'sequence)	:t
+(prelude:typep "123" 'sequence)	:t
+(prelude:typep '(1 2 3) 'sequence)	:t
+(prelude:typep "abc" 'string)	:t
+(prelude:typep mu:std-in 'stream)	:t
+(prelude:typep :sym 'symbol)	:t
+(prelude:typep 'sym 'symbol)	:t
+(prelude:typep (prelude:read (prelude:make-string-stream :input "#*1111") () ()) 'bit-vector)	:t
