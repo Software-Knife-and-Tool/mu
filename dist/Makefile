@@ -3,7 +3,7 @@
 #
 .PHONY: dist clean
 
-VERSION = 0.0.37
+VERSION = 0.0.38
 
 BASE = mu
 DOCS = ../doc
@@ -42,4 +42,4 @@ dist:
 	@rm -rf $(BASE)
 
 clean:
-	@rm -rf $(BASE)-$(VERSION).tgz $(BASE) $(MU_SHELL) $(MU_SERVER)
+	@rm -rf $(BASE)-$(VERSION).tgz $(BASE) $(MU_EXEC) $(MU_LD) $(MU_SHELL) $(MU_SERVER) prelude.l
