@@ -1,0 +1,50 @@
+[package]
+name = "mu"
+version = "0.0.1"
+edition = "2021"
+authors = ["me <putnamjm.design@gmail.com>"]
+
+[[bin]]
+name = "mu-exec"
+path = "src/exec/main.rs"
+
+[[bin]]
+name = "mu-ld"
+path = "src/ld/main.rs"
+
+[[bin]]
+name = "mu-sh"
+path = "src/sh/main.rs"
+
+[lib]
+name = "mu"
+path = "src/mu/lib.rs"
+crate-type = ["lib"]
+bench = false
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+
+[dependencies]
+async-std = "1.12.0"
+cpu-time = "1.0.0"
+crossbeam = "0.8.3"
+elf = "0.7.4"
+faerie = "0.16.0"
+futures = "0.3.30"
+futures-locks = "0.7.1"
+getopt = "1.1.3"
+lazy_static = "1.4.0"
+libc = "0.2.153"
+memmap = "0.7.0"
+modular-bitfield = "0.11.2"
+num_enum = "0.7.1"
+oports = "1.0.0"
+page_size = "0.6.0"
+rustix = { version = "0.38.30", features = ["process", "system", "time"] }
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+tikv-jemallocator = "0.5.4"

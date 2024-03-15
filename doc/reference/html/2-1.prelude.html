@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2. Prelude</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="./reference.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2. Prelude</h1>
+</header>
+<h4 id="about-the-prelude-library"><strong>about the prelude
+library</strong></h4>
+<hr />
+<p><em>prelude</em> is a syntactic and semantic extension library coded
+in the <em>mu</em> language primarily for the benefit of the
+<em>mu</em> library. It adds a complement of functions purposely
+missing from <em>mu</em>, an enhanced exception facility, a compiler for
+lambdas with rest arguments and function closures, and macros.
+<em>preface</em> is intended to be largely, if not wholly coded on
+<em>prelude</em>.</p>
+<p><em>Prelude</em> symbols reside in the <em>prelude</em> namespace. A
+complete listing of <em>prelude</em> external symbols can be found in
+the <a href="2-12.prelude-symbols.html"><em>prelude symbol
+list</em></a>.</p>
+<h5 id="type-designators">Type Designators</h5>
+<hr>
+<p>Functions and special operators described in this reference specify
+type designators for arguments and returned values. Most of these map
+directly onto the <em>mu</em> type class, but <em>prelude</em> extends a
+few synthetic system classes. In general, a <strong><em>prelude
+type</em></strong> is implemented as a mu
+<strong><em>struct</em></strong> with supporting predicate, constructor,
+and accessors.</p>
+<ul>
+<li><strong><em>function</em></strong>: an applicative type that
+implements lambda rest functions and lexical closures.</li>
+<li><strong><em>namespace</em></strong>: a symbol map similar to the
+Common LISP package type</li>
+<li><strong><em>exception</em></strong>: an exception object type</li>
+<li><strong><em>vector</em></strong>: a displaced vector type</li>
+</ul>
+<h5 id="synopsis-of-prelude-additions-to-the-mu-language">Synopsis of
+<em>prelude</em> additions to the <em>mu</em> language</h5>
+<hr>
+<div class="list">
+<p>boolean functions</br> debug repl</br> extended fixnum
+arithmetic</br> extended reader syntax</br> describe and inspect</br>
+file loader</br> format facility</br> improved exception handling, break
+loop</br> lambdas with rest arguments</br> lexical closures</br> list
+folds, maps, and utility functions</br> macro definition and
+expansion</br
+reader current namespace and extended syntax</br> stream
+designators</br> symbol and character macros</br> typep and type
+predicates</br></p>
+</div>
+</body>
+</html>

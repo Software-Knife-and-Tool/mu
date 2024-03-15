@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2.5 Functions</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="./reference.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2.5 Functions</h1>
+</header>
+<h4 id="about-prelude-functions"><strong>about prelude
+functions</strong></h4>
+<hr>
+<p><em>prelude</em> functions extend the fixed-arity <em>mu</em>
+function by accommodating rest arguments and closures.</p>
+<p>Applications of <em>prelude</em> lambda functions will subsequently
+be compiled as a call to the fixed-arity <em>prelude:apply</em> function
+which manages the function’s lexical environment and arranges for
+<em>mu:apply</em> to correctly evaluate and process the arguments.</p>
+<p>The <em>prelude</em> compiler compiles all forms so that they can be
+directly evaluated by the runtime evaluator.</p>
+<h5 id="apply-function-arg-list-value">apply <em>function</em>
+<em>arg-list</em> =&gt; <em>value</em></h5>
+<hr />
+<div class="list">
+<p><dfn>function</dfn> : a <dfn>prelude</dfn> function</br>
+<dfn>arg-list</dfn>: a list of <dfn>prelude</dfn> forms, possibly
+()</br></p>
+</div>
+<p><em>apply</em> manages the runtime’s lexical environment for closures
+and creates appropriate argument lists for the runtime evaluator.</p>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2.8 Exceptions</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="./reference.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2.8 Exceptions</h1>
+</header>
+<h4 id="about-prelude-exceptions"><strong>about prelude
+exceptions</strong></h4>
+<hr />
+<p><em>prelude</em> exceptions extend <em>mu</em> exceptions and capture
+the dynamic environment when the exception was raised.</p>
+<p><strong><em>exceptp</em></strong> <em>exception</em> =&gt;
+<em>generalized boolean</em></p>
+<hr>
+<div class="list">
+<p><dfn>exception</dfn> : an <dfn>object</dfn></br></p>
+</div>
+<p><em>exceptp</em> is the <em>prelude</em> exception type
+predicate.</p>
+<p><strong><em>exceptf</em></strong> <em>stream</em>
+<em>format-string</em> <em>printenv</em> <em>exception</em> =&gt;
+<em>()</em></p>
+<hr>
+<div class="list">
+<p><dfn>stream</dfn> : an <dfn>output stream-designator</dfn></br>
+<dfn>format-string</dfn> : a <dfn>string</dfn> acceptable to
+prelude:format</br> <dfn>printenv</dfn> : a <dfn>generalized
+boolean</dfn></br> <dfn>exception</dfn> : a <dfn>string</dfn></br></p>
+</div>
+<p><em>exceptf</em> prints a human-readable description of
+<em>exception</em> on <em>stream</em> by <em>prelude:format</em>. If
+<em>printenv</em> is false, the captured environment will not be
+printed.</p>
+<p><strong><em>with-exception</em></strong> <em>handler</em>
+<em>thunk</em> =&gt; <em>form</em></p>
+<hr>
+<div class="list">
+<p><dfn>handler</dfn> : an <dfn>exception</dfn> handler function</br>
+<dfn>thunk</dfn> : a <dfn>function</dfn></br></p>
+</div>
+<p><em>handler</em> is a function of one argument, a <em>prelude</em>
+exception. <em>thunk</em> is a function of no arguments.</p>
+<p><em>with-exception</em> executes <em>thunk</em>. If an exception is
+raised while executing <em>thunk</em>, a <em>prelude</em> exception is
+created and <em>handler</em> is called with it as the sole argument. In
+this case, <em>with-exception</em> returns whatever <em>handler</em>
+returns. If no exception is raised, <em>with-exception</em> returns
+whatever <em>thunk</em> returns.</p>
+<p><em>exceptf</em> prints a human-readable description of
+<em>exception</em> on <em>stream</em> by <em>prelude:format</em>.</p>
+<p><strong><em>break</em></strong> <em>exception</em></p>
+<hr>
+<div class="list">
+<p><dfn>exception</dfn> : an <dfn>exception</dfn> object</br></p>
+</div>
+<p><em>break</em> prints the <em>exception</em> via
+<em>prelude:exceptf</em> and enters an interactive loop.</p>
+<p><strong><em>error</em></strong> <em>format-string</em>
+<em>value</em></p>
+<hr>
+<div class="list">
+<p><dfn>format-string</dfn> : a <dfn>string</dfn> acceptable to
+prelude:format</br> <dfn>value</dfn> : an <dfn>object</dfn></br></p>
+</div>
+<p><em>error</em> prints <em>value</em> with <em>prelude:format</em>,
+creates an exception object, and raises it. <em>error</em> does not
+return.</p>
+<p><strong><em>raise</em></strong> <em>value</em> <em>source</em>
+<em>reason</em></p>
+<hr>
+<div class="list">
+<p><dfn>value</dfn> : an <dfn>object</dfn></br> <dfn>source</dfn> : a
+<dfn>symbol</dfn></br> <dfn>erason</dfn> : a <dfn>string</dfn></br></p>
+</div>
+<p><em>raise</em> creates an exception object and raises it.
+<em>source</em> is the symbol of whatever function called <em>raise</em>
+and <em>reason</em> is a string explaining why the exception was raised.
+<em>raise</em> does not return.</p>
+<p><strong><em>warn</em></strong> <em>value</em> <em>message</em> =&gt;
+<em>value</em></p>
+<hr>
+<div class="list">
+<p><dfn>value</dfn> : an <dfn>object</dfn></br> <dfn>message</dfn> : a
+<dfn>string</dfn></br></p>
+</div>
+<p>Intended primarily for debugging, <em>warn</em> does not raise an
+exception. It prints <em>value</em> and <em>message</em> on a single
+line formatted as a comment to <em>mu:err-out</em>. <em>warn</em>
+returns <em>value</em>.</p>
+</body>
+</html>
