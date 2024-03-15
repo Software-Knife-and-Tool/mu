@@ -255,16 +255,16 @@ The  `perf`  makefile offers some development options.
 The *mu* binaries, libraries, and source files are installed in `/opt/mu`. The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/mu/mu` along with supplied library sources.
 
 ```
-mu-sh		shell runtime binary, stdio listener
+mu-sys		shell runtime binary, stdio listener
 mu-ld		image loader
 mu-server	server runtime, socket listener
-mu		shell script for running the prelude listener with mu-sh
+mu		shell script for running the prelude listener with mu-sys
 ```
 
 
 ```
-OVERVIEW: mu-sh - posix platform mu shell
-USAGE: mu-sh [options] [file...]
+OVERVIEW: mu-sys - posix platform mu shell
+USAGE: mu-sys [options] [file...]
 
 runtime: x.y.z: [-h?psvcelq] [file...]
 OPTIONS:
@@ -290,7 +290,7 @@ prelude>
 *rlwrap* makes the *mu* and *runtime* repls much more useful, with command history and line editing.
 
 ```
-% alias mu-sh='rlwrap -m /opt/mu/bin/mu'
+% alias mu-sys='rlwrap -m /opt/mu/bin/mu'
 ```
 
 Depending on your version of *rlwrap*, *mu* may exhibit odd echoing behavior. Adding
@@ -302,7 +302,7 @@ set enable-bracketed-paste off
 to your `~/.inputrc` may help. If you want to run the prelude listener as part of an interactive session:
 
 ```
-alias ,mu-sh='rlwrap mu --eval='\''(prelude:repl)'\'''
+alias ,mu-sys='rlwrap mu --eval='\''(prelude:repl)'\'''
 ```
 
 
@@ -322,11 +322,10 @@ Usage: (mu-server, mu-ld, and mu-exec have similar options)
 
 ```
 
-mu-sh -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
-mu-sh -c "npages:1024,gcmode:auto"	default configuration
+mu-sys -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
+mu-sys -c "npages:1024,gcmode:auto"	default configuration
 
-mu --config="npages:4096,gcmode:demand"
-                                        4096 pages, garbage collection runs on demand
+mu --config="npages:4096,gcmode:demand" 4096 pages, garbage collection runs on demand
   
 ```
 

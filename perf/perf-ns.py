@@ -14,7 +14,7 @@ with open(os.path.join(ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
 
 def storage(ns, group, line, test):
     if ns == 'mu':
-        proc = subprocess.Popen(['../dist/mu-sh',
+        proc = subprocess.Popen(['../dist/mu-sys',
                                  '-p',
                                  '-l./perf.l',
                                  '-e (perf:%sdelta (:lambda ()' + test + ') :nil)'],\
@@ -22,7 +22,7 @@ def storage(ns, group, line, test):
                                 stderr=subprocess.PIPE)
 
     if ns == 'frequent':
-        proc = subprocess.Popen(['../dist/mu-sh',
+        proc = subprocess.Popen(['../dist/mu-sys',
                                  '-p',
                                  '-l./perf.l',
                                  '-e (perf:%sdelta (:lambda ()' + test + ') :nil)'],\
@@ -30,7 +30,7 @@ def storage(ns, group, line, test):
                                 stderr=subprocess.PIPE)
 
     if ns == 'prelude':
-        proc = subprocess.Popen(['../dist/mu-sh',
+        proc = subprocess.Popen(['../dist/mu-sys',
                                  '-l../dist/prelude.l',
                                  '-q (prelude:%init-ns)',
                                  '-p',
@@ -51,7 +51,7 @@ def storage(ns, group, line, test):
 
 def timing(ns, test):
     if ns == 'mu':
-        proc = subprocess.Popen(['../dist/mu-sh',
+        proc = subprocess.Popen(['../dist/mu-sys',
                                  '-p',
                                  '-l./perf.l',
                                  '-e (perf:%tdelta (:lambda ()' + test + ') :nil)'],\
@@ -59,7 +59,7 @@ def timing(ns, test):
                                 stderr=subprocess.PIPE)
 
     if ns == 'frequent':
-        proc = subprocess.Popen(['../dist/mu-sh',
+        proc = subprocess.Popen(['../dist/mu-sys',
                                  '-p',
                                  '-l./perf.l',
                                  '-e (perf:%tdelta (:lambda ()' + test + ') :nil)'],\
@@ -67,7 +67,7 @@ def timing(ns, test):
                                 stderr=subprocess.PIPE)
 
     if ns == 'prelude':
-        proc = subprocess.Popen(['../dist/mu-sh',
+        proc = subprocess.Popen(['../dist/mu-sys',
                                  '-l../dist/prelude.l',
                                  '-q (prelude:%init-ns)',
                                  '-p',

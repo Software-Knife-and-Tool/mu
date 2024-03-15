@@ -8,12 +8,12 @@ VERSION = 0.0.37
 BASE = mu
 DOCS = ../doc
 DIST = ../dist
-MU_SH = ./mu-sh
+MU_SYS = ./mu-sys
 MU_LD = ./mu-ld
 MU_EXEC = ./mu-exec
 
 dist:
-	@chmod 755 $(DIST)/mu-sh
+	@chmod 755 $(DIST)/mu-sys
 
 	@install -d $(BASE)
 	@install -d $(BASE)/mu
@@ -31,7 +31,7 @@ dist:
 
 	@install -m 755 $(MU_EXEC) $(BASE)/bin
 	@install -m 755 $(MU_LD) $(BASE)/bin
-	@install -m 755 $(MU_SH) $(BASE)/bin
+	@install -m 755 $(MU_SYS) $(BASE)/bin
 	@install -m 755 ./mu.sh $(BASE)/bin/mu
 
 	@install -d $(BASE)/doc/html
