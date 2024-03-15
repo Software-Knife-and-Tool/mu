@@ -13,6 +13,8 @@ MU_LD = ./mu-ld
 MU_EXEC = ./mu-exec
 
 dist:
+	@chmod 755 $(DIST)/mu-sh
+
 	@install -d $(BASE)
 	@install -d $(BASE)/mu
 	@install -d $(BASE)/mu/prelude
