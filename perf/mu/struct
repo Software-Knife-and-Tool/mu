@@ -1,0 +1,2 @@
+(mu:st-type (mu:struct :foo ()))
+(mu:st-vec (mu:struct :foo '(1 2 3 4)))

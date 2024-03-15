@@ -1,0 +1,7 @@
+(mu:fx-add 0 1)
+(mu:ash 1 1)
+(mu:ash 1 -1)
+(mu:fx-div 1 1)
+(mu:fx-lt 1 1)
+(mu:fx-mul 1 1)
+(mu:fx-sub 1 1)

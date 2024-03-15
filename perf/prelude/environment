@@ -1,0 +1,5 @@
+(prelude:type-of (prelude:make-env ()))
+(prelude:envp (prelude:make-env ()))
+(prelude:add-env (prelude:make-env ()) 'a 'b)
+(prelude:get-env (prelude:make-env '((a . b))) 'a)
+(prelude:make-env '((a . b)))
