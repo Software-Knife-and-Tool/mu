@@ -1,0 +1,15 @@
+Cargo.lock
+mu*.tgz
+dist/mu-exec
+dist/mu-sh
+dist/mu-ld
+dist/mu-server
+dist/prelude.l
+target
+*.out
+doc/rustdoc
+perf/json
+perf/current.report
+perf/cachegrind.report
+perf/callgrind.report
+perf/memcheck.report
