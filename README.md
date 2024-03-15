@@ -44,12 +44,12 @@ Most of our core computational frameworks are built on static systems and are fr
 ------
 
 - *mu*, a functional forward system language
-- *mu/mu*, minimal POSIX runtime suitable for containers
+- *mu/sys*, minimal POSIX runtime suitable for containers
 - *mu*, a native code compiler
 - small and simple installation, no external dependencies
 - add interactivity and extensibility to application implementations
 - Rust FFI system
-- mostly Common Lisp semantics
+- mostly Common Lisp syntax
 - resource overhead equivalent to a UNIX shell
 - minimal external crate dependencies
 - futures multi-threading and non-blocking I/O
