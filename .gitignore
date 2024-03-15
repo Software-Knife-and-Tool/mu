@@ -1,7 +1,7 @@
 Cargo.lock
 mu*.tgz
 dist/mu-exec
-dist/mu-sh
+dist/mu-sys
 dist/mu-ld
 dist/mu-server
 dist/prelude.l

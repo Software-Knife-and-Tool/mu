@@ -6,19 +6,19 @@ authors = ["me <putnamjm.design@gmail.com>"]
 
 [[bin]]
 name = "mu-exec"
-path = "src/exec/main.rs"
+path = "src/mu-exec/main.rs"
 
 [[bin]]
 name = "mu-ld"
-path = "src/ld/main.rs"
+path = "src/mu-ld/main.rs"
 
 [[bin]]
-name = "mu-sh"
-path = "src/sh/main.rs"
+name = "mu-sys"
+path = "src/mu-sys/main.rs"
 
 [lib]
-name = "mu"
-path = "src/mu/lib.rs"
+name = "libmu"
+path = "src/libmu/lib.rs"
 crate-type = ["lib"]
 bench = false
 

@@ -88,7 +88,7 @@ while getopts "$optspec" optchar; do
                     usage
                     ;;
                 version)
-                    $BASE/bin/mu-sh -v
+                    $BASE/bin/mu-sys -v
                     echo
                     exit 2
                     ;;
@@ -114,8 +114,7 @@ done
 
 len="${#@}"
 
-
 for (( i=${OPTIND}; i<="${#@}"; i++ )); do SOURCES+=" \"${!i}\"" ; done
 
 export MU_LOAD_LIST=SOURCES
-eval $BASE/bin/mu-sh $PRELUDE_FILES -q "\(prelude:%init-ns\)" $OPTIONS # $BASE/mu/mu.l ${SOURCES[@]}
+eval $BASE/bin/mu-sys $PRELUDE_FILES -q "\(prelude:%init-ns\)" $OPTIONS # $BASE/mu/mu.l ${SOURCES[@]}

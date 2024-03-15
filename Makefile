@@ -38,17 +38,17 @@ tags:
 release:
 	@cargo build --release --bin mu-exec
 	@cp target/release/mu-exec dist
-	@cargo build --release --bin mu-sh
-	@cp target/release/mu-sh dist
+	@cargo build --release --bin mu-sys
+	@cp target/release/mu-sys dist
 	@cargo build --release --bin mu-ld
 	@cp target/release/mu-ld dist
 	@make dist --no-print-directory
 
 debug:
-	@cargo build --bin mu-sh
-	@cp target/debug/mu-sh dist
+	@cargo build --bin mu-sys
+	@cp target/debug/mu-sys dist
 	@cargo build --release --bin mu-ld
-	@cp target/release/mu-ld dist
+	@cp target/debug/mu-ld dist
 	@make dist --no-print-directory
 
 dist:

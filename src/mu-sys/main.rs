@@ -9,12 +9,12 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate mu;
+extern crate libmu;
 
 #[allow(unused_imports)]
 use {
     getopt::Opt,
-    mu::{Condition, Mu, Result, Tag},
+    libmu::{Condition, Mu, Result, Tag},
     std::{fs, io::Write},
 };
 
@@ -47,7 +47,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
                 Some(opt) => match opt {
                     Opt('h', None) | Opt('?', None) => usage(),
                     Opt('v', None) => {
-                        print!("mu-sh: {} ", Mu::VERSION);
+                        print!("mu-sys: {} ", Mu::VERSION);
                         return None;
                     }
                     Opt('p', None) => {
@@ -80,7 +80,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
 }
 
 fn usage() {
-    println!("mu-sh: {}: [-h?pvcelq] [file...]", Mu::VERSION);
+    println!("mu-sys: {}: [-h?pvcelq] [file...]", Mu::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value,...]");
