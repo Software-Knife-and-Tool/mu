@@ -35,14 +35,16 @@
               (mu:cdr loop)))
            ())))
       `(,(mu:cons :comma   (:lambda (expr list)
-                             (mu:cons () (mu:append list (prelude:%list `(:l-comma ,expr))))))
+                             (mu:cons () (mu:append list (prelude:%list `(:l-comma ,(mu:car expr)))))))
          ,(mu:cons :comma@ (:lambda (expr list)
-                             (mu:cons () (mu:append list (prelude:%list `(:l-coma@ ,expr))))))
+                             (mu:cons () (mu:append list (prelude:%list `(:l-coma@ ,(mu:car expr)))))))
          ,(mu:cons :atom   (:lambda (expr list)
                              (mu:cons () (mu:append list (prelude:%list `(:l-atom ,(mu:car expr)))))))
          ,(mu:cons :list   (:lambda (expr list)
-                             (mu:cons () (mu:append list (prelude:%list `(:l-list ,(prelude:%qq-read-list stream)))))))
-         ,(mu:cons :list-  (:lambda (expr list) (mu:cons :t list)))
+                             (prelude:warn expr "%qq-read-list: already read")
+                             (mu:cons () (mu:append list (prelude:%list `(:l-list (prelude:%qq-read-list stream)))))))
+         ,(mu:cons :list-  (:lambda (expr list)
+                             (mu:cons :t list)))
          ,(mu:cons :quasi  (:lambda (expr list)
                              (mu:cons () (mu:append list `(,(prelude:%qq-parse stream))))))))))
 
@@ -73,7 +75,6 @@
 
 (mu:intern :prelude "%qq-compile"
    (:lambda (qq-expr)
-     (prelude:warn qq-expr "%qq-compile")
      ((:lambda (type expr compiler-map)
         ((:lambda (type-fn)
            (:if (prelude:null type-fn)
@@ -120,5 +121,5 @@
 
 (mu:intern :prelude "%qq-reader"
    (:lambda (char stream)
-     ;;; (prelude:warn (prelude:%qq-compile (prelude:%qq-read stream)) "%qq-reader")))
-     (prelude:%qq-compile (prelude:%qq-read stream))))
+     (prelude:warn (prelude:%qq-compile (prelude:%qq-read stream)) "%qq-reader")))
+     ;;; (prelude:%qq-compile (prelude:%qq-read stream))))
