@@ -41,8 +41,13 @@
          ,(mu:cons :atom   (:lambda (expr list)
                              (mu:cons () (mu:append list (prelude:%list `(:l-atom ,(mu:car expr)))))))
          ,(mu:cons :list   (:lambda (expr list)
-                             (prelude:warn expr "%qq-read-list: already read")
-                             (mu:cons () (mu:append list (prelude:%list `(:l-list (prelude:%qq-read-list stream)))))))
+                             (:if (prelude:null (mu:car expr))
+                                  (mu:cons () (mu:append list (prelude:%list `(:l-atom ()))))
+                                  (:if (prelude:consp (mu:car expr))
+                                       ((:lambda (form)
+                                          (mu:cons () (mu:append list (prelude:%list `(:l-atom ,form)))))
+                                        (prelude:mapcar (:lambda (expr) (mu:nth 1 expr)) (mu:car expr)))
+                                       (mu:cons () (mu:append list (prelude:%list `(:l-list ,(mu:car expr)))))))))
          ,(mu:cons :list-  (:lambda (expr list)
                              (mu:cons :t list)))
          ,(mu:cons :quasi  (:lambda (expr list)
@@ -121,5 +126,5 @@
 
 (mu:intern :prelude "%qq-reader"
    (:lambda (char stream)
-     (prelude:warn (prelude:%qq-compile (prelude:%qq-read stream)) "%qq-reader")))
-     ;;; (prelude:%qq-compile (prelude:%qq-read stream))))
+     ;;; (prelude:warn (prelude:%qq-compile (prelude:%qq-read stream)) "%qq-reader")))
+     (prelude:%qq-compile (prelude:%qq-read stream))))

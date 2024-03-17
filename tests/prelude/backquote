@@ -1,5 +1,5 @@
-(mu:type-of (mu:eval (prelude:read (mu:open :string :input "`,mu:fx-add") () ())))	:func
-(mu:type-of (mu:eval (prelude:read (mu:open :string :input "`,mu:version") () ())))	:vector
+(mu:eq 'mu:fx-add (mu:eval (prelude:read (mu:open :string :input "`,mu:fx-add") () ())))	:t
+(mu:eq 'mu:version (mu:eval (prelude:read (mu:open :string :input "`,mu:version") () ())))	:t
 (mu:eval (prelude:read (mu:open :string :input "`\"abc\"") () ()))	"abc"
 (mu:eval (prelude:read (mu:open :string :input "`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
 (mu:eval (prelude:read (mu:open :string :input "`#\\a") () ()))	#\a
