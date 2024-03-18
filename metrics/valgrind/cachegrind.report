@@ -1,0 +1,7 @@
+==1241293== Cachegrind, a cache and branch-prediction profiler
+==1241293== Copyright (C) 2002-2017, and GNU GPL'd, by Nicholas Nethercote et al.
+==1241293== Using Valgrind-3.21.0 and LibVEX; rerun with -h for copyright info
+==1241293== Command: ../../dist/mu-sys -p -q ((:lambda\ (g)\ (mu:apply\ g\ (mu:cons\ g\ (mu:cons\ 101010101\ (mu:cons\ 11011\ ())))))\ (:lambda\ (g\ a\ b)\ (:if\ (mu:eq\ 0\ b)\ a\ (mu:apply\ g\ (mu:cons\ g\ (mu:cons\ b\ (mu:cons\ (mu:fx-sub\ a\ (mu:fx-mul\ b\ (mu:fx-div\ a\ b)))\ ())))))))\ 
+==1241293== 
+==1241293== 
+==1241293== I refs:        2,822,353

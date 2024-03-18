@@ -19,6 +19,7 @@ mu                        total: 307      pass: 306      fail: 1        exceptio
 
 Namespace Test Summary:
 -----------------------
+prelude    backquote      total: 37       pass: 25       fail: 10       exceptions: 2       
 prelude    closure        total: 1        pass: 1        fail: 0        exceptions: 0       
 prelude    compile        total: 22       pass: 22       fail: 0        exceptions: 0       
 prelude    prelude        total: 18       pass: 18       fail: 0        exceptions: 0       
@@ -35,5 +36,5 @@ prelude    symbol         total: 3        pass: 3        fail: 0        exceptio
 prelude    types          total: 43       pass: 43       fail: 0        exceptions: 0       
 prelude    vector         total: 25       pass: 25       fail: 0        exceptions: 0       
 -----------------------
-prelude                   total: 370      pass: 370      fail: 0        exceptions: 0         
+prelude                   total: 407      pass: 395      fail: 10       exceptions: 2         
 

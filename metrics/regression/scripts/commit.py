@@ -10,13 +10,17 @@ ntests = 0
 nth_test = 0
 ntimes = 0
 test_in = ""
+delta_bytes = 0
+delta_times = 0.0
 
 def report(info_list):
     global nsize
     global nth_test
     global ntimes
     global test_in
-    
+    global delta_bytes
+    global delta_times
+
     if len(info_list) == 5:
         test_name = info_list[0]
         then_bytes = int(info_list[1])
@@ -46,14 +50,20 @@ def report(info_list):
             nth_test = 1
             test_in = test_name
 
-        print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes-then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time-then_time:.2f}, {time_ratio:.2f})')
+        if b == '*' or t == '*':
+            time_diff = time - then_time 
+            delta_bytes += bytes - then_bytes
+            delta_times += time_diff
 
-print(f'Diff Report {date:<10}')
-print('-------------------------')
+            print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes - then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time_diff:.2f}, {time_ratio:.2f})')
+
+print(f'Performance Report {date:<10}')
+print('------------------------------')
 
 for test in test_results[1:]:
     ntests += 1
     report(test[:-1].split())
 
-print('-------------------------')
-print(f'ntests: {ntests:<4} size: {nsize:<5} times: {ntimes:<5}')
+print('------------------------------')
+print(f'ntests: {ntests:<4} size: {nsize:>6}  times: {ntimes:>5}')
+print(f'deltas:      bytes: {delta_bytes:>5}  times: {delta_times:5.2f}')
