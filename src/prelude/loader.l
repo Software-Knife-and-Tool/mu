@@ -26,8 +26,8 @@
                            (:if (mu:eq prelude:%eof% loop)
                                 prelude:%eof%
                                 (prelude:with-exception
-                                    (:lambda (exception)
-                                      (prelude:%exceptf mu:err-out "load exception: ~A~%" () exception))
+                                    (:lambda (except)
+                                      (prelude:%exceptf mu:err-out "loader exception: ~A on ~A by ~S, ~A~%" () except))
                                     (:lambda ()
                                       ((:lambda (form)
                                           (:if (mu:eq prelude:%eof% form)
@@ -37,7 +37,7 @@
                                                        (prelude:format :t "~A~%" `(,value))
                                                        ())
                                                   (prelude:null loop))
-                                                (mu:eval (mu:compile form)))))
+                                                (mu:eval (prelude:compile form)))))
                                        (mu:read ifs () prelude:%eof%))))))
                        ()))))
                   (prelude:raise prelude:streamp ifs 'prelude:load "cannot open input file")))
