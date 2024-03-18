@@ -5,7 +5,7 @@
 .PHONY: doc dist install uninstall
 .PHONY: clobber commit tags
 .PHONY: tests/rust tests/summary tests/report
-.PHONY: perf/base perf/current perf/diff perf/commit
+.PHONY: regression/base regression/current regression/report regression/commit
 
 help:
 	@echo "mu top-level makefile -----------------"
@@ -26,11 +26,11 @@ help:
 	@echo "    tests/rust - rust tests"
 	@echo "    tests/summary - test summary"
 	@echo "    tests/report - full test report"
-	@echo "--- perf options"
-	@echo "    perf/base - baseline report"
-	@echo "    perf/current - current report"
-	@echo "    perf/diff - compare base and current"
-	@echo "    perf/commit - condensed report"
+	@echo "--- regression options"
+	@echo "    regression/base - baseline report"
+	@echo "    regression/current - current report"
+	@echo "    regression/report - compare base and current"
+	@echo "    regression/commit - condensed regression report"
 
 tags:
 	@etags `find src/mu -name '*.rs' -print`
@@ -72,17 +72,17 @@ tests/commit:
 tests/summary:
 	@make -C tests summary --no-print-directory
 
-perf/base:
-	@make -C perf base --no-print-directory
+regression/base:
+	@make -C metrics/regression base --no-print-directory
 
-perf/current:
-	@make -C perf current --no-print-directory
+regression/current:
+	@make -C metrics/regression current --no-print-directory
 
-perf/diff:
-	@make -C perf diff --no-print-directory
+regression/report:
+	@make -C metrics/regression report --no-print-directory
 
-perf/commit:
-	@make -C perf commit --no-print-directory
+regresssion/commit:
+	@make -C metrics/regression commit --no-print-directory
 
 commit:
 	@cargo fmt
@@ -90,8 +90,9 @@ commit:
 	@cargo -q test | sed -e '/^$$/d'
 	@echo ";;; clippy tests"
 	@cargo clippy
+	@echo ";;; regression report"
 	@make -C tests commit --no-print-directory
-	@make -C perf commit --no-print-directory
+	@make -C metrics/regression commit --no-print-directory
 
 clobber:
 	@rm -f TAGS
@@ -99,4 +100,4 @@ clobber:
 	@make -C docker clean --no-print-directory
 	@make -C dist clean --no-print-directory
 	@make -C tests clean --no-print-directory
-	@make -C perf clean --no-print-directory
+	@make -C metrics/regression clean --no-print-directory
