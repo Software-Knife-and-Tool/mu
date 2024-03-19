@@ -198,7 +198,7 @@ Metrics include the average amount of time (in microsconds) taken for an individ
 
 The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
 
-On a modern Core I7 CPU at 3+ GHz, the default perf tests take approximately four minutes of elapsed time for both the *mu* and *prelude* namespaces.
+On a modern Core I7 CPU at 3+ GHz, the default regression tests take approximately four minutes of elapsed time for both the *mu* and *prelude* namespaces.
 
 ```
 % make -C metrics/regression base
@@ -214,7 +214,7 @@ The `regression` makefile has additional facilities for development, including r
 In specific, a summary of significant performance changes (differences in measured resource consumption and/or a large difference in average test time between the current summary and the baseline summary.) Timing metrics are heavily CPU/clock speed dependent.
 
 ```
-% make -C perf commit
+% make -C metrics/regression commit
 ```
 
 produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary, and timing changes greater than 20% for any individual test. `commit` also establishes the `current` report as the new baseline in preparation for a commit to the repo.
@@ -228,12 +228,12 @@ For convenience, the *mu* Makefile provides:
 % make regression/commit	# diff baseline and current, prepare for commit
 ```
 
-The  `perf`  makefile offers some development options.
+The  `regression`  makefile offers some development options.
 
 ```
 % make -C metrics/regression help
 
---- perf options
+--- regression options
     namespaces - list namespaces
     list - list tests in $NS
     $NS - run all tests in namespace, unformatted output
@@ -257,7 +257,7 @@ The *mu* binaries, libraries, and source files are installed in `/opt/mu`. The `
 mu-sys		shell runtime binary, stdio listener
 mu-ld		image loader
 mu-server	server runtime, socket listener
-mu			shell script for running the prelude listener with mu-sys
+mu		shell script for running the prelude listener with mu-sys
 ```
 
 
@@ -331,8 +331,8 @@ mu-sys -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
 mu-sys -c "npages:1024,gcmode:auto"	default configuration
 
 mu --config="npages:4096,gcmode:demand"
-									4096 pages, garbage collection runs on demand
+					4096 pages, garbage collection runs on demand
   
 ```
 
-Tests show that currently (as of 0.0.23) 256 4k pages is about the minimum you could expect to load the *preface* library and run the listener. Any significant consing will likely run out of heap space in short order.
+Tests show that currently (and as of 0.0.23) 256 4k pages is about the minimum you could expect to load the *preface* library and run the listener. Any significant consing will likely run out of heap space in short order.
