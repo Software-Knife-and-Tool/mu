@@ -7,10 +7,10 @@
 ;;; take a type and return a closure.
 ;;;
 (defun state-frame (closure)
-  (errorp-unless symbolp closure "mu::state-frame not a function")
+  (errorp-unless symbolp closure "core::state-frame not a function")
   (let* ((desc (core::fn-lambda-desc closure))
          (frame (car (core::lambda-closure desc))))
-    (errorp-unless (lambda (frame) (eq (type-of frame :frame))) "mu:state-frame botch")
+    (errorp-unless (lambda (frame) (eq (type-of frame :frame))) "core:state-frame botch")
     frame))
 
 ;;;
@@ -27,14 +27,14 @@
 ;;;       (:t (core:error cmd "unknown cmd"))))
 ;;;
 #|
-(defmacro mu::state (type value)
-  (errorp-unless symbolp type "mu::state not a type")
+(defmacro core::state (type value)
+  (errorp-unless symbolp type "core::state not a type")
   (flet ((closure (fn &rest args)
                   (let ((state value))
                     (cond
                      ((eq fn :get) state)
-                     ((eq fn :set) (env:set-env (mu::state-frame closure) 0 (car args)))
-                     (t (error fn "mu::state unknown operator"))))))
+                     ((eq fn :set) (env:set-env (core::state-frame closure) 0 (car args)))
+                     (t (error fn "core::state unknown operator"))))))
         ;;; (errorp-unless (complement fn-unclosedp) closure "is not a closure")
         closure))
 |#

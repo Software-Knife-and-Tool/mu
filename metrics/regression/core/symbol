@@ -1,0 +1,5 @@
+(core:boundp 'core:foo)
+(core:boundp 'core:std-in)
+(core:eq :keyword (core:type-of 'abcd))
+(core:eq :keyword (core:type-of :abcd))
+(core:sy-val 'core:std-in)

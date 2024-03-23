@@ -1,4 +1,4 @@
-(mu:write 1000 () (mu:open :string :output ""))
-(mu:write (mu:fx-mul 100 200) () (mu:open :string :output ""))
-(mu:write (prelude:string= "" "") () (mu:open :string :output ""))
-(mu:write (prelude:string= "ci" "") () (mu:open :string :output ""))
+(core:write 1000 () (core:open :string :output ""))
+(core:write (core:fx-mul 100 200) () (core:open :string :output ""))
+(core:write (prelude:string= "" "") () (core:open :string :output ""))
+(core:write (prelude:string= "ci" "") () (core:open :string :output ""))

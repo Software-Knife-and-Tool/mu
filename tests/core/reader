@@ -1,0 +1,50 @@
+(core:read (core:open :string :input "a ;") () ())	a
+(core:read (core:open :string :input "a ; 1") () ())	a
+(core:read (core:open :string :input "#||#a") () ())	a
+(core:read (core:open :string :input "#||# a") () ())	a
+(core:read (core:open :string :input "a #||#") () ())	a
+(core:read (core:open :string :input "#||# a;a") () ())	a
+(core:read (core:open :string :input "#||# a ;a") () ())	a
+#(:t)	#(:t)
+#(:t 1 2 3)	#(:t 1 2 3)
+#(:byte)	#(:byte)
+#(:byte 1 2 3)	#(:byte 1 2 3)
+#(:char)	""
+#(:char #\1 #\2 #\3)	"123"
+#(:fixnum)	#(:fixnum)
+#(:fixnum 1 2 -3)	#(:fixnum 1 2 -3)
+#(:float)	#(:float)
+#(:float 1.0 2.0 -3.0)	#(:float 1.0000 2.0000 -3.0000)
+#s(:foo)	#s(:foo)
+#S(:foo)	#s(:foo)
+#s(:foo 1 2 3)	#s(:foo 1 2 3)
+#S(:foo 1 2 3)	#s(:foo 1 2 3)
+'(1 2 3)	(1 2 3)
+'()	:nil
+#\ 	#\space
+#\)	#\)
+#\a	#\a
+#\A	#\A
+"\a\b\c"	"abc"
+"\a\"\b\c"	"a"bc"
+#| hello g|# 1234	1234
+1234 ; hello	1234
+()	:nil
+'a-long-symbol	a-long-symbol
+'a-symbol	a-symbol
+'symbol	symbol
+'core:eq	core:eq
+'s	s
+(core:type-of '#:abc)	:symbol
+:a	:a
+:abcdefg	:abcdefg
+1.024e23	102400002052185839894528.0000
+1234	1234
+#xabc	2748
+""	""
+"a long string"	"a long string"
+"a"	"a"
+"abcd"	"abcd"
+"abcdefg"	"abcdefg"
+-36028797018963968	-36028797018963968
+36028797018963967	36028797018963967

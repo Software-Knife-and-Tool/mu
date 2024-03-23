@@ -1,5 +1,5 @@
-(mu:sy-name (prelude:read (prelude:make-string-stream :input "a") () ()))
-(mu:sy-name (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))
+(core:sy-name (prelude:read (prelude:make-string-stream :input "a") () ()))
+(core:sy-name (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))
 (prelude:read (prelude:make-string-stream :input "abcdefgh") () ())
 (prelude:read (prelude:make-string-stream :input "prelude:abcdefgh") () ())
 (prelude:read (prelude:make-string-stream :input "(:quote abcdefgh)") () ())

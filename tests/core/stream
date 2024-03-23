@@ -1,0 +1,9 @@
+(core:flush core:std-out)	:nil
+(core:wr-char #\a core:std-out)	a#\a
+(core:close core:err-out)	:t
+(core:openp core:err-out)	#<stream: id: 2 type: err-out dir: :output state: open>
+(core:write "abc" () core:std-out)	abc"abc"
+(core:write "abc" :t core:std-out)	"abc""abc"
+(core:write () () core:std-out)	:nil:nil
+(core:write :abcde :t core:std-out)	:abcde:abcde
+(core:get-str (core:open :string :output "abcdef"))	"abcdef"

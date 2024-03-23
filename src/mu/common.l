@@ -34,7 +34,7 @@
     (list (list 'lambda (list limit-gsym)
                 (list 'if (list 'fixnum< limit-gsym 0)
                       ()
-                      (list 'mu::fix
+                      (list 'core::fix
                             (list 'lambda (list count-var)
                                   (list 'if (list 'eq count-var limit-gsym)
                                         count-var

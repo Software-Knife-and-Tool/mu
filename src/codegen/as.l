@@ -4,41 +4,41 @@
 ;;;
 ;;; armv8 aarch64 instruction
 ;;;
-(mu:intern :arm "parser"
-   (mu:open :string :bidir ""))
+(core:intern :arm "parser"
+   (core:open :string :bidir ""))
 
-(mu:intern :arm "parse"
+(core:intern :arm "parse"
    (:lambda (line)
-      (:if (prelude:zerop (mu:sv-len line))
+      (:if (prelude:zerop (core:sv-len line))
            ()
            ((:lambda ()
-               (mu:wr-char #\( arm:parser)
-               (mu:fix
+               (core:wr-char #\( arm:parser)
+               (core:fix
                   (:lambda (index)
-                    (:if (mu:fx-lt index (mu:sv-len line))
+                    (:if (core:fx-lt index (core:sv-len line))
                          ((:lambda (char)
-                            (:if (prelude:%orf (mu:eq #\, char) (mu:eq #\# char))
+                            (:if (prelude:%orf (core:eq #\, char) (core:eq #\# char))
                                  (prelude:1+ index)
-                                 (:if (mu:eq #\/ char)
-                                      (mu:sv-len line)
+                                 (:if (core:eq #\/ char)
+                                      (core:sv-len line)
                                       ((:lambda ()
-                                         (mu:wr-char char arm:parser)
+                                         (core:wr-char char arm:parser)
                                          (prelude:1+ index))))))
-                          (mu:sv-ref line index))
+                          (core:sv-ref line index))
                          index))
                   0)
-               (mu:wr-char #\) arm:parser))))
-     (mu:read arm:parser () ())))
+               (core:wr-char #\) arm:parser))))
+     (core:read arm:parser () ())))
 
-(mu:intern :arm "assemble-file"
+(core:intern :arm "assemble-file"
    (:lambda (stream)
-     (mu:fix
+     (core:fix
       (:lambda (line-number)
         ((:lambda (line)
            (:if (prelude:null line)
                 line-number
                 ((:lambda ()
-                   (:if (mu:fx-lt line-number 10)
+                   (:if (core:fx-lt line-number 10)
                         (prelude:format :t " ~A: ~A~%" `(,line-number ,line))
                         (prelude:format :t "~A: ~A~%" `(,line-number ,line)))
                    ((:lambda (op)
@@ -51,12 +51,12 @@
       1)
      :t))
 
-(mu:intern :arm "as"
+(core:intern :arm "as"
    (:lambda (path)
       (:if (prelude:stringp path)
-           (mu:with-ex
+           (core:with-ex
                (:lambda (exception)
-                 (prelude:%exceptf mu:err-out () () exception))
+                 (prelude:%exceptf core:err-out () () exception))
                (:lambda ()
-                 (arm:assemble-file (mu:open :file :input path))))
+                 (arm:assemble-file (core:open :file :input path))))
            (prelude:error "arm:as: path ~A is not a string" `(,path)))))

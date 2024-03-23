@@ -1,1 +1,1 @@
-(mu:type-of prelude:apply)	:func
+(core:type-of prelude:apply)	:func

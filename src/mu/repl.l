@@ -39,7 +39,7 @@
                       ((eq cmd :p) (format t "~A~%" (car stack)))
                       ((eq cmd :s) (format t "~A~%" stack))
                       ((eq cmd :t) (format t "~A~%" (type-of (car stack))))
-                      ((eq cmd :v) (format t "~A~%" (mu::view (car stack))))
+                      ((eq cmd :v) (format t "~A~%" (core::view (car stack))))
                       ((eq cmd :x))
                       (t (format t "~A~%" cmd)))
                    (format t "~A~%" form))
@@ -54,7 +54,7 @@
   (flet ((repl (repl)
           (with-ex
               (lambda (ex)  ;; catch exception and break
-                (print-except ex "mu:repl")
+                (print-except ex "core:repl")
                 (break ex)
                 (repl repl))
               (lambda ()    ;; main
@@ -64,7 +64,7 @@
                             (if (keywordp form)
                                 (cond
                                   ((eq form :h)
-                                   (format t ";;; help: libmu ~A~%:l - load file~%:m - expand macro~%" mu::version))
+                                   (format t ";;; help: libcore ~A~%:l - load file~%:m - expand macro~%" core::version))
                                   ((eq form :m) (format t "~A~%" (macroexpand-1 (read t t ()))))
                                   ((eq form :l)
                                    ((lambda (path)
@@ -80,5 +80,5 @@
                         (loop loop (read t t ()))))
                   (format t "~A> " (ns-name ns))
                   (loop loop (read t t ())))))))
-    (format t ";;; Eko Lisp ~A (mu:repl) :h for help~%" mu::eko-version)
+    (format t ";;; Eko Lisp ~A (core:repl) :h for help~%" core::eko-version)
     (repl repl)))

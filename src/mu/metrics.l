@@ -63,7 +63,7 @@
 (defun room (verbosity)
   (if verbosity
       (progn
-        (format t ";;; eko version: ~A~%" mu::eko-version)
+        (format t ";;; eko version: ~A~%" core::eko-version)
         (format t ";;; automatic garbage collection is disabled~%")))
   (mapc
    (lambda (desc)

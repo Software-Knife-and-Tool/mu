@@ -4,81 +4,81 @@
 ;;;
 ;;; inspect
 ;;;
-(mu:intern :prelude "%inspect-function"
+(core:intern :prelude "%inspect-function"
    (:lambda (obj)
       ((:lambda (view)
           ((:lambda (tags)
-             (mu:struct :inspect `(function ,(mu:hp-size obj) ,tags)))
-           `(,(mu:cons :arity (mu:sv-ref view 0))
-             ,(mu:cons :body (mu:sv-ref view 1)))))
-       (mu:view obj))))
+             (core:struct :inspect `(function ,(core:hp-size obj) ,tags)))
+           `(,(core:cons :arity (core:sv-ref view 0))
+             ,(core:cons :body (core:sv-ref view 1)))))
+       (core:view obj))))
 
-(mu:intern :prelude "%inspect-type"
+(core:intern :prelude "%inspect-type"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)
-            (mu:struct :inspect `(:<type> ,(mu:hp-size obj) ,tags)))
-          `(,(mu:cons :type (mu:sv-ref (mu:st-vec obj) 0))
-            ,(mu:cons :values (mu:sv-ref (mu:st-vec obj) 1)))))
-      (mu:view obj))))
+            (core:struct :inspect `(:<type> ,(core:hp-size obj) ,tags)))
+          `(,(core:cons :type (core:sv-ref (core:st-vec obj) 0))
+            ,(core:cons :values (core:sv-ref (core:st-vec obj) 1)))))
+      (core:view obj))))
 
-(mu:intern :prelude "%inspect-struct"
+(core:intern :prelude "%inspect-struct"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (mu:struct :inspect `(struct ,(mu:hp-size obj) ,tags)))
-          `(,(mu:cons :type (mu:st-type obj))
-            ,(mu:cons :values (mu:st-vec obj)))))
-      (mu:view obj))))
+            (core:struct :inspect `(struct ,(core:hp-size obj) ,tags)))
+          `(,(core:cons :type (core:st-type obj))
+            ,(core:cons :values (core:st-vec obj)))))
+      (core:view obj))))
 
-(mu:intern :prelude "%inspect-symbol"
+(core:intern :prelude "%inspect-symbol"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (mu:struct :inspect `(symbol ,(mu:hp-size obj) ,tags)))
-          `(,(mu:cons :ns (mu:sv-ref view 0))
-            ,(mu:cons :name (mu:sv-ref view 1))
-            ,(mu:cons :value (mu:sv-ref view 2)))))
-      (mu:view obj))))
+            (core:struct :inspect `(symbol ,(core:hp-size obj) ,tags)))
+          `(,(core:cons :ns (core:sv-ref view 0))
+            ,(core:cons :name (core:sv-ref view 1))
+            ,(core:cons :value (core:sv-ref view 2)))))
+      (core:view obj))))
 
-(mu:intern :prelude "%inspect-const"
+(core:intern :prelude "%inspect-const"
    (:lambda (obj)
-     (mu:struct :inspect `(,(prelude:type-of obj) ,(mu:hp-size obj) ()))))
+     (core:struct :inspect `(,(prelude:type-of obj) ,(core:hp-size obj) ()))))
 
-(mu:intern :prelude "%inspect-vector"
-   (:lambda (obj)
-     ((:lambda (tags)          
-         (mu:struct :inspect `(vector ,(mu:hp-size obj) ,tags)))
-      `(,(mu:cons :type (mu:sv-type obj))
-        ,(mu:cons :length (mu:sv-len obj))))))
-
-(mu:intern :prelude "%inspect-cons"
+(core:intern :prelude "%inspect-vector"
    (:lambda (obj)
      ((:lambda (tags)          
-         (mu:struct :inspect `(cons ,(mu:hp-size obj) ,tags)))
-      `(,(mu:cons :car (mu:car obj))
-        ,(mu:cons :cdr (mu:cdr obj))))))
+         (core:struct :inspect `(vector ,(core:hp-size obj) ,tags)))
+      `(,(core:cons :type (core:sv-type obj))
+        ,(core:cons :length (core:sv-len obj))))))
 
-(mu:intern :prelude "%inspect"
+(core:intern :prelude "%inspect-cons"
+   (:lambda (obj)
+     ((:lambda (tags)          
+         (core:struct :inspect `(cons ,(core:hp-size obj) ,tags)))
+      `(,(core:cons :car (core:car obj))
+        ,(core:cons :cdr (core:cdr obj))))))
+
+(core:intern :prelude "%inspect"
    (:lambda (value)
-      (mu:fix
+      (core:fix
        (:lambda (loop)
           (:if (prelude:structp loop)
                loop
                (:if (prelude:null loop)
-                    (mu:struct :inspect `(unknown 0 ()))
+                    (core:struct :inspect `(unknown 0 ()))
                     ((:lambda (predicate fn)
-                       (:if (mu:apply predicate `(,value))
-                            (mu:apply fn `(,value))
-                            (mu:cdr loop)))
-                     (mu:car (mu:car loop))
-                     (mu:cdr (mu:car loop))))))
-       `(,(mu:cons prelude:%prelude-type-p prelude:%inspect-type)
-         ,(mu:cons prelude:charp prelude:%inspect-const)
-         ,(mu:cons prelude:consp prelude:%inspect-cons)
-         ,(mu:cons prelude:fixnump prelude:%inspect-const)
-         ,(mu:cons prelude:floatp prelude:%inspect-const)
-         ,(mu:cons prelude:functionp prelude:%inspect-function)
-         ,(mu:cons prelude:structp prelude:%inspect-struct)
-         ,(mu:cons prelude:symbolp prelude:%inspect-symbol)
-         ,(mu:cons prelude:vectorp prelude:%inspect-vector)))))
+                       (:if (core:apply predicate `(,value))
+                            (core:apply fn `(,value))
+                            (core:cdr loop)))
+                     (core:car (core:car loop))
+                     (core:cdr (core:car loop))))))
+       `(,(core:cons prelude:%prelude-type-p prelude:%inspect-type)
+         ,(core:cons prelude:charp prelude:%inspect-const)
+         ,(core:cons prelude:consp prelude:%inspect-cons)
+         ,(core:cons prelude:fixnump prelude:%inspect-const)
+         ,(core:cons prelude:floatp prelude:%inspect-const)
+         ,(core:cons prelude:functionp prelude:%inspect-function)
+         ,(core:cons prelude:structp prelude:%inspect-struct)
+         ,(core:cons prelude:symbolp prelude:%inspect-symbol)
+         ,(core:cons prelude:vectorp prelude:%inspect-vector)))))

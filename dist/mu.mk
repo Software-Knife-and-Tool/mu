@@ -40,7 +40,7 @@ PRELUDE = \
 
 mu:
 	@cp -r $(SRC)/codegen mu/mu
-	@cp -r $(SRC)/libmu mu/mu
+	@cp -r $(SRC)/libcore mu/mu
 	@cp -r $(SRC)/mu mu/mu
 	@cp -r $(SRC)/prelude mu/mu
 

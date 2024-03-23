@@ -1,4 +1,0 @@
-(mu:with-ex (:lambda (obj cond src) (mu:write cond () mu:std-out)) (:lambda () (mu:raise () :except)))	:except:except
-(mu:with-ex (:lambda (obj cond src) (mu:write obj () mu:std-out)) (:lambda () (mu:raise 1 :except)))	11
-(mu:with-ex (:lambda (obj cond src) (mu:write cond () mu:std-out)) (:lambda () (mu:fx-div 1 0)))	:div0:div0
-(mu:with-ex (:lambda (obj cond src) (mu:write obj () mu:std-out)) (:lambda () 1))	1

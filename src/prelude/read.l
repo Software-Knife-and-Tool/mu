@@ -4,35 +4,35 @@
 ;;;
 ;;; reader
 ;;;
-(mu:intern :prelude "%eof%" (mu:symbol "eof"))
-(mu:intern :prelude "%reader-stream%" (mu:open :string :output ""))
-(mu:intern :prelude "%reader-current-ns%" (mu:open :string :bidir "prelude"))
+(core:intern :prelude "%eof%" (core:symbol "eof"))
+(core:intern :prelude "%reader-stream%" (core:open :string :output ""))
+(core:intern :prelude "%reader-current-ns%" (core:open :string :bidir "prelude"))
 
-(mu:intern :prelude "%in-namespace"
+(core:intern :prelude "%in-namespace"
    (:lambda (ns)
       ((:lambda ()
-          (mu:make-ns ns)
+          (core:make-ns ns)
           (prelude:%reader-set-ns ns)
           ns))))
 
-(mu:intern :prelude "%reader-get-ns"
+(core:intern :prelude "%reader-get-ns"
    (:lambda ()
      ((:lambda (ns)
-        (mu:write ns () prelude:%reader-current-ns%)
-        (mu:keyword ns))
+        (core:write ns () prelude:%reader-current-ns%)
+        (core:keyword ns))
       (prelude:get-output-stream-string prelude:%reader-current-ns%))))
 
-(mu:intern :prelude "%reader-set-ns"
+(core:intern :prelude "%reader-set-ns"
    (:lambda (ns)
       (prelude:get-output-stream-string prelude:%reader-current-ns%)
-      (mu:write (mu:sy-name ns) () prelude:%reader-current-ns%)))
+      (core:write (core:sy-name ns) () prelude:%reader-current-ns%)))
 
 ;;;
 ;;; readtable
 ;;;
-(mu:intern :prelude "%read-char-syntax"
+(core:intern :prelude "%read-char-syntax"
    (:lambda (ch)
-     ((:lambda (read-table) (mu:cdr (prelude:%assoc ch read-table)))
+     ((:lambda (read-table) (core:cdr (prelude:%assoc ch read-table)))
       '((#\return . :wspace) (#\linefeed . :wspace) (#\page . :wspace)
         (#\tab . :wspace) (#\space . :wspace)
         (#\0 . :const)  (#\1 . :const)  (#\2 . :const)  (#\3 . :const)
@@ -60,7 +60,7 @@
         (#\v . :const)  (#\w . :const)  (#\x . :const)  (#\y . :const)
         (#\z . :const)))))
 
-(mu:intern :prelude "%read-number"
+(core:intern :prelude "%read-number"
   (:lambda (atom)
     ((:lambda (fx)
         (:if fx
@@ -75,18 +75,18 @@
 ;;;
 ;;; atom reader
 ;;;
-(mu:intern :prelude "%read-atom"
+(core:intern :prelude "%read-atom"
   (:lambda (ch stream)
     (prelude:write-char ch prelude:%reader-stream%)
-    (mu:fix
+    (core:fix
      (:lambda (loop)
        (:if (prelude:consp loop)
             loop
             ((:lambda (ch)
-               (:if (mu:eq prelude:%eof% ch)
+               (:if (core:eq prelude:%eof% ch)
                     loop
                     ((:lambda (syntax-type)
-                       (:if (mu:eq :const syntax-type)
+                       (:if (core:eq :const syntax-type)
                             ((:lambda ()
                                (prelude:write-char ch prelude:%reader-stream%)
                                (prelude:null loop)))
@@ -107,11 +107,11 @@
 ;;;
 ;;; parser
 ;;;
-(mu:intern :prelude "%read-dispatch"
+(core:intern :prelude "%read-dispatch"
   (:lambda (ch stream)
     ((:lambda (dispatch-table)
-       (mu:apply
-        (mu:sy-val (mu:cdr (prelude:%assoc (prelude:%read-char-syntax ch) dispatch-table)))
+       (core:apply
+        (core:sy-val (core:cdr (prelude:%assoc (prelude:%read-char-syntax ch) dispatch-table)))
         `(,ch ,stream)))
      '((:const   . prelude:%read-atom)
        (:escape  . prelude:%read-atom)
@@ -122,26 +122,26 @@
 ;;;
 ;;; consume whitespace and comments
 ;;;
-(mu:intern :prelude "%read-consume-ws"
+(core:intern :prelude "%read-consume-ws"
    (:lambda (stream)
-    (mu:fix
+    (core:fix
      (:lambda (loop)
        (:if (prelude:%orf (prelude:streamp loop) (prelude:charp loop))
             loop
             ((:lambda (ch)
                (:if (prelude:null ch)
                     stream
-                    (:if (mu:eq :wspace (prelude:%read-char-syntax ch))
+                    (:if (core:eq :wspace (prelude:%read-char-syntax ch))
                          (prelude:null loop)
-                         (:if (mu:eq ch #\#)
+                         (:if (core:eq ch #\#)
                               ((:lambda (ch)
-                                 (:if (mu:eq ch #\|)
+                                 (:if (core:eq ch #\|)
                                       ((:lambda ()
                                           (prelude:%read-sharp-comment ch stream)
                                           (prelude:null loop)))
                                       #\#))
                                 (prelude:peek-char stream () ()))
-                              (:if (mu:eq ch #\;)
+                              (:if (core:eq ch #\;)
                                    ((:lambda ()
                                        (prelude:%read-line-comment ch stream)
                                        (prelude:null loop)))
@@ -152,14 +152,14 @@
 ;;;
 ;;; recursive reader
 ;;;
-(mu:intern :prelude "%read"
+(core:intern :prelude "%read"
   (:lambda (stream)
     ((:lambda (ch)
        (:if (prelude:null ch)
             prelude:%eof%
             ((:lambda (macro)
                (:if macro
-                    (prelude:apply (mu:car macro) `(,stream ,ch))
+                    (prelude:apply (core:car macro) `(,stream ,ch))
                     (prelude:%read-dispatch ch stream)))
              (prelude:get-macro-character ch))))
      (prelude:%read-consume-ws stream))))

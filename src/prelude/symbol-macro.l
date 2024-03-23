@@ -8,78 +8,78 @@
 ;;;
 ;;; symbol readers
 ;;;
-(mu:intern :prelude "%read-keywordp"
+(core:intern :prelude "%read-keywordp"
   (:lambda (name)
-      (mu:eq #\: (prelude:schar name 0))))
+      (core:eq #\: (prelude:schar name 0))))
 
-(mu:intern :prelude "%read-symbol-scope"
+(core:intern :prelude "%read-symbol-scope"
   (:lambda (name)
      ((:lambda (colon)
         (:if (prelude:null colon)
              :extern
-             (:if (mu:eq #\: (prelude:schar name (mu:fx-add 1 colon)))
+             (:if (core:eq #\: (prelude:schar name (core:fx-add 1 colon)))
                   :intern
                   :extern)))
         (prelude:string-position #\: name))))
 
-(mu:intern :prelude "%read-symbol-ns"
+(core:intern :prelude "%read-symbol-ns"
   (:lambda (name)
     ((:lambda (colon)
        (:if (prelude:null colon)
             ()
-            (mu:keyword (prelude:substr name 0 (mu:fx-sub colon 1)))))
+            (core:keyword (prelude:substr name 0 (core:fx-sub colon 1)))))
      (prelude:string-position #\: name))))
 
-(mu:intern :prelude "%read-symbol-name"
+(core:intern :prelude "%read-symbol-name"
    (:lambda (name)
      ((:lambda (colon)
         (:if (prelude:null colon)
              name
              (prelude:substr name
-                          (:if (mu:eq #\: (prelude:schar name (mu:fx-add 1 colon)))
-                               (mu:fx-add 2 colon)
-                               (mu:fx-add 1 colon))
-                          (:if (mu:eq #\: (prelude:schar name (mu:fx-add 1 colon)))
-                               (mu:fx-add colon (mu:fx-sub (mu:sv-len name) colon))
-                               (mu:fx-add colon (mu:fx-sub (mu:sv-len name) (mu:fx-add 1 colon)))))))
+                          (:if (core:eq #\: (prelude:schar name (core:fx-add 1 colon)))
+                               (core:fx-add 2 colon)
+                               (core:fx-add 1 colon))
+                          (:if (core:eq #\: (prelude:schar name (core:fx-add 1 colon)))
+                               (core:fx-add colon (core:fx-sub (core:sv-len name) colon))
+                               (core:fx-add colon (core:fx-sub (core:sv-len name) (core:fx-add 1 colon)))))))
      (prelude:string-position #\: name))))
 
-(mu:intern :prelude "%read-symbol"
+(core:intern :prelude "%read-symbol"
    (:lambda (symbol)
      (:if (prelude:%read-keywordp symbol)
           (prelude:keyword (prelude:%read-symbol-name symbol))
           ((:lambda (ns name)
              (:if (prelude:null ns)
-                  (mu:untern () name)
-                  (mu:untern ns name)))
+                  (core:untern () name)
+                  (core:untern ns name)))
            (prelude:%read-symbol-ns symbol)
            (prelude:%read-symbol-name symbol)))))
 
 ;;;
 ;;; symbol macros
 ;;;
-(mu:intern :prelude "%symbol-macro-expand"
+(core:intern :prelude "%symbol-macro-expand"
    (:lambda (symbol)
      (:if (prelude:%orf (prelude:null symbol) (prelude:keywordp symbol))
           symbol
           (:if (prelude:uninternedp symbol)
                ((:lambda (sym)
                   (:if sym
-                       (mu:eval (prelude:symbol-value sym))
+                       (core:eval (prelude:symbol-value sym))
                        symbol))
                 (prelude:%get-symbol-macro symbol))
                symbol))))
 
-(mu:intern :prelude "%get-symbol-macro"
+(core:intern :prelude "%get-symbol-macro"
    (:lambda (symbol)
-      (:if (mu:eq :symbol (mu:type-of symbol))
-           (mu:ns-find prelude:%symbol-macro-ns% (prelude:symbol-name symbol))
+      (:if (core:eq :symbol (core:type-of symbol))
+           (core:ns-find prelude:%symbol-macro-ns% (prelude:symbol-name symbol))
            (prelude:raise symbol 'prelude:%get-symbol-macro "not a symbol"))))
 
-(mu:intern :prelude "define-symbol-macro"
+(core:intern :prelude "define-symbol-macro"
    (:lambda (symbol form)
-      (:if (mu:eq :symbol (mu:type-of symbol))
-           (mu:intern prelude:%symbol-macro-ns% (mu:sy-name symbol) form)
+      (:if (core:eq :symbol (core:type-of symbol))
+           (core:intern prelude:%symbol-macro-ns% (core:sy-name symbol) form)
            (prelude:raise symbol 'prelude:define-symbol-macro "not a symbol"))))
 
 ;;; (prelude:define-symbol-macro 't :t)

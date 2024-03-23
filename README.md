@@ -9,9 +9,9 @@
 
 ### Under heavy development
 
-*mu* is a LISP-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
+*mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
-*mu* is a LISP-1 namespaced programming language with Common Lisp idioms and macro system.
+*mu* is a Lisp-1 namespaced programming language with Common Lisp idioms and macro system.
 
 While *mu* has much in common with Scheme, it is meant to be familiar to traditional LISP programmers.
 
@@ -29,7 +29,7 @@ Functional languages bring us closer to a time when we can automatically prove o
 
 *mu* attempts to express modern programming concepts with a simple, familiar syntax. The venerable Common Lisp macro system helps the system designer create domain specific languages.
 
-*LISPs* are intentionally dynamic, which has selected against them for use in production environments. Statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few languages in use today have adequate meta-programming facilities. We need systems that can we reason about and can supplement themselves.
+*Lisps* are intentionally dynamic, which has selected against them for use in production environments. Statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few languages in use today have adequate meta-programming facilities. We need systems that can we reason about and can supplement themselves.
 
 Current systems tend to be large and resource-hungry. We need lean systems that can do useful work in low resource environments and are flexible enough to evolve to meet new demands. Current systems have runtimes measured in days, if for no other reason than improving them requires a complete reinstall. A dynamic system can have a runtime measured in months or years.
 
@@ -44,15 +44,16 @@ Most of our core computational frameworks are built on static systems and are fr
 ------
 
 - *mu*, a functional forward system language
-- *mu/sys*, minimal POSIX runtime suitable for containers
-- *mu/mu*, a native code compiler
+- *mu/core*, a small, configurable runtime library
+- *mu-sys*, minimal POSIX runtime suitable for containers
+- *mu/codegen*, a native code compiler
 - small and simple installation, no external dependencies
 - add interactivity and extensibility to application implementations
 - Rust FFI system
 - mostly Common Lisp syntax
 - resource overhead equivalent to a UNIX shell
 - minimal external crate dependencies
-- futures multi-threading and non-blocking I/O
+- futures for async and non-blocking I/O
 
 
 
@@ -77,17 +78,17 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 ------
 
-*mu/sys* is an immutable, namespaced LISP-1 that borrows heavily from *Scheme*, but is more closely related to the Common LISP family of languages. *mu* syntax and constructs will be familiar to the traditional LISP programmer. 
+*mu/sys* is an immutable, namespaced Lisp-1 that borrows heavily from *Scheme*, but is more closely related to the Common Lisp family of languages. *mu* syntax and constructs will be familiar to the traditional Lisp programmer. 
 
 *mu* leans heavily on functional programming principles.
 
 The *mu/sys* runtime kernel is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file, which is an inherently unsafe operation.)
 
-The runtime implements 64 bit tagged pointers, is available as a crate , extends a Rust API for embedded applications, and is an evaluator for the *mu/sys* kernel language. *mu/sys* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
+The runtime implements 64 bit tagged pointers, is available as a library, and  extends a Rust API for embedded applications. the runtime is primarily an evaluator for the *mu/core* kernel language. *mu/core* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
 
-The *mu* 2-LISP system is organized as a stack of compilers, culminating in the *mu* native code compiler/system builder.
+The *mu* 2-LISP system is organized as a stack of compilers, culminating in the *mu/codegen* native code compiler/system builder.
 
-The *prelude* library provides *rest* lambdas, closures, expanded struct types, *defun/defmacro* and a reader/compiler for those forms.
+The *prelude* library provides *rest* lambdas, closures, expanded struct types, macros, and a reader/compiler for those forms.
 
 Optional libraries provide a variety of enhancements and services, including Common LISP macros and binding special forms.
 
@@ -116,7 +117,7 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 
 ------
 
-The *mu/sys* runtime *libmu* is a native code program that must be built for the target CPU architecture. The *mu/sys* build system requires only a `rust` compiler, `rust-fmt`, `clippy` and some form of the `make` utility. Other tools like  `valgrind` are optional.
+The *libcore* runtime is a native code program that must be built for the target CPU architecture. The *mu-sys* build system requires only a `rust` compiler, `rust-fmt`, `clippy` and some form of the `make` utility. Other tools like  `valgrind` are optional.
 
 Tests and performance measurement requires some version of `python 3`.
 

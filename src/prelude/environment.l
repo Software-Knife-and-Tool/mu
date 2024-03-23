@@ -4,13 +4,13 @@
 ;;;
 ;;;  environment
 ;;;
-(mu:intern :prelude "environmentp"
+(core:intern :prelude "environmentp"
    (:lambda (env)
       (:if (prelude:%prelude-type-p env)
-           (mu:eq 'env (prelude:type-of env))
+           (core:eq 'env (prelude:type-of env))
            ())))
 
-(mu:intern :prelude "make-environment"
+(core:intern :prelude "make-environment"
    (:lambda (bindings)
      (:if (prelude:listp bindings)
           ((:lambda (env)
@@ -21,8 +21,8 @@
                    (:if (prelude:symbolp symbol)
                         (prelude:%add-env env symbol value)
                         (prelude:raise symbol 'prelude:make-environment "not a symbol")))
-                 (mu:car pair)
-                 (mu:cdr pair)))
+                 (core:car pair)
+                 (core:cdr pair)))
               bindings)
              env)
            (prelude:%make-env))
@@ -31,7 +31,7 @@
 ;;;
 ;;; implementation
 ;;;
-(mu:intern :prelude "%get-env"
+(core:intern :prelude "%get-env"
    (:lambda (env symbol)
      (:if (prelude:symbolp symbol)
          (:if (prelude:environmentp env)
@@ -40,12 +40,12 @@
                      (:if (prelude:null sym)
                           (prelude:raise symbol 'prelude:%get-env "symbol not in map")
                           sym))
-                  (mu:ns-find ns (mu:sy-name symbol))))
+                  (core:ns-find ns (core:sy-name symbol))))
                  (prelude:%env-prop :symbols env))
               (prelude:raise env 'prelude:%get-env "not an env"))
          (prelude:raise symbol 'prelude:%get-env "not a symbol"))))
 
-(mu:intern :prelude "%add-env"
+(core:intern :prelude "%add-env"
    (:lambda (env symbol value)
      (:if (prelude:symbolp symbol)
          (:if (prelude:environmentp env)
@@ -53,18 +53,18 @@
                  ((:lambda (sym)
                      (:if (prelude:null sym)
                           (prelude:raise symbol 'prelude:%add-env "symbol already in map")
-                          (mu:intern ns (mu:sy-name symbol) value)))
-                  (mu:ns-find ns (mu:sy-name symbol))))
+                          (core:intern ns (core:sy-name symbol) value)))
+                  (core:ns-find ns (core:sy-name symbol))))
                (prelude:%env-prop :symbols env))
               (prelude:raise env 'prelude:%add-env "not an env"))
          (prelude:raise symbol 'prelude:%add-env "not a symbol"))))
 
-(mu:intern :prelude "%make-env"
+(core:intern :prelude "%make-env"
    (:lambda ()
-     (prelude:%make-type "env" `(,(mu:cons :symbols (mu:make-ns))))))
+     (prelude:%make-type "env" `(,(core:cons :symbols (core:make-ns))))))
 
-(mu:intern :prelude "%env-prop"
+(core:intern :prelude "%env-prop"
    (:lambda (prop env)
-      (:if (prelude:findl (:lambda (env-prop) (mu:eq prop env-prop)) '(:symbols))
-           (mu:cdr (prelude:%type-ref prop env))
+      (:if (prelude:findl (:lambda (env-prop) (core:eq prop env-prop)) '(:symbols))
+           (core:cdr (prelude:%type-ref prop env))
            (prelude:raise prop 'prelude:%env-prop "not an environment property"))))
