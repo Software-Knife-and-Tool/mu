@@ -17,6 +17,7 @@ use {
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
+        features::{Core as _, Features},
         types::{
             cons::{Cons, Core as _},
             function::Function,
@@ -35,8 +36,11 @@ use futures_locks::RwLock;
 
 // mu environment
 pub struct Mu {
-    config: Config,
     pub version: Tag,
+
+    // configuration
+    config: Config,
+    features: Features,
 
     // heap
     pub heap: RwLock<BumpAllocator>,
@@ -92,6 +96,7 @@ impl Core for Mu {
             core_ns: Tag::nil(),
             dynamic: RwLock::new(Vec::new()),
             errout: Tag::nil(),
+            features: Features::new(),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
             if_: Tag::nil(),
