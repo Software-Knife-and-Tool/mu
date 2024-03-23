@@ -51,6 +51,7 @@ extern crate modular_bitfield;
 mod allocators;
 mod async_;
 mod core;
+mod features;
 mod system;
 mod types;
 

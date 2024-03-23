@@ -22,6 +22,10 @@ path = "src/libcore/lib.rs"
 crate-type = ["lib"]
 bench = false
 
+[features]
+default = []
+std = []
+
 [profile.dev]
 opt-level = 0
 
