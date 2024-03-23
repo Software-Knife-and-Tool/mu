@@ -1,21 +1,21 @@
 Namespace Test Summary:
 -----------------------
-mu         backquote      total: 37       pass: 36       fail: 1        exceptions: 0       
-mu         compile        total: 8        pass: 8        fail: 0        exceptions: 0       
-mu         core           total: 54       pass: 54       fail: 0        exceptions: 0       
-mu         exception      total: 4        pass: 4        fail: 0        exceptions: 0       
-mu         list           total: 24       pass: 24       fail: 0        exceptions: 0       
-mu         namespace      total: 14       pass: 14       fail: 0        exceptions: 0       
-mu         number         total: 41       pass: 41       fail: 0        exceptions: 0       
-mu         reader         total: 50       pass: 50       fail: 0        exceptions: 0       
-mu         special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
-mu         stream         total: 9        pass: 9        fail: 0        exceptions: 0       
-mu         struct         total: 7        pass: 7        fail: 0        exceptions: 0       
-mu         symbol         total: 12       pass: 12       fail: 0        exceptions: 0       
-mu         system         total: 13       pass: 13       fail: 0        exceptions: 0       
-mu         vector         total: 23       pass: 23       fail: 0        exceptions: 0       
+core       backquote      total: 37       pass: 36       fail: 1        exceptions: 0       
+core       compile        total: 8        pass: 8        fail: 0        exceptions: 0       
+core       core           total: 54       pass: 54       fail: 0        exceptions: 0       
+core       exception      total: 4        pass: 4        fail: 0        exceptions: 0       
+core       list           total: 24       pass: 24       fail: 0        exceptions: 0       
+core       namespace      total: 14       pass: 14       fail: 0        exceptions: 0       
+core       number         total: 41       pass: 41       fail: 0        exceptions: 0       
+core       reader         total: 50       pass: 50       fail: 0        exceptions: 0       
+core       special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
+core       stream         total: 9        pass: 9        fail: 0        exceptions: 0       
+core       struct         total: 7        pass: 7        fail: 0        exceptions: 0       
+core       symbol         total: 12       pass: 12       fail: 0        exceptions: 0       
+core       system         total: 13       pass: 13       fail: 0        exceptions: 0       
+core       vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-mu                        total: 307      pass: 306      fail: 1        exceptions: 0         
+core                      total: 307      pass: 306      fail: 1        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------

@@ -5,44 +5,44 @@
 ;;; return the elapsed process time in usec
 ;;; from applying fn to args
 ;;;
-(mu:make-ns :perf)
-(mu:intern :perf "%tdelta"
+(core:make-ns :perf)
+(core:intern :perf "%tdelta"
   (:lambda (fn args)
     ((:lambda (start stop)
-       (mu:fx-sub stop start))
-       (mu:proc-tm)
+       (core:fx-sub stop start))
+       (core:proc-tm)
        ((:lambda ()
-          (mu:apply fn args)
-          (mu:proc-tm))))))
+          (core:apply fn args)
+          (core:proc-tm))))))
 
 ;;;
 ;;; return an vector of storage consumed
 ;;; by applying fn to args
 ;;;
-(mu:intern :perf "%sdelta"
+(core:intern :perf "%sdelta"
   (:lambda (fn args)
     ((:lambda (start-vec stop-vec)
-       (mu:fix
+       (core:fix
         (:lambda (loop)
-          (:if (mu:eq :vector (mu:type-of loop))
+          (:if (core:eq :vector (core:type-of loop))
                loop
                ((:lambda (list n)
                   ((:lambda (offset)
-                     (:if (mu:fx-lt offset (mu:sv-len start-vec))
+                     (:if (core:fx-lt offset (core:sv-len start-vec))
                           ((:lambda (type total alloc in-use)
                              ((:lambda (type-stats)
-                                (mu:cons `(,@list ,@type-stats) (mu:fx-add 1 n)))
+                                (core:cons `(,@list ,@type-stats) (core:fx-add 1 n)))
                               `(,type ,total ,alloc ,in-use)))
-                           (mu:sv-ref start-vec (mu:fx-add offset 0))
-                           (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 1)) (mu:sv-ref start-vec (mu:fx-add offset 1)))
-                           (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 2)) (mu:sv-ref start-vec (mu:fx-add offset 2)))
-                           (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 3)) (mu:sv-ref start-vec (mu:fx-add offset 3))))
-                          (mu:vector :t list)))
-                         (mu:fx-mul n 4)))
-                 (mu:car loop)
-                 (mu:cdr loop))))
-         (mu:cons () 1)))
-     (mu:hp-stat)
+                           (core:sv-ref start-vec (core:fx-add offset 0))
+                           (core:fx-sub (core:sv-ref stop-vec (core:fx-add offset 1)) (core:sv-ref start-vec (core:fx-add offset 1)))
+                           (core:fx-sub (core:sv-ref stop-vec (core:fx-add offset 2)) (core:sv-ref start-vec (core:fx-add offset 2)))
+                           (core:fx-sub (core:sv-ref stop-vec (core:fx-add offset 3)) (core:sv-ref start-vec (core:fx-add offset 3))))
+                          (core:vector :t list)))
+                         (core:fx-mul n 4)))
+                 (core:car loop)
+                 (core:cdr loop))))
+         (core:cons () 1)))
+     (core:hp-stat)
      ((:lambda ()
-         (mu:apply fn args)
-         (mu:hp-stat))))))
+         (core:apply fn args)
+         (core:hp-stat))))))

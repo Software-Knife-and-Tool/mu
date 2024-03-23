@@ -1,0 +1,14 @@
+(core:eq :func (core:type-of core:make-ns))	:t
+(core:intern :core "foo" "foo")	core:foo
+(core:boundp (core:intern :core "foo" ()))	core:foo
+(core:untern :core "foo")	core:foo
+(core:boundp (core:untern :core "foo"))	:nil
+(core:make-ns :mu)	:mu
+(core:ns-find :core "eq")	core:eq
+(core:ns-find :core "foo")	:nil
+(core:type-of (core:ns-syms :list :core))	:cons
+(core:type-of (core:ns-syms :vector :core))	:vector
+(core:type-of (core:ns-syms :list :nil))	:null
+(core:type-of (core:ns-syms :vector :nil))	:vector
+(core:type-of (core:ns-syms :list ()))	:null
+(core:type-of (core:ns-syms :vector ()))	:vector

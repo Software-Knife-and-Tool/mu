@@ -1,0 +1,7 @@
+(core:type-of core:struct)	:func
+(core:type-of core:st-type)	:func
+(core:type-of core:st-vec)	:func
+(core:type-of (core:struct :foo ()))	:struct
+(core:st-type (core:struct :foo ()))	:foo
+(core:st-vec (core:struct :foo ()))	#(:t)
+(core:st-vec (core:struct :foo '(1 2 3 4)))	#(:t 1 2 3 4)

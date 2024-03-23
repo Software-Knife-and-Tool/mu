@@ -1,37 +1,37 @@
-(mu:eq 'mu:fx-add (mu:eval (prelude:read (mu:open :string :input "`,mu:fx-add") () ())))	:t
-(mu:eq 'mu:version (mu:eval (prelude:read (mu:open :string :input "`,mu:version") () ())))	:t
-(mu:eval (prelude:read (mu:open :string :input "`\"abc\"") () ()))	"abc"
-(mu:eval (prelude:read (mu:open :string :input "`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
-(mu:eval (prelude:read (mu:open :string :input "`#\\a") () ()))	#\a
-(mu:eval (prelude:read (mu:open :string :input "`mu:std-out") () ()))	mu:std-out
-(mu:eval (prelude:read (mu:open :string :input "`1234") () ()))	1234
-(mu:eval (prelude:read (mu:open :string :input "`(,(mu:cons 'satisfies ()))") () ()))	((satisfies))
-(mu:eval (prelude:read (mu:open :string :input "`(\"abc\")") () ()))	("abc")
-(mu:eval (prelude:read (mu:open :string :input "`(#(:t 1 2 3))") () ()))	(#(:t 1 2 3))
-(mu:eval (prelude:read (mu:open :string :input "`(#\\a)") () ()))	(#\a)
-(mu:eval (prelude:read (mu:open :string :input "`(())") () ()))	(:nil)
-(mu:eval (prelude:read (mu:open :string :input "`((1234) 1234 symbol)") () ()))	((1234) 1234 symbol)
-(mu:eval (prelude:read (mu:open :string :input "`((a b) c)") () ()))	((a b) c)
-(mu:eval (prelude:read (mu:open :string :input "`()") () ()))	:nil
-(mu:eval (prelude:read (mu:open :string :input "`(,(mu:fx-add 1 2))") () ()))	(3)
-(mu:eval (prelude:read (mu:open :string :input "`(,1 (2) 3)") () ()))	(1 (2) 3)
-(mu:eval (prelude:read (mu:open :string :input "`(,1234 ,@'(a b c))") () ()))	(1234 a b c)
-(mu:eval (prelude:read (mu:open :string :input "`(,@'(a b c))") () ()))	(a b c)
-(mu:eval (prelude:read (mu:open :string :input "`(,@(mu:fx-add 1 2))")) () ())	3
-(mu:eval (prelude:read (mu:open :string :input "`(0 ,@'(a b c) 1)") () ()))	(0 a b c 1)
-(mu:eval (prelude:read (mu:open :string :input "`(1 2 ,@3)") () ()))	(1 2 . 3)
-(mu:eval (prelude:read (mu:open :string :input "`(1 2 3)") () ()))	(1 2 3)
-(mu:eval (prelude:read (mu:open :string :input "`(1.0 b (2))") () ()))	(1.0000 b (2))
-(mu:eval (prelude:read (mu:open :string :input "`(1234 symbol)") () ()))	(1234 symbol)
-(mu:eval (prelude:read (mu:open :string :input "`(1234)") () ()))	(1234)
-(mu:eval (prelude:read (mu:open :string :input "`(a b c)") () ()))	(a b c)
-(mu:eval (prelude:read (mu:open :string :input "`,(mu:fx-add 1 2)") () ()))	3
-(mu:eval (prelude:read (mu:open :string :input "`,(mu:type-of 'symbol)") () ()))	:symbol
-(mu:eval (prelude:read (mu:open :string :input "`,1234") () ()))	1234
-(mu:eval (prelude:read (mu:open :string :input "`,`\"abc\"") () ()))	"abc"
-(mu:eval (prelude:read (mu:open :string :input "`,`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
-(mu:eval (prelude:read (mu:open :string :input "`,`#\\a") () ()))	#\a
-(mu:eval (prelude:read (mu:open :string :input "`,`mu:std-out") () ()))	mu:std-out
-(mu:eval (prelude:read (mu:open :string :input "`,`1234") () ()))	1234
-(mu:eval (prelude:read (mu:open :string :input "`,`(1234)") () ()))	(1234)
-(mu:eval (prelude:read (mu:open :string :input "``1234") () ()))	`1234
+(core:eq 'core:fx-add (core:eval (prelude:read (core:open :string :input "`,core:fx-add") () ())))	:t
+(core:eq 'core:version (core:eval (prelude:read (core:open :string :input "`,core:version") () ())))	:t
+(core:eval (prelude:read (core:open :string :input "`\"abc\"") () ()))	"abc"
+(core:eval (prelude:read (core:open :string :input "`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
+(core:eval (prelude:read (core:open :string :input "`#\\a") () ()))	#\a
+(core:eval (prelude:read (core:open :string :input "`core:std-out") () ()))	core:std-out
+(core:eval (prelude:read (core:open :string :input "`1234") () ()))	1234
+(core:eval (prelude:read (core:open :string :input "`(,(core:cons 'satisfies ()))") () ()))	((satisfies))
+(core:eval (prelude:read (core:open :string :input "`(\"abc\")") () ()))	("abc")
+(core:eval (prelude:read (core:open :string :input "`(#(:t 1 2 3))") () ()))	(#(:t 1 2 3))
+(core:eval (prelude:read (core:open :string :input "`(#\\a)") () ()))	(#\a)
+(core:eval (prelude:read (core:open :string :input "`(())") () ()))	(:nil)
+(core:eval (prelude:read (core:open :string :input "`((1234) 1234 symbol)") () ()))	((1234) 1234 symbol)
+(core:eval (prelude:read (core:open :string :input "`((a b) c)") () ()))	((a b) c)
+(core:eval (prelude:read (core:open :string :input "`()") () ()))	:nil
+(core:eval (prelude:read (core:open :string :input "`(,(core:fx-add 1 2))") () ()))	(3)
+(core:eval (prelude:read (core:open :string :input "`(,1 (2) 3)") () ()))	(1 (2) 3)
+(core:eval (prelude:read (core:open :string :input "`(,1234 ,@'(a b c))") () ()))	(1234 a b c)
+(core:eval (prelude:read (core:open :string :input "`(,@'(a b c))") () ()))	(a b c)
+(core:eval (prelude:read (core:open :string :input "`(,@(core:fx-add 1 2))")) () ())	3
+(core:eval (prelude:read (core:open :string :input "`(0 ,@'(a b c) 1)") () ()))	(0 a b c 1)
+(core:eval (prelude:read (core:open :string :input "`(1 2 ,@3)") () ()))	(1 2 . 3)
+(core:eval (prelude:read (core:open :string :input "`(1 2 3)") () ()))	(1 2 3)
+(core:eval (prelude:read (core:open :string :input "`(1.0 b (2))") () ()))	(1.0000 b (2))
+(core:eval (prelude:read (core:open :string :input "`(1234 symbol)") () ()))	(1234 symbol)
+(core:eval (prelude:read (core:open :string :input "`(1234)") () ()))	(1234)
+(core:eval (prelude:read (core:open :string :input "`(a b c)") () ()))	(a b c)
+(core:eval (prelude:read (core:open :string :input "`,(core:fx-add 1 2)") () ()))	3
+(core:eval (prelude:read (core:open :string :input "`,(core:type-of 'symbol)") () ()))	:symbol
+(core:eval (prelude:read (core:open :string :input "`,1234") () ()))	1234
+(core:eval (prelude:read (core:open :string :input "`,`\"abc\"") () ()))	"abc"
+(core:eval (prelude:read (core:open :string :input "`,`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
+(core:eval (prelude:read (core:open :string :input "`,`#\\a") () ()))	#\a
+(core:eval (prelude:read (core:open :string :input "`,`core:std-out") () ()))	core:std-out
+(core:eval (prelude:read (core:open :string :input "`,`1234") () ()))	1234
+(core:eval (prelude:read (core:open :string :input "`,`(1234)") () ()))	(1234)
+(core:eval (prelude:read (core:open :string :input "``1234") () ()))	`1234

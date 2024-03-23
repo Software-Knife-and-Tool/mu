@@ -1,0 +1,2 @@
+(core:st-type (core:struct :foo ()))
+(core:st-vec (core:struct :foo '(1 2 3 4)))

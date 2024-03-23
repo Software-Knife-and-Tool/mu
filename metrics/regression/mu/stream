@@ -1,2 +1,0 @@
-(mu:close mu:err-out)
-(mu:get-str (mu:open :string :output (mu:sy-name 'abcdef)))

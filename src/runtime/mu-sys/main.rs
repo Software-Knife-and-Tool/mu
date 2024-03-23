@@ -9,12 +9,12 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate libmu;
+extern crate libcore;
 
 #[allow(unused_imports)]
 use {
     getopt::Opt,
-    libmu::{Condition, Mu, Result, Tag},
+    libcore::{Condition, Mu, Result, Tag},
     std::{fs, io::Write},
 };
 
@@ -94,7 +94,7 @@ fn usage() {
 }
 
 fn listener(mu: &Mu) {
-    let eof_value = mu.eval_str("(mu:symbol \"eof\")").unwrap();
+    let eof_value = mu.eval_str("(core:symbol \"eof\")").unwrap();
 
     loop {
         match mu.read(mu.std_in(), false, eof_value) {

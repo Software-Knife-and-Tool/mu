@@ -4,139 +4,139 @@
 ;;;
 ;;; lists
 ;;;
-(mu:intern :prelude "consp" (:lambda (t) (mu:eq :cons (mu:type-of t))))
-(mu:intern :prelude "null" (:lambda (t) (mu:eq () t)))
-(mu:intern :prelude "listp" (:lambda (t) (:if (prelude:consp t) :t (prelude:null t))))
+(core:intern :prelude "consp" (:lambda (t) (core:eq :cons (core:type-of t))))
+(core:intern :prelude "null" (:lambda (t) (core:eq () t)))
+(core:intern :prelude "listp" (:lambda (t) (:if (prelude:consp t) :t (prelude:null t))))
 
-(mu:intern :prelude "dotted-pair-p"
+(core:intern :prelude "dotted-pair-p"
   (:lambda (list)
     (:if (prelude:consp list)
-         (prelude:atom (mu:cdr list))
+         (prelude:atom (core:cdr list))
          ())))
 
 ;;;
 ;;; finds
 ;;;
-(mu:intern :prelude "findl"
+(core:intern :prelude "findl"
    (:lambda (function list)
       (:if (prelude:functionp function)
            (:if (prelude:listp list)
-                (mu:cdr
-                 (mu:fix
+                (core:cdr
+                 (core:fix
                   (:lambda (loop)
-                     (:if (mu:eq :t (mu:car loop))
+                     (:if (core:eq :t (core:car loop))
                           loop
-                          (:if (mu:cdr loop)
+                          (:if (core:cdr loop)
                                ((:lambda (el)
                                    (:if (prelude:apply function `(,el))
                                         `(:t ,@el)
-                                        `(() ,@(mu:nthcdr 2 loop))))
-                                (mu:nth 1 loop))
+                                        `(() ,@(core:nthcdr 2 loop))))
+                                (core:nth 1 loop))
                                loop)))
                   `(() ,@list)))
                 (prelude:raise list 'prelude:findl "not a list"))
            (prelude:raise function 'prelude:findl "not a function"))))
 
-(mu:intern :prelude "findr"
+(core:intern :prelude "findr"
    (:lambda (function list)
      (prelude:findl function (prelude:reverse list))))
 
 ;;;
 ;;; position
 ;;;
-(mu:intern :prelude "positionl"
+(core:intern :prelude "positionl"
    (:lambda (function list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
                (:if list
                     ((:lambda (length)
-                        (mu:car (mu:fix
+                        (core:car (core:fix
                            (:lambda (loop)
                               (:if (prelude:listp loop)
                                    loop
-                                   (:if (mu:fx-lt length loop)
+                                   (:if (core:fx-lt length loop)
                                         ()
-                                        (:if (prelude:apply function `(,(mu:nth loop list)))
+                                        (:if (prelude:apply function `(,(core:nth loop list)))
                                              `(,loop)
                                              (prelude:1+ loop)))))
                            0)))
-                     (mu:length list))
+                     (core:length list))
                     ())
                (prelude:raise list 'prelude:positionl "not a list"))
           (prelude:raise function 'prelude:positionl "not a function"))))
 
-(mu:intern :prelude "positionr"
+(core:intern :prelude "positionr"
    (:lambda (function list)
       (:if (prelude:functionp function)
            (:if (prelude:listp list)
                 (:if (prelude:null list)
                      ()
-                     (mu:car
-                      (mu:fix
+                     (core:car
+                      (core:fix
                        (:lambda (loop)
                           (:if (prelude:listp loop)
                                loop
-                               (:if (mu:fx-lt loop 0)
+                               (:if (core:fx-lt loop 0)
                                     ()
-                                    (:if (prelude:apply function `(,(mu:nth loop list)))
+                                    (:if (prelude:apply function `(,(core:nth loop list)))
                                          `(,loop)
                                          (prelude:1- loop)))))
-                       (mu:fx-sub (mu:length list) 1))))
+                       (core:fx-sub (core:length list) 1))))
                 (prelude:raise list 'prelude:positionr "not a list"))
            (prelude:raise function 'prelude:positionr "not a function"))))
 
 ;;;
 ;;; fixed argument list functions
 ;;;
-(mu:intern :prelude "append"
+(core:intern :prelude "append"
    (:lambda (list)
       (:if (prelude:listp list)
            (prelude:foldr
             (:lambda (el acc)
                (:if (prelude:listp el)
-                    (prelude:foldr mu:cons acc el)
+                    (prelude:foldr core:cons acc el)
                     el))
             ()
             list)
       (prelude:raise list 'prelude:append "not a list"))))
 
-(mu:intern :prelude "reverse"
+(core:intern :prelude "reverse"
    (:lambda (list)
       (:if (prelude:listp list)
-           (prelude:foldl mu:cons () list)
+           (prelude:foldl core:cons () list)
            (prelude:raise list 'prelude:reverse "not a list"))))
 
-(mu:intern :prelude "dropl"
+(core:intern :prelude "dropl"
    (:lambda (list n)
       (:if (prelude:listp list)
          (:if (prelude:fixnump n)
-              (mu:nthcdr n list)
+              (core:nthcdr n list)
               (prelude:raise n 'prelude:dropl "not a fixnum"))
          (prelude:raise list 'prelude:dropl "not a list"))))
 
-(mu:intern :prelude "dropr"
+(core:intern :prelude "dropr"
    (:lambda (list n)
       (:if (prelude:listp list)
            (:if (prelude:fixnump n)
                 (prelude:foldl
-                 mu:cons
+                 core:cons
                  ()
                  ((:lambda (length)
                      (prelude:foldl
                       (:lambda (el last)
-                         (:if (mu:fx-lt (mu:length last) (mu:fx-sub length n))
+                         (:if (core:fx-lt (core:length last) (core:fx-sub length n))
                               `(,el ,@last)
                               last))
                       ()
                       list))
-                  (mu:length list)))
+                  (core:length list)))
                 (prelude:raise n 'prelude:dropr "not a fixnum"))
            (prelude:raise list 'prelude:dropr "not a list"))))
 
-(mu:intern :prelude "last"
+(core:intern :prelude "last"
    (:lambda (list)
       (:if (prelude:listp list)
-           (mu:fix
+           (core:fix
             (:lambda (loop)
                (:if (prelude:null list)
                     loop
@@ -144,19 +144,19 @@
                         (:if (prelude:consp cdr)
                              cdr
                              loop))
-                     (mu:cdr loop))))
+                     (core:cdr loop))))
             list)
            (prelude:raise list 'prelude:last "not a list"))))
 
 ;;;
 ;;; count
 ;;;
-(mu:intern :prelude "count"
+(core:intern :prelude "count"
    (:lambda (item list)
      (:if (prelude:listp list)
           (prelude:foldl          
            (:lambda (elt acc)
-              (:if (mu:eq elt item)
+              (:if (core:eq elt item)
                    (prelude:1+ acc)
                    acc))
            0

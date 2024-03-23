@@ -1,9 +1,0 @@
-(mu:flush mu:std-out)	:nil
-(mu:wr-char #\a mu:std-out)	a#\a
-(mu:close mu:err-out)	:t
-(mu:openp mu:err-out)	#<stream: id: 2 type: err-out dir: :output state: open>
-(mu:write "abc" () mu:std-out)	abc"abc"
-(mu:write "abc" :t mu:std-out)	"abc""abc"
-(mu:write () () mu:std-out)	:nil:nil
-(mu:write :abcde :t mu:std-out)	:abcde:abcde
-(mu:get-str (mu:open :string :output "abcdef"))	"abcdef"

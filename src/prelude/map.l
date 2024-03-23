@@ -4,40 +4,40 @@
 ;;;
 ;;; folds and maps
 ;;;
-(mu:intern :prelude "%foldl"
+(core:intern :prelude "%foldl"
   (:lambda (function init list)
-     (mu:cdr
-      (mu:fix
+     (core:cdr
+      (core:fix
        (:lambda (arg)
           ((:lambda (list acc)
              (:if list
-                  `(,(mu:cdr list)
-                     ,@(mu:apply function `(,(mu:car list) ,acc)))
+                  `(,(core:cdr list)
+                     ,@(core:apply function `(,(core:car list) ,acc)))
                    arg))
-           (mu:car arg)
-           (mu:cdr arg)))
+           (core:car arg)
+           (core:cdr arg)))
        `(,list ,@init)))))
 
-(mu:intern :prelude "foldl"
+(core:intern :prelude "foldl"
   (:lambda (function init list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
-               (mu:cdr
-                (mu:fix
+               (core:cdr
+                (core:fix
                  (:lambda (arg)
                     ((:lambda (list acc)
                         (:if list
-                             (mu:cons
-                              (mu:cdr list)
-                              (prelude:apply function `(,(mu:car list) ,acc)))
+                             (core:cons
+                              (core:cdr list)
+                              (prelude:apply function `(,(core:car list) ,acc)))
                              arg))
-                     (mu:car arg)
-                     (mu:cdr arg)))
+                     (core:car arg)
+                     (core:cdr arg)))
                  `(,list ,@init)))
                (prelude:raise list 'prelude:foldl "not a list"))
           (prelude:raise function 'prelude:foldl "not a function"))))
 
-(mu:intern :prelude "foldr"
+(core:intern :prelude "foldr"
    (:lambda (function init list)
     (:if (prelude:functionp function)
          (:if (prelude:listp list)
@@ -48,19 +48,19 @@
 ;;;
 ;;; maps
 ;;;
-(mu:intern :prelude "%mapc"
+(core:intern :prelude "%mapc"
    (:lambda (function list)
-     (mu:fix
+     (core:fix
       (:lambda (list-cdr)
         (:if list-cdr
              ((:lambda ()
-                 (mu:apply function `(,(mu:car list-cdr)))
-                 (mu:cdr list-cdr)))
+                 (core:apply function `(,(core:car list-cdr)))
+                 (core:cdr list-cdr)))
              ()))
       list)
      list))
 
-(mu:intern :prelude "mapc"
+(core:intern :prelude "mapc"
    (:lambda (function list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
@@ -69,15 +69,15 @@
           (prelude:raise function 'prelude:mapc "not a function"))
      list))
 
-(mu:intern :prelude "%mapcar"
+(core:intern :prelude "%mapcar"
    (:lambda (function list)
       (prelude:%foldl
        (:lambda (elt acc)
-          `(,@acc ,(mu:apply function `(,elt))))
+          `(,@acc ,(core:apply function `(,elt))))
        ()
        list)))
 
-(mu:intern :prelude "mapcar"
+(core:intern :prelude "mapcar"
    (:lambda (function list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
@@ -85,59 +85,59 @@
                (prelude:raise list 'prelude:mapcar "not a list"))
           (prelude:raise function 'prelude:mapcar "not a function"))))
 
-(mu:intern :prelude "mapl"
+(core:intern :prelude "mapl"
    (:lambda (function list)
       (:if (prelude:functionp function)
            (:if (prelude:listp list)
-                (mu:fix
+                (core:fix
                  (:lambda (list)
                     (:if list
                          ((:lambda ()
                             (prelude:apply function `(,list))
-                            (mu:cdr list)))
+                            (core:cdr list)))
                          ()))
                  list)
                 (prelude:raise list 'prelude:mapl "not a list"))
            (prelude:raise function 'prelude:mapl "not a function"))
       list))
 
-(mu:intern :prelude "maplist"
+(core:intern :prelude "maplist"
    (:lambda (function list)
       (:if (prelude:functionp function)
            (:if (prelude:listp list)
-                (mu:car
-                 (mu:fix
+                (core:car
+                 (core:fix
                   (:lambda (loop)
                      ((:lambda (acc list)
                          (:if list
-                              (mu:cons
+                              (core:cons
                                `(,@acc ,(prelude:apply function `(,list)))
-                                (mu:cdr list))
+                                (core:cdr list))
                               loop))
-                      (mu:car loop)
-                      (mu:cdr loop)))
+                      (core:car loop)
+                      (core:cdr loop)))
                   `(() ,@list)))
                 (prelude:raise list 'prelude:maplist "not a list"))
            (prelude:raise function 'prelude:maplist "not a function"))))
 
-(mu:intern :prelude "%assoc"
+(core:intern :prelude "%assoc"
    (:lambda (item alist)
-      (mu:car
-       (mu:fix
+      (core:car
+       (core:fix
         (:lambda (lst)
            (:if lst
                 ((:lambda (entry cdr)
                     (:if entry
-                         (:if (mu:eq item (mu:car entry))
+                         (:if (core:eq item (core:car entry))
                               lst
                               cdr)
                          cdr))
-                 (mu:car lst)
-                 (mu:cdr lst))
+                 (core:car lst)
+                 (core:cdr lst))
                 ()))
         alist))))
 
-(mu:intern :prelude "assoc"
+(core:intern :prelude "assoc"
    (:lambda (item alist)
      (:if (prelude:listp alist)
           (prelude:%assoc item alist)
