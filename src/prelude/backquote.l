@@ -123,7 +123,9 @@
                                            (prelude:%qq-compile expr)
                                            ())))
                                (mu:car expr))))
-         ,(mu:cons :qquote   (:lambda (expr) qq-expr))))))
+         ,(mu:cons :qquote   (:lambda (expr)
+                               (prelude:warn expr ":qquote")
+                               `(:quote ,(prelude:%qq-compile expr))))))))
 
 (mu:intern :prelude "%qq-reader"
    (:lambda (char stream)
