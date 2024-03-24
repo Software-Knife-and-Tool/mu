@@ -8,8 +8,8 @@
 use {
     crate::{
         core::{
+            apply::Core as _,
             frame::Frame,
-            funcall::Core as _,
             mu::{Core as _, Mu},
             types::{Tag, Type},
         },

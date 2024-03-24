@@ -9,9 +9,9 @@
 
 use crate::{
     core::{
+        apply::Core as _,
         exception::{self, Condition, Exception},
         frame::Frame,
-        funcall::Core as _,
         mu::Mu,
         stream::{Core as _, SystemStream},
         types::{Tag, Type},

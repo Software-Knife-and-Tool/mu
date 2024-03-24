@@ -6,9 +6,9 @@
 use crate::{
     async_::context::{Context, Core as _},
     core::{
+        apply::Core as _,
         exception::{self, Condition, Exception},
         frame::Frame,
-        funcall::Core as _,
         mu::Mu,
         qquote::QqReader,
         reader::{Core as _, Reader},

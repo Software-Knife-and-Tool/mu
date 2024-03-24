@@ -5,11 +5,11 @@
 use {
     crate::{
         core::{
+            apply::Core as _,
+            apply::CoreFunction,
             direct::DirectTag,
             exception::{self, Condition, Exception},
             frame::Frame,
-            funcall::Core as _,
-            funcall::CoreFunction,
             mu::Mu,
             types::{Tag, Type},
         },

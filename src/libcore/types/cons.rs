@@ -4,10 +4,10 @@
 //! mu cons class
 use crate::{
     core::{
+        apply::Core as _,
         direct::{DirectInfo, DirectTag, DirectType},
         exception::{self, Condition, Exception},
         frame::Frame,
-        funcall::Core as _,
         gc::Core as _,
         indirect::IndirectTag,
         mu::Mu,

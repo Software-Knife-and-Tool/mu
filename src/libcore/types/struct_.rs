@@ -4,9 +4,9 @@
 //! mu struct type
 use crate::{
     core::{
+        apply::Core as _,
         exception::{self, Condition, Exception},
         frame::Frame,
-        funcall::Core as _,
         gc::Core as _,
         indirect::IndirectTag,
         mu::Mu,
