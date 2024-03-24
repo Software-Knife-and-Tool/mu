@@ -196,6 +196,9 @@ impl MuFunction for Namespace {
 
         fp.value = match mu.fp_argv_check("intern", &[Type::T, Type::String, Type::T], fp) {
             Ok(_) => {
+                if ns_tag.eq_(&Symbol::keyword("core")) {
+                    return Err(Exception::new(Condition::Write, "intern", ns_tag));
+                }
                 let ns = match ns_tag.type_of() {
                     Type::Null => mu.null_ns,
                     Type::Keyword => match Namespace::is_ns(mu, ns_tag) {
