@@ -32,7 +32,6 @@
 (core:eval 1)
 (core:eval 'core:version)
 (core:intern () "a" ())
-(core:intern :core "a" ())
 (core:fix (:lambda (a) ()) ())
 (core:fix (:lambda (a) (:if (core:eq 0 a) 0 (core:fx-sub a 1))) 100)
 (core:type-of ())
