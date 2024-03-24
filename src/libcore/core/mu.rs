@@ -9,10 +9,10 @@ use {
         allocators::bump_allocator::BumpAllocator,
         async_::context::Context,
         core::{
+            apply::{Core as _, CoreFunction},
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            funcall::{Core as _, CoreFunction},
             namespace::Namespace,
             reader::{Core as _, Reader},
             types::{Tag, Type},
@@ -113,7 +113,7 @@ impl Core for Mu {
             version: Tag::nil(),
         };
 
-        // establish the namespaces
+        // establish namespaces
         mu.keyword_ns = Symbol::keyword("keyword");
 
         mu.core_ns = Symbol::keyword("core");
@@ -148,11 +148,12 @@ impl Core for Mu {
             Err(_) => panic!(),
         };
 
+        // standard stream symbols
         Namespace::intern_symbol(&mu, mu.core_ns, "std-in".to_string(), mu.stdin);
         Namespace::intern_symbol(&mu, mu.core_ns, "std-out".to_string(), mu.stdout);
         Namespace::intern_symbol(&mu, mu.core_ns, "err-out".to_string(), mu.errout);
 
-        // mu functions
+        // core functions
         mu.native_map = Self::install_core_functions(&mu);
         mu.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&mu);
 
@@ -218,9 +219,7 @@ impl Core for Mu {
 }
 
 pub trait MuFunction {
-    fn core_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn core_feature(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 
     fn if_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
@@ -242,68 +241,10 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn core_eval(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match mu.eval(fp.argv[0]) {
-            Ok(tag) => tag,
-            Err(e) => return Err(e),
-        };
+    fn core_feature(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = Cons::vlist(mu, &mu.features.installed);
 
         Ok(())
-    }
-
-    fn core_apply(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let func = fp.argv[0];
-        let args = fp.argv[1];
-
-        fp.value = match mu.fp_argv_check("apply", &[Type::Function, Type::List], fp) {
-            Ok(_) => {
-                match (Frame {
-                    func,
-                    argv: Cons::iter(mu, args)
-                        .map(|cons| Cons::car(mu, cons))
-                        .collect::<Vec<Tag>>(),
-                    value: Tag::nil(),
-                })
-                .apply(mu, func)
-                {
-                    Ok(value) => value,
-                    Err(e) => return Err(e),
-                }
-            }
-            Err(e) => return Err(e),
-        };
-
-        Ok(())
-    }
-
-    fn core_fix(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let func = fp.argv[0];
-
-        fp.value = fp.argv[1];
-
-        match func.type_of() {
-            Type::Function => {
-                loop {
-                    let value = Tag::nil();
-                    let argv = vec![fp.value];
-                    let result = Frame { func, argv, value }.apply(mu, func);
-
-                    fp.value = match result {
-                        Ok(value) => {
-                            if value.eq_(&fp.value) {
-                                break;
-                            }
-
-                            value
-                        }
-                        Err(e) => return Err(e),
-                    };
-                }
-
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "fix", func)),
-        }
     }
 }
 

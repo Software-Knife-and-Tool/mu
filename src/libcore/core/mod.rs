@@ -3,13 +3,13 @@
 
 //! core module
 pub mod allocator;
+pub mod apply;
 pub mod compiler;
 pub mod config;
 pub mod direct;
 pub mod dynamic;
 pub mod exception;
 pub mod frame;
-pub mod funcall;
 pub mod gc;
 pub mod heap;
 pub mod image;

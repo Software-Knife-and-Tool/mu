@@ -3,17 +3,20 @@
 
 //! features module
 #[allow(unused_imports)]
-use crate::core::{
-    mu::{Core as _, Mu},
-    namespace::Namespace,
-    types::{Tag, Type},
+use crate::{
+    core::{
+        mu::{Core as _, Mu},
+        namespace::Namespace,
+        types::{Tag, Type},
+    },
+    types::symbol::{Core as _, Symbol},
 };
 
 #[cfg(feature = "std")]
 pub mod std;
 
 pub struct Features {
-    installed: Vec<(String, Namespace)>,
+    pub installed: Vec<Tag>,
 }
 
 pub trait Core {
@@ -23,7 +26,13 @@ pub trait Core {
 
 impl Core for Features {
     fn new() -> Self {
-        let features = Features { installed: vec![] };
+        #[allow(clippy::let_and_return)]
+        let features = Features {
+            installed: vec![
+                #[cfg(feature = "std")]
+                Symbol::keyword("std"),
+            ],
+        };
 
         features
     }

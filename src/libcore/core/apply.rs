@@ -12,14 +12,14 @@ use {
             frame::{Frame, MuFunction as _},
             gc::{Gc, MuFunction as _},
             heap::{Heap, MuFunction as _},
-            mu::{Mu, MuFunction as _},
+            mu::{Core as __, Mu, MuFunction as _},
             namespace::{MuFunction as _, Namespace},
             system::MuFunction as _,
             types::{MuFunction as _, Tag, Type},
         },
         system::{process::MuFunction as _, time::MuFunction as _, uname::MuFunction as _, System},
         types::{
-            cons::{Cons, MuFunction as _},
+            cons::{Cons, Core as _, MuFunction as _},
             fixnum::{Fixnum, MuFunction as _},
             float::{Float, MuFunction as _},
             function::Function,
@@ -57,16 +57,19 @@ lazy_static! {
         // async
         ( "await",   1, Context::core_await ),
         ( "abort",   1, Context::core_abort ),
-        // heap
+        //
+        ( "compile", 1, Compiler::core_compile ),
+        //,
         ( "gc",      0, Gc::core_gc ),
+        // heap
         ( "hp-info", 0, Heap::core_hp_info ),
         ( "hp-stat", 0, Heap::core_hp_stat ),
         ( "hp-size", 1, Heap::core_hp_size ),
         // mu
         ( "apply",   2, Mu::core_apply ),
-        ( "compile", 1, Compiler::core_compile ),
         ( "eval",    1, Mu::core_eval ),
         ( "frames",  0, Mu::core_frames ),
+        ( "feature", 0, Mu::core_feature ),
         ( "fix",     2, Mu::core_fix ),
         // exceptions
         ( "with-ex", 2, Exception::core_with_ex ),
@@ -202,6 +205,78 @@ impl Core for Mu {
         }
 
         Ok(())
+    }
+}
+
+pub trait MuFunction {
+    fn core_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn core_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn core_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+}
+
+impl MuFunction for Mu {
+    fn core_eval(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = match mu.eval(fp.argv[0]) {
+            Ok(tag) => tag,
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn core_apply(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let func = fp.argv[0];
+        let args = fp.argv[1];
+
+        fp.value = match mu.fp_argv_check("apply", &[Type::Function, Type::List], fp) {
+            Ok(_) => {
+                match (Frame {
+                    func,
+                    argv: Cons::iter(mu, args)
+                        .map(|cons| Cons::car(mu, cons))
+                        .collect::<Vec<Tag>>(),
+                    value: Tag::nil(),
+                })
+                .apply(mu, func)
+                {
+                    Ok(value) => value,
+                    Err(e) => return Err(e),
+                }
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn core_fix(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let func = fp.argv[0];
+
+        fp.value = fp.argv[1];
+
+        match func.type_of() {
+            Type::Function => {
+                loop {
+                    let value = Tag::nil();
+                    let argv = vec![fp.value];
+                    let result = Frame { func, argv, value }.apply(mu, func);
+
+                    fp.value = match result {
+                        Ok(value) => {
+                            if value.eq_(&fp.value) {
+                                break;
+                            }
+
+                            value
+                        }
+                        Err(e) => return Err(e),
+                    };
+                }
+
+                Ok(())
+            }
+            _ => Err(Exception::new(Condition::Type, "fix", func)),
+        }
     }
 }
 

@@ -9,8 +9,8 @@
 //!    frame_ref
 use crate::{
     core::{
+        apply::Core as _,
         exception::{self, Condition, Exception},
-        funcall::Core as _,
         gc::Core as _,
         mu::{Core as _, Mu},
         types::{Tag, Type},

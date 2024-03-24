@@ -5,9 +5,9 @@
 #[allow(unused_imports)]
 use crate::{
     core::{
+        apply::Core as _,
         exception::{self},
         frame::Frame,
-        funcall::Core as _,
         mu::Mu,
         types::{Tag, Type},
     },

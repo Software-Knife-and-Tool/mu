@@ -1,35 +1,30 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! posix interface
-use {
-    crate::{
-        core::{
-            exception::{self, Condition, Exception},
-            frame::Frame,
-            funcall::Core as _,
-            mu::Mu,
-            types::{Tag, Type},
-        },
-        system::System,
-        types::{
-            cons::{Cons, Core as _},
-            fixnum::Fixnum,
-            vector::{Core as _, Vector},
-        },
+//! std interface
+use crate::{
+    core::{
+        apply::Core as _,
+        exception::{self, Condition, Exception},
+        frame::Frame,
+        mu::Mu,
+        types::Type,
     },
-    rustix::process,
+    features::Features,
+    types::{
+        cons::{Cons, Core as _},
+        fixnum::Fixnum,
+        vector::{Core as _, Vector},
+    },
 };
 
 pub trait MuFunction {
-    fn sys_spawn(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn posix_getpid(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn posix_getcwd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn posix_exit(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn std_command(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn std_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for System {
-    fn sys_spawn(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+impl MuFunction for Features {
+    fn std_command(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let command = fp.argv[0];
         let args = fp.argv[1];
 
@@ -65,25 +60,7 @@ impl MuFunction for System {
         Ok(())
     }
 
-    fn posix_getpid(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::as_tag(process::getpid().as_raw_nonzero().get() as i64);
-
-        Ok(())
-    }
-
-    fn posix_getcwd(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match process::getcwd(vec![]) {
-            Ok(cstring) => match cstring.into_string() {
-                Ok(string) => Vector::from_string(&string).evict(mu),
-                Err(_) => return Err(Exception::new(Condition::Syscall, "getcwd", Tag::nil())),
-            },
-            Err(_) => return Err(Exception::new(Condition::Syscall, "getcwd", Tag::nil())),
-        };
-
-        Ok(())
-    }
-
-    fn posix_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn std_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let rc = fp.argv[0];
 
         match rc.type_of() {

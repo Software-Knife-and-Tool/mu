@@ -6,11 +6,11 @@
 use {
     crate::{
         core::{
+            apply::Core as _,
             compiler::Compiler as _,
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
-            funcall::Core as _,
             mu::{Core as _, Mu},
             system::Core as _,
             types::{Tag, Type},

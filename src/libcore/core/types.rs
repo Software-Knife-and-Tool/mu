@@ -7,10 +7,10 @@
 use {
     crate::{
         core::{
+            apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
-            funcall::Core as _,
             indirect::IndirectTag,
             mu::Mu,
         },

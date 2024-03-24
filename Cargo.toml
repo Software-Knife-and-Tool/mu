@@ -23,7 +23,7 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = []
+default = [ "std" ]
 std = []
 
 [profile.dev]

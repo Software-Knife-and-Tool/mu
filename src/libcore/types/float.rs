@@ -5,10 +5,10 @@
 use {
     crate::{
         core::{
+            apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
-            funcall::Core as _,
             mu::Mu,
             system::Core as _,
             types::{Tag, Type},
