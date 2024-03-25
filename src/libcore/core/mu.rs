@@ -17,7 +17,7 @@ use {
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
-        features::{Core as _, Features},
+        features::{Core as _, Feature},
         types::{
             cons::{Cons, Core as _},
             function::Function,
@@ -40,7 +40,6 @@ pub struct Mu {
 
     // configuration
     config: Config,
-    features: Features,
 
     // heap
     pub heap: RwLock<BumpAllocator>,
@@ -61,6 +60,8 @@ pub struct Mu {
     pub if_: Tag,
 
     // namespaces
+    features: Vec<Tag>,
+
     pub keyword_ns: Tag,
     pub core_ns: Tag,
     pub null_ns: Tag,
@@ -96,7 +97,7 @@ impl Core for Mu {
             core_ns: Tag::nil(),
             dynamic: RwLock::new(Vec::new()),
             errout: Tag::nil(),
-            features: Features::new(),
+            features: Vec::new(),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
             if_: Tag::nil(),
@@ -127,6 +128,8 @@ impl Core for Mu {
             Ok(_) => (),
             Err(_) => panic!(),
         };
+
+        mu.features = Feature::add_features(&mu);
 
         // version string
         mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
@@ -215,36 +218,6 @@ impl Core for Mu {
             }
             _ => Ok(expr),
         }
-    }
-}
-
-pub trait MuFunction {
-    fn core_feature(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-
-    fn if_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-}
-
-impl MuFunction for Mu {
-    fn if_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let test = fp.argv[0];
-        let true_fn = fp.argv[1];
-        let false_fn = fp.argv[2];
-
-        fp.value = match mu.fp_argv_check("::if", &[Type::T, Type::Function, Type::Function], fp) {
-            Ok(_) => match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
-                Ok(tag) => tag,
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
-        };
-
-        Ok(())
-    }
-
-    fn core_feature(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Cons::vlist(mu, &mu.features.installed);
-
-        Ok(())
     }
 }
 

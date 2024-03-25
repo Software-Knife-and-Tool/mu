@@ -7,9 +7,10 @@
 use crate::{
     async_::context::{Context, Core as _},
     core::{
+        apply::Core as _,
         exception::{self, Condition, Exception},
         frame::Frame,
-        mu::Mu,
+        mu::{Core as _, Mu},
         namespace::Namespace,
         types::{Tag, Type},
     },
@@ -30,16 +31,16 @@ type LexicalEnv = Vec<(Tag, Vec<Tag>)>;
 
 lazy_static! {
     static ref SPECMAP: Vec<SpecMap> = vec![
-        (Symbol::keyword("async"), Compiler::async_),
-        (Symbol::keyword("if"), Compiler::if_),
-        (Symbol::keyword("lambda"), Compiler::lambda),
-        (Symbol::keyword("quote"), Compiler::quoted_list),
+        (Symbol::keyword("async"), Compile::async_),
+        (Symbol::keyword("if"), Compile::if_),
+        (Symbol::keyword("lambda"), Compile::lambda),
+        (Symbol::keyword("quote"), Compile::quoted_list),
     ];
 }
 
-pub struct Compiler {}
+pub struct Compile {}
 
-impl Compiler {
+impl Compile {
     pub fn if_(mu: &Mu, args: Tag, lexenv: &mut LexicalEnv) -> exception::Result<Tag> {
         if Cons::length(mu, args) != Some(3) {
             return Err(Exception::new(Condition::Syntax, ":if", args));
@@ -270,9 +271,26 @@ impl Compiler {
 
 pub trait MuFunction {
     fn core_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn if__(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Compiler {
+impl MuFunction for Compile {
+    fn if__(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let test = fp.argv[0];
+        let true_fn = fp.argv[1];
+        let false_fn = fp.argv[2];
+
+        fp.value = match mu.fp_argv_check("::if", &[Type::T, Type::Function, Type::Function], fp) {
+            Ok(_) => match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
+                Ok(tag) => tag,
+                Err(e) => return Err(e),
+            },
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
     fn core_compile(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let mut lexenv: LexicalEnv = vec![];
 
@@ -288,7 +306,7 @@ impl MuFunction for Compiler {
 #[cfg(test)]
 mod tests {
     use crate::core::{
-        compiler::Compiler,
+        compile::Compile,
         mu::{Core, Mu},
         types::{Tag, Type},
     };
@@ -302,14 +320,14 @@ mod tests {
 
         let mu: &Mu = &Core::new(&config);
 
-        match Compiler::compile(mu, Tag::nil(), &mut vec![]) {
+        match Compile::compile(mu, Tag::nil(), &mut vec![]) {
             Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),
             },
             _ => assert!(false),
         }
-        match Compiler::list(mu, Tag::nil(), &mut vec![]) {
+        match Compile::list(mu, Tag::nil(), &mut vec![]) {
             Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),
