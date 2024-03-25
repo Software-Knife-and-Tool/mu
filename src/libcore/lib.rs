@@ -57,7 +57,7 @@ mod types;
 
 use {
     crate::core::{
-        compiler::Compiler,
+        compile::Compile,
         config::Config,
         exception,
         mu::{self, Core},
@@ -122,7 +122,7 @@ impl Mu {
 
     /// compile a tagged s-expression
     pub fn compile(&self, expr: Tag) -> exception::Result<Tag> {
-        Compiler::compile(&self.0, expr, &mut vec![])
+        Compile::compile(&self.0, expr, &mut vec![])
     }
 
     /// read a tagged s-expression from a mu stream

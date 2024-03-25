@@ -1,16 +1,16 @@
-//  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
 //! std interface
 use crate::{
     core::{
-        apply::Core as _,
+        apply::{Core as _, CoreFunction},
         exception::{self, Condition, Exception},
         frame::Frame,
         mu::Mu,
         types::Type,
     },
-    features::Features,
+    features::Feature,
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
@@ -18,17 +18,38 @@ use crate::{
     },
 };
 
+// mu function dispatch table
+lazy_static! {
+    static ref STD_SYMBOLS: Vec<(&'static str, u16, CoreFunction)> =
+        vec![("command", 2, Std::std_command), ("exit", 1, Std::std_exit),];
+}
+
+pub struct Std {}
+
+pub trait Core {
+    fn make_feature(_: &Mu) -> Feature;
+}
+
+impl Core for Std {
+    fn make_feature(_: &Mu) -> Feature {
+        Feature {
+            symbols: STD_SYMBOLS.to_vec(),
+            namespace: "std".to_string(),
+        }
+    }
+}
+
 pub trait MuFunction {
     fn std_command(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn std_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Features {
+impl MuFunction for Std {
     fn std_command(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let command = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("spawn", &[Type::String, Type::List], fp) {
+        fp.value = match mu.fp_argv_check("command", &[Type::String, Type::List], fp) {
             Ok(_) => {
                 let mut argv = vec![];
 
@@ -40,7 +61,7 @@ impl MuFunction for Features {
                             let str = Vector::as_string(mu, string);
                             argv.push(str)
                         }
-                        _ => return Err(Exception::new(Condition::Type, "system", string)),
+                        _ => return Err(Exception::new(Condition::Type, "command", string)),
                     }
                 }
 
@@ -49,7 +70,7 @@ impl MuFunction for Features {
                     .status();
 
                 match status {
-                    Err(_) => return Err(Exception::new(Condition::Open, "spawn", command)),
+                    Err(_) => return Err(Exception::new(Condition::Open, "command", command)),
                     Ok(exit_status) => Fixnum::as_tag(exit_status.code().unwrap() as i64),
                 }
             }

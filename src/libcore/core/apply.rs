@@ -6,13 +6,13 @@ use {
     crate::{
         async_::context::{Context, MuFunction as _},
         core::{
-            compiler::{Compiler, MuFunction as _},
+            compile::{Compile, MuFunction as _},
             dynamic::MuFunction as _,
             exception::{self, Condition, Exception, MuFunction as _},
             frame::{Frame, MuFunction as _},
             gc::{Gc, MuFunction as _},
             heap::{Heap, MuFunction as _},
-            mu::{Core as __, Mu, MuFunction as _},
+            mu::{Core as __, Mu},
             namespace::{MuFunction as _, Namespace},
             system::MuFunction as _,
             types::{MuFunction as _, Tag, Type},
@@ -57,9 +57,9 @@ lazy_static! {
         // async
         ( "await",   1, Context::core_await ),
         ( "abort",   1, Context::core_abort ),
-        //
-        ( "compile", 1, Compiler::core_compile ),
-        //,
+        // compiler
+        ( "compile", 1, Compile::core_compile ),
+        // gc
         ( "gc",      0, Gc::core_gc ),
         // heap
         ( "hp-info", 0, Heap::core_hp_info ),
@@ -69,7 +69,6 @@ lazy_static! {
         ( "apply",   2, Mu::core_apply ),
         ( "eval",    1, Mu::core_eval ),
         ( "frames",  0, Mu::core_frames ),
-        ( "feature", 0, Mu::core_feature ),
         ( "fix",     2, Mu::core_fix ),
         // exceptions
         ( "with-ex", 2, Exception::core_with_ex ),
@@ -137,19 +136,23 @@ lazy_static! {
         ( "getpid",  0, System::posix_getpid ),
         ( "getcwd",  0, System::posix_getcwd ),
         ( "uname",   0, System::posix_uname ),
-        ( "spawn",   2, System::sys_spawn ),
         ( "sysinfo", 0, System::posix_sysinfo ),
-        ( "exit",    1, System::posix_exit ),
     ];
 }
 
-impl Mu {
-    pub fn install_core_functions(mu: &Mu) -> HashMap<u64, CoreFunction> {
-        let mut fn_map = HashMap::<u64, CoreFunction>::new();
+pub trait Core {
+    fn install_core_functions(_: &Mu) -> HashMap<u64, CoreFunction>;
+    fn install_feature_functions(_: &Mu, _: Tag, _: Vec<(&'static str, u16, CoreFunction)>);
+    fn fp_argv_check(&self, _: &str, _: &[Type], _: &Frame) -> exception::Result<()>;
+}
 
-        fn_map.insert(Tag::as_u64(&Symbol::keyword("if")), Mu::if_);
+impl Core for Mu {
+    fn install_core_functions(mu: &Mu) -> HashMap<u64, CoreFunction> {
+        let mut functions = HashMap::<u64, CoreFunction>::new();
 
-        fn_map.extend(CORE_SYMBOLS.iter().map(|(name, nreqs, libfn)| {
+        functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
+
+        functions.extend(CORE_SYMBOLS.iter().map(|(name, nreqs, libfn)| {
             let fn_key = Symbol::keyword(name);
             let func = Function::new(Tag::from(*nreqs as i64), fn_key).evict(mu);
 
@@ -158,15 +161,26 @@ impl Mu {
             (Tag::as_u64(&fn_key), *libfn)
         }));
 
-        fn_map
+        functions
     }
-}
 
-pub trait Core {
-    fn fp_argv_check(&self, _: &str, _: &[Type], _: &Frame) -> exception::Result<()>;
-}
+    fn install_feature_functions(
+        mu: &Mu,
+        ns: Tag,
+        symbols: Vec<(&'static str, u16, CoreFunction)>,
+    ) {
+        let mut functions = mu.functions.borrow_mut();
 
-impl Core for Mu {
+        functions.extend(symbols.iter().map(|(name, nreqs, feature_fn)| {
+            let fn_key = Symbol::keyword(name);
+            let func = Function::new(Tag::from(*nreqs as i64), fn_key).evict(mu);
+
+            Namespace::intern_symbol(mu, ns, name.to_string(), func);
+
+            (Tag::as_u64(&fn_key), *feature_fn)
+        }));
+    }
+
     fn fp_argv_check(&self, fn_name: &str, types: &[Type], fp: &Frame) -> exception::Result<()> {
         for (index, arg_type) in types.iter().enumerate() {
             let fp_arg = fp.argv[index];

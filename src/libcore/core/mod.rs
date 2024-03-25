@@ -4,7 +4,7 @@
 //! core module
 pub mod allocator;
 pub mod apply;
-pub mod compiler;
+pub mod compile;
 pub mod config;
 pub mod direct;
 pub mod dynamic;

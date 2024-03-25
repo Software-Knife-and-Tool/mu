@@ -12,10 +12,10 @@ core       special-form   total: 11       pass: 11       fail: 0        exceptio
 core       stream         total: 9        pass: 9        fail: 0        exceptions: 0       
 core       struct         total: 7        pass: 7        fail: 0        exceptions: 0       
 core       symbol         total: 12       pass: 12       fail: 0        exceptions: 0       
-core       system         total: 13       pass: 13       fail: 0        exceptions: 0       
+core       system         total: 11       pass: 11       fail: 0        exceptions: 0       
 core       vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-core                      total: 307      pass: 306      fail: 1        exceptions: 0         
+core                      total: 305      pass: 304      fail: 1        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------

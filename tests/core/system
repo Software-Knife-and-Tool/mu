@@ -1,8 +1,6 @@
-(core:type-of core:exit)	:func
 (core:type-of core:getcwd)	:func
 (core:type-of core:getpid)	:func
 (core:type-of core:proc-tm)	:func
-(core:type-of core:spawn)	:func
 (core:type-of core:sys-tm)	:func
 (core:type-of core:sysinfo)	:func
 (core:type-of core:uname)	:func
