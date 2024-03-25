@@ -54,8 +54,8 @@ pub struct Mu {
     pub async_index: RwLock<HashMap<u64, Context>>,
     pub ns_index: RwLock<HashMap<u64, (Tag, RwLock<HashMap<String, Tag>>)>>,
 
-    // native function map
-    pub native_map: HashMap<u64, CoreFunction>,
+    // core function map
+    pub functions: RefCell<HashMap<u64, CoreFunction>>,
 
     // internal functions
     pub if_: Tag,
@@ -102,7 +102,7 @@ impl Core for Mu {
             if_: Tag::nil(),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
-            native_map: HashMap::new(),
+            functions: RefCell::new(HashMap::new()),
             ns_index: RwLock::new(HashMap::new()),
             null_ns: Tag::nil(),
             reader: Reader::new(),
@@ -154,7 +154,7 @@ impl Core for Mu {
         Namespace::intern_symbol(&mu, mu.core_ns, "err-out".to_string(), mu.errout);
 
         // core functions
-        mu.native_map = Self::install_core_functions(&mu);
+        mu.functions = RefCell::new(Self::install_core_functions(&mu));
         mu.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&mu);
 
         // the reader, has to be last

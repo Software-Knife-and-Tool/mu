@@ -145,11 +145,11 @@ lazy_static! {
 
 impl Mu {
     pub fn install_core_functions(mu: &Mu) -> HashMap<u64, CoreFunction> {
-        let mut fn_map = HashMap::<u64, CoreFunction>::new();
+        let mut functions = HashMap::<u64, CoreFunction>::new();
 
-        fn_map.insert(Tag::as_u64(&Symbol::keyword("if")), Mu::if_);
+        functions.insert(Tag::as_u64(&Symbol::keyword("if")), Mu::if_);
 
-        fn_map.extend(CORE_SYMBOLS.iter().map(|(name, nreqs, libfn)| {
+        functions.extend(CORE_SYMBOLS.iter().map(|(name, nreqs, libfn)| {
             let fn_key = Symbol::keyword(name);
             let func = Function::new(Tag::from(*nreqs as i64), fn_key).evict(mu);
 
@@ -158,7 +158,24 @@ impl Mu {
             (Tag::as_u64(&fn_key), *libfn)
         }));
 
-        fn_map
+        functions
+    }
+
+    pub fn install_feature_functions(
+        mu: &Mu,
+        ns: Tag,
+        symbols: Vec<(&'static str, u16, CoreFunction)>,
+    ) {
+        let mut functions = mu.functions.borrow_mut();
+
+        functions.extend(symbols.iter().map(|(name, nreqs, feature_fn)| {
+            let fn_key = Symbol::keyword(name);
+            let func = Function::new(Tag::from(*nreqs as i64), fn_key).evict(mu);
+
+            Namespace::intern_symbol(mu, ns, name.to_string(), func);
+
+            (Tag::as_u64(&fn_key), *feature_fn)
+        }));
     }
 }
 

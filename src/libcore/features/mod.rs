@@ -12,6 +12,8 @@ use crate::{
     types::symbol::{Core as _, Symbol},
 };
 
+#[cfg(feature = "libc")]
+pub mod libc;
 #[cfg(feature = "std")]
 pub mod std;
 
@@ -29,6 +31,8 @@ impl Core for Features {
         #[allow(clippy::let_and_return)]
         let features = Features {
             installed: vec![
+                #[cfg(feature = "std")]
+                Symbol::keyword("std"),
                 #[cfg(feature = "std")]
                 Symbol::keyword("std"),
             ],
