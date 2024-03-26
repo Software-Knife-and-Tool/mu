@@ -169,13 +169,13 @@ impl Core for Mu {
     fn install_feature_functions(mu: &Mu, ns: Tag, symbols: Vec<CoreFunctionDef>) {
         let mut functions = mu.functions.borrow_mut();
 
-        functions.extend(symbols.iter().map(|(name, nreqs, feature_fn)| {
+        functions.extend(symbols.iter().map(|(name, nreqs, featurefn)| {
             let form = Namespace::intern_symbol(mu, ns, name.to_string(), *UNBOUND);
             let func = Function::new(Tag::from(*nreqs as i64), form).evict(mu);
 
             Namespace::intern_symbol(mu, ns, name.to_string(), func);
 
-            (Tag::as_u64(&form), *feature_fn)
+            (Tag::as_u64(&form), *featurefn)
         }));
     }
 
