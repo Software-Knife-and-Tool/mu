@@ -45,10 +45,12 @@ release:
 	@make dist --no-print-directory
 
 debug:
+	@cargo build --bin mu-exec
+	@cp target/release/mu-exec dist
 	@cargo build --bin mu-sys
-	@cp target/debug/mu-sys dist
-	@cargo build --release --bin mu-ld
-	@cp target/debug/mu-ld dist
+	@cp target/release/mu-sys dist
+	@cargo build --bin mu-ld
+	@cp target/release/mu-ld dist
 	@make dist --no-print-directory
 
 dist:

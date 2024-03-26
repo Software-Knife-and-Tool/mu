@@ -26,7 +26,7 @@ use {
             stream::Stream,
             streams::MuFunction as _,
             struct_::{MuFunction as _, Struct},
-            symbol::{Core as _, MuFunction as _, Symbol},
+            symbol::{Core as _, MuFunction as _, Symbol, UNBOUND},
             vector::{MuFunction as _, Vector},
         },
     },
@@ -38,9 +38,11 @@ use {
 //
 pub type CoreFunction = fn(&Mu, &mut Frame) -> exception::Result<()>;
 
+pub type CoreFunctionDef = (&'static str, u16, CoreFunction);
+
 // mu function dispatch table
 lazy_static! {
-    static ref CORE_SYMBOLS: Vec<(&'static str, u16, CoreFunction)> = vec![
+    static ref CORE_SYMBOLS: Vec<CoreFunctionDef> = vec![
         // types
         ( "eq",      2, Tag::core_eq ),
         ( "type-of", 1, Tag::core_typeof ),
@@ -142,7 +144,7 @@ lazy_static! {
 
 pub trait Core {
     fn install_core_functions(_: &Mu) -> HashMap<u64, CoreFunction>;
-    fn install_feature_functions(_: &Mu, _: Tag, _: Vec<(&'static str, u16, CoreFunction)>);
+    fn install_feature_functions(_: &Mu, _: Tag, _: Vec<CoreFunctionDef>);
     fn fp_argv_check(&self, _: &str, _: &[Type], _: &Frame) -> exception::Result<()>;
 }
 
@@ -164,20 +166,16 @@ impl Core for Mu {
         functions
     }
 
-    fn install_feature_functions(
-        mu: &Mu,
-        ns: Tag,
-        symbols: Vec<(&'static str, u16, CoreFunction)>,
-    ) {
+    fn install_feature_functions(mu: &Mu, ns: Tag, symbols: Vec<CoreFunctionDef>) {
         let mut functions = mu.functions.borrow_mut();
 
         functions.extend(symbols.iter().map(|(name, nreqs, feature_fn)| {
-            let fn_key = Symbol::keyword(name);
-            let func = Function::new(Tag::from(*nreqs as i64), fn_key).evict(mu);
+            let form = Namespace::intern_symbol(mu, ns, name.to_string(), *UNBOUND);
+            let func = Function::new(Tag::from(*nreqs as i64), form).evict(mu);
 
             Namespace::intern_symbol(mu, ns, name.to_string(), func);
 
-            (Tag::as_u64(&fn_key), *feature_fn)
+            (Tag::as_u64(&form), *feature_fn)
         }));
     }
 

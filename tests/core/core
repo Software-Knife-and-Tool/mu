@@ -27,7 +27,7 @@
 (core:view #(:t 1 2))	#(:t 2 :t)
 (core:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
 (core:view 'a)	#(:t :nil a :UNBOUND)
-(core:view 'core:eq)	#(:t :core eq #<:function :native [req:2, form:eq]>)
+(core:view 'core:eq)	#(:t :core eq #<:function :core [req:2, form:eq]>)
 (core:view core:eq)	#(:t 2 :eq)
 (core:view core:std-in)	#(:t 0 :input :nil)
 (core:hp-size ())	8

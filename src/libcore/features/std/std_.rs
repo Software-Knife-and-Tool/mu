@@ -4,7 +4,7 @@
 //! std interface
 use crate::{
     core::{
-        apply::{Core as _, CoreFunction},
+        apply::{Core as _, CoreFunctionDef},
         exception::{self, Condition, Exception},
         frame::Frame,
         mu::Mu,
@@ -20,8 +20,8 @@ use crate::{
 
 // mu function dispatch table
 lazy_static! {
-    static ref STD_SYMBOLS: Vec<(&'static str, u16, CoreFunction)> =
-        vec![("command", 2, Std::std_command), ("exit", 1, Std::std_exit),];
+    static ref STD_SYMBOLS: Vec<CoreFunctionDef> =
+        vec![("command", 2, Std::std_command), ("exit", 1, Std::std_exit)];
 }
 
 pub struct Std {}
