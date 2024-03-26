@@ -1,10 +1,10 @@
-(core:read (core:open :string :input "a ;") () ())	a
-(core:read (core:open :string :input "a ; 1") () ())	a
-(core:read (core:open :string :input "#||#a") () ())	a
-(core:read (core:open :string :input "#||# a") () ())	a
-(core:read (core:open :string :input "a #||#") () ())	a
-(core:read (core:open :string :input "#||# a;a") () ())	a
-(core:read (core:open :string :input "#||# a ;a") () ())	a
+(libcore:read (libcore:open :string :input "a ;") () ())	a
+(libcore:read (libcore:open :string :input "a ; 1") () ())	a
+(libcore:read (libcore:open :string :input "#||#a") () ())	a
+(libcore:read (libcore:open :string :input "#||# a") () ())	a
+(libcore:read (libcore:open :string :input "a #||#") () ())	a
+(libcore:read (libcore:open :string :input "#||# a;a") () ())	a
+(libcore:read (libcore:open :string :input "#||# a ;a") () ())	a
 #(:t)	#(:t)
 #(:t 1 2 3)	#(:t 1 2 3)
 #(:byte)	#(:byte)
@@ -33,9 +33,9 @@
 'a-long-symbol	a-long-symbol
 'a-symbol	a-symbol
 'symbol	symbol
-'core:eq	core:eq
+'libcore:eq	libcore:eq
 's	s
-(core:type-of '#:abc)	:symbol
+(libcore:type-of '#:abc)	:symbol
 :a	:a
 :abcdefg	:abcdefg
 1.024e23	102400002052185839894528.0000

@@ -4,40 +4,40 @@
 ;;;
 ;;; folds and maps
 ;;;
-(core:intern :prelude "%foldl"
+(libcore:intern :prelude "%foldl"
   (:lambda (function init list)
-     (core:cdr
-      (core:fix
+     (libcore:cdr
+      (libcore:fix
        (:lambda (arg)
           ((:lambda (list acc)
              (:if list
-                  `(,(core:cdr list)
-                     ,@(core:apply function `(,(core:car list) ,acc)))
+                  `(,(libcore:cdr list)
+                     ,@(libcore:apply function `(,(libcore:car list) ,acc)))
                    arg))
-           (core:car arg)
-           (core:cdr arg)))
+           (libcore:car arg)
+           (libcore:cdr arg)))
        `(,list ,@init)))))
 
-(core:intern :prelude "foldl"
+(libcore:intern :prelude "foldl"
   (:lambda (function init list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
-               (core:cdr
-                (core:fix
+               (libcore:cdr
+                (libcore:fix
                  (:lambda (arg)
                     ((:lambda (list acc)
                         (:if list
-                             (core:cons
-                              (core:cdr list)
-                              (prelude:apply function `(,(core:car list) ,acc)))
+                             (libcore:cons
+                              (libcore:cdr list)
+                              (prelude:apply function `(,(libcore:car list) ,acc)))
                              arg))
-                     (core:car arg)
-                     (core:cdr arg)))
+                     (libcore:car arg)
+                     (libcore:cdr arg)))
                  `(,list ,@init)))
                (prelude:raise list 'prelude:foldl "not a list"))
           (prelude:raise function 'prelude:foldl "not a function"))))
 
-(core:intern :prelude "foldr"
+(libcore:intern :prelude "foldr"
    (:lambda (function init list)
     (:if (prelude:functionp function)
          (:if (prelude:listp list)
@@ -48,19 +48,19 @@
 ;;;
 ;;; maps
 ;;;
-(core:intern :prelude "%mapc"
+(libcore:intern :prelude "%mapc"
    (:lambda (function list)
-     (core:fix
+     (libcore:fix
       (:lambda (list-cdr)
         (:if list-cdr
              ((:lambda ()
-                 (core:apply function `(,(core:car list-cdr)))
-                 (core:cdr list-cdr)))
+                 (libcore:apply function `(,(libcore:car list-cdr)))
+                 (libcore:cdr list-cdr)))
              ()))
       list)
      list))
 
-(core:intern :prelude "mapc"
+(libcore:intern :prelude "mapc"
    (:lambda (function list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
@@ -69,15 +69,15 @@
           (prelude:raise function 'prelude:mapc "not a function"))
      list))
 
-(core:intern :prelude "%mapcar"
+(libcore:intern :prelude "%mapcar"
    (:lambda (function list)
       (prelude:%foldl
        (:lambda (elt acc)
-          `(,@acc ,(core:apply function `(,elt))))
+          `(,@acc ,(libcore:apply function `(,elt))))
        ()
        list)))
 
-(core:intern :prelude "mapcar"
+(libcore:intern :prelude "mapcar"
    (:lambda (function list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
@@ -85,59 +85,59 @@
                (prelude:raise list 'prelude:mapcar "not a list"))
           (prelude:raise function 'prelude:mapcar "not a function"))))
 
-(core:intern :prelude "mapl"
+(libcore:intern :prelude "mapl"
    (:lambda (function list)
       (:if (prelude:functionp function)
            (:if (prelude:listp list)
-                (core:fix
+                (libcore:fix
                  (:lambda (list)
                     (:if list
                          ((:lambda ()
                             (prelude:apply function `(,list))
-                            (core:cdr list)))
+                            (libcore:cdr list)))
                          ()))
                  list)
                 (prelude:raise list 'prelude:mapl "not a list"))
            (prelude:raise function 'prelude:mapl "not a function"))
       list))
 
-(core:intern :prelude "maplist"
+(libcore:intern :prelude "maplist"
    (:lambda (function list)
       (:if (prelude:functionp function)
            (:if (prelude:listp list)
-                (core:car
-                 (core:fix
+                (libcore:car
+                 (libcore:fix
                   (:lambda (loop)
                      ((:lambda (acc list)
                          (:if list
-                              (core:cons
+                              (libcore:cons
                                `(,@acc ,(prelude:apply function `(,list)))
-                                (core:cdr list))
+                                (libcore:cdr list))
                               loop))
-                      (core:car loop)
-                      (core:cdr loop)))
+                      (libcore:car loop)
+                      (libcore:cdr loop)))
                   `(() ,@list)))
                 (prelude:raise list 'prelude:maplist "not a list"))
            (prelude:raise function 'prelude:maplist "not a function"))))
 
-(core:intern :prelude "%assoc"
+(libcore:intern :prelude "%assoc"
    (:lambda (item alist)
-      (core:car
-       (core:fix
+      (libcore:car
+       (libcore:fix
         (:lambda (lst)
            (:if lst
                 ((:lambda (entry cdr)
                     (:if entry
-                         (:if (core:eq item (core:car entry))
+                         (:if (libcore:eq item (libcore:car entry))
                               lst
                               cdr)
                          cdr))
-                 (core:car lst)
-                 (core:cdr lst))
+                 (libcore:car lst)
+                 (libcore:cdr lst))
                 ()))
         alist))))
 
-(core:intern :prelude "assoc"
+(libcore:intern :prelude "assoc"
    (:lambda (item alist)
      (:if (prelude:listp alist)
           (prelude:%assoc item alist)

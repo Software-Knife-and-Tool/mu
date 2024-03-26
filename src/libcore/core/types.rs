@@ -220,14 +220,14 @@ impl Tag {
 }
 
 pub trait MuFunction {
-    fn core_eq(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_typeof(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_repr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_eq(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_typeof(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_repr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Tag {
-    fn core_repr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_repr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let type_ = fp.argv[0];
         let arg = fp.argv[1];
 
@@ -268,7 +268,7 @@ impl MuFunction for Tag {
         Ok(())
     }
 
-    fn core_eq(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_eq(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = if fp.argv[0].eq_(&fp.argv[1]) {
             Symbol::keyword("t")
         } else {
@@ -278,7 +278,7 @@ impl MuFunction for Tag {
         Ok(())
     }
 
-    fn core_typeof(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_typeof(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match Tag::type_key(fp.argv[0].type_of()) {
             Some(type_key) => type_key,
             None => panic!(),
@@ -287,7 +287,7 @@ impl MuFunction for Tag {
         Ok(())
     }
 
-    fn core_view(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_view(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
         fp.value = match tag.type_of() {

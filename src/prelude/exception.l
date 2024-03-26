@@ -4,7 +4,7 @@
 ;;;
 ;;; exceptions
 ;;;
-(core:untern :prelude "%debug-symbols%")
+(libcore:untern :prelude "%debug-symbols%")
 
 ;;;
 ;;; [*exception descriptor*] #s(:except cond value source reason env)
@@ -15,26 +15,26 @@
 ;;; reason: extended condition, usually a string
 ;;; env:    dynamic environment, list of frames
 ;;;
-(core:intern :prelude "exceptp"
+(libcore:intern :prelude "exceptp"
    (:lambda (ex)
-      (core:eq (prelude:type-of ex) 'except)))
+      (libcore:eq (prelude:type-of ex) 'except)))
 
-(core:intern :prelude "%make-except"
+(libcore:intern :prelude "%make-except"
    (:lambda (cond value source reason env)
       (prelude:%make-type "except"
-        `(,(core:cons :cond   cond)
-          ,(core:cons :value  value)
-          ,(core:cons :source source)
-          ,(core:cons :reason reason)
-          ,(core:cons :env    env)))))
+        `(,(libcore:cons :cond   cond)
+          ,(libcore:cons :value  value)
+          ,(libcore:cons :source source)
+          ,(libcore:cons :reason reason)
+          ,(libcore:cons :env    env)))))
 
-(core:intern :prelude "%except-prop"
+(libcore:intern :prelude "%except-prop"
    (:lambda (prop except)
-      (:if (prelude:findl (:lambda (lambda-prop) (core:eq prop lambda-prop)) '(:cond :value :source :reason :env))
+      (:if (prelude:findl (:lambda (lambda-prop) (libcore:eq prop lambda-prop)) '(:cond :value :source :reason :env))
            (prelude:%type-ref prop except)
            (prelude:raise prop 'prelude:%except-prop "not an except property"))))
 
-(core:intern :prelude "%exceptf"
+(libcore:intern :prelude "%exceptf"
    (:lambda (stream format-string printenv except)
      ((:lambda (cond value source reason env)
          (:if (prelude:null format-string)
@@ -46,10 +46,10 @@
                   (prelude:%mapc
                    (:lambda (frame)
                       (prelude:format stream "  ~A~T(~A ~A)~%"
-                                   `(,(prelude:%format-mapped-symbol (core:car frame))
-                                     ,(core:car frame)
-                                     ,(core:cdr frame))))
-                   (core:cdr env))))
+                                   `(,(prelude:%format-mapped-symbol (libcore:car frame))
+                                     ,(libcore:car frame)
+                                     ,(libcore:cdr frame))))
+                   (libcore:cdr env))))
               ()))
       (prelude:%except-prop :cond except)
       (prelude:%except-prop :value except)
@@ -57,52 +57,52 @@
       (prelude:%except-prop :reason except)
       (prelude:%except-prop :env except))))
 
-(core:intern :prelude "with-exception"
+(libcore:intern :prelude "with-exception"
   (:lambda (handler thunk)
-     (core:with-ex
+     (libcore:with-ex
       (:lambda (value condition source)
-         (:if (core:eq condition :except)
+         (:if (libcore:eq condition :except)
               (prelude:apply handler `(,value))
               (prelude:apply handler `(,(prelude:%make-except
                                       condition
                                       value
                                       source
-                                      "core:raise"
-                                      (core:frames))))))
+                                      "libcore:raise"
+                                      (libcore:frames))))))
       (:lambda () (prelude:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
 ;;;
-(core:intern :prelude "make-exception" prelude:%make-except)
+(libcore:intern :prelude "make-exception" prelude:%make-except)
 
-(core:intern :prelude "error"
+(libcore:intern :prelude "error"
    (:lambda (value format-string arg-list)
-      (prelude:format core:err-out format-string arg-list)
-      (core:raise
+      (prelude:format libcore:err-out format-string arg-list)
+      (libcore:raise
        (prelude:%make-except :error value :error "" ())
        :except)))
 
-(core:intern :prelude "raise"
+(libcore:intern :prelude "raise"
    (:lambda (value source reason verbose)
       (:if verbose          
-           (core:raise
-            (prelude:%make-except :error value source reason (core:frames))
+           (libcore:raise
+            (prelude:%make-except :error value source reason (libcore:frames))
             :except)
-           (core:raise
+           (libcore:raise
             (prelude:%make-except :error value source reason ())
             :except))))
 
-(core:intern :prelude "debug"
+(libcore:intern :prelude "debug"
    (:lambda (value message)
-     (core:write ";;; debug: " () core:err-out)          
-     (core:write value () core:err-out)
-     (core:write " " () core:err-out)
-     (core:write message () core:err-out)
-     (core:wr-char #\linefeed core:err-out)
+     (libcore:write ";;; debug: " () libcore:err-out)          
+     (libcore:write value () libcore:err-out)
+     (libcore:write " " () libcore:err-out)
+     (libcore:write message () libcore:err-out)
+     (libcore:wr-char #\linefeed libcore:err-out)
      value))
 
-(core:intern :prelude "warn"
+(libcore:intern :prelude "warn"
    (:lambda (value message)
-     (prelude:format core:err-out ";;; warning: ~S ~A~%" `(,value ,message))
+     (prelude:format libcore:err-out ";;; warning: ~S ~A~%" `(,value ,message))
     value))

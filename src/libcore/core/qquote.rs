@@ -52,8 +52,8 @@ impl QqReader {
     pub fn new(mu: &Mu, stream: Tag) -> Self {
         Self {
             stream,
-            cons: Namespace::intern_symbol(mu, mu.core_ns, "cons".to_string(), Tag::nil()),
-            qappend: Namespace::intern_symbol(mu, mu.core_ns, "append".to_string(), Tag::nil()),
+            cons: Namespace::intern_symbol(mu, mu.libcore_ns, "cons".to_string(), Tag::nil()),
+            qappend: Namespace::intern_symbol(mu, mu.libcore_ns, "append".to_string(), Tag::nil()),
         }
     }
 

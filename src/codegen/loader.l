@@ -9,7 +9,7 @@
 ;;; loader
 ;;;
 #|
-(core:intern :arm "load"
+(libcore:intern :arm "load"
   (:lambda (source verbose)
     ;;; (prelude:raise prelude:stringp source 'prelude:load "not a file designator")
     ((:lambda (ifs)
@@ -17,13 +17,13 @@
        (:if verbose
             (prelude:format :t ";;; loading ~A~%" `(,source))
             ())
-       (core:fix
+       (libcore:fix
         (:lambda (loop)
           (:if (prelude:eof ifs)
                loop
                (prelude:with-exception
                 (:lambda (exception)
-                     (prelude:%exceptf core:err-out "load exception: ~A~%" () exception))
+                     (prelude:%exceptf libcore:err-out "load exception: ~A~%" () exception))
                 (:lambda ()
                    ((:lambda (form)
                       (:if (prelude:eof ifs)
@@ -32,7 +32,7 @@
                                 (prelude:format :t "~A~%" `(,form))
                                 ()))
                       (prelude:null loop))
-                    (core:eval (prelude:compile (prelude:read ifs :t ()))))))))
+                    (libcore:eval (prelude:compile (prelude:read ifs :t ()))))))))
         ()))
-(core:open :file :input source))))
+(libcore:open :file :input source))))
 |#

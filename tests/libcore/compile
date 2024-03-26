@@ -1,0 +1,8 @@
+((:lambda (fn)(libcore:apply (:lambda (fn) (libcore:eq :func (libcore:type-of fn))) (libcore:cons fn ()))) libcore:eq)	:t
+(libcore:apply (libcore:compile '(:lambda (a) ((:lambda (a) (libcore:fx-add a a)) (libcore:fx-add a 2)))) '(1))	6
+(libcore:apply (libcore:compile '(:lambda (a) ((:lambda (b) (libcore:fx-add a b)) (libcore:fx-add a 2)))) '(1))	4
+(libcore:apply (libcore:compile '(:lambda (a) (libcore:fx-add a a))) '(1))	2
+(libcore:compile #\a)	#\a
+(libcore:compile 1)	1
+(libcore:compile :compile)	:compile
+(libcore:compile "compile")	"compile"

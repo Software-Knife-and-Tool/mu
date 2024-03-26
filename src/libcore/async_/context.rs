@@ -106,12 +106,12 @@ impl Core for Context {
 }
 
 pub trait MuFunction {
-    fn core_await(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_abort(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_await(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_abort(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Context {
-    fn core_await(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_await(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let async_id = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("await", &[Type::Vector], fp) {
@@ -129,7 +129,7 @@ impl MuFunction for Context {
         Ok(())
     }
 
-    fn core_abort(_mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_abort(_mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = Tag::nil();
         Ok(())
     }

@@ -9,139 +9,139 @@
 ;;; utilities
 ;;;
 #|
-(core:intern core::ns :extern "make-exception"
+(libcore:intern libcore::ns :extern "make-exception"
   (:lambda (obj condition source)
-    (core:struct :except
-      (core:cons obj
-        (core:cons condition
-          (core:cons source
-            (core::list (core::frames))))))))
+    (libcore:struct :except
+      (libcore:cons obj
+        (libcore:cons condition
+          (libcore:cons source
+            (libcore::list (libcore::frames))))))))
 
-(core:intern core::ns :extern "print-exception"
+(libcore:intern libcore::ns :extern "print-exception"
   (:lambda (stream exception)
     ((:lambda (obj source condition)
-       (core:format stream 
+       (libcore:format stream 
                     ";;; exception raised on ~A, condition ~A by ~A~%"
-                    (core::list-3 obj source condition)))
-     (core:sv-ref (core:st-vec exception) 0)
-     (core:sv-ref (core:st-vec exception) 1)
-     (core:sv-ref (core:st-vec exception) 2))))
+                    (libcore::list-3 obj source condition)))
+     (libcore:sv-ref (libcore:st-vec exception) 0)
+     (libcore:sv-ref (libcore:st-vec exception) 1)
+     (libcore:sv-ref (libcore:st-vec exception) 2))))
      
-(core:intern core::ns :intern "print-frames"
+(libcore:intern libcore::ns :intern "print-frames"
   (:lambda (frames)
-    (core:mapc
+    (libcore:mapc
       (:lambda (frame)
-        (core:format :t "(~A ~A)~%" frame))
+        (libcore:format :t "(~A ~A)~%" frame))
         frames)))
 
-(core:intern core::ns :intern "eprinc"
+(libcore:intern libcore::ns :intern "eprinc"
   (:lambda (obj)
-    (core:write obj () core:err-out)))           
+    (libcore:write obj () libcore:err-out)))           
 
-(core:intern core::ns :intern "eprint"
+(libcore:intern libcore::ns :intern "eprint"
   (:lambda (obj)
-    (core:write obj :t core:err-out)))           
+    (libcore:write obj :t libcore:err-out)))           
 
-(core:intern core::ns :intern "princ"
+(libcore:intern libcore::ns :intern "princ"
   (:lambda (obj)
-    (core:write obj () core:std-out)))           
+    (libcore:write obj () libcore:std-out)))           
 
-(core:intern core::ns :intern "print"
+(libcore:intern libcore::ns :intern "print"
   (:lambda (obj)
-    (core:write obj :t core:std-out)))           
+    (libcore:write obj :t libcore:std-out)))           
 
-(core:intern core::ns :extern "raise"
+(libcore:intern libcore::ns :extern "raise"
    (:lambda (obj msg)
-     (core::eprinc "error: ")
-     (core::eprinc msg)
-     (core::eprinc " ")
-     (core::eprint obj)
-     (core:terpri core:err-out)
-     (core:raise :error obj)))
+     (libcore::eprinc "error: ")
+     (libcore::eprinc msg)
+     (libcore::eprinc " ")
+     (libcore::eprint obj)
+     (libcore:terpri libcore:err-out)
+     (libcore:raise :error obj)))
 
-(core:intern core::ns :extern "raise-if"
+(libcore:intern libcore::ns :extern "raise-if"
    (:lambda (test obj msg)
      (:if test
           ((:lambda ()
-             (core::eprinc "raise-if: ")
-             (core::eprinc msg)
-             (core::eprinc " ")
-             (core::eprint obj)
-             (core:terpri core:err-out)
-             (core:raise :error obj)))
+             (libcore::eprinc "raise-if: ")
+             (libcore::eprinc msg)
+             (libcore::eprinc " ")
+             (libcore::eprint obj)
+             (libcore:terpri libcore:err-out)
+             (libcore:raise :error obj)))
           obj)))
 
-(core:intern core::ns :extern "raise-when"
+(libcore:intern libcore::ns :extern "raise-when"
    (:lambda (fn obj msg)
-     (:if (core:apply fn (core::list obj))
+     (:if (libcore:apply fn (libcore::list obj))
           ((:lambda ()
-             (core::eprinc "raise-when: ")
-             (core::eprinc msg)
-             (core::eprinc " ")
-             (core::eprint obj)
-             (core:terpri core:err-out)
-             (core:raise :error obj)))
+             (libcore::eprinc "raise-when: ")
+             (libcore::eprinc msg)
+             (libcore::eprinc " ")
+             (libcore::eprint obj)
+             (libcore:terpri libcore:err-out)
+             (libcore:raise :error obj)))
           obj)))
 
-(core:intern core::ns :extern "raise-unless"
+(libcore:intern libcore::ns :extern "raise-unless"
    (:lambda (fnp obj msg)
-     (:if (core:apply fnp (core::list obj))
+     (:if (libcore:apply fnp (libcore::list obj))
           obj
           ((:lambda ()
-             (core::eprinc "raise-unless: ")
-             (core::eprinc msg)
-             (core::eprinc " ")
-             (core::eprint obj)
-             (core:terpri core:err-out)
-             (core:raise :error obj))))))
+             (libcore::eprinc "raise-unless: ")
+             (libcore::eprinc msg)
+             (libcore::eprinc " ")
+             (libcore::eprint obj)
+             (libcore:terpri libcore:err-out)
+             (libcore:raise :error obj))))))
 
-(core:intern core::ns :extern "warn"
+(libcore:intern libcore::ns :extern "warn"
    (:lambda (obj msg)
-     (core::eprinc "warning: ")
-     (core::eprinc msg)
-     (core::eprinc " ")
-     (core::eprint obj)
-     (core:terpri core:err-out)
+     (libcore::eprinc "warning: ")
+     (libcore::eprinc msg)
+     (libcore::eprinc " ")
+     (libcore::eprint obj)
+     (libcore:terpri libcore:err-out)
      obj))
 
 ;;;
 ;;; break loop
 ;;;
-(core:intern core::ns :extern "break"
+(libcore:intern libcore::ns :extern "break"
    (:lambda (except)
-     (core:raise-unless core:stringp except "core:break: not an exception")
-     (core:write ";;; entering break loop, :h for commands" () ())
-     (core:terpri ())
-     (core:fix
+     (libcore:raise-unless libcore:stringp except "libcore:break: not an exception")
+     (libcore:write ";;; entering break loop, :h for commands" () ())
+     (libcore:terpri ())
+     (libcore:fix
       (:lambda (loop)
-        (:if (core:stringp loop)
+        (:if (libcore:stringp loop)
              loop
-             (:if (core:eof :t)
+             (:if (libcore:eof :t)
                   ()
                   ((:lambda (form)
-                     (:if (core:eq form :h)
+                     (:if (libcore:eq form :h)
                           ((:lambda ()
-                             (core:write "break help:" () ()) (core:terpri ())
-                             (core:write ":x - exit process" () ()) (core:terpri ())
-                             (core:write ":r - return from break" () ()) (core:terpri ())
-                             (core:write ":s - print stack frames" () ()) (core:terpri ())
-                             (core:null loop)))
-                          (:if (core:eq form :x)
+                             (libcore:write "break help:" () ()) (libcore:terpri ())
+                             (libcore:write ":x - exit process" () ()) (libcore:terpri ())
+                             (libcore:write ":r - return from break" () ()) (libcore:terpri ())
+                             (libcore:write ":s - print stack frames" () ()) (libcore:terpri ())
+                             (libcore:null loop)))
+                          (:if (libcore:eq form :x)
                                (sys:exit 0)
-                               (:if (core:eq form :s)
+                               (:if (libcore:eq form :s)
                                     ((:lambda ()
-                                       (core:mapc
-                                        (:lambda (frame) (core::print-frame frame))
-                                        (core:car (core::context)))
-                                       (core:null loop)))
-                                    (:if (core:eq form :r)
+                                       (libcore:mapc
+                                        (:lambda (frame) (libcore::print-frame frame))
+                                        (libcore:car (libcore::context)))
+                                       (libcore:null loop)))
+                                    (:if (libcore:eq form :r)
                                          except
                                          ((:lambda ()
-                                            (core:write (core:eval (core:compile form)) () :t)
-                                            (core:terpri ())
-                                            (core:null loop))))))))
+                                            (libcore:write (libcore:eval (libcore:compile form)) () :t)
+                                            (libcore:terpri ())
+                                            (libcore:null loop))))))))
                    ((:lambda ()
-                      (core:write "break> " () ())
-                      (core:read :t () ())))))))
+                      (libcore:write "break> " () ())
+                      (libcore:read :t () ())))))))
      ())))
 |#

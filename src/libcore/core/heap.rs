@@ -90,13 +90,13 @@ impl Core for Heap {
 }
 
 pub trait MuFunction {
-    fn core_hp_info(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_hp_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_hp_stat(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_hp_info(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_hp_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_hp_stat(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Heap {
-    fn core_hp_stat(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_hp_stat(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let (pagesz, npages) = Heap::heap_info(mu);
 
         let mut vec = vec![
@@ -122,7 +122,7 @@ impl MuFunction for Heap {
         Ok(())
     }
 
-    fn core_hp_info(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_hp_info(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let (page_size, npages) = Self::heap_info(mu);
 
         let vec = vec![
@@ -135,7 +135,7 @@ impl MuFunction for Heap {
         Ok(())
     }
 
-    fn core_hp_size(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_hp_size(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = Tag::from(Self::heap_size(mu, fp.argv[0]) as i64);
 
         Ok(())

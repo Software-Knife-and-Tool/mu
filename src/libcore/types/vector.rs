@@ -469,14 +469,14 @@ impl<'a> Core<'a> for Vector {
 
 /// mu functions
 pub trait MuFunction {
-    fn core_type(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_length(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_make_vector(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_svref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_type(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_length(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_make_vector(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_svref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Vector {
-    fn core_make_vector(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_make_vector(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let type_sym = fp.argv[0];
         let list = fp.argv[1];
 
@@ -575,7 +575,7 @@ impl MuFunction for Vector {
         Ok(())
     }
 
-    fn core_svref(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_svref(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
         let index = fp.argv[1];
 
@@ -598,7 +598,7 @@ impl MuFunction for Vector {
         Ok(())
     }
 
-    fn core_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("sv-type", &[Type::Vector], fp) {
@@ -612,7 +612,7 @@ impl MuFunction for Vector {
         Ok(())
     }
 
-    fn core_length(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_length(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("sv-len", &[Type::Vector], fp) {

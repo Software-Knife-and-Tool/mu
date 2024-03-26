@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //!
-//! The mu-core machine is the implementation surface for the [`mu programming environment`].
+//! The libcore machine is the implementation surface for the [`mu programming environment`].
 //!
 //! As much as is practible, mu-core's functions and data types resemble Common Lisp in preference to
 //! Scheme/Clojure in order to be immediately familiar to the traditional LISP programmer.
@@ -209,7 +209,7 @@ impl Mu {
 
     pub fn load(&self, file_path: &str) -> exception::Result<bool> {
         if fs::metadata(file_path).is_ok() {
-            let load_form = format!("(core:open :file :input \"{}\")", file_path);
+            let load_form = format!("(libcore:open :file :input \"{}\")", file_path);
             let istream = self.0.eval(self.read_str(&load_form).unwrap()).unwrap();
             let eof_value = self.read_str(":eof").unwrap(); // need make_symbol here
 

@@ -1,4 +1,0 @@
-(core:with-ex (:lambda (obj cond src) (core:write cond () core:std-out)) (:lambda () (core:raise () :except)))	:except:except
-(core:with-ex (:lambda (obj cond src) (core:write obj () core:std-out)) (:lambda () (core:raise 1 :except)))	11
-(core:with-ex (:lambda (obj cond src) (core:write cond () core:std-out)) (:lambda () (core:fx-div 1 0)))	:div0:div0
-(core:with-ex (:lambda (obj cond src) (core:write obj () core:std-out)) (:lambda () 1))	1

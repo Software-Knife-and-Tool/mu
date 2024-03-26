@@ -1,0 +1,24 @@
+(libcore:append '(1) 1)	(1 . 1)
+(libcore:append '(1) '(1))	(1 1)
+(libcore:car '(1))	1
+(libcore:car ())	:nil
+(libcore:cdr '(1 2))	(2)
+(libcore:cdr ())	:nil
+(libcore:cons 1 ())	(1)
+(libcore:cons 1 2)	(1 . 2)
+(libcore:length '(1))	1
+(libcore:length ())	0
+(libcore:nth 0 '(1 . 2))	1
+(libcore:nth 0 '(1 2))	1
+(libcore:nth 0 ())	:nil
+(libcore:nth 1 '(1 . 2))	2
+(libcore:nth 1 '(1 2))	2
+(libcore:nth 1 ())	:nil
+(libcore:nth 3 '(1 2))	:nil
+(libcore:nthcdr 0 '(1 . 2))	(1 . 2)
+(libcore:nthcdr 0 '(1 2))	(1 2)
+(libcore:nthcdr 0 ())	:nil
+(libcore:nthcdr 1 '(1 . 2))	2
+(libcore:nthcdr 1 '(1 2))	(2)
+(libcore:nthcdr 1 ())	:nil
+(libcore:nthcdr 3 '(1 2))	:nil

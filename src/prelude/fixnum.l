@@ -4,65 +4,65 @@
 ;;;
 ;;; fixnums
 ;;;
-(core:intern :prelude "1+"
+(libcore:intern :prelude "1+"
    (:lambda (n)
      (:if (prelude:fixnump n)
-          (core:fx-add n 1)
+          (libcore:fx-add n 1)
           (prelude:raise n 'prelude:1+ "not a fixnum"))))
 
-(core:intern :prelude "1-"
+(libcore:intern :prelude "1-"
    (:lambda (n)
      (:if (prelude:fixnump n)
-          (core:fx-sub n 1)
+          (libcore:fx-sub n 1)
           (prelude:raise n 'prelude:1- "not a fixnum"))))
 
-(core:intern :prelude "truncate"
+(libcore:intern :prelude "truncate"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(core:fx-div n m) ,@(core:fx-sub n (core:fx-mul m (core:fx-div n m))))
+               `(,(libcore:fx-div n m) ,@(libcore:fx-sub n (libcore:fx-mul m (libcore:fx-div n m))))
                (prelude:raise m 'prelude:truncate "not a fixnum"))
           (prelude:raise n 'prelude:truncate "not a fixnum"))))
 
 ;;; round to negative infinity
-(core:intern :prelude "floor"
+(libcore:intern :prelude "floor"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(core:fx-div n m) ,@(core:fx-sub n (core:fx-mul m (core:fx-div n m))))
+               `(,(libcore:fx-div n m) ,@(libcore:fx-sub n (libcore:fx-mul m (libcore:fx-div n m))))
                (prelude:raise m 'prelude:rem "not a fixnum"))
           (prelude:raise n 'prelude:floor "not a fixnum"))))
 
 ;;; round to positive infinity
-(core:intern :prelude "ceiling"
+(libcore:intern :prelude "ceiling"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(core:fx-div n m) ,@(core:fx-sub n (core:fx-mul m (core:fx-div n m))))
+               `(,(libcore:fx-div n m) ,@(libcore:fx-sub n (libcore:fx-mul m (libcore:fx-div n m))))
                (prelude:raise m 'prelude:ceiling "not a fixnum"))
           (prelude:raise n 'prelude:ceiling "not a fixnum"))))
 
-(core:intern :prelude "mod"
+(libcore:intern :prelude "mod"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               (core:cdr (prelude:floor m n))
+               (libcore:cdr (prelude:floor m n))
                (prelude:raise m 'prelude:mod "not a fixnum"))
           (prelude:raise n 'prelude:mod "not a fixnum"))))
 
-(core:intern :prelude "rem"
+(libcore:intern :prelude "rem"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               (core:cdr (prelude:truncate m n))
+               (libcore:cdr (prelude:truncate m n))
                (prelude:raise m 'prelude:rem "not a fixnum"))
           (prelude:raise n 'prelude:rem "not a fixnum"))))
 
 ;;; round to nearest
-(core:intern :prelude "round"
+(libcore:intern :prelude "round"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               (core:fx-sub (core:fx-div n m) (core:fx-sub n (core:fx-mul m (core:fx-div n m))))
+               (libcore:fx-sub (libcore:fx-div n m) (libcore:fx-sub n (libcore:fx-mul m (libcore:fx-div n m))))
                (prelude:raise m 'prelude:round "not a fixnum"))
           (prelude:raise n 'prelude:round "not a fixnum"))))

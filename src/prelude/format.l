@@ -4,85 +4,85 @@
 ;;;
 ;;; format
 ;;;
-(core:intern :prelude "%fmt-tilde"
+(libcore:intern :prelude "%fmt-tilde"
   (:lambda (dest arg-list)
     (prelude:write-char #\~ dest)
     arg-list))
 
-(core:intern :prelude "%fmt-tab"
+(libcore:intern :prelude "%fmt-tab"
   (:lambda (dest arg-list)
     (prelude:write-char #\tab dest)
     arg-list))
 
-(core:intern :prelude "%fmt-percent"
+(libcore:intern :prelude "%fmt-percent"
   (:lambda (dest arg-list)
     (prelude:write-char #\linefeed dest)
     arg-list))
 
-(core:intern :prelude "%fmt-bang"
+(libcore:intern :prelude "%fmt-bang"
   (:lambda (dest arg-list)
-    (core:cdr arg-list)))
+    (libcore:cdr arg-list)))
 
-(core:intern :prelude "%fmt-decimal"
+(libcore:intern :prelude "%fmt-decimal"
   (:lambda (dest arg-list)
-     (:if (prelude:fixnump (core:car arg-list))
+     (:if (prelude:fixnump (libcore:car arg-list))
           ((:lambda ()
-              (prelude:write (core:car arg-list) () dest)
-              (core:cdr arg-list)))
-          (prelude:raise (core:car arg-list) 'prelude:format "argument to ~D not a fixnum"))))
+              (prelude:write (libcore:car arg-list) () dest)
+              (libcore:cdr arg-list)))
+          (prelude:raise (libcore:car arg-list) 'prelude:format "argument to ~D not a fixnum"))))
 
-(core:intern :prelude "%fmt-hex"
+(libcore:intern :prelude "%fmt-hex"
   (:lambda (dest arg-list)
      ((:lambda (fx)
        (:if (prelude:fixnump fx)
             (:if (prelude:zerop fx)
                  (prelude:write "0" () dest)
                  ((:lambda (str-stream)
-                     (core:fix
+                     (libcore:fix
                       (:lambda (n)
-                         (:if (prelude:%orf (prelude:null n) (core:eq 0 n))
+                         (:if (prelude:%orf (prelude:null n) (libcore:eq 0 n))
                               ()
                               ((:lambda ()
-                                  (core:write (prelude:schar "0123456789abcdef" (core:logand n #xf)) () str-stream)
-                                  (core:fx-div n 16)))))
-                      (:if (core:fx-lt fx 0) (core:fx-mul -1 fx) fx))
-                     (:if (core:fx-lt fx 0)
-                          (core:write #\- () str-stream)
+                                  (libcore:write (prelude:schar "0123456789abcdef" (libcore:logand n #xf)) () str-stream)
+                                  (libcore:fx-div n 16)))))
+                      (:if (libcore:fx-lt fx 0) (libcore:fx-mul -1 fx) fx))
+                     (:if (libcore:fx-lt fx 0)
+                          (libcore:write #\- () str-stream)
                           ())
                      ((:lambda (hexstr)
-                         (core:fix
+                         (libcore:fix
                           (:lambda (len)
                              (:if (prelude:zerop len)
                           0
                           ((:lambda ()
-                              (core:write (prelude:schar hexstr (core:fx-sub len 1)) () dest)
-                              (core:fx-sub len 1)))))
-                   (core:sv-len hexstr)))
-                  (core:get-str str-stream)))
-             (core:open :string :output "")))
+                              (libcore:write (prelude:schar hexstr (libcore:fx-sub len 1)) () dest)
+                              (libcore:fx-sub len 1)))))
+                   (libcore:sv-len hexstr)))
+                  (libcore:get-str str-stream)))
+             (libcore:open :string :output "")))
             (prelude:raise fx 'prelude:format "argument to ~X not a fixnum")))
-      (core:car arg-list))))
+      (libcore:car arg-list))))
 
-(core:intern :prelude "%fmt-aesthetic"
+(libcore:intern :prelude "%fmt-aesthetic"
   (:lambda (dest arg-list)
-    (prelude:write (core:car arg-list) () dest)
-    (core:cdr arg-list)))
+    (prelude:write (libcore:car arg-list) () dest)
+    (libcore:cdr arg-list)))
 
-(core:intern :prelude "%fmt-standard"
+(libcore:intern :prelude "%fmt-standard"
   (:lambda (dest arg-list)
-    (prelude:write (core:car arg-list) :t dest)
-    (core:cdr arg-list)))
+    (prelude:write (libcore:car arg-list) :t dest)
+    (libcore:cdr arg-list)))
 
 ;;;
 ;;; control ops
 ;;;
-(core:intern :prelude "%fmt-op"
+(libcore:intern :prelude "%fmt-op"
   (:lambda (dir dest arg-list)
     ((:lambda (fn)
        (:if fn
-            (prelude:apply (core:sy-val fn) `(,dest ,arg-list))
+            (prelude:apply (libcore:sy-val fn) `(,dest ,arg-list))
             (prelude:raise dir 'prelude:format "unrecognized format directive")))
-     (core:cdr
+     (libcore:cdr
       (prelude:%assoc
        dir
        '((#\A . prelude:%fmt-aesthetic)
@@ -94,40 +94,40 @@
          (#\% . prelude:%fmt-percent)
          (#\! . prelude:%fmt-bang)))))))
 
-(core:intern :prelude "%fmt-loop"
+(libcore:intern :prelude "%fmt-loop"
   (:lambda (stream dest fmt arg-list)
-    (core:fix
+    (libcore:fix
      (:lambda (loop)
        ((:lambda (nth argl)
-          (:if (core:eq nth (core:sv-len fmt))
+          (:if (libcore:eq nth (libcore:sv-len fmt))
                loop
                ((:lambda (ch)
-                  (:if (core:eq ch #\~)
-                       `(,(core:fx-add 2 nth) ,@(prelude:%fmt-op (prelude:schar fmt (core:fx-add 1 nth)) dest argl))
+                  (:if (libcore:eq ch #\~)
+                       `(,(libcore:fx-add 2 nth) ,@(prelude:%fmt-op (prelude:schar fmt (libcore:fx-add 1 nth)) dest argl))
                        ((:lambda ()
                            (prelude:write-char ch dest)
-                           `(,(core:fx-add 1 nth) ,@argl)))))
+                           `(,(libcore:fx-add 1 nth) ,@argl)))))
                 (prelude:schar fmt nth))))
-        (core:car loop)
-        (core:cdr loop)))
+        (libcore:car loop)
+        (libcore:cdr loop)))
      `(0 ,@arg-list))
     (:if (prelude:null stream)
          (prelude:get-output-stream-string dest)
          ())))
 
-(core:intern :prelude "format"
+(libcore:intern :prelude "format"
    (:lambda (stream format-string arg-list)
       (:if (prelude:stringp format-string)
            (:if (prelude:listp arg-list)
-                (:if (prelude:zerop (core:sv-len format-string))
+                (:if (prelude:zerop (libcore:sv-len format-string))
                      (:if stream
                           ""
                           ())
                      ((:lambda (dest) (prelude:%fmt-loop stream dest format-string arg-list))
                       (:if (prelude:null stream)
-                           (core:open :string :output "")
-                           (:if (core:eq stream :t)
-                                core:std-out
+                           (libcore:open :string :output "")
+                           (:if (libcore:eq stream :t)
+                                libcore:std-out
                                 (:if (prelude:streamp stream)
                                      stream
                                      (prelude:raise stream 'prelude:format "not a stream designator"))))))

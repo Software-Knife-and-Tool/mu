@@ -181,12 +181,12 @@ impl Core for Mu {
 }
 
 pub trait MuFunction {
-    fn core_read(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_write(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_read(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_write(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
-    fn core_read(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_read(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
@@ -202,7 +202,7 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn core_write(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_write(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let value = fp.argv[0];
         let escape = fp.argv[1];
         let stream = fp.argv[2];

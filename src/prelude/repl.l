@@ -4,9 +4,9 @@
 ;;;
 ;;; repl
 ;;;
-(core:intern :prelude "repl"
+(libcore:intern :prelude "repl"
    (:lambda ()
-     (core:fix
+     (libcore:fix
        (:lambda (loop)
          (prelude:with-exception
              (:lambda (ex)
@@ -14,13 +14,13 @@
                (prelude:null loop))
            (:lambda ()
              (prelude:format :t "prelude> " ())
-             (core:flush core:std-out)
+             (libcore:flush libcore:std-out)
              ((:lambda (form)
-                (:if (core:eq form prelude:%eof%)
+                (:if (libcore:eq form prelude:%eof%)
                      loop
                      ((:lambda (value)
                         (prelude:format :t "[~A] ~S~%" `(,(prelude:type-of value) ,value))
                         (prelude:null loop))
-                      (core:eval (prelude:compile form)))))
+                      (libcore:eval (prelude:compile form)))))
               (prelude:read :t () prelude:%eof%)))))
        ())))

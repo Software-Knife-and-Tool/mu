@@ -1,1 +1,1 @@
-(core:type-of prelude:apply)	:func
+(libcore:type-of prelude:apply)	:func

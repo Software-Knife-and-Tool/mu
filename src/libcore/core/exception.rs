@@ -125,12 +125,12 @@ impl Exception {
 }
 
 pub trait MuFunction {
-    fn core_with_ex(mu: &Mu, fp: &mut Frame) -> Result<()>;
-    fn core_raise(mu: &Mu, fp: &mut Frame) -> Result<()>;
+    fn libcore_with_ex(mu: &Mu, fp: &mut Frame) -> Result<()>;
+    fn libcore_raise(mu: &Mu, fp: &mut Frame) -> Result<()>;
 }
 
 impl MuFunction for Exception {
-    fn core_raise(mu: &Mu, fp: &mut Frame) -> Result<()> {
+    fn libcore_raise(mu: &Mu, fp: &mut Frame) -> Result<()> {
         let src = fp.argv[0];
         let condition = fp.argv[1];
 
@@ -143,7 +143,7 @@ impl MuFunction for Exception {
         }
     }
 
-    fn core_with_ex(mu: &Mu, fp: &mut Frame) -> Result<()> {
+    fn libcore_with_ex(mu: &Mu, fp: &mut Frame) -> Result<()> {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 

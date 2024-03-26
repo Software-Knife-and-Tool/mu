@@ -29,20 +29,20 @@ use crate::{
 use futures::executor::block_on;
 
 pub trait MuFunction {
-    fn core_close(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_flush(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_get_string(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_open(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_openp(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_read_byte(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_read_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_unread_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_write_byte(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_write_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_close(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_flush(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_get_string(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_open(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_openp(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_read_byte(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_read_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_unread_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_write_byte(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_write_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Stream {
-    fn core_close(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_close(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("close", &[Type::Stream], fp) {
@@ -60,7 +60,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_openp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_openp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("openp", &[Type::Stream], fp) {
@@ -77,7 +77,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_open(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_open(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let st_type = fp.argv[0];
         let st_dir = fp.argv[1];
         let st_arg = fp.argv[2];
@@ -125,7 +125,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_flush(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_flush(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("flush", &[Type::Stream], fp) {
@@ -153,7 +153,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_get_string(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_get_string(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("get-str", &[Type::Stream], fp) {
@@ -167,7 +167,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_read_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_read_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
@@ -185,7 +185,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_read_byte(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_read_byte(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
@@ -203,7 +203,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_unread_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_unread_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ch = fp.argv[0];
         let stream = fp.argv[1];
 
@@ -219,7 +219,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_write_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_write_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ch = fp.argv[0];
         let stream = fp.argv[1];
 
@@ -234,7 +234,7 @@ impl MuFunction for Stream {
         Ok(())
     }
 
-    fn core_write_byte(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_write_byte(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let byte = fp.argv[0];
         let stream = fp.argv[1];
 

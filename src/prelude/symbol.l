@@ -4,67 +4,67 @@
 ;;;
 ;;;  symbol predicates
 ;;;
-(core:intern :prelude "boundp" core:boundp)
+(libcore:intern :prelude "boundp" libcore:boundp)
 
-(core:intern :prelude "fboundp"
+(libcore:intern :prelude "fboundp"
   (:lambda (symbol)
     (:if (prelude:boundp symbol)
-         (prelude:functionp (core:sy-val symbol))
+         (prelude:functionp (libcore:sy-val symbol))
          ())))
 
-(core:intern :prelude "uninternedp"
+(libcore:intern :prelude "uninternedp"
    (:lambda (sym)
       (prelude:null (prelude:symbol-ns sym))))
 
-(core:intern :prelude "keywordp"
+(libcore:intern :prelude "keywordp"
    (:lambda (t)
-      (core:eq (prelude:type-of t) 'keyword)))
+      (libcore:eq (prelude:type-of t) 'keyword)))
 
-(core:intern :prelude "symbolp"
+(libcore:intern :prelude "symbolp"
    (:lambda (t)
-      (prelude:%orf (prelude:%orf (prelude:keywordp t) (core:eq () t))
-                (core:eq 'symbol (prelude:type-of t)))))
+      (prelude:%orf (prelude:%orf (prelude:keywordp t) (libcore:eq () t))
+                (libcore:eq 'symbol (prelude:type-of t)))))
 
 ;;;
 ;;; symbol components
 ;;;
-(core:intern :prelude "symbol-name" core:sy-name)
+(libcore:intern :prelude "symbol-name" libcore:sy-name)
 
-(core:intern :prelude "symbol-ns"
+(libcore:intern :prelude "symbol-ns"
    (:lambda (sym)
-      (core:sy-ns sym)))
+      (libcore:sy-ns sym)))
 
-(core:intern :prelude "symbol-value" core:sy-val)
+(libcore:intern :prelude "symbol-value" libcore:sy-val)
 
-(core:intern :prelude "keyword"
+(libcore:intern :prelude "keyword"
    (:lambda (name)
       (:if (prelude:stringp name)
-           (:if (core:fx-lt (core:sv-len name) 8)
-                (core:keyword name)
-                (prelude:%make-type "keyword" `(,(core:cons :name name))))
+           (:if (libcore:fx-lt (libcore:sv-len name) 8)
+                (libcore:keyword name)
+                (prelude:%make-type "keyword" `(,(libcore:cons :name name))))
            (prelude:raise name 'prelude:keyword "not a legal name"))))
 
 ;;;
 ;;; utilities
 ;;;
-(core:intern :prelude "%gensym-counter"
-   (core:open :string :bidir "0"))
+(libcore:intern :prelude "%gensym-counter"
+   (libcore:open :string :bidir "0"))
 
-(core:intern :prelude "gensym"
+(libcore:intern :prelude "gensym"
    (:lambda ()
       ((:lambda (counter)
-          (core:write (prelude:1+ counter) () prelude:%gensym-counter)
-          (core:symbol (prelude:format () "g~X" `(,counter))))
-       (core:read prelude:%gensym-counter () ()))))
+          (libcore:write (prelude:1+ counter) () prelude:%gensym-counter)
+          (libcore:symbol (prelude:format () "g~X" `(,counter))))
+       (libcore:read prelude:%gensym-counter () ()))))
 
-(core:intern :prelude "genkeyword"
+(libcore:intern :prelude "genkeyword"
    (:lambda (prefix)
       (:if (prelude:%orf (prelude:null prefix) (prelude:charp prefix))
            ((:lambda (counter)
-              (core:write (prelude:1+ counter) () prelude:%gensym-counter)
-              (core:keyword
+              (libcore:write (prelude:1+ counter) () prelude:%gensym-counter)
+              (libcore:keyword
                (:if (prelude:charp prefix)
                     (prelude:format () "~A~X" `(,prefix ,counter))
                     (prelude:format () "<~X>" `(,counter)))))
-            (core:read prelude:%gensym-counter () ()))
+            (libcore:read prelude:%gensym-counter () ()))
            (prelude:raise name 'prelude:genkeyword "not a legal prefix"))))

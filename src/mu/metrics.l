@@ -9,7 +9,7 @@
 ;;; time macro
 ;;;
 (defmacro time (form verbose)
-  (let ((cform (core:compile form))
+  (let ((cform (libcore:compile form))
          (type-map
           '((:cons   . "conses     ")
             (:except . "exceptions ")
@@ -63,7 +63,7 @@
 (defun room (verbosity)
   (if verbosity
       (progn
-        (format t ";;; eko version: ~A~%" core::eko-version)
+        (format t ";;; eko version: ~A~%" libcore::eko-version)
         (format t ";;; automatic garbage collection is disabled~%")))
   (mapc
    (lambda (desc)

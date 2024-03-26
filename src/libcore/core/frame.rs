@@ -197,13 +197,13 @@ impl Frame {
 }
 
 pub trait MuFunction {
-    fn core_fr_pop(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fr_push(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fr_ref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fr_pop(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fr_push(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fr_ref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Frame {
-    fn core_fr_pop(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fr_pop(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.fp_argv_check("fr-pop", &[Type::Function], fp) {
             Ok(_) => {
                 Self::frame_stack_pop(mu, fp.argv[0]);
@@ -215,7 +215,7 @@ impl MuFunction for Frame {
         Ok(())
     }
 
-    fn core_fr_push(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fr_push(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.fp_argv_check("fr-push", &[Type::Vector], fp) {
             Ok(_) => {
                 Self::from_tag(mu, fp.value).frame_stack_push(mu);
@@ -227,7 +227,7 @@ impl MuFunction for Frame {
         Ok(())
     }
 
-    fn core_fr_ref(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fr_ref(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 

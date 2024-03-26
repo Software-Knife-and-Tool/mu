@@ -94,7 +94,7 @@ fn usage() {
 }
 
 fn listener(mu: &Mu) {
-    let eof_value = mu.eval_str("(core:symbol \"eof\")").unwrap();
+    let eof_value = mu.eval_str("(libcore:symbol \"eof\")").unwrap();
 
     loop {
         match mu.read(mu.std_in(), false, eof_value) {

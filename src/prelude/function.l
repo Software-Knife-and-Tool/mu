@@ -7,15 +7,15 @@
 ;;;
 ;;; predicates
 ;;;
-(core:intern :prelude "%prelude-function-p"
+(libcore:intern :prelude "%prelude-function-p"
    (:lambda (fn)
-      (core:eq 'funct (prelude:type-of fn))))
+      (libcore:eq 'funct (prelude:type-of fn))))
 
-(core:intern :prelude "functionp"
+(libcore:intern :prelude "functionp"
    (:lambda (function)
-      (:if (core:eq :func (core:type-of function))
+      (:if (libcore:eq :func (libcore:type-of function))
            :t
-           (core:eq 'funct (prelude:type-of function)))))
+           (libcore:eq 'funct (prelude:type-of function)))))
 
 ;;;
 ;;; [*function descriptor*] #s(:<type> :funct (lambda narg-list fn env))
@@ -27,24 +27,24 @@
 ;;;
 ;;; function
 ;;;
-(core:intern :prelude "%make-funct"
+(libcore:intern :prelude "%make-funct"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
           (prelude:%make-type "funct"
-             `(,(core:cons :lambda lambda)
-               ,(core:cons :arity  nargs)
-               ,(core:cons :fn     fn)
-               ,(core:cons :env    env))))
-       (core:fx-sub
-        (core:length (prelude:%lambda-prop :bound lambda))
+             `(,(libcore:cons :lambda lambda)
+               ,(libcore:cons :arity  nargs)
+               ,(libcore:cons :fn     fn)
+               ,(libcore:cons :env    env))))
+       (libcore:fx-sub
+        (libcore:length (prelude:%lambda-prop :bound lambda))
         (:if (prelude:%lambda-prop :rest lambda) 1 0)))))
 
-(core:intern :prelude "%funct-prop"
+(libcore:intern :prelude "%funct-prop"
    (:lambda (prop funct)
-      (:if (prelude:findl (:lambda (funct-prop) (core:eq prop funct-prop)) '(:lambda :arity :fn :env))
+      (:if (prelude:findl (:lambda (funct-prop) (libcore:eq prop funct-prop)) '(:lambda :arity :fn :env))
            ((:lambda (ref)
                ;;; (prelude:raise-when prelude:null prop 'prelude:%function-prop "property not bound")
-               (core:cdr ref))
+               (libcore:cdr ref))
             (prelude:%type-ref prop funct))
            (prelude:%lambda-prop prop (prelude:%funct-prop :lambda funct)))))
 
@@ -53,7 +53,7 @@
 ;;;
 ;;; retruns env
 ;;;
-(core:intern :prelude "%closure-env"
+(libcore:intern :prelude "%closure-env"
    (:lambda (lambda body env)
       ((:lambda (bound-symbols)
           (prelude:%foldl
@@ -62,24 +62,24 @@
                    ((:lambda (function-form)
                        (:if (prelude:consp function-form)
                             `(,@(prelude:%closure-env lambda function-form env) ,@acc)
-                            `(,@(prelude:%closure-env lambda (core:cdr elt) env) ,@acc)))
-                    (core:car elt))
-                   (:if (core:eq :symbol (core:type-of elt))
+                            `(,@(prelude:%closure-env lambda (libcore:cdr elt) env) ,@acc)))
+                    (libcore:car elt))
+                   (:if (libcore:eq :symbol (libcore:type-of elt))
                         (:if (prelude:uninternedp elt)
                              ((:lambda (symbol)
                                  (:if symbol
                                       acc
                                       ((:lambda (binding-lambda)
                                           (:if binding-lambda
-                                                `(,(core:cons form binding-lambda) ,@acc)
+                                                `(,(libcore:cons form binding-lambda) ,@acc)
                                                 acc))
                                        (prelude:findl
                                         (:lambda (lambda)
                                            (prelude:findl
-                                            (:lambda (symbol) (core:eq symbol form))
+                                            (:lambda (symbol) (libcore:eq symbol form))
                                             (prelude:%type-ref :bound lambda)))
                                         env))))
-                                 (prelude:findl (:lambda (symbol) (core:eq symbol form)) bound-symbols))
+                                 (prelude:findl (:lambda (symbol) (libcore:eq symbol form)) bound-symbols))
                              acc)
                         acc)))
            ()
@@ -89,29 +89,29 @@
 ;;;
 ;;; %close-env = > closure
 ;;;
-;;; core:frames => list of [*frame descriptor*] (function . vector)
+;;; libcore:frames => list of [*frame descriptor*] (function . vector)
 ;;; env => list of (symbol . lambda)
 ;;;
-(core:intern :prelude "%close-env"
+(libcore:intern :prelude "%close-env"
   (:lambda (closure env)
      ((:lambda (lambda fn env)
          (prelude:%make-funct lambda fn env))
       (prelude:%make-lambda
        (prelude:%lambda-prop :bound fn)
        (prelude:%lambda-prop :rest fn)
-       (core:frames))
+       (libcore:frames))
       (prelude:%funct-prop :fn fn))))
 
 ;;;
 ;;; compile closed lambda => function
 ;;;
-(core:intern :prelude "%compile-function"
+(libcore:intern :prelude "%compile-function"
    (:lambda (form env)
       ((:lambda (lambda)
           ((:lambda (fn)
               (prelude:%make-funct lambda fn ()))
-           (core:compile
+           (libcore:compile
             `(:lambda
               ,(prelude:%lambda-prop :bound lambda)
-              ,(prelude:%compile-lambda-body lambda (core:nthcdr 2 form) env)))))
-       (prelude:%compile-lambda-list (core:nth 1 form) env))))
+              ,(prelude:%compile-lambda-body lambda (libcore:nthcdr 2 form) env)))))
+       (prelude:%compile-lambda-list (libcore:nth 1 form) env))))
