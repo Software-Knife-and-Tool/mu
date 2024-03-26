@@ -198,7 +198,7 @@ impl Compile {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
                 let lex_ref = vec![
-                    Namespace::intern_symbol(mu, mu.core_ns, "fr-ref".to_string(), Tag::nil()),
+                    Namespace::intern_symbol(mu, mu.libcore_ns, "fr-ref".to_string(), Tag::nil()),
                     Tag::from(tag.as_u64() as i64),
                     Tag::from(nth as i64),
                 ];
@@ -270,7 +270,7 @@ impl Compile {
 }
 
 pub trait MuFunction {
-    fn core_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn if__(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
@@ -291,7 +291,7 @@ impl MuFunction for Compile {
         Ok(())
     }
 
-    fn core_compile(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_compile(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let mut lexenv: LexicalEnv = vec![];
 
         fp.value = match Self::compile(mu, fp.argv[0], &mut lexenv) {

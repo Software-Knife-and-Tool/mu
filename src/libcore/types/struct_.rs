@@ -190,13 +190,13 @@ impl<'a> Core<'a> for Struct {
 
 // mu functions
 pub trait MuFunction {
-    fn core_struct_type(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_struct_vector(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_make_struct(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_struct_type(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_struct_vector(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_make_struct(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Struct {
-    fn core_struct_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_struct_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("st-type", &[Type::Struct], fp) {
@@ -207,7 +207,7 @@ impl MuFunction for Struct {
         Ok(())
     }
 
-    fn core_struct_vector(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_struct_vector(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("st-vec", &[Type::Struct], fp) {
@@ -218,7 +218,7 @@ impl MuFunction for Struct {
         Ok(())
     }
 
-    fn core_make_struct(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_make_struct(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stype = fp.argv[0];
         let list = fp.argv[1];
 

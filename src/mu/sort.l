@@ -4,56 +4,56 @@
 ;;;
 ;;; list sorting
 ;;;
-(core:intern :prelude "%list-n-of"
+(libcore:intern :prelude "%list-n-of"
    (:lambda (item n)          
-     (core:cdr          
-      (core:fix
+     (libcore:cdr          
+      (libcore:fix
        (:lambda (loop)
          ((:lambda (count list)
             (:if (prelude:zerop count)
                  loop
-                 (core:cons (prelude:1- count) (core:cons item list))))
-          (core:car loop)
-          (core:cdr loop)))
-       (core:cons n ())))))
+                 (libcore:cons (prelude:1- count) (libcore:cons item list))))
+          (libcore:car loop)
+          (libcore:cdr loop)))
+       (libcore:cons n ())))))
 
-(core:intern :prelude "%max-le"
+(libcore:intern :prelude "%max-le"
    (:lambda (root list)
      ((:lambda (next)
-        (:if (core:eq next root)
+        (:if (libcore:eq next root)
              ()
              `(,@(prelude:%list-n-of next (prelude:count next list)) ,@(prelude:%max-le next list))))
       (prelude:%fx-max-le root list))))
 
-(core:intern :prelude "%min-ge"
+(libcore:intern :prelude "%min-ge"
    (:lambda (root list)
      ((:lambda (next)
-        (:if (core:eq next root)
+        (:if (libcore:eq next root)
              ()
              `(,@(prelude:%list-n-of next (prelude:count next list)) ,@(prelude:%min-ge next list))))
       (prelude:%fx-min-ge root list))))
 
-(core:intern :prelude "sort-list-ascending"
+(libcore:intern :prelude "sort-list-ascending"
    (:lambda (list)
      (:if (prelude:listp list)
           ((:lambda (root max min)
-             (:if (core:eq root min)
+             (:if (libcore:eq root min)
                   `(,@(prelude:%list-n-of root (prelude:count root list))
                     ,@(prelude:%min-ge root list)
                     ,@(prelude:%max-le root list))
-                  (:if (core:eq root max)
+                  (:if (libcore:eq root max)
                        `(,@(prelude:reverse (prelude:%min-ge root list))
                          ,@(prelude:reverse (prelude:%max-le root list))
                          ,@(prelude:%list-n-of root (prelude:count root list)))
                        `(,@(prelude:reverse (prelude:%max-le root list))
                          ,@(prelude:%list-n-of root (prelude:count root list))
                          ,@(prelude:%min-ge root list)))))
-           (core:car list)
+           (libcore:car list)
            (prelude:%fx-list-max list)
            (prelude:%fx-list-min list))
           (prelude:raise list 'prelude:sort-list-ascending "not a list"))))
 
-(core:intern :prelude "sort-list-descending"
+(libcore:intern :prelude "sort-list-descending"
    (:lambda (list)
       (:if (prelude:listp list)
            (prelude:reverse (prelude:sort-list-ascending list))
@@ -62,48 +62,48 @@
 ;;;
 ;;; misc
 ;;;
-(core:intern :prelude "%fx-list-max"
+(libcore:intern :prelude "%fx-list-max"
    (:lambda (list)
       (prelude:foldl          
        (:lambda (elt acc)
-         (:if (core:fx-lt acc elt)
+         (:if (libcore:fx-lt acc elt)
               elt
               acc))
-         (core:car list)
+         (libcore:car list)
          list)))
 
-(core:intern :prelude "%fx-list-min"
+(libcore:intern :prelude "%fx-list-min"
    (:lambda (list)
       (prelude:foldl
        (:lambda (elt acc)
-         (:if (core:fx-lt acc elt)
+         (:if (libcore:fx-lt acc elt)
               acc
               elt))
-         (core:car list)
+         (libcore:car list)
          list)))
 
-(core:intern :prelude "%fx-max-le"
+(libcore:intern :prelude "%fx-max-le"
    (:lambda (max list)
       ((:lambda (min)
-          (:if (core:fx-lt max min)
+          (:if (libcore:fx-lt max min)
                max
                (prelude:foldl     
                 (:lambda (elt acc)
-                  (:if (prelude:%andf (core:fx-lt elt max) (core:fx-lt acc elt))
+                  (:if (prelude:%andf (libcore:fx-lt elt max) (libcore:fx-lt acc elt))
                        elt
                        acc))
                 min
                 list)))
        (prelude:%fx-list-min list))))
 
-(core:intern :prelude "%fx-min-ge"
+(libcore:intern :prelude "%fx-min-ge"
    (:lambda (min list)
       ((:lambda (max)
-          (:if (core:fx-lt max min)
+          (:if (libcore:fx-lt max min)
                min
                (prelude:foldl          
                 (:lambda (elt acc)
-                  (:if (prelude:%andf (core:fx-lt min elt) (core:fx-lt elt acc))
+                  (:if (prelude:%andf (libcore:fx-lt min elt) (libcore:fx-lt elt acc))
                        elt
                        acc))
                 max

@@ -309,17 +309,17 @@ impl Core for Cons {
 
 /// mu functions
 pub trait MuFunction {
-    fn core_append(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_car(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_cdr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_cons(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_length(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_nth(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_nthcdr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_append(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_car(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_cdr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_cons(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_length(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_nth(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_nthcdr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Cons {
-    fn core_append(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_append(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list1 = fp.argv[0];
         let list2 = fp.argv[1];
 
@@ -337,7 +337,7 @@ impl MuFunction for Cons {
         Ok(())
     }
 
-    fn core_car(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_car(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
         fp.value = match list.type_of() {
@@ -349,7 +349,7 @@ impl MuFunction for Cons {
         Ok(())
     }
 
-    fn core_cdr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_cdr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
         fp.value = match list.type_of() {
@@ -361,12 +361,12 @@ impl MuFunction for Cons {
         Ok(())
     }
 
-    fn core_cons(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_cons(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = Self::new(fp.argv[0], fp.argv[1]).evict(mu);
         Ok(())
     }
 
-    fn core_length(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_length(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
         fp.value = match list.type_of() {
@@ -381,7 +381,7 @@ impl MuFunction for Cons {
         Ok(())
     }
 
-    fn core_nth(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_nth(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
@@ -406,7 +406,7 @@ impl MuFunction for Cons {
         Ok(())
     }
 
-    fn core_nthcdr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_nthcdr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 

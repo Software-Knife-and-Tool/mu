@@ -1,0 +1,11 @@
+(libcore:boundp 'libcore:foo)	:nil
+(libcore:boundp 'libcore:std-in)	libcore:std-in
+(libcore:sy-name 'libcore:std-in)	"std-in"
+(libcore:sy-ns 'libcore:std-in)	:libcore
+(libcore:sy-ns 'std-in)	:nil
+(libcore:sy-ns :std-in)	:keyword
+(libcore:sy-ns ())	:nil
+(libcore:sy-ns :nil)	:nil
+(libcore:sy-val 'libcore:std-in)	#<stream: id: 0 type: std-in dir: :input state: open>
+(libcore:keyword "abcde")	:abcde
+(libcore:symbol "abcde")	abcde

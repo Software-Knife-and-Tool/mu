@@ -8,55 +8,55 @@
 ;;;
 ;;; number reader
 ;;;
-(core:intern :prelude "parse-integer"
+(libcore:intern :prelude "parse-integer"
   (:lambda (digits base)
     (:if (prelude:stringp digits)
          (:if (prelude:fixnump base)
-              (:if (prelude:zerop (core:sv-len digits))
+              (:if (prelude:zerop (libcore:sv-len digits))
                    ()
                    ((:lambda (sign)
                        ((:lambda (integer)
                            (:if (prelude:fixnump integer)
                                 (:if (prelude:null sign)
                                      integer
-                                     (core:fx-mul sign integer))
+                                     (libcore:fx-mul sign integer))
                                 ()))
-                        (core:cdr
-                         (core:fix
+                        (libcore:cdr
+                         (libcore:fix
                           (:lambda (loop)
                              (:if (prelude:null loop)
                                   ()
                                   ((:lambda (index acc)
-                                      (:if (core:fx-lt (core:fx-sub (core:sv-len digits) 1) index)
+                                      (:if (libcore:fx-lt (libcore:fx-sub (libcore:sv-len digits) 1) index)
                                            loop
                                            ((:lambda (n)
                                                (:if (prelude:null n)
                                                     ()
-                                                    (:if (core:fx-lt (core:fx-sub base 1) n)
+                                                    (:if (libcore:fx-lt (libcore:fx-sub base 1) n)
                                                          ()
-                                                         `(,(core:fx-add 1 index) ,@(core:fx-add n (core:fx-mul acc base))))))
+                                                         `(,(libcore:fx-add 1 index) ,@(libcore:fx-add n (libcore:fx-mul acc base))))))
                                             (prelude:string-position (prelude:schar digits index) "0123456789abcdef"))))
-                                   (core:car loop)
-                                   (core:cdr loop))))
+                                   (libcore:car loop)
+                                   (libcore:cdr loop))))
                           (:if (prelude:fixnump sign)
                                '(1 . 0)
                                '(0 . 0))))))
                     ((:lambda (digit)
-                        (:if (core:eq #\- digit)
+                        (:if (libcore:eq #\- digit)
                              -1
-                             (:if (core:eq #\+ digit)
+                             (:if (libcore:eq #\+ digit)
                                   1
                                   ())))
                      (prelude:schar digits 0))))
               (prelude:raise base 'prelude:parse-integer "not a fixnum"))
          (prelude:raise digits 'prelude:parse-integer "not a string"))))
 
-(core:intern :prelude "parse-float"
+(libcore:intern :prelude "parse-float"
   (:lambda (str)
     ((:lambda (stream)
        ((:lambda (float)
           (:if (prelude:floatp float)
                float
                ()))
-          (core:read stream () ())))
-       (core:open :string :input str))))
+          (libcore:read stream () ())))
+       (libcore:open :string :input str))))

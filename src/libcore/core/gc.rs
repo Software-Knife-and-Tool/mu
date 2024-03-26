@@ -137,11 +137,11 @@ impl Core for Mu {
 }
 
 pub trait MuFunction {
-    fn core_gc(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_gc(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Gc {
-    fn core_gc(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_gc(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.gc() {
             Ok(_) => Symbol::keyword("t"),
             Err(e) => return Err(e),

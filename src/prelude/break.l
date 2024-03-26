@@ -4,23 +4,23 @@
 ;;;
 ;;; debugging
 ;;;
-(core:intern :prelude "%debug-map-symbol"
+(libcore:intern :prelude "%debug-map-symbol"
    (:lambda (value)
-      (:if (core:boundp 'prelude:%debug-symbols%)
+      (:if (libcore:boundp 'prelude:%debug-symbols%)
            ()
-           (core:intern :prelude "%debug-symbols%" (core:ns-syms :list :prelude)))
-      (core:fix
+           (libcore:intern :prelude "%debug-symbols%" (libcore:ns-syms :list :prelude)))
+      (libcore:fix
        (:lambda (list)
           (:if (prelude:consp list)
                ((:lambda (symbol)
-                   (:if (core:eq (core:sy-val symbol) value)
+                   (:if (libcore:eq (libcore:sy-val symbol) value)
                         symbol
-                        (core:cdr list)))
-                (core:car list))
+                        (libcore:cdr list)))
+                (libcore:car list))
                list))
        prelude:%debug-symbols%)))
 
-(core:intern :prelude "%format-mapped-symbol"
+(libcore:intern :prelude "%format-mapped-symbol"
    (:lambda (value)
      ((:lambda (symbol)
         (:if (prelude:null symbol)
@@ -31,17 +31,17 @@
 ;;;
 ;;; break loop
 ;;;
-(core:intern :prelude "break"
+(libcore:intern :prelude "break"
    (:lambda (except)
      (prelude:format :t ";;; entering break loop with exception~%" ())
      (prelude:%exceptf :t ";;; ~A on ~A by ~S, ~A~%" () except)
      (prelude:format :t ";;; :h for commands~%" ())
-     (core:fix
+     (libcore:fix
       (:lambda (loop)
         ((:lambda (form)
-           (:if (core:eq form prelude:%eof%)
+           (:if (libcore:eq form prelude:%eof%)
                 loop
-                (:if (core:eq form :h)
+                (:if (libcore:eq form :h)
                      ((:lambda ()
                         (prelude:format :t "break help:~%" ())
                         (prelude:format :t ":d - describe exception value~%" ())
@@ -49,24 +49,24 @@
                         (prelude:format :t ":r - return from break~%" ())
                         (prelude:format :t ":x - exit process~%" ())
                         (prelude:null loop)))
-                     (:if (core:eq form :d)
+                     (:if (libcore:eq form :d)
                           ((:lambda (value)
-                             (prelude:describe (core:cdr value) :t)
+                             (prelude:describe (libcore:cdr value) :t)
                              (prelude:null loop))
                            (prelude:%except-prop :value except))
-                          (:if (core:eq form :x)
-                               (core:exit 0)
-                               (:if (core:eq form :e)
+                          (:if (libcore:eq form :x)
+                               (libcore:exit 0)
+                               (:if (libcore:eq form :e)
                                     ((:lambda ()
-                                       (prelude:%exceptf core:std-out "exception: ~A on ~A by ~S, ~A~%" :t except)
+                                       (prelude:%exceptf libcore:std-out "exception: ~A on ~A by ~S, ~A~%" :t except)
                                        (prelude:null loop)))
-                                    (:if (core:eq form :r)
+                                    (:if (libcore:eq form :r)
                                          loop
                                          ((:lambda ()
                                             (prelude:format :t ";;; unrecognized debugger command: h for help~%" ())
                                             (prelude:null loop))))))))))
          ((:lambda ()
             (prelude:format :t "prelude:debug> " ())
-            (core:flush core:std-out)
+            (libcore:flush libcore:std-out)
             (prelude:read :t () prelude:%eof%)))))
      ())))

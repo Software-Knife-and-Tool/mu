@@ -1,4 +1,4 @@
-(core:write 1000 () (core:open :string :output ""))
-(core:write (core:fx-mul 100 200) () (core:open :string :output ""))
-(core:write (prelude:string= "" "") () (core:open :string :output ""))
-(core:write (prelude:string= "ci" "") () (core:open :string :output ""))
+(libcore:write 1000 () (libcore:open :string :output ""))
+(libcore:write (libcore:fx-mul 100 200) () (libcore:open :string :output ""))
+(libcore:write (prelude:string= "" "") () (libcore:open :string :output ""))
+(libcore:write (prelude:string= "ci" "") () (libcore:open :string :output ""))

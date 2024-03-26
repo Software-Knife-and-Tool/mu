@@ -1,0 +1,1 @@
+((:lambda (g) (libcore:apply g (libcore:cons g (libcore:cons 101010101 (libcore:cons 11011 ()))))) (:lambda (g a b) (:if (libcore:eq 0 b) a (libcore:apply g (libcore:cons g (libcore:cons b (libcore:cons (libcore:fx-sub a (libcore:fx-mul b (libcore:fx-div a b))) ())))))))

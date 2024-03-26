@@ -8,19 +8,19 @@
 ;;;
 ;;; file compiler
 ;;;
-(core:intern :arm "compile-file"
+(libcore:intern :arm "compile-file"
   (:lambda (source dest verbose)
     ((:lambda (ifs ofs)
        (:if verbose
             (prelude:format :t ";;; compiling ~A~%" `(,source))
             ())
-       (core:fix
+       (libcore:fix
         (:lambda (loop)
           (:if (prelude:eof ifs)
                loop
                (prelude:with-exception
                 (:lambda (ex)
-                   (prelude:%exceptf core:err-out "compile exception: ~A on ~A by ~S ~A~%" () ex)
+                   (prelude:%exceptf libcore:err-out "compile exception: ~A on ~A by ~S ~A~%" () ex)
                    loop)
                 (:lambda ()
                    ((:lambda (form)
@@ -30,12 +30,12 @@
                                (:if verbose
                                     (prelude:format :t "form: ~S~%" `(,form))
                                     ())
-                               (prelude:format ofs " ~S~%" `(,(core:compile form)))
+                               (prelude:format ofs " ~S~%" `(,(libcore:compile form)))
                                (prelude:null loop)))))
                     (prelude:read ifs :t ()))))))
         ())
        (prelude:format ofs ")" ())
-       (core:close ifs)
-       (core:close ofs))
-     (core:open :file :input source)
-     (core:open :file :output dest))))
+       (libcore:close ifs)
+       (libcore:close ofs))
+     (libcore:open :file :input source)
+     (libcore:open :file :output dest))))

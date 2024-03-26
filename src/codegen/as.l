@@ -4,41 +4,41 @@
 ;;;
 ;;; armv8 aarch64 instruction
 ;;;
-(core:intern :arm "parser"
-   (core:open :string :bidir ""))
+(libcore:intern :arm "parser"
+   (libcore:open :string :bidir ""))
 
-(core:intern :arm "parse"
+(libcore:intern :arm "parse"
    (:lambda (line)
-      (:if (prelude:zerop (core:sv-len line))
+      (:if (prelude:zerop (libcore:sv-len line))
            ()
            ((:lambda ()
-               (core:wr-char #\( arm:parser)
-               (core:fix
+               (libcore:wr-char #\( arm:parser)
+               (libcore:fix
                   (:lambda (index)
-                    (:if (core:fx-lt index (core:sv-len line))
+                    (:if (libcore:fx-lt index (libcore:sv-len line))
                          ((:lambda (char)
-                            (:if (prelude:%orf (core:eq #\, char) (core:eq #\# char))
+                            (:if (prelude:%orf (libcore:eq #\, char) (libcore:eq #\# char))
                                  (prelude:1+ index)
-                                 (:if (core:eq #\/ char)
-                                      (core:sv-len line)
+                                 (:if (libcore:eq #\/ char)
+                                      (libcore:sv-len line)
                                       ((:lambda ()
-                                         (core:wr-char char arm:parser)
+                                         (libcore:wr-char char arm:parser)
                                          (prelude:1+ index))))))
-                          (core:sv-ref line index))
+                          (libcore:sv-ref line index))
                          index))
                   0)
-               (core:wr-char #\) arm:parser))))
-     (core:read arm:parser () ())))
+               (libcore:wr-char #\) arm:parser))))
+     (libcore:read arm:parser () ())))
 
-(core:intern :arm "assemble-file"
+(libcore:intern :arm "assemble-file"
    (:lambda (stream)
-     (core:fix
+     (libcore:fix
       (:lambda (line-number)
         ((:lambda (line)
            (:if (prelude:null line)
                 line-number
                 ((:lambda ()
-                   (:if (core:fx-lt line-number 10)
+                   (:if (libcore:fx-lt line-number 10)
                         (prelude:format :t " ~A: ~A~%" `(,line-number ,line))
                         (prelude:format :t "~A: ~A~%" `(,line-number ,line)))
                    ((:lambda (op)
@@ -51,12 +51,12 @@
       1)
      :t))
 
-(core:intern :arm "as"
+(libcore:intern :arm "as"
    (:lambda (path)
       (:if (prelude:stringp path)
-           (core:with-ex
+           (libcore:with-ex
                (:lambda (exception)
-                 (prelude:%exceptf core:err-out () () exception))
+                 (prelude:%exceptf libcore:err-out () () exception))
                (:lambda ()
-                 (arm:assemble-file (core:open :file :input path))))
+                 (arm:assemble-file (libcore:open :file :input path))))
            (prelude:error "arm:as: path ~A is not a string" `(,path)))))

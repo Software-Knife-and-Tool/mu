@@ -12,9 +12,9 @@
 'a-long-symbol
 'a-symbol
 'symbol
-'core:eq
+'libcore:eq
 's
-(core:type-of '#:abc)
+(libcore:type-of '#:abc)
 :a
 :abcdefg
 1.024e23

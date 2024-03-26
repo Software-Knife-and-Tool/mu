@@ -89,19 +89,19 @@ impl Core for Fixnum {
 }
 
 pub trait MuFunction {
-    fn core_ash(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fxadd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fxdiv(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fxlt(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fxmul(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fxsub(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_logand(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_lognot(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_logor(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_ash(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fxadd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fxdiv(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fxlt(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fxmul(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fxsub(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_logand(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_lognot(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_logor(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Fixnum {
-    fn core_ash(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_ash(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.fp_argv_check("ash", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {
                 let value = Self::as_i64(fp.argv[0]);
@@ -129,7 +129,7 @@ impl MuFunction for Fixnum {
         Ok(())
     }
 
-    fn core_fxadd(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fxadd(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
@@ -150,7 +150,7 @@ impl MuFunction for Fixnum {
         Ok(())
     }
 
-    fn core_fxsub(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fxsub(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
@@ -171,7 +171,7 @@ impl MuFunction for Fixnum {
         Ok(())
     }
 
-    fn core_fxmul(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fxmul(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
@@ -192,7 +192,7 @@ impl MuFunction for Fixnum {
         Ok(())
     }
 
-    fn core_fxdiv(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fxdiv(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
@@ -219,7 +219,7 @@ impl MuFunction for Fixnum {
         Ok(())
     }
 
-    fn core_fxlt(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fxlt(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
@@ -237,7 +237,7 @@ impl MuFunction for Fixnum {
         Ok(())
     }
 
-    fn core_logand(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_logand(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
@@ -249,7 +249,7 @@ impl MuFunction for Fixnum {
         Ok(())
     }
 
-    fn core_logor(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_logor(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
@@ -261,7 +261,7 @@ impl MuFunction for Fixnum {
         Ok(())
     }
 
-    fn core_lognot(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_lognot(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("lognot", &[Type::Fixnum], fp) {

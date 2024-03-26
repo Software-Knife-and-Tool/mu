@@ -1,0 +1,54 @@
+(libcore:eq 1 1)	:t
+(libcore:eq 1 2)	:nil
+(libcore:eval 'libcore:std-in)	#<stream: id: 0 type: std-in dir: :input state: open>
+(libcore:eval ())	:nil
+(libcore:fix (:lambda (l) (:if l ((:lambda () (libcore:write (libcore:car l) () libcore:std-out) (libcore:cdr l))) ())) '(1 2 3 4))	1234:nil
+(libcore:fix (:lambda (l) (:if l ((:lambda () (libcore:write (libcore:car (libcore:car l)) () libcore:std-out) (libcore:cdr l))) ())) '((0 . 1) (2 . 3)))	02:nil
+(libcore:apply libcore:eq '(1 2))	:nil
+(libcore:apply libcore:fx-add '(1 2))	3
+(libcore:type-of #\a)	:char
+(libcore:type-of '(1 2 3))	:cons
+(libcore:type-of '(:lambda ()))	:cons
+(libcore:type-of 'libcore:apply)	:symbol
+(libcore:type-of ())	:null
+(libcore:type-of 1)	:fixnum
+(libcore:type-of :typeof)	:keyword
+(libcore:type-of libcore:std-in)	:stream
+(libcore:type-of libcore:hp-info)	:func
+(libcore:type-of "type-of")	:vector
+(libcore:view ())	#(:t :nil nil :nil)
+(libcore:view :keyword)	#(:t :keyword keyword :keyword)
+(libcore:view #\a)	#(:t a)
+(libcore:view "abcdefg")	#(:t 7 :char)
+(libcore:view "abcdefgh")	#(:t 8 :char)
+(libcore:view '(1 2))	#(:t 1 (2))
+(libcore:view 1234)	#(:t 1234)
+(libcore:view 1.0)	#(:t 1.0000)
+(libcore:view #(:t 1 2))	#(:t 2 :t)
+(libcore:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
+(libcore:view 'a)	#(:t :nil a :UNBOUND)
+(libcore:view 'libcore:eq)	#(:t :libcore eq #<:function :core [req:2, form:eq]>)
+(libcore:view libcore:eq)	#(:t 2 :eq)
+(libcore:view libcore:std-in)	#(:t 0 :input :nil)
+(libcore:hp-size ())	8
+(libcore:hp-size :keyword)	8
+(libcore:hp-size #\a)	8
+(libcore:hp-size '(1 2))	8
+(libcore:hp-size 1234)	8
+(libcore:hp-size 1.0)	8
+(libcore:hp-size #s(:foo 1 2))	52
+(libcore:hp-size "abcdefg")	8
+(libcore:hp-size "abcdefgh")	26
+(libcore:hp-size #(:t 1 2))	34
+(libcore:hp-size 'a)	27
+(libcore:hp-size 'libcore:eq)	45
+(libcore:hp-size libcore:eq)	18
+(libcore:hp-size libcore:std-in)	8
+(libcore:with-ex (:lambda (cond obj) (libcore:write cond () libcore:std-out)) (:lambda () (libcore:fx-div 1 1)))	1
+(libcore:repr :t (libcore:repr :vector :t))	:t
+(libcore:type-of libcore:untern)	:func
+(libcore:type-of libcore:intern)	:func
+(libcore:type-of libcore:make-ns)	:func
+(libcore:type-of libcore:ns-syms)	:func
+(libcore:type-of libcore:ns-find)	:func
+(libcore:type-of libcore:ns-map)	:func

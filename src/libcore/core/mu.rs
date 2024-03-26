@@ -63,7 +63,7 @@ pub struct Mu {
     features: Vec<Tag>,
 
     pub keyword_ns: Tag,
-    pub core_ns: Tag,
+    pub libcore_ns: Tag,
     pub null_ns: Tag,
 
     // reader
@@ -94,16 +94,16 @@ impl Core for Mu {
         let mut mu = Mu {
             async_index: RwLock::new(HashMap::new()),
             config: *config,
-            core_ns: Tag::nil(),
             dynamic: RwLock::new(Vec::new()),
             errout: Tag::nil(),
             features: Vec::new(),
+            functions: RefCell::new(HashMap::new()),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
             if_: Tag::nil(),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
-            functions: RefCell::new(HashMap::new()),
+            libcore_ns: Tag::nil(),
             ns_index: RwLock::new(HashMap::new()),
             null_ns: Tag::nil(),
             reader: Reader::new(),
@@ -117,8 +117,8 @@ impl Core for Mu {
         // establish namespaces
         mu.keyword_ns = Symbol::keyword("keyword");
 
-        mu.core_ns = Symbol::keyword("core");
-        match Namespace::add_ns(&mu, mu.core_ns) {
+        mu.libcore_ns = Symbol::keyword("libcore");
+        match Namespace::add_ns(&mu, mu.libcore_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
@@ -133,7 +133,7 @@ impl Core for Mu {
 
         // version string
         mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
-        Namespace::intern_symbol(&mu, mu.core_ns, "version".to_string(), mu.version);
+        Namespace::intern_symbol(&mu, mu.libcore_ns, "version".to_string(), mu.version);
 
         // standard streams
         mu.stdin = match StreamBuilder::new().stdin().build(&mu) {
@@ -152,12 +152,12 @@ impl Core for Mu {
         };
 
         // standard stream symbols
-        Namespace::intern_symbol(&mu, mu.core_ns, "std-in".to_string(), mu.stdin);
-        Namespace::intern_symbol(&mu, mu.core_ns, "std-out".to_string(), mu.stdout);
-        Namespace::intern_symbol(&mu, mu.core_ns, "err-out".to_string(), mu.errout);
+        Namespace::intern_symbol(&mu, mu.libcore_ns, "std-in".to_string(), mu.stdin);
+        Namespace::intern_symbol(&mu, mu.libcore_ns, "std-out".to_string(), mu.stdout);
+        Namespace::intern_symbol(&mu, mu.libcore_ns, "err-out".to_string(), mu.errout);
 
         // core functions
-        mu.functions = RefCell::new(Self::install_core_functions(&mu));
+        mu.functions = RefCell::new(Self::install_libcore_functions(&mu));
         mu.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&mu);
 
         // the reader, has to be last

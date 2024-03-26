@@ -137,16 +137,16 @@ impl Namespace {
 }
 
 pub trait MuFunction {
-    fn core_intern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_untern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_make_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_ns_find(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_ns_map(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_ns_symbols(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_intern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_untern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_make_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_ns_find(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_ns_map(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_ns_symbols(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Namespace {
-    fn core_untern(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_untern(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
         let name = fp.argv[1];
 
@@ -189,7 +189,7 @@ impl MuFunction for Namespace {
         Ok(())
     }
 
-    fn core_intern(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_intern(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns_tag = fp.argv[0];
         let name = fp.argv[1];
         let value = fp.argv[2];
@@ -232,7 +232,7 @@ impl MuFunction for Namespace {
         Ok(())
     }
 
-    fn core_make_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_make_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns_tag = fp.argv[0];
 
         match ns_tag.type_of() {
@@ -249,7 +249,7 @@ impl MuFunction for Namespace {
         Ok(())
     }
 
-    fn core_ns_find(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_ns_find(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns_tag = fp.argv[0];
         let name = fp.argv[1];
 
@@ -275,7 +275,7 @@ impl MuFunction for Namespace {
         Ok(())
     }
 
-    fn core_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let type_ = fp.argv[0];
         let ns = fp.argv[1];
 
@@ -303,7 +303,7 @@ impl MuFunction for Namespace {
         Ok(())
     }
 
-    fn core_ns_map(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_ns_map(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns_ref = block_on(mu.ns_index.read());
         let vec = ns_ref
             .keys()

@@ -57,9 +57,9 @@ impl Core for Reader {
 
     fn build(&self, mu: &Mu) -> Self {
         Reader {
-            append: Namespace::intern_symbol(mu, mu.core_ns, "append".to_string(), Tag::nil()),
+            append: Namespace::intern_symbol(mu, mu.libcore_ns, "append".to_string(), Tag::nil()),
             eol: self.eol,
-            cons: Namespace::intern_symbol(mu, mu.core_ns, "cons".to_string(), Tag::nil()),
+            cons: Namespace::intern_symbol(mu, mu.libcore_ns, "cons".to_string(), Tag::nil()),
         }
     }
 

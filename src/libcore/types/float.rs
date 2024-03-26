@@ -83,15 +83,15 @@ impl Core for Float {
 }
 
 pub trait MuFunction {
-    fn core_fladd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_flsub(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_flmul(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fllt(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_fldiv(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fladd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_flsub(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_flmul(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fllt(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_fldiv(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Float {
-    fn core_fladd(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fladd(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
@@ -110,7 +110,7 @@ impl MuFunction for Float {
         Ok(())
     }
 
-    fn core_flsub(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_flsub(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
@@ -129,7 +129,7 @@ impl MuFunction for Float {
         Ok(())
     }
 
-    fn core_flmul(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_flmul(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
@@ -149,7 +149,7 @@ impl MuFunction for Float {
         Ok(())
     }
 
-    fn core_fldiv(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fldiv(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
@@ -172,7 +172,7 @@ impl MuFunction for Float {
         Ok(())
     }
 
-    fn core_fllt(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_fllt(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 

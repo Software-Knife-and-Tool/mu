@@ -1,0 +1,2 @@
+(libcore:close libcore:err-out)
+(libcore:get-str (libcore:open :string :output (libcore:sy-name 'abcdef)))

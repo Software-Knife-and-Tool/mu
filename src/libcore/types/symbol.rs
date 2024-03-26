@@ -300,16 +300,16 @@ impl Core for Symbol {
 }
 
 pub trait MuFunction {
-    fn core_name(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_value(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_boundp(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_symbol(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn core_keyword(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_name(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_value(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_boundp(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_symbol(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn libcore_keyword(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Symbol {
-    fn core_name(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_name(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
@@ -320,7 +320,7 @@ impl MuFunction for Symbol {
         Ok(())
     }
 
-    fn core_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
@@ -331,7 +331,7 @@ impl MuFunction for Symbol {
         Ok(())
     }
 
-    fn core_value(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_value(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
@@ -349,7 +349,7 @@ impl MuFunction for Symbol {
         Ok(())
     }
 
-    fn core_boundp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_boundp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
@@ -367,7 +367,7 @@ impl MuFunction for Symbol {
         Ok(())
     }
 
-    fn core_keyword(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_keyword(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
         match symbol.type_of() {
@@ -384,7 +384,7 @@ impl MuFunction for Symbol {
         }
     }
 
-    fn core_symbol(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn libcore_symbol(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("symbol", &[Type::String], fp) {

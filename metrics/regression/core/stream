@@ -1,2 +1,0 @@
-(core:close core:err-out)
-(core:get-str (core:open :string :output (core:sy-name 'abcdef)))
