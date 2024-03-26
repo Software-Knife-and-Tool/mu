@@ -2,7 +2,7 @@
 (libcore:boundp (libcore:intern () "foo" ()))	foo
 (libcore:intern () "foo" "foo")	foo
 (libcore:untern :libcore "foo")	libcore:foo
-(libcore:boundp (libcore:untern :core "foo"))	:nil
+(libcore:boundp (libcore:untern :libcore "foo"))	:nil
 (libcore:make-ns :mu)	:mu
 (libcore:ns-find :libcore "eq")	libcore:eq
 (libcore:ns-find :libcore "foo")	:nil

@@ -129,8 +129,6 @@ impl Core for Mu {
             Err(_) => panic!(),
         };
 
-        mu.features = Feature::add_features(&mu);
-
         // version string
         mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
         Namespace::intern_symbol(&mu, mu.libcore_ns, "version".to_string(), mu.version);
@@ -160,7 +158,9 @@ impl Core for Mu {
         mu.functions = RefCell::new(Self::install_libcore_functions(&mu));
         mu.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&mu);
 
-        // the reader, has to be last
+        mu.features = Feature::add_features(&mu);
+
+        // the reader has to be last
         mu.reader = mu.reader.build(&mu);
 
         mu

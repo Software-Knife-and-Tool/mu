@@ -27,7 +27,7 @@
 (libcore:view #(:t 1 2))	#(:t 2 :t)
 (libcore:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
 (libcore:view 'a)	#(:t :nil a :UNBOUND)
-(libcore:view 'libcore:eq)	#(:t :libcore eq #<:function :core [req:2, form:eq]>)
+(libcore:view 'libcore:eq)	#(:t :libcore eq #<:function :libcore [req:2, form:eq]>)
 (libcore:view libcore:eq)	#(:t 2 :eq)
 (libcore:view libcore:std-in)	#(:t 0 :input :nil)
 (libcore:hp-size ())	8

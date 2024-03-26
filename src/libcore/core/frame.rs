@@ -147,7 +147,7 @@ impl Frame {
             }
             Type::Function => match Function::form(mu, func).type_of() {
                 Type::Null => Ok(Tag::nil()),
-                Type::Keyword => {
+                Type::Keyword | Type::Symbol => {
                     let nreqs = Fixnum::as_i64(Function::arity(mu, func)) as usize;
                     let nargs = self.argv.len();
 
