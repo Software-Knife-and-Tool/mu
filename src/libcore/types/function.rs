@@ -129,7 +129,11 @@ impl Core for Function {
                         (":lambda".to_string(), format!("{:x}", form.as_u64()))
                     }
                     Type::Keyword => (
-                        ":native".to_string(),
+                        ":core".to_string(),
+                        Vector::as_string(mu, Symbol::name(mu, form)).to_string(),
+                    ),
+                    Type::Vector if Vector::type_of(mu, form) == Type::Char => (
+                        ":namespace".to_string(),
                         Vector::as_string(mu, Symbol::name(mu, form)).to_string(),
                     ),
                     _ => panic!(),
