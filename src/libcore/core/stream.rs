@@ -368,7 +368,7 @@ impl Core for SystemStream {
             },
             SystemStream::File(file) => {
                 let mut file_ref: RefMut<fs::File> = file.borrow_mut();
-                match file_ref.write(&buf) {
+                match file_ref.write_all(&buf) {
                     Ok(_) => Ok(None),
                     Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
                 }

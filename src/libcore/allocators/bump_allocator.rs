@@ -34,6 +34,7 @@ impl BumpAllocator {
             .read(true)
             .write(true)
             .create(true)
+            .truncate(true)
             .open(path)
             .expect("unable to open heap mmap file");
 

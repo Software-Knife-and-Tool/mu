@@ -3,22 +3,19 @@
 
 //! image management
 #[allow(unused_imports)]
-use crate::{
-    core::{
-        apply::Core as _,
-        exception::{self},
-        frame::Frame,
-        mu::Mu,
-        types::{Tag, Type},
-    },
-    system::System,
+use crate::core::{
+    apply::Core as _,
+    exception::{self},
+    frame::Frame,
+    mu::Mu,
+    types::{Tag, Type},
 };
 
 pub trait Core {
     fn save_and_exit(_: &Mu, _: String) -> exception::Result<()>;
 }
 
-impl Core for System {
+impl Core for Mu {
     fn save_and_exit(_: &Mu, _: String) -> exception::Result<()> {
         std::process::exit(0);
     }

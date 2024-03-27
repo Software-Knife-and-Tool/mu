@@ -10,38 +10,29 @@ use crate::{
         namespace::Namespace,
         types::{Tag, Type},
     },
-    features::std::std_::{Core as _, Std},
     types::symbol::{Core as _, Symbol},
 };
 
-#[cfg(feature = "libc")]
-pub mod libc;
+#[cfg(feature = "std")]
+use crate::features::std::std_::{Core as _, Std};
+#[cfg(feature = "sysinfo")]
+use crate::features::sysinfo::sysinfo_::{Core as _, Sysinfo};
+#[cfg(feature = "uname")]
+use crate::features::uname::uname_::{Core as _, Uname};
+
 #[cfg(feature = "std")]
 pub mod std;
+#[cfg(feature = "sysinfo")]
+pub mod sysinfo;
+#[cfg(feature = "uname")]
+pub mod uname;
 
 pub struct Feature {
     symbols: Vec<(&'static str, u16, CoreFunction)>,
     namespace: String,
 }
 
-pub trait Core {
-    fn install_feature(_: &Mu, _: Feature) -> Tag;
-    fn add_features(_: &Mu) -> Vec<Tag>;
-}
-
-impl Core for Feature {
-    fn add_features(mu: &Mu) -> Vec<Tag> {
-        #[allow(clippy::let_and_return)]
-        let features = vec![
-            #[cfg(feature = "std")]
-            Self::install_feature(mu, Std::make_feature(mu)),
-            #[cfg(feature = "libc")]
-            Self::install_feature(mu, Libc::make_feature(mu)),
-        ];
-
-        features
-    }
-
+impl Feature {
     fn install_feature(mu: &Mu, feature: Feature) -> Tag {
         let ns = Symbol::keyword(&feature.namespace);
         match Namespace::add_ns(mu, ns) {
@@ -52,5 +43,25 @@ impl Core for Feature {
         Mu::install_feature_functions(mu, ns, feature.symbols);
 
         ns
+    }
+}
+
+pub trait Core {
+    fn add_features(_: &Mu) -> Vec<Tag>;
+}
+
+impl Core for Feature {
+    fn add_features(_mu: &Mu) -> Vec<Tag> {
+        #[allow(clippy::let_and_return)]
+        let features = vec![
+            #[cfg(feature = "std")]
+            Self::install_feature(_mu, Std::make_feature(_mu)),
+            #[cfg(feature = "sysinfo")]
+            Self::install_feature(_mu, Sysinfo::make_feature(_mu)),
+            #[cfg(feature = "uname")]
+            Self::install_feature(_mu, Uname::make_feature(_mu)),
+        ];
+
+        features
     }
 }
