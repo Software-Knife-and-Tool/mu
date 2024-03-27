@@ -23,10 +23,11 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "std", "uname", "sysinfo" ]
+default = [ "std", "uname", "nix" ]
+nix = []
 std = []
-uname = []
 sysinfo = []
+uname = []
 
 [profile.dev]
 opt-level = 0
@@ -43,6 +44,7 @@ getopt = "1.1.3"
 lazy_static = "1.4.0"
 memmap = "0.7.0"
 modular-bitfield = "0.11.2"
+nix = "0.28.0"
 num_enum = "0.7.1"
 page_size = "0.6.0"
 sysinfo_dot_h = "0.2.0"

@@ -13,6 +13,8 @@ use crate::{
     types::symbol::{Core as _, Symbol},
 };
 
+#[cfg(feature = "nix")]
+use crate::features::nix::nix_::{Core as _, Nix};
 #[cfg(feature = "std")]
 use crate::features::std::std_::{Core as _, Std};
 #[cfg(feature = "sysinfo")]
@@ -20,6 +22,8 @@ use crate::features::sysinfo::sysinfo_::{Core as _, Sysinfo};
 #[cfg(feature = "uname")]
 use crate::features::uname::uname_::{Core as _, Uname};
 
+#[cfg(feature = "nix")]
+pub mod nix;
 #[cfg(feature = "std")]
 pub mod std;
 #[cfg(feature = "sysinfo")]
@@ -54,6 +58,8 @@ impl Core for Feature {
     fn add_features(_mu: &Mu) -> Vec<Tag> {
         #[allow(clippy::let_and_return)]
         let features = vec![
+            #[cfg(feature = "nix")]
+            Self::install_feature(_mu, Nix::make_feature(_mu)),
             #[cfg(feature = "std")]
             Self::install_feature(_mu, Std::make_feature(_mu)),
             #[cfg(feature = "sysinfo")]
