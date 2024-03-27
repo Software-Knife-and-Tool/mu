@@ -7,5 +7,5 @@ pub struct System {}
 
 pub mod image;
 pub mod process;
-pub mod time;
+// pub mod time;
 pub mod uname;
