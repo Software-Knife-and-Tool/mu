@@ -1,7 +1,7 @@
 #
 # install makefile
 #
-.PHONY: install uninstall help
+.PHONY: install release uninstall help
 
 ROOT = /opt
 BASE = mu
@@ -11,7 +11,7 @@ help:
 	@echo uninstall - remove $(BASE) from $(ROOT) (needs sudo)
 
 install:
-	@cat ./$(BASE)*.tgz | (cd $(ROOT); tar xfz -)
+	@cat ./$(BASE)*.tgz | (cd $(ROOT); tar --no-same-owner -xzf -)
 
 uninstall:
 	@rm -rf $(ROOT)/$(BASE)

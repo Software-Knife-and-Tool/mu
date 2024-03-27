@@ -1,9 +1,9 @@
 #
 # dist makefile
 #
-.PHONY: dist clean
+.PHONY: dist clean release
 
-VERSION = 0.0.38
+VERSION != grep VERSION: ../src/libcore/core/mu.rs | sed 's/.* "//' | sed 's/".*//'
 
 BASE = mu
 DOCS = ../doc
@@ -38,7 +38,8 @@ dist:
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
 	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
 
-	@tar cfz $(BASE)-$(VERSION).tgz $(BASE)
+	@strip $(MU_SYS)
+	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
 	@rm -rf $(BASE)
 
 clean:
