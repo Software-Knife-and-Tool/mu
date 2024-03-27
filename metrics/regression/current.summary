@@ -1,40 +1,40 @@
 Perf Metrics Summary: libcore
 --------------------
-libcore/compile    bytes:     1520     usecs:      34.95
-libcore/core       bytes:     5808     usecs:     159.50
-libcore/gcd        bytes:      624     usecs:      91.40
-libcore/list       bytes:     5296     usecs:      88.90
-libcore/namespace  bytes:      240     usecs:       2.85
-libcore/number     bytes:     3600     usecs:      62.70
-libcore/reader     bytes:     5280     usecs:      81.55
-libcore/special-form bytes:     2400     usecs:      46.25
-libcore/stream     bytes:      480     usecs:       9.50
-libcore/struct     bytes:      576     usecs:      24.10
-libcore/symbol     bytes:     1200     usecs:      21.55
-libcore/vector     bytes:     4456     usecs:      79.50
+libcore/compile    bytes:     1520     usecs:      40.30
+libcore/core       bytes:     5808     usecs:     126.18
+libcore/gcd        bytes:      624     usecs:     119.72
+libcore/list       bytes:     5296     usecs:     100.10
+libcore/namespace  bytes:      240     usecs:       3.36
+libcore/number     bytes:     3600     usecs:      68.42
+libcore/reader     bytes:     5280     usecs:      93.72
+libcore/special-form bytes:     2400     usecs:      52.90
+libcore/stream     bytes:      480     usecs:      10.56
+libcore/struct     bytes:      576     usecs:      11.32
+libcore/symbol     bytes:     1200     usecs:      23.68
+libcore/vector     bytes:     4456     usecs:      85.06
 
 Perf Metrics Summary: frequent
 --------------------
-frequent/core      bytes:     9624     usecs:     423.75
-frequent/fixnum    bytes:     1680     usecs:      28.40
-frequent/float     bytes:     1200     usecs:      19.80
-frequent/list      bytes:     2160     usecs:      36.70
-frequent/vector    bytes:      240     usecs:       4.25
+frequent/core      bytes:     9624     usecs:     529.64
+frequent/fixnum    bytes:     1680     usecs:      31.62
+frequent/float     bytes:     1200     usecs:      24.96
+frequent/list      bytes:     2160     usecs:      44.84
+frequent/vector    bytes:      240     usecs:       5.08
 
 Perf Metrics Summary: prelude
 --------------------
-prelude/closure    bytes:    20904     usecs:    8994.02
-prelude/compile    bytes:     5512     usecs:     991.24
-prelude/prelude    bytes:     4592     usecs:     246.86
-prelude/exception  bytes:     7320     usecs:    3219.46
-prelude/fixnum     bytes:     2000     usecs:     153.22
-prelude/format     bytes:     6184     usecs:    4421.28
-prelude/lambda     bytes:    97784     usecs:   42232.48
-prelude/list       bytes:    20864     usecs:    5862.50
-prelude/macro      bytes:    58640     usecs:   28055.46
-prelude/reader     bytes:    15216     usecs:   74193.22
-prelude/stream     bytes:      960     usecs:      60.70
-prelude/string     bytes:     2160     usecs:     411.08
-prelude/type       bytes:     8768     usecs:    4183.70
-prelude/vector     bytes:     9472     usecs:    4432.96
+prelude/closure    bytes:    20904     usecs:   13382.26
+prelude/compile    bytes:     5512     usecs:    1435.90
+prelude/prelude    bytes:     4592     usecs:     265.64
+prelude/exception  bytes:     7320     usecs:    4668.62
+prelude/fixnum     bytes:     2000     usecs:     173.22
+prelude/format     bytes:     6184     usecs:    6654.50
+prelude/lambda     bytes:    97784     usecs:   63261.38
+prelude/list       bytes:    20864     usecs:    8468.64
+prelude/macro      bytes:    58640     usecs:   41758.14
+prelude/reader     bytes:    15216     usecs:  108739.52
+prelude/stream     bytes:      960     usecs:      68.20
+prelude/string     bytes:     2160     usecs:     524.68
+prelude/type       bytes:     8768     usecs:    5638.36
+prelude/vector     bytes:     9472     usecs:    6210.04
 
