@@ -10,10 +10,10 @@
   (:lambda (fn args)
     ((:lambda (start stop)
        (libcore:fx-sub stop start))
-       (libcore:proc-tm)
+       (libcore:utime)
        ((:lambda ()
           (libcore:apply fn args)
-          (libcore:proc-tm))))))
+          (libcore:utime))))))
 
 ;;;
 ;;; return an vector of storage consumed

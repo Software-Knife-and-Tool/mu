@@ -16,8 +16,9 @@ use {
             namespace::{MuFunction as _, Namespace},
             system::MuFunction as _,
             types::{MuFunction as _, Tag, Type},
+            utime::MuFunction as _,
         },
-        system::{process::MuFunction as _, time::MuFunction as _, uname::MuFunction as _, System},
+        system::{process::MuFunction as _, uname::MuFunction as _, System},
         types::{
             cons::{Cons, Core as _, MuFunction as _},
             fixnum::{Fixnum, MuFunction as _},
@@ -133,12 +134,14 @@ lazy_static! {
         ( "wr-byte", 2, Stream::libcore_write_byte ),
         ( "wr-char", 2, Stream::libcore_write_char ),
         // system
-        ( "sys-tm",  0, System::sys_getrealtime ),
-        ( "proc-tm", 0, System::sys_getproctime ),
+        // ( "sys-tm",  0, System::sys_getrealtime ),
+        // ( "proc-tm", 0, System::sys_getproctime ),
         ( "getpid",  0, System::posix_getpid ),
         ( "getcwd",  0, System::posix_getcwd ),
         ( "uname",   0, System::posix_uname ),
         ( "sysinfo", 0, System::posix_sysinfo ),
+        // utime
+        ( "utime",   0, Mu::libcore_utime ),
     ];
 }
 

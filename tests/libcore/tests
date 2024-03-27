@@ -10,5 +10,4 @@ special-form
 stream
 struct
 symbol
-system
 vector

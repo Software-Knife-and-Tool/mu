@@ -12,10 +12,9 @@ libcore    special-form   total: 11       pass: 11       fail: 0        exceptio
 libcore    stream         total: 9        pass: 9        fail: 0        exceptions: 0       
 libcore    struct         total: 7        pass: 7        fail: 0        exceptions: 0       
 libcore    symbol         total: 11       pass: 11       fail: 0        exceptions: 0       
-libcore    system         total: 11       pass: 11       fail: 0        exceptions: 0       
 libcore    vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-libcore                   total: 304      pass: 303      fail: 1        exceptions: 0         
+libcore                   total: 293      pass: 292      fail: 1        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------
