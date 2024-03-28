@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! nix interface
-#[allow(unused_imports)]
+#![allow(unused_imports)]
 use crate::{
     core::{
         apply::CoreFunctionDef,
@@ -14,18 +14,16 @@ use crate::{
     features::Feature,
     types::{
         cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vecimage::VecType,
         vector::{Core as _, Vector},
     },
 };
-// use nix::{self};
+use nix::{self};
 
 // mu function dispatch table
 lazy_static! {
-    static ref NIX_SYMBOLS: Vec<CoreFunctionDef> = vec![("sysinfo", 0, Nix::nix_sysinfo),];
+    static ref NIX_SYMBOLS: Vec<CoreFunctionDef> = vec![("uname", 0, Nix::uname)];
 }
 
 pub struct Nix {}
@@ -44,57 +42,46 @@ impl Core for Nix {
 }
 
 pub trait MuFunction {
-    fn nix_sysinfo(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn uname(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Nix {
-    fn nix_sysinfo(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match nix::sys::sysinfo::sysinfo() {
-            Err(_) => return Err(Exception::new(Condition::Type, "sysinfo", Tag::nil())),
-            Ok(sysinfo) => {
-                let sysinfo = vec![Cons::vlist(
+    fn uname(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = match nix::sys::utsname::uname() {
+            Err(_) => return Err(Exception::new(Condition::Type, "uname", Tag::nil())),
+            Ok(info) => {
+                let uname = vec![Cons::vlist(
                     mu,
                     &[
                         Cons::new(
-                            Symbol::keyword("uptime"),
-                            Fixnum::as_tag(sysinfo.uptime().as_secs() as i64),
+                            Symbol::keyword("sysname"),
+                            Vector::from_string(info.sysname().to_str().unwrap()).evict(mu),
                         )
                         .evict(mu),
                         Cons::new(
-                            Symbol::keyword("loads"),
-                            vec![
-                                sysinfo.load_average().0 as f32,
-                                sysinfo.load_average().1 as f32,
-                                sysinfo.load_average().2 as f32,
-                            ]
-                            .to_vector()
-                            .evict(mu),
+                            Symbol::keyword("node"),
+                            Vector::from_string(info.nodename().to_str().unwrap()).evict(mu),
                         )
                         .evict(mu),
                         Cons::new(
-                            Symbol::keyword("totlram"),
-                            Fixnum::as_tag(sysinfo.ram_total() as i64),
+                            Symbol::keyword("release"),
+                            Vector::from_string(info.release().to_str().unwrap()).evict(mu),
                         )
                         .evict(mu),
                         Cons::new(
-                            Symbol::keyword("freeram"),
-                            Fixnum::as_tag(sysinfo.ram_unused() as i64),
+                            Symbol::keyword("version"),
+                            Vector::from_string(info.version().to_str().unwrap()).evict(mu),
                         )
                         .evict(mu),
                         Cons::new(
-                            Symbol::keyword("totswap"),
-                            Fixnum::as_tag(sysinfo.swap_total() as i64),
-                        )
-                        .evict(mu),
-                        Cons::new(
-                            Symbol::keyword("freswap"),
-                            Fixnum::as_tag(sysinfo.swap_free() as i64),
+                            Symbol::keyword("machine"),
+                            Vector::from_string(info.machine().to_str().unwrap()).evict(mu),
                         )
                         .evict(mu),
                     ],
                 )];
 
-                Struct::new(mu, "sysinfo", sysinfo).evict(mu)
+                Struct::new(mu, "uname", uname).evict(mu)
             }
         };
 

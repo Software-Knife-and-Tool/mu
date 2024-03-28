@@ -59,9 +59,9 @@ impl MuFunction for Sysinfo {
                         Cons::new(
                             Symbol::keyword("loads"),
                             vec![
-                                sysinfo.loads[0] as i64,
-                                sysinfo.loads[1] as i64,
-                                sysinfo.loads[2] as i64,
+                                sysinfo.loads[0] as f32,
+                                sysinfo.loads[1] as f32,
+                                sysinfo.loads[2] as f32,
                             ]
                             .to_vector()
                             .evict(mu),
