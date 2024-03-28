@@ -176,6 +176,8 @@ Note: the installation mechanism does not remove the installation directory befo
 
 As of 0.0.40, the *libcore* runtime supports conditional compilation of a variety of features. See `Cargo.toml` for the features available in your code base.
 
+The *sysinfo* feature is currently not functional for *macos* builds, and is disabled by default.
+
 
 
 #### Testing
