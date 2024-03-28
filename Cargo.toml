@@ -23,11 +23,10 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "std", "uname", "nix" ]
+default = [ "std", "sysinfo", "nix" ]
 nix = []
 std = []
 sysinfo = []  # not for macos
-uname = []
 
 [profile.dev]
 opt-level = 0
@@ -44,11 +43,11 @@ getopt = "1.1.3"
 lazy_static = "1.4.0"
 memmap = "0.7.0"
 modular-bitfield = "0.11.2"
-nix = "0.28.0"
+nix = {version = "0.28.0", features = ["feature"]}
 num_enum = "0.7.1"
 page_size = "0.6.0"
 sysinfo_dot_h = "0.2.0"
-uname = "0.1.1"
+# uname = "0.1.1"
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.5.4"

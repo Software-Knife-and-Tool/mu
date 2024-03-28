@@ -158,7 +158,7 @@ impl Core for Mu {
         mu.functions = RefCell::new(Self::install_libcore_functions(&mu));
         mu.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&mu);
 
-        mu.features = Feature::add_features(&mu);
+        mu.features = Feature::install_features(&mu);
 
         // the reader has to be last
         mu.reader = mu.reader.build(&mu);
