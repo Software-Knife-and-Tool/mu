@@ -46,8 +46,9 @@ modular-bitfield = "0.11.2"
 nix = {version = "0.28.0", features = ["feature"]}
 num_enum = "0.7.1"
 page_size = "0.6.0"
+
+[target.'cfg(not(target_env = "macos"))'.dependencies]
 sysinfo_dot_h = "0.2.0"
-# uname = "0.1.1"
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.5.4"
