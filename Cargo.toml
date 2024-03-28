@@ -26,7 +26,7 @@ bench = false
 default = [ "std", "uname", "nix" ]
 nix = []
 std = []
-sysinfo = []
+sysinfo = []  # not for macos
 uname = []
 
 [profile.dev]
