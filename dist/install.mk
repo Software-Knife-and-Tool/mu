@@ -3,6 +3,7 @@
 #
 .PHONY: install release uninstall help
 
+VERSION != grep VERSION: ../src/libcore/core/mu.rs | sed 's/.* "//' | sed 's/".*//'
 ROOT = /opt
 BASE = mu
 
@@ -11,7 +12,7 @@ help:
 	@echo uninstall - remove $(BASE) from $(ROOT) (needs sudo)
 
 install:
-	@cat ./$(BASE)*.tgz | (cd $(ROOT); tar --no-same-owner -xzf -)
+	@cat ./$(BASE)-$(VERSION).tgz | (cd $(ROOT); tar --no-same-owner -xzf -)
 
 uninstall:
 	@rm -rf $(ROOT)/$(BASE)
