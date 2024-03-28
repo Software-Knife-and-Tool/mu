@@ -17,14 +17,14 @@ use crate::{
 use crate::features::nix::nix_::{Core as _, Nix};
 #[cfg(feature = "std")]
 use crate::features::std::std_::{Core as _, Std};
-#[cfg(feature = "sysinfo")]
+#[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
 use crate::features::sysinfo::sysinfo_::{Core as _, Sysinfo};
 
 #[cfg(feature = "nix")]
 pub mod nix;
 #[cfg(feature = "std")]
 pub mod std;
-#[cfg(feature = "sysinfo")]
+#[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
 pub mod sysinfo;
 
 pub struct Feature {
@@ -58,7 +58,7 @@ impl Core for Feature {
             Self::install(_mu, Nix::make_feature(_mu)),
             #[cfg(feature = "std")]
             Self::install(_mu, Std::make_feature(_mu)),
-            #[cfg(feature = "sysinfo")]
+            #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
             Self::install(_mu, Sysinfo::make_feature(_mu)),
         ];
 
