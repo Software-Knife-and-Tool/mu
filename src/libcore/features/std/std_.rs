@@ -8,7 +8,7 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         mu::Mu,
-        types::Type,
+        types::{Tag, Type},
     },
     features::Feature,
     types::{
@@ -20,8 +20,11 @@ use crate::{
 
 // mu function dispatch table
 lazy_static! {
-    static ref STD_SYMBOLS: Vec<CoreFunctionDef> =
-        vec![("command", 2, Std::std_command), ("exit", 1, Std::std_exit)];
+    static ref STD_SYMBOLS: Vec<CoreFunctionDef> = vec![
+        ("command", 2, Std::std_command),
+        ("env", 0, Std::std_env),
+        ("exit", 1, Std::std_exit),
+    ];
 }
 
 pub struct Std {}
@@ -41,6 +44,7 @@ impl Core for Std {
 
 pub trait MuFunction {
     fn std_command(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn std_env(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
     fn std_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
 }
 
@@ -88,6 +92,26 @@ impl MuFunction for Std {
             Type::Fixnum => std::process::exit(Fixnum::as_i64(rc) as i32),
             _ => Err(Exception::new(Condition::Type, "exit", rc)),
         }
+    }
+
+    fn std_env(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = {
+            let mut vars = vec![];
+
+            for (key, value) in std::env::vars() {
+                vars.push(
+                    Cons::new(
+                        Vector::from_string(&key).evict(mu),
+                        Vector::from_string(&value).evict(mu),
+                    )
+                    .evict(mu),
+                )
+            }
+
+            Tag::nil()
+        };
+
+        Ok(())
     }
 }
 
