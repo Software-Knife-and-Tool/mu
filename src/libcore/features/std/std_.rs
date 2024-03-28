@@ -8,7 +8,7 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         mu::Mu,
-        types::{Tag, Type},
+        types::Type,
     },
     features::Feature,
     types::{
@@ -108,7 +108,7 @@ impl MuFunction for Std {
                 )
             }
 
-            Tag::nil()
+            Cons::vlist(mu, &vars)
         };
 
         Ok(())
