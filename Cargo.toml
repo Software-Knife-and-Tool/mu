@@ -17,7 +17,7 @@ name = "mu-sys"
 path = "src/runtime/mu-sys/main.rs"
 
 [lib]
-name = "lib"
+name = "mu"
 path = "src/lib/lib.rs"
 crate-type = ["lib"]
 bench = false

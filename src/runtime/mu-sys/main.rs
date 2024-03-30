@@ -9,12 +9,12 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate lib;
+extern crate mu;
 
 #[allow(unused_imports)]
 use {
     getopt::Opt,
-    lib::{Condition, Mu, Result, Tag},
+    mu::{Condition, Mu, Result, Tag},
     std::{fs, io::Write},
 };
 

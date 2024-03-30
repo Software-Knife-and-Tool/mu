@@ -9,7 +9,7 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate lib;
+extern crate mu;
 
 #[allow(unused_imports)]
 use {
@@ -20,7 +20,7 @@ use {
         ElfBytes,
     },
     getopt::Opt,
-    lib::{Condition, Mu, Result, Tag},
+    mu::{Condition, Mu, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 
