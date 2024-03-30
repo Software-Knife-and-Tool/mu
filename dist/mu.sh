@@ -23,7 +23,6 @@ SOURCES=""
 # prelude.l needs to be first
 PRELUDE=(	       	\
       prelude.l		\
-      backquote.l	\
       break.l		\
       compile.l		\
       ctype.l		\
@@ -43,6 +42,7 @@ PRELUDE=(	       	\
       map.l		\
       namespace.l	\
       parse.l		\
+      quasiquote.l	\
       read-macro.l	\
       read.l		\
       repl.l		\

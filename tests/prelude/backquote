@@ -1,37 +1,37 @@
-(libcore:eq 'libcore:fx-add (libcore:eval (prelude:read (libcore:open :string :input "`,libcore:fx-add") () ())))	:t
-(libcore:eq 'libcore:version (libcore:eval (prelude:read (libcore:open :string :input "`,libcore:version") () ())))	:t
-(libcore:eval (prelude:read (libcore:open :string :input "`\"abc\"") () ()))	"abc"
-(libcore:eval (prelude:read (libcore:open :string :input "`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
-(libcore:eval (prelude:read (libcore:open :string :input "`#\\a") () ()))	#\a
-(libcore:eval (prelude:read (libcore:open :string :input "`libcore:std-out") () ()))	libcore:std-out
-(libcore:eval (prelude:read (libcore:open :string :input "`1234") () ()))	1234
-(libcore:eval (prelude:read (libcore:open :string :input "`(,(libcore:cons 'satisfies ()))") () ()))	((satisfies))
-(libcore:eval (prelude:read (libcore:open :string :input "`(\"abc\")") () ()))	("abc")
-(libcore:eval (prelude:read (libcore:open :string :input "`(#(:t 1 2 3))") () ()))	(#(:t 1 2 3))
-(libcore:eval (prelude:read (libcore:open :string :input "`(#\\a)") () ()))	(#\a)
-(libcore:eval (prelude:read (libcore:open :string :input "`(())") () ()))	(:nil)
-(libcore:eval (prelude:read (libcore:open :string :input "`((1234) 1234 symbol)") () ()))	((1234) 1234 symbol)
-(libcore:eval (prelude:read (libcore:open :string :input "`((a b) c)") () ()))	((a b) c)
-(libcore:eval (prelude:read (libcore:open :string :input "`()") () ()))	:nil
-(libcore:eval (prelude:read (libcore:open :string :input "`(,(libcore:fx-add 1 2))") () ()))	(3)
-(libcore:eval (prelude:read (libcore:open :string :input "`(,1 (2) 3)") () ()))	(1 (2) 3)
-(libcore:eval (prelude:read (libcore:open :string :input "`(,1234 ,@'(a b c))") () ()))	(1234 a b c)
-(libcore:eval (prelude:read (libcore:open :string :input "`(,@'(a b c))") () ()))	(a b c)
-(libcore:eval (prelude:read (libcore:open :string :input "`(,@(libcore:fx-add 1 2))")) () ())	3
-(libcore:eval (prelude:read (libcore:open :string :input "`(0 ,@'(a b c) 1)") () ()))	(0 a b c 1)
-(libcore:eval (prelude:read (libcore:open :string :input "`(1 2 ,@3)") () ()))	(1 2 . 3)
-(libcore:eval (prelude:read (libcore:open :string :input "`(1 2 3)") () ()))	(1 2 3)
-(libcore:eval (prelude:read (libcore:open :string :input "`(1.0 b (2))") () ()))	(1.0000 b (2))
-(libcore:eval (prelude:read (libcore:open :string :input "`(1234 symbol)") () ()))	(1234 symbol)
-(libcore:eval (prelude:read (libcore:open :string :input "`(1234)") () ()))	(1234)
-(libcore:eval (prelude:read (libcore:open :string :input "`(a b c)") () ()))	(a b c)
-(libcore:eval (prelude:read (libcore:open :string :input "`,(libcore:fx-add 1 2)") () ()))	3
-(libcore:eval (prelude:read (libcore:open :string :input "`,(libcore:type-of 'symbol)") () ()))	:symbol
-(libcore:eval (prelude:read (libcore:open :string :input "`,1234") () ()))	1234
-(libcore:eval (prelude:read (libcore:open :string :input "`,`\"abc\"") () ()))	"abc"
-(libcore:eval (prelude:read (libcore:open :string :input "`,`#(:t 1 2 3)") () ()))	#(:t 1 2 3)
-(libcore:eval (prelude:read (libcore:open :string :input "`,`#\\a") () ()))	#\a
-(libcore:eval (prelude:read (libcore:open :string :input "`,`libcore:std-out") () ()))	libcore:std-out
-(libcore:eval (prelude:read (libcore:open :string :input "`,`1234") () ()))	1234
-(libcore:eval (prelude:read (libcore:open :string :input "`,`(1234)") () ()))	(1234)
-(libcore:eval (prelude:read (libcore:open :string :input "``1234") () ()))	`1234
+(libcore:eq 'libcore:fx-add (libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,libcore:fx-add") () ()))))	:t
+(libcore:eq 'libcore:version (libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,libcore:version") () ()))))	:t
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`\"abc\"") () ())))	"abc"
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`#\\a") () ())))	#\a
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`libcore:std-out") () ())))	libcore:std-out
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`1234") () ())))	1234
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(,(libcore:cons 'satisfies ()))") () ())))	((satisfies))
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(\"abc\")") () ())))	("abc")
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(#(:t 1 2 3))") () ())))	(#(:t 1 2 3))
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(#\\a)") () ())))	(#\a)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(())") () ())))	(:nil)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`((1234) 1234 symbol)") () ())))	((1234) 1234 symbol)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`((a b) c)") () ())))	((a b) c)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`()") () ())))	:nil
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(,(libcore:fx-add 1 2))") () ())))	(3)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(,1 (2) 3)") () ())))	(1 (2) 3)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(,1234 ,@'(a b c))") () ())))	(1234 a b c)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(,@'(a b c))") () ())))	(a b c)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(,@(libcore:fx-add 1 2))")) () ()))	3
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(0 ,@'(a b c) 1)") () ())))	(0 a b c 1)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(1 2 ,@3)") () ())))	(1 2 . 3)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(1 2 3)") () ())))	(1 2 3)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(1.0 b (2))") () ())))	(1.0000 b (2))
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(1234 symbol)") () ())))	(1234 symbol)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(1234)") () ())))	(1234)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`(a b c)") () ())))	(a b c)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,(libcore:fx-add 1 2)") () ())))	3
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,(libcore:type-of 'symbol)") () ())))	:symbol
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,1234") () ())))	1234
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,`\"abc\"") () ())))	"abc"
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,`#\\a") () ())))	#\a
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,`libcore:std-out") () ())))	libcore:std-out
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,`1234") () ())))	1234
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "`,`(1234)") () ())))	(1234)
+(libcore:eval (prelude:compile (prelude:read (libcore:open :string :input "``1234") () ())))	`1234
