@@ -4,24 +4,20 @@
 ;;;
 ;;; symbol table
 ;;;
-(mu:intern :prelude "symbols"
+(lib:intern :prelude "symbols"
    (:lambda (file-name)
       ((:lambda (stream)
           (prelude:mapc
            (:lambda (symbol)
-              (:if (prelude:null (mu:sy-ns symbol))
-                   (prelude:format stream "~A~%" `(,(mu:sy-name symbol)))
-                   (prelude:format stream "prelude:~A~%" `(,(mu:sy-name symbol)))))
-           (mu:ns-syms :list :prelude))
+              (:if (prelude:null (lib:sy-ns symbol))
+                   (prelude:format stream "~A~%" `(,(lib:sy-name symbol)))
+                   (prelude:format stream "prelude:~A~%" `(,(lib:sy-name symbol)))))
+           (lib:ns-syms :list :prelude))
           (prelude:mapc
            (:lambda (symbol)
-              (:if (prelude:null (mu:sy-ns symbol))
-                   (prelude:format stream "~A~%" `(,(mu:sy-name symbol)))
-                   (prelude:format stream "mu:~A~%" `(,(mu:sy-name symbol)))))
-           (mu:ns-syms :list :mu))
-          (prelude:mapc
-           (:lambda (symbol)
-             (prelude:format stream "sys:~A~%" `(,(mu:sy-name symbol))))
-           (mu:ns-syms :list :sys)))
-       (mu:open :file :output file-name))
+              (:if (prelude:null (lib:sy-ns symbol))
+                   (prelude:format stream "~A~%" `(,(lib:sy-name symbol)))
+                   (prelude:format stream "lib:~A~%" `(,(lib:sy-name symbol)))))
+           (lib:ns-syms :list :lib)))
+       (lib:open :file :output file-name))
       :t))

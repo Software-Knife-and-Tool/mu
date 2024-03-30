@@ -1,3 +1,4 @@
+*.out
 Cargo.lock
 dist/mu*.tgz
 dist/mu-exec
