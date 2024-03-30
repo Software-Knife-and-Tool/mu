@@ -83,15 +83,17 @@
        (prelude:%make-except :error value :error "" ())
        :except)))
 
+(lib:intern :prelude "raise-env"
+   (:lambda (value source reason)
+     (lib:raise
+      (prelude:%make-except :error value source reason (lib:frames))
+      :except)))
+
 (lib:intern :prelude "raise"
-   (:lambda (value source reason verbose)
-      (:if verbose          
-           (lib:raise
-            (prelude:%make-except :error value source reason (lib:frames))
-            :except)
-           (lib:raise
-            (prelude:%make-except :error value source reason ())
-            :except))))
+   (:lambda (value source reason)
+     (lib:raise
+      (prelude:%make-except :error value source reason ())
+      :except)))
 
 (lib:intern :prelude "debug"
    (:lambda (value message)
