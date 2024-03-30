@@ -79,7 +79,7 @@
          ,(lib:cons :list-  (:lambda (expr list)
                              (lib:cons :t list)))
          ,(lib:cons :quasi  (:lambda (expr list)
-                             (lib:cons () (lib:append list `(,(prelude:%qq-parse stream))))))))))
+                             (lib:cons () (lib:append list `(,(prelude:%qq-read stream))))))))))
 
 (lib:intern :prelude "%qq-compile"
    (:lambda (qq-expr)
