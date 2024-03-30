@@ -17,42 +17,42 @@
 ;;;
 ;;; macro environment
 ;;;
-(libcore:intern :prelude "%map-macro-symbol-ns"
+(lib:intern :prelude "%map-macro-symbol-ns"
    (:lambda (symbol)
       ((:lambda (ns-name)
-          (libcore:ns-find prelude:%macro-ns% ns-name))
-       (libcore:sy-name (libcore:sy-ns symbol)))))
+          (lib:ns-find prelude:%macro-ns% ns-name))
+       (lib:sy-name (lib:sy-ns symbol)))))
 
-(libcore:intern :prelude "%make-macro-ns"
+(lib:intern :prelude "%make-macro-ns"
    (:lambda (ns)
       ((:lambda (macro-ns)
-          (libcore:intern prelude:%macro-ns% (libcore:sy-name ns) macro-ns)
+          (lib:intern prelude:%macro-ns% (lib:sy-name ns) macro-ns)
           macro-ns)
        (prelude:%gen-anon-ns))))
 
-(libcore:intern :prelude "%defmacro"
+(lib:intern :prelude "%defmacro"
    (:lambda (symbol macro-function)
       ((:lambda (macro-ns symbol-ns)
          (:if macro-ns
-              (libcore:intern macro-ns symbol-ns macro-function)
-              (libcore:intern (prelude:%make-macro-ns symbol-ns) (libcore:sy-name symbol) macro-function))
+              (lib:intern macro-ns symbol-ns macro-function)
+              (lib:intern (prelude:%make-macro-ns symbol-ns) (lib:sy-name symbol) macro-function))
          symbol)
        (prelude:%map-macro-symbol-ns symbol)
-       (libcore:sy-ns symbol))))
+       (lib:sy-ns symbol))))
 
-(libcore:intern :prelude "%find-macro"
+(lib:intern :prelude "%find-macro"
    (:lambda (symbol env)
       ((:lambda (macro-ns symbol-ns symbol-name)
           (:if macro-ns
-               (libcore:ns-find (libcore:sy-val macro-ns) symbol-name)
+               (lib:ns-find (lib:sy-val macro-ns) symbol-name)
                ()))
-       (libcore:ns-find
+       (lib:ns-find
         prelude:%macro-ns%
-        (libcore:sy-name (libcore:sy-ns symbol)))
-       (libcore:sy-name (libcore:sy-ns symbol))
-       (libcore:sy-name symbol))))
+        (lib:sy-name (lib:sy-ns symbol)))
+       (lib:sy-name (lib:sy-ns symbol))
+       (lib:sy-name symbol))))
 
-(libcore:intern :prelude "%compile-macro-call"
+(lib:intern :prelude "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
        ((:lambda (macro-function)
           ((:lambda (expanded-form)
@@ -60,37 +60,37 @@
            (:if (prelude:%prelude-function-p macro-function)
                 (prelude:%funct-apply-quoted
                  macro-function
-                 (libcore:eval (prelude:%compile-lambda-arg-list macro-function arg-list env)))
-                (libcore:apply macro-function arg-list))))
+                 (lib:eval (prelude:%compile-lambda-arg-list macro-function arg-list env)))
+                (lib:apply macro-function arg-list))))
       (prelude:macro-function macro-symbol env))))
 
 ;;;
 ;;; macroexpand-1 expands a macro call once.
 ;;;
-(libcore:intern :prelude "macroexpand-1"
+(lib:intern :prelude "macroexpand-1"
    (:lambda (form env)
      (:if (prelude:consp form)
           ((:lambda (fn-symbol arg-list)
-             (:if (libcore:eq :symbol (libcore:type-of fn-symbol))
+             (:if (lib:eq :symbol (lib:type-of fn-symbol))
                   ((:lambda (macro-function)
                      (:if macro-function
                           (:if (prelude:%prelude-function-p macro-function)
                                (prelude:%funct-apply-quoted macro-function (prelude:%quoted-lambda-arg-list macro-function arg-list))
-                               (libcore:apply macro-function arg-list))
+                               (lib:apply macro-function arg-list))
                           form))
                    (prelude:macro-function fn-symbol env))
                   form))
-           (libcore:car form)
-           (libcore:cdr form))
+           (lib:car form)
+           (lib:cdr form))
           form)))
 
 ;;;
 ;;; macroexpand: expand a form until it is no longer a macro call
 ;;;
-(libcore:intern :prelude "macroexpand"
+(lib:intern :prelude "macroexpand"
    (:lambda (form env)
      ((:lambda (expanded)
-          (:if (libcore:eq form expanded)
+          (:if (lib:eq form expanded)
              expanded
              (prelude:macroexpand expanded env)))
        (prelude:macroexpand-1 form env))))
@@ -100,12 +100,12 @@
 ;;;
 ;;; acts as a predicate
 ;;;
-(libcore:intern :prelude "macro-function"
+(lib:intern :prelude "macro-function"
    (:lambda (symbol env)
-      (:if (libcore:eq :symbol (libcore:type-of symbol))
+      (:if (lib:eq :symbol (lib:type-of symbol))
            ((:lambda (macro)
                (:if macro
-                    (libcore:sy-val macro)
+                    (lib:sy-val macro)
                     ()))
             (prelude:%find-macro symbol env))
           ())))

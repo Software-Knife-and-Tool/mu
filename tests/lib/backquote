@@ -1,0 +1,37 @@
+(lib:type-of `,lib:fx-add)	:func
+(lib:type-of `,lib:version)	:vector
+`"abc"	"abc"
+`#(:t 1 2 3)	#(:t 1 2 3)
+`#\a	#\a
+`lib:std-out	lib:std-out
+`1234	1234
+`(,(lib:cons 'satisfies ()))	((satisfies))
+`("abc")	("abc")
+`(#(:t 1 2 3))	(#(:t 1 2 3))
+`(#\a)	(#\a)
+`(())	(:nil)
+`((1234) 1234 symbol)	((1234) 1234 symbol)
+`((a b) c)	((a b) c)
+`()	:nil
+`(,(lib:fx-add 1 2))	(3)
+`(,1 (2) 3)	(1 (2) 3)
+`(,1234 ,@'(a b c))	(1234 a b c)
+`(,@'(a b c))	(a b c)
+`(,@(lib:fx-add 1 2))	3
+`(0 ,@'(a b c) 1)	(0 a b c 1)
+`(1 2 ,@3)	(1 2 . 3)
+`(1 2 3)	(1 2 3)
+`(1.0 b (2))	(1.0000 b (2))
+`(1234 symbol)	(1234 symbol)
+`(1234)	(1234)
+`(a b c)	(a b c)
+`,(lib:fx-add 1 2)	3
+`,(lib:type-of 'symbol)	:symbol
+`,1234	1234
+`,`"abc"	"abc"
+`,`#(:t 1 2 3)	#(:t 1 2 3)
+`,`#\a	#\a
+`,`lib:std-out	lib:std-out
+`,`1234	1234
+`,`(1234)	(1234)
+``1234	`1234

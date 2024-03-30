@@ -1,22 +1,22 @@
-(libcore:eq :func (libcore:type-of prelude:compile))	:t
-(libcore:eq :func (libcore:type-of (prelude:compile '(lambda () 1))))	:t
-(libcore:eq :func (libcore:type-of (prelude:compile '(lambda (a b) b))))	:t
-(libcore:eq :func (libcore:type-of (prelude:compile '(lambda (a) "hoo"))))	:t
-(libcore:eq :func (libcore:type-of (prelude:compile '(lambda (a) a))))	:t
-(libcore:eval (prelude:compile '(if :t :t ())))	:t
-(libcore:eval (prelude:compile '(if () () :t)))	:t
-(libcore:eval (prelude:compile '(if :t () :t)))	:nil
-(libcore:eval (prelude:compile '(if () :t ())))	:nil
-(libcore:eval (prelude:compile '(if :t :t ())))	:t
-(libcore:eval (prelude:compile '(if :t :t :t)))	:t
-(libcore:eval (prelude:compile '(if () ())))	:nil
-(libcore:eval (prelude:compile '(if () :t)))	:nil
-(libcore:eval (prelude:compile '(if :t ())))	:nil
-(libcore:eval (prelude:compile '(if :t :t)))	:t
-(libcore:eval (prelude:compile '(if () (libcore:fx-add 0 1) (libcore:fx-add 0 0))))	0
-(libcore:eval (prelude:compile '(if :t (libcore:fx-add 0 1) (libcore:fx-add 0 0))))	1
-(libcore:eval (prelude:compile '(if (prelude:null ()) (libcore:fx-add 0 1) (libcore:fx-add 0 0))))	1
-(libcore:eval (prelude:compile '(if (prelude:not (prelude:null :t)) (libcore:fx-add 0 1) (libcore:fx-add 0 0))))	1
-(libcore:eval (prelude:compile '(if (prelude:null ()) (libcore:fx-add 0 1) (prelude:write "should not eval" () ()))))	1
-(libcore:eval (prelude:compile '(if (prelude:null :t) (prelude:write "should not eval" () ()) (libcore:fx-add 0 0))))	0
-(libcore:eval (prelude:compile '((:lambda (fn) (prelude:apply (:lambda (fn) (libcore:eq :func (libcore:type-of fn))) `(,fn))) libcore:eq)))	:t
+(lib:eq :func (lib:type-of prelude:compile))	:t
+(lib:eq :func (lib:type-of (prelude:compile '(lambda () 1))))	:t
+(lib:eq :func (lib:type-of (prelude:compile '(lambda (a b) b))))	:t
+(lib:eq :func (lib:type-of (prelude:compile '(lambda (a) "hoo"))))	:t
+(lib:eq :func (lib:type-of (prelude:compile '(lambda (a) a))))	:t
+(lib:eval (prelude:compile '(if :t :t ())))	:t
+(lib:eval (prelude:compile '(if () () :t)))	:t
+(lib:eval (prelude:compile '(if :t () :t)))	:nil
+(lib:eval (prelude:compile '(if () :t ())))	:nil
+(lib:eval (prelude:compile '(if :t :t ())))	:t
+(lib:eval (prelude:compile '(if :t :t :t)))	:t
+(lib:eval (prelude:compile '(if () ())))	:nil
+(lib:eval (prelude:compile '(if () :t)))	:nil
+(lib:eval (prelude:compile '(if :t ())))	:nil
+(lib:eval (prelude:compile '(if :t :t)))	:t
+(lib:eval (prelude:compile '(if () (lib:fx-add 0 1) (lib:fx-add 0 0))))	0
+(lib:eval (prelude:compile '(if :t (lib:fx-add 0 1) (lib:fx-add 0 0))))	1
+(lib:eval (prelude:compile '(if (prelude:null ()) (lib:fx-add 0 1) (lib:fx-add 0 0))))	1
+(lib:eval (prelude:compile '(if (prelude:not (prelude:null :t)) (lib:fx-add 0 1) (lib:fx-add 0 0))))	1
+(lib:eval (prelude:compile '(if (prelude:null ()) (lib:fx-add 0 1) (prelude:write "should not eval" () ()))))	1
+(lib:eval (prelude:compile '(if (prelude:null :t) (prelude:write "should not eval" () ()) (lib:fx-add 0 0))))	0
+(lib:eval (prelude:compile '((:lambda (fn) (prelude:apply (:lambda (fn) (lib:eq :func (lib:type-of fn))) `(,fn))) lib:eq)))	:t

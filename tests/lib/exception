@@ -1,0 +1,4 @@
+(lib:with-ex (:lambda (obj cond src) (lib:write cond () lib:std-out)) (:lambda () (lib:raise () :except)))	:except:except
+(lib:with-ex (:lambda (obj cond src) (lib:write obj () lib:std-out)) (:lambda () (lib:raise 1 :except)))	11
+(lib:with-ex (:lambda (obj cond src) (lib:write cond () lib:std-out)) (:lambda () (lib:fx-div 1 0)))	:div0:div0
+(lib:with-ex (:lambda (obj cond src) (lib:write obj () lib:std-out)) (:lambda () 1))	1

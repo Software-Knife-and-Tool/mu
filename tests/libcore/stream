@@ -1,9 +1,0 @@
-(libcore:flush libcore:std-out)	:nil
-(libcore:wr-char #\a libcore:std-out)	a#\a
-(libcore:close libcore:err-out)	:t
-(libcore:openp libcore:err-out)	#<stream: id: 2 type: err-out dir: :output state: open>
-(libcore:write "abc" () libcore:std-out)	abc"abc"
-(libcore:write "abc" :t libcore:std-out)	"abc""abc"
-(libcore:write () () libcore:std-out)	:nil:nil
-(libcore:write :abcde :t libcore:std-out)	:abcde:abcde
-(libcore:get-str (libcore:open :string :output "abcdef"))	"abcdef"

@@ -4,12 +4,12 @@
 ;;;
 ;;; namespace
 ;;;
-(libcore:make-ns :prelude)
+(lib:make-ns :prelude)
 
 ;;;
 ;;; types
 ;;;
-(libcore:intern :prelude "%init-ns"
+(lib:intern :prelude "%init-ns"
    (:lambda ()
       ;;; function
       (prelude:define-type "funct"
@@ -47,87 +47,87 @@
             (:disp    . :listp)
             (:bitvec  . :listp)))
 
-      (libcore:intern :prelude "%char-macro-ns%" (prelude:%gen-anon-ns))
-      (libcore:intern :prelude "%macro-ns%" (prelude:%gen-anon-ns))
-      (libcore:intern :prelude "%symbol-macro-ns%" (prelude:%gen-anon-ns))))
+      (lib:intern :prelude "%char-macro-ns%" (prelude:%gen-anon-ns))
+      (lib:intern :prelude "%macro-ns%" (prelude:%gen-anon-ns))
+      (lib:intern :prelude "%symbol-macro-ns%" (prelude:%gen-anon-ns))))
 
 ;;;
 ;;; predicates
 ;;;
-(libcore:intern :prelude "not" (:lambda (value) (prelude:null value)))
-(libcore:intern :prelude "atom" (:lambda (value) (prelude:not (prelude:consp value))))
+(lib:intern :prelude "not" (:lambda (value) (prelude:null value)))
+(lib:intern :prelude "atom" (:lambda (value) (prelude:not (prelude:consp value))))
 
-(libcore:intern :prelude "constantp"
+(lib:intern :prelude "constantp"
    (:lambda (value)
       (:if (prelude:%orf (prelude:null value) (prelude:keywordp value))
            :t
            (:if (prelude:consp value)
-                (libcore:eq :quote (libcore:car value))
+                (lib:eq :quote (lib:car value))
                 (prelude:not (prelude:symbolp value))))))
 
-(libcore:intern :prelude "numberp"
+(lib:intern :prelude "numberp"
   (:lambda (n)
      (:if (prelude:fixnump n)
           :t
           (prelude:floatp n))))
 
-(libcore:intern :prelude "zerop"
+(lib:intern :prelude "zerop"
    (:lambda (n)
      (:if (prelude:numberp n)
-          (:if (libcore:eq 0 n)
+          (:if (lib:eq 0 n)
                :t
-               (libcore:eq 0.0 n))
+               (lib:eq 0.0 n))
           (prelude:raise n 'prelude:zerop "not a number"))))
 
-(libcore:intern :prelude "minusp"
+(lib:intern :prelude "minusp"
    (:lambda (n)
       (:if (prelude:numberp n)
            (:if (prelude:floatp n)
-                (libcore:fl-lt n 0.0)
-                (libcore:fx-lt n 0))
+                (lib:fl-lt n 0.0)
+                (lib:fx-lt n 0))
            (prelude:raise n 'prelude:minusp "not a number"))))
 
-(libcore:intern :prelude "plusp"
+(lib:intern :prelude "plusp"
    (:lambda (n)
       (:if (prelude:numberp n)
            (:if (prelude:floatp n)
-                (libcore:fl-lt 0.0 n)
-                (libcore:fx-lt 0 n))
+                (lib:fl-lt 0.0 n)
+                (lib:fx-lt 0 n))
            (prelude:raise n 'prelude:plusp "not a number"))))
 
 ;;;
 ;;; system classes
 ;;;
-(libcore:intern :prelude "charp" (:lambda (t) (libcore:eq :char (libcore:type-of t))))
-(libcore:intern :prelude "fixnump" (:lambda (t) (libcore:eq :fixnum (libcore:type-of t))))
-(libcore:intern :prelude "floatp" (:lambda (t) (libcore:eq :float (libcore:type-of t))))
-(libcore:intern :prelude "structp" (:lambda (t) (libcore:eq :struct (libcore:type-of t))))
+(lib:intern :prelude "charp" (:lambda (t) (lib:eq :char (lib:type-of t))))
+(lib:intern :prelude "fixnump" (:lambda (t) (lib:eq :fixnum (lib:type-of t))))
+(lib:intern :prelude "floatp" (:lambda (t) (lib:eq :float (lib:type-of t))))
+(lib:intern :prelude "structp" (:lambda (t) (lib:eq :struct (lib:type-of t))))
 
 ;;;
 ;;; syntactic sugar
 ;;;
-(libcore:intern :prelude "%orf"
+(lib:intern :prelude "%orf"
    (:lambda (arg arg1)
      (:if arg arg arg1)))
 
-(libcore:intern :prelude "%andf"
+(lib:intern :prelude "%andf"
    (:lambda (arg arg1)
      (:if arg arg1 ())))
 
 ;;;
 ;;; apply
 ;;;
-(libcore:intern :prelude "apply"
+(lib:intern :prelude "apply"
    (:lambda (function arg-list)
      (:if (prelude:functionp function)
           (:if (prelude:%prelude-function-p function)
                (prelude:%funct-apply function arg-list)
-               (libcore:apply function arg-list))
+               (lib:apply function arg-list))
           (prelude:raise function 'prelude:apply "not a function designator"))))
 
 ;;;
 ;;; namespace components
 ;;;
-(libcore:intern :prelude "%gen-anon-ns"
+(lib:intern :prelude "%gen-anon-ns"
    (:lambda ()
-      (libcore:make-ns (prelude:genkeyword #\%))))
+      (lib:make-ns (prelude:genkeyword #\%))))

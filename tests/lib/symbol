@@ -1,0 +1,11 @@
+(lib:boundp 'lib:foo)	:nil
+(lib:boundp 'lib:std-in)	lib:std-in
+(lib:sy-name 'lib:std-in)	"std-in"
+(lib:sy-ns 'lib:std-in)	:lib
+(lib:sy-ns 'std-in)	:nil
+(lib:sy-ns :std-in)	:keyword
+(lib:sy-ns ())	:nil
+(lib:sy-ns :nil)	:nil
+(lib:sy-val 'lib:std-in)	#<stream: id: 0 type: std-in dir: :input state: open>
+(lib:keyword "abcde")	:abcde
+(lib:symbol "abcde")	abcde

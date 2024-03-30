@@ -1,7 +1,0 @@
-(libcore:type-of libcore:struct)	:func
-(libcore:type-of libcore:st-type)	:func
-(libcore:type-of libcore:st-vec)	:func
-(libcore:type-of (libcore:struct :foo ()))	:struct
-(libcore:st-type (libcore:struct :foo ()))	:foo
-(libcore:st-vec (libcore:struct :foo ()))	#(:t)
-(libcore:st-vec (libcore:struct :foo '(1 2 3 4)))	#(:t 1 2 3 4)

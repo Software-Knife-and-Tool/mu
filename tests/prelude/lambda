@@ -1,8 +1,8 @@
-(libcore:apply (prelude:compile '(lambda () 1)) ())	1
-(libcore:apply (prelude:compile '(lambda (a b) (prelude:null b))) '(1 2))	:nil
-(libcore:apply (prelude:compile '(lambda (a b) (libcore:fx-add 1 2))) '(1 2))	3
-(libcore:apply (prelude:compile '(lambda (a b) (libcore:fx-add a b))) '(1 2))	3
-(libcore:apply (prelude:compile '(lambda (a b) (libcore:type-of b))) '(1 2))	:fixnum
+(lib:apply (prelude:compile '(lambda () 1)) ())	1
+(lib:apply (prelude:compile '(lambda (a b) (prelude:null b))) '(1 2))	:nil
+(lib:apply (prelude:compile '(lambda (a b) (lib:fx-add 1 2))) '(1 2))	3
+(lib:apply (prelude:compile '(lambda (a b) (lib:fx-add a b))) '(1 2))	3
+(lib:apply (prelude:compile '(lambda (a b) (lib:type-of b))) '(1 2))	:fixnum
 (prelude:apply (prelude:compile '(lambda ())) ())	:nil
 (prelude:apply (prelude:compile '(lambda () 1)) ())	1
 (prelude:apply (prelude:compile '(lambda (a) a)) '(1))	1
@@ -10,14 +10,14 @@
 (prelude:apply (prelude:compile '(lambda (a b) 1)) '(2 3))	1
 (prelude:apply (prelude:compile '(lambda (a b) (prelude:fixnump b))) '(1 2))	:t
 (prelude:apply (prelude:compile '(lambda (a b) (prelude:null b))) '(1 2))	:nil
-(prelude:apply (prelude:compile '(lambda (a b) (libcore:fx-add 1 2))) '(1 2))	3
-(prelude:apply (prelude:compile '(lambda (a b) (libcore:fx-add a b))) '(1 2))	3
-(prelude:apply (prelude:compile '(lambda (a b) (libcore:type-of b))) '(1 2))	:fixnum
+(prelude:apply (prelude:compile '(lambda (a b) (lib:fx-add 1 2))) '(1 2))	3
+(prelude:apply (prelude:compile '(lambda (a b) (lib:fx-add a b))) '(1 2))	3
+(prelude:apply (prelude:compile '(lambda (a b) (lib:type-of b))) '(1 2))	:fixnum
 (prelude:apply (prelude:compile '(lambda (&rest e) e)) '(1 2 3 4 5))	(1 2 3 4 5)
 (prelude:apply (prelude:compile '(lambda (a &rest e) e)) '(1 2 3 4 5))	(2 3 4 5)
 (prelude:apply (prelude:compile '(lambda (a b &rest e) e)) '(1 2 3 4 5))	(3 4 5)
 (prelude:apply (prelude:compile '(lambda (a b c &rest e) e)) '(1 2 3 4 5))	(4 5)
 (prelude:apply (prelude:compile '(lambda (a b c d &rest e) e)) '(1 2 3 4 5))	(5)
 (prelude:apply (prelude:compile '(lambda (a b c d e &rest f) f)) '(1 2 3 4 5))	:nil
-(prelude:apply (prelude:compile '(lambda (a b c d &rest f) (libcore:write f () libcore:std-out))) '(1 2 3 4 5))	(5)(5)
-(libcore:type-of (prelude:apply (prelude:compile '(lambda (a) (a))) (libcore:cons (:lambda () 1) ())))	:fixnum
+(prelude:apply (prelude:compile '(lambda (a b c d &rest f) (lib:write f () lib:std-out))) '(1 2 3 4 5))	(5)(5)
+(lib:type-of (prelude:apply (prelude:compile '(lambda (a) (a))) (lib:cons (:lambda () 1) ())))	:fixnum

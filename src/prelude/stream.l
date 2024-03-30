@@ -4,27 +4,27 @@
 ;;;
 ;;; streams
 ;;;
-(libcore:intern :prelude "streamp" (:lambda (t) (libcore:eq :stream (libcore:type-of t))))
+(lib:intern :prelude "streamp" (:lambda (t) (lib:eq :stream (lib:type-of t))))
 
 ;;;
 ;;; utilities
 ;;;
-(libcore:intern :prelude "%write-stream-designator"
+(lib:intern :prelude "%write-stream-designator"
   (:lambda (designator)
     (:if (prelude:null designator)
-         libcore:std-out
+         lib:std-out
          (:if (prelude:streamp designator)
               designator
               (prelude:raise designator
                           'prelude:%write-stream-designator
                           "not a stream designator")))))
 
-(libcore:intern :prelude "%read-stream-designator"
+(lib:intern :prelude "%read-stream-designator"
   (:lambda (designator)
     (:if (prelude:null designator)
-         libcore:std-in
-         (:if (libcore:eq :t designator)
-              libcore:std-in
+         lib:std-in
+         (:if (lib:eq :t designator)
+              lib:std-in
               (:if (prelude:streamp designator)
                    designator
                    (prelude:raise designator
@@ -34,51 +34,51 @@
 ;;;
 ;;; constructors
 ;;;
-(libcore:intern :prelude "make-string-stream"
+(lib:intern :prelude "make-string-stream"
    (:lambda (dir init)
       (:if (prelude:keywordp dir)
            (:if (prelude:stringp init)
-                (:if (libcore:eq dir :input)
-                     (libcore:open :string :input init)
-                     (:if (libcore:eq dir :output)
-                          (libcore:open :string :output init)
-                          (:if (libcore:eq dir :bidir)
-                               (libcore:open :string :bidir init)
+                (:if (lib:eq dir :input)
+                     (lib:open :string :input init)
+                     (:if (lib:eq dir :output)
+                          (lib:open :string :output init)
+                          (:if (lib:eq dir :bidir)
+                               (lib:open :string :bidir init)
                                (prelude:raise dir 'prelude:make-string-stream "not a direction keyword"))))
                 (prelude:raise dir 'prelude:make-string-stream "not a direction keyword"))
            (prelude:raise init 'prelude:make-string-stream "not a string initializer"))))
 
-(libcore:intern :prelude "open"
+(lib:intern :prelude "open"
   (:lambda (dir path)
      (:if (prelude:stringp path)
           (:if (prelude:keywordp dir)
-               (:if (libcore:eq dir :input)
-                    (libcore:open :file :input path)
-                    (:if (libcore:eq dir :output)
-                         (libcore:open :file :output path)
+               (:if (lib:eq dir :input)
+                    (lib:open :file :input path)
+                    (:if (lib:eq dir :output)
+                         (lib:open :file :output path)
                          (prelude:raise dir 'prelude:open "not a direction keyword")))
                (prelude:raise path 'prelude:open "not a path string"))
           (prelude:raise dir 'prelude:open "not a direction keyword"))))
 
-(libcore:intern :prelude "close"
+(lib:intern :prelude "close"
    (:lambda (stream)
       (:if (prelude:streamp stream)
-           (libcore:close stream)
+           (lib:close stream)
            (prelude:raise stream 'prelude:close "not a stream"))))
 
-(libcore:intern :prelude "with-open-stream"
+(lib:intern :prelude "with-open-stream"
    (:lambda (type dir specifier fn)
      (:if (prelude:functionp fn)
           (:if (prelude:stringp specifier)
-               (:if (prelude:%orf (libcore:eq :file type)
-                               (libcore:eq :string type))
-                    (:if (prelude:%orf (libcore:eq :input dir)
-                                    (libcore:eq :output dir))
+               (:if (prelude:%orf (lib:eq :file type)
+                               (lib:eq :string type))
+                    (:if (prelude:%orf (lib:eq :input dir)
+                                    (lib:eq :output dir))
                          ((:lambda (stream)
-                             (libcore:with-ex
-                              (:lambda (ex) (libcore:close stream) ex)
+                             (lib:with-ex
+                              (:lambda (ex) (lib:close stream) ex)
                               (:lambda () (prelude:apply fn `(,stream)))))
-                          (libcore:open type dir specifier))
+                          (lib:open type dir specifier))
                          (prelude:raise dir 'prelude:with-open-stream "not a direction keyword"))
                     (prelude:raise type 'prelude:with-open-stream "not a type keyword"))
                (prelude:raise path 'prelude:with-open-stream "not a stream specifier"))
@@ -87,82 +87,82 @@
 ;;;
 ;;; chars, bytes, and unread
 ;;;
-(libcore:intern :prelude "write-char"
+(lib:intern :prelude "write-char"
    (:lambda (ch designator)
-     (libcore:wr-char ch (prelude:%write-stream-designator designator))))
+     (lib:wr-char ch (prelude:%write-stream-designator designator))))
 
-(libcore:intern :prelude "write-byte"
+(lib:intern :prelude "write-byte"
    (:lambda (byte designator)
-     (libcore:wr-byte byte (prelude:%write-stream-designator designator))))
+     (lib:wr-byte byte (prelude:%write-stream-designator designator))))
 
-(libcore:intern :prelude "read-char"
+(lib:intern :prelude "read-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
-       (libcore:rd-char stream error-eofp eof-value))
+       (lib:rd-char stream error-eofp eof-value))
      (prelude:%read-stream-designator designator))))
 
-(libcore:intern :prelude "read-byte"
+(lib:intern :prelude "read-byte"
    (:lambda (designator error-eofp eof-value)
      ((:lambda (stream)
-        (libcore:rd-byte stream error-eofp eof-value))
+        (lib:rd-byte stream error-eofp eof-value))
       (prelude:%read-stream-designator designator))))
 
-(libcore:intern :prelude "peek-char"
+(lib:intern :prelude "peek-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
-       (libcore:un-char
+       (lib:un-char
         (prelude:read-char stream error-eofp eof-value)
         stream))
      (prelude:%read-stream-designator designator))))
 
-(libcore:intern :prelude "unread-char"
+(lib:intern :prelude "unread-char"
    (:lambda (ch designator)
      (:if (prelude:charp ch)
-          (libcore:un-char ch (prelude:%write-stream-designator designator))
+          (lib:un-char ch (prelude:%write-stream-designator designator))
           (prelude:raise ch 'prelude:unread-char "not a char"))))
 
 ;;;
 ;;; read/read-line/write
 ;;;
-(libcore:intern :prelude "read"
+(lib:intern :prelude "read"
    (:lambda (designator eof-error eof-value)
      ((:lambda (stream)
         ((:lambda (form)
-           (:if (libcore:eq prelude:%eof% form)
+           (:if (lib:eq prelude:%eof% form)
                 (:if eof-error
                      (prelude:raise stream 'prelude:read "early end of file")
                      eof-value)
-                (:if (libcore:eq form prelude:%read-list-eol%)
+                (:if (lib:eq form prelude:%read-list-eol%)
                      (prelude:raise stream 'prelude:read "unmatched close parenthesis")
                      form)))
          (prelude:%read stream)))
       (prelude:%read-stream-designator designator))))
 
-(libcore:intern :prelude "read-line"
+(lib:intern :prelude "read-line"
    (:lambda (stream eof-error-p eof-value)
      ((:lambda (line)
         ((:lambda (value)
-           (:if (libcore:eq value prelude:%eof%)
+           (:if (lib:eq value prelude:%eof%)
                 eof-value
-                (libcore:get-str line)))              
-         (libcore:fix
+                (lib:get-str line)))              
+         (lib:fix
           (:lambda (loop)
             ((:lambda (ch)
-               (:if (libcore:eq ch prelude:%eof%)
+               (:if (lib:eq ch prelude:%eof%)
                     prelude:%eof%
-                    (:if (libcore:eq #\linefeed ch)
+                    (:if (lib:eq #\linefeed ch)
                          loop
                          ((:lambda ()
-                            (libcore:wr-char ch line)
+                            (lib:wr-char ch line)
                             (prelude:null loop))))))
              (prelude:read-char stream eof-error-p prelude:%eof%)))
          ())))
-      (libcore:open :string :output ""))))
+      (lib:open :string :output ""))))
 
-(libcore:intern :prelude "write"
+(lib:intern :prelude "write"
    (:lambda (object escape designator)
       ((:lambda (stream)
           (:if (prelude:%andf (prelude:vectorp object) (prelude:%prelude-type-p object))
                (prelude:%vector-write object escape stream)
-               (libcore:write object escape stream)))
+               (lib:write object escape stream)))
       (prelude:%read-stream-designator designator))))

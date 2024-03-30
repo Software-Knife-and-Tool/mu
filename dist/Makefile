@@ -3,7 +3,7 @@
 #
 .PHONY: dist clean release
 
-VERSION != grep VERSION: ../src/libcore/core/mu.rs | sed 's/.* "//' | sed 's/".*//'
+VERSION != grep VERSION: ../src/lib/core/mu.rs | sed 's/.* "//' | sed 's/".*//'
 
 BASE = mu
 DOCS = ../doc

@@ -1,5 +1,0 @@
-(libcore:boundp 'libcore:foo)
-(libcore:boundp 'libcore:std-in)
-(libcore:eq :keyword (libcore:type-of 'abcd))
-(libcore:eq :keyword (libcore:type-of :abcd))
-(libcore:sy-val 'libcore:std-in)

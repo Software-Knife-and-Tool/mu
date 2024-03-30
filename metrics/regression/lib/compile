@@ -1,0 +1,4 @@
+((:lambda (fn) (lib:apply (:lambda (fn) (lib:eq :func (lib:type-of fn))) (lib:cons fn ()))) lib:eq)
+(lib:apply (lib:compile '(:lambda (a) ((:lambda (a) (lib:fx-add a a)) (lib:fx-add a 2)))) '(1))
+(lib:apply (lib:compile '(:lambda (a) (lib:fx-add a a))) '(1))
+(lib:compile '(:lambda ()))
