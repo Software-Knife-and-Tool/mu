@@ -4,6 +4,8 @@
 ;;;
 ;;; quasiquote
 ;;;
+(libcore:intern () "%quasi%" ())
+
 (libcore:intern :prelude "%list"
    (:lambda (form)
      `(,form)))
@@ -124,10 +126,8 @@
                                            ())))
                                (libcore:car expr))))
          ,(libcore:cons :qquote   (:lambda (expr)
-                               (prelude:warn expr ":qquote")
                                `(:quote ,(prelude:%qq-compile expr))))))))
 
 (libcore:intern :prelude "%qq-reader"
    (:lambda (char stream)
-     ;;; (prelude:warn (prelude:%qq-compile (prelude:%qq-read stream)) "%qq-reader")))
-     (prelude:%qq-compile (prelude:%qq-read stream))))
+     `(%quasi% ,(prelude:%qq-read stream))))

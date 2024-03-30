@@ -79,6 +79,13 @@
        (libcore:length form))))
 
 ;;;
+;;; compile a quasiquote form
+;;;
+(libcore:intern :prelude "%compile-quasi"
+   (:lambda (form env)
+     (prelude:compile (prelude:%qq-compile (libcore:nth 1 form)))))               
+   
+;;;
 ;;; prelude compiler
 ;;;
 ;;; rewrites a function call/special call/macro call against an environment
@@ -105,6 +112,7 @@
                                    function-form
                                    '((define-macro . prelude:%compile-defmacro)
                                      (if           . prelude:%compile-if)
+                                     (%quasi%      . prelude:%compile-quasi)
                                      (lambda       . prelude:%compile-lambda)))))
                     (prelude:%compile-funcall function-form arg-list env))))
             (libcore:car form)
