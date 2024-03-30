@@ -4,4 +4,4 @@
 ;;;
 ;;; namespace
 ;;;
-(libcore:make-ns :common)
+(lib:make-ns :common)

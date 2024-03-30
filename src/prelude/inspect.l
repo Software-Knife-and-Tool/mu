@@ -4,81 +4,81 @@
 ;;;
 ;;; inspect
 ;;;
-(libcore:intern :prelude "%inspect-function"
+(lib:intern :prelude "%inspect-function"
    (:lambda (obj)
       ((:lambda (view)
           ((:lambda (tags)
-             (libcore:struct :inspect `(function ,(libcore:hp-size obj) ,tags)))
-           `(,(libcore:cons :arity (libcore:sv-ref view 0))
-             ,(libcore:cons :body (libcore:sv-ref view 1)))))
-       (libcore:view obj))))
+             (lib:struct :inspect `(function ,(lib:hp-size obj) ,tags)))
+           `(,(lib:cons :arity (lib:sv-ref view 0))
+             ,(lib:cons :body (lib:sv-ref view 1)))))
+       (lib:view obj))))
 
-(libcore:intern :prelude "%inspect-type"
+(lib:intern :prelude "%inspect-type"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)
-            (libcore:struct :inspect `(:<type> ,(libcore:hp-size obj) ,tags)))
-          `(,(libcore:cons :type (libcore:sv-ref (libcore:st-vec obj) 0))
-            ,(libcore:cons :values (libcore:sv-ref (libcore:st-vec obj) 1)))))
-      (libcore:view obj))))
+            (lib:struct :inspect `(:<type> ,(lib:hp-size obj) ,tags)))
+          `(,(lib:cons :type (lib:sv-ref (lib:st-vec obj) 0))
+            ,(lib:cons :values (lib:sv-ref (lib:st-vec obj) 1)))))
+      (lib:view obj))))
 
-(libcore:intern :prelude "%inspect-struct"
+(lib:intern :prelude "%inspect-struct"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (libcore:struct :inspect `(struct ,(libcore:hp-size obj) ,tags)))
-          `(,(libcore:cons :type (libcore:st-type obj))
-            ,(libcore:cons :values (libcore:st-vec obj)))))
-      (libcore:view obj))))
+            (lib:struct :inspect `(struct ,(lib:hp-size obj) ,tags)))
+          `(,(lib:cons :type (lib:st-type obj))
+            ,(lib:cons :values (lib:st-vec obj)))))
+      (lib:view obj))))
 
-(libcore:intern :prelude "%inspect-symbol"
+(lib:intern :prelude "%inspect-symbol"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (libcore:struct :inspect `(symbol ,(libcore:hp-size obj) ,tags)))
-          `(,(libcore:cons :ns (libcore:sv-ref view 0))
-            ,(libcore:cons :name (libcore:sv-ref view 1))
-            ,(libcore:cons :value (libcore:sv-ref view 2)))))
-      (libcore:view obj))))
+            (lib:struct :inspect `(symbol ,(lib:hp-size obj) ,tags)))
+          `(,(lib:cons :ns (lib:sv-ref view 0))
+            ,(lib:cons :name (lib:sv-ref view 1))
+            ,(lib:cons :value (lib:sv-ref view 2)))))
+      (lib:view obj))))
 
-(libcore:intern :prelude "%inspect-const"
+(lib:intern :prelude "%inspect-const"
    (:lambda (obj)
-     (libcore:struct :inspect `(,(prelude:type-of obj) ,(libcore:hp-size obj) ()))))
+     (lib:struct :inspect `(,(prelude:type-of obj) ,(lib:hp-size obj) ()))))
 
-(libcore:intern :prelude "%inspect-vector"
-   (:lambda (obj)
-     ((:lambda (tags)          
-         (libcore:struct :inspect `(vector ,(libcore:hp-size obj) ,tags)))
-      `(,(libcore:cons :type (libcore:sv-type obj))
-        ,(libcore:cons :length (libcore:sv-len obj))))))
-
-(libcore:intern :prelude "%inspect-cons"
+(lib:intern :prelude "%inspect-vector"
    (:lambda (obj)
      ((:lambda (tags)          
-         (libcore:struct :inspect `(cons ,(libcore:hp-size obj) ,tags)))
-      `(,(libcore:cons :car (libcore:car obj))
-        ,(libcore:cons :cdr (libcore:cdr obj))))))
+         (lib:struct :inspect `(vector ,(lib:hp-size obj) ,tags)))
+      `(,(lib:cons :type (lib:sv-type obj))
+        ,(lib:cons :length (lib:sv-len obj))))))
 
-(libcore:intern :prelude "%inspect"
+(lib:intern :prelude "%inspect-cons"
+   (:lambda (obj)
+     ((:lambda (tags)          
+         (lib:struct :inspect `(cons ,(lib:hp-size obj) ,tags)))
+      `(,(lib:cons :car (lib:car obj))
+        ,(lib:cons :cdr (lib:cdr obj))))))
+
+(lib:intern :prelude "%inspect"
    (:lambda (value)
-      (libcore:fix
+      (lib:fix
        (:lambda (loop)
           (:if (prelude:structp loop)
                loop
                (:if (prelude:null loop)
-                    (libcore:struct :inspect `(unknown 0 ()))
+                    (lib:struct :inspect `(unknown 0 ()))
                     ((:lambda (predicate fn)
-                       (:if (libcore:apply predicate `(,value))
-                            (libcore:apply fn `(,value))
-                            (libcore:cdr loop)))
-                     (libcore:car (libcore:car loop))
-                     (libcore:cdr (libcore:car loop))))))
-       `(,(libcore:cons prelude:%prelude-type-p prelude:%inspect-type)
-         ,(libcore:cons prelude:charp prelude:%inspect-const)
-         ,(libcore:cons prelude:consp prelude:%inspect-cons)
-         ,(libcore:cons prelude:fixnump prelude:%inspect-const)
-         ,(libcore:cons prelude:floatp prelude:%inspect-const)
-         ,(libcore:cons prelude:functionp prelude:%inspect-function)
-         ,(libcore:cons prelude:structp prelude:%inspect-struct)
-         ,(libcore:cons prelude:symbolp prelude:%inspect-symbol)
-         ,(libcore:cons prelude:vectorp prelude:%inspect-vector)))))
+                       (:if (lib:apply predicate `(,value))
+                            (lib:apply fn `(,value))
+                            (lib:cdr loop)))
+                     (lib:car (lib:car loop))
+                     (lib:cdr (lib:car loop))))))
+       `(,(lib:cons prelude:%prelude-type-p prelude:%inspect-type)
+         ,(lib:cons prelude:charp prelude:%inspect-const)
+         ,(lib:cons prelude:consp prelude:%inspect-cons)
+         ,(lib:cons prelude:fixnump prelude:%inspect-const)
+         ,(lib:cons prelude:floatp prelude:%inspect-const)
+         ,(lib:cons prelude:functionp prelude:%inspect-function)
+         ,(lib:cons prelude:structp prelude:%inspect-struct)
+         ,(lib:cons prelude:symbolp prelude:%inspect-symbol)
+         ,(lib:cons prelude:vectorp prelude:%inspect-vector)))))

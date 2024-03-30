@@ -1,0 +1,2 @@
+(lib:close lib:err-out)
+(lib:get-str (lib:open :string :output (lib:sy-name 'abcdef)))

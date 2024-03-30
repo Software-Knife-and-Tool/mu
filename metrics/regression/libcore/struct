@@ -1,2 +1,0 @@
-(libcore:st-type (libcore:struct :foo ()))
-(libcore:st-vec (libcore:struct :foo '(1 2 3 4)))

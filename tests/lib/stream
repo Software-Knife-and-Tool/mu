@@ -1,0 +1,9 @@
+(lib:flush lib:std-out)	:nil
+(lib:wr-char #\a lib:std-out)	a#\a
+(lib:close lib:err-out)	:t
+(lib:openp lib:err-out)	#<stream: id: 2 type: err-out dir: :output state: open>
+(lib:write "abc" () lib:std-out)	abc"abc"
+(lib:write "abc" :t lib:std-out)	"abc""abc"
+(lib:write () () lib:std-out)	:nil:nil
+(lib:write :abcde :t lib:std-out)	:abcde:abcde
+(lib:get-str (lib:open :string :output "abcdef"))	"abcdef"

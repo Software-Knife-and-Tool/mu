@@ -1,5 +1,5 @@
 (prelude:compile (:quote (lambda ())))
 (prelude:compile (:quote (lambda (a) a)))
 (prelude:compile (:quote (lambda (&rest c))))
-(prelude:compile (:quote ((lambda (a b) (libcore:fx-add a b)) 1 2)))
-(prelude:compile (:quote ((lambda (a b &rest c) (libcore:fx-add a b) c) 1 2)))
+(prelude:compile (:quote ((lambda (a b) (lib:fx-add a b)) 1 2)))
+(prelude:compile (:quote ((lambda (a b &rest c) (lib:fx-add a b) c) 1 2)))

@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;;  libcore: eko language
+;;;  lib: eko language
 ;;;
 ;;;  mu namespace
 ;;;
@@ -11,10 +11,10 @@
 (defun identity (obj) obj)
 
 (defun funcall (fn &rest args)
-  (libcore::funcall fn args))
+  (lib::funcall fn args))
 
 (defun format (stream fmt-string &rest args)
-  (libcore:format stream fmt-string args))
+  (lib:format stream fmt-string args))
 
 (defun append (&rest lists)
   (foldr
@@ -52,13 +52,13 @@
   (list (list* 'lambda () body)))
 
 (defmacro when (test &rest body)
-  (libcore:list 'if test (list* 'progn body)))
+  (lib:list 'if test (list* 'progn body)))
 
 (defmacro unless (test &rest body)
-  (libcore:list 'if test () (list* 'progn body)))
+  (lib:list 'if test () (list* 'progn body)))
 
 (defmacro let (binds &rest body)
-  (errorp-unless libcore:listp binds "let: not a binding list")
+  (errorp-unless lib:listp binds "let: not a binding list")
   (list*
     (list* 'lambda (mapcar car binds) body)
     (mapcar (lambda (el) (nth 1 el)) binds)))
@@ -70,19 +70,19 @@
        (list* 'progn body)))
    (lambda (fn binds)
      (if (cdr binds)
-         (list 'let (list (car binds)) (libcore::funcall fn (list fn (cdr binds))))
+         (list 'let (list (car binds)) (lib::funcall fn (list fn (cdr binds))))
          (list* 'let (list (car binds)) body)))))
 
-(defconst libcore::gensym
+(defconst lib::gensym
   (let ((genstream (make-string-stream :output "0")))
     (lambda () ;;; this becomes a closure
       ((lambda (n)
-         (libcore:format genstream "~A" (list (1+ n)))
-         (symbol (libcore:format () "g~A" (list n))))
-       (libcore:read (make-string-stream :input (get-output-stream-string genstream)))))))
+         (lib:format genstream "~A" (list (1+ n)))
+         (symbol (lib:format () "g~A" (list n))))
+       (lib:read (make-string-stream :input (get-output-stream-string genstream)))))))
 
 (defun gensym ()
-  (libcore::funcall libcore::gensym ()))
+  (lib::funcall lib::gensym ()))
 
 (defmacro bind-seq (pattern source &rest body)
   (errorp-unless consp pattern "bind-seq: pattern not a list")
@@ -95,19 +95,19 @@
                       (errorp-unless symbolp sym "bind-seq: not a symbol")
                       (let* ((nth (car acc))
                              (phrases (cdr acc))
-                             (phrase (list sym (libcore:list 'elt source-gsym nth))))
+                             (phrase (list sym (lib:list 'elt source-gsym nth))))
                         (cons (1- nth) (cons phrase phrases))))
                     (cons (1- (length pattern)) ())
                     pattern)))
               (cdr nths)))))
-    (list* 'let* (cons (libcore:list source-gsym source) (destruct)) body)))
+    (list* 'let* (cons (lib:list source-gsym source) (destruct)) body)))
 
 (defmacro cond (&rest clauses)
   (car
     (foldr
       (lambda (clause cond)
         ;;; (form) or (form . body)
-        (errorp-unless consp clause "libcore:cond not a cons")
+        (errorp-unless consp clause "lib:cond not a cons")
         (let ((test (car clause))
               (body (cdr clause)))
           (if body
@@ -171,23 +171,23 @@
           (list 'lambda (list* self-gensym exit-gensym return-gensym var-list)
                 (list 'if (nth 0 end-form)
                       (list 'progn
-                            (list 'env:fp-setv (list libcore::fn-frame-id self-gensym) 1 0)
-                            (list 'env:fp-setv (list libcore::fn-frame-id self-gensym) 2 (nth 1 end-form)))
+                            (list 'env:fp-setv (list lib::fn-frame-id self-gensym) 1 0)
+                            (list 'env:fp-setv (list lib::fn-frame-id self-gensym) 2 (nth 1 end-form)))
                       (list 'progn
                             (cons 'progn body)
-                            (list 'env:fp-setv (list libcore::fn-frame-id self-gensym) 1 (list 'null exit-gensym))
+                            (list 'env:fp-setv (list lib::fn-frame-id self-gensym) 1 (list 'null exit-gensym))
                             (cons 'progn
                                   (maplist
                                    (lambda (step-cdr)
-                                     (list 'env:fp-setv (list libcore::fn-frame-id self-gensym) (fixnum+ 2 (length step-cdr)) (car step-cdr)))
+                                     (list 'env:fp-setv (list lib::fn-frame-id self-gensym) (fixnum+ 2 (length step-cdr)) (car step-cdr)))
                                    step-list)))))
           (list 'list* () () (cons 'list init-list)))))
 
 ;;; (do let-form (end-test result) . body)
 
-(defun libcore::reclose (closure)
+(defun lib::reclose (closure)
   (errorp-unless functionp closure "reclose: not a function")
-  (let ((closed (libcore::lambda-closure (libcore::fn-lambda-desc closure))))
+  (let ((closed (lib::lambda-closure (lib::fn-lambda-desc closure))))
     (errorp-unless (lambda (list) (fixnum< 0 (length list))) closed "reclose environment botch")
     (env:fnv-set (car closed) 0 closure))
   closure)
@@ -199,7 +199,7 @@
                       (list 'let
                             (list (list name (list 'lambda lambda)))
                             (list* 'lambda lambda body))))
-          (list 'libcore::reclose gsym))))
+          (list 'lib::reclose gsym))))
 
 (defmacro letf (binds &rest body)
   (errorp-unless listp binds "letf: not a list")
@@ -207,7 +207,7 @@
          (mapcar
            (lambda (bind)
              (list (car bind)
-                   (libcore::funcall recur bind)))
+                   (lib::funcall recur bind)))
              binds)
          body))
 
@@ -219,7 +219,7 @@
        (list* 'progn body)))
    (lambda (fn binds)
      (if (cdr binds)
-         (list 'letf (list (car binds)) (libcore::funcall fn (list fn (cdr binds))))
+         (list 'letf (list (car binds)) (lib::funcall fn (list fn (cdr binds))))
          (list* 'letf (list (car binds)) body)))))
 
 (defmacro flet (binds &rest body)
@@ -240,7 +240,7 @@
        (list* 'progn body)))
    (lambda (fn binds)
      (if (cdr binds)
-         (list 'flet (list (car binds)) (libcore::funcall fn (list fn (cdr binds))))
+         (list 'flet (list (car binds)) (lib::funcall fn (list fn (cdr binds))))
          (list* 'flet (list (car binds)) body)))))
 
 (defmacro defun-rec (name lambda &rest body)
@@ -248,9 +248,9 @@
   (errorp-when keywordp name "defun: not a symbol")
   (errorp-unless listp lambda "defun: not a lambda list")
   (format t "expands to: ~A~%" (list 'lambda lambda (list* 'letf (list (list* name lambda body)) body)))
-  (libcore::def-symbol
+  (lib::def-symbol
         name
-        (libcore:compile (list 'lambda lambda (list* 'letf (list (list* name lambda body)) body)))
+        (lib:compile (list 'lambda lambda (list* 'letf (list (list* name lambda body)) body)))
         ())
   (list :quote name))
 

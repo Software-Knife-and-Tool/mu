@@ -5,44 +5,44 @@
 ;;; return the elapsed process time in usec
 ;;; from applying fn to args
 ;;;
-(libcore:make-ns :perf)
-(libcore:intern :perf "%tdelta"
+(lib:make-ns :perf)
+(lib:intern :perf "%tdelta"
   (:lambda (fn args)
     ((:lambda (start stop)
-       (libcore:fx-sub stop start))
-       (libcore:utime)
+       (lib:fx-sub stop start))
+       (lib:utime)
        ((:lambda ()
-          (libcore:apply fn args)
-          (libcore:utime))))))
+          (lib:apply fn args)
+          (lib:utime))))))
 
 ;;;
 ;;; return an vector of storage consumed
 ;;; by applying fn to args
 ;;;
-(libcore:intern :perf "%sdelta"
+(lib:intern :perf "%sdelta"
   (:lambda (fn args)
     ((:lambda (start-vec stop-vec)
-       (libcore:fix
+       (lib:fix
         (:lambda (loop)
-          (:if (libcore:eq :vector (libcore:type-of loop))
+          (:if (lib:eq :vector (lib:type-of loop))
                loop
                ((:lambda (list n)
                   ((:lambda (offset)
-                     (:if (libcore:fx-lt offset (libcore:sv-len start-vec))
+                     (:if (lib:fx-lt offset (lib:sv-len start-vec))
                           ((:lambda (type total alloc in-use)
                              ((:lambda (type-stats)
-                                (libcore:cons `(,@list ,@type-stats) (libcore:fx-add 1 n)))
+                                (lib:cons `(,@list ,@type-stats) (lib:fx-add 1 n)))
                               `(,type ,total ,alloc ,in-use)))
-                           (libcore:sv-ref start-vec (libcore:fx-add offset 0))
-                           (libcore:fx-sub (libcore:sv-ref stop-vec (libcore:fx-add offset 1)) (libcore:sv-ref start-vec (libcore:fx-add offset 1)))
-                           (libcore:fx-sub (libcore:sv-ref stop-vec (libcore:fx-add offset 2)) (libcore:sv-ref start-vec (libcore:fx-add offset 2)))
-                           (libcore:fx-sub (libcore:sv-ref stop-vec (libcore:fx-add offset 3)) (libcore:sv-ref start-vec (libcore:fx-add offset 3))))
-                          (libcore:vector :t list)))
-                         (libcore:fx-mul n 4)))
-                 (libcore:car loop)
-                 (libcore:cdr loop))))
-         (libcore:cons () 1)))
-     (libcore:hp-stat)
+                           (lib:sv-ref start-vec (lib:fx-add offset 0))
+                           (lib:fx-sub (lib:sv-ref stop-vec (lib:fx-add offset 1)) (lib:sv-ref start-vec (lib:fx-add offset 1)))
+                           (lib:fx-sub (lib:sv-ref stop-vec (lib:fx-add offset 2)) (lib:sv-ref start-vec (lib:fx-add offset 2)))
+                           (lib:fx-sub (lib:sv-ref stop-vec (lib:fx-add offset 3)) (lib:sv-ref start-vec (lib:fx-add offset 3))))
+                          (lib:vector :t list)))
+                         (lib:fx-mul n 4)))
+                 (lib:car loop)
+                 (lib:cdr loop))))
+         (lib:cons () 1)))
+     (lib:hp-stat)
      ((:lambda ()
-         (libcore:apply fn args)
-         (libcore:hp-stat))))))
+         (lib:apply fn args)
+         (lib:hp-stat))))))

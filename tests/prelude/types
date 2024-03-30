@@ -1,15 +1,15 @@
-(libcore:type-of prelude:define-type)	:func
-(libcore:type-of prelude:%prelude-type-p)	:func
-(libcore:type-of prelude:type-of)	:func
-(libcore:type-of (libcore:eval (prelude:compile '((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%make-type "test" '((:v . 2))))))))	:struct
-(prelude:type-of (libcore:eval (prelude:compile '((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%make-type "test" '((:v . 2))))))))	test
+(lib:type-of prelude:define-type)	:func
+(lib:type-of prelude:%prelude-type-p)	:func
+(lib:type-of prelude:type-of)	:func
+(lib:type-of (lib:eval (prelude:compile '((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%make-type "test" '((:v . 2))))))))	:struct
+(prelude:type-of (lib:eval (prelude:compile '((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%make-type "test" '((:v . 2))))))))	test
 ((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%type-ref :v (prelude:%make-type "test" '((:v . 2))))))	(:v . 2)
 (prelude:typep '(1 2) :cons)	:t
 (prelude:typep 1 :fixnum)	:t
-(prelude:typep (libcore:struct :struct ()) :struct)	:t
+(prelude:typep (lib:struct :struct ()) :struct)	:t
 (prelude:typep "abc" :vector)	:t
 (prelude:typep #(:t 1 2 3) :vector)	:t
-(prelude:typep libcore:std-in :stream)	:t
+(prelude:typep lib:std-in :stream)	:t
 (prelude:typep #\a :char)	:t
 (prelude:typep 1.024e23 :float)	:t
 (prelude:typep :foo :keyword)	:t
@@ -37,7 +37,7 @@
 (prelude:typep "123" 'sequence)	:t
 (prelude:typep '(1 2 3) 'sequence)	:t
 (prelude:typep "abc" 'string)	:t
-(prelude:typep libcore:std-in 'stream)	:t
+(prelude:typep lib:std-in 'stream)	:t
 (prelude:typep :sym 'symbol)	:t
 (prelude:typep 'sym 'symbol)	:t
 (prelude:typep (prelude:read (prelude:make-string-stream :input "#*1111") () ()) 'bit-vector)	:t

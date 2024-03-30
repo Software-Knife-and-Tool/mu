@@ -7,49 +7,49 @@
 
 ;;;
 ;;; (prelude:load "/opt/mu/mu/arm-codegen/codegen.l" ())
-;;; (arm:assemble-file (libcore:open :file :input "arm.s"))
+;;; (arm:assemble-file (lib:open :file :input "arm.s"))
 ;;;
 
 ;;;
 ;;; emit an imm12 field
 ;;;
-(libcore:intern :arm "emit-imm12"
+(lib:intern :arm "emit-imm12"
    (:lambda (range arg)
      (prelude:warn `(,range ,arg) "emit-imm12")
      ((:lambda (offset size value)
-        (libcore:ash value (libcore:fx-sub offset (prelude:1- size))))
-      (libcore:car range)
-      (libcore:cdr range)
-      (libcore:cdr arg))))
+        (lib:ash value (lib:fx-sub offset (prelude:1- size))))
+      (lib:car range)
+      (lib:cdr range)
+      (lib:cdr arg))))
 
 ;;;
 ;;; emit a register field
 ;;;
-(libcore:intern :arm "emit-reg"
+(lib:intern :arm "emit-reg"
    (:lambda (range arg)
      (prelude:warn `(,range ,arg) "emit-reg")
      ((:lambda (reg-map offset size)
-        (prelude:warn (libcore:fx-sub offset (prelude:1- size)) "shift")
-        (prelude:warn (prelude:assoc (libcore:keyword (libcore:sy-name (libcore:cdr arg))) reg-map) "reg value")
-        (libcore:ash (libcore:cdr (prelude:assoc (libcore:keyword (libcore:sy-name (libcore:cdr arg))) reg-map))
-                (libcore:fx-sub offset (prelude:1- size))))
-      (libcore:cdr (prelude:assoc :regs arm:armv8-aarch64))
-      (libcore:car range)
-      (libcore:cdr range))))
+        (prelude:warn (lib:fx-sub offset (prelude:1- size)) "shift")
+        (prelude:warn (prelude:assoc (lib:keyword (lib:sy-name (lib:cdr arg))) reg-map) "reg value")
+        (lib:ash (lib:cdr (prelude:assoc (lib:keyword (lib:sy-name (lib:cdr arg))) reg-map))
+                (lib:fx-sub offset (prelude:1- size))))
+      (lib:cdr (prelude:assoc :regs arm:armv8-aarch64))
+      (lib:car range)
+      (lib:cdr range))))
 
 ;;;
 ;;; emit a const field
 ;;;
-(libcore:intern :arm "emit-const"
+(lib:intern :arm "emit-const"
      (:lambda (range arg)
        (prelude:warn `(,range ,arg) "emit-const")
-       (prelude:warn (libcore:fx-sub (libcore:car range) (prelude:1- (libcore:cdr range))) "shift")
-       (libcore:ash (libcore:cdr arg) (libcore:fx-sub (libcore:car range) (prelude:1- (libcore:cdr range))))))
+       (prelude:warn (lib:fx-sub (lib:car range) (prelude:1- (lib:cdr range))) "shift")
+       (lib:ash (lib:cdr arg) (lib:fx-sub (lib:car range) (prelude:1- (lib:cdr range))))))
 
 ;;;
 ;;; emitter dispatch
 ;;;
-(libcore:intern :arm "field-emitter"
+(lib:intern :arm "field-emitter"
     `((:sf . arm:emit-const)
       (:op . arm:emit-const)
       (:sh . arm:emit-const)
@@ -62,89 +62,89 @@
 ;;;
 ;;; return the emitted binary value
 ;;;
-(libcore:intern :arm "emit-field"
+(lib:intern :arm "emit-field"
    (:lambda (field-descriptor instruction-args)
      ((:lambda (tag range value)
         ((:lambda (inst-field emitter)
            (:if (prelude:null inst-field)
-                (libcore:apply emitter `(,range ,(libcore:cons tag value)))
-                (libcore:apply emitter `(,range ,inst-field))))
+                (lib:apply emitter `(,range ,(lib:cons tag value)))
+                (lib:apply emitter `(,range ,inst-field))))
          (prelude:assoc tag instruction-args)
-         (libcore:eval (libcore:cdr (prelude:assoc tag arm:field-emitter)))))
-      (libcore:nth 0 field-descriptor)
-      (libcore:nth 1 field-descriptor)
-      (libcore:nth 2 field-descriptor))))
+         (lib:eval (lib:cdr (prelude:assoc tag arm:field-emitter)))))
+      (lib:nth 0 field-descriptor)
+      (lib:nth 1 field-descriptor)
+      (lib:nth 2 field-descriptor))))
 
 ;;;
 ;;; loop over the opcode fields and construct the
 ;;; instruction binary value from the instruction arguments.
 ;;;
-(libcore:intern :arm "emit-instruction"
+(lib:intern :arm "emit-instruction"
    (:lambda (opcode-fields instruction-args)
      ((:lambda (config)
-        (libcore:fix
+        (lib:fix
          (:lambda (loop)
            (:if (prelude:numberp loop)
                 loop
                 ((:lambda (op field-list)
                    (:if (prelude:null field-list)
                         op
-                        (libcore:cons
-                         (libcore:logor op (arm:emit-field (libcore:car field-list) instruction-args))
-                         (libcore:cdr field-list))))
-                 (libcore:car loop)
-                 (libcore:cdr loop))))
-         (libcore:cons 0 opcode-fields)))
-      (libcore:cdr (prelude:assoc :config arm:armv8-aarch64)))))     
+                        (lib:cons
+                         (lib:logor op (arm:emit-field (lib:car field-list) instruction-args))
+                         (lib:cdr field-list))))
+                 (lib:car loop)
+                 (lib:cdr loop))))
+         (lib:cons 0 opcode-fields)))
+      (lib:cdr (prelude:assoc :config arm:armv8-aarch64)))))     
 
 ;;;
 ;;; assemble an instruction from the instruction's opcode
 ;;; field list table entry and an alist of typed instruction
 ;;; arguments.
 ;;;
-(libcore:intern :arm "assemble-instruction"
+(lib:intern :arm "assemble-instruction"
    (:lambda (instruction opcode-format opcode-fields)
      ((:lambda (format-length)
         (arm:emit-instruction
          opcode-fields
-         (libcore:cdr
-          (libcore:fix
+         (lib:cdr
+          (lib:fix
            (:lambda (loop)
              ((:lambda (nth acc)
-                (:if (libcore:fx-lt nth format-length)
-                     (libcore:cons (prelude:1+ nth)
-                              (libcore:append
+                (:if (lib:fx-lt nth format-length)
+                     (lib:cons (prelude:1+ nth)
+                              (lib:append
                                acc
-                               `(,(libcore:cons (libcore:nth nth opcode-format)
-                                           (libcore:nth (prelude:1+ nth) instruction)))))
+                               `(,(lib:cons (lib:nth nth opcode-format)
+                                           (lib:nth (prelude:1+ nth) instruction)))))
                      loop))
-              (libcore:car loop)
-              (libcore:cdr loop)))
+              (lib:car loop)
+              (lib:cdr loop)))
            '(0 . ())))))
-      (libcore:length opcode-format))))
+      (lib:length opcode-format))))
 
 ;;;
 ;;; assemble an instruction to binary
 ;;;
-(libcore:intern :arm "armv8-assemble"
+(lib:intern :arm "armv8-assemble"
    (:lambda (instruction)
      ((:lambda (opcodes)
         ((:lambda (opcode-descriptor)
            ((:lambda (opcode-format opcode-fields)
               (:if (prelude:null opcode-format)
                    ()
-                   (:if (libcore:eq (libcore:length opcode-format) (libcore:length instruction))
+                   (:if (lib:eq (lib:length opcode-format) (lib:length instruction))
                         (arm:assemble-instruction instruction opcode-format opcode-fields)
                         (prelude:format () "~A argument arity: expected ~A, got ~A"
-                                        `(,(libcore:car instruction)
-                                           ,(libcore:length opcode-format)
-                                           ,(libcore:length instruction))))))
-            (libcore:cdr (prelude:assoc :format opcode-descriptor))
-            (libcore:cdr (prelude:assoc :fields opcode-descriptor))))
-         (libcore:cdr (prelude:assoc (libcore:car instruction) opcodes))))
-      (libcore:cdr (prelude:assoc :opcodes arm:armv8-aarch64)))))
+                                        `(,(lib:car instruction)
+                                           ,(lib:length opcode-format)
+                                           ,(lib:length instruction))))))
+            (lib:cdr (prelude:assoc :format opcode-descriptor))
+            (lib:cdr (prelude:assoc :fields opcode-descriptor))))
+         (lib:cdr (prelude:assoc (lib:car instruction) opcodes))))
+      (lib:cdr (prelude:assoc :opcodes arm:armv8-aarch64)))))
 
-(libcore:intern :arm "armv8-aarch64"
+(lib:intern :arm "armv8-aarch64"
    '((:config . ((:arch :aarch64)))
      (:opcodes .
       ((:add.im .

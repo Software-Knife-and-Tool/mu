@@ -1,0 +1,2 @@
+(lib:st-type (lib:struct :foo ()))
+(lib:st-vec (lib:struct :foo '(1 2 3 4)))

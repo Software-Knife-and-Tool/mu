@@ -1,20 +1,20 @@
-(libcore:type-of prelude:close)	:func
-(libcore:type-of prelude:get-output-stream-string)	:func
-(libcore:type-of prelude:make-string-stream)	:func
-(libcore:type-of prelude:open)	:func
-(libcore:type-of prelude:with-open-stream)	:func
-(libcore:type-of prelude:read)	:func
-(libcore:type-of prelude:read-byte)	:func
-(libcore:type-of prelude:read-char)	:func
-(libcore:type-of prelude:unread-char)	:func
-(libcore:type-of prelude:write)	:func
-(libcore:type-of prelude:write-byte)	:func
-(libcore:write 1 () libcore:std-out)	11
-(libcore:write (libcore:fx-add 1 2) () libcore:std-out)	33
-(libcore:write (prelude:string= "" "") () libcore:std-out)	:t:t
-(libcore:write (prelude:string= "" "1") () libcore:std-out)	:nil:nil
-(libcore:write (prelude:string= "1" "1") () libcore:std-out)	:t:t
-(libcore:write (prelude:string= "123" "1") () libcore:std-out)	:nil:nil
-(libcore:write (prelude:string= "" "ci") () libcore:std-out)	:nil:nil
-(libcore:write (prelude:string= "ci" "") () libcore:std-out)	:nil:nil
-(libcore:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () libcore:std-out)	f#\f
+(lib:type-of prelude:close)	:func
+(lib:type-of prelude:get-output-stream-string)	:func
+(lib:type-of prelude:make-string-stream)	:func
+(lib:type-of prelude:open)	:func
+(lib:type-of prelude:with-open-stream)	:func
+(lib:type-of prelude:read)	:func
+(lib:type-of prelude:read-byte)	:func
+(lib:type-of prelude:read-char)	:func
+(lib:type-of prelude:unread-char)	:func
+(lib:type-of prelude:write)	:func
+(lib:type-of prelude:write-byte)	:func
+(lib:write 1 () lib:std-out)	11
+(lib:write (lib:fx-add 1 2) () lib:std-out)	33
+(lib:write (prelude:string= "" "") () lib:std-out)	:t:t
+(lib:write (prelude:string= "" "1") () lib:std-out)	:nil:nil
+(lib:write (prelude:string= "1" "1") () lib:std-out)	:t:t
+(lib:write (prelude:string= "123" "1") () lib:std-out)	:nil:nil
+(lib:write (prelude:string= "" "ci") () lib:std-out)	:nil:nil
+(lib:write (prelude:string= "ci" "") () lib:std-out)	:nil:nil
+(lib:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () lib:std-out)	f#\f

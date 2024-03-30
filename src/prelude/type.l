@@ -4,22 +4,22 @@
 ;;;
 ;;; types
 ;;;
-(libcore:intern :prelude "type-of"
+(lib:intern :prelude "type-of"
    (:lambda (value)
       ((:lambda (type)
-          (:if (libcore:eq type :struct)
-               (:if (libcore:eq :<type> (libcore:st-type value))
-                    (libcore:untern () (libcore:sv-ref (libcore:st-vec value) 0))
-                    (libcore:st-type value))
+          (:if (lib:eq type :struct)
+               (:if (lib:eq :<type> (lib:st-type value))
+                    (lib:untern () (lib:sv-ref (lib:st-vec value) 0))
+                    (lib:st-type value))
                (:if (prelude:stringp value)
                     'string
-                    (libcore:untern () (libcore:sy-name type)))))
-       (libcore:type-of value))))
+                    (lib:untern () (lib:sy-name type)))))
+       (lib:type-of value))))
 
 ;;;
 ;;; typep
 ;;;
-(libcore:intern :prelude "%typespec-map%"
+(lib:intern :prelude "%typespec-map%"
    `((asyncid :asyncid)
      (bit-vector (satisfies prelude:bit-vector-p))
      (char (satisfies prelude:charp))
@@ -33,23 +33,23 @@
      (struct (satisifes prelude:structp))
      (symbol (or (satisfies prelude:symbolp) (satisfies prelude:keywordp)))))
 
-(libcore:intern :prelude "%compound-typespec-map%"
-   `(,(libcore:cons 'satisfies
+(lib:intern :prelude "%compound-typespec-map%"
+   `(,(lib:cons 'satisfies
          (:lambda (value spec-list)
-            (:if (libcore:eq 1 (libcore:length spec-list))
+            (:if (lib:eq 1 (lib:length spec-list))
                  ((:lambda (predicate-symbol)
                     (:if (prelude:symbolp predicate-symbol)
-                         (:if (libcore:boundp predicate-symbol)
-                              (prelude:apply (libcore:sy-val predicate-symbol) `(,value))
+                         (:if (lib:boundp predicate-symbol)
+                              (prelude:apply (lib:sy-val predicate-symbol) `(,value))
                               (prelude:raise predicate 'prelude:typep "satisfies typespec format"))
                          (prelude:raise predicate 'prelude:typep "satisfies typespec format")))
-                  (libcore:car spec-list))
+                  (lib:car spec-list))
                  (prelude:raise spec-list 'prelude:typep "satisfies typespec format"))))
-     ,(libcore:cons 'not (:lambda (value spec-list)
-                       (:if (libcore:eq 1 (libcore:length spec-list))
-                            (prelude:not (prelude:typep value (libcore:car spec-list)))
+     ,(lib:cons 'not (:lambda (value spec-list)
+                       (:if (lib:eq 1 (lib:length spec-list))
+                            (prelude:not (prelude:typep value (lib:car spec-list)))
                             (prelude:raise spec-list 'prelude:typep "no typespec format"))))
-     ,(libcore:cons 'and (:lambda (value spec-list)
+     ,(lib:cons 'and (:lambda (value spec-list)
                        (:if (prelude:null spec-list)
                             :t
                             (prelude:foldl
@@ -57,7 +57,7 @@
                                 (prelude:%andf acc (prelude:typep value elt)))
                              :t
                              spec-list))))
-     ,(libcore:cons 'or (:lambda (value spec-list)
+     ,(lib:cons 'or (:lambda (value spec-list)
                      (:if (prelude:null spec-list)
                           ()
                           (prelude:foldl
@@ -66,25 +66,25 @@
                            :t
                            spec-list))))))
 
-(libcore:intern :prelude "typep"
+(lib:intern :prelude "typep"
    (:lambda (value typespec)
      (:if (prelude:keywordp typespec)
-          (libcore:eq typespec (libcore:type-of value))
+          (lib:eq typespec (lib:type-of value))
           (:if (prelude:keywordp typespec)
-               (libcore:eq typespec (prelude:type-of value))
+               (lib:eq typespec (prelude:type-of value))
                (:if (prelude:symbolp typespec)
                     ((:lambda (spec-phrase)
                        (:if (prelude:null spec-phrase)
                             (prelude:raise typespec 'prelude:typep "typespec format")
-                            (prelude:typep value (libcore:car (libcore:cdr spec-phrase)))))
+                            (prelude:typep value (lib:car (lib:cdr spec-phrase)))))
                      (prelude:%assoc typespec prelude:%typespec-map%))
                     (:if (prelude:consp typespec)
                          ((:lambda (spec spec-list)
                             ((:lambda (spec-phrase)
                                (:if (prelude:null spec-phrase)
                                     (prelude:raise typespec 'prelude:typep "typespec not found")
-                                    (libcore:apply (libcore:cdr spec-phrase) `(,value ,spec-list))))
+                                    (lib:apply (lib:cdr spec-phrase) `(,value ,spec-list))))
                              (prelude:%assoc spec prelude:%compound-typespec-map%)))
-                          (libcore:car typespec)
-                          (libcore:cdr typespec))
+                          (lib:car typespec)
+                          (lib:cdr typespec))
                          (prelude:raise typespec 'prelude:typep "typespec format")))))))
