@@ -313,7 +313,7 @@ mod tests {
 
     #[test]
     fn compile_test() {
-        let config = match Mu::config("".to_string()) {
+        let config = match Mu::config(None) {
             Some(config) => config,
             None => return assert!(false),
         };

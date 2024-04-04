@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 BASE=${MU_HOME:=/opt/mu}
-BASE_PRELUDE=$BASE/mu/prelude
+BASE_PRELUDE=$BASE/lib/prelude
 
 usage () {
     echo "usage: $0 [session options] [runtime options] src-file..." >&2
@@ -117,4 +117,4 @@ len="${#@}"
 for (( i=${OPTIND}; i<="${#@}"; i++ )); do SOURCES+=" \"${!i}\"" ; done
 
 export MU_LOAD_LIST=SOURCES
-eval $BASE/bin/mu-sys $PRELUDE_FILES -q "\(prelude:%init-ns\)" $OPTIONS # $BASE/mu/mu.l ${SOURCES[@]}
+eval $BASE/bin/mu-sys $PRELUDE_FILES -q "\(prelude:%init-ns\)" $OPTIONS # $BASE/lib/mu.l ${SOURCES[@]}

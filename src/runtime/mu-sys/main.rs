@@ -149,7 +149,7 @@ fn listener(mu: &Mu) {
 }
 
 pub fn main() {
-    let mut _config = String::new();
+    let mut _config: Option<String> = None;
     let mut _debug = false;
     let mut pipe = false;
 
@@ -158,7 +158,7 @@ pub fn main() {
             for opt in opts {
                 // maybe a filter here?
                 if let ShellOpt::Config(string) = opt {
-                    _config = string
+                    _config = Some(string)
                 }
             }
         }
@@ -168,7 +168,7 @@ pub fn main() {
         }
     }
 
-    let mu = match Mu::config(&_config) {
+    let mu = match Mu::config(_config) {
         Some(config) => Mu::new(&config),
         None => {
             eprintln!("option: configuration error");

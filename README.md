@@ -184,7 +184,6 @@ Currently supported features by namespace:
  nix:     uname
  std:     command, exit
  sysinfo: sysinfo
- 
 ```
 
 The *sysinfo* feature is disabled on *macos* builds.
@@ -221,7 +220,6 @@ The `tests` makefile has additional facilities for development. The `help` targe
     mu | prelude - run all tests in namespace, raw output
     test - run single test in $NS/$TEST
     summary - run all tests in all namespaces and print summary
-    
 ```
 
 
@@ -278,7 +276,6 @@ The  `regression`  makefile offers some development options.
     commit - compare current with base, promote current to base
     report - compare current report with base report
     metrics - run tests and verbose report
-
 ```
 
 
@@ -287,7 +284,7 @@ The  `regression`  makefile offers some development options.
 
 ------
 
-The *mu* binaries, libraries, and source files are installed in `/opt/mu`. The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/mu/mu` along with supplied library sources.
+The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory contains the binaries and shell scripts for running the system. The library sources are included in `lib`.
 
 ```
 mu-sys		shell runtime binary, stdio listener
@@ -312,7 +309,6 @@ OPTIONS:
   -q SEXPR             evaluate SEXPR quietly
   -c name:value[,...]  environment configuration  	   
   [file ...]           load source file(s)
-  
 ```
 
 An interactive session for the extended *mu* system is invoked by the `mu` shell script. The *mu* repl does not display a prompt.
@@ -362,13 +358,11 @@ gcmode			{ none, auto, demand } how the garbage collector operates
 Usage: (*mu-server*, *mu-ld*, and *mu-exec* have similar options)
 
 ```
-
 mu-sys -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
 mu-sys -c "npages:1024,gcmode:auto"	default configuration
 
 mu --config="npages:4096,gcmode:demand"
-					4096 pages, garbage collection runs on demand
-  
+					4096 pages, garbage collection runs on demand 
 ```
 
 Tests show that currently (and as of 0.0.23) 256 4k pages is about the minimum you could expect to load the *preface* library and run the listener. Any significant consing will likely run out of heap space in short order.

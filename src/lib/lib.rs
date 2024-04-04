@@ -7,12 +7,12 @@
 //! As much as is practible, mu-core's functions and data types resemble Common Lisp in preference to
 //! Scheme/Clojure in order to be immediately familiar to the traditional LISP programmer.
 //!
-//! core is an immutable, lexically scoped LISP-1 kernel meant as a porting layer for an ascending
+//! lib is an immutable, lexically scoped LISP-1 kernel meant as a porting layer for an ascending
 //! tower of LISP languages. While it is possible to do some useful application work directly in the
-//! core language, core defers niceties like macros, closures, and rest functions to a compiler
+//! lib language, lib defers niceties like macros, closures, and rest functions to a compiler
 //! layered on it. See [`mu programming environment`] for details.
 //!
-//! core characteristics:
+//! lib characteristics:
 //! - mostly-safe Rust
 //! - 64 bit tagged objects
 //! - garbage collected heap
@@ -22,7 +22,7 @@
 //! - s-expression reader/printer
 //! - symbol namespaces
 //!
-//! core data types:
+//! lib data types:
 //!    56 bit fixnums (immediate)
 //!    Lisp-1 symbols
 //!    character, string, and byte streams
@@ -35,7 +35,7 @@
 //!    single float 32 bit IEEE float (immediate)
 //!    structs
 //!
-//! core documentation:
+//! lib documentation:
 //!    see doc/refcards and doc/rustdoc
 //!
 //! [`mu programming environment`]: <https://github.com/Software-Knife-and-Tool/mu>
@@ -95,8 +95,8 @@ impl Mu {
     pub const VERSION: &'static str = core::mu::Mu::VERSION;
 
     /// config
-    pub fn config(config_string: &String) -> Option<Config> {
-        core::mu::Mu::config(config_string.to_string())
+    pub fn config(config: Option<String>) -> Option<Config> {
+        core::mu::Mu::config(config)
     }
 
     /// constructor

@@ -18,15 +18,15 @@ dist:
 	@install -d $(BASE)
 	@install -d $(BASE)/bin
 	@install -d $(BASE)/doc
-	@install -d $(BASE)/mu
-	@install -d $(BASE)/mu/mu
-	@install -d $(BASE)/mu/prelude
-	@install -d $(BASE)/mu/codegen
+	@install -d $(BASE)/lib
+	@install -d $(BASE)/lib/prelude
+	@install -d $(BASE)/lib/codegen
+	@install -d $(BASE)/lib/mu
 
-	@make -f mu.mk mu prelude
+	@make -f mu.mk mu
 
-	@install -m 644 $(DIST)/prelude.l $(BASE)/mu
-	@install -m 644 $(DIST)/mu.l $(BASE)/mu
+	@install -m 644 $(DIST)/prelude.l $(BASE)/lib
+	@install -m 644 $(DIST)/mu.l $(BASE)/lib
 
 	@install -m 755 $(MU_EXEC) $(BASE)/bin
 	@install -m 755 $(MU_LD) $(BASE)/bin
