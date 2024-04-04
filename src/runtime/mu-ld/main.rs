@@ -89,7 +89,7 @@ fn usage() {
 }
 
 pub fn main() {
-    let mut _config = String::new();
+    let mut _config: Option<String> = None;
     let mut _opath = "a.out".to_string();
 
     match options(std::env::args().collect()) {
@@ -98,7 +98,7 @@ pub fn main() {
                 // maybe a filter here?
 
                 if let LoadOpt::Config(string) = opt {
-                    _config = string
+                    _config = Some(string)
                 }
             }
         }
@@ -108,7 +108,7 @@ pub fn main() {
         }
     }
 
-    let mu = match Mu::config(&_config) {
+    let mu = match Mu::config(_config) {
         Some(config) => Mu::new(&config),
         None => {
             eprintln!("option: configuration error");

@@ -39,13 +39,11 @@ PRELUDE = \
 	vector.l
 
 mu:
-	@cp -r $(SRC)/codegen mu/mu
-	@cp -r $(SRC)/lib mu/mu
-	@cp -r $(SRC)/mu mu/mu
-	@cp -r $(SRC)/prelude mu/mu
-
-prelude:
+	@cp -r $(SRC)/codegen mu/lib
+	@cp -r $(SRC)/mu mu/lib
+	@cp -r $(SRC)/prelude mu/lib
 	@rm -f prelude.l
 	@for prelude in $(PRELUDE); do		\
 	    cat $(SRC)/prelude/$$prelude >> prelude.l;	\
 	done
+	@cp prelude.l mu/lib

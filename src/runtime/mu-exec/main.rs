@@ -86,7 +86,7 @@ pub fn main() {
     let mut _toc = false;
     let mut _path = String::new();
 
-    let _mu = match Mu::config(&"".to_string()) {
+    let _mu = match Mu::config(None) {
         Some(config) => Mu::new(&config),
         None => {
             eprintln!("option: configuration error");
