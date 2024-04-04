@@ -135,7 +135,7 @@ impl MuFunction for Stream {
 
                     match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
                         Some(stream_ref) => {
-                            let stream = stream_ref.borrow();
+                            let stream = block_on(stream_ref.read());
 
                             if stream.direction.eq_(&Symbol::keyword("output")) {
                                 SystemStream::flush(&stream.system).unwrap()

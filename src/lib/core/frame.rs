@@ -156,7 +156,7 @@ impl Frame {
                     }
 
                     let fn_key = Function::form(mu, func);
-                    let fn_ = mu.functions.borrow()[&Tag::as_u64(&fn_key)];
+                    let fn_ = block_on(mu.functions.read())[&Tag::as_u64(&fn_key)];
 
                     match fn_(mu, &mut self) {
                         Ok(_) => Ok(self.value),
