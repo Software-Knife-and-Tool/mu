@@ -16,15 +16,13 @@ use {
         },
     },
     std::{
-        cell::{Ref, RefCell, RefMut},
         collections::VecDeque,
         fs,
         io::{Read, Write},
         str,
     },
 };
-
-use futures::executor::block_on;
+use {futures::executor::block_on, futures_locks::RwLock};
 
 // stream builder
 pub struct SystemStreamBuilder {
@@ -75,19 +73,19 @@ impl SystemStreamBuilder {
         match &self.file {
             Some(path) => match self.input {
                 Some(_) => match fs::File::open(path) {
-                    Ok(file) => Some(SystemStream::File(RefCell::new(file))),
+                    Ok(file) => Some(SystemStream::File(RwLock::new(file))),
                     Err(_) => None,
                 },
                 None => match self.output {
                     Some(_) => match fs::File::create(path) {
-                        Ok(file) => Some(SystemStream::File(RefCell::new(file))),
+                        Ok(file) => Some(SystemStream::File(RwLock::new(file))),
                         Err(_) => None,
                     },
                     None => None,
                 },
             },
             None => self.string.as_ref().map(|contents| {
-                SystemStream::String(RefCell::new(VecDeque::from(contents.as_bytes().to_vec())))
+                SystemStream::String(RwLock::new(VecDeque::from(contents.as_bytes().to_vec())))
             }),
         }
     }
@@ -96,8 +94,8 @@ impl SystemStreamBuilder {
 // system stream
 #[derive(Debug)]
 pub enum SystemStream {
-    File(RefCell<fs::File>),
-    String(RefCell<VecDeque<u8>>),
+    File(RwLock<fs::File>),
+    String(RwLock<VecDeque<u8>>),
     StdInput,
     StdOutput,
     StdError,
@@ -160,9 +158,7 @@ impl Core for SystemStream {
         match stream {
             Self::StdInput | Self::StdOutput | Self::StdError => (),
             Self::File(file) => {
-                let file_ref: Ref<fs::File> = file.borrow();
-
-                std::mem::drop(file_ref)
+                std::mem::drop(block_on(file.read()));
             }
             SystemStream::String(_) => (),
         };
@@ -189,7 +185,7 @@ impl Core for SystemStream {
                 let mut streams_ref = block_on(mu.streams.write());
                 let index = streams_ref.len();
 
-                streams_ref.push(RefCell::new(Stream {
+                streams_ref.push(RwLock::new(Stream {
                     index,
                     system: system_stream.unwrap(),
                     open: true,
@@ -236,7 +232,7 @@ impl Core for SystemStream {
                 let mut streams_ref = block_on(mu.streams.write());
                 let index = streams_ref.len();
 
-                streams_ref.push(RefCell::new(Stream {
+                streams_ref.push(RwLock::new(Stream {
                     index,
                     open: true,
                     system: system_stream.unwrap(),
@@ -275,7 +271,7 @@ impl Core for SystemStream {
                 let mut streams_ref = block_on(mu.streams.write());
                 let index = streams_ref.len();
 
-                streams_ref.push(RefCell::new(Stream {
+                streams_ref.push(RwLock::new(Stream {
                     index,
                     open: true,
                     direction: match &std_stream {
@@ -304,7 +300,7 @@ impl Core for SystemStream {
             Self::StdInput | Self::StdOutput | Self::StdError => None,
             SystemStream::File(_) => None,
             SystemStream::String(string) => {
-                let mut string_ref: RefMut<VecDeque<u8>> = string.borrow_mut();
+                let mut string_ref = block_on(string.write());
                 let string_vec: Vec<u8> = string_ref.iter().cloned().collect();
 
                 string_ref.clear();
@@ -328,7 +324,7 @@ impl Core for SystemStream {
                 Err(_) => Err(Exception::new(Condition::Read, "rd_byte", Tag::nil())),
             },
             Self::File(file) => {
-                let mut file_ref: RefMut<fs::File> = file.borrow_mut();
+                let mut file_ref = block_on(file.write());
 
                 match file_ref.read(&mut buf) {
                     Ok(nread) => {
@@ -342,7 +338,7 @@ impl Core for SystemStream {
                 }
             }
             SystemStream::String(string) => {
-                let mut string_ref: RefMut<VecDeque<u8>> = string.borrow_mut();
+                let mut string_ref = block_on(string.write());
 
                 if string_ref.is_empty() {
                     Ok(None)
@@ -367,14 +363,15 @@ impl Core for SystemStream {
                 Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
             },
             SystemStream::File(file) => {
-                let mut file_ref: RefMut<fs::File> = file.borrow_mut();
+                let mut file_ref = block_on(file.write());
+
                 match file_ref.write_all(&buf) {
                     Ok(_) => Ok(None),
                     Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
                 }
             }
             SystemStream::String(string) => {
-                let mut string_ref: RefMut<VecDeque<u8>> = string.borrow_mut();
+                let mut string_ref = block_on(string.write());
 
                 string_ref.push_back(buf[0]);
                 Ok(Some(()))

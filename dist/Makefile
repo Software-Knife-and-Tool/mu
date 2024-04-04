@@ -42,4 +42,4 @@ dist:
 	@rm -rf $(BASE)
 
 clean:
-	@rm -rf $(BASE)-$(VERSION).tgz $(BASE) $(MU_EXEC) $(MU_LD) $(MU_SHELL) $(MU_SERVER) prelude.l
+	@rm -rf $(BASE)-*.tgz $(BASE) $(MU_EXEC) $(MU_LD) $(MU_SYS) $(MU_SERVER) prelude.l

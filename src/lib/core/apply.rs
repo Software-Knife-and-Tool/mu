@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu functions
+use futures::executor::block_on;
 use {
     crate::{
         async_::context::{Context, MuFunction as _},
@@ -162,7 +163,7 @@ impl Core for Mu {
     }
 
     fn install_feature_functions(mu: &Mu, ns: Tag, symbols: Vec<CoreFunctionDef>) {
-        let mut functions = mu.functions.borrow_mut();
+        let mut functions = block_on(mu.functions.write());
 
         functions.extend(symbols.iter().map(|(name, nreqs, featurefn)| {
             let form = Namespace::intern_symbol(mu, ns, name.to_string(), *UNBOUND);

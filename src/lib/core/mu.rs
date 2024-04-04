@@ -28,7 +28,7 @@ use {
         },
     },
     cpu_time::ProcessTime,
-    std::{cell::RefCell, collections::HashMap},
+    std::collections::HashMap,
 };
 
 // locking protocols
@@ -54,7 +54,7 @@ pub struct Mu {
     pub ns_index: RwLock<HashMap<u64, (Tag, RwLock<HashMap<String, Tag>>)>>,
 
     // core function map
-    pub functions: RefCell<HashMap<u64, CoreFunction>>,
+    pub functions: RwLock<HashMap<u64, CoreFunction>>,
 
     // internal functions
     pub if_: Tag,
@@ -70,7 +70,7 @@ pub struct Mu {
     pub reader: Reader,
 
     // streams
-    pub streams: RwLock<Vec<RefCell<Stream>>>,
+    pub streams: RwLock<Vec<RwLock<Stream>>>,
 
     pub stdin: Tag,
     pub stdout: Tag,
@@ -81,7 +81,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.41";
+    const VERSION: &'static str = "0.0.42";
 
     fn new(config: &Config) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -97,7 +97,7 @@ impl Core for Mu {
             dynamic: RwLock::new(Vec::new()),
             errout: Tag::nil(),
             features: Vec::new(),
-            functions: RefCell::new(HashMap::new()),
+            functions: RwLock::new(HashMap::new()),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
             if_: Tag::nil(),
@@ -155,7 +155,7 @@ impl Core for Mu {
         Namespace::intern_symbol(&mu, mu.lib_ns, "err-out".to_string(), mu.errout);
 
         // core functions
-        mu.functions = RefCell::new(Self::install_lib_functions(&mu));
+        mu.functions = RwLock::new(Self::install_lib_functions(&mu));
         mu.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&mu);
 
         mu.features = Feature::install_features(&mu);

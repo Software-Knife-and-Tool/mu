@@ -78,7 +78,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let stream = stream_ref.borrow();
+                let stream = block_on(stream_ref.read());
                 let vec = vec![
                     Tag::from(stream.index as i64),
                     stream.direction,
@@ -96,7 +96,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let stream = stream_ref.borrow();
+                let stream = block_on(stream_ref.read());
 
                 stream.open
             }
@@ -109,7 +109,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let stream = stream_ref.borrow();
+                let stream = block_on(stream_ref.read());
 
                 SystemStream::close(&stream.system);
             }
@@ -126,7 +126,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let stream = stream_ref.borrow();
+                let stream = block_on(stream_ref.read());
 
                 Ok(SystemStream::get_string(&stream.system).unwrap())
             }
@@ -141,7 +141,7 @@ impl Core for Stream {
 
                 match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
                     Some(stream_ref) => {
-                        let stream = stream_ref.borrow();
+                        let stream = block_on(stream_ref.read());
 
                         mu.write_string(
                             format!(
@@ -189,7 +189,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let mut stream = stream_ref.borrow_mut();
+                let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
                     return Err(Exception::new(Condition::Stream, "rd-char", tag));
@@ -223,7 +223,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let mut stream = stream_ref.borrow_mut();
+                let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
                     return Err(Exception::new(Condition::Stream, "rd-byte", tag));
@@ -258,7 +258,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let mut stream = stream_ref.borrow_mut();
+                let mut stream = block_on(stream_ref.write());
 
                 SystemStream::close(&stream.system);
 
@@ -287,7 +287,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let stream = stream_ref.borrow();
+                let stream = block_on(stream_ref.read());
 
                 if stream.direction.eq_(&Symbol::keyword("input")) {
                     return Err(Exception::new(Condition::Type, "wr-char", tag));
@@ -308,7 +308,7 @@ impl Core for Stream {
 
         match streams_ref.get(Self::to_stream_index(mu, tag).unwrap()) {
             Some(stream_ref) => {
-                let stream = stream_ref.borrow();
+                let stream = block_on(stream_ref.read());
 
                 if stream.direction.eq_(&Symbol::keyword("input")) {
                     return Err(Exception::new(Condition::Type, "wr-byte", tag));
