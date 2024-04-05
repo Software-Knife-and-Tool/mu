@@ -298,7 +298,7 @@ mu		shell script for running the prelude listener with mu-sys
 OVERVIEW: mu-sys - posix platform mu shell command
 USAGE: mu-sys [options] [file...]
 
-runtime: x.y.z: [-h?psvcelq] [file...]
+runtime: x.y.z: [-h?psvcelq0] [file...]
 OPTIONS:
   -h                   print this message
   -?                   print this message
@@ -308,6 +308,7 @@ OPTIONS:
   -e SEXPR             evaluate SEXPR and print result
   -q SEXPR             evaluate SEXPR quietly
   -c name:value[,...]  environment configuration  	   
+  -0                   null termination  
   [file ...]           load source file(s)
 ```
 
