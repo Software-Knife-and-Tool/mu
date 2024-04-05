@@ -25,10 +25,11 @@ enum ShellOpt {
     Load(String),
     Pipe,
     Quiet(String),
+    Null,
 }
 
 fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
-    let mut opts = getopt::Parser::new(&argv, "h?pvc:e:l:q:");
+    let mut opts = getopt::Parser::new(&argv, "h?pvc:e:l:q:0");
     let mut optv = Vec::new();
 
     loop {
@@ -65,6 +66,9 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
                     Opt('c', Some(config)) => {
                         optv.push(ShellOpt::Config(config));
                     }
+                    Opt('0', None) => {
+                        optv.push(ShellOpt::Null);
+                    }
                     _ => panic!(),
                 },
                 None => panic!(),
@@ -89,11 +93,12 @@ fn usage() {
     println!("p: pipe mode");
     println!("q: eval [form] quietly");
     println!("v: print version and exit");
+    println!("0: null termination");
 
     std::process::exit(0);
 }
 
-fn listener(mu: &Mu) {
+fn listener(mu: &Mu, null: bool) {
     let eof_value = mu.eval_str("(lib:symbol \"eof\")").unwrap();
 
     loop {
@@ -108,7 +113,10 @@ fn listener(mu: &Mu) {
                     Ok(form) => match mu.eval(form) {
                         Ok(eval) => {
                             mu.write(eval, true, mu.std_out()).unwrap();
-                            println!();
+                            if null {
+                                print!("\0")
+                            }
+                            println!()
                         }
                         Err(e) => {
                             eprint!(
@@ -152,6 +160,7 @@ pub fn main() {
     let mut _config: Option<String> = None;
     let mut _debug = false;
     let mut pipe = false;
+    let mut null = false;
 
     match options(std::env::args().collect()) {
         Some(opts) => {
@@ -187,6 +196,9 @@ pub fn main() {
                             std::process::exit(-1);
                         }
                     },
+                    ShellOpt::Null => {
+                        null = true;
+                    }
                     ShellOpt::Pipe => {
                         pipe = true;
                     }
@@ -216,6 +228,6 @@ pub fn main() {
     };
 
     if !pipe {
-        listener(&mu)
+        listener(&mu, null)
     }
 }
