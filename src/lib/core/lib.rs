@@ -27,16 +27,8 @@ use crate::{
         vector::{Core as _, Vector},
     },
 };
-use {futures::executor::block_on, futures_locks::RwLock};
-
-lazy_static! {
-    static ref SIGNAL_EXCEPTION: RwLock<bool> = RwLock::new(false);
-}
 
 pub trait Core {
-    fn signal_exception();
-    fn on_signal() -> exception::Result<()>;
-
     fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
     fn debug_vprint(&self, _: &str, _: bool, _: Tag);
 
@@ -46,25 +38,6 @@ pub trait Core {
 }
 
 impl Core for Mu {
-    fn signal_exception() {
-        ctrlc::set_handler(|| {
-            let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
-            *signal_ref = true
-        })
-        .expect("Error setting Ctrl-C handler");
-    }
-
-    fn on_signal() -> exception::Result<()> {
-        let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
-
-        if *signal_ref {
-            *signal_ref = false;
-            Err(Exception::new(Condition::Signal, "sigint", Tag::nil()))
-        } else {
-            Ok(())
-        }
-    }
-
     // debug printing
     //
     fn debug_vprint(&self, label: &str, verbose: bool, tag: Tag) {

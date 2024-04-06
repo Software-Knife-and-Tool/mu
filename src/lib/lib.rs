@@ -58,7 +58,7 @@ use {
     crate::core::{
         compile::Compile,
         config::Config,
-        exception,
+        exception::{self, Core as _},
         lib::Core as _,
         mu::{self, Core},
     },
@@ -96,7 +96,7 @@ impl Mu {
 
     /// init
     pub fn signal_exception() {
-        <mu::Mu as core::lib::Core>::signal_exception()
+        Exception::signal_exception()
     }
 
     /// config

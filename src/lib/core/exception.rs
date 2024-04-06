@@ -17,8 +17,7 @@ use {
     },
     std::fmt,
 };
-
-use futures::executor::block_on;
+use {futures::executor::block_on, futures_locks::RwLock};
 
 pub type Result<T> = std::result::Result<T, Exception>;
 
@@ -52,6 +51,7 @@ pub enum Condition {
 }
 
 lazy_static! {
+    static ref SIGNAL_EXCEPTION: RwLock<bool> = RwLock::new(false);
     static ref CONDMAP: Vec<(Tag, Condition)> = vec![
         (Symbol::keyword("arity"), Condition::Arity),
         (Symbol::keyword("div0"), Condition::ZeroDivide),
@@ -122,6 +122,32 @@ impl Exception {
         match condmap {
             Some(entry) => Ok(entry.0),
             _ => panic!(),
+        }
+    }
+}
+
+pub trait Core {
+    fn signal_exception();
+    fn on_signal() -> Result<()>;
+}
+
+impl Core for Exception {
+    fn signal_exception() {
+        ctrlc::set_handler(|| {
+            let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
+            *signal_ref = true
+        })
+        .expect("Error setting Ctrl-C handler");
+    }
+
+    fn on_signal() -> Result<()> {
+        let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
+
+        if *signal_ref {
+            *signal_ref = false;
+            Err(Exception::new(Condition::Signal, "sigint", Tag::nil()))
+        } else {
+            Ok(())
         }
     }
 }
