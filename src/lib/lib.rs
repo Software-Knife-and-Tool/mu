@@ -59,8 +59,8 @@ use {
         compile::Compile,
         config::Config,
         exception,
+        lib::Core as _,
         mu::{self, Core},
-        system::Core as _,
     },
     std::fs,
     types::{
@@ -69,9 +69,9 @@ use {
     },
 };
 
-/// The core API
+/// The lib API
 ///
-/// The core API exposes these types:
+/// The lib API exposes these types:
 /// - Condition, enumeration of possible exceptional conditions
 /// - Exception, exception state
 /// - Mu, environment and API namespace
@@ -87,12 +87,17 @@ pub type Condition = core::exception::Condition;
 /// the Exception representation
 pub type Exception = core::exception::Exception;
 
-/// the Mu struct abstracts the core library struct
+/// the Mu struct abstracts the mu library struct
 pub struct Mu(core::mu::Mu);
 
 impl Mu {
     /// current version
     pub const VERSION: &'static str = core::mu::Mu::VERSION;
+
+    /// init
+    pub fn signal_exception() {
+        <mu::Mu as core::lib::Core>::signal_exception()
+    }
 
     /// config
     pub fn config(config: Option<String>) -> Option<Config> {

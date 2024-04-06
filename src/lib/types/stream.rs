@@ -11,9 +11,9 @@ use crate::{
     core::{
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
         exception::{self, Condition, Exception},
+        lib::Core as _,
         mu::Mu,
         stream::{Core as _, SystemStream},
-        system::Core as _,
         types::{Tag, Type},
     },
     types::{

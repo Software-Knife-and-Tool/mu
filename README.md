@@ -312,7 +312,7 @@ OPTIONS:
   [file ...]           load source file(s)
 ```
 
-An interactive session for the extended *mu* system is invoked by the `mu` shell script. The *mu* repl does not display a prompt.
+An interactive session for the extended *mu* system is invoked by the `mu` shell script. The *mu* repl does not display a prompt. *mu-sys* configures the library to catch SIGINT and generate a `:sigint` exception rather than abort the process.
 
 ```
 % /opt/mu/bin/mu 

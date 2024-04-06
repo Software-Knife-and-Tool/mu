@@ -6,8 +6,8 @@ use crate::{
     core::{
         direct::{DirectInfo, DirectTag, DirectType},
         exception,
+        lib::Core as _,
         mu::Mu,
-        system::Core as _,
         types::Tag,
     },
     types::{

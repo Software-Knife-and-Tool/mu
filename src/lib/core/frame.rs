@@ -12,6 +12,7 @@ use crate::{
         apply::Core as _,
         exception::{self, Condition, Exception},
         gc::Core as _,
+        lib::Core as _,
         mu::{Core as _, Mu},
         types::{Tag, Type},
     },
@@ -137,6 +138,8 @@ impl Frame {
 
     // apply
     pub fn apply(mut self, mu: &Mu, func: Tag) -> exception::Result<Tag> {
+        Mu::on_signal()?;
+
         match func.type_of() {
             Type::Symbol => {
                 if Symbol::is_unbound(mu, func) {
