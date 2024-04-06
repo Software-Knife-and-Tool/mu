@@ -11,8 +11,8 @@ use {
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
+            lib::Core as _,
             mu::{Core as _, Mu},
-            system::Core as _,
             types::{Tag, Type},
         },
         types::{

@@ -10,8 +10,8 @@ use crate::{
         frame::Frame,
         gc::Core as _,
         indirect::IndirectTag,
+        lib::Core as _,
         mu::Mu,
-        system::Core as _,
         types::{Tag, TagType, Type},
     },
     types::{

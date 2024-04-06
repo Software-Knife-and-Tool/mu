@@ -36,6 +36,7 @@ opt-level = 3
 
 [dependencies]
 cpu-time = "1.0.0"
+ctrlc = "3.4.4"
 elf = "0.7.4"
 futures = "0.3.30"
 futures-locks = "0.7.1"

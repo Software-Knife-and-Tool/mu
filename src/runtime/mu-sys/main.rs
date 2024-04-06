@@ -177,6 +177,9 @@ pub fn main() {
         }
     }
 
+    // enable signal exceptions
+    Mu::signal_exception();
+
     let mu = match Mu::config(_config) {
         Some(config) => Mu::new(&config),
         None => {

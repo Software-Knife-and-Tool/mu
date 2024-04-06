@@ -5,10 +5,10 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception},
+        lib::Core as _,
         mu::Mu,
         namespace::Namespace,
         reader::{Core as _, Reader},
-        system::Core as _,
         types::{Tag, Type},
     },
     types::{

@@ -10,9 +10,9 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::Core as _,
+            lib::Core as _,
             mu::Mu,
             readtable::{map_char_syntax, SyntaxType},
-            system::Core as _,
             types::{Tag, Type},
         },
         types::{

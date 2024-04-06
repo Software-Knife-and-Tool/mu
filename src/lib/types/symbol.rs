@@ -12,10 +12,10 @@ use {
             gc::Core as _,
             heap::{Core as _, Heap},
             indirect::IndirectTag,
+            lib::Core as _,
             mu::Mu,
             namespace::Namespace,
             readtable::{map_char_syntax, SyntaxType},
-            system::Core as _,
             types::{Tag, TagType, Type},
         },
         types::{
