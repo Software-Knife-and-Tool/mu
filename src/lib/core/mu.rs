@@ -195,14 +195,14 @@ impl Core for Mu {
                         Ok(Cons::car(self, args))
                     }
                     Type::Symbol => {
-                        if Symbol::is_unbound(self, func) {
-                            Err(Exception::new(Condition::Unbound, "eval", func))
-                        } else {
+                        if Symbol::is_bound(self, func) {
                             let fn_ = Symbol::value(self, func);
                             match fn_.type_of() {
                                 Type::Function => self.apply(fn_, args),
                                 _ => Err(Exception::new(Condition::Type, "eval", func)),
                             }
+                        } else {
+                            Err(Exception::new(Condition::Unbound, "eval", func))
                         }
                     }
                     Type::Function => self.apply(func, args),
@@ -210,10 +210,10 @@ impl Core for Mu {
                 }
             }
             Type::Symbol => {
-                if Symbol::is_unbound(self, expr) {
-                    Err(Exception::new(Condition::Unbound, "eval", expr))
-                } else {
+                if Symbol::is_bound(self, expr) {
                     Ok(Symbol::value(self, expr))
+                } else {
+                    Err(Exception::new(Condition::Unbound, "eval", expr))
                 }
             }
             _ => Ok(expr),

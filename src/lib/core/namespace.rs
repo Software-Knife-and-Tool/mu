@@ -95,14 +95,12 @@ impl Namespace {
     }
 
     pub fn intern_symbol(mu: &Mu, ns: Tag, name: String, value: Tag) -> Tag {
-        match Namespace::is_ns(mu, ns) {
-            Some(ns) => match Namespace::map_symbol(mu, ns, &name) {
+        match Self::is_ns(mu, ns) {
+            Some(ns) => match Self::map_symbol(mu, ns, &name) {
                 Some(symbol) => {
-                    // if the symbol is unbound, bind it.
-                    // otherwise, we ignore the new binding.
-                    // this allows a reader to intern a functional
-                    // symbol without binding it.
-                    if Symbol::is_unbound(mu, symbol) {
+                    // if the symbol is unbound, bind it. otherwise,
+                    // we ignore the new bind unless it's an untern
+                    if !Symbol::is_bound(mu, symbol) {
                         let image = Symbol::to_image(mu, symbol);
 
                         let slices: &[[u8; 8]] = &[
@@ -120,13 +118,12 @@ impl Namespace {
 
                         heap_ref.write_image(slices, offset);
                     }
-
                     symbol
                 }
                 None => {
                     let symbol = Symbol::new(mu, ns, &name, value).evict(mu);
 
-                    Namespace::intern(mu, ns, symbol);
+                    Self::intern(mu, ns, symbol);
 
                     symbol
                 }
@@ -154,7 +151,7 @@ impl MuFunction for Namespace {
             Ok(_) => {
                 let ns = match ns.type_of() {
                     Type::Null => mu.null_ns,
-                    Type::Keyword => match Namespace::is_ns(mu, ns) {
+                    Type::Keyword => match Self::is_ns(mu, ns) {
                         Some(ns) => ns,
                         _ => return Err(Exception::new(Condition::Type, "untern", ns)),
                     },
@@ -180,7 +177,7 @@ impl MuFunction for Namespace {
 
                     Symbol::keyword(&name_str)
                 } else {
-                    Namespace::intern_symbol(mu, ns, name_str, *UNBOUND)
+                    Self::intern_symbol(mu, ns, name_str, *UNBOUND)
                 }
             }
             Err(e) => return Err(e),
@@ -201,7 +198,7 @@ impl MuFunction for Namespace {
                 }
                 let ns = match ns_tag.type_of() {
                     Type::Null => mu.null_ns,
-                    Type::Keyword => match Namespace::is_ns(mu, ns_tag) {
+                    Type::Keyword => match Self::is_ns(mu, ns_tag) {
                         Some(ns) => ns,
                         _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
                     },
@@ -238,9 +235,9 @@ impl MuFunction for Namespace {
         match ns_tag.type_of() {
             Type::Keyword => {
                 fp.value = ns_tag;
-                match Namespace::is_ns(mu, ns_tag) {
+                match Self::is_ns(mu, ns_tag) {
                     Some(_) => return Err(Exception::new(Condition::Namespace, "make-ns", ns_tag)),
-                    None => Namespace::add_ns(mu, fp.value).unwrap(),
+                    None => Self::add_ns(mu, fp.value).unwrap(),
                 };
             }
             _ => return Err(Exception::new(Condition::Type, "make-ns", ns_tag)),
@@ -257,14 +254,14 @@ impl MuFunction for Namespace {
             Ok(_) => {
                 match ns_tag.type_of() {
                     Type::Null => mu.null_ns,
-                    Type::Keyword => match Namespace::is_ns(mu, ns_tag) {
+                    Type::Keyword => match Self::is_ns(mu, ns_tag) {
                         Some(_) => ns_tag,
                         _ => return Err(Exception::new(Condition::Type, "ns-find", ns_tag)),
                     },
                     _ => return Err(Exception::new(Condition::Type, "ns-find", ns_tag)),
                 };
 
-                match Namespace::map_symbol(mu, ns_tag, &Vector::as_string(mu, name)) {
+                match Self::map_symbol(mu, ns_tag, &Vector::as_string(mu, name)) {
                     Some(sym) => sym,
                     None => Tag::nil(),
                 }
@@ -280,7 +277,7 @@ impl MuFunction for Namespace {
         let ns = fp.argv[1];
 
         fp.value = match mu.fp_argv_check("ns-syms", &[Type::Keyword, Type::T], fp) {
-            Ok(_) => match Namespace::is_ns(mu, ns) {
+            Ok(_) => match Self::is_ns(mu, ns) {
                 Some(_) => {
                     let ns_ref = block_on(mu.ns_index.read());
                     let (_, ns_cache) = &ns_ref[&ns.as_u64()];
