@@ -95,11 +95,22 @@ impl Namespace {
     }
 
     pub fn intern_symbol(mu: &Mu, ns: Tag, name: String, value: Tag) -> Tag {
+        // if !ns.eq_(&Symbol::keyword("lib")) { print!("intern: {} ", name) }
         match Self::is_ns(mu, ns) {
             Some(ns) => match Self::map_symbol(mu, ns, &name) {
                 Some(symbol) => {
+                    /*
+                        if !ns.eq_(&Symbol::keyword("lib")) { println!("existing symbol: {} boundp, value is unbound {}",
+                                 Symbol::is_bound(mu, symbol),
+                                 value.eq_(&*UNBOUND)
+                    )}
+                        */
                     // if the symbol is unbound, bind it.
-                    if !Symbol::is_bound(mu, symbol) {
+                    if Symbol::is_bound(mu, symbol)
+                    /* && !value.eq_(&*UNBOUND) */
+                    {
+                        symbol
+                    } else {
                         let image = Symbol::to_image(mu, symbol);
 
                         let slices: &[[u8; 8]] = &[
@@ -116,10 +127,17 @@ impl Namespace {
                         let mut heap_ref = block_on(mu.heap.write());
 
                         heap_ref.write_image(slices, offset);
+
+                        symbol
                     }
-                    symbol
                 }
                 None => {
+                    /*
+                        if !ns.eq_(&Symbol::keyword("lib")) { println!("new symbol: value is unbound {}",
+                                                                       value.eq_(&*UNBOUND)
+                    )}
+                        */
+
                     let symbol = Symbol::new(mu, ns, &name, value).evict(mu);
 
                     Self::intern(mu, ns, symbol);
