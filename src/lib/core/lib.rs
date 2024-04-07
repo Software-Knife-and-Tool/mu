@@ -28,6 +28,30 @@ use crate::{
     },
 };
 
+/*
+pub struct Lib {
+    lib_ns: Tag,
+    functions: HashMap<String, Tag>
+    features: Vec<Tag>,
+}
+
+pub trait Lib {
+    fn new() -> Self {
+        let lib = match Namespace::add_ns(&mu, Symbol::Keyword("lib")) {
+            Ok(_) => Self::install_lib_functions(&mu),
+            Err(_) => panic!(),
+        };
+
+        let features = Feature::install_features(&mu);
+
+        Lib {
+            lib_ns,
+            features,
+        }
+    }
+}
+*/
+
 pub trait Core {
     fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
     fn debug_vprint(&self, _: &str, _: bool, _: Tag);
