@@ -9,11 +9,11 @@
       ((:lambda (type)
           (:if (lib:eq type :struct)
                (:if (lib:eq :<type> (lib:st-type value))
-                    (lib:untern () (lib:sv-ref (lib:st-vec value) 0))
+                    (lib:unbound () (lib:sv-ref (lib:st-vec value) 0))
                     (lib:st-type value))
                (:if (prelude:stringp value)
                     'string
-                    (lib:untern () (lib:sy-name type)))))
+                    (lib:unbound () (lib:sy-name type)))))
        (lib:type-of value))))
 
 ;;;

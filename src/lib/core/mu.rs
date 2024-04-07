@@ -81,7 +81,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.42";
+    const VERSION: &'static str = "0.0.44";
 
     fn new(config: &Config) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;

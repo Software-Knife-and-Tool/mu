@@ -50,8 +50,8 @@
           (prelude:keyword (prelude:%read-symbol-name symbol))
           ((:lambda (ns name)
              (:if (prelude:null ns)
-                  (lib:untern () name)
-                  (lib:untern ns name)))
+                  (lib:unbound () name)
+                  (lib:unbound ns name)))
            (prelude:%read-symbol-ns symbol)
            (prelude:%read-symbol-name symbol)))))
 

@@ -1,8 +1,8 @@
 (lib:eq :func (lib:type-of lib:make-ns))	:t
 (lib:boundp (lib:intern () "foo" ()))	foo
 (lib:intern () "foo" "foo")	foo
-(lib:untern :lib "foo")	lib:foo
-(lib:boundp (lib:untern :lib "foo"))	:nil
+(lib:unbound :lib "foo")	lib:foo
+(lib:boundp (lib:unbound :lib "foo"))	:nil
 (lib:make-ns :mu)	:mu
 (lib:ns-find :lib "eq")	lib:eq
 (lib:ns-find :lib "foo")	:nil
