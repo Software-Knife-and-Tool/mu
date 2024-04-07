@@ -118,7 +118,7 @@ pub trait Core {
     fn evict(&self, _: &Mu) -> Tag;
     fn mark(_: &Mu, _: Tag);
     fn heap_size(_: &Mu, _: Tag) -> usize;
-    fn is_unbound(_: &Mu, _: Tag) -> bool;
+    fn is_bound(_: &Mu, _: Tag) -> bool;
     fn keyword(_: &str) -> Tag;
     fn parse(_: &Mu, _: String) -> exception::Result<Tag>;
     fn view(_: &Mu, _: Tag) -> Tag;
@@ -130,7 +130,7 @@ impl Core for Symbol {
         let vec = vec![
             Self::namespace(mu, symbol),
             Self::name(mu, symbol),
-            if Self::is_unbound(mu, symbol) {
+            if !Self::is_bound(mu, symbol) {
                 Symbol::keyword("UNBOUND")
             } else {
                 Self::value(mu, symbol)
@@ -294,8 +294,8 @@ impl Core for Symbol {
         }
     }
 
-    fn is_unbound(mu: &Mu, symbol: Tag) -> bool {
-        Self::value(mu, symbol).eq_(&UNBOUND)
+    fn is_bound(mu: &Mu, symbol: Tag) -> bool {
+        !Self::value(mu, symbol).eq_(&UNBOUND)
     }
 }
 
@@ -336,10 +336,10 @@ impl MuFunction for Symbol {
 
         fp.value = match symbol.type_of() {
             Type::Symbol => {
-                if Symbol::is_unbound(mu, symbol) {
-                    return Err(Exception::new(Condition::Type, "sy-val", symbol));
-                } else {
+                if Symbol::is_bound(mu, symbol) {
                     Symbol::value(mu, symbol)
+                } else {
+                    return Err(Exception::new(Condition::Type, "sy-val", symbol));
                 }
             }
             Type::Keyword => symbol,
@@ -355,7 +355,7 @@ impl MuFunction for Symbol {
         fp.value = match symbol.type_of() {
             Type::Keyword => symbol,
             Type::Symbol => {
-                if Self::is_unbound(mu, symbol) {
+                if !Self::is_bound(mu, symbol) {
                     Tag::nil()
                 } else {
                     symbol

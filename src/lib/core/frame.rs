@@ -141,10 +141,10 @@ impl Frame {
 
         match func.type_of() {
             Type::Symbol => {
-                if Symbol::is_unbound(mu, func) {
-                    Err(Exception::new(Condition::Unbound, "apply", func))
-                } else {
+                if Symbol::is_bound(mu, func) {
                     self.apply(mu, Symbol::value(mu, func))
+                } else {
+                    Err(Exception::new(Condition::Unbound, "apply", func))
                 }
             }
             Type::Function => match Function::form(mu, func).type_of() {

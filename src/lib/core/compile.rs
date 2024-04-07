@@ -210,14 +210,14 @@ impl Compile {
             }
         }
 
-        if Symbol::is_unbound(mu, symbol) {
-            Ok(symbol)
-        } else {
+        if Symbol::is_bound(mu, symbol) {
             let value = Symbol::value(mu, symbol);
             match value.type_of() {
                 Type::Cons | Type::Symbol => Ok(symbol),
                 _ => Ok(value),
             }
+        } else {
+            Ok(symbol)
         }
     }
 
@@ -235,14 +235,14 @@ impl Compile {
                     },
                     Type::Symbol => match Self::list(mu, args, lexenv) {
                         Ok(args) => {
-                            if Symbol::is_unbound(mu, func) {
-                                Ok(Cons::new(func, args).evict(mu))
-                            } else {
+                            if Symbol::is_bound(mu, func) {
                                 let fn_ = Symbol::value(mu, func);
                                 match fn_.type_of() {
                                     Type::Function => Ok(Cons::new(fn_, args).evict(mu)),
                                     _ => Err(Exception::new(Condition::Type, "compile", func)),
                                 }
+                            } else {
+                                Ok(Cons::new(func, args).evict(mu))
                             }
                         }
                         Err(e) => Err(e),
