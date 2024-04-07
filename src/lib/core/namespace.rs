@@ -98,8 +98,7 @@ impl Namespace {
         match Self::is_ns(mu, ns) {
             Some(ns) => match Self::map_symbol(mu, ns, &name) {
                 Some(symbol) => {
-                    // if the symbol is unbound, bind it. otherwise,
-                    // we ignore the new bind unless it's an untern
+                    // if the symbol is unbound, bind it.
                     if !Symbol::is_bound(mu, symbol) {
                         let image = Symbol::to_image(mu, symbol);
 
@@ -135,31 +134,31 @@ impl Namespace {
 
 pub trait MuFunction {
     fn lib_intern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn lib_untern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_make_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns_find(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns_map(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns_symbols(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn lib_unbound(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Namespace {
-    fn lib_untern(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_unbound(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
         let name = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("untern", &[Type::T, Type::String], fp) {
+        fp.value = match mu.fp_argv_check("unbound", &[Type::T, Type::String], fp) {
             Ok(_) => {
                 let ns = match ns.type_of() {
                     Type::Null => mu.null_ns,
                     Type::Keyword => match Self::is_ns(mu, ns) {
                         Some(ns) => ns,
-                        _ => return Err(Exception::new(Condition::Type, "untern", ns)),
+                        _ => return Err(Exception::new(Condition::Type, "unbound", ns)),
                     },
-                    _ => return Err(Exception::new(Condition::Type, "untern", ns)),
+                    _ => return Err(Exception::new(Condition::Type, "unbound", ns)),
                 };
 
                 if Vector::length(mu, name) == 0 {
-                    return Err(Exception::new(Condition::Syntax, "untern", ns));
+                    return Err(Exception::new(Condition::Syntax, "unbound", ns));
                 }
 
                 let name_str = Vector::as_string(mu, name);
@@ -167,12 +166,12 @@ impl MuFunction for Namespace {
                 let len = str.len();
 
                 if len == 0 {
-                    return Err(Exception::new(Condition::Syntax, "untern", name));
+                    return Err(Exception::new(Condition::Syntax, "unbound", name));
                 }
 
                 if ns.eq_(&mu.keyword_ns) {
                     if len > DirectTag::DIRECT_STR_MAX {
-                        return Err(Exception::new(Condition::Syntax, "untern", name));
+                        return Err(Exception::new(Condition::Syntax, "unbound", name));
                     }
 
                     Symbol::keyword(&name_str)

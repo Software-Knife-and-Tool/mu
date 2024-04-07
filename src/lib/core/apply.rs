@@ -97,12 +97,12 @@ lazy_static! {
         ( "fl-mul",  2, Float::lib_flmul ),
         ( "fl-div",  2, Float::lib_fldiv ),
         // namespaces
-        ( "untern",  2, Namespace::lib_untern ),
         ( "intern",  3, Namespace::lib_intern ),
         ( "make-ns", 1, Namespace::lib_make_ns ),
-        ( "ns-syms", 2, Namespace::lib_ns_symbols ),
         ( "ns-find", 2, Namespace::lib_ns_find ),
         ( "ns-map",  0, Namespace::lib_ns_map ),
+        ( "ns-syms", 2, Namespace::lib_ns_symbols ),
+        ( "unbound", 2, Namespace::lib_unbound ),
         // read/write
         ( "read",    3, Mu::lib_read ),
         ( "write",   3, Mu::lib_write ),

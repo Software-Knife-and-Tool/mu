@@ -4,7 +4,7 @@
 ;;;
 ;;; exceptions
 ;;;
-(lib:untern :prelude "%debug-symbols%")
+(lib:unbound :prelude "%debug-symbols%")
 
 ;;;
 ;;; [*exception descriptor*] #s(:except cond value source reason env)

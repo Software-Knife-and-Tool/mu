@@ -46,7 +46,7 @@
 (lib:hp-size lib:std-in)	8
 (lib:with-ex (:lambda (cond obj) (lib:write cond () lib:std-out)) (:lambda () (lib:fx-div 1 1)))	1
 (lib:repr :t (lib:repr :vector :t))	:t
-(lib:type-of lib:untern)	:func
+(lib:type-of lib:unbound)	:func
 (lib:type-of lib:intern)	:func
 (lib:type-of lib:make-ns)	:func
 (lib:type-of lib:ns-syms)	:func
