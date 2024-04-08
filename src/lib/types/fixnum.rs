@@ -8,10 +8,10 @@ use crate::{
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
         exception::{self, Condition, Exception, Result},
         frame::Frame,
-        lib::Core as _,
         mu::Mu,
         types::{Tag, Type},
     },
+    streams::write::Core as _,
     types::{
         cons::{Cons, Core as _},
         symbol::{Core as _, Symbol},

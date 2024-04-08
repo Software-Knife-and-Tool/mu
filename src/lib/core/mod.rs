@@ -20,6 +20,5 @@ pub mod namespace;
 pub mod qquote;
 pub mod reader;
 pub mod readtable;
-pub mod stream;
 pub mod types;
 pub mod utime;

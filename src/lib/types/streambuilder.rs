@@ -6,9 +6,9 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         mu::Mu,
-        stream::{Core as _, SystemStream},
         types::Tag,
     },
+    streams::{operator::Core as _, system::SystemStream},
     types::symbol::{Core as _, Symbol},
 };
 
@@ -111,7 +111,7 @@ impl StreamBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::stream::{SystemStream, SystemStreamBuilder};
+    use crate::streams::system::{SystemStream, SystemStreamBuilder};
 
     #[test]
     fn stream_builder() {

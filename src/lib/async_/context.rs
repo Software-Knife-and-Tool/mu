@@ -15,6 +15,7 @@ use {
             mu::{Core as _, Mu},
             types::{Tag, Type},
         },
+        streams::{read::Core as _, write::Core as _},
         types::{
             cons::Cons,
             fixnum::Fixnum,

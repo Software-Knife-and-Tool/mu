@@ -11,10 +11,13 @@ use crate::{
     core::{
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
         exception::{self, Condition, Exception},
-        lib::Core as _,
         mu::Mu,
-        stream::{Core as _, SystemStream},
         types::{Tag, Type},
+    },
+    streams::{
+        operator::Core as _,
+        system::{Core as _, SystemStream},
+        write::Core as _,
     },
     types::{
         char::Char,

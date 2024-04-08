@@ -4,9 +4,9 @@
 //! sysinfo interface
 use crate::{
     core::{
-        apply::CoreFunctionDef,
         exception::{self, Condition, Exception},
         frame::Frame,
+        lib::CoreFunctionDef,
         mu::Mu,
         types::Tag,
     },

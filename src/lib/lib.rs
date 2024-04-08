@@ -52,6 +52,7 @@ mod allocators;
 mod async_;
 mod core;
 mod features;
+mod streams;
 mod types;
 
 use {
@@ -59,10 +60,10 @@ use {
         compile::Compile,
         config::Config,
         exception::{self, Core as _},
-        lib::Core as _,
         mu::{self, Core},
     },
     std::fs,
+    streams::{read::Core as _, write::Core as _},
     types::{
         stream::{Core as _, Stream},
         streambuilder::StreamBuilder,
