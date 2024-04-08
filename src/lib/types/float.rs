@@ -82,7 +82,7 @@ impl Core for Float {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_fladd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_flsub(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_flmul(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -90,7 +90,7 @@ pub trait MuFunction {
     fn lib_fldiv(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Float {
+impl LibFunction for Float {
     fn lib_fladd(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];

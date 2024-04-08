@@ -269,12 +269,12 @@ impl Compile {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn if__(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Compile {
+impl LibFunction for Compile {
     fn if__(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let test = fp.argv[0];
         let true_fn = fp.argv[1];

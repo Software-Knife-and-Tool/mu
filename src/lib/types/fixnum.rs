@@ -88,7 +88,7 @@ impl Core for Fixnum {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_ash(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_fxadd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_fxdiv(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -100,7 +100,7 @@ pub trait MuFunction {
     fn lib_logor(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Fixnum {
+impl LibFunction for Fixnum {
     fn lib_ash(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.fp_argv_check("ash", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {

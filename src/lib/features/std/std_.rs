@@ -7,7 +7,7 @@ use crate::{
         apply::Core as _,
         exception::{self, Condition, Exception},
         frame::Frame,
-        lib::CoreFunctionDef,
+        lib::LibFnDef,
         mu::Mu,
         types::Type,
     },
@@ -21,7 +21,7 @@ use crate::{
 
 // mu function dispatch table
 lazy_static! {
-    static ref STD_SYMBOLS: Vec<CoreFunctionDef> = vec![
+    static ref STD_SYMBOLS: Vec<LibFnDef> = vec![
         ("command", 2, Std::std_command),
         ("env", 0, Std::std_env),
         ("exit", 1, Std::std_exit),
@@ -43,13 +43,13 @@ impl Core for Std {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn std_command(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn std_env(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
     fn std_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Std {
+impl LibFunction for Std {
     fn std_command(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let command = fp.argv[0];
         let args = fp.argv[1];

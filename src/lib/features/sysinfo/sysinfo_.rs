@@ -6,7 +6,7 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         frame::Frame,
-        lib::CoreFunctionDef,
+        lib::LibFnDef,
         mu::Mu,
         types::Tag,
     },
@@ -24,7 +24,7 @@ use sysinfo_dot_h::{self};
 
 // mu function dispatch table
 lazy_static! {
-    static ref SYSINFO_SYMBOLS: Vec<CoreFunctionDef> = vec![("sysinfo", 0, Sysinfo::sysinfo),];
+    static ref SYSINFO_SYMBOLS: Vec<LibFnDef> = vec![("sysinfo", 0, Sysinfo::sysinfo),];
 }
 
 pub struct Sysinfo {}
@@ -42,11 +42,11 @@ impl Core for Sysinfo {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn sysinfo(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Sysinfo {
+impl LibFunction for Sysinfo {
     fn sysinfo(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match sysinfo_dot_h::try_collect() {
             Err(_) => return Err(Exception::new(Condition::Type, "sysinfo", Tag::nil())),

@@ -106,12 +106,12 @@ impl Core for Context {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_await(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_abort(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Context {
+impl LibFunction for Context {
     fn lib_await(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let async_id = fp.argv[0];
 

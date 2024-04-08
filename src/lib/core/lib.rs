@@ -2,40 +2,35 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu system functions
-#[allow(unused_imports)]
 use crate::{
-    async_::context::{Context, Core as _, MuFunction as _},
+    async_::context::{Context, LibFunction as _},
     core::{
-        apply::{Core as _, MuFunction as _},
-        compile::{Compile, MuFunction as _},
-        dynamic::MuFunction as _,
-        exception::{self, Condition, Exception, MuFunction as _},
-        frame::{Frame, MuFunction as _},
-        gc::{Gc, MuFunction as _},
-        heap::{Heap, MuFunction as _},
+        apply::LibFunction as _,
+        compile::{Compile, LibFunction as _},
+        dynamic::LibFunction as _,
+        exception::{self, Exception, LibFunction as _},
+        frame::{Frame, LibFunction as _},
+        gc::{Gc, LibFunction as _},
+        heap::{Heap, LibFunction as _},
         mu::Mu,
-        namespace::{MuFunction as _, Namespace},
-        qquote::QqReader,
-        reader::{Core as _, Reader},
-        readtable::{map_char_syntax, SyntaxType},
-        types::{MuFunction as _, Tag, Type},
-        utime::MuFunction as _,
+        namespace::{LibFunction as _, Namespace},
+        types::{LibFunction as _, Tag},
+        utime::LibFunction as _,
     },
     streams::{
-        read::MuFunction as _,
-        write::{Core as _, MuFunction as _},
+        read::LibFunction as _,
+        write::{Core as _, LibFunction as _},
     },
     types::{
-        char::{Char, Core as _},
-        cons::{Cons, Core as _, MuFunction as _},
-        fixnum::{Core as _, Fixnum, MuFunction as _},
-        float::{Core as _, Float, MuFunction as _},
-        function::{Core as _, Function},
-        stream::{Core as _, Stream},
-        streams::MuFunction as _,
-        struct_::{Core as _, MuFunction as _, Struct},
-        symbol::{Core as _, MuFunction as _, Symbol, UNBOUND},
-        vector::{Core as _, MuFunction as _, Vector},
+        cons::{Cons, LibFunction as _},
+        fixnum::{Fixnum, LibFunction as _},
+        float::{Float, LibFunction as _},
+        function::Function,
+        stream::Stream,
+        streams::LibFunction as _,
+        struct_::{LibFunction as _, Struct},
+        symbol::{Core as _, LibFunction as _, Symbol, UNBOUND},
+        vector::{LibFunction as _, Vector},
     },
 };
 
@@ -69,12 +64,12 @@ pub trait Lib {
 //
 // native functions
 //
-pub type CoreFunction = fn(&Mu, &mut Frame) -> exception::Result<()>;
-pub type CoreFunctionDef = (&'static str, u16, CoreFunction);
+pub type LibFn = fn(&Mu, &mut Frame) -> exception::Result<()>;
+pub type LibFnDef = (&'static str, u16, LibFn);
 
 // mu function dispatch table
 lazy_static! {
-    static ref LIB_SYMBOLS: Vec<CoreFunctionDef> = vec![
+    static ref LIB_SYMBOLS: Vec<LibFnDef> = vec![
         // types
         ( "eq",      2, Tag::lib_eq ),
         ( "type-of", 1, Tag::lib_typeof ),
@@ -170,16 +165,16 @@ lazy_static! {
 }
 
 pub trait Core {
-    fn install_lib_functions(_: &Mu) -> HashMap<u64, CoreFunction>;
-    fn install_feature_functions(_: &Mu, _: Tag, _: Vec<CoreFunctionDef>);
+    fn install_lib_functions(_: &Mu) -> HashMap<u64, LibFn>;
+    fn install_feature_functions(_: &Mu, _: Tag, _: Vec<LibFnDef>);
 
     fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
     fn debug_vprint(&self, _: &str, _: bool, _: Tag);
 }
 
 impl Core for Mu {
-    fn install_lib_functions(mu: &Mu) -> HashMap<u64, CoreFunction> {
-        let mut functions = HashMap::<u64, CoreFunction>::new();
+    fn install_lib_functions(mu: &Mu) -> HashMap<u64, LibFn> {
+        let mut functions = HashMap::<u64, LibFn>::new();
 
         functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
 
@@ -195,7 +190,7 @@ impl Core for Mu {
         functions
     }
 
-    fn install_feature_functions(mu: &Mu, ns: Tag, symbols: Vec<CoreFunctionDef>) {
+    fn install_feature_functions(mu: &Mu, ns: Tag, symbols: Vec<LibFnDef>) {
         let mut functions = block_on(mu.functions.write());
 
         functions.extend(symbols.iter().map(|(name, nreqs, featurefn)| {

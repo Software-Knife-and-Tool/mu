@@ -299,7 +299,7 @@ impl Core for Symbol {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_name(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_value(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -308,7 +308,7 @@ pub trait MuFunction {
     fn lib_keyword(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Symbol {
+impl LibFunction for Symbol {
     fn lib_name(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 

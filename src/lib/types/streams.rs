@@ -28,7 +28,7 @@ use crate::{
 
 use futures::executor::block_on;
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_close(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_flush(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_get_string(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -41,7 +41,7 @@ pub trait MuFunction {
     fn lib_write_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Stream {
+impl LibFunction for Stream {
     fn lib_close(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 

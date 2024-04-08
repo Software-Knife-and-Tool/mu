@@ -62,13 +62,13 @@ impl Core for Mu {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl LibFunction for Mu {
     fn lib_eval(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.eval(fp.argv[0]) {
             Ok(tag) => tag,
