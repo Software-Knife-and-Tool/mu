@@ -23,11 +23,11 @@ impl Core for Mu {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_utime(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl LibFunction for Mu {
     fn lib_utime(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match ProcessTime::try_now() {
             Err(_) => panic!(),

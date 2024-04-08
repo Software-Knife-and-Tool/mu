@@ -46,11 +46,11 @@ impl Mu {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_frames(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl LibFunction for Mu {
     fn lib_frames(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let frames_ref = block_on(mu.dynamic.read());
         let mut frames = Vec::new();

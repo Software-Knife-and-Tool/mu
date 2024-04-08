@@ -5,7 +5,7 @@
 #[allow(unused_imports)]
 use crate::{
     core::{
-        lib::{Core as _, CoreFunction},
+        lib::{Core as _, LibFn},
         mu::{Core as _, Mu},
         namespace::Namespace,
         types::{Tag, Type},
@@ -28,7 +28,7 @@ pub mod std;
 pub mod sysinfo;
 
 pub struct Feature {
-    symbols: Vec<(&'static str, u16, CoreFunction)>,
+    symbols: Vec<(&'static str, u16, LibFn)>,
     namespace: String,
 }
 

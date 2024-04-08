@@ -89,13 +89,13 @@ impl Core for Heap {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_hp_info(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_hp_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_hp_stat(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Heap {
+impl LibFunction for Heap {
     fn lib_hp_stat(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let (pagesz, npages) = Heap::heap_info(mu);
 

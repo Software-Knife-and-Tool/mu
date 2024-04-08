@@ -189,13 +189,13 @@ impl<'a> Core<'a> for Struct {
 }
 
 // mu functions
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_struct_type(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_struct_vector(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_make_struct(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Struct {
+impl LibFunction for Struct {
     fn lib_struct_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 

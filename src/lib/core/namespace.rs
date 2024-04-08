@@ -9,7 +9,7 @@ use {
             direct::DirectTag,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::CoreFunction,
+            lib::LibFn,
             mu::Mu,
             types::{Tag, Type},
         },
@@ -27,11 +27,11 @@ use {futures::executor::block_on, futures_locks::RwLock};
 
 pub struct Namespace {
     pub symbols: RwLock<HashMap<String, Tag>>,
-    pub functions: RwLock<Vec<(&'static str, u16, CoreFunction)>>,
+    pub functions: RwLock<Vec<(&'static str, u16, LibFn)>>,
 }
 
 impl Namespace {
-    pub fn new(native: Vec<(&'static str, u16, CoreFunction)>) -> Self {
+    pub fn new(native: Vec<(&'static str, u16, LibFn)>) -> Self {
         Self {
             symbols: RwLock::new(HashMap::<String, Tag>::new()),
             functions: RwLock::new(native),
@@ -150,7 +150,7 @@ impl Namespace {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_intern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_make_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns_find(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -159,7 +159,7 @@ pub trait MuFunction {
     fn lib_unbound(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Namespace {
+impl LibFunction for Namespace {
     fn lib_unbound(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
         let name = fp.argv[1];

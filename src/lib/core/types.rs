@@ -219,14 +219,14 @@ impl Tag {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_eq(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_typeof(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_repr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Tag {
+impl LibFunction for Tag {
     fn lib_repr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let type_ = fp.argv[0];
         let arg = fp.argv[1];

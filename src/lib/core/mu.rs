@@ -12,7 +12,7 @@ use {
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::{Core as _, CoreFunction},
+            lib::{Core as _, LibFn},
             namespace::Namespace,
             reader::{Core as _, Reader},
             types::{Tag, Type},
@@ -54,7 +54,7 @@ pub struct Mu {
     pub ns_index: RwLock<HashMap<u64, (Tag, RwLock<HashMap<String, Tag>>)>>,
 
     // core function map
-    pub functions: RwLock<HashMap<u64, CoreFunction>>,
+    pub functions: RwLock<HashMap<u64, LibFn>>,
 
     // internal functions
     pub if_: Tag,

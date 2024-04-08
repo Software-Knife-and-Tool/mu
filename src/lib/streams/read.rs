@@ -4,34 +4,34 @@
 //! stream read functions
 #[allow(unused_imports)]
 use crate::{
-    async_::context::{Context, Core as _, MuFunction as _},
+    async_::context::{Context, Core as _, LibFunction as _},
     core::{
-        apply::{Core as _, MuFunction as _},
-        compile::{Compile, MuFunction as _},
-        dynamic::MuFunction as _,
-        exception::{self, Condition, Exception, MuFunction as _},
-        frame::{Frame, MuFunction as _},
-        gc::{Gc, MuFunction as _},
-        heap::{Heap, MuFunction as _},
+        apply::{Core as _, LibFunction as _},
+        compile::{Compile, LibFunction as _},
+        dynamic::LibFunction as _,
+        exception::{self, Condition, Exception, LibFunction as _},
+        frame::{Frame, LibFunction as _},
+        gc::{Gc, LibFunction as _},
+        heap::{Heap, LibFunction as _},
         mu::Mu,
-        namespace::{MuFunction as _, Namespace},
+        namespace::{LibFunction as _, Namespace},
         qquote::QqReader,
         reader::{Core as _, Reader},
         readtable::{map_char_syntax, SyntaxType},
-        types::{MuFunction as _, Tag, Type},
-        utime::MuFunction as _,
+        types::{LibFunction as _, Tag, Type},
+        utime::LibFunction as _,
     },
     types::{
         char::{Char, Core as _},
-        cons::{Cons, Core as _, MuFunction as _},
-        fixnum::{Core as _, Fixnum, MuFunction as _},
-        float::{Core as _, Float, MuFunction as _},
+        cons::{Cons, Core as _, LibFunction as _},
+        fixnum::{Core as _, Fixnum, LibFunction as _},
+        float::{Core as _, Float, LibFunction as _},
         function::{Core as _, Function},
         stream::{Core as _, Stream},
-        streams::MuFunction as _,
-        struct_::{Core as _, MuFunction as _, Struct},
-        symbol::{Core as _, MuFunction as _, Symbol, UNBOUND},
-        vector::{Core as _, MuFunction as _, Vector},
+        streams::LibFunction as _,
+        struct_::{Core as _, LibFunction as _, Struct},
+        symbol::{Core as _, LibFunction as _, Symbol, UNBOUND},
+        vector::{Core as _, LibFunction as _, Vector},
     },
 };
 
@@ -133,11 +133,11 @@ impl Core for Mu {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_read(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl LibFunction for Mu {
     fn lib_read(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
         let eof_error_p = fp.argv[1];

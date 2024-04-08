@@ -198,13 +198,13 @@ impl Frame {
     }
 }
 
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_fr_pop(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_fr_push(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_fr_ref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Frame {
+impl LibFunction for Frame {
     fn lib_fr_pop(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.fp_argv_check("fr-pop", &[Type::Function], fp) {
             Ok(_) => {

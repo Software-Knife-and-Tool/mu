@@ -308,7 +308,7 @@ impl Core for Cons {
 }
 
 /// mu functions
-pub trait MuFunction {
+pub trait LibFunction {
     fn lib_append(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_car(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn lib_cdr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -318,7 +318,7 @@ pub trait MuFunction {
     fn lib_nthcdr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Cons {
+impl LibFunction for Cons {
     fn lib_append(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list1 = fp.argv[0];
         let list2 = fp.argv[1];
