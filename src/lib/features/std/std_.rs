@@ -4,9 +4,10 @@
 //! std interface
 use crate::{
     core::{
-        apply::{Core as _, CoreFunctionDef},
+        apply::Core as _,
         exception::{self, Condition, Exception},
         frame::Frame,
+        lib::CoreFunctionDef,
         mu::Mu,
         types::Type,
     },

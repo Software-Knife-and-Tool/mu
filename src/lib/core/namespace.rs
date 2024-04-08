@@ -6,10 +6,10 @@ use {
     crate::{
         core::{
             apply::Core as _,
-            apply::CoreFunction,
             direct::DirectTag,
             exception::{self, Condition, Exception},
             frame::Frame,
+            lib::CoreFunction,
             mu::Mu,
             types::{Tag, Type},
         },

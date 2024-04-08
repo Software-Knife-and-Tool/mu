@@ -9,10 +9,10 @@ use {
         allocators::bump_allocator::BumpAllocator,
         async_::context::Context,
         core::{
-            apply::{Core as _, CoreFunction},
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
+            lib::{Core as _, CoreFunction},
             namespace::Namespace,
             reader::{Core as _, Reader},
             types::{Tag, Type},

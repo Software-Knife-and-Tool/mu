@@ -4,29 +4,43 @@
 //! mu system functions
 #[allow(unused_imports)]
 use crate::{
-    async_::context::{Context, Core as _},
+    async_::context::{Context, Core as _, MuFunction as _},
     core::{
-        apply::Core as _,
-        exception::{self, Condition, Exception},
-        frame::Frame,
+        apply::{Core as _, MuFunction as _},
+        compile::{Compile, MuFunction as _},
+        dynamic::MuFunction as _,
+        exception::{self, Condition, Exception, MuFunction as _},
+        frame::{Frame, MuFunction as _},
+        gc::{Gc, MuFunction as _},
+        heap::{Heap, MuFunction as _},
         mu::Mu,
+        namespace::{MuFunction as _, Namespace},
         qquote::QqReader,
         reader::{Core as _, Reader},
         readtable::{map_char_syntax, SyntaxType},
-        types::{Tag, Type},
+        types::{MuFunction as _, Tag, Type},
+        utime::MuFunction as _,
+    },
+    streams::{
+        read::MuFunction as _,
+        write::{Core as _, MuFunction as _},
     },
     types::{
         char::{Char, Core as _},
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        float::{Core as _, Float},
+        cons::{Cons, Core as _, MuFunction as _},
+        fixnum::{Core as _, Fixnum, MuFunction as _},
+        float::{Core as _, Float, MuFunction as _},
         function::{Core as _, Function},
         stream::{Core as _, Stream},
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        streams::MuFunction as _,
+        struct_::{Core as _, MuFunction as _, Struct},
+        symbol::{Core as _, MuFunction as _, Symbol, UNBOUND},
+        vector::{Core as _, MuFunction as _, Vector},
     },
 };
+
+use futures::executor::block_on;
+use std::collections::HashMap;
 
 /*
 pub struct Lib {
@@ -52,16 +66,148 @@ pub trait Lib {
 }
 */
 
+//
+// native functions
+//
+pub type CoreFunction = fn(&Mu, &mut Frame) -> exception::Result<()>;
+pub type CoreFunctionDef = (&'static str, u16, CoreFunction);
+
+// mu function dispatch table
+lazy_static! {
+    static ref LIB_SYMBOLS: Vec<CoreFunctionDef> = vec![
+        // types
+        ( "eq",      2, Tag::lib_eq ),
+        ( "type-of", 1, Tag::lib_typeof ),
+        ( "repr",    2, Tag::lib_repr ),
+        ( "view",    1, Tag::lib_view ),
+        // conses and lists
+        ( "append",  2, Cons::lib_append ),
+        ( "car",     1, Cons::lib_car ),
+        ( "cdr",     1, Cons::lib_cdr ),
+        ( "cons",    2, Cons::lib_cons ),
+        ( "length",  1, Cons::lib_length ),
+        ( "nth",     2, Cons::lib_nth ),
+        ( "nthcdr",  2, Cons::lib_nthcdr ),
+        // async
+        ( "await",   1, Context::lib_await ),
+        ( "abort",   1, Context::lib_abort ),
+        // compiler
+        ( "compile", 1, Compile::lib_compile ),
+        // gc
+        ( "gc",      0, Gc::lib_gc ),
+        // heap
+        ( "hp-info", 0, Heap::lib_hp_info ),
+        ( "hp-stat", 0, Heap::lib_hp_stat ),
+        ( "hp-size", 1, Heap::lib_hp_size ),
+        // mu
+        ( "apply",   2, Mu::lib_apply ),
+        ( "eval",    1, Mu::lib_eval ),
+        ( "frames",  0, Mu::lib_frames ),
+        ( "fix",     2, Mu::lib_fix ),
+        // exceptions
+        ( "with-ex", 2, Exception::lib_with_ex ),
+        ( "raise",   2, Exception::lib_raise ),
+        // frames
+        ( "fr-pop",  1, Frame::lib_fr_pop ),
+        ( "fr-push", 1, Frame::lib_fr_push ),
+        ( "fr-ref",  2, Frame::lib_fr_ref ),
+        // fixnums
+        ( "ash",     2, Fixnum::lib_ash ),
+        ( "fx-add",  2, Fixnum::lib_fxadd ),
+        ( "fx-sub",  2, Fixnum::lib_fxsub ),
+        ( "fx-lt",   2, Fixnum::lib_fxlt ),
+        ( "fx-mul",  2, Fixnum::lib_fxmul ),
+        ( "fx-div",  2, Fixnum::lib_fxdiv ),
+        ( "logand",  2, Fixnum::lib_logand ),
+        ( "logor",   2, Fixnum::lib_logor ),
+        ( "lognot",  1, Fixnum::lib_lognot ),
+        // floats
+        ( "fl-add",  2, Float::lib_fladd ),
+        ( "fl-sub",  2, Float::lib_flsub ),
+        ( "fl-lt",   2, Float::lib_fllt ),
+        ( "fl-mul",  2, Float::lib_flmul ),
+        ( "fl-div",  2, Float::lib_fldiv ),
+        // namespaces
+        ( "intern",  3, Namespace::lib_intern ),
+        ( "make-ns", 1, Namespace::lib_make_ns ),
+        ( "ns-find", 2, Namespace::lib_ns_find ),
+        ( "ns-map",  0, Namespace::lib_ns_map ),
+        ( "ns-syms", 2, Namespace::lib_ns_symbols ),
+        ( "unbound", 2, Namespace::lib_unbound ),
+        // read/write
+        ( "read",    3, Mu::lib_read ),
+        ( "write",   3, Mu::lib_write ),
+        // symbols
+        ( "boundp",  1, Symbol::lib_boundp ),
+        ( "keyword", 1, Symbol::lib_keyword ),
+        ( "symbol",  1, Symbol::lib_symbol ),
+        ( "sy-name", 1, Symbol::lib_name ),
+        ( "sy-ns",   1, Symbol::lib_ns ),
+        ( "sy-val",  1, Symbol::lib_value ),
+        // simple vectors
+        ( "vector",  2, Vector::lib_make_vector ),
+        ( "sv-len",  1, Vector::lib_length ),
+        ( "sv-ref",  2, Vector::lib_svref ),
+        ( "sv-type", 1, Vector::lib_type ),
+        // structs
+        ( "struct",  2, Struct::lib_make_struct ),
+        ( "st-type", 1, Struct::lib_struct_type ),
+        ( "st-vec",  1, Struct::lib_struct_vector ),
+        // streams
+        ( "close",   1, Stream::lib_close ),
+        ( "flush",   1, Stream::lib_flush ),
+        ( "get-str", 1, Stream::lib_get_string ),
+        ( "open",    3, Stream::lib_open ),
+        ( "openp",   1, Stream::lib_openp ),
+        ( "rd-byte", 3, Stream::lib_read_byte ),
+        ( "rd-char", 3, Stream::lib_read_char ),
+        ( "un-char", 2, Stream::lib_unread_char ),
+        ( "wr-byte", 2, Stream::lib_write_byte ),
+        ( "wr-char", 2, Stream::lib_write_char ),
+        // utime
+        ( "utime",   0, Mu::lib_utime ),
+    ];
+}
+
 pub trait Core {
+    fn install_lib_functions(_: &Mu) -> HashMap<u64, CoreFunction>;
+    fn install_feature_functions(_: &Mu, _: Tag, _: Vec<CoreFunctionDef>);
+
     fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
     fn debug_vprint(&self, _: &str, _: bool, _: Tag);
-
-    fn read_stream(&self, _: Tag, _: bool, _: Tag, _: bool) -> exception::Result<Tag>;
-    fn write_stream(&self, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn write_string(&self, _: &str, _: Tag) -> exception::Result<()>;
 }
 
 impl Core for Mu {
+    fn install_lib_functions(mu: &Mu) -> HashMap<u64, CoreFunction> {
+        let mut functions = HashMap::<u64, CoreFunction>::new();
+
+        functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
+
+        functions.extend(LIB_SYMBOLS.iter().map(|(name, nreqs, libfn)| {
+            let fn_key = Symbol::keyword(name);
+            let func = Function::new(Tag::from(*nreqs as i64), fn_key).evict(mu);
+
+            Namespace::intern_symbol(mu, mu.lib_ns, name.to_string(), func);
+
+            (Tag::as_u64(&fn_key), *libfn)
+        }));
+
+        functions
+    }
+
+    fn install_feature_functions(mu: &Mu, ns: Tag, symbols: Vec<CoreFunctionDef>) {
+        let mut functions = block_on(mu.functions.write());
+
+        functions.extend(symbols.iter().map(|(name, nreqs, featurefn)| {
+            let form = Namespace::intern_symbol(mu, ns, name.to_string(), *UNBOUND);
+            let func = Function::new(Tag::from(*nreqs as i64), form).evict(mu);
+
+            Namespace::intern_symbol(mu, ns, name.to_string(), func);
+
+            (Tag::as_u64(&form), *featurefn)
+        }));
+    }
+
     // debug printing
     //
     fn debug_vprint(&self, label: &str, verbose: bool, tag: Tag) {
@@ -72,174 +218,6 @@ impl Core for Mu {
     fn debug_vprintln(&self, label: &str, verbose: bool, tag: Tag) {
         self.debug_vprint(label, verbose, tag);
         println!();
-    }
-
-    // read_stream:
-    //
-    //  returns:
-    //     Err raise exception if I/O problem, syntax error, or end of file and !eofp
-    //     Ok(eof_value) if end of file and eofp
-    //     Ok(tag) if the read succeeded,
-    //
-    #[allow(clippy::only_used_in_recursion)]
-    fn read_stream(
-        &self,
-        stream: Tag,
-        eof_error_p: bool,
-        eof_value: Tag,
-        recursivep: bool,
-    ) -> exception::Result<Tag> {
-        match Reader::read_ws(self, stream) {
-            Ok(None) => {
-                return if eof_error_p {
-                    Err(Exception::new(Condition::Eof, "read", stream))
-                } else {
-                    Ok(eof_value)
-                }
-            }
-            Ok(_) => (),
-            Err(e) => return Err(e),
-        };
-
-        match Stream::read_char(self, stream) {
-            Ok(None) => {
-                if eof_error_p {
-                    Err(Exception::new(Condition::Eof, "read", stream))
-                } else {
-                    Ok(eof_value)
-                }
-            }
-            Ok(Some(ch)) => match map_char_syntax(ch) {
-                Some(stype) => match stype {
-                    SyntaxType::Constituent => Reader::read_atom(self, ch, stream),
-                    SyntaxType::Macro => match ch {
-                        '#' => match Reader::sharp_macro(self, stream) {
-                            Ok(Some(tag)) => Ok(tag),
-                            Ok(None) => {
-                                Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
-                            }
-                            Err(e) => Err(e),
-                        },
-                        _ => Err(Exception::new(
-                            Condition::Type,
-                            "read",
-                            Tag::from(ch as i64),
-                        )),
-                    },
-                    SyntaxType::Tmacro => match ch {
-                        '`' => QqReader::read(self, false, stream, false),
-                        '\'' => {
-                            match Self::read_stream(self, stream, false, Tag::nil(), recursivep) {
-                                Ok(tag) => Ok(Cons::vlist(self, &[Symbol::keyword("quote"), tag])),
-                                Err(e) => Err(e),
-                            }
-                        }
-                        '"' => match Vector::read(self, '"', stream) {
-                            Ok(tag) => Ok(tag),
-                            Err(e) => Err(e),
-                        },
-                        '(' => match Cons::read(self, stream) {
-                            Ok(cons) => Ok(cons),
-                            Err(e) => Err(e),
-                        },
-                        ')' => {
-                            if recursivep {
-                                Ok(self.reader.eol)
-                            } else {
-                                Err(Exception::new(Condition::Syntax, "read", stream))
-                            }
-                        }
-                        ';' => match Reader::read_comment(self, stream) {
-                            Ok(_) => {
-                                Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
-                            }
-                            Err(e) => Err(e),
-                        },
-                        ',' => Err(Exception::new(Condition::Range, "read", Tag::from(ch))),
-                        _ => Err(Exception::new(Condition::Range, "read", Tag::from(ch))),
-                    },
-                    _ => Err(Exception::new(Condition::Read, "read", Tag::from(ch))),
-                },
-                _ => Err(Exception::new(Condition::Read, "read", Tag::from(ch))),
-            },
-            Err(e) => Err(e),
-        }
-    }
-
-    fn write_stream(&self, tag: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        if stream.type_of() != Type::Stream {
-            panic!("{:?}", stream.type_of())
-        }
-
-        match tag.type_of() {
-            Type::AsyncId => Context::write(self, tag, escape, stream),
-            Type::Char => Char::write(self, tag, escape, stream),
-            Type::Cons => Cons::write(self, tag, escape, stream),
-            Type::Fixnum => Fixnum::write(self, tag, escape, stream),
-            Type::Float => Float::write(self, tag, escape, stream),
-            Type::Function => Function::write(self, tag, escape, stream),
-            Type::Keyword => Symbol::write(self, tag, escape, stream),
-            Type::Null => Symbol::write(self, tag, escape, stream),
-            Type::Stream => Stream::write(self, tag, escape, stream),
-            Type::Struct => Struct::write(self, tag, escape, stream),
-            Type::Symbol => Symbol::write(self, tag, escape, stream),
-            Type::Vector => Vector::write(self, tag, escape, stream),
-            _ => panic!(),
-        }
-    }
-
-    fn write_string(&self, str: &str, stream: Tag) -> exception::Result<()> {
-        if stream.type_of() != Type::Stream {
-            panic!("{:?}", stream.type_of())
-        }
-
-        for ch in str.chars() {
-            match Stream::write_char(self, stream, ch) {
-                Ok(_) => (),
-                Err(e) => return Err(e),
-            }
-        }
-
-        Ok(())
-    }
-}
-
-pub trait MuFunction {
-    fn lib_read(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn lib_write(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-}
-
-impl MuFunction for Mu {
-    fn lib_read(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let stream = fp.argv[0];
-        let eof_error_p = fp.argv[1];
-        let eof_value = fp.argv[2];
-
-        fp.value = match mu.fp_argv_check("read", &[Type::Stream], fp) {
-            Ok(_) => match Self::read_stream(mu, stream, !eof_error_p.null_(), eof_value, false) {
-                Ok(tag) => tag,
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
-        };
-
-        Ok(())
-    }
-
-    fn lib_write(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let value = fp.argv[0];
-        let escape = fp.argv[1];
-        let stream = fp.argv[2];
-
-        fp.value = match mu.fp_argv_check("write", &[Type::T, Type::T, Type::Stream], fp) {
-            Ok(_) => match mu.write_stream(value, !escape.null_(), stream) {
-                Ok(_) => value,
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
-        };
-
-        Ok(())
     }
 }
 

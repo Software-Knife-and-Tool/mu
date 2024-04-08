@@ -10,11 +10,11 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::Core as _,
-            lib::Core as _,
             mu::Mu,
             readtable::{map_char_syntax, SyntaxType},
             types::{Tag, Type},
         },
+        streams::write::Core as _,
         types::{
             char::Char,
             cons::{Cons, Core as _},

@@ -6,10 +6,10 @@ use crate::{
     core::{
         direct::{DirectInfo, DirectTag, DirectType},
         exception,
-        lib::Core as _,
         mu::Mu,
         types::Tag,
     },
+    streams::write::Core as _,
     types::{
         stream::{Core as _, Stream},
         vecimage::{TypedVec, VecType},

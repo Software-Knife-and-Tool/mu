@@ -13,9 +13,9 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         mu::Mu,
-        stream::{Core as _, SystemStream},
         types::{Tag, Type},
     },
+    streams::{operator::Core as _, system::SystemStream},
     types::{
         char::Char,
         fixnum::Fixnum,

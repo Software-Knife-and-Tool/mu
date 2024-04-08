@@ -9,10 +9,10 @@ use {
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::Core as _,
             mu::Mu,
             types::{Tag, Type},
         },
+        streams::write::Core as _,
         types::{
             symbol::{Core as _, Symbol},
             vecimage::{TypedVec, VecType},

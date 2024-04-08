@@ -12,12 +12,12 @@ use {
             gc::Core as _,
             heap::{Core as _, Heap},
             indirect::IndirectTag,
-            lib::Core as _,
             mu::Mu,
             namespace::Namespace,
             readtable::{map_char_syntax, SyntaxType},
             types::{Tag, TagType, Type},
         },
+        streams::write::Core as _,
         types::{
             stream::{Core as _, Stream},
             vecimage::{TypedVec, VecType},

@@ -5,7 +5,7 @@
 #[allow(unused_imports)]
 use crate::{
     core::{
-        apply::{Core as _, CoreFunction},
+        lib::{Core as _, CoreFunction},
         mu::{Core as _, Mu},
         namespace::Namespace,
         types::{Tag, Type},

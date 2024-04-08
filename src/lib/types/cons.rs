@@ -10,10 +10,10 @@ use crate::{
         frame::Frame,
         gc::Core as _,
         indirect::IndirectTag,
-        lib::Core as _,
         mu::Mu,
         types::{Tag, TagType, Type},
     },
+    streams::{read::Core as _, write::Core as _},
     types::{
         fixnum::Fixnum,
         symbol::Symbol,

@@ -9,10 +9,10 @@ use crate::{
         frame::Frame,
         gc::Core as _,
         indirect::IndirectTag,
-        lib::Core as _,
         mu::Mu,
         types::{Tag, TagType, Type},
     },
+    streams::write::Core as _,
     types::{
         cons::{Cons, Core as _},
         stream::{Core as _, Stream},
