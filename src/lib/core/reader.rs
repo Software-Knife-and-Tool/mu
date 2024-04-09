@@ -4,10 +4,9 @@
 //! mu reader
 use crate::{
     core::{
-        direct::{DirectInfo, DirectTag, DirectType},
         exception::{self, Condition, Exception},
+        lib::Lib,
         mu::Mu,
-        namespace::Namespace,
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
     },
@@ -20,12 +19,6 @@ use crate::{
     },
 };
 
-pub struct Reader {
-    pub append: Tag,
-    pub cons: Tag,
-    pub eol: Tag,
-}
-
 //
 // read functions return:
 //
@@ -35,8 +28,6 @@ pub struct Reader {
 //     errors propagate out of read()
 //
 pub trait Core {
-    fn new() -> Self;
-    fn build(&self, _: &Mu) -> Self;
     fn read_atom(_: &Mu, _: char, _: Tag) -> exception::Result<Tag>;
     fn read_block_comment(_: &Mu, _: Tag) -> exception::Result<Option<()>>;
     fn read_char_literal(_: &Mu, _: Tag) -> exception::Result<Option<Tag>>;
@@ -46,23 +37,7 @@ pub trait Core {
     fn read_token(_: &Mu, _: Tag) -> exception::Result<Option<String>>;
 }
 
-impl Core for Reader {
-    fn new() -> Self {
-        Reader {
-            append: Tag::nil(),
-            cons: Tag::nil(),
-            eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
-        }
-    }
-
-    fn build(&self, mu: &Mu) -> Self {
-        Reader {
-            append: Namespace::intern_symbol(mu, mu.lib_ns, "append".to_string(), Tag::nil()),
-            cons: Namespace::intern_symbol(mu, mu.lib_ns, "cons".to_string(), Tag::nil()),
-            eol: self.eol,
-        }
-    }
-
+impl Core for Lib {
     //
     // read whitespace:
     //

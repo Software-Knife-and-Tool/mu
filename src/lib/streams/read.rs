@@ -13,10 +13,13 @@ use crate::{
         frame::{Frame, LibFunction as _},
         gc::{Gc, LibFunction as _},
         heap::{Heap, LibFunction as _},
+        lib::Lib,
+        lib::LIB,
         mu::Mu,
         namespace::{LibFunction as _, Namespace},
         qquote::QqReader,
-        reader::{Core as _, Reader},
+        reader::Core as _,
+        reader::Core as _,
         readtable::{map_char_syntax, SyntaxType},
         types::{LibFunction as _, Tag, Type},
         utime::LibFunction as _,
@@ -55,7 +58,7 @@ impl Core for Mu {
         eof_value: Tag,
         recursivep: bool,
     ) -> exception::Result<Tag> {
-        match Reader::read_ws(self, stream) {
+        match Lib::read_ws(self, stream) {
             Ok(None) => {
                 return if eof_error_p {
                     Err(Exception::new(Condition::Eof, "read", stream))
@@ -77,9 +80,9 @@ impl Core for Mu {
             }
             Ok(Some(ch)) => match map_char_syntax(ch) {
                 Some(stype) => match stype {
-                    SyntaxType::Constituent => Reader::read_atom(self, ch, stream),
+                    SyntaxType::Constituent => Lib::read_atom(self, ch, stream),
                     SyntaxType::Macro => match ch {
-                        '#' => match Reader::sharp_macro(self, stream) {
+                        '#' => match Lib::sharp_macro(self, stream) {
                             Ok(Some(tag)) => Ok(tag),
                             Ok(None) => {
                                 Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
@@ -110,12 +113,12 @@ impl Core for Mu {
                         },
                         ')' => {
                             if recursivep {
-                                Ok(self.reader.eol)
+                                Ok(LIB.eol)
                             } else {
                                 Err(Exception::new(Condition::Syntax, "read", stream))
                             }
                         }
-                        ';' => match Reader::read_comment(self, stream) {
+                        ';' => match Lib::read_comment(self, stream) {
                             Ok(_) => {
                                 Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
                             }

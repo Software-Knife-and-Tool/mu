@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! mu cons class
+//! cons class
 use crate::{
     core::{
         apply::Core as _,
@@ -10,6 +10,7 @@ use crate::{
         frame::Frame,
         gc::Core as _,
         indirect::IndirectTag,
+        lib::LIB,
         mu::Mu,
         types::{Tag, TagType, Type},
     },
@@ -181,15 +182,15 @@ impl Core for Cons {
 
         match mu.read_stream(stream, false, Tag::nil(), true) {
             Ok(car) => {
-                if mu.reader.eol.eq_(&car) {
+                if LIB.eol.eq_(&car) {
                     Ok(Tag::nil())
                 } else {
                     match car.type_of() {
                         Type::Symbol if dot.eq_(&Symbol::name(mu, car)) => {
                             match mu.read_stream(stream, false, Tag::nil(), true) {
-                                Ok(cdr) if mu.reader.eol.eq_(&cdr) => Ok(Tag::nil()),
+                                Ok(cdr) if LIB.eol.eq_(&cdr) => Ok(Tag::nil()),
                                 Ok(cdr) => match mu.read_stream(stream, false, Tag::nil(), true) {
-                                    Ok(eol) if mu.reader.eol.eq_(&eol) => Ok(cdr),
+                                    Ok(eol) if LIB.eol.eq_(&eol) => Ok(cdr),
                                     Ok(_) => Err(Exception::new(Condition::Eof, "car", stream)),
                                     Err(e) => Err(e),
                                 },

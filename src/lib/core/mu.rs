@@ -12,9 +12,8 @@ use {
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::{Core as _, LibFn},
+            lib::{Core as _, LibFn, LIB},
             namespace::Namespace,
-            reader::{Core as _, Reader},
             types::{Tag, Type},
         },
         features::{Core as _, Feature},
@@ -36,7 +35,7 @@ use futures_locks::RwLock;
 
 // mu environment
 pub struct Mu {
-    pub version: Tag,
+    version: Tag,
 
     // configuration
     config: Config,
@@ -66,9 +65,6 @@ pub struct Mu {
     pub lib_ns: Tag,
     pub null_ns: Tag,
 
-    // reader
-    pub reader: Reader,
-
     // streams
     pub streams: RwLock<Vec<RwLock<Stream>>>,
 
@@ -81,8 +77,6 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.44";
-
     fn new(config: &Config) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
@@ -106,7 +100,6 @@ impl Core for Mu {
             lib_ns: Tag::nil(),
             ns_index: RwLock::new(HashMap::new()),
             null_ns: Tag::nil(),
-            reader: Reader::new(),
             start_time: ProcessTime::now(),
             stdin: Tag::nil(),
             stdout: Tag::nil(),
@@ -130,7 +123,7 @@ impl Core for Mu {
         };
 
         // version string
-        mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
+        mu.version = Vector::from_string(LIB.version).evict(&mu);
         Namespace::intern_symbol(&mu, mu.lib_ns, "version".to_string(), mu.version);
 
         // standard streams
@@ -159,9 +152,6 @@ impl Core for Mu {
         mu.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&mu);
 
         mu.features = Feature::install_features(&mu);
-
-        // the reader has to be last
-        mu.reader = mu.reader.build(&mu);
 
         mu
     }
