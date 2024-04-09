@@ -20,7 +20,6 @@ use {
         types::{
             cons::{Cons, Core as _},
             function::Function,
-            stream::Stream,
             streambuilder::StreamBuilder,
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
@@ -35,8 +34,6 @@ use futures_locks::RwLock;
 
 // env environment
 pub struct Env {
-    version: Tag,
-
     // configuration
     config: Config,
 
@@ -65,9 +62,7 @@ pub struct Env {
     pub lib_ns: Tag,
     pub null_ns: Tag,
 
-    // streams
-    pub streams: RwLock<Vec<RwLock<Stream>>>,
-
+    // standard streams
     pub stdin: Tag,
     pub stdout: Tag,
     pub errout: Tag,
@@ -103,8 +98,6 @@ impl Core for Env {
             start_time: ProcessTime::now(),
             stdin: Tag::nil(),
             stdout: Tag::nil(),
-            streams: RwLock::new(Vec::new()),
-            version: Tag::nil(),
         };
 
         // establish namespaces
@@ -123,21 +116,25 @@ impl Core for Env {
         };
 
         // version string
-        env.version = Vector::from_string(LIB.version).evict(&env);
-        Namespace::intern_symbol(&env, env.lib_ns, "version".to_string(), env.version);
+        Namespace::intern_symbol(
+            &env,
+            env.lib_ns,
+            "version".to_string(),
+            Vector::from_string(LIB.version).evict(&env),
+        );
 
         // standard streams
-        env.stdin = match StreamBuilder::new().stdin().build(&env) {
+        env.stdin = match StreamBuilder::new().stdin().build() {
             Ok(stream) => stream,
             Err(_) => panic!(),
         };
 
-        env.stdout = match StreamBuilder::new().stdout().build(&env) {
+        env.stdout = match StreamBuilder::new().stdout().build() {
             Ok(stream) => stream,
             Err(_) => panic!(),
         };
 
-        env.errout = match StreamBuilder::new().errout().build(&env) {
+        env.errout = match StreamBuilder::new().errout().build() {
             Ok(stream) => stream,
             Err(_) => panic!(),
         };

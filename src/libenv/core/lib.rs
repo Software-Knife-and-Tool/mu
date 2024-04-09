@@ -3,6 +3,7 @@
 
 //! env system functions
 use futures::executor::block_on;
+use futures_locks::RwLock;
 use {
     crate::{
         async_::context::{Context, LibFunction as _},
@@ -40,8 +41,10 @@ use {
 };
 
 pub struct Lib {
-    pub version: &'static str,
     pub eol: Tag,
+    pub streams: RwLock<Vec<RwLock<Stream>>>,
+    pub functions: RwLock<HashMap<u64, LibFn>>,
+    pub version: &'static str,
 }
 
 impl Lib {
@@ -49,8 +52,10 @@ impl Lib {
 
     pub fn new() -> Self {
         Lib {
-            version: Self::VERSION,
             eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
+            streams: RwLock::new(Vec::new()),
+            functions: RwLock::new(HashMap::new()),
+            version: Self::VERSION,
         }
     }
 }

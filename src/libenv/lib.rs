@@ -137,11 +137,7 @@ impl Env {
 
     /// convert a rust String to a tagged s-expression
     pub fn read_str(&self, str: &str) -> exception::Result<Tag> {
-        match StreamBuilder::new()
-            .string(str.to_string())
-            .input()
-            .build(&self.0)
-        {
+        match StreamBuilder::new().string(str.to_string()).input().build() {
             Ok(stream) => self.0.read_stream(stream, true, Tag::nil(), false),
             Err(e) => Err(e),
         }
@@ -159,11 +155,7 @@ impl Env {
 
     /// write a tag to a String
     pub fn write_to_string(&self, expr: Tag, esc: bool) -> String {
-        let str_stream = match StreamBuilder::new()
-            .string("".to_string())
-            .output()
-            .build(&self.0)
-        {
+        let str_stream = match StreamBuilder::new().string("".to_string()).output().build() {
             Ok(stream) => {
                 let str_tag = stream;
 

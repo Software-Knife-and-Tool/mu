@@ -13,6 +13,7 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
+        lib::LIB,
         types::{Tag, Type},
     },
     streams::{operator::Core as _, system::SystemStream},
@@ -88,9 +89,9 @@ impl LibFunction for Stream {
                     let arg = Vector::as_string(env, st_arg);
 
                     let stream = if st_dir.eq_(&Symbol::keyword("input")) {
-                        StreamBuilder::new().file(arg).input().build(env)
+                        StreamBuilder::new().file(arg).input().build()
                     } else if st_dir.eq_(&Symbol::keyword("output")) {
-                        StreamBuilder::new().file(arg).output().build(env)
+                        StreamBuilder::new().file(arg).output().build()
                     } else {
                         return Err(Exception::new(Condition::Type, "open", st_dir));
                     };
@@ -104,11 +105,11 @@ impl LibFunction for Stream {
                     let arg = Vector::as_string(env, st_arg);
 
                     let stream = if st_dir.eq_(&Symbol::keyword("input")) {
-                        StreamBuilder::new().string(arg).input().build(env)
+                        StreamBuilder::new().string(arg).input().build()
                     } else if st_dir.eq_(&Symbol::keyword("output")) {
-                        StreamBuilder::new().string(arg).output().build(env)
+                        StreamBuilder::new().string(arg).output().build()
                     } else if st_dir.eq_(&Symbol::keyword("bidir")) {
-                        StreamBuilder::new().string(arg).bidir().build(env)
+                        StreamBuilder::new().string(arg).bidir().build()
                     } else {
                         return Err(Exception::new(Condition::Type, "open", st_dir));
                     };
@@ -131,7 +132,7 @@ impl LibFunction for Stream {
         fp.value = match env.fp_argv_check("flush", &[Type::Stream], fp) {
             Ok(_) => {
                 if Self::is_open(env, tag) {
-                    let streams_ref = block_on(env.streams.read());
+                    let streams_ref = block_on(LIB.streams.read());
 
                     match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
                         Some(stream_ref) => {
