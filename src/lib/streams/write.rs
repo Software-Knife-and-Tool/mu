@@ -16,7 +16,7 @@ use crate::{
         mu::Mu,
         namespace::{LibFunction as _, Namespace},
         qquote::QqReader,
-        reader::{Core as _, Reader},
+        reader::Core as _,
         readtable::{map_char_syntax, SyntaxType},
         types::{LibFunction as _, Tag, Type},
         utime::LibFunction as _,

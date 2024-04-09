@@ -2,64 +2,62 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu system functions
-use crate::{
-    async_::context::{Context, LibFunction as _},
-    core::{
-        apply::LibFunction as _,
-        compile::{Compile, LibFunction as _},
-        dynamic::LibFunction as _,
-        exception::{self, Exception, LibFunction as _},
-        frame::{Frame, LibFunction as _},
-        gc::{Gc, LibFunction as _},
-        heap::{Heap, LibFunction as _},
-        mu::Mu,
-        namespace::{LibFunction as _, Namespace},
-        types::{LibFunction as _, Tag},
-        utime::LibFunction as _,
+use futures::executor::block_on;
+use {
+    crate::{
+        async_::context::{Context, LibFunction as _},
+        core::{
+            apply::LibFunction as _,
+            compile::{Compile, LibFunction as _},
+            direct::{DirectInfo, DirectTag, DirectType},
+            dynamic::LibFunction as _,
+            exception::{self, Exception, LibFunction as _},
+            frame::{Frame, LibFunction as _},
+            gc::{Gc, LibFunction as _},
+            heap::{Heap, LibFunction as _},
+            mu::Mu,
+            namespace::{LibFunction as _, Namespace},
+            types::{LibFunction as _, Tag},
+            utime::LibFunction as _,
+        },
+        streams::{
+            read::LibFunction as _,
+            write::{Core as _, LibFunction as _},
+        },
+        types::{
+            cons::{Cons, LibFunction as _},
+            fixnum::{Fixnum, LibFunction as _},
+            float::{Float, LibFunction as _},
+            function::Function,
+            stream::Stream,
+            streams::LibFunction as _,
+            struct_::{LibFunction as _, Struct},
+            symbol::{Core as _, LibFunction as _, Symbol, UNBOUND},
+            vector::{LibFunction as _, Vector},
+        },
     },
-    streams::{
-        read::LibFunction as _,
-        write::{Core as _, LibFunction as _},
-    },
-    types::{
-        cons::{Cons, LibFunction as _},
-        fixnum::{Fixnum, LibFunction as _},
-        float::{Float, LibFunction as _},
-        function::Function,
-        stream::Stream,
-        streams::LibFunction as _,
-        struct_::{LibFunction as _, Struct},
-        symbol::{Core as _, LibFunction as _, Symbol, UNBOUND},
-        vector::{LibFunction as _, Vector},
-    },
+    std::collections::HashMap,
 };
 
-use futures::executor::block_on;
-use std::collections::HashMap;
-
-/*
 pub struct Lib {
-    lib_ns: Tag,
-    functions: HashMap<String, Tag>
-    features: Vec<Tag>,
+    pub version: &'static str,
+    pub eol: Tag,
 }
 
-pub trait Lib {
-    fn new() -> Self {
-        let lib = match Namespace::add_ns(&mu, Symbol::Keyword("lib")) {
-            Ok(_) => Self::install_lib_functions(&mu),
-            Err(_) => panic!(),
-        };
+impl Lib {
+    pub const VERSION: &'static str = "0.0.44";
 
-        let features = Feature::install_features(&mu);
-
+    pub fn new() -> Self {
         Lib {
-            lib_ns,
-            features,
+            version: Self::VERSION,
+            eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
         }
     }
 }
-*/
+
+lazy_static! {
+    pub static ref LIB: Lib = Lib::new();
+}
 
 //
 // native functions
@@ -67,7 +65,6 @@ pub trait Lib {
 pub type LibFn = fn(&Mu, &mut Frame) -> exception::Result<()>;
 pub type LibFnDef = (&'static str, u16, LibFn);
 
-// mu function dispatch table
 lazy_static! {
     static ref LIB_SYMBOLS: Vec<LibFnDef> = vec![
         // types

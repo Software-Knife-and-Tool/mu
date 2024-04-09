@@ -5,9 +5,10 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception},
+        lib::Lib,
         mu::Mu,
         namespace::Namespace,
-        reader::{Core as _, Reader},
+        reader::Core as _,
         types::{Tag, Type},
     },
     streams::read::Core as _,
@@ -154,7 +155,7 @@ impl QqReader {
         */
 
     fn read_syntax(&self, mu: &Mu, stream: Tag) -> exception::Result<Option<QqSyntax>> {
-        Reader::read_ws(mu, stream).unwrap();
+        Lib::read_ws(mu, stream).unwrap();
         match Stream::read_char(mu, stream) {
             Err(e) => Err(e),
             Ok(None) => Ok(None),

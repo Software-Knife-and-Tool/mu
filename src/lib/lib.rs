@@ -93,7 +93,7 @@ pub struct Mu(core::mu::Mu);
 
 impl Mu {
     /// current version
-    pub const VERSION: &'static str = core::mu::Mu::VERSION;
+    pub const VERSION: &'static str = core::lib::Lib::VERSION;
 
     /// init
     pub fn signal_exception() {
