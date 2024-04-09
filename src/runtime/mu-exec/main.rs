@@ -9,7 +9,7 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate mu;
+extern crate libenv;
 
 #[allow(unused_imports)]
 use {
@@ -20,7 +20,7 @@ use {
         ElfBytes,
     },
     getopt::Opt,
-    mu::{Condition, Mu, Result, Tag},
+    libenv::{Condition, Env, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 
@@ -40,7 +40,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ExecOpt>> {
         match opt {
             Err(_) => {
                 if let Err(error) = opt {
-                    eprintln!("mu-exec: option {error:?}")
+                    eprintln!("env-exec: option {error:?}")
                 };
                 std::process::exit(-1);
             }
@@ -53,7 +53,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ExecOpt>> {
                     Opt('c', None) => optv.push(ExecOpt::Check),
                     Opt('t', None) => optv.push(ExecOpt::Toc),
                     Opt('v', None) => {
-                        print!("mu-exec: {} ", Mu::VERSION);
+                        print!("env-exec: {} ", Env::VERSION);
                         return None;
                     }
                     _ => panic!(),
@@ -71,7 +71,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ExecOpt>> {
 }
 
 fn usage() {
-    println!("mu-exec: {}: [-h?vd] file", Mu::VERSION);
+    println!("env-exec: {}: [-h?vd] file", Env::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("dump: load path");
@@ -86,8 +86,8 @@ pub fn main() {
     let mut _toc = false;
     let mut _path = String::new();
 
-    let _mu = match Mu::config(None) {
-        Some(config) => Mu::new(&config),
+    let _env = match Env::config(None) {
+        Some(config) => Env::new(&config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)

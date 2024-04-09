@@ -9,12 +9,12 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate mu;
+extern crate libenv;
 
 #[allow(unused_imports)]
 use {
     getopt::Opt,
-    mu::{Condition, Mu, Result, Tag},
+    libenv::{Condition, Env, Result, Tag},
     std::{fs, io::Write},
 };
 
@@ -48,7 +48,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
                 Some(opt) => match opt {
                     Opt('h', None) | Opt('?', None) => usage(),
                     Opt('v', None) => {
-                        print!("mu-sys: {} ", Mu::VERSION);
+                        print!("env-sys: {} ", Env::VERSION);
                         return None;
                     }
                     Opt('p', None) => {
@@ -84,7 +84,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
 }
 
 fn usage() {
-    println!("mu-sys: {}: [-h?pvcelq] [file...]", Mu::VERSION);
+    println!("env-sys: {}: [-h?pvcelq] [file...]", Env::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value,...]");
@@ -98,21 +98,21 @@ fn usage() {
     std::process::exit(0);
 }
 
-fn listener(mu: &Mu, null: bool) {
-    let eof_value = mu.eval_str("(lib:symbol \"eof\")").unwrap();
+fn listener(env: &Env, null: bool) {
+    let eof_value = env.eval_str("(lib:symbol \"eof\")").unwrap();
 
     loop {
-        match mu.read(mu.std_in(), false, eof_value) {
+        match env.read(env.std_in(), false, eof_value) {
             Ok(expr) => {
-                if mu.eq(expr, eof_value) {
+                if env.eq(expr, eof_value) {
                     break;
                 }
 
                 #[allow(clippy::single_match)]
-                match mu.compile(expr) {
-                    Ok(form) => match mu.eval(form) {
+                match env.compile(expr) {
+                    Ok(form) => match env.eval(form) {
                         Ok(eval) => {
-                            mu.write(eval, true, mu.std_out()).unwrap();
+                            env.write(eval, true, env.std_out()).unwrap();
                             if null {
                                 print!("\0")
                             }
@@ -121,20 +121,20 @@ fn listener(mu: &Mu, null: bool) {
                         Err(e) => {
                             eprint!(
                                 "eval exception raised by {}, {:?} condition on ",
-                                mu.write_to_string(e.source, true),
+                                env.write_to_string(e.source, true),
                                 e.condition
                             );
-                            mu.write(e.object, true, mu.err_out()).unwrap();
+                            env.write(e.object, true, env.err_out()).unwrap();
                             eprintln!()
                         }
                     },
                     Err(e) => {
                         eprint!(
                             "compile exception raised by {}, {:?} condition on ",
-                            mu.write_to_string(e.source, true),
+                            env.write_to_string(e.source, true),
                             e.condition
                         );
-                        mu.write(e.object, true, mu.err_out()).unwrap();
+                        env.write(e.object, true, env.err_out()).unwrap();
                         eprintln!()
                     }
                 }
@@ -145,10 +145,10 @@ fn listener(mu: &Mu, null: bool) {
                 } else {
                     eprint!(
                         "reader exception raised by {}, {:?} condition on ",
-                        mu.write_to_string(e.source, true),
+                        env.write_to_string(e.source, true),
                         e.condition
                     );
-                    mu.write(e.object, true, mu.err_out()).unwrap();
+                    env.write(e.object, true, env.err_out()).unwrap();
                     eprintln!()
                 }
             }
@@ -178,10 +178,10 @@ pub fn main() {
     }
 
     // enable signal exceptions
-    Mu::signal_exception();
+    Env::signal_exception();
 
-    let mu = match Mu::config(_config) {
-        Some(config) => Mu::new(&config),
+    let env = match Env::config(_config) {
+        Some(config) => Env::new(&config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)
@@ -192,10 +192,10 @@ pub fn main() {
         Some(opts) => {
             for opt in opts {
                 match opt {
-                    ShellOpt::Eval(expr) => match mu.eval_str(&expr) {
-                        Ok(eval) => println!("{}", mu.write_to_string(eval, true)),
+                    ShellOpt::Eval(expr) => match env.eval_str(&expr) {
+                        Ok(eval) => println!("{}", env.write_to_string(eval, true)),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, mu.exception_string(e));
+                            eprintln!("runtime: error {}, {}", expr, env.exception_string(e));
                             std::process::exit(-1);
                         }
                     },
@@ -205,21 +205,21 @@ pub fn main() {
                     ShellOpt::Pipe => {
                         pipe = true;
                     }
-                    ShellOpt::Load(path) => match mu.load(&path) {
+                    ShellOpt::Load(path) => match env.load(&path) {
                         Ok(_) => (),
                         Err(e) => {
                             eprintln!(
                                 "runtime: failed to load {}, {}",
                                 &path,
-                                mu.exception_string(e)
+                                env.exception_string(e)
                             );
                             std::process::exit(-1);
                         }
                     },
-                    ShellOpt::Quiet(expr) => match mu.eval_str(&expr) {
+                    ShellOpt::Quiet(expr) => match env.eval_str(&expr) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, mu.exception_string(e));
+                            eprintln!("runtime: error {}, {}", expr, env.exception_string(e));
                             std::process::exit(-1);
                         }
                     },
@@ -231,6 +231,6 @@ pub fn main() {
     };
 
     if !pipe {
-        listener(&mu, null)
+        listener(&env, null)
     }
 }

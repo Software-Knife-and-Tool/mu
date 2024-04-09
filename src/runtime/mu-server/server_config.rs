@@ -2,12 +2,12 @@
 //  SPDX-License-Identifier: MIT
 
 //! runtime loader/listener
-extern crate mu;
+extern crate env;
 
 use {
     futures::executor::block_on,
     getopt::Opt,
-    mu::{Mu},
+    env::{Env},
     std::net::{SocketAddr, ToSocketAddrs},
 };
 
@@ -37,7 +37,7 @@ enum OptType {
 
 impl ServerConfig {
     fn usage() {
-        println!("mu-server: {}: [-h?psvcel] [file...]", Mu::VERSION);
+        println!("env-server: {}: [-h?psvcel] [file...]", Env::VERSION);
         println!("h: usage message");
         println!("?: usage message");
         println!("c: [name:value,...]");
@@ -68,7 +68,7 @@ impl ServerConfig {
                     Some(opt) => match opt {
                         Opt('h', None) | Opt('?', None) => Self::usage(),
                         Opt('v', None) => {
-                            print!("runtime: {} ", Mu::VERSION);
+                            print!("runtime: {} ", Env::VERSION);
                             return None;
                         }
                         Opt('p', None) => {

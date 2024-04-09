@@ -9,12 +9,12 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate mu;
+extern crate libenv;
 
 #[allow(unused_imports)]
 use {
     getopt::Opt,
-    mu::{Condition, Mu, Result, Tag},
+    libenv::{Condition, Env, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 
@@ -46,7 +46,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<LoadOpt>> {
                 Some(opt) => match opt {
                     Opt('h', None) | Opt('?', None) => usage(),
                     Opt('v', None) => {
-                        print!("mu-ld: {} ", Mu::VERSION);
+                        print!("env-ld: {} ", Env::VERSION);
                         return None;
                     }
                     Opt('e', Some(expr)) => {
@@ -76,7 +76,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<LoadOpt>> {
 }
 
 fn usage() {
-    println!("mu-ld: {}: [-h?vcelq] [file...]", Mu::VERSION);
+    println!("env-ld: {}: [-h?vcelq] [file...]", Env::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value,...]");
@@ -108,8 +108,8 @@ pub fn main() {
         }
     }
 
-    let mu = match Mu::config(_config) {
-        Some(config) => Mu::new(&config),
+    let env = match Env::config(_config) {
+        Some(config) => Env::new(&config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)
@@ -120,20 +120,20 @@ pub fn main() {
         Some(opts) => {
             for opt in opts {
                 match opt {
-                    LoadOpt::Eval(expr) => match mu.eval_str(&expr) {
+                    LoadOpt::Eval(expr) => match env.eval_str(&expr) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("mu-ld: error {}, {}", expr, mu.exception_string(e));
+                            eprintln!("env-ld: error {}, {}", expr, env.exception_string(e));
                             std::process::exit(-1);
                         }
                     },
-                    LoadOpt::Load(path) => match mu.load(&path) {
+                    LoadOpt::Load(path) => match env.load(&path) {
                         Ok(_) => (),
                         Err(e) => {
                             eprintln!(
-                                "mu-ld: failed to load {}, {}",
+                                "env-ld: failed to load {}, {}",
                                 &path,
-                                mu.exception_string(e)
+                                env.exception_string(e)
                             );
                             std::process::exit(-1);
                         }
