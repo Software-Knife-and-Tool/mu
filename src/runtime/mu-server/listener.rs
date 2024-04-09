@@ -2,32 +2,32 @@
 //  SPDX-License-Identifier: MIT
 
 //! runtime loader/listener
-extern crate mu;
+extern crate env;
 
-use mu::{Condition};
+use env::{Condition};
 
 pub fn _listener(system: &System, _config: &str) {
-    let mu = system.mu();
+    let env = system.env();
 
     let eval_string = system
-        .eval(&"(mu:open :string :output \"\")".to_string())
+        .eval(&"(env:open :string :output \"\")".to_string())
         .unwrap();
 
-    let eof_value = system.eval(&"(mu:symbol \"eof\")".to_string()).unwrap();
+    let eof_value = system.eval(&"(env:symbol \"eof\")".to_string()).unwrap();
 
     loop {
-        match mu.read(mu.std_in(), true, eof_value) {
+        match env.read(env.std_in(), true, eof_value) {
             Ok(expr) => {
-                if mu.eq(expr, eof_value) {
+                if env.eq(expr, eof_value) {
                     break;
                 }
 
                 #[allow(clippy::single_match)]
-                match mu.compile(expr) {
-                    Ok(form) => match mu.eval(form) {
+                match env.compile(expr) {
+                    Ok(form) => match env.eval(form) {
                         Ok(eval) => {
-                            mu.write(eval, true, eval_string).unwrap();
-                            println!("{}", mu.get_string(eval_string).unwrap());
+                            env.write(eval, true, eval_string).unwrap();
+                            println!("{}", env.get_string(eval_string).unwrap());
                         }
                         Err(e) => {
                             eprint!(
@@ -35,7 +35,7 @@ pub fn _listener(system: &System, _config: &str) {
                                 system.write(e.source, true),
                                 e.condition
                             );
-                            mu.write(e.object, true, mu.err_out()).unwrap();
+                            env.write(e.object, true, env.err_out()).unwrap();
                             eprintln!()
                         }
                     },
@@ -45,7 +45,7 @@ pub fn _listener(system: &System, _config: &str) {
                             system.write(e.source, true),
                             e.condition
                         );
-                        mu.write(e.object, true, mu.err_out()).unwrap();
+                        env.write(e.object, true, env.err_out()).unwrap();
                         eprintln!()
                     }
                 }
@@ -59,7 +59,7 @@ pub fn _listener(system: &System, _config: &str) {
                         system.write(e.source, true),
                         e.condition
                     );
-                    mu.write(e.object, true, mu.err_out()).unwrap();
+                    env.write(e.object, true, env.err_out()).unwrap();
                     eprintln!()
                 }
             }
