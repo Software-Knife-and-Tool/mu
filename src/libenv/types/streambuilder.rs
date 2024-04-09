@@ -4,7 +4,6 @@
 //! system streams
 use crate::{
     core::{
-        env::Env,
         exception::{self, Condition, Exception},
         types::Tag,
     },
@@ -77,29 +76,29 @@ impl StreamBuilder {
         self
     }
 
-    pub fn build(&self, env: &Env) -> exception::Result<Tag> {
+    pub fn build(&self) -> exception::Result<Tag> {
         match &self.file {
             Some(path) => match self.input {
-                Some(_) => SystemStream::open_input_file(env, path),
-                None => SystemStream::open_output_file(env, path),
+                Some(_) => SystemStream::open_input_file(path),
+                None => SystemStream::open_output_file(path),
             },
             None => match &self.string {
                 Some(contents) => match self.input {
-                    Some(_) => SystemStream::open_input_string(env, contents),
+                    Some(_) => SystemStream::open_input_string(contents),
                     None => match self.output {
-                        Some(_) => SystemStream::open_output_string(env, contents),
+                        Some(_) => SystemStream::open_output_string(contents),
                         None => match self.bidir {
-                            Some(_) => SystemStream::open_bidir_string(env, contents),
+                            Some(_) => SystemStream::open_bidir_string(contents),
                             None => Err(Exception::new(Condition::Range, "open", Tag::nil())),
                         },
                     },
                 },
                 None => match self.stdin {
-                    Some(_) => SystemStream::open_std_stream(env, SystemStream::StdInput),
+                    Some(_) => SystemStream::open_std_stream(SystemStream::StdInput),
                     None => match self.stdout {
-                        Some(_) => SystemStream::open_std_stream(env, SystemStream::StdOutput),
+                        Some(_) => SystemStream::open_std_stream(SystemStream::StdOutput),
                         None => match self.errout {
-                            Some(_) => SystemStream::open_std_stream(env, SystemStream::StdError),
+                            Some(_) => SystemStream::open_std_stream(SystemStream::StdError),
                             None => Err(Exception::new(Condition::Range, "open", Tag::nil())),
                         },
                     },

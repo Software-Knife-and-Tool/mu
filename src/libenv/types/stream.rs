@@ -12,6 +12,7 @@ use crate::{
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
         env::Env,
         exception::{self, Condition, Exception},
+        lib::LIB,
         types::{Tag, Type},
     },
     streams::{
@@ -77,7 +78,7 @@ impl Core for Stream {
     }
 
     fn view(env: &Env, tag: Tag) -> Tag {
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
@@ -95,7 +96,7 @@ impl Core for Stream {
     }
 
     fn is_open(env: &Env, tag: Tag) -> bool {
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
@@ -108,7 +109,7 @@ impl Core for Stream {
     }
 
     fn close(env: &Env, tag: Tag) {
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
@@ -125,7 +126,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "get-str", tag));
         }
 
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
@@ -140,7 +141,7 @@ impl Core for Stream {
     fn write(env: &Env, tag: Tag, _: bool, stream_tag: Tag) -> exception::Result<()> {
         match tag.type_of() {
             Type::Stream => {
-                let streams_ref = block_on(env.streams.read());
+                let streams_ref = block_on(LIB.streams.read());
 
                 match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
                     Some(stream_ref) => {
@@ -188,7 +189,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "rd-char", tag));
         }
 
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
@@ -222,7 +223,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "rd-byte", tag));
         }
 
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
@@ -257,7 +258,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "un-char", tag));
         }
 
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
@@ -286,7 +287,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "wr-char", tag));
         }
 
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
@@ -307,7 +308,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "wr-byte", tag));
         }
 
-        let streams_ref = block_on(env.streams.read());
+        let streams_ref = block_on(LIB.streams.read());
 
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
