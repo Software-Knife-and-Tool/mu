@@ -40,7 +40,7 @@ impl Feature {
             Err(_) => panic!(),
         };
 
-        Env::install_feature_functions(env, ns, feature.symbols);
+        Env::feature_functions(env, ns, feature.symbols);
 
         ns
     }

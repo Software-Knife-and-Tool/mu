@@ -6,6 +6,7 @@ use futures::executor::block_on;
 use futures_locks::RwLock;
 use {
     crate::{
+        allocators::bump_allocator::BumpAllocator,
         async_::context::{Context, LibFunction as _},
         core::{
             apply::LibFunction as _,
@@ -42,6 +43,7 @@ use {
 
 pub struct Lib {
     pub eol: Tag,
+    pub heap: RwLock<BumpAllocator>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub functions: RwLock<HashMap<u64, LibFn>>,
     pub version: &'static str,
@@ -53,8 +55,9 @@ impl Lib {
     pub fn new() -> Self {
         Lib {
             eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
-            streams: RwLock::new(Vec::new()),
             functions: RwLock::new(HashMap::new()),
+            heap: RwLock::new(BumpAllocator::new(10, Tag::NTYPES)),
+            streams: RwLock::new(Vec::new()),
             version: Self::VERSION,
         }
     }
@@ -167,16 +170,17 @@ lazy_static! {
 }
 
 pub trait Core {
-    fn install_lib_functions(_: &Env) -> HashMap<u64, LibFn>;
-    fn install_feature_functions(_: &Env, _: Tag, _: Vec<LibFnDef>);
+    fn lib_functions(_: &Env);
+    fn feature_functions(_: &Env, _: Tag, _: Vec<LibFnDef>);
 
     fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
     fn debug_vprint(&self, _: &str, _: bool, _: Tag);
 }
 
 impl Core for Env {
-    fn install_lib_functions(env: &Env) -> HashMap<u64, LibFn> {
-        let mut functions = HashMap::<u64, LibFn>::new();
+    // lib functions
+    fn lib_functions(env: &Env) {
+        let mut functions = block_on(LIB.functions.write());
 
         functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
 
@@ -188,12 +192,11 @@ impl Core for Env {
 
             (Tag::as_u64(&fn_key), *libfn)
         }));
-
-        functions
     }
 
-    fn install_feature_functions(env: &Env, ns: Tag, symbols: Vec<LibFnDef>) {
-        let mut functions = block_on(env.functions.write());
+    // features
+    fn feature_functions(env: &Env, ns: Tag, symbols: Vec<LibFnDef>) {
+        let mut functions = block_on(LIB.functions.write());
 
         functions.extend(symbols.iter().map(|(name, nreqs, featurefn)| {
             let form = Namespace::intern_symbol(env, ns, name.to_string(), *UNBOUND);
@@ -206,7 +209,6 @@ impl Core for Env {
     }
 
     // debug printing
-    //
     fn debug_vprint(&self, label: &str, verbose: bool, tag: Tag) {
         print!("{}: ", label);
         self.write_stream(tag, verbose, self.stdout).unwrap();

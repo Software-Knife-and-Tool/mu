@@ -84,9 +84,9 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 *mu* leans heavily on functional programming principles.
 
-The *mu* runtime kernel, *libenv*, is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file, which is an inherently unsafe operation.)
+The *mu* runtime kernel, *libenv*, is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file and random user selected features may have unsafe implementations.)
 
-The runtime implements 64 bit tagged pointers, is available as a crate, and extends a Rust API for embedded applications. The runtime is primarily an resource allocator and evaluator for the *libenv* kernel language. *libenv* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
+The runtime implements 64 bit tagged pointers, is available as a crate, and extends a Rust API for embedded applications. The runtime is primarily a resource allocator and evaluator for the *libenv* kernel language. *libenv* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
 
 The *mu* 2-LISP system is organized as a stack of compilers, culminating in the *mu/codegen* native code compiler/system builder.
 
