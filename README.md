@@ -241,7 +241,7 @@ On a modern Core I7 CPU at 3+ GHz, the default regression tests take approximate
 % make -C metrics/regression commit
 ```
 
-The `base` target produces a performance run and establishes a base line. The `current`  target produces a secondary performance run. The current summary will be checked into the repo as the base at the next commit. The `report` target produces a human-readable diff between `base` and `current`. 
+The `base` target produces a performance run and establishes a base line. The `current`  target produces a secondary performance run. The `report` target produces a human-readable diff between `base` and `current`.  Normally, you'd run a 
 
 The `regression` makefile has additional facilities for development, including reporting on individual tests. The `help` target will list them. 
 
@@ -251,7 +251,7 @@ In specific, a summary of significant performance changes (differences in measur
 % make -C metrics/regression commit
 ```
 
-produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary, and timing changes greater than 20% for any individual test. `commit` also establishes the `current` report as the new baseline in preparation for a commit to the repo.
+produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary.
 
 For convenience, the *mu* Makefile provides:
 

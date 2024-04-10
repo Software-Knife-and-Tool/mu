@@ -29,7 +29,7 @@ help:
 
 report:
 	@sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF)
-	@python3 $(BIN)/commit.py $(TMPF)
+	@python3 $(BIN)/report.py $(TMPF)
 	@rm -f $(TMPF)
 
 regression:
