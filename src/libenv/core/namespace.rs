@@ -10,7 +10,6 @@ use {
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::LibFn,
             types::{Tag, Type},
         },
         types::{
@@ -25,17 +24,22 @@ use {
 
 use {futures::executor::block_on, futures_locks::RwLock};
 
-pub struct Namespace {
-    pub symbols: RwLock<HashMap<String, Tag>>,
-    pub functions: RwLock<Vec<(&'static str, u16, LibFn)>>,
+pub enum Namespace {
+    Static(&'static RwLock<HashMap<String, Tag>>),
+    Dynamic(RwLock<HashMap<String, Tag>>),
 }
 
 impl Namespace {
-    pub fn new(native: Vec<(&'static str, u16, LibFn)>) -> Self {
-        Self {
-            symbols: RwLock::new(HashMap::<String, Tag>::new()),
-            functions: RwLock::new(native),
+    pub fn register_ns(env: &Env, name: Tag, ns: Namespace) -> exception::Result<Tag> {
+        let mut ns_ref = block_on(env.ns_index.write());
+
+        if ns_ref.contains_key(&name.as_u64()) {
+            return Err(Exception::new(Condition::Type, "make-ns", name));
         }
+
+        ns_ref.insert(name.as_u64(), (name, ns));
+
+        Ok(name)
     }
 
     pub fn add_ns(env: &Env, ns: Tag) -> exception::Result<Tag> {
@@ -47,10 +51,29 @@ impl Namespace {
 
         ns_ref.insert(
             ns.as_u64(),
-            (ns, RwLock::new(HashMap::<String, Tag>::new())),
+            (
+                ns,
+                Namespace::Dynamic(RwLock::new(HashMap::<String, Tag>::new())),
+            ),
         );
 
         Ok(ns)
+    }
+
+    pub fn add_static_ns(
+        env: &Env,
+        name: Tag,
+        ns: &'static RwLock<HashMap<String, Tag>>,
+    ) -> exception::Result<Tag> {
+        let mut ns_ref = block_on(env.ns_index.write());
+
+        if ns_ref.contains_key(&name.as_u64()) {
+            return Err(Exception::new(Condition::Type, "make-ns", name));
+        }
+
+        ns_ref.insert(name.as_u64(), (name, Namespace::Static(ns)));
+
+        Ok(name)
     }
 
     fn map_symbol(env: &Env, ns: Tag, name: &str) -> Option<Tag> {
@@ -58,7 +81,10 @@ impl Namespace {
 
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
 
-        let hash = block_on(ns_cache.read());
+        let hash = block_on(match ns_cache {
+            Namespace::Static(hash) => hash.read(),
+            Namespace::Dynamic(hash) => hash.read(),
+        });
 
         if hash.contains_key(name) {
             Some(hash[name])
@@ -73,7 +99,10 @@ impl Namespace {
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
         let name = Vector::as_string(env, Symbol::name(env, symbol));
 
-        let mut hash = block_on(ns_cache.write());
+        let mut hash = block_on(match ns_cache {
+            Namespace::Static(hash) => hash.write(),
+            Namespace::Dynamic(hash) => hash.write(),
+        });
 
         hash.insert(name, symbol);
     }
@@ -298,7 +327,12 @@ impl LibFunction for Namespace {
                 Some(_) => {
                     let ns_ref = block_on(env.ns_index.read());
                     let (_, ns_cache) = &ns_ref[&ns.as_u64()];
-                    let hash = block_on(ns_cache.read());
+
+                    let hash = block_on(match ns_cache {
+                        Namespace::Static(hash) => hash.read(),
+                        Namespace::Dynamic(hash) => hash.read(),
+                    });
+
                     let vec = hash.keys().map(|key| hash[key]).collect::<Vec<Tag>>();
 
                     if type_.eq_(&Symbol::keyword("list")) {

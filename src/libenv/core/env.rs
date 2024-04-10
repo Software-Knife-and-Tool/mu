@@ -12,7 +12,7 @@ use {
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::{Core as _, LIB},
+            lib::{Core as _, Lib, LIB},
             namespace::Namespace,
             types::{Tag, Type},
         },
@@ -47,7 +47,7 @@ pub struct Env {
 
     // ns/async maps
     pub async_index: RwLock<HashMap<u64, Context>>,
-    pub ns_index: RwLock<HashMap<u64, (Tag, RwLock<HashMap<String, Tag>>)>>,
+    pub ns_index: RwLock<HashMap<u64, (Tag, Namespace)>>,
 
     // internal functions
     pub if_: Tag,
@@ -100,7 +100,7 @@ impl Core for Env {
         env.keyword_ns = Symbol::keyword("keyword");
 
         env.lib_ns = Symbol::keyword("lib");
-        match Namespace::add_ns(&env, env.lib_ns) {
+        match Namespace::add_static_ns(&env, env.lib_ns, Lib::symbols()) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
