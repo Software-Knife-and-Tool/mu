@@ -13,6 +13,7 @@ use crate::{
         env::{Core as _, Env},
         exception::{self, Condition, Core as _, Exception},
         gc::Core as _,
+        lib::LIB,
         types::{Tag, Type},
     },
     types::{
@@ -158,7 +159,7 @@ impl Frame {
                     }
 
                     let fn_key = Function::form(env, func);
-                    let fn_ = block_on(env.functions.read())[&Tag::as_u64(&fn_key)];
+                    let fn_ = block_on(LIB.functions.read())[&Tag::as_u64(&fn_key)];
 
                     match fn_(env, &mut self) {
                         Ok(_) => Ok(self.value),

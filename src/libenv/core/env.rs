@@ -12,7 +12,7 @@ use {
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::{Core as _, LibFn, LIB},
+            lib::{Core as _, LIB},
             namespace::Namespace,
             types::{Tag, Type},
         },
@@ -49,9 +49,6 @@ pub struct Env {
     pub async_index: RwLock<HashMap<u64, Context>>,
     pub ns_index: RwLock<HashMap<u64, (Tag, RwLock<HashMap<String, Tag>>)>>,
 
-    // core function map
-    pub functions: RwLock<HashMap<u64, LibFn>>,
-
     // internal functions
     pub if_: Tag,
 
@@ -86,7 +83,6 @@ impl Core for Env {
             dynamic: RwLock::new(Vec::new()),
             errout: Tag::nil(),
             features: Vec::new(),
-            functions: RwLock::new(HashMap::new()),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
             if_: Tag::nil(),
@@ -145,7 +141,7 @@ impl Core for Env {
         Namespace::intern_symbol(&env, env.lib_ns, "err-out".to_string(), env.errout);
 
         // core functions
-        env.functions = RwLock::new(Self::install_lib_functions(&env));
+        Self::lib_functions(&env);
         env.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&env);
 
         env.features = Feature::install_features(&env);
