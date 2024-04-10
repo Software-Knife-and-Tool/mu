@@ -41,32 +41,6 @@ use {
     std::collections::HashMap,
 };
 
-pub struct Lib {
-    pub eol: Tag,
-    pub heap: RwLock<BumpAllocator>,
-    pub streams: RwLock<Vec<RwLock<Stream>>>,
-    pub functions: RwLock<HashMap<u64, LibFn>>,
-    pub version: &'static str,
-}
-
-impl Lib {
-    pub const VERSION: &'static str = "0.0.45";
-
-    pub fn new() -> Self {
-        Lib {
-            eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
-            functions: RwLock::new(HashMap::new()),
-            heap: RwLock::new(BumpAllocator::new(10, Tag::NTYPES)),
-            streams: RwLock::new(Vec::new()),
-            version: Self::VERSION,
-        }
-    }
-}
-
-lazy_static! {
-    pub static ref LIB: Lib = Lib::new();
-}
-
 //
 // native functions
 //
@@ -167,6 +141,50 @@ lazy_static! {
         // utime
         ( "utime",   0, Env::lib_utime ),
     ];
+}
+
+pub struct Lib {
+    pub eol: Tag,
+    pub heap: RwLock<BumpAllocator>,
+    pub streams: RwLock<Vec<RwLock<Stream>>>,
+    pub symbols: RwLock<HashMap<String, Tag>>,
+    pub functions: RwLock<HashMap<u64, LibFn>>,
+    pub version: &'static str,
+}
+
+impl Lib {
+    pub const VERSION: &'static str = "0.0.45";
+
+    pub fn new() -> Self {
+        let lib = Lib {
+            eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
+            functions: RwLock::new(HashMap::new()),
+            heap: RwLock::new(BumpAllocator::new(10, Tag::NTYPES)),
+            streams: RwLock::new(Vec::new()),
+            symbols: RwLock::new(HashMap::new()),
+            version: Self::VERSION,
+        };
+
+        let mut functions = block_on(lib.functions.write());
+
+        // native functions
+        functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
+        functions.extend(
+            LIB_SYMBOLS
+                .iter()
+                .map(|(name, _, libfn)| (Tag::as_u64(&Symbol::keyword(name)), *libfn)),
+        );
+
+        lib
+    }
+
+    pub fn symbols() -> &'static RwLock<HashMap<String, Tag>> {
+        &LIB.symbols
+    }
+}
+
+lazy_static! {
+    pub static ref LIB: Lib = Lib::new();
 }
 
 pub trait Core {

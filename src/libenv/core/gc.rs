@@ -14,6 +14,7 @@ use {
             exception,
             frame::Frame,
             indirect::{self, IndirectTag},
+            namespace::Namespace,
             types::{Tag, Type},
         },
         types::{
@@ -126,8 +127,11 @@ impl Core for Env {
     fn gc_namespaces(&self) {
         let ns_index_ref = block_on(self.ns_index.read());
 
-        for (_, hash) in ns_index_ref.iter() {
-            let hash_ref = block_on(hash.1.read());
+        for (_, ns) in ns_index_ref.iter() {
+            let hash_ref = block_on(match ns.1 {
+                Namespace::Static(hash) => hash.read(),
+                Namespace::Dynamic(ref hash) => hash.read(),
+            });
 
             for (_, symbol) in hash_ref.iter() {
                 self.mark(*symbol)
