@@ -7,7 +7,7 @@ dist/mu-server
 dist/mu-sys
 dist/prelude.l
 doc/rustdoc
-metrics/regression/current.report
+metrics/regression/*.report
 metrics/regression/json
 metrics/valgrind/cachegrind.report
 metrics/valgrind/callgrind.report

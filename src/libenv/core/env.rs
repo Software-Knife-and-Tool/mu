@@ -12,14 +12,13 @@ use {
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::{Core as _, Lib, LIB},
+            lib::{Lib, LIB},
             namespace::Namespace,
             types::{Tag, Type},
         },
         features::{Core as _, Feature},
         types::{
             cons::{Cons, Core as _},
-            function::Function,
             streambuilder::StreamBuilder,
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
@@ -48,9 +47,6 @@ pub struct Env {
     // ns/async maps
     pub async_index: RwLock<HashMap<u64, Context>>,
     pub ns_index: RwLock<HashMap<u64, (Tag, Namespace)>>,
-
-    // internal functions
-    pub if_: Tag,
 
     // namespaces
     features: Vec<Tag>,
@@ -85,7 +81,6 @@ impl Core for Env {
             features: Vec::new(),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
-            if_: Tag::nil(),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
             lib_ns: Tag::nil(),
@@ -140,10 +135,10 @@ impl Core for Env {
         Namespace::intern_symbol(&env, env.lib_ns, "std-out".to_string(), env.stdout);
         Namespace::intern_symbol(&env, env.lib_ns, "err-out".to_string(), env.errout);
 
-        // core functions
-        Self::lib_functions(&env);
-        env.if_ = Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(&env);
+        // lib functions
+        Lib::lib_symbols(&env);
 
+        // features
         env.features = Feature::install_features(&env);
 
         env
