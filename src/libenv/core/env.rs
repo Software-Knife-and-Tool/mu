@@ -16,7 +16,6 @@ use {
             namespace::Namespace,
             types::{Tag, Type},
         },
-        features::{Core as _, Feature},
         types::{
             cons::{Cons, Core as _},
             symbol::{Core as _, Symbol},
@@ -47,8 +46,6 @@ pub struct Env {
     pub ns_index: RwLock<HashMap<u64, (Tag, Namespace)>>,
 
     // namespaces
-    features: Vec<Tag>,
-
     pub keyword_ns: Tag,
     pub lib_ns: Tag,
     pub null_ns: Tag,
@@ -70,7 +67,6 @@ impl Core for Env {
             async_index: RwLock::new(HashMap::new()),
             config: *config,
             dynamic: RwLock::new(Vec::new()),
-            features: Vec::new(),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
             keyword_ns: Tag::nil(),
@@ -90,17 +86,13 @@ impl Core for Env {
             Err(_) => panic!(),
         };
 
+        Lib::lib_namespaces(&env);
+
         env.null_ns = Tag::nil();
         match Namespace::add_ns(&env, env.null_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
-
-        // lib functions
-        Lib::lib_symbols(&env);
-
-        // features
-        env.features = Feature::install_features(&env);
 
         env
     }

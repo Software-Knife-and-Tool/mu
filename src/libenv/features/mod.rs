@@ -27,39 +27,26 @@ pub mod std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
 pub mod sysinfo;
 
+#[derive(Clone)]
 pub struct Feature {
-    symbols: Vec<(&'static str, u16, LibFn)>,
-    namespace: String,
-}
-
-impl Feature {
-    fn install(env: &Env, feature: Feature) -> Tag {
-        let ns = Symbol::keyword(&feature.namespace);
-        match Namespace::add_ns(env, ns) {
-            Ok(_) => (),
-            Err(_) => panic!(),
-        };
-
-        Lib::feature_symbols(env, ns, feature.symbols);
-
-        ns
-    }
+    pub symbols: Vec<(&'static str, u16, LibFn)>,
+    pub namespace: String,
 }
 
 pub trait Core {
-    fn install_features(_: &Env) -> Vec<Tag>;
+    fn install_features() -> Vec<Feature>;
 }
 
 impl Core for Feature {
-    fn install_features(_env: &Env) -> Vec<Tag> {
+    fn install_features() -> Vec<Feature> {
         #[allow(clippy::let_and_return)]
         let features = vec![
             #[cfg(feature = "nix")]
-            Self::install(_env, Nix::make_feature(_env)),
+            Nix::feature(),
             #[cfg(feature = "std")]
-            Self::install(_env, Std::make_feature(_env)),
+            Std::feature(),
             #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
-            Self::install(_env, Sysinfo::make_feature(_env)),
+            Sysinfo::feature(),
         ];
 
         features

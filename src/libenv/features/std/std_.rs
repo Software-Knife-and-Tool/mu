@@ -31,11 +31,11 @@ lazy_static! {
 pub struct Std {}
 
 pub trait Core {
-    fn make_feature(_: &Env) -> Feature;
+    fn feature() -> Feature;
 }
 
 impl Core for Std {
-    fn make_feature(_: &Env) -> Feature {
+    fn feature() -> Feature {
         Feature {
             symbols: STD_SYMBOLS.to_vec(),
             namespace: "std".to_string(),
