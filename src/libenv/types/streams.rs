@@ -89,9 +89,9 @@ impl LibFunction for Stream {
                     let arg = Vector::as_string(env, st_arg);
 
                     let stream = if st_dir.eq_(&Symbol::keyword("input")) {
-                        StreamBuilder::new().file(arg).input().build()
+                        StreamBuilder::new().file(arg).input().build(&LIB)
                     } else if st_dir.eq_(&Symbol::keyword("output")) {
-                        StreamBuilder::new().file(arg).output().build()
+                        StreamBuilder::new().file(arg).output().build(&LIB)
                     } else {
                         return Err(Exception::new(Condition::Type, "open", st_dir));
                     };
@@ -105,11 +105,11 @@ impl LibFunction for Stream {
                     let arg = Vector::as_string(env, st_arg);
 
                     let stream = if st_dir.eq_(&Symbol::keyword("input")) {
-                        StreamBuilder::new().string(arg).input().build()
+                        StreamBuilder::new().string(arg).input().build(&LIB)
                     } else if st_dir.eq_(&Symbol::keyword("output")) {
-                        StreamBuilder::new().string(arg).output().build()
+                        StreamBuilder::new().string(arg).output().build(&LIB)
                     } else if st_dir.eq_(&Symbol::keyword("bidir")) {
-                        StreamBuilder::new().string(arg).bidir().build()
+                        StreamBuilder::new().string(arg).bidir().build(&LIB)
                     } else {
                         return Err(Exception::new(Condition::Type, "open", st_dir));
                     };

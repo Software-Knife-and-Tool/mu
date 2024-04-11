@@ -61,6 +61,7 @@ use {
         config::Config,
         env::{self, Core},
         exception::{self, Core as _},
+        lib::LIB,
     },
     std::fs,
     streams::{read::Core as _, write::Core as _},
@@ -137,7 +138,11 @@ impl Env {
 
     /// convert a rust String to a tagged s-expression
     pub fn read_str(&self, str: &str) -> exception::Result<Tag> {
-        match StreamBuilder::new().string(str.to_string()).input().build() {
+        match StreamBuilder::new()
+            .string(str.to_string())
+            .input()
+            .build(&LIB)
+        {
             Ok(stream) => self.0.read_stream(stream, true, Tag::nil(), false),
             Err(e) => Err(e),
         }
@@ -155,7 +160,11 @@ impl Env {
 
     /// write a tag to a String
     pub fn write_to_string(&self, expr: Tag, esc: bool) -> String {
-        let str_stream = match StreamBuilder::new().string("".to_string()).output().build() {
+        let str_stream = match StreamBuilder::new()
+            .string("".to_string())
+            .output()
+            .build(&LIB)
+        {
             Ok(stream) => {
                 let str_tag = stream;
 
@@ -170,17 +179,17 @@ impl Env {
 
     /// return the standard-input lib stream
     pub fn std_in(&self) -> Tag {
-        self.0.stdin
+        LIB.stdin()
     }
 
     /// return the standard-output lib stream
     pub fn std_out(&self) -> Tag {
-        self.0.stdout
+        LIB.stdout()
     }
 
     /// return the error-output lib stream
     pub fn err_out(&self) -> Tag {
-        self.0.errout
+        LIB.errout()
     }
 
     // eval &str

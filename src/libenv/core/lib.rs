@@ -32,14 +32,19 @@ use {
             float::{Float, LibFunction as _},
             function::Function,
             stream::Stream,
+            streambuilder::StreamBuilder,
             streams::LibFunction as _,
             struct_::{LibFunction as _, Struct},
             symbol::{Core as _, LibFunction as _, Symbol, UNBOUND},
-            vector::{LibFunction as _, Vector},
+            vector::{Core as _, LibFunction as _, Vector},
         },
     },
     std::collections::HashMap,
 };
+
+lazy_static! {
+    pub static ref LIB: Lib = Lib::new().stdio();
+}
 
 //
 // native functions
@@ -144,12 +149,14 @@ lazy_static! {
 }
 
 pub struct Lib {
-    pub eol: Tag,
+    pub version: &'static str,
+
     pub heap: RwLock<BumpAllocator>,
-    pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub symbols: RwLock<HashMap<String, Tag>>,
     pub functions: RwLock<HashMap<u64, LibFn>>,
-    pub version: &'static str,
+    pub streams: RwLock<Vec<RwLock<Stream>>>,
+    pub eol: Tag,
+    pub stdio: RwLock<(Tag, Tag, Tag)>,
 }
 
 impl Lib {
@@ -163,6 +170,7 @@ impl Lib {
             streams: RwLock::new(Vec::new()),
             symbols: RwLock::new(HashMap::new()),
             version: Self::VERSION,
+            stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
         };
 
         let mut functions = block_on(lib.functions.write());
@@ -178,6 +186,47 @@ impl Lib {
         lib
     }
 
+    pub fn stdio(self) -> Self {
+        let mut stdio = block_on(self.stdio.write());
+
+        let stdin = match StreamBuilder::new().stdin().build(&self) {
+            Ok(stream) => stream,
+            Err(_) => panic!(),
+        };
+
+        let stdout = match StreamBuilder::new().stdout().build(&self) {
+            Ok(stream) => stream,
+            Err(_) => panic!(),
+        };
+
+        let errout = match StreamBuilder::new().errout().build(&self) {
+            Ok(stream) => stream,
+            Err(_) => panic!(),
+        };
+
+        *stdio = (stdin, stdout, errout);
+
+        self
+    }
+
+    pub fn stdin(&self) -> Tag {
+        let stdio = block_on(self.stdio.read());
+
+        stdio.0
+    }
+
+    pub fn stdout(&self) -> Tag {
+        let stdio = block_on(self.stdio.read());
+
+        stdio.1
+    }
+
+    pub fn errout(&self) -> Tag {
+        let stdio = block_on(self.stdio.read());
+
+        stdio.2
+    }
+
     pub fn symbols() -> &'static RwLock<HashMap<String, Tag>> {
         &LIB.symbols
     }
@@ -186,13 +235,27 @@ impl Lib {
     pub fn lib_symbols(env: &Env) {
         let mut functions = block_on(LIB.functions.write());
 
-        functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
+        Namespace::intern_symbol(
+            env,
+            env.lib_ns,
+            "version".to_string(),
+            Vector::from_string(LIB.version).evict(env),
+        );
+
         Namespace::intern_symbol(
             env,
             env.lib_ns,
             "if".to_string(),
             Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(env),
         );
+
+        Namespace::intern_symbol(env, env.lib_ns, "std-in".to_string(), LIB.stdin());
+
+        Namespace::intern_symbol(env, env.lib_ns, "std-out".to_string(), LIB.stdout());
+
+        Namespace::intern_symbol(env, env.lib_ns, "err-out".to_string(), LIB.errout());
+
+        functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
 
         functions.extend(LIB_SYMBOLS.iter().map(|(name, nreqs, libfn)| {
             let fn_key = Symbol::keyword(name);
@@ -219,10 +282,6 @@ impl Lib {
     }
 }
 
-lazy_static! {
-    pub static ref LIB: Lib = Lib::new();
-}
-
 pub trait Core {
     fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
     fn debug_vprint(&self, _: &str, _: bool, _: Tag);
@@ -231,8 +290,10 @@ pub trait Core {
 impl Core for Env {
     // debug printing
     fn debug_vprint(&self, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(LIB.stdio.read());
+
         print!("{}: ", label);
-        self.write_stream(tag, verbose, self.stdout).unwrap();
+        self.write_stream(tag, verbose, stdio.1).unwrap();
     }
 
     fn debug_vprintln(&self, label: &str, verbose: bool, tag: Tag) {

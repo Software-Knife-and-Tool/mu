@@ -12,16 +12,14 @@ use {
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::{Lib, LIB},
+            lib::Lib,
             namespace::Namespace,
             types::{Tag, Type},
         },
         features::{Core as _, Feature},
         types::{
             cons::{Cons, Core as _},
-            streambuilder::StreamBuilder,
             symbol::{Core as _, Symbol},
-            vector::{Core as _, Vector},
         },
     },
     cpu_time::ProcessTime,
@@ -55,11 +53,6 @@ pub struct Env {
     pub lib_ns: Tag,
     pub null_ns: Tag,
 
-    // standard streams
-    pub stdin: Tag,
-    pub stdout: Tag,
-    pub errout: Tag,
-
     // system
     pub start_time: ProcessTime,
 }
@@ -77,7 +70,6 @@ impl Core for Env {
             async_index: RwLock::new(HashMap::new()),
             config: *config,
             dynamic: RwLock::new(Vec::new()),
-            errout: Tag::nil(),
             features: Vec::new(),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
@@ -87,8 +79,6 @@ impl Core for Env {
             ns_index: RwLock::new(HashMap::new()),
             null_ns: Tag::nil(),
             start_time: ProcessTime::now(),
-            stdin: Tag::nil(),
-            stdout: Tag::nil(),
         };
 
         // establish namespaces
@@ -105,35 +95,6 @@ impl Core for Env {
             Ok(_) => (),
             Err(_) => panic!(),
         };
-
-        // version string
-        Namespace::intern_symbol(
-            &env,
-            env.lib_ns,
-            "version".to_string(),
-            Vector::from_string(LIB.version).evict(&env),
-        );
-
-        // standard streams
-        env.stdin = match StreamBuilder::new().stdin().build() {
-            Ok(stream) => stream,
-            Err(_) => panic!(),
-        };
-
-        env.stdout = match StreamBuilder::new().stdout().build() {
-            Ok(stream) => stream,
-            Err(_) => panic!(),
-        };
-
-        env.errout = match StreamBuilder::new().errout().build() {
-            Ok(stream) => stream,
-            Err(_) => panic!(),
-        };
-
-        // standard stream symbols
-        Namespace::intern_symbol(&env, env.lib_ns, "std-in".to_string(), env.stdin);
-        Namespace::intern_symbol(&env, env.lib_ns, "std-out".to_string(), env.stdout);
-        Namespace::intern_symbol(&env, env.lib_ns, "err-out".to_string(), env.errout);
 
         // lib functions
         Lib::lib_symbols(&env);
