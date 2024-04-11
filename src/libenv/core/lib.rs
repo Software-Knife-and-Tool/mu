@@ -22,6 +22,7 @@ use {
             types::{LibFunction as _, Tag},
             utime::LibFunction as _,
         },
+        features::{Core as _, Feature},
         streams::{
             read::LibFunction as _,
             write::{Core as _, LibFunction as _},
@@ -43,7 +44,7 @@ use {
 };
 
 lazy_static! {
-    pub static ref LIB: Lib = Lib::new().stdio();
+    pub static ref LIB: Lib = Lib::new().features().stdio();
 }
 
 //
@@ -154,6 +155,7 @@ pub struct Lib {
     pub heap: RwLock<BumpAllocator>,
     pub symbols: RwLock<HashMap<String, Tag>>,
     pub functions: RwLock<HashMap<u64, LibFn>>,
+    pub features: RwLock<Vec<Feature>>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub eol: Tag,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
@@ -165,12 +167,13 @@ impl Lib {
     pub fn new() -> Self {
         let lib = Lib {
             eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
+            features: RwLock::new(Vec::new()),
             functions: RwLock::new(HashMap::new()),
             heap: RwLock::new(BumpAllocator::new(10, Tag::NTYPES)),
+            stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(Vec::new()),
             symbols: RwLock::new(HashMap::new()),
             version: Self::VERSION,
-            stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
         };
 
         let mut functions = block_on(lib.functions.write());
@@ -184,6 +187,14 @@ impl Lib {
         );
 
         lib
+    }
+
+    pub fn features(self) -> Self {
+        let mut features = block_on(self.features.write());
+
+        *features = Feature::install_features();
+
+        self
     }
 
     pub fn stdio(self) -> Self {
@@ -232,7 +243,7 @@ impl Lib {
     }
 
     // lib symbols
-    pub fn lib_symbols(env: &Env) {
+    pub fn lib_namespaces(env: &Env) {
         let mut functions = block_on(LIB.functions.write());
 
         Namespace::intern_symbol(
@@ -265,20 +276,25 @@ impl Lib {
 
             (Tag::as_u64(&fn_key), *libfn)
         }));
-    }
 
-    // features
-    pub fn feature_symbols(env: &Env, ns: Tag, symbols: Vec<LibFnDef>) {
-        let mut functions = block_on(LIB.functions.write());
+        let features = block_on(LIB.features.read());
 
-        functions.extend(symbols.iter().map(|(name, nreqs, featurefn)| {
-            let form = Namespace::intern_symbol(env, ns, name.to_string(), *UNBOUND);
-            let func = Function::new(Tag::from(*nreqs as i64), form).evict(env);
+        for feature in &*features {
+            let ns = Symbol::keyword(&feature.namespace);
+            match Namespace::add_ns(env, ns) {
+                Ok(_) => (),
+                Err(_) => panic!(),
+            };
 
-            Namespace::intern_symbol(env, ns, name.to_string(), func);
+            functions.extend(feature.symbols.iter().map(|(name, nreqs, featurefn)| {
+                let form = Namespace::intern_symbol(env, ns, name.to_string(), *UNBOUND);
+                let func = Function::new(Tag::from(*nreqs as i64), form).evict(env);
 
-            (Tag::as_u64(&form), *featurefn)
-        }));
+                Namespace::intern_symbol(env, ns, name.to_string(), func);
+
+                (Tag::as_u64(&form), *featurefn)
+            }));
+        }
     }
 }
 

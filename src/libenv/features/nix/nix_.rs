@@ -29,11 +29,11 @@ lazy_static! {
 pub struct Nix {}
 
 pub trait Core {
-    fn make_feature(_: &Env) -> Feature;
+    fn feature() -> Feature;
 }
 
 impl Core for Nix {
-    fn make_feature(_: &Env) -> Feature {
+    fn feature() -> Feature {
         Feature {
             symbols: NIX_SYMBOLS.to_vec(),
             namespace: "nix".to_string(),

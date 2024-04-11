@@ -30,11 +30,11 @@ lazy_static! {
 pub struct Sysinfo {}
 
 pub trait Core {
-    fn make_feature(_: &Env) -> Feature;
+    fn feature() -> Feature;
 }
 
 impl Core for Sysinfo {
-    fn make_feature(_: &Env) -> Feature {
+    fn feature() -> Feature {
         Feature {
             symbols: SYSINFO_SYMBOLS.to_vec(),
             namespace: "sysinfo".to_string(),
