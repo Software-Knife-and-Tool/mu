@@ -18,7 +18,7 @@ use {
             frame::{Frame, LibFunction as _},
             gc::{Gc, LibFunction as _},
             heap::{Heap, LibFunction as _},
-            namespace::{LibFunction as _, Namespace},
+            namespace::{LibFunction as _, Namespace, NsRwLockMap},
             types::{LibFunction as _, Tag},
             utime::LibFunction as _,
         },
@@ -152,13 +152,14 @@ lazy_static! {
 pub struct Lib {
     pub version: &'static str,
 
-    pub heap: RwLock<BumpAllocator>,
-    pub symbols: RwLock<HashMap<String, Tag>>,
-    pub functions: RwLock<HashMap<u64, LibFn>>,
-    pub features: RwLock<Vec<Feature>>,
-    pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub eol: Tag,
+    pub features: RwLock<Vec<Feature>>,
+    pub functions: RwLock<HashMap<u64, LibFn>>,
+    pub heap: RwLock<BumpAllocator>,
+    pub ns_index: RwLock<HashMap<u64, (Tag, Namespace)>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
+    pub streams: RwLock<Vec<RwLock<Stream>>>,
+    pub symbols: NsRwLockMap,
 }
 
 impl Lib {
@@ -170,6 +171,7 @@ impl Lib {
             features: RwLock::new(Vec::new()),
             functions: RwLock::new(HashMap::new()),
             heap: RwLock::new(BumpAllocator::new(10, Tag::NTYPES)),
+            ns_index: RwLock::new(HashMap::new()),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(Vec::new()),
             symbols: RwLock::new(HashMap::new()),
