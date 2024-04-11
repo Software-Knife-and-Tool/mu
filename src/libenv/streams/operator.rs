@@ -7,7 +7,7 @@ use {
         core::{
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
-            lib::LIB,
+            lib::{Lib, LIB},
             types::Tag,
         },
         streams::system::{StringDirection, SystemStream, SystemStreamBuilder},
@@ -36,7 +36,7 @@ pub trait Core {
     fn open_input_string(_: &str) -> exception::Result<Tag>;
     fn open_output_string(_: &str) -> exception::Result<Tag>;
     fn open_bidir_string(_: &str) -> exception::Result<Tag>;
-    fn open_std_stream(_: SystemStream) -> exception::Result<Tag>;
+    fn open_std_stream(_: SystemStream, _: &Lib) -> exception::Result<Tag>;
 
     fn get_string(_: &SystemStream) -> Option<String>;
 }
@@ -181,10 +181,10 @@ impl Core for SystemStream {
         Self::open_string(path, StringDirection::Bidir)
     }
 
-    fn open_std_stream(std_stream: SystemStream) -> exception::Result<Tag> {
+    fn open_std_stream(std_stream: SystemStream, lib: &Lib) -> exception::Result<Tag> {
         match std_stream {
             SystemStream::StdInput | SystemStream::StdOutput | SystemStream::StdError => {
-                let mut streams_ref = block_on(LIB.streams.write());
+                let mut streams_ref = block_on(lib.streams.write());
                 let index = streams_ref.len();
 
                 streams_ref.push(RwLock::new(Stream {

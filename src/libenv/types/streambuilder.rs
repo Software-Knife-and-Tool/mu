@@ -5,6 +5,7 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception},
+        lib::Lib,
         types::Tag,
     },
     streams::{operator::Core as _, system::SystemStream},
@@ -76,7 +77,7 @@ impl StreamBuilder {
         self
     }
 
-    pub fn build(&self) -> exception::Result<Tag> {
+    pub fn build(&self, lib: &Lib) -> exception::Result<Tag> {
         match &self.file {
             Some(path) => match self.input {
                 Some(_) => SystemStream::open_input_file(path),
@@ -94,11 +95,11 @@ impl StreamBuilder {
                     },
                 },
                 None => match self.stdin {
-                    Some(_) => SystemStream::open_std_stream(SystemStream::StdInput),
+                    Some(_) => SystemStream::open_std_stream(SystemStream::StdInput, lib),
                     None => match self.stdout {
-                        Some(_) => SystemStream::open_std_stream(SystemStream::StdOutput),
+                        Some(_) => SystemStream::open_std_stream(SystemStream::StdOutput, lib),
                         None => match self.errout {
-                            Some(_) => SystemStream::open_std_stream(SystemStream::StdError),
+                            Some(_) => SystemStream::open_std_stream(SystemStream::StdError, lib),
                             None => Err(Exception::new(Condition::Range, "open", Tag::nil())),
                         },
                     },
