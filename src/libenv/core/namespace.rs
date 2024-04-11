@@ -23,21 +23,45 @@ use {
 };
 
 use {futures::executor::block_on, futures_locks::RwLock};
+pub type NsRwLockMap = RwLock<HashMap<String, Tag>>;
+pub type NsRwLockIndex = RwLock<HashMap<u64, (Tag, Namespace)>>;
 
 pub enum Namespace {
-    Static(&'static RwLock<HashMap<String, Tag>>),
-    Dynamic(RwLock<HashMap<String, Tag>>),
+    Static(&'static NsRwLockMap),
+    Dynamic(NsRwLockMap),
 }
 
 impl Namespace {
-    pub fn register_ns(env: &Env, name: Tag, ns: Namespace) -> exception::Result<Tag> {
-        let mut ns_ref = block_on(env.ns_index.write());
+    pub fn register_ns(index: &NsRwLockIndex, name: Tag) -> exception::Result<Tag> {
+        let mut ns_ref = block_on(index.write());
 
         if ns_ref.contains_key(&name.as_u64()) {
             return Err(Exception::new(Condition::Type, "make-ns", name));
         }
 
-        ns_ref.insert(name.as_u64(), (name, ns));
+        ns_ref.insert(
+            name.as_u64(),
+            (
+                name,
+                Namespace::Dynamic(RwLock::new(HashMap::<String, Tag>::new())),
+            ),
+        );
+
+        Ok(name)
+    }
+
+    pub fn register_static_ns(
+        index: &NsRwLockIndex,
+        name: Tag,
+        ns: &'static NsRwLockMap,
+    ) -> exception::Result<Tag> {
+        let mut ns_ref = block_on(index.write());
+
+        if ns_ref.contains_key(&name.as_u64()) {
+            return Err(Exception::new(Condition::Type, "make-ns", name));
+        }
+
+        ns_ref.insert(name.as_u64(), (name, Namespace::Static(ns)));
 
         Ok(name)
     }

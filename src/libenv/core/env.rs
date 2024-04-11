@@ -13,7 +13,7 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             lib::Lib,
-            namespace::Namespace,
+            namespace::{Namespace, NsRwLockIndex},
             types::{Tag, Type},
         },
         types::{
@@ -43,7 +43,7 @@ pub struct Env {
 
     // ns/async maps
     pub async_index: RwLock<HashMap<u64, Context>>,
-    pub ns_index: RwLock<HashMap<u64, (Tag, Namespace)>>,
+    pub ns_index: NsRwLockIndex,
 
     // namespaces
     pub keyword_ns: Tag,
