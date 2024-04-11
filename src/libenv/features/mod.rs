@@ -6,7 +6,7 @@
 use crate::{
     core::{
         env::{Core as _, Env},
-        lib::{Core as _, LibFn},
+        lib::{Core as _, Lib, LibFn},
         namespace::Namespace,
         types::{Tag, Type},
     },
@@ -40,7 +40,7 @@ impl Feature {
             Err(_) => panic!(),
         };
 
-        Env::feature_functions(env, ns, feature.symbols);
+        Lib::feature_symbols(env, ns, feature.symbols);
 
         ns
     }

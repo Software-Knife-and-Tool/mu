@@ -49,7 +49,7 @@ impl Compile {
         let lambda = Symbol::keyword("lambda");
 
         let if_vec = vec![
-            env.if_,
+            Namespace::intern_symbol(env, env.lib_ns, "if".to_string(), Tag::nil()),
             Cons::nth(env, 0, args).unwrap(),
             Cons::vlist(env, &[lambda, Tag::nil(), Cons::nth(env, 1, args).unwrap()]),
             Cons::vlist(env, &[lambda, Tag::nil(), Cons::nth(env, 2, args).unwrap()]),

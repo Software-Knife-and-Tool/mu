@@ -181,26 +181,18 @@ impl Lib {
     pub fn symbols() -> &'static RwLock<HashMap<String, Tag>> {
         &LIB.symbols
     }
-}
 
-lazy_static! {
-    pub static ref LIB: Lib = Lib::new();
-}
-
-pub trait Core {
-    fn lib_functions(_: &Env);
-    fn feature_functions(_: &Env, _: Tag, _: Vec<LibFnDef>);
-
-    fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
-    fn debug_vprint(&self, _: &str, _: bool, _: Tag);
-}
-
-impl Core for Env {
-    // lib functions
-    fn lib_functions(env: &Env) {
+    // lib symbols
+    pub fn lib_symbols(env: &Env) {
         let mut functions = block_on(LIB.functions.write());
 
         functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
+        Namespace::intern_symbol(
+            env,
+            env.lib_ns,
+            "if".to_string(),
+            Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(env),
+        );
 
         functions.extend(LIB_SYMBOLS.iter().map(|(name, nreqs, libfn)| {
             let fn_key = Symbol::keyword(name);
@@ -213,7 +205,7 @@ impl Core for Env {
     }
 
     // features
-    fn feature_functions(env: &Env, ns: Tag, symbols: Vec<LibFnDef>) {
+    pub fn feature_symbols(env: &Env, ns: Tag, symbols: Vec<LibFnDef>) {
         let mut functions = block_on(LIB.functions.write());
 
         functions.extend(symbols.iter().map(|(name, nreqs, featurefn)| {
@@ -225,7 +217,18 @@ impl Core for Env {
             (Tag::as_u64(&form), *featurefn)
         }));
     }
+}
 
+lazy_static! {
+    pub static ref LIB: Lib = Lib::new();
+}
+
+pub trait Core {
+    fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
+    fn debug_vprint(&self, _: &str, _: bool, _: Tag);
+}
+
+impl Core for Env {
     // debug printing
     fn debug_vprint(&self, label: &str, verbose: bool, tag: Tag) {
         print!("{}: ", label);
