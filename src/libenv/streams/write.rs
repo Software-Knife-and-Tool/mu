@@ -2,35 +2,24 @@
 //  SPDX-License-Identifier: MIT
 
 //! stream write functions
-#[allow(unused_imports)]
 use crate::{
     core::{
-        apply::{Core as _, LibFunction as _},
-        compile::{Compile, LibFunction as _},
-        dynamic::LibFunction as _,
+        apply::Core as _,
         env::Env,
-        exception::{self, Condition, Exception, LibFunction as _},
-        frame::{Frame, LibFunction as _},
-        gc::{Gc, LibFunction as _},
-        heap::{Heap, LibFunction as _},
-        namespace::{LibFunction as _, Namespace},
-        qquote::QqReader,
-        reader::Core as _,
-        readtable::{map_char_syntax, SyntaxType},
-        types::{LibFunction as _, Tag, Type},
-        utime::LibFunction as _,
+        exception::{self},
+        frame::Frame,
+        types::{Tag, Type},
     },
     types::{
         char::{Char, Core as _},
-        cons::{Cons, Core as _, LibFunction as _},
-        fixnum::{Core as _, Fixnum, LibFunction as _},
-        float::{Core as _, Float, LibFunction as _},
+        cons::{Cons, Core as _},
+        fixnum::{Core as _, Fixnum},
+        float::{Core as _, Float},
         function::{Core as _, Function},
         stream::{Core as _, Stream},
-        streams::LibFunction as _,
-        struct_::{Core as _, LibFunction as _, Struct},
-        symbol::{Core as _, LibFunction as _, Symbol, UNBOUND},
-        vector::{Core as _, LibFunction as _, Vector},
+        struct_::{Core as _, Struct},
+        symbol::{Core as _, Symbol},
+        vector::{Core as _, Vector},
     },
 };
 

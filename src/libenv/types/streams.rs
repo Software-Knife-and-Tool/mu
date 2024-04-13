@@ -4,7 +4,6 @@
 //! env stream functions
 #![allow(unused_braces)]
 #![allow(dead_code)]
-#![allow(unused_variables)]
 #![allow(clippy::identity_op)]
 
 use crate::{

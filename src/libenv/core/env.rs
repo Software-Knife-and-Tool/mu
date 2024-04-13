@@ -3,7 +3,6 @@
 
 //! env environment
 //!    Env
-#![allow(clippy::type_complexity)]
 use {
     crate::{
         allocators::bump_allocator::BumpAllocator,

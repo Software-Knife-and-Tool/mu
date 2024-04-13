@@ -2,16 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! features module
-#[allow(unused_imports)]
-use crate::{
-    core::{
-        env::{Core as _, Env},
-        lib::{Core as _, Lib, LibFn},
-        namespace::Namespace,
-        types::{Tag, Type},
-    },
-    types::symbol::{Core as _, Symbol},
-};
+use crate::core::lib::LibFn;
 
 #[cfg(feature = "nix")]
 use crate::features::nix::nix_::{Core as _, Nix};

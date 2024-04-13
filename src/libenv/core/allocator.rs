@@ -3,39 +3,16 @@
 
 //! env allocators
 //!    Env
-#[allow(unused_imports)]
 use {
     crate::{
-        allocators::{
-            bump_allocator::{BumpAllocator, BumpAllocatorIter},
-            stack_allocator::{StackAllocator, StackAllocatorIter},
-        },
+        allocators::{bump_allocator::BumpAllocator, stack_allocator::StackAllocator},
         core::{
-            config::Config,
-            direct::DirectTag,
-            env::{Core as _, Env},
-            exception,
-            frame::Frame,
+            env::Env,
             heap::Heap,
-            indirect::{self, IndirectTag},
             types::{Tag, Type},
         },
-        types::{
-            char::{Char, Core as _},
-            cons::{Cons, Core as _},
-            fixnum::{Core as _, Fixnum},
-            float::{Core as _, Float},
-            function::{Core as _, Function},
-            stream::{Core as _, Stream},
-            struct_::{Core as _, Struct},
-            symbol::{Core as _, Symbol},
-            vecimage::{TypedVec, VecType},
-            vector::{Core as _, Vector},
-        },
     },
-    memmap,
     modular_bitfield::specifiers::{B11, B4},
-    num_enum::TryFromPrimitive,
     std::fmt,
 };
 

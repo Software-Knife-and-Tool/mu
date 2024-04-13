@@ -3,36 +3,21 @@
 
 //! env gc
 //!    Env
-#[allow(unused_imports)]
-use {
-    crate::{
-        allocators::{bump_allocator::BumpAllocator, stack_allocator::StackAllocator},
-        core::{
-            config::Config,
-            direct::DirectTag,
-            env::{Core as _, Env},
-            exception,
-            frame::Frame,
-            indirect::{self, IndirectTag},
-            namespace::Namespace,
-            types::{Tag, Type},
-        },
-        types::{
-            char::{Char, Core as _},
-            cons::{Cons, Core as _},
-            fixnum::{Core as _, Fixnum},
-            float::{Core as _, Float},
-            function::{Core as _, Function},
-            stream::{Core as _, Stream},
-            struct_::{Core as _, Struct},
-            symbol::{Core as _, Symbol},
-            vecimage::{TypedVec, VecType},
-            vector::{Core as _, Vector},
-        },
+use crate::{
+    core::{
+        env::Env,
+        exception,
+        frame::Frame,
+        namespace::Namespace,
+        types::{Tag, Type},
     },
-    memmap,
-    modular_bitfield::specifiers::{B11, B4},
-    num_enum::TryFromPrimitive,
+    types::{
+        cons::{Cons, Core as _},
+        function::{Core as _, Function},
+        struct_::{Core as _, Struct},
+        symbol::{Core as _, Symbol},
+        vector::{Core as _, Vector},
+    },
 };
 
 use futures::executor::block_on;

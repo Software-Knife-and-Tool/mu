@@ -2,13 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! env config
-#[allow(unused_imports)]
-use crate::{
-    core::gc::GcMode,
-    core::types::{Tag, TagType, Type},
-    env::Env,
-    types::symbol::{Core as _, Symbol},
-};
+use crate::{core::gc::GcMode, env::Env};
 
 #[derive(Copy, Clone)]
 pub struct Config {

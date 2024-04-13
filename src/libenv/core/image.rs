@@ -2,13 +2,9 @@
 //  SPDX-License-Identifier: MIT
 
 //! image management
-#[allow(unused_imports)]
 use crate::core::{
-    apply::Core as _,
     env::Env,
     exception::{self},
-    frame::Frame,
-    types::{Tag, Type},
 };
 
 pub trait Core {
