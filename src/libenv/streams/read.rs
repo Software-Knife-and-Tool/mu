@@ -4,7 +4,6 @@
 //! stream read functions
 #[allow(unused_imports)]
 use crate::{
-    async_::context::{Context, Core as _, LibFunction as _},
     core::{
         apply::{Core as _, LibFunction as _},
         compile::{Compile, LibFunction as _},

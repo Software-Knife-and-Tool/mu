@@ -4,7 +4,6 @@
 //! env system functions
 use {
     crate::{
-        async_::context::{Context, LibFunction as _},
         core::{
             apply::LibFunction as _,
             compile::{Compile, LibFunction as _},
@@ -66,9 +65,6 @@ lazy_static! {
         ( "length",  1, Cons::lib_length ),
         ( "nth",     2, Cons::lib_nth ),
         ( "nthcdr",  2, Cons::lib_nthcdr ),
-        // async
-        ( "await",   1, Context::lib_await ),
-        ( "abort",   1, Context::lib_abort ),
         // compiler
         ( "compile", 1, Compile::lib_compile ),
         // gc
@@ -159,7 +155,7 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.0.45";
+    pub const VERSION: &'static str = "0.1.46";
 
     pub fn new() -> Self {
         let lib = Lib {

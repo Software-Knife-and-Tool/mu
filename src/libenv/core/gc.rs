@@ -50,7 +50,6 @@ pub trait Core {
     fn gc(&self) -> exception::Result<bool>;
     fn mark(&self, _: Tag);
     fn add_gc_root(&self, _: Tag);
-    fn gc_asyncs(&self);
     fn gc_namespaces(&self);
     fn mark_image(&self, _: Tag) -> Option<bool>;
 }
@@ -76,7 +75,6 @@ impl Core for Env {
         }
 
         self.gc_namespaces();
-        self.gc_asyncs();
 
         Frame::gc_lexical(self);
 
@@ -114,13 +112,6 @@ impl Core for Env {
 
                 marked
             }
-        }
-    }
-
-    fn gc_asyncs(&self) {
-        let async_index_ref = block_on(self.async_index.read());
-        for (_name, _hash) in async_index_ref.iter() {
-            // env.mark(*context)
         }
     }
 

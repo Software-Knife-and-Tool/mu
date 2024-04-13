@@ -49,7 +49,6 @@ extern crate lazy_static;
 extern crate modular_bitfield;
 
 mod allocators;
-mod async_;
 mod core;
 mod features;
 mod streams;

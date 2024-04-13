@@ -7,7 +7,6 @@
 use {
     crate::{
         allocators::bump_allocator::BumpAllocator,
-        async_::context::Context,
         core::{
             config::Config,
             exception::{self, Condition, Exception},
@@ -41,8 +40,7 @@ pub struct Env {
     pub dynamic: RwLock<Vec<(u64, usize)>>,
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
-    // ns/async maps
-    pub async_index: RwLock<HashMap<u64, Context>>,
+    // ns map
     pub ns_index: NsRwLockIndex,
 
     // namespaces
@@ -64,7 +62,6 @@ pub trait Core {
 impl Core for Env {
     fn new(config: &Config) -> Self {
         let mut env = Env {
-            async_index: RwLock::new(HashMap::new()),
             config: *config,
             dynamic: RwLock::new(Vec::new()),
             gc_root: RwLock::new(Vec::<Tag>::new()),

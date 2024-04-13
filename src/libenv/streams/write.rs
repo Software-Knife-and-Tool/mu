@@ -4,7 +4,6 @@
 //! stream write functions
 #[allow(unused_imports)]
 use crate::{
-    async_::context::{Context, Core as _, LibFunction as _},
     core::{
         apply::{Core as _, LibFunction as _},
         compile::{Compile, LibFunction as _},
@@ -47,7 +46,6 @@ impl Core for Env {
         }
 
         match tag.type_of() {
-            Type::AsyncId => Context::write(self, tag, escape, stream),
             Type::Char => Char::write(self, tag, escape, stream),
             Type::Cons => Cons::write(self, tag, escape, stream),
             Type::Fixnum => Fixnum::write(self, tag, escape, stream),
