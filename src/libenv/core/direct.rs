@@ -36,9 +36,8 @@ pub enum DirectType {
 pub enum ExtType {
     Fixnum = 0,
     Float = 1,
-    AsyncId = 2,
-    Cons = 3,
-    Stream = 4,
+    Cons = 2,
+    Stream = 3,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -51,9 +50,8 @@ impl DirectTag {
     pub const EXT_TYPE_FIXNUM: u8 = 0; // 56 bits: -36028797018963967 to 36028797018963968
     pub const EXT_TYPE_FLOAT: u8 = 1; // 32 bit IEEE float: -3.40282347E+38 to -1.17549435E-38,
                                       //                    1.17549435E-38 to 3.40282347E+38
-    pub const EXT_TYPE_ASYNC: u8 = 2;
-    pub const EXT_TYPE_CONS: u8 = 3;
-    pub const EXT_TYPE_STREAM: u8 = 4;
+    pub const EXT_TYPE_CONS: u8 = 2;
+    pub const EXT_TYPE_STREAM: u8 = 3;
 
     pub const DIRECT_STR_MAX: usize = 7;
 

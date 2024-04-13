@@ -5,7 +5,6 @@
 //!     function calls
 //!     special forms
 use crate::{
-    async_::context::{Context, Core as _},
     core::{
         apply::Core as _,
         env::{Core as _, Env},
@@ -16,7 +15,6 @@ use crate::{
     },
     types::{
         cons::{Cons, Core as _},
-        fixnum::Fixnum,
         function::Function,
         symbol::{Core as _, Symbol},
     },
@@ -31,7 +29,6 @@ type LexicalEnv = Vec<(Tag, Vec<Tag>)>;
 
 lazy_static! {
     static ref SPECMAP: Vec<SpecMap> = vec![
-        (Symbol::keyword("async"), Compile::async_),
         (Symbol::keyword("if"), Compile::if_),
         (Symbol::keyword("lambda"), Compile::lambda),
         (Symbol::keyword("quote"), Compile::quoted_list),
@@ -151,45 +148,6 @@ impl Compile {
         lexenv.pop();
 
         form
-    }
-
-    pub fn async_(env: &Env, args: Tag, lexenv: &mut LexicalEnv) -> exception::Result<Tag> {
-        let (func, arg_list) = match args.type_of() {
-            Type::Cons => {
-                let fn_arg = match Self::compile(env, Cons::car(env, args), lexenv) {
-                    Ok(fn_) => match fn_.type_of() {
-                        Type::Function => fn_,
-                        Type::Symbol => {
-                            let sym_val = Symbol::value(env, fn_);
-                            match sym_val.type_of() {
-                                Type::Function => sym_val,
-                                _ => return Err(Exception::new(Condition::Type, "async", sym_val)),
-                            }
-                        }
-                        _ => return Err(Exception::new(Condition::Type, "async", fn_)),
-                    },
-                    Err(e) => return Err(e),
-                };
-
-                let async_args = match Self::list(env, Cons::cdr(env, args), lexenv) {
-                    Ok(list) => list,
-                    Err(e) => return Err(e),
-                };
-
-                let arity = Fixnum::as_i64(Function::arity(env, fn_arg));
-                if arity != Cons::length(env, async_args).unwrap() as i64 {
-                    return Err(Exception::new(Condition::Arity, "async", args));
-                }
-
-                (fn_arg, async_args)
-            }
-            _ => return Err(Exception::new(Condition::Syntax, "async", args)),
-        };
-
-        match Context::context(env, func, arg_list) {
-            Ok(asyncid) => Ok(asyncid),
-            Err(e) => Err(e),
-        }
     }
 
     pub fn lexical(env: &Env, symbol: Tag, lexenv: &mut LexicalEnv) -> exception::Result<Tag> {
