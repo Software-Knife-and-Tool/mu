@@ -2,11 +2,8 @@
 //  SPDX-License-Identifier: MIT
 
 //! env system functions
-use futures::executor::block_on;
-use futures_locks::RwLock;
 use {
     crate::{
-        allocators::bump_allocator::BumpAllocator,
         async_::context::{Context, LibFunction as _},
         core::{
             apply::LibFunction as _,
@@ -42,6 +39,7 @@ use {
     },
     std::collections::HashMap,
 };
+use {futures::executor::block_on, futures_locks::RwLock};
 
 lazy_static! {
     pub static ref LIB: Lib = Lib::new().features().stdio();
@@ -155,8 +153,6 @@ pub struct Lib {
     pub eol: Tag,
     pub features: RwLock<Vec<Feature>>,
     pub functions: RwLock<HashMap<u64, LibFn>>,
-    pub heap: RwLock<BumpAllocator>,
-    pub ns_index: RwLock<HashMap<u64, (Tag, Namespace)>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub symbols: NsRwLockMap,
@@ -170,8 +166,6 @@ impl Lib {
             eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
             features: RwLock::new(Vec::new()),
             functions: RwLock::new(HashMap::new()),
-            heap: RwLock::new(BumpAllocator::new(10, Tag::NTYPES)),
-            ns_index: RwLock::new(HashMap::new()),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(Vec::new()),
             symbols: RwLock::new(HashMap::new()),
