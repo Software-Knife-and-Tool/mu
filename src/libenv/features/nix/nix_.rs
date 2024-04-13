@@ -2,7 +2,6 @@
 //  SPDX-License-Identifier: MIT
 
 //! nix interface
-#![allow(unused_imports)]
 use crate::{
     core::{
         env::Env,

@@ -3,40 +3,25 @@
 
 //! env heap interface
 //!    Env
-#[allow(unused_imports)]
-use {
-    crate::{
-        allocators::{
-            bump_allocator::{BumpAllocator, BumpAllocatorIter},
-            stack_allocator::{StackAllocator, StackAllocatorIter},
-        },
-        core::{
-            allocator::AllocTypeInfo,
-            config::Config,
-            direct::DirectTag,
-            env::{Core as _, Env},
-            exception,
-            frame::Frame,
-            indirect::{self, IndirectTag},
-            types::{Tag, Type},
-        },
-        types::{
-            char::{Char, Core as _},
-            cons::{Cons, Core as _},
-            fixnum::{Core as _, Fixnum},
-            float::{Core as _, Float},
-            function::{Core as _, Function},
-            stream::{Core as _, Stream},
-            struct_::{Core as _, Struct},
-            symbol::{Core as _, Symbol},
-            vecimage::{TypedVec, VecType},
-            vector::{Core as _, Vector},
-        },
+use crate::{
+    allocators::bump_allocator::BumpAllocator,
+    core::{
+        allocator::AllocTypeInfo,
+        direct::DirectTag,
+        env::Env,
+        exception,
+        frame::Frame,
+        indirect::{self, IndirectTag},
+        types::{Tag, Type},
     },
-    memmap,
-    modular_bitfield::specifiers::{B11, B4},
-    num_enum::TryFromPrimitive,
-    std::fmt,
+    types::{
+        cons::{Cons, Core as _},
+        function::{Core as _, Function},
+        struct_::{Core as _, Struct},
+        symbol::{Core as _, Symbol},
+        vecimage::{TypedVec, VecType},
+        vector::{Core as _, Vector},
+    },
 };
 
 use futures::executor::block_on;
