@@ -32,40 +32,6 @@ pub enum Namespace {
 }
 
 impl Namespace {
-    pub fn register_ns(index: &NsRwLockIndex, name: Tag) -> exception::Result<Tag> {
-        let mut ns_ref = block_on(index.write());
-
-        if ns_ref.contains_key(&name.as_u64()) {
-            return Err(Exception::new(Condition::Type, "make-ns", name));
-        }
-
-        ns_ref.insert(
-            name.as_u64(),
-            (
-                name,
-                Namespace::Dynamic(RwLock::new(HashMap::<String, Tag>::new())),
-            ),
-        );
-
-        Ok(name)
-    }
-
-    pub fn register_static_ns(
-        index: &NsRwLockIndex,
-        name: Tag,
-        ns: &'static NsRwLockMap,
-    ) -> exception::Result<Tag> {
-        let mut ns_ref = block_on(index.write());
-
-        if ns_ref.contains_key(&name.as_u64()) {
-            return Err(Exception::new(Condition::Type, "make-ns", name));
-        }
-
-        ns_ref.insert(name.as_u64(), (name, Namespace::Static(ns)));
-
-        Ok(name)
-    }
-
     pub fn add_ns(env: &Env, ns: Tag) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_index.write());
 
