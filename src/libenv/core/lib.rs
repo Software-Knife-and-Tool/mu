@@ -81,10 +81,9 @@ lazy_static! {
         ( "frames",  0, Env::lib_frames ),
         ( "fix",     2, Env::lib_fix ),
         // futures
-        ( "fwait",   1, Futures::lib_fwait ),
+        ( "fwait",   1, Futures::lib_future_wait ),
         ( "future",  2, Futures::lib_future ),
-        ( "fdone",   1, Futures::lib_fcomplete ),
-        ( "ftest",   0, Futures::lib_ftest ),
+        ( "fdone",   1, Futures::lib_future_complete ),
         // exceptions
         ( "with-ex", 2, Exception::lib_with_ex ),
         ( "raise",   2, Exception::lib_raise ),
@@ -156,11 +155,12 @@ pub struct Lib {
     pub eol: Tag,
     pub features: RwLock<Vec<Feature>>,
     pub functions: RwLock<HashMap<u64, LibFn>>,
-    pub futures: RwLock<Vec<std::thread::JoinHandle<Tag>>>,
-    pub threads: FuturePool,
+    pub future_id: RwLock<u64>,
+    pub futures: RwLock<HashMap<u64, std::thread::JoinHandle<Tag>>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub symbols: NsRwLockMap,
+    pub threads: FuturePool,
 }
 
 impl Lib {
@@ -171,14 +171,14 @@ impl Lib {
             eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
             features: RwLock::new(Vec::new()),
             functions: RwLock::new(HashMap::new()),
-            futures: RwLock::new(Vec::new()),
+            future_id: RwLock::new(0),
+            futures: RwLock::new(HashMap::new()),
             threads: FuturePool::new(),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(Vec::new()),
             symbols: RwLock::new(HashMap::new()),
             version: Self::VERSION,
         };
-
         let mut functions = block_on(lib.functions.write());
 
         // native functions

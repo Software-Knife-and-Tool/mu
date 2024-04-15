@@ -54,39 +54,44 @@ trait Core {
 }
 
 impl Core for Futures {
-    fn make_future(env: &Env, _func: Tag, _args: Tag) -> exception::Result<Tag> {
-        let (tx, rx) = mpsc::unbounded::<i32>();
+    fn make_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
+        let (tx, rx) = mpsc::unbounded::<Tag>();
 
-        let fut_values = async {
+        let fut_values = async move {
             let fut_tx_result = async move {
-                (0..20).for_each(|v| {
-                    tx.unbounded_send(v).expect("Failed to send");
-                })
+                let tags: Vec<Tag> = vec![func, args];
+
+                for tag in tags.into_iter() {
+                    tx.unbounded_send(tag).expect("Failed to send")
+                }
             };
 
             LIB.threads.pool.spawn_ok(fut_tx_result);
 
-            let fut_values = rx.map(|v| v * 2).collect();
+            let fut_values = rx.map(|v| v).collect();
 
             fut_values.await
         };
 
         let join_id = std::thread::spawn(|| {
             std::thread::sleep(std::time::Duration::from_secs(5));
-            let values: Vec<i32> = executor::block_on(fut_values);
+            let values: Vec<Tag> = executor::block_on(fut_values);
 
             Fixnum::as_tag(values.len() as i64)
         });
 
         let mut futures_ref = block_on(LIB.futures.write());
-        let nfutures = futures_ref.len();
+        let mut future_id_ref = block_on(LIB.future_id.write());
+        let future_id = *future_id_ref;
 
-        let vec = vec![Fixnum::as_tag(nfutures as i64)];
+        *future_id_ref = future_id + 1;
+
+        let vec = vec![Fixnum::as_tag(future_id as i64)];
         let vector = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
         let stype = Symbol::keyword("future");
         let future = Struct { stype, vector }.evict(env);
 
-        futures_ref.push(join_id);
+        futures_ref.insert(future_id, join_id);
 
         Ok(future)
     }
@@ -95,7 +100,7 @@ impl Core for Futures {
         let futures_ref = block_on(LIB.futures.read());
 
         let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
-        let join_id = &futures_ref[Fixnum::as_i64(index) as usize];
+        let join_id = &futures_ref.get(&(Fixnum::as_i64(index) as u64)).unwrap();
 
         join_id.is_finished()
     }
@@ -103,26 +108,25 @@ impl Core for Futures {
 
 pub trait LibFunction {
     fn lib_future(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_fwait(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_ftest(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_fcomplete(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_future_wait(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_future_complete(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl LibFunction for Futures {
-    fn lib_fwait(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_future_wait(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 
         let mut futures_ref = block_on(LIB.futures.write());
 
         let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
-        let join_id = futures_ref.remove(Fixnum::as_i64(index) as usize);
+        let join_id = futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap();
 
         fp.value = join_id.join().unwrap();
 
         Ok(())
     }
 
-    fn lib_fcomplete(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_future_complete(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 
         fp.value = if Self::is_future_complete(env, future) {
@@ -145,28 +149,30 @@ impl LibFunction for Futures {
         Ok(())
     }
 
-    fn lib_ftest(_: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let (tx, rx) = mpsc::unbounded::<i32>();
+    /*
+        fn lib_ftest(_: &Env, fp: &mut Frame) -> exception::Result<()> {
+            let (tx, rx) = mpsc::unbounded::<i32>();
 
-        let fut_values = async {
-            let fut_tx_result = async move {
-                (0..20).for_each(|v| {
-                    tx.unbounded_send(v).expect("Failed to send");
-                })
+            let fut_values = async {
+                let fut_tx_result = async move {
+                    (0..20).for_each(|v| {
+                        tx.unbounded_send(v).expect("Failed to send");
+                    })
+                };
+
+                LIB.threads.pool.spawn_ok(fut_tx_result);
+
+                let fut_values = rx.map(|v| v * 2).collect();
+
+                fut_values.await
             };
 
-            LIB.threads.pool.spawn_ok(fut_tx_result);
+            let values: Vec<i32> = executor::block_on(fut_values);
 
-            let fut_values = rx.map(|v| v * 2).collect();
+            println!("Values={:?}", values);
 
-            fut_values.await
-        };
-
-        let values: Vec<i32> = executor::block_on(fut_values);
-
-        println!("Values={:?}", values);
-
-        fp.value = Tag::nil();
-        Ok(())
+            fp.value = Tag::nil();
+            Ok(())
     }
+         */
 }
