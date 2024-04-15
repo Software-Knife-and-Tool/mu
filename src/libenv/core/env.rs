@@ -39,7 +39,7 @@ pub struct Env {
     pub dynamic: RwLock<Vec<(u64, usize)>>,
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
-    // ns map
+    // map
     pub ns_index: NsRwLockIndex,
 
     // namespaces
