@@ -33,7 +33,7 @@ pub enum Namespace {
 
 impl Namespace {
     pub fn add_ns(env: &Env, ns: Tag) -> exception::Result<Tag> {
-        let mut ns_ref = block_on(env.ns_index.write());
+        let mut ns_ref = block_on(env.ns_map.write());
 
         if ns_ref.contains_key(&ns.as_u64()) {
             return Err(Exception::new(Condition::Type, "make-ns", ns));
@@ -55,7 +55,7 @@ impl Namespace {
         name: Tag,
         ns: &'static RwLock<HashMap<String, Tag>>,
     ) -> exception::Result<Tag> {
-        let mut ns_ref = block_on(env.ns_index.write());
+        let mut ns_ref = block_on(env.ns_map.write());
 
         if ns_ref.contains_key(&name.as_u64()) {
             return Err(Exception::new(Condition::Type, "make-ns", name));
@@ -67,7 +67,7 @@ impl Namespace {
     }
 
     fn map_symbol(env: &Env, ns: Tag, name: &str) -> Option<Tag> {
-        let ns_ref = block_on(env.ns_index.read());
+        let ns_ref = block_on(env.ns_map.read());
 
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
 
@@ -84,7 +84,7 @@ impl Namespace {
     }
 
     pub fn intern(env: &Env, ns: Tag, symbol: Tag) {
-        let ns_ref = block_on(env.ns_index.read());
+        let ns_ref = block_on(env.ns_map.read());
 
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
         let name = Vector::as_string(env, Symbol::name(env, symbol));
@@ -101,7 +101,7 @@ impl Namespace {
         match tag.type_of() {
             Type::Null => Some(tag),
             Type::Keyword => {
-                let ns_ref = block_on(env.ns_index.read());
+                let ns_ref = block_on(env.ns_map.read());
 
                 if ns_ref.contains_key(&tag.as_u64()) {
                     Some(tag)
@@ -315,7 +315,7 @@ impl LibFunction for Namespace {
         fp.value = match env.fp_argv_check("ns-syms", &[Type::Keyword, Type::T], fp) {
             Ok(_) => match Self::is_ns(env, ns) {
                 Some(_) => {
-                    let ns_ref = block_on(env.ns_index.read());
+                    let ns_ref = block_on(env.ns_map.read());
                     let (_, ns_cache) = &ns_ref[&ns.as_u64()];
 
                     let hash = block_on(match ns_cache {
@@ -342,7 +342,7 @@ impl LibFunction for Namespace {
     }
 
     fn lib_ns_map(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let ns_ref = block_on(env.ns_index.read());
+        let ns_ref = block_on(env.ns_map.read());
         let vec = ns_ref
             .keys()
             .map(|key| Tag::from(&key.to_le_bytes()))

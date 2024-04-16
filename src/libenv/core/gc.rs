@@ -101,7 +101,7 @@ impl Core for Env {
     }
 
     fn gc_namespaces(&self) {
-        let ns_index_ref = block_on(self.ns_index.read());
+        let ns_index_ref = block_on(self.ns_map.read());
 
         for (_, ns) in ns_index_ref.iter() {
             let hash_ref = block_on(match ns.1 {

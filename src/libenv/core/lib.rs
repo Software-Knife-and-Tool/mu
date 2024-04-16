@@ -39,6 +39,7 @@ pub struct Lib {
     pub functions: RwLock<HashMap<u64, LibFn>>,
     pub future_id: RwLock<u64>,
     pub futures: RwLock<HashMap<u64, std::thread::JoinHandle<Tag>>>,
+    pub env_map: RwLock<HashMap<u64, Env>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub symbols: NsRwLockMap,
@@ -46,11 +47,12 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.46";
+    pub const VERSION: &'static str = "0.1.47";
 
     pub fn new() -> Self {
         let lib = Lib {
             eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
+            env_map: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
             functions: RwLock::new(HashMap::new()),
             future_id: RwLock::new(0),
@@ -184,11 +186,26 @@ impl Lib {
 }
 
 pub trait Core {
+    fn add_env(_: Env) -> Tag;
+}
+
+impl Core for Env {
+    fn add_env(env: Env) -> Tag {
+        let mut env_map_ref = block_on(LIB.env_map.write());
+        let key = Symbol::keyword(&format!("{:07x}", env_map_ref.len()));
+
+        env_map_ref.insert(key.as_u64(), env);
+
+        key
+    }
+}
+
+pub trait Debug {
     fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
     fn debug_vprint(&self, _: &str, _: bool, _: Tag);
 }
 
-impl Core for Env {
+impl Debug for Env {
     // debug printing
     fn debug_vprint(&self, label: &str, verbose: bool, tag: Tag) {
         let stdio = block_on(LIB.stdio.read());

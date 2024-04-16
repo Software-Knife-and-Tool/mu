@@ -40,7 +40,7 @@ pub struct Env {
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
     // map
-    pub ns_index: NsRwLockIndex,
+    pub ns_map: NsRwLockIndex,
 
     // namespaces
     pub keyword_ns: Tag,
@@ -68,7 +68,7 @@ impl Core for Env {
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
             lib_ns: Tag::nil(),
-            ns_index: RwLock::new(HashMap::new()),
+            ns_map: RwLock::new(HashMap::new()),
             null_ns: Tag::nil(),
             start_time: ProcessTime::now(),
         };

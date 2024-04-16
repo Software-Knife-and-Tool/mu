@@ -54,20 +54,23 @@ mod features;
 mod streams;
 mod types;
 
+use futures::executor::block_on;
 use {
-    crate::core::{
-        compile::Compile,
-        config::Config,
-        env::{self, Core},
-        exception::{self, Core as _},
-        lib::LIB,
+    crate::{
+        core::{
+            compile::Compile,
+            config::Config,
+            env::{self, Core},
+            exception::{self, Core as _},
+            lib::LIB,
+        },
+        streams::{read::Core as _, write::Core as _},
+        types::{
+            stream::{Core as _, Stream},
+            streambuilder::StreamBuilder,
+        },
     },
     std::fs,
-    streams::{read::Core as _, write::Core as _},
-    types::{
-        stream::{Core as _, Stream},
-        streambuilder::StreamBuilder,
-    },
 };
 
 /// The lib API
@@ -89,7 +92,7 @@ pub type Condition = core::exception::Condition;
 pub type Exception = core::exception::Exception;
 
 /// the Env struct abstracts the library struct
-pub struct Env(core::env::Env);
+pub struct Env(Tag);
 
 impl Env {
     /// current version
@@ -107,12 +110,17 @@ impl Env {
 
     /// constructor
     pub fn new(config: &Config) -> Self {
-        Env(core::env::Env::new(config))
+        Env(<core::env::Env as core::lib::Core>::add_env(
+            core::env::Env::new(config),
+        ))
     }
 
     /// apply a function to a list of arguments
     pub fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
-        self.0.apply(func, args)
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
+        env.apply(func, args)
     }
 
     /// test tagged s-expressions for strict equality
@@ -122,43 +130,64 @@ impl Env {
 
     /// evaluate a tagged s-expression
     pub fn eval(&self, expr: Tag) -> exception::Result<Tag> {
-        self.0.eval(expr)
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
+        env.eval(expr)
     }
 
     /// compile a tagged s-expression
     pub fn compile(&self, expr: Tag) -> exception::Result<Tag> {
-        Compile::compile(&self.0, expr, &mut vec![])
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
+        Compile::compile(env, expr, &mut vec![])
     }
 
     /// read a tagged s-expression from a lib stream
     pub fn read(&self, stream: Tag, eof_error_p: bool, eof_value: Tag) -> exception::Result<Tag> {
-        self.0.read_stream(stream, eof_error_p, eof_value, false)
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
+        env.read_stream(stream, eof_error_p, eof_value, false)
     }
 
     /// convert a rust String to a tagged s-expression
     pub fn read_str(&self, str: &str) -> exception::Result<Tag> {
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
         match StreamBuilder::new()
             .string(str.to_string())
             .input()
             .build(&LIB)
         {
-            Ok(stream) => self.0.read_stream(stream, true, Tag::nil(), false),
+            Ok(stream) => env.read_stream(stream, true, Tag::nil(), false),
             Err(e) => Err(e),
         }
     }
 
     /// write an s-expression to a lib stream
     pub fn write(&self, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        self.0.write_stream(expr, escape, stream)
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
+        env.write_stream(expr, escape, stream)
     }
 
     /// write a rust String to a lib stream
     pub fn write_str(&self, str: &str, stream: Tag) -> exception::Result<()> {
-        self.0.write_string(str, stream)
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
+        env.write_string(str, stream)
     }
 
     /// write a tag to a String
     pub fn write_to_string(&self, expr: Tag, esc: bool) -> String {
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
         let str_stream = match StreamBuilder::new()
             .string("".to_string())
             .output()
@@ -173,7 +202,7 @@ impl Env {
             Err(_) => panic!(),
         };
 
-        Stream::get_string(&self.0, str_stream).unwrap()
+        Stream::get_string(env, str_stream).unwrap()
     }
 
     /// return the standard-input lib stream
@@ -193,9 +222,12 @@ impl Env {
 
     // eval &str
     pub fn eval_str(&self, expr: &str) -> exception::Result<Tag> {
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
         match self.read_str(expr) {
             Ok(expr) => match self.compile(expr) {
-                Ok(expr) => self.0.eval(expr),
+                Ok(expr) => env.eval(expr),
                 Err(e) => Err(e),
             },
             Err(e) => Err(e),
@@ -214,8 +246,11 @@ impl Env {
 
     pub fn load(&self, file_path: &str) -> exception::Result<bool> {
         if fs::metadata(file_path).is_ok() {
+            let env_ref = block_on(LIB.env_map.read());
+            let env = env_ref.get(&self.0.as_u64()).unwrap();
+
             let load_form = format!("(lib:open :file :input \"{}\")", file_path);
-            let istream = self.0.eval(self.read_str(&load_form).unwrap()).unwrap();
+            let istream = env.eval(self.read_str(&load_form).unwrap()).unwrap();
             let eof_value = self.read_str(":eof").unwrap(); // need make_symbol here
 
             #[allow(clippy::while_let_loop)]
