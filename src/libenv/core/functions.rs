@@ -10,8 +10,7 @@ use crate::{
         env::Env,
         exception::{self, Exception, LibFunction as _},
         frame::{Frame, LibFunction as _},
-        futures::Futures,
-        futures::LibFunction as _,
+        future::{Future, LibFunction as _},
         gc::{Gc, LibFunction as _},
         heap::{Heap, LibFunction as _},
         namespace::{LibFunction as _, Namespace},
@@ -63,9 +62,9 @@ lazy_static! {
         ( "frames",  0, Env::lib_frames ),
         ( "fix",     2, Env::lib_fix ),
         // futures
-        ( "fwait",   1, Futures::lib_future_wait ),
-        ( "future",  2, Futures::lib_future ),
-        ( "fdone",   1, Futures::lib_future_complete ),
+        ( "fwait",   1, Future::lib_future_wait ),
+        ( "future",  2, Future::lib_future ),
+        ( "fdone",   1, Future::lib_future_complete ),
         // exceptions
         ( "with-ex", 2, Exception::lib_with_ex ),
         ( "raise",   2, Exception::lib_raise ),

@@ -48,6 +48,7 @@ pub struct Env {
     pub null_ns: Tag,
 
     // system
+    pub tag: RwLock<Tag>,
     pub start_time: ProcessTime,
 }
 
@@ -71,6 +72,7 @@ impl Core for Env {
             ns_map: RwLock::new(HashMap::new()),
             null_ns: Tag::nil(),
             start_time: ProcessTime::now(),
+            tag: RwLock::new(Tag::nil()),
         };
 
         // establish namespaces
