@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! features module
-use crate::core::lib::LibFn;
+use crate::core::functions::LibFn;
 
 #[cfg(feature = "nix")]
 use crate::features::nix::nix_::{Core as _, Nix};
