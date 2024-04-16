@@ -12,7 +12,7 @@ pub mod env;
 pub mod exception;
 pub mod frame;
 pub mod functions;
-pub mod futures;
+pub mod future;
 pub mod gc;
 pub mod heap;
 pub mod image;

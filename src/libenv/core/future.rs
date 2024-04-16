@@ -34,7 +34,7 @@ use {
     futures_locks::RwLock,
 };
 
-pub struct Futures {}
+pub struct Future {}
 
 pub struct FuturePool {
     pool: ThreadPool,
@@ -53,8 +53,11 @@ trait Core {
     fn is_future_complete(_: &Env, _: Tag) -> bool;
 }
 
-impl Core for Futures {
+impl Core for Future {
     fn make_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
+        let env_ref = block_on(env.tag.read());
+        let env_tag = (*env_ref).as_u64();
+
         let (tx, rx) = mpsc::unbounded::<Tag>();
 
         let fut_values = async move {
@@ -73,11 +76,13 @@ impl Core for Futures {
             fut_values.await
         };
 
-        let join_id = std::thread::spawn(|| {
-            std::thread::sleep(std::time::Duration::from_secs(5));
+        let join_id = std::thread::spawn(move || {
             let values: Vec<Tag> = executor::block_on(fut_values);
 
-            Fixnum::as_tag(values.len() as i64)
+            let env_ref = block_on(LIB.env_map.read());
+            let env = env_ref.get(&env_tag).unwrap();
+
+            env.apply(values[0], values[1]).unwrap()
         });
 
         let mut futures_ref = block_on(LIB.futures.write());
@@ -112,7 +117,7 @@ pub trait LibFunction {
     fn lib_future_complete(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Futures {
+impl LibFunction for Future {
     fn lib_future_wait(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 
@@ -148,31 +153,4 @@ impl LibFunction for Futures {
 
         Ok(())
     }
-
-    /*
-        fn lib_ftest(_: &Env, fp: &mut Frame) -> exception::Result<()> {
-            let (tx, rx) = mpsc::unbounded::<i32>();
-
-            let fut_values = async {
-                let fut_tx_result = async move {
-                    (0..20).for_each(|v| {
-                        tx.unbounded_send(v).expect("Failed to send");
-                    })
-                };
-
-                LIB.threads.pool.spawn_ok(fut_tx_result);
-
-                let fut_values = rx.map(|v| v * 2).collect();
-
-                fut_values.await
-            };
-
-            let values: Vec<i32> = executor::block_on(fut_values);
-
-            println!("Values={:?}", values);
-
-            fp.value = Tag::nil();
-            Ok(())
-    }
-         */
 }

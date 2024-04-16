@@ -9,7 +9,7 @@ use {
             direct::{DirectInfo, DirectTag, DirectType},
             env::Env,
             functions::{LibFn, LIB_SYMBOLS},
-            futures::FuturePool,
+            future::FuturePool,
             namespace::{Namespace, NsRwLockMap},
             types::Tag,
         },
@@ -192,8 +192,11 @@ pub trait Core {
 impl Core for Env {
     fn add_env(env: Env) -> Tag {
         let mut env_map_ref = block_on(LIB.env_map.write());
+        let mut tag_ref = block_on(env.tag.write());
+
         let key = Symbol::keyword(&format!("{:07x}", env_map_ref.len()));
 
+        *tag_ref = key;
         env_map_ref.insert(key.as_u64(), env);
 
         key
