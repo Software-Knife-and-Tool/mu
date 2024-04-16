@@ -8,7 +8,7 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        lib::LibFnDef,
+        functions::LibFnDef,
         types::Type,
     },
     features::Feature,

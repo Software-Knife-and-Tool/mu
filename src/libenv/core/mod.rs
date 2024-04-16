@@ -11,6 +11,7 @@ pub mod dynamic;
 pub mod env;
 pub mod exception;
 pub mod frame;
+pub mod functions;
 pub mod futures;
 pub mod gc;
 pub mod heap;
