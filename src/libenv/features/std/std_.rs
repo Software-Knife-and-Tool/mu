@@ -15,6 +15,7 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
+        float::Float,
         vector::{Core as _, Vector},
     },
 };
@@ -25,6 +26,7 @@ lazy_static! {
         ("command", 2, Std::std_command),
         ("env", 0, Std::std_env),
         ("exit", 1, Std::std_exit),
+        ("sleep", 1, Std::std_sleep),
     ];
 }
 
@@ -47,6 +49,7 @@ pub trait LibFunction {
     fn std_command(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn std_env(_: &Env, fp: &mut Frame) -> exception::Result<()>;
     fn std_exit(_: &Env, fp: &mut Frame) -> exception::Result<()>;
+    fn std_sleep(_: &Env, fp: &mut Frame) -> exception::Result<()>;
 }
 
 impl LibFunction for Std {
@@ -111,6 +114,24 @@ impl LibFunction for Std {
 
             Cons::vlist(env, &vars)
         };
+
+        Ok(())
+    }
+
+    fn std_sleep(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let interval = fp.argv[0];
+
+        fp.value = interval;
+
+        match interval.type_of() {
+            Type::Float => {
+                let us =
+                    std::time::Duration::from_micros((1e6 * Float::as_f32(env, interval)) as u64);
+
+                std::thread::sleep(us)
+            }
+            _ => return Err(Exception::new(Condition::Type, "exit", interval)),
+        }
 
         Ok(())
     }
