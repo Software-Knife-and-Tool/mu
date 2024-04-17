@@ -112,9 +112,9 @@ impl Core for Future {
 }
 
 pub trait LibFunction {
-    fn lib_future(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_future_apply(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_future_wait(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_future_complete(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_future_poll(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl LibFunction for Future {
@@ -131,7 +131,7 @@ impl LibFunction for Future {
         Ok(())
     }
 
-    fn lib_future_complete(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_future_poll(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 
         fp.value = if Self::is_future_complete(env, future) {
@@ -143,7 +143,7 @@ impl LibFunction for Future {
         Ok(())
     }
 
-    fn lib_future(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_future_apply(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
