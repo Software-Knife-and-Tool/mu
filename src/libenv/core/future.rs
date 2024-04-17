@@ -134,10 +134,16 @@ impl LibFunction for Future {
     fn lib_future_poll(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 
-        fp.value = if Self::is_future_complete(env, future) {
-            future
-        } else {
-            Tag::nil()
+        fp.value = match env.fp_argv_check("fpoll", &[Type::Struct], fp) {
+            Ok(_) if Struct::stype(env, future).eq_(&Symbol::keyword("future")) => {
+                if Self::is_future_complete(env, future) {
+                    future
+                } else {
+                    Tag::nil()
+                }
+            }
+            Ok(_) => return Err(Exception::new(Condition::Type, "fpoll", future)),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -147,9 +153,13 @@ impl LibFunction for Future {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        let future = Self::make_future(env, func, args).unwrap();
-
-        fp.value = future;
+        fp.value = match env.fp_argv_check("fapply", &[Type::Function, Type::List], fp) {
+            Ok(_) => match Self::make_future(env, func, args) {
+                Ok(future) => future,
+                Err(_) => return Err(Exception::new(Condition::Future, "fapply", Tag::nil())),
+            },
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }
