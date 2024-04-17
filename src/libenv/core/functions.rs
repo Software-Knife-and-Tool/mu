@@ -62,9 +62,9 @@ lazy_static! {
         ( "frames",  0, Env::lib_frames ),
         ( "fix",     2, Env::lib_fix ),
         // futures
+        ( "fapply",  2, Future::lib_future_apply ),
+        ( "fpoll",   1, Future::lib_future_poll ),
         ( "fwait",   1, Future::lib_future_wait ),
-        ( "future",  2, Future::lib_future ),
-        ( "fdone",   1, Future::lib_future_complete ),
         // exceptions
         ( "with-ex", 2, Exception::lib_with_ex ),
         ( "raise",   2, Exception::lib_raise ),
