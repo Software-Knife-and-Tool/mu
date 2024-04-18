@@ -23,13 +23,18 @@ use {
             vector::{Core as _, Vector},
         },
     },
-    std::collections::HashMap,
+    std::{
+        collections::HashMap,
+        sync::{Arc, Mutex},
+    },
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
 lazy_static! {
     pub static ref LIB: Lib = Lib::new().features().stdio();
 }
+
+pub type FutureState = (std::thread::JoinHandle<Tag>, Arc<Mutex<i32>>);
 
 pub struct Lib {
     pub version: &'static str,
@@ -38,7 +43,7 @@ pub struct Lib {
     pub features: RwLock<Vec<Feature>>,
     pub functions: RwLock<HashMap<u64, LibFn>>,
     pub future_id: RwLock<u64>,
-    pub futures: RwLock<HashMap<u64, std::thread::JoinHandle<Tag>>>,
+    pub futures: RwLock<HashMap<u64, FutureState>>,
     pub env_map: RwLock<HashMap<u64, Env>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
@@ -47,7 +52,7 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.48";
+    pub const VERSION: &'static str = "0.1.49";
 
     pub fn new() -> Self {
         let lib = Lib {
