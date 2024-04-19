@@ -9,7 +9,7 @@ use {
             direct::{DirectInfo, DirectTag, DirectType},
             env::Env,
             functions::{LibFn, LIB_SYMBOLS},
-            future::FuturePool,
+            future::{Future, FuturePool},
             namespace::{Namespace, NsRwLockMap},
             types::Tag,
         },
@@ -23,18 +23,13 @@ use {
             vector::{Core as _, Vector},
         },
     },
-    std::{
-        collections::HashMap,
-        sync::{Arc, Mutex},
-    },
+    std::collections::HashMap,
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
 lazy_static! {
     pub static ref LIB: Lib = Lib::new().features().stdio();
 }
-
-pub type FutureState = (std::thread::JoinHandle<Tag>, Arc<Mutex<i32>>);
 
 pub struct Lib {
     pub version: &'static str,
@@ -43,7 +38,7 @@ pub struct Lib {
     pub features: RwLock<Vec<Feature>>,
     pub functions: RwLock<HashMap<u64, LibFn>>,
     pub future_id: RwLock<u64>,
-    pub futures: RwLock<HashMap<u64, FutureState>>,
+    pub futures: RwLock<HashMap<u64, Future>>,
     pub env_map: RwLock<HashMap<u64, Env>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,

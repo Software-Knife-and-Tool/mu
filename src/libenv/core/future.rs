@@ -35,7 +35,10 @@ use {
     futures_locks::RwLock,
 };
 
-pub struct Future {}
+pub enum Future {
+    Eager(std::thread::JoinHandle<Tag>),
+    Lazy(std::thread::JoinHandle<Tag>, Arc<Mutex<Tag>>),
+}
 
 pub struct FuturePool {
     pool: ThreadPool,
@@ -87,7 +90,7 @@ impl Core for Future {
         let future = Struct {
             stype: Symbol::keyword("future"),
             vector: TypedVec::<Vec<Tag>> {
-                vec: vec![Fixnum::as_tag(future_id as i64), Symbol::keyword("lazy")],
+                vec: vec![Fixnum::as_tag(future_id as i64)],
             }
             .vec
             .to_vector()
@@ -95,7 +98,7 @@ impl Core for Future {
         }
         .evict(env);
 
-        let mutex = Arc::new(Mutex::new(0));
+        let mutex = Arc::new(Mutex::new(Tag::nil()));
 
         let thread_clone = Arc::clone(&mutex);
         let join_id = std::thread::spawn(move || {
@@ -109,7 +112,7 @@ impl Core for Future {
             env.apply(values[0], values[1]).unwrap()
         });
 
-        futures_ref.insert(future_id, (join_id, mutex));
+        futures_ref.insert(future_id, Future::Lazy(join_id, mutex));
 
         Ok(future)
     }
@@ -145,7 +148,7 @@ impl Core for Future {
         let future = Struct {
             stype: Symbol::keyword("future"),
             vector: TypedVec::<Vec<Tag>> {
-                vec: vec![Fixnum::as_tag(future_id as i64), Symbol::keyword("eager")],
+                vec: vec![Fixnum::as_tag(future_id as i64)],
             }
             .vec
             .to_vector()
@@ -161,7 +164,7 @@ impl Core for Future {
             env.apply(values[0], values[1]).unwrap()
         });
 
-        futures_ref.insert(future_id, (join_id, Arc::new(Mutex::new(0))));
+        futures_ref.insert(future_id, Future::Eager(join_id));
 
         Ok(future)
     }
@@ -170,7 +173,11 @@ impl Core for Future {
         let futures_ref = block_on(LIB.futures.read());
 
         let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
-        let join_id = &futures_ref.get(&(Fixnum::as_i64(index) as u64)).unwrap().0;
+
+        let join_id = match &futures_ref.get(&(Fixnum::as_i64(index) as u64)).unwrap() {
+            Future::Eager(join_id) => join_id,
+            Future::Lazy(join_id, _) => join_id,
+        };
 
         join_id.is_finished()
     }
@@ -191,12 +198,14 @@ impl LibFunction for Future {
                 let mut futures_ref = block_on(LIB.futures.write());
 
                 let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
-                let (join_id, mutex) = futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap();
 
-                let type_ = Vector::ref_(env, Struct::vector(env, future), 1).unwrap();
-                if type_.eq_(&Symbol::keyword("lazy")) {
-                    drop(mutex)
-                }
+                let join_id = match futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap() {
+                    Future::Eager(join_id) => join_id,
+                    Future::Lazy(join_id, mutex) => {
+                        drop(mutex);
+                        join_id
+                    }
+                };
 
                 join_id.join().unwrap()
             }
@@ -218,7 +227,7 @@ impl LibFunction for Future {
                     Tag::nil()
                 }
             }
-            Ok(_) => return Err(Exception::new(Condition::Type, "fpoll", future)),
+            Ok(_) => return Err(Exception::new(Condition::Type, "poll", future)),
             Err(e) => return Err(e),
         };
 
