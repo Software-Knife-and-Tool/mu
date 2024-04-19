@@ -20,4 +20,4 @@
 (lib:view 'a)
 (lib:view 'lib:eq)
 (lib:view lib:std-in)
-(lib:with-ex (:lambda (cond obj) cond) (:lambda () (lib:fx-div 1 1)))
+(lib:unwind (:lambda (cond obj) cond) (:lambda () (lib:fx-div 1 1)))

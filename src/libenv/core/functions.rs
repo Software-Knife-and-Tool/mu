@@ -66,7 +66,7 @@ lazy_static! {
         ( "poll",    1, Future::lib_future_poll ),
         ( "force",   1, Future::lib_future_force ),
         // exceptions
-        ( "with-ex", 2, Exception::lib_with_ex ),
+        ( "unwind",  2, Exception::lib_unwind ),
         ( "raise",   2, Exception::lib_raise ),
         // frames
         ( "fr-pop",  1, Frame::lib_fr_pop ),

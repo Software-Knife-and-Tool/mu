@@ -59,7 +59,7 @@
 
 (lib:intern :prelude "with-exception"
   (:lambda (handler thunk)
-     (lib:with-ex
+     (lib:unwind
       (:lambda (value condition source)
          (:if (lib:eq condition :except)
               (prelude:apply handler `(,value))

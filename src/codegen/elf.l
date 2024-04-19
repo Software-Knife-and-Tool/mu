@@ -105,7 +105,7 @@
 
 (lib:intern :arm "elf64-read-header"
    (:lambda (stream)
-      (lib:with-ex
+      (lib:unwind
        (:lambda (ex)
           (prelude:%exceptf
            lib:err-out

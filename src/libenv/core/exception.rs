@@ -40,6 +40,7 @@ pub enum Condition {
     Namespace,
     Range,
     Read,
+    Return,
     Signal,
     Stream,
     Syntax,
@@ -65,6 +66,7 @@ lazy_static! {
         (Symbol::keyword("over"), Condition::Over),
         (Symbol::keyword("range"), Condition::Range),
         (Symbol::keyword("read"), Condition::Read),
+        (Symbol::keyword("return"), Condition::Return),
         (Symbol::keyword("signal"), Condition::Signal),
         (Symbol::keyword("stream"), Condition::Stream),
         (Symbol::keyword("syntax"), Condition::Syntax),
@@ -155,7 +157,7 @@ impl Core for Exception {
 }
 
 pub trait LibFunction {
-    fn lib_with_ex(env: &Env, fp: &mut Frame) -> Result<()>;
+    fn lib_unwind(env: &Env, fp: &mut Frame) -> Result<()>;
     fn lib_raise(env: &Env, fp: &mut Frame) -> Result<()>;
 }
 
@@ -173,11 +175,11 @@ impl LibFunction for Exception {
         }
     }
 
-    fn lib_with_ex(env: &Env, fp: &mut Frame) -> Result<()> {
+    fn lib_unwind(env: &Env, fp: &mut Frame) -> Result<()> {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("with-ex", &[Type::Function, Type::Function], fp) {
+        fp.value = match env.fp_argv_check("unwind", &[Type::Function, Type::Function], fp) {
             Ok(_) => {
                 let frame_stack_len;
 
