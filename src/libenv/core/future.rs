@@ -177,13 +177,13 @@ impl Core for Future {
 }
 
 pub trait LibFunction {
-    fn lib_future_apply(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_future_wait(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_future_defer(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_future_force(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_future_poll(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl LibFunction for Future {
-    fn lib_future_wait(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_future_force(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 
         fp.value = match env.fp_argv_check("fwait", &[Type::Struct], fp) {
@@ -225,7 +225,7 @@ impl LibFunction for Future {
         Ok(())
     }
 
-    fn lib_future_apply(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_future_defer(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let type_ = fp.argv[0];
         let func = fp.argv[1];
         let args = fp.argv[2];

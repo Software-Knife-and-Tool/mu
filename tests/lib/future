@@ -1,6 +1,6 @@
-(lib:type-of lib:fapply)	:func
-(lib:type-of lib:fwait)	:func
-(lib:type-of lib:fpoll)	:func
-(lib:type-of (lib:fapply :eager lib:fx-add '(1 2)))	:struct
-(lib:fwait (lib:fapply :eager lib:fx-add '(1 2)))	3
-(lib:type-of (lib:fpoll (lib:fapply :eager lib:fx-add '(1 2))))	:null
+(lib:type-of lib:defer)	:func
+(lib:type-of lib:force)	:func
+(lib:type-of lib:poll)	:func
+(lib:type-of (lib:defer :eager lib:fx-add '(1 2)))	:struct
+(lib:force (lib:defer :eager lib:fx-add '(1 2)))	3
+(lib:type-of (lib:poll (lib:defer :eager lib:fx-add '(1 2))))	:null
