@@ -65,7 +65,7 @@
 ;;;
 (defmacro with-open-file (symbol path dir &rest body)
   (list 'let (list (list symbol (list lib:open-file dir path)))
-    (list 'with-ex
+    (list 'unwind
       (list 'lambda (list 'ex)
         (list 'print-except 'ex "with-open-file")
         (list 'close symbol))

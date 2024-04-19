@@ -75,7 +75,7 @@
                     (:if (prelude:%orf (lib:eq :input dir)
                                     (lib:eq :output dir))
                          ((:lambda (stream)
-                             (lib:with-ex
+                             (lib:unwind
                               (:lambda (ex) (lib:close stream) ex)
                               (:lambda () (prelude:apply fn `(,stream)))))
                           (lib:open type dir specifier))

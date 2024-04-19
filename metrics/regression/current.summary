@@ -1,40 +1,40 @@
 Perf Metrics Summary: lib
 --------------------
-lib/compile        bytes:     1520     usecs:      49.74
-lib/core           bytes:     5808     usecs:     156.66
-lib/gcd            bytes:      624     usecs:     143.44
-lib/list           bytes:     5296     usecs:     117.76
+lib/compile        bytes:     1520     usecs:      50.46
+lib/core           bytes:     5808     usecs:     155.98
+lib/gcd            bytes:      624     usecs:     143.72
+lib/list           bytes:     5296     usecs:     117.04
 lib/namespace      bytes:      240     usecs:       3.94
-lib/number         bytes:     3600     usecs:      79.96
-lib/reader         bytes:     5280     usecs:     103.34
-lib/special-form   bytes:     2400     usecs:      60.24
-lib/stream         bytes:      480     usecs:      13.40
-lib/struct         bytes:      576     usecs:      13.18
-lib/symbol         bytes:     1200     usecs:      27.60
-lib/vector         bytes:     4456     usecs:      99.74
+lib/number         bytes:     3600     usecs:      79.08
+lib/reader         bytes:     5280     usecs:     102.50
+lib/special-form   bytes:     2400     usecs:      60.00
+lib/stream         bytes:      480     usecs:      12.96
+lib/struct         bytes:      576     usecs:      13.26
+lib/symbol         bytes:     1200     usecs:      27.82
+lib/vector         bytes:     4456     usecs:     100.44
 
 Perf Metrics Summary: frequent
 --------------------
-frequent/core      bytes:     9624     usecs:     631.06
-frequent/fixnum    bytes:     1680     usecs:      36.94
-frequent/float     bytes:     1200     usecs:      26.82
-frequent/list      bytes:     2160     usecs:      46.54
-frequent/vector    bytes:      240     usecs:       5.52
+frequent/core      bytes:     9624     usecs:     635.02
+frequent/fixnum    bytes:     1680     usecs:      36.52
+frequent/float     bytes:     1200     usecs:      26.84
+frequent/list      bytes:     2160     usecs:      46.82
+frequent/vector    bytes:      240     usecs:       5.44
 
 Perf Metrics Summary: prelude
 --------------------
-prelude/closure    bytes:    20904     usecs:   14070.58
-prelude/compile    bytes:     5512     usecs:    1518.70
-prelude/prelude    bytes:     4592     usecs:     262.00
-prelude/exception  bytes:     6896     usecs:    5102.76
-prelude/fixnum     bytes:     2000     usecs:     183.42
-prelude/format     bytes:     6184     usecs:    6986.22
-prelude/lambda     bytes:    97784     usecs:   67273.32
-prelude/list       bytes:    20864     usecs:    9090.38
-prelude/macro      bytes:    58640     usecs:   45438.90
-prelude/reader     bytes:    15216     usecs:  121868.98
-prelude/stream     bytes:      960     usecs:      75.44
-prelude/string     bytes:     2160     usecs:     605.96
-prelude/type       bytes:     8768     usecs:    6219.98
-prelude/vector     bytes:     9472     usecs:    6732.54
+prelude/closure    bytes:    20904     usecs:   14064.30
+prelude/compile    bytes:     5512     usecs:    1526.74
+prelude/prelude    bytes:     4592     usecs:     263.94
+prelude/exception  bytes:     6896     usecs:    5123.08
+prelude/fixnum     bytes:     2000     usecs:     186.34
+prelude/format     bytes:     6184     usecs:    7080.94
+prelude/lambda     bytes:    97784     usecs:   67833.12
+prelude/list       bytes:    20864     usecs:    9021.78
+prelude/macro      bytes:    58640     usecs:   44043.68
+prelude/reader     bytes:    15216     usecs:  118794.86
+prelude/stream     bytes:      960     usecs:      68.82
+prelude/string     bytes:     2160     usecs:     562.12
+prelude/type       bytes:     8768     usecs:    6064.54
+prelude/vector     bytes:     9472     usecs:    6578.82
 

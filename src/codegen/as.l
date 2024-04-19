@@ -54,7 +54,7 @@
 (lib:intern :arm "as"
    (:lambda (path)
       (:if (prelude:stringp path)
-           (lib:with-ex
+           (lib:unwind
                (:lambda (exception)
                  (prelude:%exceptf lib:err-out () () exception))
                (:lambda ()
