@@ -97,15 +97,13 @@ impl Core for Future {
 
         let mutex = Arc::new(Mutex::new(0));
 
-        let thread_mutex = Arc::clone(&mutex);
-
-        drop(thread_mutex.lock().unwrap());
-
+        let thread_clone = Arc::clone(&mutex);
         let join_id = std::thread::spawn(move || {
             let env_ref = block_on(LIB.env_map.read());
             let env = env_ref.get(&env_tag).unwrap();
 
-            drop(thread_mutex.lock().unwrap());
+            let _unused = thread_clone.lock().unwrap();
+            let _unused = thread_clone.lock().unwrap();
 
             let values: Vec<Tag> = executor::block_on(fut_values);
             env.apply(values[0], values[1]).unwrap()
@@ -195,13 +193,14 @@ impl LibFunction for Future {
                 let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
                 let (join_id, mutex) = futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap();
 
-                if Struct::stype(env, future).eq_(&Symbol::keyword("lazy")) {
+                let type_ = Vector::ref_(env, Struct::vector(env, future), 1).unwrap();
+                if type_.eq_(&Symbol::keyword("lazy")) {
                     drop(mutex)
                 }
 
                 join_id.join().unwrap()
             }
-            Ok(_) => return Err(Exception::new(Condition::Type, "fpoll", future)),
+            Ok(_) => return Err(Exception::new(Condition::Type, "fwait", future)),
             Err(e) => return Err(e),
         };
 
