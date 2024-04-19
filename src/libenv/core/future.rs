@@ -50,12 +50,13 @@ impl FuturePool {
 }
 
 trait Core {
-    fn make_future(_: &Env, _: bool, _: Tag, _: Tag) -> exception::Result<Tag>;
+    fn make_eager_future(_: &Env, _: Tag, _: Tag) -> exception::Result<Tag>;
+    fn make_lazy_future(_: &Env, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn is_future_complete(_: &Env, _: Tag) -> bool;
 }
 
 impl Core for Future {
-    fn make_future(env: &Env, lazy: bool, func: Tag, args: Tag) -> exception::Result<Tag> {
+    fn make_lazy_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
         let env_ref = block_on(env.tag.read());
         let env_tag = (*env_ref).as_u64();
 
@@ -86,14 +87,7 @@ impl Core for Future {
         let future = Struct {
             stype: Symbol::keyword("future"),
             vector: TypedVec::<Vec<Tag>> {
-                vec: vec![
-                    Fixnum::as_tag(future_id as i64),
-                    if lazy {
-                        Symbol::keyword("lazy")
-                    } else {
-                        Symbol::keyword("eager")
-                    },
-                ],
+                vec: vec![Fixnum::as_tag(future_id as i64), Symbol::keyword("lazy")],
             }
             .vec
             .to_vector()
@@ -105,9 +99,7 @@ impl Core for Future {
 
         let thread_mutex = Arc::clone(&mutex);
 
-        if lazy {
-            let _unused = thread_mutex.lock().unwrap();
-        }
+        drop(thread_mutex.lock().unwrap());
 
         let join_id = std::thread::spawn(move || {
             let env_ref = block_on(LIB.env_map.read());
@@ -120,6 +112,58 @@ impl Core for Future {
         });
 
         futures_ref.insert(future_id, (join_id, mutex));
+
+        Ok(future)
+    }
+
+    fn make_eager_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
+        let env_ref = block_on(env.tag.read());
+        let env_tag = (*env_ref).as_u64();
+
+        let (tx, rx) = mpsc::unbounded::<Tag>();
+
+        let fut_values = async move {
+            let fut_tx_result = async move {
+                let tags: Vec<Tag> = vec![func, args];
+
+                for tag in tags.into_iter() {
+                    tx.unbounded_send(tag).expect("Failed to send")
+                }
+            };
+
+            LIB.threads.pool.spawn_ok(fut_tx_result);
+
+            let fut_values = rx.map(|v| v).collect();
+
+            fut_values.await
+        };
+
+        let mut futures_ref = block_on(LIB.futures.write());
+        let mut future_id_ref = block_on(LIB.future_id.write());
+        let future_id = *future_id_ref;
+
+        *future_id_ref = future_id + 1;
+
+        let future = Struct {
+            stype: Symbol::keyword("future"),
+            vector: TypedVec::<Vec<Tag>> {
+                vec: vec![Fixnum::as_tag(future_id as i64), Symbol::keyword("eager")],
+            }
+            .vec
+            .to_vector()
+            .evict(env),
+        }
+        .evict(env);
+
+        let join_id = std::thread::spawn(move || {
+            let env_ref = block_on(LIB.env_map.read());
+            let env = env_ref.get(&env_tag).unwrap();
+
+            let values: Vec<Tag> = executor::block_on(fut_values);
+            env.apply(values[0], values[1]).unwrap()
+        });
+
+        futures_ref.insert(future_id, (join_id, Arc::new(Mutex::new(0))));
 
         Ok(future)
     }
@@ -190,7 +234,7 @@ impl LibFunction for Future {
         fp.value =
             match env.fp_argv_check("fapply", &[Type::Keyword, Type::Function, Type::List], fp) {
                 Ok(_) if type_.eq_(&Symbol::keyword("eager")) => {
-                    match Self::make_future(env, false, func, args) {
+                    match Self::make_eager_future(env, func, args) {
                         Ok(future) => future,
                         Err(_) => {
                             return Err(Exception::new(Condition::Type, "fapply", Tag::nil()))
@@ -198,7 +242,7 @@ impl LibFunction for Future {
                     }
                 }
                 Ok(_) if type_.eq_(&Symbol::keyword("lazy")) => {
-                    match Self::make_future(env, true, func, args) {
+                    match Self::make_lazy_future(env, func, args) {
                         Ok(future) => future,
                         Err(_) => {
                             return Err(Exception::new(Condition::Type, "fapply", Tag::nil()))
