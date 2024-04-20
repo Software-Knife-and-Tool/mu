@@ -4,7 +4,7 @@ lib        backquote      total: 37       pass: 36       fail: 1        exceptio
 lib        compile        total: 8        pass: 8        fail: 0        exceptions: 0       
 lib        core           total: 54       pass: 54       fail: 0        exceptions: 0       
 lib        exception      total: 4        pass: 4        fail: 0        exceptions: 0       
-lib        future         total: 6        pass: 6        fail: 0        exceptions: 0       
+lib        future         total: 9        pass: 9        fail: 0        exceptions: 0       
 lib        list           total: 24       pass: 24       fail: 0        exceptions: 0       
 lib        namespace      total: 14       pass: 14       fail: 0        exceptions: 0       
 lib        number         total: 41       pass: 41       fail: 0        exceptions: 0       
@@ -15,7 +15,7 @@ lib        struct         total: 7        pass: 7        fail: 0        exceptio
 lib        symbol         total: 11       pass: 11       fail: 0        exceptions: 0       
 lib        vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-lib                       total: 299      pass: 298      fail: 1        exceptions: 0         
+lib                       total: 302      pass: 301      fail: 1        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------

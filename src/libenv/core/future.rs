@@ -23,7 +23,6 @@ use crate::{
         vector::{Core as _, Vector},
     },
 };
-use std::sync::{Arc, Mutex};
 
 #[allow(unused_imports)]
 use {
@@ -37,7 +36,7 @@ use {
 
 pub enum Future {
     Eager(std::thread::JoinHandle<Tag>),
-    Lazy(std::thread::JoinHandle<Tag>, Arc<Mutex<Tag>>),
+    Lazy(Tag, Tag),
 }
 
 pub struct FuturePool {
@@ -53,34 +52,13 @@ impl FuturePool {
 }
 
 trait Core {
-    fn make_eager_future(_: &Env, _: Tag, _: Tag) -> exception::Result<Tag>;
-    fn make_lazy_future(_: &Env, _: Tag, _: Tag) -> exception::Result<Tag>;
+    fn make_defer_future(_: &Env, _: Tag, _: Tag) -> exception::Result<Tag>;
+    fn make_detach_future(_: &Env, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn is_future_complete(_: &Env, _: Tag) -> bool;
 }
 
 impl Core for Future {
-    fn make_lazy_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(env.tag.read());
-        let env_tag = (*env_ref).as_u64();
-
-        let (tx, rx) = mpsc::unbounded::<Tag>();
-
-        let fut_values = async move {
-            let fut_tx_result = async move {
-                let tags: Vec<Tag> = vec![func, args];
-
-                for tag in tags.into_iter() {
-                    tx.unbounded_send(tag).expect("Failed to send")
-                }
-            };
-
-            LIB.threads.pool.spawn_ok(fut_tx_result);
-
-            let fut_values = rx.map(|v| v).collect();
-
-            fut_values.await
-        };
-
+    fn make_defer_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
         let mut futures_ref = block_on(LIB.futures.write());
         let mut future_id_ref = block_on(LIB.future_id.write());
         let future_id = *future_id_ref;
@@ -98,26 +76,12 @@ impl Core for Future {
         }
         .evict(env);
 
-        let mutex = Arc::new(Mutex::new(Tag::nil()));
-
-        let thread_clone = Arc::clone(&mutex);
-        let join_id = std::thread::spawn(move || {
-            let env_ref = block_on(LIB.env_map.read());
-            let env = env_ref.get(&env_tag).unwrap();
-
-            let _unused = thread_clone.lock().unwrap();
-            let _unused = thread_clone.lock().unwrap();
-
-            let values: Vec<Tag> = executor::block_on(fut_values);
-            env.apply(values[0], values[1]).unwrap()
-        });
-
-        futures_ref.insert(future_id, Future::Lazy(join_id, mutex));
+        futures_ref.insert(future_id, Future::Lazy(func, args));
 
         Ok(future)
     }
 
-    fn make_eager_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
+    fn make_detach_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
         let env_ref = block_on(env.tag.read());
         let env_tag = (*env_ref).as_u64();
 
@@ -176,7 +140,7 @@ impl Core for Future {
 
         let join_id = match &futures_ref.get(&(Fixnum::as_i64(index) as u64)).unwrap() {
             Future::Eager(join_id) => join_id,
-            Future::Lazy(join_id, _) => join_id,
+            Future::Lazy(_, _) => return false,
         };
 
         join_id.is_finished()
@@ -185,6 +149,7 @@ impl Core for Future {
 
 pub trait LibFunction {
     fn lib_future_defer(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_future_detach(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_future_force(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_future_poll(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
@@ -196,18 +161,12 @@ impl LibFunction for Future {
         fp.value = match env.fp_argv_check("fwait", &[Type::Struct], fp) {
             Ok(_) if Struct::stype(env, future).eq_(&Symbol::keyword("future")) => {
                 let mut futures_ref = block_on(LIB.futures.write());
-
                 let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
 
-                let join_id = match futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap() {
-                    Future::Eager(join_id) => join_id,
-                    Future::Lazy(join_id, mutex) => {
-                        drop(mutex);
-                        join_id
-                    }
-                };
-
-                join_id.join().unwrap()
+                match futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap() {
+                    Future::Eager(join_id) => join_id.join().unwrap(),
+                    Future::Lazy(func, args) => env.apply(func, args).unwrap(),
+                }
             }
             Ok(_) => return Err(Exception::new(Condition::Type, "fwait", future)),
             Err(e) => return Err(e),
@@ -235,31 +194,31 @@ impl LibFunction for Future {
     }
 
     fn lib_future_defer(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let type_ = fp.argv[0];
-        let func = fp.argv[1];
-        let args = fp.argv[2];
+        let func = fp.argv[0];
+        let args = fp.argv[1];
 
-        fp.value =
-            match env.fp_argv_check("fapply", &[Type::Keyword, Type::Function, Type::List], fp) {
-                Ok(_) if type_.eq_(&Symbol::keyword("eager")) => {
-                    match Self::make_eager_future(env, func, args) {
-                        Ok(future) => future,
-                        Err(_) => {
-                            return Err(Exception::new(Condition::Type, "fapply", Tag::nil()))
-                        }
-                    }
-                }
-                Ok(_) if type_.eq_(&Symbol::keyword("lazy")) => {
-                    match Self::make_lazy_future(env, func, args) {
-                        Ok(future) => future,
-                        Err(_) => {
-                            return Err(Exception::new(Condition::Type, "fapply", Tag::nil()))
-                        }
-                    }
-                }
-                Ok(_) => return Err(Exception::new(Condition::Range, "fapply", type_)),
-                Err(e) => return Err(e),
-            };
+        fp.value = match env.fp_argv_check("defer", &[Type::Function, Type::List], fp) {
+            Ok(_) => match Self::make_defer_future(env, func, args) {
+                Ok(future) => future,
+                Err(_) => return Err(Exception::new(Condition::Type, "defer", Tag::nil())),
+            },
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn lib_future_detach(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let func = fp.argv[0];
+        let args = fp.argv[1];
+
+        fp.value = match env.fp_argv_check("detach", &[Type::Function, Type::List], fp) {
+            Ok(_) => match Self::make_detach_future(env, func, args) {
+                Ok(future) => future,
+                Err(_) => return Err(Exception::new(Condition::Type, "detach", Tag::nil())),
+            },
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }
