@@ -41,7 +41,7 @@ pub enum Condition {
     Range,
     Read,
     Return,
-    Signal,
+    SigInt,
     Stream,
     Syntax,
     Syscall,
@@ -67,7 +67,7 @@ lazy_static! {
         (Symbol::keyword("range"), Condition::Range),
         (Symbol::keyword("read"), Condition::Read),
         (Symbol::keyword("return"), Condition::Return),
-        (Symbol::keyword("signal"), Condition::Signal),
+        (Symbol::keyword("sigint"), Condition::SigInt),
         (Symbol::keyword("stream"), Condition::Stream),
         (Symbol::keyword("syntax"), Condition::Syntax),
         (Symbol::keyword("syscall"), Condition::Syscall),
@@ -149,7 +149,7 @@ impl Core for Exception {
 
         if *signal_ref {
             *signal_ref = false;
-            Err(Exception::new(Condition::Signal, "sigint", Tag::nil()))
+            Err(Exception::new(Condition::SigInt, "sigint", Tag::nil()))
         } else {
             Ok(())
         }

@@ -138,7 +138,10 @@ impl Frame {
 
     // apply
     pub fn apply(mut self, env: &Env, func: Tag) -> exception::Result<Tag> {
-        Exception::on_signal()?;
+        match Exception::on_signal() {
+            Ok(_) => (),
+            Err(e) => return Err(e),
+        }
 
         match func.type_of() {
             Type::Symbol => {
