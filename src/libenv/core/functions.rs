@@ -62,7 +62,8 @@ lazy_static! {
         ( "frames",  0, Env::lib_frames ),
         ( "fix",     2, Env::lib_fix ),
         // futures
-        ( "defer",   3, Future::lib_future_defer ),
+        ( "defer",   2, Future::lib_future_defer ),
+        ( "detach",  2, Future::lib_future_detach ),
         ( "poll",    1, Future::lib_future_poll ),
         ( "force",   1, Future::lib_future_force ),
         // exceptions

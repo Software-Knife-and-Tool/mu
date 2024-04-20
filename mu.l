@@ -1,6 +1,6 @@
 (lib:intern () "future-loop"
   (:lambda ()
-    (lib:fapply
+    (lib:defer
      :lazy
      (:lambda ()
        (lib:write (lib:hp-stat) () lib:std-out)
