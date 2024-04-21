@@ -3,9 +3,12 @@
 
 //! system streams
 use {
-    crate::core::{
-        exception::{self, Condition, Exception},
-        types::Tag,
+    crate::{
+        core::{
+            exception::{self, Condition, Exception},
+            types::Tag,
+        },
+        streams::asyncio::Core as _,
     },
     std::{
         collections::VecDeque,
@@ -108,7 +111,7 @@ impl Core for SystemStream {
         let mut buf = [0; 1];
 
         match stream {
-            Self::StdInput => match std::io::stdin().read(&mut buf) {
+            Self::StdInput => match Self::async_stdin_read(&mut buf) {
                 Ok(nread) => {
                     if nread == 0 {
                         Ok(None)
@@ -116,7 +119,7 @@ impl Core for SystemStream {
                         Ok(Some(buf[0]))
                     }
                 }
-                Err(_) => Err(Exception::new(Condition::Read, "rd_byte", Tag::nil())),
+                Err(_) => Err(Exception::new(Condition::Read, "rd-byte", Tag::nil())),
             },
             Self::File(file) => {
                 let mut file_ref = block_on(file.write());
