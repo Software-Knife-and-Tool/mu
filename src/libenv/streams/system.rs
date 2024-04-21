@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! system streams
+use async_std::{fs, task};
 use {
     crate::{
         core::{
@@ -10,11 +11,7 @@ use {
         },
         streams::asyncio::Core as _,
     },
-    std::{
-        collections::VecDeque,
-        fs,
-        io::{Read, Write},
-    },
+    std::collections::VecDeque,
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
@@ -66,15 +63,27 @@ impl SystemStreamBuilder {
     pub fn build(&self) -> Option<SystemStream> {
         match &self.file {
             Some(path) => match self.input {
-                Some(_) => match fs::File::open(path) {
-                    Ok(file) => Some(SystemStream::File(RwLock::new(file))),
-                    Err(_) => None,
-                },
+                Some(_) => {
+                    let task: Option<SystemStream> = task::block_on(async {
+                        match fs::File::open(path).await {
+                            Ok(file) => Some(SystemStream::File(RwLock::new(file))),
+                            Err(_) => None,
+                        }
+                    });
+
+                    task
+                }
                 None => match self.output {
-                    Some(_) => match fs::File::create(path) {
-                        Ok(file) => Some(SystemStream::File(RwLock::new(file))),
-                        Err(_) => None,
-                    },
+                    Some(_) => {
+                        let task: Option<SystemStream> = task::block_on(async {
+                            match fs::File::create(path).await {
+                                Ok(file) => Some(SystemStream::File(RwLock::new(file))),
+                                Err(_) => None,
+                            }
+                        });
+
+                        task
+                    }
                     None => None,
                 },
             },
@@ -124,7 +133,7 @@ impl Core for SystemStream {
             Self::File(file) => {
                 let mut file_ref = block_on(file.write());
 
-                match file_ref.read(&mut buf) {
+                match Self::async_file_read(&mut file_ref, &mut buf) {
                     Ok(nread) => {
                         if nread == 0 {
                             Ok(None)
@@ -152,18 +161,18 @@ impl Core for SystemStream {
         let buf = [byte; 1];
 
         match stream {
-            Self::StdOutput => match std::io::stdout().write(&buf) {
+            Self::StdOutput => match Self::async_stdout_write(&buf) {
                 Ok(_) => Ok(None),
                 Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
             },
-            Self::StdError => match std::io::stderr().write(&buf) {
+            Self::StdError => match Self::async_stderr_write(&buf) {
                 Ok(_) => Ok(None),
                 Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
             },
             SystemStream::File(file) => {
                 let mut file_ref = block_on(file.write());
 
-                match file_ref.write_all(&buf) {
+                match Self::async_file_write(&mut file_ref, &buf) {
                     Ok(_) => Ok(None),
                     Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
                 }
