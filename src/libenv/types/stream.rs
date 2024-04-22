@@ -152,7 +152,7 @@ impl Core for Stream {
                                 "#<stream: id: {} type: {} dir: {} state: {}>",
                                 stream.index,
                                 match stream.system {
-                                    SystemStream::File(_) => ":file",
+                                    SystemStream::Reader(_) | SystemStream::Writer(_) => ":file",
                                     SystemStream::String(_) => ":string",
                                     SystemStream::StdInput => "std-in",
                                     SystemStream::StdOutput => "std-out",
