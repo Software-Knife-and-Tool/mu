@@ -44,7 +44,7 @@ pub trait Core {
 impl Core for SystemStream {
     fn is_file(stream: &SystemStream) -> Option<bool> {
         match stream {
-            SystemStream::File(_) => Some(true),
+            SystemStream::Reader(_) | SystemStream::Writer(_) => Some(true),
             _ => Some(false),
         }
     }
@@ -73,9 +73,8 @@ impl Core for SystemStream {
     fn close(stream: &SystemStream) -> Option<()> {
         match stream {
             Self::StdInput | Self::StdOutput | Self::StdError => (),
-            Self::File(file) => {
-                std::mem::drop(block_on(file.read()));
-            }
+            Self::Reader(file) => std::mem::drop(block_on(file.read())),
+            Self::Writer(file) => std::mem::drop(block_on(file.read())),
             SystemStream::String(_) => (),
         };
 
@@ -214,7 +213,7 @@ impl Core for SystemStream {
     fn get_string(stream: &SystemStream) -> Option<String> {
         match stream {
             Self::StdInput | Self::StdOutput | Self::StdError => None,
-            SystemStream::File(_) => None,
+            SystemStream::Reader(_) | SystemStream::Writer(_) => None,
             SystemStream::String(string) => {
                 let mut string_ref = block_on(string.write());
                 let string_vec: Vec<u8> = string_ref.iter().cloned().collect();

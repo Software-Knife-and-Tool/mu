@@ -9,7 +9,7 @@ use {
     },
     async_std::{
         fs,
-        io::{self, *},
+        io::{self, BufReader, BufWriter, ReadExt, WriteExt},
         task,
     },
     std::collections::VecDeque,
@@ -67,7 +67,9 @@ impl SystemStreamBuilder {
                 Some(_) => {
                     let task: Option<SystemStream> = task::block_on(async {
                         match fs::File::open(path).await {
-                            Ok(file) => Some(SystemStream::File(RwLock::new(file))),
+                            Ok(file) => {
+                                Some(SystemStream::Reader(RwLock::new(BufReader::new(file))))
+                            }
                             Err(_) => None,
                         }
                     });
@@ -78,7 +80,9 @@ impl SystemStreamBuilder {
                     Some(_) => {
                         let task: Option<SystemStream> = task::block_on(async {
                             match fs::File::create(path).await {
-                                Ok(file) => Some(SystemStream::File(RwLock::new(file))),
+                                Ok(file) => {
+                                    Some(SystemStream::Writer(RwLock::new(BufWriter::new(file))))
+                                }
                                 Err(_) => None,
                             }
                         });
@@ -98,7 +102,8 @@ impl SystemStreamBuilder {
 // system stream
 #[derive(Debug)]
 pub enum SystemStream {
-    File(RwLock<fs::File>),
+    Reader(RwLock<BufReader<fs::File>>),
+    Writer(RwLock<BufWriter<fs::File>>),
     String(RwLock<VecDeque<u8>>),
     StdInput,
     StdOutput,
@@ -136,7 +141,7 @@ impl Core for SystemStream {
                     Err(_) => Err(Exception::new(Condition::Read, "rd-byte", Tag::nil())),
                 }
             }
-            Self::File(file) => {
+            Self::Reader(file) => {
                 let mut file_ref = block_on(file.write());
                 let task: io::Result<usize> =
                     task::block_on(async { file_ref.read(&mut buf).await });
@@ -187,7 +192,7 @@ impl Core for SystemStream {
                     Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
                 }
             }
-            SystemStream::File(file) => {
+            SystemStream::Writer(file) => {
                 let mut file_ref = block_on(file.write());
                 let task: io::Result<()> = task::block_on(async { file_ref.write_all(&buf).await });
 
