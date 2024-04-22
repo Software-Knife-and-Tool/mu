@@ -2,7 +2,6 @@
 //  SPDX-License-Identifier: MIT
 
 //! system streams
-pub mod asyncio;
 pub mod operator;
 pub mod read;
 pub mod system;

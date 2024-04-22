@@ -2,14 +2,15 @@
 //  SPDX-License-Identifier: MIT
 
 //! system streams
-use async_std::{fs, task};
 use {
-    crate::{
-        core::{
-            exception::{self, Condition, Exception},
-            types::Tag,
-        },
-        streams::asyncio::Core as _,
+    crate::core::{
+        exception::{self, Condition, Exception},
+        types::Tag,
+    },
+    async_std::{
+        fs,
+        io::{self, *},
+        task,
     },
     std::collections::VecDeque,
 };
@@ -120,20 +121,27 @@ impl Core for SystemStream {
         let mut buf = [0; 1];
 
         match stream {
-            Self::StdInput => match Self::async_stdin_read(&mut buf) {
-                Ok(nread) => {
-                    if nread == 0 {
-                        Ok(None)
-                    } else {
-                        Ok(Some(buf[0]))
+            Self::StdInput => {
+                let task: io::Result<usize> =
+                    task::block_on(async { io::stdin().read(&mut buf).await });
+
+                match task {
+                    Ok(nread) => {
+                        if nread == 0 {
+                            Ok(None)
+                        } else {
+                            Ok(Some(buf[0]))
+                        }
                     }
+                    Err(_) => Err(Exception::new(Condition::Read, "rd-byte", Tag::nil())),
                 }
-                Err(_) => Err(Exception::new(Condition::Read, "rd-byte", Tag::nil())),
-            },
+            }
             Self::File(file) => {
                 let mut file_ref = block_on(file.write());
+                let task: io::Result<usize> =
+                    task::block_on(async { file_ref.read(&mut buf).await });
 
-                match Self::async_file_read(&mut file_ref, &mut buf) {
+                match task {
                     Ok(nread) => {
                         if nread == 0 {
                             Ok(None)
@@ -161,18 +169,29 @@ impl Core for SystemStream {
         let buf = [byte; 1];
 
         match stream {
-            Self::StdOutput => match Self::async_stdout_write(&buf) {
-                Ok(_) => Ok(None),
-                Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
-            },
-            Self::StdError => match Self::async_stderr_write(&buf) {
-                Ok(_) => Ok(None),
-                Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
-            },
+            Self::StdOutput => {
+                let task: io::Result<usize> =
+                    task::block_on(async { io::stdout().write(&buf).await });
+
+                match task {
+                    Ok(_) => Ok(None),
+                    Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
+                }
+            }
+            Self::StdError => {
+                let task: io::Result<usize> =
+                    task::block_on(async { io::stderr().write(&buf).await });
+
+                match task {
+                    Ok(_) => Ok(None),
+                    Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
+                }
+            }
             SystemStream::File(file) => {
                 let mut file_ref = block_on(file.write());
+                let task: io::Result<()> = task::block_on(async { file_ref.write_all(&buf).await });
 
-                match Self::async_file_write(&mut file_ref, &buf) {
+                match task {
                     Ok(_) => Ok(None),
                     Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
                 }
