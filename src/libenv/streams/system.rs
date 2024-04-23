@@ -117,15 +117,15 @@ pub enum StringDirection {
 }
 
 pub trait Core {
-    fn read_byte(_: &SystemStream) -> exception::Result<Option<u8>>;
-    fn write_byte(_: &SystemStream, _: u8) -> exception::Result<Option<()>>;
+    fn read_byte(&self) -> exception::Result<Option<u8>>;
+    fn write_byte(&self, _: u8) -> exception::Result<Option<()>>;
 }
 
 impl Core for SystemStream {
-    fn read_byte(stream: &SystemStream) -> exception::Result<Option<u8>> {
+    fn read_byte(&self) -> exception::Result<Option<u8>> {
         let mut buf = [0; 1];
 
-        match stream {
+        match self {
             Self::StdInput => {
                 let task: io::Result<usize> =
                     task::block_on(async { io::stdin().read(&mut buf).await });
@@ -170,10 +170,10 @@ impl Core for SystemStream {
         }
     }
 
-    fn write_byte(stream: &SystemStream, byte: u8) -> exception::Result<Option<()>> {
+    fn write_byte(&self, byte: u8) -> exception::Result<Option<()>> {
         let buf = [byte; 1];
 
-        match stream {
+        match self {
             Self::StdOutput => {
                 let task: io::Result<usize> =
                     task::block_on(async { io::stdout().write(&buf).await });

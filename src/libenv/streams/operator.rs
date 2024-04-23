@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! stream operators
+#![allow(unused_imports)]
 use {
     crate::{
         core::{
@@ -16,6 +17,11 @@ use {
             symbol::{Core as _, Symbol},
         },
     },
+    async_std::{
+        fs,
+        io::{self, BufReader, BufWriter, ReadExt, WriteExt},
+        task,
+    },
     std::{io::Write, str},
 };
 
@@ -23,12 +29,6 @@ use futures::executor::block_on;
 use futures_locks::RwLock;
 
 pub trait Core {
-    fn close(_: &SystemStream) -> Option<()>;
-    fn flush(_: &SystemStream) -> Option<()>;
-
-    fn is_file(_: &SystemStream) -> Option<bool>;
-    fn is_string(_: &SystemStream) -> Option<bool>;
-
     fn open_file(_: &str, _: bool) -> exception::Result<Tag>;
     fn open_input_file(_: &str) -> exception::Result<Tag>;
     fn open_output_file(_: &str) -> exception::Result<Tag>;
@@ -37,27 +37,25 @@ pub trait Core {
     fn open_output_string(_: &str) -> exception::Result<Tag>;
     fn open_bidir_string(_: &str) -> exception::Result<Tag>;
     fn open_std_stream(_: SystemStream, _: &Lib) -> exception::Result<Tag>;
-
-    fn get_string(_: &SystemStream) -> Option<String>;
 }
 
-impl Core for SystemStream {
-    fn is_file(stream: &SystemStream) -> Option<bool> {
-        match stream {
+impl SystemStream {
+    pub fn is_file(&self) -> Option<bool> {
+        match self {
             SystemStream::Reader(_) | SystemStream::Writer(_) => Some(true),
             _ => Some(false),
         }
     }
 
-    fn is_string(stream: &SystemStream) -> Option<bool> {
-        match stream {
+    pub fn is_string(&self) -> Option<bool> {
+        match self {
             SystemStream::String(_) => Some(true),
             _ => Some(false),
         }
     }
 
-    fn flush(stream: &SystemStream) -> Option<()> {
-        match stream {
+    pub fn flush(&self) -> Option<()> {
+        match self {
             Self::StdOutput => {
                 std::io::stdout().flush().unwrap();
             }
@@ -70,17 +68,38 @@ impl Core for SystemStream {
         Some(())
     }
 
-    fn close(stream: &SystemStream) -> Option<()> {
-        match stream {
+    pub fn close(&self) -> Option<()> {
+        match self {
             Self::StdInput | Self::StdOutput | Self::StdError => (),
             Self::Reader(file) => std::mem::drop(block_on(file.read())),
-            Self::Writer(file) => std::mem::drop(block_on(file.read())),
+            Self::Writer(file) => {
+                let mut file = block_on(file.write());
+                let _unused = task::block_on(async { file.flush().await });
+
+                std::mem::drop(file)
+            }
             SystemStream::String(_) => (),
         };
 
         Some(())
     }
 
+    pub fn get_string(&self) -> Option<String> {
+        match self {
+            Self::StdInput | Self::StdOutput | Self::StdError => None,
+            SystemStream::Reader(_) | SystemStream::Writer(_) => None,
+            SystemStream::String(string) => {
+                let mut string_ref = block_on(string.write());
+                let string_vec: Vec<u8> = string_ref.iter().cloned().collect();
+
+                string_ref.clear();
+                Some(str::from_utf8(&string_vec).unwrap().to_owned())
+            }
+        }
+    }
+}
+
+impl Core for SystemStream {
     fn open_file(path: &str, is_input: bool) -> exception::Result<Tag> {
         let system_stream = if is_input {
             SystemStreamBuilder::new()
@@ -207,20 +226,6 @@ impl Core for SystemStream {
                 ))
             }
             _ => panic!(),
-        }
-    }
-
-    fn get_string(stream: &SystemStream) -> Option<String> {
-        match stream {
-            Self::StdInput | Self::StdOutput | Self::StdError => None,
-            SystemStream::Reader(_) | SystemStream::Writer(_) => None,
-            SystemStream::String(string) => {
-                let mut string_ref = block_on(string.write());
-                let string_vec: Vec<u8> = string_ref.iter().cloned().collect();
-
-                string_ref.clear();
-                Some(str::from_utf8(&string_vec).unwrap().to_owned())
-            }
         }
     }
 }

@@ -16,7 +16,6 @@ use crate::{
         types::{Tag, Type},
     },
     streams::{
-        operator::Core as _,
         system::{Core as _, SystemStream},
         write::Core as _,
     },
