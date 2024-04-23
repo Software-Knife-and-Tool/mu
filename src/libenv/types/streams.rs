@@ -15,7 +15,7 @@ use crate::{
         lib::LIB,
         types::{Tag, Type},
     },
-    streams::{operator::Core as _, system::SystemStream},
+    streams::system::SystemStream,
     types::{
         char::Char,
         fixnum::Fixnum,
