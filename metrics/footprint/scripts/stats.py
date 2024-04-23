@@ -9,7 +9,7 @@ import subprocess
 ntests = sys.argv[1]
 
 mu_cmd = '../../dist/mu-sys'
-time_cmd = '/usr/bin/time'
+time_cmd = 'time'
 format = '"%S %U %e %M %w %Z"'
 
 def stats():
