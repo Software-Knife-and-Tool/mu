@@ -31,11 +31,16 @@ help:
 	@echo "    regression/current - current report"
 	@echo "    regression/report - compare base and current"
 	@echo "    regression/commit - condensed regression report"
+	@echo "--- footprint options"
+	@echo "    footprint/base - baseline report"
+	@echo "    footprint/current - current report"
+	@echo "    footprint/report - compare base and current"
+	@echo "    footprint/commit - condensed footprint report"
 
 tags:
-	@etags `find src/mu -name '*.rs' -print`
+	@etags `find src/libenv -name '*.rs' -print`
 
-release:
+release: tags
 	@cargo build --release --bin mu-exec
 	@cp target/release/mu-exec dist
 	@cargo build --release --bin mu-sys
@@ -83,23 +88,37 @@ regression/current:
 regression/report:
 	@make -C metrics/regression report --no-print-directory
 
-regresssion/commit:
+regression/commit:
 	@make -C metrics/regression commit --no-print-directory
+
+footprint/base:
+	@make -C metrics/footprint base --no-print-directory
+
+footprint/current:
+	@make -C metrics/footprint current --no-print-directory
+
+footprint/report:
+	@make -C metrics/footprint report --no-print-directory
+
+footprint/commit:
+	@make -C metrics/footprint commit --no-print-directory
 
 commit:
 	@cargo fmt
-	@echo ";;; rust tests"
+	@echo ";;; internal tests"
 	@cargo -q test | sed -e '/^$$/d'
 	@echo ";;; clippy tests"
 	@cargo clippy
-	@echo ";;; regression report"
+	@echo ";;; external tests report"
 	@make -C tests commit --no-print-directory
+	@echo ";;; metrics reports"
 	@make -C metrics/regression commit --no-print-directory
+#	@make -C metrics/footprint commit --no-print-directory
 
 clobber:
-	@rm -f TAGS
-	@rm -rf target Cargo.lock
+	@rm -rf target Cargo.lock TAGS
 	@make -C docker clean --no-print-directory
 	@make -C dist clean --no-print-directory
 	@make -C tests clean --no-print-directory
 	@make -C metrics/regression clean --no-print-directory
+	@make -C metrics/footprint clean --no-print-directory
