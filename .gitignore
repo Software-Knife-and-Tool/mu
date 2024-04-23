@@ -1,4 +1,5 @@
 *.out
+TAGS
 Cargo.lock
 dist/mu*.tgz
 dist/mu-exec
@@ -7,6 +8,8 @@ dist/mu-server
 dist/mu-sys
 dist/prelude.l
 doc/rustdoc
+metrics/footprint/*.report
+metrics/footprint/json
 metrics/regression/*.report
 metrics/regression/json
 metrics/valgrind/cachegrind.report
