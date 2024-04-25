@@ -214,10 +214,11 @@ impl Core for Lib {
     fn read_char_literal(env: &Env, stream: Tag) -> exception::Result<Option<Tag>> {
         match Stream::read_char(env, stream) {
             Ok(Some(ch)) => match Stream::read_char(env, stream) {
-                Ok(Some(ch_)) => match map_char_syntax(ch_) {
-                    Some(stype) => match stype {
+                Ok(Some(space)) => match map_char_syntax(space) {
+                    Some(sp_type) => match sp_type {
+                        SyntaxType::Whitespace => Ok(Some(Tag::from(ch))),
                         SyntaxType::Constituent => {
-                            Stream::unread_char(env, stream, ch_).unwrap();
+                            Stream::unread_char(env, stream, space).unwrap();
                             match Self::read_token(env, stream) {
                                 Ok(Some(str)) => {
                                     let phrase = ch.to_string() + &str;
@@ -227,9 +228,11 @@ impl Core for Lib {
                                         "space" => Ok(Some(Tag::from(' '))),
                                         "page" => Ok(Some(Tag::from('\x0c'))),
                                         "return" => Ok(Some(Tag::from('\r'))),
-                                        _ => {
-                                            Err(Exception::new(Condition::Range, "read:ch", stream))
-                                        }
+                                        _ => Err(Exception::new(
+                                            Condition::Type,
+                                            "read:ch",
+                                            Vector::from_string(&phrase).evict(env),
+                                        )),
                                     }
                                 }
                                 Ok(None) => Err(Exception::new(Condition::Eof, "read:ch", stream)),
@@ -237,7 +240,7 @@ impl Core for Lib {
                             }
                         }
                         _ => {
-                            Stream::unread_char(env, stream, ch_).unwrap();
+                            Stream::unread_char(env, stream, space).unwrap();
                             Ok(Some(Tag::from(ch)))
                         }
                     },
