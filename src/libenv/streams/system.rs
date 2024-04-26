@@ -68,12 +68,7 @@ impl SystemStreamBuilder {
                     let task: Option<SystemStream> = task::block_on(async {
                         match fs::File::open(path).await {
                             Ok(file) => {
-                                let zeros = [0; READ_BUF_SIZE];
-                                Some(SystemStream::Reader(RwLock::new(Reader {
-                                    reader: BufReader::new(file),
-                                    buffer: zeros,
-                                    len: 0,
-                                })))
+                                Some(SystemStream::Reader(RwLock::new(BufReader::new(file))))
                             }
                             Err(_) => None,
                         }
@@ -107,7 +102,7 @@ impl SystemStreamBuilder {
 // system stream
 #[derive(Debug)]
 pub enum SystemStream {
-    Reader(RwLock<Reader>),
+    Reader(RwLock<BufReader<fs::File>>),
     Writer(RwLock<BufWriter<fs::File>>),
     String(RwLock<VecDeque<u8>>),
     StdInput,
@@ -119,15 +114,6 @@ pub enum StringDirection {
     Input,
     Output,
     Bidir,
-}
-
-const READ_BUF_SIZE: usize = 32;
-
-#[derive(Debug)]
-pub struct Reader {
-    reader: BufReader<fs::File>,
-    buffer: [u8; READ_BUF_SIZE],
-    len: usize,
 }
 
 pub trait Core {
@@ -158,7 +144,7 @@ impl Core for SystemStream {
             Self::Reader(file) => {
                 let mut file_ref = block_on(file.write());
                 let task: io::Result<usize> =
-                    task::block_on(async { file_ref.reader.read(&mut buf).await });
+                    task::block_on(async { file_ref.read(&mut buf).await });
 
                 match task {
                     Ok(nread) => {
