@@ -18,8 +18,8 @@ use crate::{
     types::{
         fixnum::Fixnum,
         symbol::Symbol,
-        vecimage::{TypedVec, VecType},
-        vector::Core as _,
+        vector::{TypedVec, VecType},
+        vectors::Core as _,
     },
 };
 

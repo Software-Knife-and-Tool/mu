@@ -15,7 +15,7 @@ use crate::{
         cons::{Cons, Core as _},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vectors::{Core as _, Vector},
     },
 };
 use nix::{self};

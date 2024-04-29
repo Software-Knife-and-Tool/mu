@@ -26,7 +26,7 @@ use crate::{
         streams::LibFunction as _,
         struct_::{LibFunction as _, Struct},
         symbol::{LibFunction as _, Symbol},
-        vector::{LibFunction as _, Vector},
+        vectors::{LibFunction as _, Vector},
     },
 };
 

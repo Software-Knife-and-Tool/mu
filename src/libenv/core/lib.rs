@@ -20,7 +20,7 @@ use {
             stream::Stream,
             streambuilder::StreamBuilder,
             symbol::{Core as _, Symbol, UNBOUND},
-            vector::{Core as _, Vector},
+            vectors::{Core as _, Vector},
         },
     },
     std::collections::HashMap,

@@ -22,7 +22,7 @@ use crate::{
         stream::{Core as _, Stream},
         streambuilder::StreamBuilder,
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vectors::{Core as _, Vector},
     },
 };
 

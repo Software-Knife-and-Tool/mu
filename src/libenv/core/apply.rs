@@ -12,7 +12,7 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
-        vector::Vector,
+        vectors::Vector,
     },
 };
 

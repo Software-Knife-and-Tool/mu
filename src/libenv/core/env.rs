@@ -17,6 +17,7 @@ use {
         types::{
             cons::{Cons, Core as _},
             symbol::{Core as _, Symbol},
+            vectors::VecCacheMap,
         },
     },
     cpu_time::ProcessTime,
@@ -34,6 +35,7 @@ pub struct Env {
     // heap
     pub heap: RwLock<BumpAllocator>,
     pub gc_root: RwLock<Vec<Tag>>,
+    pub vector_map: RwLock<VecCacheMap>,
 
     // environments
     pub dynamic: RwLock<Vec<(u64, usize)>>,
@@ -73,6 +75,7 @@ impl Core for Env {
             null_ns: Tag::nil(),
             start_time: ProcessTime::now(),
             tag: RwLock::new(Tag::nil()),
+            vector_map: RwLock::new(HashMap::new()),
         };
 
         // establish namespaces

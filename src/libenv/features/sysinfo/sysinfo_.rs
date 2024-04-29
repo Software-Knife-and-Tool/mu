@@ -16,8 +16,8 @@ use crate::{
         fixnum::Fixnum,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vecimage::VecType,
-        vector::Core as _,
+        vector::VecType,
+        vectors::Core as _,
     },
 };
 use sysinfo_dot_h::{self};

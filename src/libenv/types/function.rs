@@ -14,9 +14,8 @@ use crate::{
     types::{
         fixnum::Fixnum,
         symbol::Symbol,
-        vecimage::{TypedVec, VecType},
-        vector::Core as _,
-        vector::Vector,
+        vector::{TypedVec, VecType},
+        vectors::{Core as _, Vector},
     },
 };
 

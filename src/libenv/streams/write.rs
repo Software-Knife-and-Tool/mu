@@ -19,7 +19,7 @@ use crate::{
         stream::{Core as _, Stream},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vectors::{Core as _, Vector},
     },
 };
 

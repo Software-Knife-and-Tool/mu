@@ -23,8 +23,8 @@ use {
             stream::{Core as _, Stream},
             struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol},
-            vecimage::{TypedVec, VecType},
-            vector::{Core as _, Vector},
+            vector::{TypedVec, VecType},
+            vectors::{Core as _, Vector},
         },
     },
     num_enum::TryFromPrimitive,
@@ -41,7 +41,7 @@ pub enum Tag {
 }
 
 // types
-#[derive(PartialEq, Copy, Clone, Debug, TryFromPrimitive)]
+#[derive(PartialEq, Hash, Eq, Copy, Clone, Debug, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Type {
     Byte,
