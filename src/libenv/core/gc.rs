@@ -16,7 +16,7 @@ use crate::{
         function::{Core as _, Function},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vectors::{Core as _, Vector},
     },
 };
 

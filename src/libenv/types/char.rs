@@ -12,8 +12,8 @@ use crate::{
     streams::write::Core as _,
     types::{
         stream::{Core as _, Stream},
-        vecimage::{TypedVec, VecType},
-        vector::Core as _,
+        vector::{TypedVec, VecType},
+        vectors::Core as _,
     },
 };
 

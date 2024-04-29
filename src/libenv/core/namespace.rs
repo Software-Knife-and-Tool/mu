@@ -15,8 +15,8 @@ use {
         types::{
             cons::{Cons, Core as _},
             symbol::{Core as _, Symbol, UNBOUND},
-            vecimage::{TypedVec, VecType},
-            vector::{Core as _, Vector},
+            vector::{TypedVec, VecType},
+            vectors::{Core as _, Vector},
         },
     },
     std::{collections::HashMap, str},

@@ -15,8 +15,8 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         symbol::{Core as _, Symbol},
-        vecimage::{TypedVec, VecType},
-        vector::Core as _,
+        vector::{TypedVec, VecType},
+        vectors::Core as _,
     },
 };
 

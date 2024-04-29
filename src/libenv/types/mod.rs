@@ -12,5 +12,5 @@ pub mod streambuilder;
 pub mod streams;
 pub mod struct_;
 pub mod symbol;
-pub mod vecimage;
 pub mod vector;
+pub mod vectors;

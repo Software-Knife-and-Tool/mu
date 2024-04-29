@@ -20,8 +20,8 @@ use {
         streams::write::Core as _,
         types::{
             stream::{Core as _, Stream},
-            vecimage::{TypedVec, VecType},
-            vector::{Core as _, Vector},
+            vector::{TypedVec, VecType},
+            vectors::{Core as _, Vector},
         },
     },
     std::str,

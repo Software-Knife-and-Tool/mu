@@ -22,8 +22,8 @@ use crate::{
         function::Function,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vecimage::VectorIter,
-        vector::{Core as _, Vector},
+        vector::VectorIter,
+        vectors::{Core as _, Vector},
     },
 };
 

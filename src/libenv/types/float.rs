@@ -15,8 +15,8 @@ use {
         streams::write::Core as _,
         types::{
             symbol::{Core as _, Symbol},
-            vecimage::{TypedVec, VecType},
-            vector::Core as _,
+            vector::{TypedVec, VecType},
+            vectors::Core as _,
         },
     },
     std::ops::{Add, Div, Mul, Sub},

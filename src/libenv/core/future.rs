@@ -19,8 +19,8 @@ use crate::{
         function::Function,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vecimage::{TypedVec, VecType, VectorIter},
-        vector::{Core as _, Vector},
+        vector::{TypedVec, VecType, VectorIter},
+        vectors::{Core as _, Vector},
     },
 };
 

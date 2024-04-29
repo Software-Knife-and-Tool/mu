@@ -17,8 +17,8 @@ use crate::{
         cons::{Cons, Core as _},
         stream::{Core as _, Stream},
         symbol::{Core as _, Symbol},
-        vecimage::{TypedVec, VecType, VectorIter},
-        vector::{Core as _, Vector},
+        vector::{TypedVec, VecType, VectorIter},
+        vectors::{Core as _, Vector},
     },
 };
 
