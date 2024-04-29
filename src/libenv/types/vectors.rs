@@ -139,10 +139,10 @@ impl Vector {
             IndirectVector::Byte(image, ivec)
             | IndirectVector::Char(image, ivec)
             | IndirectVector::Fixnum(image, ivec)
-            | IndirectVector::Float(image, ivec)
-            | IndirectVector::T(image, ivec) => {
+            | IndirectVector::Float(image, ivec) => {
                 (image.vtype, Fixnum::as_i64(image.length) as i32, ivec)
             }
+            _ => panic!(),
         };
 
         match (*cache).get(&(Tag::key_type(vtype).unwrap(), length)) {
@@ -168,12 +168,7 @@ impl Vector {
                             *float == Float::as_f32(env, Vector::ref_(env, **src, index).unwrap())
                         })
                     }),
-                    IVec::T(tag_vec) => tag_vec.iter().find(|src| {
-                        tag_vec
-                            .iter()
-                            .enumerate()
-                            .all(|(index, tag)| tag.eq_(&Vector::ref_(env, **src, index).unwrap()))
-                    }),
+                    _ => panic!(),
                 };
 
                 tag.copied()
@@ -532,14 +527,11 @@ impl<'a> Core<'a> for Vector {
                     IVec::T(_) => indirect.evict(env),
                     _ => match Self::cached(env, &indirect) {
                         Some(tag) => {
-                            // println!("found in cache {:x}", tag.as_u64());
-
                             tag
                         }
                         None => {
                             let tag = indirect.evict(env);
 
-                            // println!("caching: {:x}", tag.as_u64());
                             Self::cache(env, tag);
                             tag
                         }

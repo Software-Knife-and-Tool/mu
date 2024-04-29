@@ -250,7 +250,7 @@ impl<'a> IVector for IndirectVector<'a> {
     }
 }
 
-/// typed vector allocation
+// typed vector allocation
 pub struct TypedVec<T: VecType> {
     pub vec: T,
 }
@@ -330,7 +330,7 @@ impl VecType for Vec<f32> {
     }
 }
 
-/// iterator
+// iterator
 pub struct VectorIter<'a> {
     env: &'a Env,
     pub vec: Tag,
