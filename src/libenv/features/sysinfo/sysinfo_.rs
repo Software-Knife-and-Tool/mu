@@ -7,24 +7,24 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        functions::LibFnDef,
+        symbols::CoreFnDef,
         types::Tag,
     },
     features::Feature,
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
+        indirect_vector::VecType,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::VecType,
-        vectors::Core as _,
+        vector::Core as _,
     },
 };
 use sysinfo_dot_h::{self};
 
 // env function dispatch table
 lazy_static! {
-    static ref SYSINFO_SYMBOLS: Vec<LibFnDef> = vec![("sysinfo", 0, Sysinfo::sysinfo),];
+    static ref SYSINFO_SYMBOLS: Vec<CoreFnDef> = vec![("sysinfo", 0, Sysinfo::sysinfo),];
 }
 
 pub struct Sysinfo {}
@@ -42,11 +42,11 @@ impl Core for Sysinfo {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn sysinfo(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Sysinfo {
+impl CoreFunction for Sysinfo {
     fn sysinfo(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match sysinfo_dot_h::try_collect() {
             Err(_) => return Err(Exception::new(Condition::Type, "sysinfo", Tag::nil())),

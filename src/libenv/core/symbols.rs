@@ -1,40 +1,40 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! lib functions
+//! lib symbols
 use crate::{
     core::{
-        apply::LibFunction as _,
-        compile::{Compile, LibFunction as _},
-        dynamic::LibFunction as _,
+        apply::CoreFunction as _,
+        compile::{Compile, CoreFunction as _},
+        dynamic::CoreFunction as _,
         env::Env,
-        exception::{self, Exception, LibFunction as _},
-        frame::{Frame, LibFunction as _},
-        future::{Future, LibFunction as _},
-        gc::{Gc, LibFunction as _},
-        heap::{Heap, LibFunction as _},
-        namespace::{LibFunction as _, Namespace},
-        types::{LibFunction as _, Tag},
-        utime::LibFunction as _,
+        exception::{self, CoreFunction as _, Exception},
+        frame::{CoreFunction as _, Frame},
+        future::{CoreFunction as _, Future},
+        gc::{CoreFunction as _, Gc},
+        heap::{CoreFunction as _, Heap},
+        namespace::{CoreFunction as _, Namespace},
+        types::{CoreFunction as _, Tag},
+        utime::CoreFunction as _,
     },
-    streams::{read::LibFunction as _, write::LibFunction as _},
+    streams::{read::CoreFunction as _, write::CoreFunction as _},
     types::{
-        cons::{Cons, LibFunction as _},
-        fixnum::{Fixnum, LibFunction as _},
-        float::{Float, LibFunction as _},
-        stream::Stream,
-        streams::LibFunction as _,
-        struct_::{LibFunction as _, Struct},
-        symbol::{LibFunction as _, Symbol},
-        vectors::{LibFunction as _, Vector},
+        cons::{Cons, CoreFunction as _},
+        core_stream::Stream,
+        fixnum::{CoreFunction as _, Fixnum},
+        float::{CoreFunction as _, Float},
+        stream::CoreFunction as _,
+        struct_::{CoreFunction as _, Struct},
+        symbol::{CoreFunction as _, Symbol},
+        vector::{CoreFunction as _, Vector},
     },
 };
 
-pub type LibFn = fn(&Env, &mut Frame) -> exception::Result<()>;
-pub type LibFnDef = (&'static str, u16, LibFn);
+pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
+pub type CoreFnDef = (&'static str, u16, CoreFn);
 
 lazy_static! {
-    pub static ref LIB_SYMBOLS: Vec<LibFnDef> = vec![
+    pub static ref LIB_SYMBOLS: Vec<CoreFnDef> = vec![
         // types
         ( "eq",      2, Tag::lib_eq ),
         ( "type-of", 1, Tag::lib_typeof ),
@@ -50,12 +50,13 @@ lazy_static! {
         ( "nthcdr",  2, Cons::lib_nthcdr ),
         // compiler
         ( "compile", 1, Compile::lib_compile ),
+        ( "if",      3, Compile::if__),
         // gc
         ( "gc",      0, Gc::lib_gc ),
         // heap
-        ( "hp-info", 0, Heap::lib_hp_info ),
-        ( "hp-stat", 0, Heap::lib_hp_stat ),
-        ( "hp-size", 1, Heap::lib_hp_size ),
+        ( "heap-info", 0, Heap::lib_hp_info ),
+        ( "heap-stat", 0, Heap::lib_hp_stat ),
+        ( "heap-size", 1, Heap::lib_hp_size ),
         // env
         ( "apply",   2, Env::lib_apply ),
         ( "eval",    1, Env::lib_eval ),

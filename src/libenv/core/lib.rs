@@ -5,22 +5,21 @@
 use {
     crate::{
         core::{
-            compile::{Compile, LibFunction as _},
-            direct::{DirectInfo, DirectTag, DirectType},
             env::Env,
-            functions::{LibFn, LIB_SYMBOLS},
             future::{Future, FuturePool},
             namespace::{Namespace, NsRwLockMap},
+            symbols::{CoreFn, LIB_SYMBOLS},
             types::Tag,
         },
         features::{Core as _, Feature},
         streams::write::Core as _,
         types::{
+            core_stream::Stream,
             function::Function,
-            stream::Stream,
+            indirect_vector::{TypedVector, VecType},
             streambuilder::StreamBuilder,
-            symbol::{Core as _, Symbol, UNBOUND},
-            vectors::{Core as _, Vector},
+            symbol::{Core as _, Symbol},
+            vector::{Core as _, Vector},
         },
     },
     std::collections::HashMap,
@@ -34,9 +33,8 @@ lazy_static! {
 pub struct Lib {
     pub version: &'static str,
 
-    pub eol: Tag,
     pub features: RwLock<Vec<Feature>>,
-    pub functions: RwLock<HashMap<u64, LibFn>>,
+    pub functions: RwLock<Vec<CoreFn>>,
     pub future_id: RwLock<u64>,
     pub futures: RwLock<HashMap<u64, Future>>,
     pub env_map: RwLock<HashMap<u64, Env>>,
@@ -47,14 +45,13 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.52";
+    pub const VERSION: &'static str = "0.1.53";
 
     pub fn new() -> Self {
-        let lib = Lib {
-            eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
+        Lib {
             env_map: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
-            functions: RwLock::new(HashMap::new()),
+            functions: RwLock::new(Vec::new()),
             future_id: RwLock::new(0),
             futures: RwLock::new(HashMap::new()),
             threads: FuturePool::new(),
@@ -62,20 +59,10 @@ impl Lib {
             streams: RwLock::new(Vec::new()),
             symbols: RwLock::new(HashMap::new()),
             version: Self::VERSION,
-        };
-        let mut functions = block_on(lib.functions.write());
-
-        // native functions
-        functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
-        functions.extend(
-            LIB_SYMBOLS
-                .iter()
-                .map(|(name, _, libfn)| (Tag::as_u64(&Symbol::keyword(name)), *libfn)),
-        );
-
-        lib
+        }
     }
 
+    // builders
     pub fn features(self) -> Self {
         let mut features = block_on(self.features.write());
 
@@ -107,6 +94,7 @@ impl Lib {
         self
     }
 
+    // accessors
     pub fn stdin(&self) -> Tag {
         let stdio = block_on(self.stdio.read());
 
@@ -130,7 +118,7 @@ impl Lib {
     }
 
     // lib symbols
-    pub fn lib_namespaces(env: &Env) {
+    pub fn lib_symbols(env: &Env) {
         let mut functions = block_on(LIB.functions.write());
 
         Namespace::intern_symbol(
@@ -140,29 +128,24 @@ impl Lib {
             Vector::from_string(LIB.version).evict(env),
         );
 
-        Namespace::intern_symbol(
-            env,
-            env.lib_ns,
-            "if".to_string(),
-            Function::new(Tag::from(3i64), Symbol::keyword("if")).evict(env),
-        );
-
         Namespace::intern_symbol(env, env.lib_ns, "std-in".to_string(), LIB.stdin());
-
         Namespace::intern_symbol(env, env.lib_ns, "std-out".to_string(), LIB.stdout());
-
         Namespace::intern_symbol(env, env.lib_ns, "err-out".to_string(), LIB.errout());
 
-        functions.insert(Tag::as_u64(&Symbol::keyword("if")), Compile::if__);
+        for (name, nreqs, fn_) in &*LIB_SYMBOLS {
+            let vec = vec![
+                env.lib_ns,
+                Vector::from_string(name).evict(env),
+                Tag::from(functions.len() as i64),
+            ];
 
-        functions.extend(LIB_SYMBOLS.iter().map(|(name, nreqs, libfn)| {
-            let fn_key = Symbol::keyword(name);
-            let func = Function::new(Tag::from(*nreqs as i64), fn_key).evict(env);
+            let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+            let func = Function::new(Tag::from(*nreqs as i64), fn_vec).evict(env);
 
             Namespace::intern_symbol(env, env.lib_ns, name.to_string(), func);
 
-            (Tag::as_u64(&fn_key), *libfn)
-        }));
+            functions.push(*fn_)
+        }
 
         let features = block_on(LIB.features.read());
 
@@ -173,14 +156,20 @@ impl Lib {
                 Err(_) => panic!(),
             };
 
-            functions.extend(feature.symbols.iter().map(|(name, nreqs, featurefn)| {
-                let form = Namespace::intern_symbol(env, ns, name.to_string(), *UNBOUND);
-                let func = Function::new(Tag::from(*nreqs as i64), form).evict(env);
+            for (name, nreqs, fn_) in &*feature.symbols {
+                let vec = vec![
+                    ns,
+                    Vector::from_string(name).evict(env),
+                    Tag::from(functions.len() as i64),
+                ];
+
+                let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+                let func = Function::new(Tag::from(*nreqs as i64), fn_vec).evict(env);
 
                 Namespace::intern_symbol(env, ns, name.to_string(), func);
 
-                (Tag::as_u64(&form), *featurefn)
-            }));
+                functions.push(*fn_)
+            }
         }
     }
 }

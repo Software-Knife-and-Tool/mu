@@ -8,7 +8,7 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        functions::LibFnDef,
+        symbols::CoreFnDef,
         types::Type,
     },
     features::Feature,
@@ -16,13 +16,13 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
         float::Float,
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
 // env function dispatch table
 lazy_static! {
-    static ref STD_SYMBOLS: Vec<LibFnDef> = vec![
+    static ref STD_SYMBOLS: Vec<CoreFnDef> = vec![
         ("command", 2, Std::std_command),
         ("env", 0, Std::std_env),
         ("exit", 1, Std::std_exit),
@@ -45,14 +45,14 @@ impl Core for Std {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn std_command(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn std_env(_: &Env, fp: &mut Frame) -> exception::Result<()>;
     fn std_exit(_: &Env, fp: &mut Frame) -> exception::Result<()>;
     fn std_sleep(_: &Env, fp: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Std {
+impl CoreFunction for Std {
     fn std_command(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let command = fp.argv[0];
         let args = fp.argv[1];

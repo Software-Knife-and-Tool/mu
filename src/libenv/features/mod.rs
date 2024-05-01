@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! features module
-use crate::core::functions::LibFn;
+use crate::core::symbols::CoreFn;
 
 #[cfg(feature = "nix")]
 use crate::features::nix::nix_::{Core as _, Nix};
@@ -20,7 +20,7 @@ pub mod sysinfo;
 
 #[derive(Clone)]
 pub struct Feature {
-    pub symbols: Vec<(&'static str, u16, LibFn)>,
+    pub symbols: Vec<(&'static str, u16, CoreFn)>,
     pub namespace: String,
 }
 

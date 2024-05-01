@@ -16,7 +16,7 @@ use crate::{
         function::{Core as _, Function},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -116,11 +116,11 @@ impl Core for Env {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_gc(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Gc {
+impl CoreFunction for Gc {
     fn lib_gc(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match env.gc() {
             Ok(_) => Symbol::keyword("t"),

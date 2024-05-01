@@ -4,6 +4,7 @@
 //! env reader
 use crate::{
     core::{
+        direct::{DirectInfo, DirectTag, DirectType},
         env::Env,
         exception::{self, Condition, Exception},
         lib::Lib,
@@ -11,11 +12,11 @@ use crate::{
         types::{Tag, Type},
     },
     types::{
+        core_stream::{Core as _, Stream},
         fixnum::Fixnum,
-        stream::{Core as _, Stream},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -27,6 +28,11 @@ use crate::{
 //     Err if stream or syntax error
 //     errors propagate out of read()
 //
+
+lazy_static! {
+    pub static ref EOL: Tag = DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword);
+}
+
 pub trait Core {
     fn read_atom(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
     fn read_block_comment(_: &Env, _: Tag) -> exception::Result<Option<()>>;

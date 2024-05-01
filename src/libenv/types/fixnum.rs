@@ -14,9 +14,9 @@ use crate::{
     streams::write::Core as _,
     types::{
         cons::{Cons, Core as _},
+        indirect_vector::{TypedVector, VecType},
         symbol::{Core as _, Symbol},
-        vector::{TypedVec, VecType},
-        vectors::Core as _,
+        vector::Core as _,
     },
 };
 
@@ -84,11 +84,11 @@ impl Core for Fixnum {
     fn view(env: &Env, fx: Tag) -> Tag {
         let vec = vec![fx];
 
-        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_ash(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fxadd(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fxdiv(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -100,7 +100,7 @@ pub trait LibFunction {
     fn lib_logor(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Fixnum {
+impl CoreFunction for Fixnum {
     fn lib_ash(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match env.fp_argv_check("ash", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {

@@ -16,8 +16,8 @@ use crate::{
     },
     types::{
         cons::{Cons, Core as _},
-        vector::{TypedVec, VecType},
-        vectors::Core as _,
+        indirect_vector::{TypedVector, VecType},
+        vector::Core as _,
     },
 };
 
@@ -46,11 +46,11 @@ impl Env {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_frames(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Env {
+impl CoreFunction for Env {
     fn lib_frames(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let frames_ref = block_on(env.dynamic.read());
         let mut frames = Vec::new();
@@ -67,7 +67,7 @@ impl LibFunction for Env {
 
             Cons::new(
                 Tag::from(&func.to_le_bytes()),
-                TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env),
+                TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env),
             )
             .evict(env)
         }));

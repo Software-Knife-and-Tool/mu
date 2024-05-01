@@ -14,9 +14,9 @@ use {
         },
         streams::write::Core as _,
         types::{
+            indirect_vector::{TypedVector, VecType},
             symbol::{Core as _, Symbol},
-            vector::{TypedVec, VecType},
-            vectors::Core as _,
+            vector::Core as _,
         },
     },
     std::ops::{Add, Div, Mul, Sub},
@@ -74,7 +74,7 @@ impl Core for Float {
     fn view(env: &Env, fl: Tag) -> Tag {
         let vec = vec![fl];
 
-        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
     }
 
     fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
@@ -82,7 +82,7 @@ impl Core for Float {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_fladd(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_flsub(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_flenvl(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -90,7 +90,7 @@ pub trait LibFunction {
     fn lib_fldiv(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Float {
+impl CoreFunction for Float {
     fn lib_fladd(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];

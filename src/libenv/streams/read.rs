@@ -8,17 +8,17 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        lib::{Lib, LIB},
+        lib::Lib,
         qquote::QqReader,
-        reader::Core as _,
+        reader::{Core as _, EOL},
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
     },
     types::{
         cons::{Cons, Core as _},
-        stream::{Core as _, Stream},
+        core_stream::{Core as _, Stream},
         symbol::{Core as _, Symbol},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -97,7 +97,7 @@ impl Core for Env {
                         },
                         ')' => {
                             if recursivep {
-                                Ok(LIB.eol)
+                                Ok(*EOL)
                             } else {
                                 Err(Exception::new(Condition::Syntax, "read", stream))
                             }
@@ -120,11 +120,11 @@ impl Core for Env {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_read(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Env {
+impl CoreFunction for Env {
     fn lib_read(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
         let eof_error_p = fp.argv[1];

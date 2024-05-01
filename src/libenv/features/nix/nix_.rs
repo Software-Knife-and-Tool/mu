@@ -7,7 +7,7 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        functions::LibFnDef,
+        symbols::CoreFnDef,
         types::Tag,
     },
     features::Feature,
@@ -15,14 +15,14 @@ use crate::{
         cons::{Cons, Core as _},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 use nix::{self};
 
 // env function dispatch table
 lazy_static! {
-    static ref NIX_SYMBOLS: Vec<LibFnDef> = vec![("uname", 0, Nix::uname)];
+    static ref NIX_SYMBOLS: Vec<CoreFnDef> = vec![("uname", 0, Nix::uname)];
 }
 
 pub struct Nix {}
@@ -40,11 +40,11 @@ impl Core for Nix {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn uname(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Nix {
+impl CoreFunction for Nix {
     fn uname(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match nix::sys::utsname::uname() {
             Err(_) => return Err(Exception::new(Condition::Type, "uname", Tag::nil())),

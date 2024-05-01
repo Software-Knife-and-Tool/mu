@@ -1,4 +1,5 @@
 *.out
+.dir-locals.el
 TAGS
 Cargo.lock
 dist/mu*.tgz

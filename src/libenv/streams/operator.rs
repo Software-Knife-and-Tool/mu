@@ -13,7 +13,7 @@ use {
         },
         streams::system::{StringDirection, SystemStream, SystemStreamBuilder},
         types::{
-            stream::Stream,
+            core_stream::Stream,
             symbol::{Core as _, Symbol},
         },
     },

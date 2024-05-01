@@ -17,10 +17,10 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
         function::Function,
+        indirect_vector::{TypedVector, VecType, VectorIter},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{TypedVec, VecType, VectorIter},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -67,7 +67,7 @@ impl Core for Future {
 
         let future = Struct {
             stype: Symbol::keyword("future"),
-            vector: TypedVec::<Vec<Tag>> {
+            vector: TypedVector::<Vec<Tag>> {
                 vec: vec![Fixnum::as_tag(future_id as i64)],
             }
             .vec
@@ -111,7 +111,7 @@ impl Core for Future {
 
         let future = Struct {
             stype: Symbol::keyword("future"),
-            vector: TypedVec::<Vec<Tag>> {
+            vector: TypedVector::<Vec<Tag>> {
                 vec: vec![Fixnum::as_tag(future_id as i64)],
             }
             .vec
@@ -147,14 +147,14 @@ impl Core for Future {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_future_defer(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_future_detach(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_future_force(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_future_poll(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Future {
+impl CoreFunction for Future {
     fn lib_future_force(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 

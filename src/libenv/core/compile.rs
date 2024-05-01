@@ -227,12 +227,12 @@ impl Compile {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_compile(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn if__(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Compile {
+impl CoreFunction for Compile {
     fn if__(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let test = fp.argv[0];
         let true_fn = fp.argv[1];

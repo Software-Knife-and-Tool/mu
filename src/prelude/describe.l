@@ -9,7 +9,7 @@
       ((:lambda (view)
           (prelude:format stream
             "function: (~A bytes) :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
-            `(,(lib:hp-size fn)
+            `(,(lib:heap-size fn)
               ,(prelude:type-of fn)
               ,(lib:sv-ref view 2)
               ,(lib:sv-ref view 0)
@@ -20,7 +20,7 @@
    (:lambda (value stream)
       (prelude:format stream
        "prelude-type: (~A bytes) :<type> ~A~%    type:  ~A~%    props: ~A~%"
-       `(,(lib:hp-size value)
+       `(,(lib:heap-size value)
          ,(prelude:type-of value)
          ,(lib:sv-ref (lib:st-vec value) 0)
          ,(lib:sv-ref (lib:st-vec value) 0)))))
@@ -29,7 +29,7 @@
    (:lambda (struct stream)
       (prelude:format stream
        "struct: (~A bytes) :struct ~A~%    type:  ~A~%    props: ~A~%"
-       `(,(lib:hp-size struct)
+       `(,(lib:heap-size struct)
          ,(prelude:type-of struct)
          ,(lib:st-type struct)
          ,(lib:st-vec struct)))))
@@ -39,16 +39,16 @@
       (:if (prelude:null symbol)
            (prelude:format stream
             "symbol: (~A bytes) :null null~%    ns:    ()~%    name:  :nil~%    value: ()~%"
-            `(,(lib:hp-size symbol)))
+            `(,(lib:heap-size symbol)))
            (:if (prelude:keywordp symbol)
                 (prelude:format stream
                  "symbol: (~A bytes) :symbol keyword~%    ns:    ()~%    name:  ~A~%    value: ~A~%"
-                 `(,(lib:hp-size symbol) ,(lib:sy-name symbol) ,(lib:sy-val symbol)))
+                 `(,(lib:heap-size symbol) ,(lib:sy-name symbol) ,(lib:sy-val symbol)))
                 (:if (lib:boundp symbol)
                      ((:lambda (view)
                          (prelude:format stream
                           "symbol: (~A bytes) :symbol symbol~%    ns:    ~A~%    name:  ~A~%    value: ~A~%"
-                          `(,(lib:hp-size symbol)
+                          `(,(lib:heap-size symbol)
                             ,(lib:sv-ref view 0)
                             ,(lib:sv-ref view 1)
                             ,(lib:sv-ref view 2))))
@@ -56,7 +56,7 @@
                      ((:lambda (view)
                          (prelude:format stream
                           "symbol: (~A bytes) :symbol symbol~%    ns:      ~A~%    name:    ~A~%    unbound: :t~%"
-                          `(,(lib:hp-size symbol)
+                          `(,(lib:heap-size symbol)
                             ,(lib:sv-ref view 0)
                             ,(lib:sv-ref view 1)
                             ,(lib:sv-ref view 2))))
@@ -65,12 +65,12 @@
 (lib:intern :prelude "%describe-fixnum"
    (:lambda (fx stream)
       (prelude:format stream "fixnum: (~A bytes) :fixnum ~A~%    format: 61b signed integer~%    value:  ~A~%"
-        `(,(lib:hp-size fx) ,(prelude:type-of fx) ,fx))))
+        `(,(lib:heap-size fx) ,(prelude:type-of fx) ,fx))))
 
 (lib:intern :prelude "%describe-char"
    (:lambda (ch stream)
       (prelude:format stream "char: (~A bytes) :char ~A~%    format: 8b ASCII character~%    value:  ~A~%"
-        `(,(lib:hp-size ch) ,(prelude:type-of ch) ,ch))))
+        `(,(lib:heap-size ch) ,(prelude:type-of ch) ,ch))))
 
 (lib:intern :prelude "%describe-float"
    (:lambda (fl stream)
@@ -82,23 +82,23 @@
    (:lambda (str stream)
       (prelude:format stream
        "string: (~A bytes) :vector string~%    format: unsigned 8b character vector~%    length: ~A~%    value:  ~A~%"
-       `(,(lib:hp-size str) ,(lib:sv-len str) ,str))))
+       `(,(lib:heap-size str) ,(lib:sv-len str) ,str))))
 
 (lib:intern :prelude "%describe-vector"
    (:lambda (vec stream)
       (prelude:format stream
        "vector: (~A bytes) :vector ~A~%    format: ~A~%    length: ~A~%    elements:  ~A~%"
-       `(,(lib:hp-size vec) ,(prelude:type-of vec) ,(lib:sv-type vec) ,(lib:sv-type vec) ,vec))))
+       `(,(lib:heap-size vec) ,(prelude:type-of vec) ,(lib:sv-type vec) ,(lib:sv-type vec) ,vec))))
 
 (lib:intern :prelude "%describe-cons"
    (:lambda (cons stream)
       (:if (prelude:dotted-pair-p cons)
            (prelude:format stream
             "dotted pair: (~A bytes) :cons ~A~%    value:  ~A~%"
-            `(,(lib:hp-size cons) ,(prelude:type-of cons) ,cons))
+            `(,(lib:heap-size cons) ,(prelude:type-of cons) ,cons))
            (prelude:format stream
             "cons: (~A bytes) :cons ~A~%    length: ~A~%    value:  ~A~%"
-            `(,(lib:hp-size cons) ,(prelude:type-of cons) ,(lib:length cons) ,cons)))))
+            `(,(lib:heap-size cons) ,(prelude:type-of cons) ,(lib:length cons) ,cons)))))
 
 (lib:intern :prelude "describe"
    (:lambda (value stream)

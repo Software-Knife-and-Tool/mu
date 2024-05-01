@@ -12,7 +12,7 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
-        vectors::Vector,
+        vector::Vector,
     },
 };
 
@@ -62,13 +62,13 @@ impl Core for Env {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_apply(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_eval(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fix(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Env {
+impl CoreFunction for Env {
     fn lib_eval(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match env.eval(fp.argv[0]) {
             Ok(tag) => tag,

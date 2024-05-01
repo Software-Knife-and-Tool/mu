@@ -14,9 +14,9 @@ use {
         },
         types::{
             cons::{Cons, Core as _},
+            indirect_vector::{TypedVector, VecType},
             symbol::{Core as _, Symbol, UNBOUND},
-            vector::{TypedVec, VecType},
-            vectors::{Core as _, Vector},
+            vector::{Core as _, Vector},
         },
     },
     std::{collections::HashMap, str},
@@ -169,7 +169,7 @@ impl Namespace {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_intern(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_make_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns_find(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -178,7 +178,7 @@ pub trait LibFunction {
     fn lib_unbound(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Namespace {
+impl CoreFunction for Namespace {
     fn lib_unbound(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
         let name = fp.argv[1];
@@ -328,7 +328,7 @@ impl LibFunction for Namespace {
                     if type_.eq_(&Symbol::keyword("list")) {
                         Cons::vlist(env, &vec)
                     } else if type_.eq_(&Symbol::keyword("vector")) {
-                        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+                        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
                     } else {
                         return Err(Exception::new(Condition::Type, "ns-syms", type_));
                     }

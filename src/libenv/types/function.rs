@@ -13,9 +13,9 @@ use crate::{
     streams::write::Core as _,
     types::{
         fixnum::Fixnum,
+        indirect_vector::{TypedVector, VecType},
         symbol::Symbol,
-        vector::{TypedVec, VecType},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -24,7 +24,7 @@ use futures::executor::block_on;
 #[derive(Copy, Clone)]
 pub struct Function {
     pub arity: Tag, // fixnum # of required arguments
-    pub form: Tag,  // list or native keyword
+    pub form: Tag,  // list or symbol
 }
 
 impl Function {
@@ -106,13 +106,14 @@ impl Core for Function {
     fn view(env: &Env, func: Tag) -> Tag {
         let vec = vec![Self::arity(env, func), Self::form(env, func)];
 
-        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
     }
 
     fn heap_size(env: &Env, fn_: Tag) -> usize {
         match Self::form(env, fn_).type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
-            Type::Keyword => std::mem::size_of::<Function>(),
+            Type::Vector => std::mem::size_of::<Function>(),
+            Type::Symbol => std::mem::size_of::<Function>(),
             _ => panic!(),
         }
     }
@@ -125,21 +126,22 @@ impl Core for Function {
 
                 let desc = match form.type_of() {
                     Type::Cons | Type::Null => {
-                        (":lambda".to_string(), format!("{:x}", form.as_u64()))
+                        ("lambda".to_string(), format!("{:x}", form.as_u64()))
                     }
-                    Type::Keyword => (
-                        ":lib".to_string(),
-                        Vector::as_string(env, Symbol::name(env, form)).to_string(),
-                    ),
-                    Type::Symbol => (
-                        ":feature".to_string(),
-                        Vector::as_string(env, Symbol::name(env, form)).to_string(),
-                    ),
+                    Type::Vector => {
+                        let ns = Vector::ref_(env, form, 0).unwrap();
+                        let name = Vector::ref_(env, form, 1).unwrap();
+
+                        (
+                            Vector::as_string(env, Symbol::name(env, ns)).to_string(),
+                            Vector::as_string(env, name).to_string(),
+                        )
+                    }
                     _ => panic!(),
                 };
 
                 env.write_string(
-                    format!("#<:function {} [req:{nreq}, form:{}]>", desc.0, desc.1).as_str(),
+                    format!("#<:function :{} [req:{nreq}, form:{}]>", desc.0, desc.1).as_str(),
                     stream,
                 )
             }
