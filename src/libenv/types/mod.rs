@@ -4,13 +4,13 @@
 //! env types module
 pub mod char;
 pub mod cons;
+pub mod core_stream;
 pub mod fixnum;
 pub mod float;
 pub mod function;
+pub mod indirect_vector;
 pub mod stream;
 pub mod streambuilder;
-pub mod streams;
 pub mod struct_;
 pub mod symbol;
 pub mod vector;
-pub mod vectors;

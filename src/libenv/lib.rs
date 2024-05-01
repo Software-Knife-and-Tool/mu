@@ -66,7 +66,7 @@ use {
         },
         streams::{read::Core as _, write::Core as _},
         types::{
-            stream::{Core as _, Stream},
+            core_stream::{Core as _, Stream},
             streambuilder::StreamBuilder,
         },
     },

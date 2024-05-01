@@ -11,9 +11,9 @@ use crate::{
     },
     streams::write::Core as _,
     types::{
-        stream::{Core as _, Stream},
-        vector::{TypedVec, VecType},
-        vectors::Core as _,
+        core_stream::{Core as _, Stream},
+        indirect_vector::{TypedVector, VecType},
+        vector::Core as _,
     },
 };
 
@@ -76,7 +76,7 @@ impl Core for Char {
     fn view(env: &Env, chr: Tag) -> Tag {
         let vec = vec![chr];
 
-        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
     }
 }
 

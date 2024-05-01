@@ -19,9 +19,9 @@ use {
         },
         streams::write::Core as _,
         types::{
-            stream::{Core as _, Stream},
-            vector::{TypedVec, VecType},
-            vectors::{Core as _, Vector},
+            core_stream::{Core as _, Stream},
+            indirect_vector::{TypedVector, VecType},
+            vector::{Core as _, Vector},
         },
     },
     std::str,
@@ -137,7 +137,7 @@ impl Core for Symbol {
             },
         ];
 
-        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
     }
 
     fn heap_size(env: &Env, symbol: Tag) -> usize {
@@ -299,7 +299,7 @@ impl Core for Symbol {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_name(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_value(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -308,7 +308,7 @@ pub trait LibFunction {
     fn lib_keyword(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Symbol {
+impl CoreFunction for Symbol {
     fn lib_name(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 

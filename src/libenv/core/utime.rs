@@ -23,11 +23,11 @@ impl Core for Env {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_utime(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Env {
+impl CoreFunction for Env {
     fn lib_utime(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match ProcessTime::try_now() {
             Err(_) => panic!(),

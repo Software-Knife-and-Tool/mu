@@ -14,7 +14,7 @@ use crate::{
     streams::read::Core as _,
     types::{
         cons::{Cons, Core as _},
-        stream::{Core as _, Stream},
+        core_stream::{Core as _, Stream},
         symbol::{Core as _, Symbol},
     },
 };

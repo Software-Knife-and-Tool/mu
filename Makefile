@@ -3,7 +3,7 @@
 #
 .PHONY: release debug
 .PHONY: doc dist install uninstall
-.PHONY: clobber commit tags
+.PHONY: clobber commit tags emacs
 .PHONY: tests/rust tests/summary tests/report
 .PHONY: regression/base regression/current regression/report regression/commit
 
@@ -21,6 +21,7 @@ help:
 	@echo "--- development options"
 	@echo "    clobber - remove build artifacts"
 	@echo "    commit - run clippy, rustfmt, make test and perf reports"
+	@echo "    emacs - maintainer's local emacs variables"
 	@echo "    tags - make etags"
 	@echo "--- test options"
 	@echo "    tests/rust - rust tests"
@@ -39,6 +40,9 @@ help:
 
 tags:
 	@etags `find src/libenv -name '*.rs' -print`
+
+emacs:
+	@echo '((nil . ((compile-command . "make -C ~/projects/mu release"))))' > .dir-locals.el
 
 release: tags
 	@cargo build --release --bin mu-exec

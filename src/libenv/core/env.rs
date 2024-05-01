@@ -17,7 +17,7 @@ use {
         types::{
             cons::{Cons, Core as _},
             symbol::{Core as _, Symbol},
-            vectors::VecCacheMap,
+            vector::VecCacheMap,
         },
     },
     cpu_time::ProcessTime,
@@ -81,19 +81,20 @@ impl Core for Env {
         // establish namespaces
         env.keyword_ns = Symbol::keyword("keyword");
 
+        env.null_ns = Tag::nil();
+        match Namespace::add_ns(&env, env.null_ns) {
+            Ok(_) => (),
+            Err(_) => panic!(),
+        };
+
         env.lib_ns = Symbol::keyword("lib");
         match Namespace::add_static_ns(&env, env.lib_ns, Lib::symbols()) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
-        Lib::lib_namespaces(&env);
-
-        env.null_ns = Tag::nil();
-        match Namespace::add_ns(&env, env.null_ns) {
-            Ok(_) => (),
-            Err(_) => panic!(),
-        };
+        // initialize lib namespaces
+        Lib::lib_symbols(&env);
 
         env
     }

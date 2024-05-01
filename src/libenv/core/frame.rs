@@ -13,17 +13,17 @@ use crate::{
         env::{Core as _, Env},
         exception::{self, Condition, Core as _, Exception},
         gc::Core as _,
-        lib::LIB,
+        symbols::LIB_SYMBOLS,
         types::{Tag, Type},
     },
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
         function::Function,
+        indirect_vector::VectorIter,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::VectorIter,
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -153,7 +153,7 @@ impl Frame {
             }
             Type::Function => match Function::form(env, func).type_of() {
                 Type::Null => Ok(Tag::nil()),
-                Type::Keyword | Type::Symbol => {
+                Type::Vector => {
                     let nreqs = Fixnum::as_i64(Function::arity(env, func)) as usize;
                     let nargs = self.argv.len();
 
@@ -161,10 +161,10 @@ impl Frame {
                         return Err(Exception::new(Condition::Arity, "apply", func));
                     }
 
-                    let fn_key = Function::form(env, func);
-                    let fn_ = block_on(LIB.functions.read())[&Tag::as_u64(&fn_key)];
+                    let offset =
+                        Fixnum::as_i64(Vector::ref_(env, Function::form(env, func), 2).unwrap());
 
-                    match fn_(env, &mut self) {
+                    match LIB_SYMBOLS[offset as usize].2(env, &mut self) {
                         Ok(_) => Ok(self.value),
                         Err(e) => Err(e),
                     }
@@ -202,13 +202,13 @@ impl Frame {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_fr_pop(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fr_push(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fr_ref(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Frame {
+impl CoreFunction for Frame {
     fn lib_fr_pop(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match env.fp_argv_check("fr-pop", &[Type::Function], fp) {
             Ok(_) => {

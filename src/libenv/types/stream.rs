@@ -1,326 +1,252 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env stream type
+//! env stream functions
 #![allow(unused_braces)]
 #![allow(dead_code)]
-#![allow(unused_variables)]
 #![allow(clippy::identity_op)]
 
 use crate::{
     core::{
-        direct::{DirectInfo, DirectTag, DirectType, ExtType},
+        apply::Core as _,
         env::Env,
         exception::{self, Condition, Exception},
+        frame::Frame,
         lib::LIB,
         types::{Tag, Type},
     },
-    streams::{
-        system::{Core as _, SystemStream},
-        write::Core as _,
-    },
+    streams::system::SystemStream,
     types::{
         char::Char,
+        core_stream::{Core as _, Stream},
+        fixnum::Fixnum,
+        streambuilder::StreamBuilder,
         symbol::{Core as _, Symbol},
-        vector::{TypedVec, VecType},
-        vectors::Core as _,
+        vector::{Core as _, Vector},
     },
 };
 
 use futures::executor::block_on;
 
-// stream struct
-pub struct Stream {
-    pub system: SystemStream, // system stream
-    pub index: usize,         // stream table index
-    pub open: bool,           // stream open
-    pub direction: Tag,       // :input | :output | :bidir (keyword)
-    pub unch: Tag,            // pushbask for input streams
+pub trait CoreFunction {
+    fn lib_close(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_flush(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_get_string(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_open(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_openp(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_read_byte(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_read_char(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_unread_char(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_write_byte(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_write_char(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl From<Stream> for Tag {
-    fn from(stream: Stream) -> Tag {
-        DirectTag::to_direct(
-            stream.index as u64,
-            DirectInfo::ExtType(ExtType::Stream),
-            DirectType::Ext,
-        )
+impl CoreFunction for Stream {
+    fn lib_close(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+
+        fp.value = match env.fp_argv_check("close", &[Type::Stream], fp) {
+            Ok(_) => {
+                if Self::is_open(env, stream) {
+                    Self::close(env, stream);
+                    Symbol::keyword("t")
+                } else {
+                    Tag::nil()
+                }
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
-}
 
-pub trait Core {
-    fn to_stream_index(_: &Env, _: Tag) -> exception::Result<usize>;
-    fn close(_: &Env, _: Tag);
-    fn get_string(_: &Env, _: Tag) -> exception::Result<String>;
-    fn is_open(_: &Env, _: Tag) -> bool;
-    fn read_byte(_: &Env, _: Tag) -> exception::Result<Option<u8>>;
-    fn read_char(_: &Env, _: Tag) -> exception::Result<Option<char>>;
-    fn unread_char(_: &Env, _: Tag, _: char) -> exception::Result<Option<()>>;
-    fn view(_: &Env, _: Tag) -> Tag;
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn write_byte(_: &Env, _: Tag, _: u8) -> exception::Result<Option<()>>;
-    fn write_char(_: &Env, _: Tag, _: char) -> exception::Result<Option<()>>;
-}
+    fn lib_openp(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
 
-impl Core for Stream {
-    fn to_stream_index(env: &Env, tag: Tag) -> exception::Result<usize> {
-        match tag {
-            Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.info() {
-                    DirectTag::EXT_TYPE_STREAM => Ok(dtag.data() as usize),
-                    _ => panic!(),
-                },
-                _ => panic!(),
+        fp.value = match env.fp_argv_check("openp", &[Type::Stream], fp) {
+            Ok(_) => {
+                if Self::is_open(env, stream) {
+                    stream
+                } else {
+                    Tag::nil()
+                }
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn lib_open(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let st_type = fp.argv[0];
+        let st_dir = fp.argv[1];
+        let st_arg = fp.argv[2];
+
+        fp.value =
+            match env.fp_argv_check("open", &[Type::Keyword, Type::Keyword, Type::String], fp) {
+                Ok(_) if st_type.eq_(&Symbol::keyword("file")) => {
+                    let arg = Vector::as_string(env, st_arg);
+
+                    let stream = if st_dir.eq_(&Symbol::keyword("input")) {
+                        StreamBuilder::new().file(arg).input().build(&LIB)
+                    } else if st_dir.eq_(&Symbol::keyword("output")) {
+                        StreamBuilder::new().file(arg).output().build(&LIB)
+                    } else {
+                        return Err(Exception::new(Condition::Type, "open", st_dir));
+                    };
+
+                    match stream {
+                        Err(e) => return Err(e),
+                        Ok(stream) => stream,
+                    }
+                }
+                Ok(_) if st_type.eq_(&Symbol::keyword("string")) => {
+                    let arg = Vector::as_string(env, st_arg);
+
+                    let stream = if st_dir.eq_(&Symbol::keyword("input")) {
+                        StreamBuilder::new().string(arg).input().build(&LIB)
+                    } else if st_dir.eq_(&Symbol::keyword("output")) {
+                        StreamBuilder::new().string(arg).output().build(&LIB)
+                    } else if st_dir.eq_(&Symbol::keyword("bidir")) {
+                        StreamBuilder::new().string(arg).bidir().build(&LIB)
+                    } else {
+                        return Err(Exception::new(Condition::Type, "open", st_dir));
+                    };
+
+                    match stream {
+                        Err(e) => return Err(e),
+                        Ok(stream) => stream,
+                    }
+                }
+                Ok(_) => return Err(Exception::new(Condition::Type, "open", st_type)),
+                Err(e) => return Err(e),
+            };
+
+        Ok(())
+    }
+
+    fn lib_flush(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let tag = fp.argv[0];
+
+        fp.value = match env.fp_argv_check("flush", &[Type::Stream], fp) {
+            Ok(_) => {
+                if Self::is_open(env, tag) {
+                    let streams_ref = block_on(LIB.streams.read());
+
+                    match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+                        Some(stream_ref) => {
+                            let stream = block_on(stream_ref.read());
+
+                            if stream.direction.eq_(&Symbol::keyword("output")) {
+                                SystemStream::flush(&stream.system).unwrap()
+                            }
+                        }
+                        None => panic!(),
+                    }
+                }
+
+                Tag::nil()
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn lib_get_string(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+
+        fp.value = match env.fp_argv_check("get-str", &[Type::Stream], fp) {
+            Ok(_) => match Self::get_string(env, stream) {
+                Ok(string) => Vector::from_string(&string).evict(env),
+                Err(e) => return Err(e),
             },
-            _ => panic!(),
-        }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 
-    fn view(env: &Env, tag: Tag) -> Tag {
-        let streams_ref = block_on(LIB.streams.read());
+    fn lib_read_char(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+        let eof_error_p = fp.argv[1];
+        let eof_value = fp.argv[2];
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let stream = block_on(stream_ref.read());
-                let vec = vec![
-                    Tag::from(stream.index as i64),
-                    stream.direction,
-                    stream.unch,
-                ];
+        fp.value = match env.fp_argv_check("rd-char", &[Type::Stream, Type::T, Type::T], fp) {
+            Ok(_) => match Self::read_char(env, stream) {
+                Ok(Some(ch)) => Tag::from(ch),
+                Ok(None) if eof_error_p.null_() => eof_value,
+                Ok(None) => return Err(Exception::new(Condition::Eof, "rd-char", stream)),
+                Err(e) => return Err(e),
+            },
+            Err(e) => return Err(e),
+        };
 
-                TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
-            }
-            None => panic!(),
-        }
+        Ok(())
     }
 
-    fn is_open(env: &Env, tag: Tag) -> bool {
-        let streams_ref = block_on(LIB.streams.read());
+    fn lib_read_byte(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+        let eof_error_p = fp.argv[1];
+        let eof_value = fp.argv[2];
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let stream = block_on(stream_ref.read());
+        fp.value = match env.fp_argv_check("rd-byte", &[Type::Stream, Type::T, Type::T], fp) {
+            Ok(_) => match Self::read_byte(env, stream) {
+                Ok(Some(byte)) => Tag::from(byte as i64),
+                Ok(None) if eof_error_p.null_() => eof_value,
+                Ok(None) => return Err(Exception::new(Condition::Eof, "rd-byte", stream)),
+                Err(e) => return Err(e),
+            },
+            Err(e) => return Err(e),
+        };
 
-                stream.open
-            }
-            None => panic!(),
-        }
+        Ok(())
     }
 
-    fn close(env: &Env, tag: Tag) {
-        let streams_ref = block_on(LIB.streams.read());
+    fn lib_unread_char(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let ch = fp.argv[0];
+        let stream = fp.argv[1];
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let stream = block_on(stream_ref.read());
+        fp.value = match env.fp_argv_check("un-char", &[Type::Char, Type::Stream], fp) {
+            Ok(_) => match Self::unread_char(env, stream, Char::as_char(env, ch)) {
+                Ok(Some(_)) => panic!(),
+                Ok(None) => ch,
+                Err(e) => return Err(e),
+            },
+            Err(e) => return Err(e),
+        };
 
-                SystemStream::close(&stream.system);
-            }
-            None => panic!(),
-        }
+        Ok(())
     }
 
-    fn get_string(env: &Env, tag: Tag) -> exception::Result<String> {
-        if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "get-str", tag));
-        }
+    fn lib_write_char(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let ch = fp.argv[0];
+        let stream = fp.argv[1];
 
-        let streams_ref = block_on(LIB.streams.read());
+        fp.value = match env.fp_argv_check("wr-char", &[Type::Char, Type::Stream], fp) {
+            Ok(_) => match Self::write_char(env, stream, Char::as_char(env, ch)) {
+                Ok(_) => ch,
+                Err(e) => return Err(e),
+            },
+            Err(e) => return Err(e),
+        };
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let stream = block_on(stream_ref.read());
-
-                Ok(SystemStream::get_string(&stream.system).unwrap())
-            }
-            None => panic!(),
-        }
+        Ok(())
     }
 
-    fn write(env: &Env, tag: Tag, _: bool, stream_tag: Tag) -> exception::Result<()> {
-        match tag.type_of() {
-            Type::Stream => {
-                let streams_ref = block_on(LIB.streams.read());
+    fn lib_write_byte(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let byte = fp.argv[0];
+        let stream = fp.argv[1];
 
-                match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-                    Some(stream_ref) => {
-                        let stream = block_on(stream_ref.read());
+        fp.value = match env.fp_argv_check("wr-byte", &[Type::Byte, Type::Stream], fp) {
+            Ok(_) => match Self::write_byte(env, stream, Fixnum::as_i64(byte) as u8) {
+                Ok(_) => byte,
+                Err(e) => return Err(e),
+            },
+            Err(e) => return Err(e),
+        };
 
-                        env.write_string(
-                            format!(
-                                "#<stream: id: {} type: {} dir: {} state: {}>",
-                                stream.index,
-                                match stream.system {
-                                    SystemStream::Reader(_) | SystemStream::Writer(_) => ":file",
-                                    SystemStream::String(_) => ":string",
-                                    SystemStream::StdInput => "std-in",
-                                    SystemStream::StdOutput => "std-out",
-                                    SystemStream::StdError => "err-out",
-                                },
-                                if Symbol::keyword("input").eq_(&stream.direction) {
-                                    ":input"
-                                } else if Symbol::keyword("output").eq_(&stream.direction) {
-                                    ":output"
-                                } else if Symbol::keyword("bidir").eq_(&stream.direction) {
-                                    ":bidir"
-                                } else {
-                                    panic!()
-                                },
-                                if Self::is_open(env, tag) {
-                                    "open"
-                                } else {
-                                    "close"
-                                },
-                            )
-                            .as_str(),
-                            stream_tag,
-                        )
-                    }
-                    None => panic!(),
-                }
-            }
-            _ => panic!(),
-        }
-    }
-
-    fn read_char(env: &Env, tag: Tag) -> exception::Result<Option<char>> {
-        if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "rd-char", tag));
-        }
-
-        let streams_ref = block_on(LIB.streams.read());
-
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let mut stream = block_on(stream_ref.write());
-
-                if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(Condition::Stream, "rd-char", tag));
-                }
-
-                if stream.unch.null_() {
-                    match SystemStream::read_byte(&stream.system) {
-                        Ok(opt) => match opt {
-                            Some(byte) => Ok(Some(byte as char)),
-                            None => Ok(None),
-                        },
-                        Err(e) => Err(e),
-                    }
-                } else {
-                    let unch = stream.unch;
-
-                    stream.unch = Tag::nil();
-                    Ok(Some(Char::as_char(env, unch)))
-                }
-            }
-            None => panic!(),
-        }
-    }
-
-    fn read_byte(env: &Env, tag: Tag) -> exception::Result<Option<u8>> {
-        if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "rd-byte", tag));
-        }
-
-        let streams_ref = block_on(LIB.streams.read());
-
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let mut stream = block_on(stream_ref.write());
-
-                if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(Condition::Stream, "rd-byte", tag));
-                }
-
-                if stream.unch.null_() {
-                    match SystemStream::read_byte(&stream.system) {
-                        Ok(opt) => match opt {
-                            Some(byte) => Ok(Some(byte)),
-                            None => Ok(None),
-                        },
-                        Err(e) => Err(e),
-                    }
-                } else {
-                    let unch = stream.unch;
-
-                    stream.unch = Tag::nil();
-
-                    Ok(Some(Char::as_char(env, unch) as u8))
-                }
-            }
-            None => panic!(),
-        }
-    }
-
-    fn unread_char(env: &Env, tag: Tag, ch: char) -> exception::Result<Option<()>> {
-        if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "un-char", tag));
-        }
-
-        let streams_ref = block_on(LIB.streams.read());
-
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let mut stream = block_on(stream_ref.write());
-
-                SystemStream::close(&stream.system);
-
-                if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(Condition::Type, "un-char", tag));
-                }
-
-                if stream.unch.null_() {
-                    stream.unch = Tag::from(ch);
-
-                    Ok(None)
-                } else {
-                    Err(Exception::new(Condition::Stream, "un-char", stream.unch))
-                }
-            }
-            None => panic!(),
-        }
-    }
-
-    fn write_char(env: &Env, tag: Tag, ch: char) -> exception::Result<Option<()>> {
-        if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "wr-char", tag));
-        }
-
-        let streams_ref = block_on(LIB.streams.read());
-
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let stream = block_on(stream_ref.read());
-
-                if stream.direction.eq_(&Symbol::keyword("input")) {
-                    return Err(Exception::new(Condition::Type, "wr-char", tag));
-                }
-
-                SystemStream::write_byte(&stream.system, ch as u8)
-            }
-            None => panic!(),
-        }
-    }
-
-    fn write_byte(env: &Env, tag: Tag, byte: u8) -> exception::Result<Option<()>> {
-        if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "wr-byte", tag));
-        }
-
-        let streams_ref = block_on(LIB.streams.read());
-
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-            Some(stream_ref) => {
-                let stream = block_on(stream_ref.read());
-
-                if stream.direction.eq_(&Symbol::keyword("input")) {
-                    return Err(Exception::new(Condition::Type, "wr-byte", tag));
-                }
-
-                SystemStream::write_byte(&stream.system, byte)
-            }
-            None => panic!(),
-        }
+        Ok(())
     }
 }
 

@@ -156,12 +156,12 @@ impl Core for Exception {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_unwind(env: &Env, fp: &mut Frame) -> Result<()>;
     fn lib_raise(env: &Env, fp: &mut Frame) -> Result<()>;
 }
 
-impl LibFunction for Exception {
+impl CoreFunction for Exception {
     fn lib_raise(env: &Env, fp: &mut Frame) -> Result<()> {
         let src = fp.argv[0];
         let condition = fp.argv[1];

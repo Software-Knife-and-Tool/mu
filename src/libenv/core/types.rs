@@ -17,14 +17,14 @@ use {
         types::{
             char::{Char, Core as _},
             cons::{Cons, Core as _},
+            core_stream::{Core as _, Stream},
             fixnum::{Core as _, Fixnum},
             float::{Core as _, Float},
             function::{Core as _, Function},
-            stream::{Core as _, Stream},
+            indirect_vector::{TypedVector, VecType},
             struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol},
-            vector::{TypedVec, VecType},
-            vectors::{Core as _, Vector},
+            vector::{Core as _, Vector},
         },
     },
     num_enum::TryFromPrimitive,
@@ -216,14 +216,14 @@ impl Tag {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_eq(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_typeof(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_repr(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_view(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Tag {
+impl CoreFunction for Tag {
     fn lib_repr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let type_ = fp.argv[0];
         let arg = fp.argv[1];
@@ -233,7 +233,7 @@ impl LibFunction for Tag {
                 if type_.eq_(&Symbol::keyword("vector")) {
                     let slice = arg.as_slice();
 
-                    TypedVec::<Vec<u8>> {
+                    TypedVector::<Vec<u8>> {
                         vec: slice.to_vec(),
                     }
                     .vec

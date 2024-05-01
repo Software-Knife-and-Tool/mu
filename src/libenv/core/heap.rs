@@ -17,10 +17,10 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         function::{Core as _, Function},
+        indirect_vector::{TypedVector, VecType},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{TypedVec, VecType},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -74,13 +74,13 @@ impl Core for Heap {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_hp_info(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_hp_size(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_hp_stat(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Heap {
+impl CoreFunction for Heap {
     fn lib_hp_stat(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let (pagesz, npages) = Heap::heap_info(env);
 
@@ -103,7 +103,7 @@ impl LibFunction for Heap {
             vec.push(Tag::from(type_map.free as i64));
         }
 
-        fp.value = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+        fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
         Ok(())
     }
 
@@ -116,7 +116,7 @@ impl LibFunction for Heap {
             Tag::from(npages as i64),
         ];
 
-        fp.value = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+        fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
         Ok(())
     }
 

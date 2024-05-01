@@ -11,15 +11,15 @@ use crate::{
         frame::Frame,
         gc::Core as _,
         indirect::IndirectTag,
-        lib::LIB,
+        reader::EOL,
         types::{Tag, TagType, Type},
     },
     streams::{read::Core as _, write::Core as _},
     types::{
         fixnum::Fixnum,
+        indirect_vector::{TypedVector, VecType},
         symbol::Symbol,
-        vector::{TypedVec, VecType},
-        vectors::Core as _,
+        vector::Core as _,
     },
 };
 
@@ -123,7 +123,7 @@ impl Core for Cons {
     fn view(env: &Env, cons: Tag) -> Tag {
         let vec = vec![Self::car(env, cons), Self::cdr(env, cons)];
 
-        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
     }
 
     fn mark(env: &Env, cons: Tag) {
@@ -182,15 +182,15 @@ impl Core for Cons {
 
         match env.read_stream(stream, false, Tag::nil(), true) {
             Ok(car) => {
-                if LIB.eol.eq_(&car) {
+                if EOL.eq_(&car) {
                     Ok(Tag::nil())
                 } else {
                     match car.type_of() {
                         Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
                             match env.read_stream(stream, false, Tag::nil(), true) {
-                                Ok(cdr) if LIB.eol.eq_(&cdr) => Ok(Tag::nil()),
+                                Ok(cdr) if EOL.eq_(&cdr) => Ok(Tag::nil()),
                                 Ok(cdr) => match env.read_stream(stream, false, Tag::nil(), true) {
-                                    Ok(eol) if LIB.eol.eq_(&eol) => Ok(cdr),
+                                    Ok(eol) if EOL.eq_(&eol) => Ok(cdr),
                                     Ok(_) => Err(Exception::new(Condition::Eof, "car", stream)),
                                     Err(e) => Err(e),
                                 },
@@ -309,7 +309,7 @@ impl Core for Cons {
 }
 
 /// env functions
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_append(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_car(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_cdr(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -319,7 +319,7 @@ pub trait LibFunction {
     fn lib_nthcdr(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Cons {
+impl CoreFunction for Cons {
     fn lib_append(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let list1 = fp.argv[0];
         let list2 = fp.argv[1];

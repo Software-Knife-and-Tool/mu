@@ -15,10 +15,10 @@ use crate::{
     streams::write::Core as _,
     types::{
         cons::{Cons, Core as _},
-        stream::{Core as _, Stream},
+        core_stream::{Core as _, Stream},
+        indirect_vector::{TypedVector, VecType, VectorIter},
         symbol::{Core as _, Symbol},
-        vector::{TypedVec, VecType, VectorIter},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -63,7 +63,7 @@ impl Struct {
     pub fn to_tag(env: &Env, stype: Tag, vec: Vec<Tag>) -> Tag {
         match stype.type_of() {
             Type::Keyword => {
-                let vector = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+                let vector = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
                 Struct { stype, vector }.evict(env)
             }
             _ => panic!(),
@@ -86,7 +86,7 @@ impl<'a> Core<'a> for Struct {
     fn new(env: &Env, key: &str, vec: Vec<Tag>) -> Self {
         Struct {
             stype: Symbol::keyword(key),
-            vector: TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env),
+            vector: TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env),
         }
     }
 
@@ -102,7 +102,7 @@ impl<'a> Core<'a> for Struct {
         let image = Self::to_image(env, tag);
         let vec = vec![image.stype, image.vector];
 
-        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
     }
 
     fn heap_size(env: &Env, struct_: Tag) -> usize {
@@ -189,13 +189,13 @@ impl<'a> Core<'a> for Struct {
 }
 
 // env functions
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_struct_type(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_struct_vector(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_make_struct(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Struct {
+impl CoreFunction for Struct {
     fn lib_struct_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
@@ -227,7 +227,7 @@ impl LibFunction for Struct {
                 let vec = Cons::iter(env, list)
                     .map(|cons| Cons::car(env, cons))
                     .collect::<Vec<Tag>>();
-                let vector = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+                let vector = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
 
                 Struct { stype, vector }.evict(env)
             }

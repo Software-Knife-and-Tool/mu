@@ -13,13 +13,13 @@ use crate::{
     types::{
         char::{Char, Core as _},
         cons::{Cons, Core as _},
+        core_stream::{Core as _, Stream},
         fixnum::{Core as _, Fixnum},
         float::{Core as _, Float},
         function::{Core as _, Function},
-        stream::{Core as _, Stream},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vectors::{Core as _, Vector},
+        vector::{Core as _, Vector},
     },
 };
 
@@ -66,11 +66,11 @@ impl Core for Env {
     }
 }
 
-pub trait LibFunction {
+pub trait CoreFunction {
     fn lib_write(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl LibFunction for Env {
+impl CoreFunction for Env {
     fn lib_write(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let value = fp.argv[0];
         let escape = fp.argv[1];
