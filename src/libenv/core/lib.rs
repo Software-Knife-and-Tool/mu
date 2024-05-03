@@ -1,13 +1,12 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env system functions
+//! lib environment
 use {
     crate::{
         core::{
             env::Env,
             future::{Future, FuturePool},
-            namespace::{Namespace, NsRwLockMap},
             symbols::{CoreFn, LIB_SYMBOLS},
             types::Tag,
         },
@@ -17,6 +16,7 @@ use {
             core_stream::Stream,
             function::Function,
             indirect_vector::{TypedVector, VecType},
+            namespace::Namespace,
             streambuilder::StreamBuilder,
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
@@ -37,15 +37,16 @@ pub struct Lib {
     pub functions: RwLock<Vec<CoreFn>>,
     pub future_id: RwLock<u64>,
     pub futures: RwLock<HashMap<u64, Future>>,
+    pub keywords: RwLock<HashMap<String, Tag>>,
     pub env_map: RwLock<HashMap<u64, Env>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
-    pub symbols: NsRwLockMap,
+    pub symbols: RwLock<HashMap<String, Tag>>,
     pub threads: FuturePool,
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.53";
+    pub const VERSION: &'static str = "0.1.54";
 
     pub fn new() -> Self {
         Lib {
@@ -54,6 +55,7 @@ impl Lib {
             functions: RwLock::new(Vec::new()),
             future_id: RwLock::new(0),
             futures: RwLock::new(HashMap::new()),
+            keywords: RwLock::new(HashMap::new()),
             threads: FuturePool::new(),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(Vec::new()),
@@ -113,24 +115,21 @@ impl Lib {
         stdio.2
     }
 
-    pub fn symbols() -> &'static RwLock<HashMap<String, Tag>> {
-        &LIB.symbols
-    }
-
     // lib symbols
-    pub fn lib_symbols(env: &Env) {
+    pub fn namespaces(env: &Env) {
         let mut functions = block_on(LIB.functions.write());
 
-        Namespace::intern_symbol(
+        Namespace::intern(
             env,
             env.lib_ns,
             "version".to_string(),
             Vector::from_string(LIB.version).evict(env),
-        );
+        )
+        .unwrap();
 
-        Namespace::intern_symbol(env, env.lib_ns, "std-in".to_string(), LIB.stdin());
-        Namespace::intern_symbol(env, env.lib_ns, "std-out".to_string(), LIB.stdout());
-        Namespace::intern_symbol(env, env.lib_ns, "err-out".to_string(), LIB.errout());
+        Namespace::intern(env, env.lib_ns, "std-in".to_string(), LIB.stdin()).unwrap();
+        Namespace::intern(env, env.lib_ns, "std-out".to_string(), LIB.stdout()).unwrap();
+        Namespace::intern(env, env.lib_ns, "err-out".to_string(), LIB.errout()).unwrap();
 
         for (name, nreqs, fn_) in &*LIB_SYMBOLS {
             let vec = vec![
@@ -142,7 +141,7 @@ impl Lib {
             let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
             let func = Function::new(Tag::from(*nreqs as i64), fn_vec).evict(env);
 
-            Namespace::intern_symbol(env, env.lib_ns, name.to_string(), func);
+            Namespace::intern(env, env.lib_ns, name.to_string(), func).unwrap();
 
             functions.push(*fn_)
         }
@@ -150,9 +149,8 @@ impl Lib {
         let features = block_on(LIB.features.read());
 
         for feature in &*features {
-            let ns = Symbol::keyword(&feature.namespace);
-            match Namespace::add_ns(env, ns) {
-                Ok(_) => (),
+            let ns = match Namespace::add_ns(env, &feature.namespace) {
+                Ok(ns) => ns,
                 Err(_) => panic!(),
             };
 
@@ -166,7 +164,7 @@ impl Lib {
                 let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
                 let func = Function::new(Tag::from(*nreqs as i64), fn_vec).evict(env);
 
-                Namespace::intern_symbol(env, ns, name.to_string(), func);
+                Namespace::intern(env, ns, name.to_string(), func).unwrap();
 
                 functions.push(*fn_)
             }

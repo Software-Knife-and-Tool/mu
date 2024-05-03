@@ -10,12 +10,12 @@ use crate::{
         env::{Core as _, Env},
         exception::{self, Condition, Exception},
         frame::Frame,
-        namespace::Namespace,
         types::{Tag, Type},
     },
     types::{
         cons::{Cons, Core as _},
         function::Function,
+        namespace::Namespace,
         symbol::{Core as _, Symbol},
     },
 };
@@ -46,7 +46,7 @@ impl Compile {
         let lambda = Symbol::keyword("lambda");
 
         let if_vec = vec![
-            Namespace::intern_symbol(env, env.lib_ns, "if".to_string(), Tag::nil()),
+            Namespace::intern(env, env.lib_ns, "%if".to_string(), Tag::nil()).unwrap(),
             Cons::nth(env, 0, args).unwrap(),
             Cons::vlist(env, &[lambda, Tag::nil(), Cons::nth(env, 1, args).unwrap()]),
             Cons::vlist(env, &[lambda, Tag::nil(), Cons::nth(env, 2, args).unwrap()]),
@@ -156,7 +156,7 @@ impl Compile {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
                 let lex_ref = vec![
-                    Namespace::intern_symbol(env, env.lib_ns, "fr-ref".to_string(), Tag::nil()),
+                    Namespace::intern(env, env.lib_ns, "fr-ref".to_string(), Tag::nil()).unwrap(),
                     Tag::from(tag.as_u64() as i64),
                     Tag::from(nth as i64),
                 ];
@@ -229,16 +229,16 @@ impl Compile {
 
 pub trait CoreFunction {
     fn lib_compile(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn if__(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_if(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Compile {
-    fn if__(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_if(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let test = fp.argv[0];
         let true_fn = fp.argv[1];
         let false_fn = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("::if", &[Type::T, Type::Function, Type::Function], fp) {
+        fp.value = match env.fp_argv_check(":if", &[Type::T, Type::Function, Type::Function], fp) {
             Ok(_) => match env.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
                 Ok(tag) => tag,
                 Err(e) => return Err(e),

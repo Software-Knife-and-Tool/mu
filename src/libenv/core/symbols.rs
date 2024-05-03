@@ -13,7 +13,6 @@ use crate::{
         future::{CoreFunction as _, Future},
         gc::{CoreFunction as _, Gc},
         heap::{CoreFunction as _, Heap},
-        namespace::{CoreFunction as _, Namespace},
         types::{CoreFunction as _, Tag},
         utime::CoreFunction as _,
     },
@@ -23,6 +22,7 @@ use crate::{
         core_stream::Stream,
         fixnum::{CoreFunction as _, Fixnum},
         float::{CoreFunction as _, Float},
+        namespace::{CoreFunction as _, Namespace},
         stream::CoreFunction as _,
         struct_::{CoreFunction as _, Struct},
         symbol::{CoreFunction as _, Symbol},
@@ -50,7 +50,7 @@ lazy_static! {
         ( "nthcdr",  2, Cons::lib_nthcdr ),
         // compiler
         ( "compile", 1, Compile::lib_compile ),
-        ( "if",      3, Compile::if__),
+        ( "%if",     3, Compile::lib_if),
         // gc
         ( "gc",      0, Gc::lib_gc ),
         // heap
@@ -91,22 +91,22 @@ lazy_static! {
         ( "fl-mul",  2, Float::lib_flenvl ),
         ( "fl-div",  2, Float::lib_fldiv ),
         // namespaces
+        ( "find",    2, Namespace::lib_find ),
+        ( "find-ns", 1, Namespace::lib_find_ns ),
         ( "intern",  3, Namespace::lib_intern ),
         ( "make-ns", 1, Namespace::lib_make_ns ),
-        ( "ns-find", 2, Namespace::lib_ns_find ),
         ( "ns-map",  0, Namespace::lib_ns_map ),
-        ( "ns-syms", 2, Namespace::lib_ns_symbols ),
-        ( "unbound", 2, Namespace::lib_unbound ),
+        ( "symbols", 1, Namespace::lib_symbols ),
+        ( "untern",  2, Namespace::lib_unbound ),
         // read/write
         ( "read",    3, Env::lib_read ),
         ( "write",   3, Env::lib_write ),
         // symbols
-        ( "boundp",  1, Symbol::lib_boundp ),
-        ( "keyword", 1, Symbol::lib_keyword ),
-        ( "symbol",  1, Symbol::lib_symbol ),
-        ( "sy-name", 1, Symbol::lib_name ),
-        ( "sy-ns",   1, Symbol::lib_ns ),
-        ( "sy-val",  1, Symbol::lib_value ),
+        ( "boundp",        1, Symbol::lib_boundp ),
+        ( "make-symbol",   1, Symbol::lib_symbol ),
+        ( "symbol-name",   1, Symbol::lib_name ),
+        ( "symbol-ns",     1, Symbol::lib_ns ),
+        ( "symbol-value",  1, Symbol::lib_value ),
         // simple vectors
         ( "vector",  2, Vector::lib_make_vector ),
         ( "sv-len",  1, Vector::lib_length ),

@@ -64,6 +64,7 @@ pub enum Type {
 }
 
 #[derive(BitfieldSpecifier, Copy, Clone, Debug, PartialEq, Eq)]
+#[bits = 3]
 pub enum TagType {
     Direct = 0,   // 56 bit direct objects
     Cons = 1,     // cons heap tag
@@ -72,7 +73,7 @@ pub enum TagType {
     Struct = 4,   // struct heap tags
     Symbol = 5,   // symbol heap tag
     Vector = 6,   // vector heap tag
-    Namespace = 7,
+                  // and room for a pony
 }
 
 lazy_static! {
@@ -89,6 +90,7 @@ lazy_static! {
         (Type::Float, Symbol::keyword("float")),
         (Type::Function, Symbol::keyword("func")),
         (Type::Keyword, Symbol::keyword("keyword")),
+        (Type::Namespace, Symbol::keyword("ns")),
         (Type::Null, Symbol::keyword("null")),
         (Type::Stream, Symbol::keyword("stream")),
         (Type::Struct, Symbol::keyword("struct")),
@@ -183,6 +185,7 @@ impl Tag {
                         Ok(ExtType::Cons) => Type::Cons,
                         Ok(ExtType::Fixnum) => Type::Fixnum,
                         Ok(ExtType::Float) => Type::Float,
+                        Ok(ExtType::Namespace) => Type::Namespace,
                         Ok(ExtType::Stream) => Type::Stream,
                         _ => panic!("direct type botch {:x}", self.as_u64()),
                     },

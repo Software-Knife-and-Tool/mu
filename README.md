@@ -61,9 +61,9 @@ Most of our core computational frameworks are built on static systems and are fr
 
 ------
 
-*mu* is a work in progress.
+*mu* is a work in progress and under heavy development.
 
-The runtime builds with rust 1.70 or better. *mu* runtime builds are targeted to:
+*mu* runtime builds are targeted to:
 
 - x86-64 and AArch-64 Linux distributions
 - x86-64 and M-series MacOs X
@@ -130,6 +130,8 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 #### Building the *mu* system
 
 ------
+
+version 0.1.54  is built with rust 1.78.0.
 
 The *lib* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 

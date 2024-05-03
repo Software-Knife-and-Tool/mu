@@ -9,6 +9,7 @@ pub mod fixnum;
 pub mod float;
 pub mod function;
 pub mod indirect_vector;
+pub mod namespace;
 pub mod stream;
 pub mod streambuilder;
 pub mod struct_;

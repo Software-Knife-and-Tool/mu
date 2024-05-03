@@ -2,39 +2,39 @@ Namespace Test Summary:
 -----------------------
 lib        backquote      total: 37       pass: 36       fail: 1        exceptions: 0       
 lib        compile        total: 8        pass: 8        fail: 0        exceptions: 0       
-lib        core           total: 54       pass: 54       fail: 0        exceptions: 0       
+lib        core           total: 56       pass: 56       fail: 0        exceptions: 0       
 lib        exception      total: 4        pass: 4        fail: 0        exceptions: 0       
 lib        future         total: 9        pass: 9        fail: 0        exceptions: 0       
 lib        list           total: 24       pass: 24       fail: 0        exceptions: 0       
-lib        namespace      total: 14       pass: 14       fail: 0        exceptions: 0       
+lib        namespace      total: 11       pass: 11       fail: 0        exceptions: 0       
 lib        number         total: 41       pass: 41       fail: 0        exceptions: 0       
 lib        reader         total: 50       pass: 50       fail: 0        exceptions: 0       
 lib        special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
 lib        stream         total: 9        pass: 9        fail: 0        exceptions: 0       
 lib        struct         total: 7        pass: 7        fail: 0        exceptions: 0       
-lib        symbol         total: 11       pass: 11       fail: 0        exceptions: 0       
+lib        symbol         total: 10       pass: 10       fail: 0        exceptions: 0       
 lib        vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-lib                       total: 302      pass: 301      fail: 1        exceptions: 0         
+lib                       total: 300      pass: 299      fail: 1        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------
-prelude    backquote      total: 37       pass: 25       fail: 10       exceptions: 2       
-prelude    closure        total: 1        pass: 1        fail: 0        exceptions: 0       
-prelude    compile        total: 22       pass: 22       fail: 0        exceptions: 0       
-prelude    prelude        total: 18       pass: 18       fail: 0        exceptions: 0       
-prelude    exception      total: 7        pass: 7        fail: 0        exceptions: 0       
-prelude    fixnum         total: 16       pass: 16       fail: 0        exceptions: 0       
-prelude    format         total: 15       pass: 15       fail: 0        exceptions: 0       
-prelude    lambda         total: 23       pass: 23       fail: 0        exceptions: 0       
-prelude    list           total: 76       pass: 76       fail: 0        exceptions: 0       
-prelude    macro          total: 13       pass: 13       fail: 0        exceptions: 0       
-prelude    reader         total: 68       pass: 68       fail: 0        exceptions: 0       
-prelude    stream         total: 20       pass: 20       fail: 0        exceptions: 0       
-prelude    string         total: 20       pass: 20       fail: 0        exceptions: 0       
-prelude    symbol         total: 3        pass: 3        fail: 0        exceptions: 0       
-prelude    types          total: 43       pass: 43       fail: 0        exceptions: 0       
-prelude    vector         total: 25       pass: 25       fail: 0        exceptions: 0       
+prelude    backquote      total: 37       pass: 0        fail: 0        exceptions: 37      
+prelude    closure        total: 1        pass: 0        fail: 0        exceptions: 1       
+prelude    compile        total: 22       pass: 0        fail: 0        exceptions: 22      
+prelude    prelude        total: 18       pass: 0        fail: 0        exceptions: 18      
+prelude    exception      total: 7        pass: 0        fail: 0        exceptions: 7       
+prelude    fixnum         total: 16       pass: 0        fail: 0        exceptions: 16      
+prelude    format         total: 15       pass: 0        fail: 0        exceptions: 15      
+prelude    lambda         total: 23       pass: 0        fail: 0        exceptions: 23      
+prelude    list           total: 76       pass: 0        fail: 0        exceptions: 76      
+prelude    macro          total: 13       pass: 0        fail: 0        exceptions: 13      
+prelude    reader         total: 68       pass: 0        fail: 0        exceptions: 68      
+prelude    stream         total: 20       pass: 0        fail: 0        exceptions: 20      
+prelude    string         total: 20       pass: 0        fail: 0        exceptions: 20      
+prelude    symbol         total: 3        pass: 0        fail: 0        exceptions: 3       
+prelude    types          total: 43       pass: 0        fail: 0        exceptions: 43      
+prelude    vector         total: 25       pass: 0        fail: 0        exceptions: 25      
 -----------------------
-prelude                   total: 407      pass: 395      fail: 10       exceptions: 2         
+prelude                   total: 407      pass: 0        fail: 0        exceptions: 407       
 

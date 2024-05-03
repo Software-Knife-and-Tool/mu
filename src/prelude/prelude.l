@@ -4,7 +4,7 @@
 ;;;
 ;;; namespace
 ;;;
-(lib:make-ns :prelude)
+(lib:make-ns "prelude")
 
 ;;;
 ;;; types

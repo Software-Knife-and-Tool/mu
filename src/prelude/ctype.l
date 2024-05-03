@@ -4,7 +4,7 @@
 ;;;
 ;;; prelude types
 ;;;
-(lib:intern :prelude "%types-ns" (lib:make-ns :%types))
+(lib:intern :prelude "%types-ns" (lib:make-ns "%types"))
 
 (lib:intern :prelude "%prelude-type-p"
    (:lambda (value)
