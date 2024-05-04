@@ -11,7 +11,6 @@ pub mod function;
 pub mod indirect_vector;
 pub mod namespace;
 pub mod stream;
-pub mod streambuilder;
 pub mod struct_;
 pub mod symbol;
 pub mod vector;

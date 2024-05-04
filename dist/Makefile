@@ -3,7 +3,7 @@
 #
 .PHONY: dist clean release
 
-VERSION != grep VERSION: ../src/libenv/core/lib.rs | sed 's/.* "//' | sed 's/".*//'
+VERSION != grep VERSION: ../src/librt/core/lib.rs | sed 's/.* "//' | sed 's/".*//'
 
 BASE = mu
 DOCS = ../doc
