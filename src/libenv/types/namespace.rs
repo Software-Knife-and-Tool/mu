@@ -151,7 +151,7 @@ impl Namespace {
         ) {
             Some(tag) => {
                 if tag.is_empty() {
-                    Some(":nil".to_string())
+                    Some("".to_string())
                 } else {
                     Some(tag.to_string())
                 }
@@ -233,7 +233,7 @@ pub trait Core {
 impl Core for Namespace {
     fn write(env: &Env, ns: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         if escape {
-            match env.write_string("#<:ns ", stream) {
+            match env.write_string("#<:ns \"", stream) {
                 Ok(_) => (),
                 Err(e) => return Err(e),
             }
@@ -243,7 +243,7 @@ impl Core for Namespace {
                 Err(e) => return Err(e),
             }
 
-            match env.write_string(">", stream) {
+            match env.write_string("\">", stream) {
                 Ok(_) => (),
                 Err(e) => return Err(e),
             }
@@ -261,28 +261,21 @@ impl Core for Namespace {
 pub trait CoreFunction {
     fn lib_intern(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_make_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()>;
     fn lib_find_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_find(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns_map(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_unbound(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_untern(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Namespace {
-    fn lib_unbound(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_untern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
         let name = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("unbound", &[Type::T, Type::String], fp) {
-            Ok(_) => {
-                let ns = match ns.type_of() {
-                    Type::Null => env.null_ns,
-                    Type::Namespace => ns,
-                    _ => return Err(Exception::new(Condition::Type, "unbound", ns)),
-                };
-
-                Self::intern(env, ns, Vector::as_string(env, name), *UNBOUND).unwrap()
-            }
+        fp.value = match env.fp_argv_check("unbound", &[Type::Namespace, Type::String], fp) {
+            Ok(_) => Self::intern(env, ns, Vector::as_string(env, name), *UNBOUND).unwrap(),
             Err(e) => return Err(e),
         };
 
@@ -317,6 +310,17 @@ impl CoreFunction for Namespace {
         Ok(())
     }
 
+    fn lib_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let ns = fp.argv[0];
+
+        fp.value = match env.fp_argv_check("ns-name", &[Type::Namespace], fp) {
+            Ok(_) => Vector::from_string(&Self::ns_name(env, ns).unwrap()).evict(env),
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
     fn lib_find_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
@@ -335,33 +339,27 @@ impl CoreFunction for Namespace {
         let ns_tag = fp.argv[0];
         let name = fp.argv[1];
 
-        fp.value =
-            match env.fp_argv_check("ns-find", &[Type::T, Type::String], fp) {
-                Ok(_) => match ns_tag.type_of() {
-                    Type::Null => env.null_ns,
-                    Type::Namespace => {
-                        let ns_ref = block_on(env.ns_map.read());
-
-                        match ns_ref.iter().find_map(|(tag, _, ns_map)| {
-                            if ns_tag.eq_(tag) {
-                                Some(ns_map)
-                            } else {
-                                None
-                            }
-                        }) {
-                            Some(_) => {
-                                match Self::map_symbol(env, ns_tag, &Vector::as_string(env, name)) {
-                                    Some(sym) => sym,
-                                    None => Tag::nil(),
-                                }
-                            }
-                            None => return Err(Exception::new(Condition::Type, "find", ns_tag)),
+        fp.value = match env.fp_argv_check("ns-find", &[Type::Namespace, Type::String], fp) {
+            Ok(_) => {
+                let ns_ref = block_on(env.ns_map.read());
+                match ns_ref.iter().find_map(
+                    |(tag, _, ns_map)| {
+                        if ns_tag.eq_(tag) {
+                            Some(ns_map)
+                        } else {
+                            None
                         }
-                    }
-                    _ => return Err(Exception::new(Condition::Type, "find", ns_tag)),
-                },
-                _ => return Err(Exception::new(Condition::Type, "find", ns_tag)),
-            };
+                    },
+                ) {
+                    Some(_) => match Self::map_symbol(env, ns_tag, &Vector::as_string(env, name)) {
+                        Some(sym) => sym,
+                        None => Tag::nil(),
+                    },
+                    None => return Err(Exception::new(Condition::Type, "find", ns_tag)),
+                }
+            }
+            _ => return Err(Exception::new(Condition::Type, "find", ns_tag)),
+        };
 
         Ok(())
     }

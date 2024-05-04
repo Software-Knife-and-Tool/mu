@@ -4,13 +4,13 @@
 ;;;
 ;;; vectors
 ;;;
-(lib:intern :prelude "vectorp"
+(lib:intern prelude "vectorp"
    (:lambda (vector)
      (:if (lib:eq :vector (lib:type-of vector))
           :t
           (lib:eq 'vector (prelude:type-of vector)))))
 
-(lib:intern :prelude "bit-vector-p"
+(lib:intern prelude "bit-vector-p"
    (:lambda (vector)
      (:if (prelude:%prelude-type-p vector)
           (:if (lib:eq 'vector (prelude:type-of vector))
@@ -18,7 +18,7 @@
                ())
           ())))
 
-(lib:intern :prelude "vector-displaced-p"
+(lib:intern prelude "vector-displaced-p"
    (:lambda (vector)
      (:if (prelude:%prelude-type-p vector)
           (:if (lib:eq 'vector (prelude:type-of vector))
@@ -26,13 +26,13 @@
                ())
           ())))
 
-(lib:intern :prelude "make-vector"
+(lib:intern prelude "make-vector"
    (:lambda (list)
      (:if (prelude:listp list)
           (lib:vector (prelude:%specialized-vector-type list) list)
           (prelude:raise list 'prelude:make-vector "not a list"))))
 
-(lib:intern :prelude "slice"
+(lib:intern prelude "slice"
    (:lambda (vector start length)
      (:if (prelude:typep vector :vector)
           (:if (prelude:fixnump start)
@@ -46,7 +46,7 @@
                (prelude:raise length 'prelude:slice "not a fixnum"))
           (prelude:raise vector 'prelude:slice "not a base vector"))))
 
-(lib:intern :prelude "vector-length"
+(lib:intern prelude "vector-length"
    (:lambda (vector)
      (:if (prelude:vectorp vector)
           (:if (prelude:bit-vector-p vector)
@@ -56,7 +56,7 @@
                     (lib:cdr (prelude:%vector-prop :disp vector))))
           (prelude:raise vector 'prelude:vector-length "not a vector"))))
 
-(lib:intern :prelude "vector-type"
+(lib:intern prelude "vector-type"
    (:lambda (vector)
      (:if (prelude:vectorp vector)
           (:if (prelude:bit-vector-p vector)
@@ -66,7 +66,7 @@
                     (lib:sv-type (prelude:%vector-prop :base vector))))
           (prelude:raise vector 'prelude:vector-type "not a vector"))))
 
-(lib:intern :prelude "vector-ref"
+(lib:intern prelude "vector-ref"
    (:lambda (vector nth)
      (:if (prelude:vectorp vector)
           (:if (prelude:fixnump nth)
@@ -93,7 +93,7 @@
 ;;;
 ;;; write
 ;;;
-(lib:intern :prelude "%vector-write"
+(lib:intern prelude "%vector-write"
    (:lambda (vector escape stream)
        (:if (prelude:typep vector :vector)
            (lib:write vector escape stream)
@@ -117,14 +117,14 @@
 ;;;
 ;;; implementations
 ;;;
-(lib:intern :prelude "%make-vector"
+(lib:intern prelude "%make-vector"
    (:lambda (vector displace bitvec)
      (prelude:%make-type "vector"
        `(,(lib:cons :base   vector)
          ,(lib:cons :disp   displace)
          ,(lib:cons :bitvec bitvec)))))
 
-(lib:intern :prelude "%specialized-vector-type"
+(lib:intern prelude "%specialized-vector-type"
    (:lambda (list)
      ((:lambda (type)
         (:if (prelude:findl (:lambda (stype) (lib:eq type stype)) '(:t :char :fixnum :float))
@@ -152,13 +152,13 @@
       (lib:type-of (lib:car list))
       (lib:cdr list)))))
 
-(lib:intern :prelude "%vector-prop"
+(lib:intern prelude "%vector-prop"
    (:lambda (prop vector)
       (:if (prelude:findl (:lambda (vec-prop) (lib:eq prop vec-prop)) '(:base :disp :bitvec))
            (lib:cdr (prelude:%type-ref prop vector))
            (prelude:raise prop 'prelude:%vector-prop "not a vector property"))))
 
-(lib:intern :prelude "%map-vector"
+(lib:intern prelude "%map-vector"
   (:lambda (fn vector)
     (lib:fix
      (:lambda (nth)

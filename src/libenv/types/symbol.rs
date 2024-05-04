@@ -49,13 +49,21 @@ impl Symbol {
     pub fn new(env: &Env, namespace: Tag, name: &str, value: Tag) -> Self {
         let str = name.as_bytes();
 
-        match str[0] as char {
-            ':' => Symbol::Keyword(Self::keyword(&name[1..])),
-            _ => Symbol::Symbol(SymbolImage {
+        if name.is_empty() {
+            Symbol::Symbol(SymbolImage {
                 namespace,
                 name: Vector::from_string(name).evict(env),
                 value,
-            }),
+            })
+        } else {
+            match str[0] as char {
+                ':' => Symbol::Keyword(Self::keyword(&name[1..])),
+                _ => Symbol::Symbol(SymbolImage {
+                    namespace,
+                    name: Vector::from_string(name).evict(env),
+                    value,
+                }),
+            }
         }
     }
 
@@ -129,7 +137,11 @@ pub trait Core {
 impl Core for Symbol {
     fn view(env: &Env, symbol: Tag) -> Tag {
         let vec = vec![
-            Self::namespace(env, symbol),
+            Vector::from_string(&format!(
+                "\"{}\"",
+                Namespace::ns_name(env, Self::namespace(env, symbol)).unwrap()
+            ))
+            .evict(env),
             Self::name(env, symbol),
             if !Self::is_bound(env, symbol) {
                 Symbol::keyword("UNBOUND")

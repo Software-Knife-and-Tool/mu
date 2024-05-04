@@ -8,7 +8,7 @@
 ;;;
 ;;; loader
 ;;;
-(lib:intern :prelude "load"
+(lib:intern prelude "load"
   (:lambda (path verbose)
     (:if (prelude:stringp path)
          ((:lambda (ifs)

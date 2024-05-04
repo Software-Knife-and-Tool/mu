@@ -8,11 +8,11 @@
 ;;;
 ;;; sharpsign readers
 ;;;
-(lib:intern :prelude "%read-sharp-char"
+(lib:intern prelude "%read-sharp-char"
    (:lambda (ch stream)
       (prelude:read-char stream () ())))
 
-(lib:intern :prelude "%read-sharp-comment"
+(lib:intern prelude "%read-sharp-comment"
    (:lambda (ch stream)
       (lib:fix
        (:lambda (loop)
@@ -37,7 +37,7 @@
                     (prelude:read-char stream () ())))))
        ())))
 
-(lib:intern :prelude "%read-sharp-vector"
+(lib:intern prelude "%read-sharp-vector"
    (:lambda (ch stream)
       ((:lambda (type)
           (:if (prelude:keywordp type)
@@ -45,7 +45,7 @@
                (prelude:raise type 'prelude:%read-sharp-vector "not a type keyword")))
           (prelude:%read stream))))
 
-(lib:intern :prelude "%read-byte-bits"
+(lib:intern prelude "%read-byte-bits"
    (:lambda (stream)
      (lib:cdr
       (lib:fix
@@ -75,7 +75,7 @@
           (lib:cdr loop)))
         '(8 . 0)))))
              
-(lib:intern :prelude "%read-sharp-bit-vector"
+(lib:intern prelude "%read-sharp-bit-vector"
    (:lambda (ch stream)
      (lib:fix
        (:lambda (loop)
@@ -94,19 +94,19 @@
                (prelude:%read-byte-bits stream))))
        ())))
 
-(lib:intern :prelude "%read-sharp-dot"
+(lib:intern prelude "%read-sharp-dot"
    (:lambda (ch stream)
       (lib:eval (prelude:compile (prelude:read stream () ())))))
 
-(lib:intern :prelude "%read-sharp-symbol"
+(lib:intern prelude "%read-sharp-symbol"
    (:lambda (ch stream)
      ((:lambda (symbol)
           (:if (lib:eq :symbol (lib:type-of symbol))
-               (lib:symbol (lib:sy-name symbol))
+               (lib:make-symbol (lib:symbol-name symbol))
                (prelude:raise symbol 'prelude:%read-sharp-symbol "not a symbol")))
        (prelude:%read-atom ch stream))))
 
-(lib:intern :prelude "%read-sharp-number"
+(lib:intern prelude "%read-sharp-number"
   (:lambda (base stream)
     (lib:fix
       (:lambda (loop)
@@ -135,11 +135,11 @@
               (prelude:read-char stream () ()))))
       ())))
 
-(lib:intern :prelude "%read-sharp"
+(lib:intern prelude "%read-sharp"
   (:lambda (ch stream)
     ((:lambda (ch sharp-table)
        (lib:apply
-        (lib:sy-val (lib:cdr (prelude:%assoc ch sharp-table)))
+        (lib:symbol-value (lib:cdr (prelude:%assoc ch sharp-table)))
         `(,ch ,stream)))
      (prelude:read-char stream () ())
      '((#\| . prelude:%read-sharp-comment)
@@ -155,13 +155,13 @@
 ;;;
 ;;; list reader
 ;;;
-(lib:intern :prelude "%read-list-eol%" (lib:symbol "eol"))
+(lib:intern prelude "%read-list-eol%" (lib:make-symbol "eol"))
 
-(lib:intern :prelude "%read-list-eol"
+(lib:intern prelude "%read-list-eol"
    (:lambda (ch stream)
       prelude:%read-list-eol%))
 
-(lib:intern :prelude "%read-list"
+(lib:intern prelude "%read-list"
    (:lambda (ch stream)
       (lib:fix
        (:lambda (loop)
@@ -169,7 +169,7 @@
             (:if (lib:eq el prelude:%read-list-eol%)
                  loop
                  (:if (lib:eq :symbol (lib:type-of el))
-                      (:if (lib:eq (lib:sy-name el) ".")
+                      (:if (lib:eq (lib:symbol-name el) ".")
                            ((:lambda (dotted)
                               (:if (lib:eq (prelude:%read stream) prelude:%read-list-eol%)
                                    ((:lambda ()
@@ -185,7 +185,7 @@
 ;;;
 ;;; string reader
 ;;;
-(lib:intern :prelude "%read-string"
+(lib:intern prelude "%read-string"
    (:lambda (ch stream)
      (lib:fix
       (:lambda (loop)
@@ -203,14 +203,14 @@
 ;;;
 ;;; quote reader
 ;;;
-(lib:intern :prelude "%read-quote"
+(lib:intern prelude "%read-quote"
   (:lambda (ch stream)
      `(:quote ,(prelude:%read stream))))
 
 ;;;
 ;;; line comment
 ;;;
-(lib:intern :prelude "%read-line-comment"
+(lib:intern prelude "%read-line-comment"
     (:lambda (ch stream)
       (lib:fix
        (:lambda (loop)
@@ -226,11 +226,11 @@
 ;;;
 ;;; read macros
 ;;;
-(lib:intern :prelude "%read-macro"
+(lib:intern prelude "%read-macro"
   (:lambda (ch stream)
      ((:lambda (macro-table)
        (lib:apply
-            (lib:sy-val (lib:cdr (prelude:%assoc ch macro-table)))
+            (lib:symbol-value (lib:cdr (prelude:%assoc ch macro-table)))
             `(,ch ,stream)))
        '((#\" . prelude:%read-string)
          (#\# . prelude:%read-sharp)
@@ -243,17 +243,17 @@
 ;;;
 ;;; get/set-macro-character
 ;;;
-(lib:intern :prelude "get-macro-character"
+(lib:intern prelude "get-macro-character"
    (:lambda (char)
      (:if (prelude:charp char)
           ((:lambda (macro-symbol)
               (:if macro-symbol
                    (prelude:symbol-value macro-symbol)
                    ()))
-           (lib:ns-find prelude:%char-macro-ns% (lib:vector :char `(,char))))
+           (lib:find prelude:%char-macro-ns% (lib:vector :char `(,char))))
           (prelude:raise char 'prelude:get-macro-character "not a character"))))
 
-(lib:intern :prelude "set-macro-character"
+(lib:intern prelude "set-macro-character"
    (:lambda (char fn non-terminating)
       (:if (prelude:charp char)
          (:if (prelude:functionp fn)

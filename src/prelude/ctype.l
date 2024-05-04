@@ -4,9 +4,9 @@
 ;;;
 ;;; prelude types
 ;;;
-(lib:intern :prelude "%types-ns" (lib:make-ns "%types"))
+(lib:intern prelude "%types-ns" (lib:make-ns "%types"))
 
-(lib:intern :prelude "%prelude-type-p"
+(lib:intern prelude "%prelude-type-p"
    (:lambda (value)
       (:if (prelude:structp value)
            (lib:eq :<type> (lib:st-type value))
@@ -17,19 +17,19 @@
 ;;;
 ;;; where the property-alist is ((:predicate . :predicate) ...)
 ;;;
-(lib:intern :prelude "define-type"
+(lib:intern prelude "define-type"
    (:lambda (name properties)
       ((:lambda (str)
           (:if (prelude:listp properties)
                ((:lambda (symbol)
                    (:if (prelude:null symbol)
-                        (lib:intern :%types str (lib:struct :<type> `(,str ,properties)))
+                        (lib:intern (lib:find-ns "%types") str (lib:struct :<type> `(,str ,properties)))
                         (prelude:raise symbol 'prelude:define-type "type symbol bound")))
-                (lib:ns-find :%types str))
+                (lib:find (lib:find-ns "%types") str))
                (prelude:raise properties 'prelude:define-type "not a property list")))
        (prelude:string name))))
 
-(lib:intern :prelude "%type-predicate-map%"
+(lib:intern prelude "%type-predicate-map%"
    `(,(lib:cons :char (:lambda (t) (prelude:charp t)))
       ,(lib:cons :cons (:lambda (t) (prelude:consp t)))
       ,(lib:cons :fixnum (:lambda (t) (prelude:fixnump t)))
@@ -46,13 +46,13 @@
       ,(lib:cons :t (:lambda (t) :t))
       ,(lib:cons :vector (:lambda (t) (prelude:vectorp t)))))
 
-(lib:intern :prelude "%type-predicate"
+(lib:intern prelude "%type-predicate"
    (:lambda (type value)
       ((:lambda (predicate)
           (lib:apply predicate `(,value)))
        (lib:cdr (prelude:%assoc type prelude:%type-predicate-map%)))))
 
-(lib:intern :prelude "%make-type"
+(lib:intern prelude "%make-type"
     (:lambda (name property-values)
        ((:lambda (type-symbol)
            (prelude:%mapc
@@ -67,15 +67,15 @@
                          (lib:cdr property-def)
                          (lib:cdr property-value))
                         ()))
-                (lib:sv-ref (lib:st-vec (lib:sy-val type-symbol)) 1)))
+                (lib:sv-ref (lib:st-vec (lib:symbol-value type-symbol)) 1)))
             property-values))
-        (lib:ns-find prelude:%types-ns name))
+        (lib:find prelude:%types-ns name))
        (lib:struct :<type> `(,name ,property-values))))
 
 ;;;
 ;;; returns () if not found
 ;;;
-(lib:intern :prelude "%type-ref"
+(lib:intern prelude "%type-ref"
    (:lambda (prop-name struct)
       (:if (prelude:%prelude-type-p struct)
            (:if (prelude:keywordp prop-name)

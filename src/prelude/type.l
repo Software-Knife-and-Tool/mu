@@ -4,22 +4,22 @@
 ;;;
 ;;; types
 ;;;
-(lib:intern :prelude "type-of"
+(lib:intern prelude "type-of"
    (:lambda (value)
       ((:lambda (type)
           (:if (lib:eq type :struct)
                (:if (lib:eq :<type> (lib:st-type value))
-                    (lib:unbound () (lib:sv-ref (lib:st-vec value) 0))
+                    (lib:untern (lib:find-ns "") (lib:sv-ref (lib:st-vec value) 0))
                     (lib:st-type value))
                (:if (prelude:stringp value)
                     'string
-                    (lib:unbound () (lib:sy-name type)))))
+                    (lib:untern (lib:find-ns "") (lib:symbol-name type)))))
        (lib:type-of value))))
 
 ;;;
 ;;; typep
 ;;;
-(lib:intern :prelude "%typespec-map%"
+(lib:intern prelude "%typespec-map%"
    `((asyncid :asyncid)
      (bit-vector (satisfies prelude:bit-vector-p))
      (char (satisfies prelude:charp))
@@ -33,14 +33,14 @@
      (struct (satisifes prelude:structp))
      (symbol (or (satisfies prelude:symbolp) (satisfies prelude:keywordp)))))
 
-(lib:intern :prelude "%compound-typespec-map%"
+(lib:intern prelude "%compound-typespec-map%"
    `(,(lib:cons 'satisfies
          (:lambda (value spec-list)
             (:if (lib:eq 1 (lib:length spec-list))
                  ((:lambda (predicate-symbol)
                     (:if (prelude:symbolp predicate-symbol)
                          (:if (lib:boundp predicate-symbol)
-                              (prelude:apply (lib:sy-val predicate-symbol) `(,value))
+                              (prelude:apply (lib:symbol-value predicate-symbol) `(,value))
                               (prelude:raise predicate 'prelude:typep "satisfies typespec format"))
                          (prelude:raise predicate 'prelude:typep "satisfies typespec format")))
                   (lib:car spec-list))
@@ -66,7 +66,7 @@
                            :t
                            spec-list))))))
 
-(lib:intern :prelude "typep"
+(lib:intern prelude "typep"
    (:lambda (value typespec)
      (:if (prelude:keywordp typespec)
           (lib:eq typespec (lib:type-of value))

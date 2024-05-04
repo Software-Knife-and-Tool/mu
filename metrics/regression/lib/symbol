@@ -2,4 +2,4 @@
 (lib:boundp 'lib:std-in)
 (lib:eq :keyword (lib:type-of 'abcd))
 (lib:eq :keyword (lib:type-of :abcd))
-(lib:sy-val 'lib:std-in)
+(lib:symbol-value 'lib:std-in)

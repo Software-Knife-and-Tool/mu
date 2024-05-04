@@ -4,17 +4,17 @@
 ;;;
 ;;; cross reference
 ;;;
-(lib:intern :prelude "crossref"
+(lib:intern (lib:find-ns "prelude") "crossref"
    (:lambda (file-name)
       ((:lambda (stream)
           (prelude:mapc
            (:lambda (symbol)
               (:if (lib:boundp symbol)
                    (prelude:format stream "~A~T~A~T~S~%"
-                                `(,(lib:sy-name symbol)
-                                  ,(prelude:type-of (lib:sy-val symbol))
-                                  ,(lib:sy-val symbol)))
-                   (prelude:format stream "unbound~Tunbound~T~A~%" `(,(lib:sy-name symbol)))))
-           (lib:ns-syms :list :prelude)))
+                                `(,(lib:symbol-name symbol)
+                                  ,(prelude:type-of (lib:symbol-value symbol))
+                                  ,(lib:symbol-value symbol)))
+                   (prelude:format stream "unbound~Tunbound~T~A~%" `(,(lib:symbol-name symbol)))))
+           (lib:symbols (lib:find-ns "prelude"))))
        (lib:open :file :output file-name))
       :t))

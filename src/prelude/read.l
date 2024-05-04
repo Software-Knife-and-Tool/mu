@@ -4,33 +4,33 @@
 ;;;
 ;;; reader
 ;;;
-(lib:intern :prelude "%eof%" (lib:symbol "eof"))
-(lib:intern :prelude "%reader-stream%" (lib:open :string :output ""))
-(lib:intern :prelude "%reader-current-ns%" (lib:open :string :bidir "prelude"))
+(lib:intern prelude "%eof%" (lib:make-symbol "eof"))
+(lib:intern prelude "%reader-stream%" (lib:open :string :output ""))
+(lib:intern prelude "%reader-current-ns%" (lib:open :string :bidir "prelude"))
 
-(lib:intern :prelude "%in-namespace"
+(lib:intern prelude "%in-namespace"
    (:lambda (ns)
       ((:lambda ()
           (lib:make-ns ns)
           (prelude:%reader-set-ns ns)
           ns))))
 
-(lib:intern :prelude "%reader-get-ns"
+(lib:intern prelude "%reader-get-ns"
    (:lambda ()
      ((:lambda (ns)
         (lib:write ns () prelude:%reader-current-ns%)
-        (lib:keyword ns))
+        (lib:find-ns ns))
       (prelude:get-output-stream-string prelude:%reader-current-ns%))))
 
-(lib:intern :prelude "%reader-set-ns"
+(lib:intern prelude "%reader-set-ns"
    (:lambda (ns)
       (prelude:get-output-stream-string prelude:%reader-current-ns%)
-      (lib:write (lib:sy-name ns) () prelude:%reader-current-ns%)))
+      (lib:write ns () prelude:%reader-current-ns%)))
 
 ;;;
 ;;; readtable
 ;;;
-(lib:intern :prelude "%read-char-syntax"
+(lib:intern prelude "%read-char-syntax"
    (:lambda (ch)
      ((:lambda (read-table) (lib:cdr (prelude:%assoc ch read-table)))
       '((#\return . :wspace) (#\linefeed . :wspace) (#\page . :wspace)
@@ -60,7 +60,7 @@
         (#\v . :const)  (#\w . :const)  (#\x . :const)  (#\y . :const)
         (#\z . :const)))))
 
-(lib:intern :prelude "%read-number"
+(lib:intern prelude "%read-number"
   (:lambda (atom)
     ((:lambda (fx)
         (:if fx
@@ -75,7 +75,7 @@
 ;;;
 ;;; atom reader
 ;;;
-(lib:intern :prelude "%read-atom"
+(lib:intern prelude "%read-atom"
   (:lambda (ch stream)
     (prelude:write-char ch prelude:%reader-stream%)
     (lib:fix
@@ -107,11 +107,11 @@
 ;;;
 ;;; parser
 ;;;
-(lib:intern :prelude "%read-dispatch"
+(lib:intern prelude "%read-dispatch"
   (:lambda (ch stream)
     ((:lambda (dispatch-table)
        (lib:apply
-        (lib:sy-val (lib:cdr (prelude:%assoc (prelude:%read-char-syntax ch) dispatch-table)))
+        (lib:symbol-value (lib:cdr (prelude:%assoc (prelude:%read-char-syntax ch) dispatch-table)))
         `(,ch ,stream)))
      '((:const   . prelude:%read-atom)
        (:escape  . prelude:%read-atom)
@@ -122,7 +122,7 @@
 ;;;
 ;;; consume whitespace and comments
 ;;;
-(lib:intern :prelude "%read-consume-ws"
+(lib:intern prelude "%read-consume-ws"
    (:lambda (stream)
     (lib:fix
      (:lambda (loop)
@@ -152,7 +152,7 @@
 ;;;
 ;;; recursive reader
 ;;;
-(lib:intern :prelude "%read"
+(lib:intern prelude "%read"
   (:lambda (stream)
     ((:lambda (ch)
        (:if (prelude:null ch)

@@ -19,7 +19,7 @@ def storage(ns, group, line, test):
         proc = subprocess.Popen([mu_sys,
                                  '-p',
                                  '-l./perf.l',
-                                 '-e (perf:%sdelta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
@@ -27,7 +27,7 @@ def storage(ns, group, line, test):
         proc = subprocess.Popen([mu_sys,
                                  '-p',
                                  '-l./perf.l',
-                                 '-e (perf:%sdelta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
@@ -37,7 +37,7 @@ def storage(ns, group, line, test):
                                  '-q (prelude:%init-ns)',
                                  '-p',
                                  '-l./perf.l',
-                                 '-e (perf:%sdelta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
     
@@ -56,7 +56,7 @@ def timing(ns, test):
         proc = subprocess.Popen([mu_sys,
                                  '-p',
                                  '-l./perf.l',
-                                 '-e (perf:%tdelta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
@@ -64,7 +64,7 @@ def timing(ns, test):
         proc = subprocess.Popen([mu_sys,
                                  '-p',
                                  '-l./perf.l',
-                                 '-e (perf:%tdelta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
@@ -74,7 +74,7 @@ def timing(ns, test):
                                  '-q (prelude:%init-ns)',
                                  '-p',
                                  '-l./perf.l',
-                                 '-e (perf:%tdelta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
     

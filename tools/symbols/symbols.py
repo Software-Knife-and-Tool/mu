@@ -15,7 +15,7 @@ def symbols_in(line):
     if len(line) == 0 or line[0] == ';':
         return
     
-    tokens = re.split('[ ,\~\#\.\`\'\@;\(\)]', line)
+    tokens = re.split(r"[ ,\~\#\.\`\'\@;\(\)]", line)
     if len(tokens) == 0:
         return
 

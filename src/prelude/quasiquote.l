@@ -4,17 +4,17 @@
 ;;;
 ;;; quasiquote
 ;;;
-(lib:intern () "%quasi%" ())
+(lib:intern (lib:find-ns "") "%quasi%" ())
 
-(lib:intern :prelude "%list"
+(lib:intern prelude "%list"
    (:lambda (form)
      `(,form)))
 
-(lib:intern :prelude "%qq-func-map"
+(lib:intern prelude "%qq-func-map"
    (:lambda (key map)
      (lib:cdr (prelude:assoc key map))))
 
-(lib:intern :prelude "%qq-read"
+(lib:intern prelude "%qq-read"
    (:lambda (stream)
      ((:lambda (ch syntax-map)
         (:if (prelude:null ch)
@@ -40,7 +40,7 @@
            ,(lib:cons #\' (:lambda () `(:qquote ,(prelude:%qq-read stream))))
            ,(lib:cons #\` (:lambda () `(:quasi ,(prelude:read stream () ()))))))))
 
-(lib:intern :prelude "%qq-read-list"
+(lib:intern prelude "%qq-read-list"
    (:lambda (stream)
      ((:lambda (syntax-map)
          (lib:cdr
@@ -81,7 +81,7 @@
          ,(lib:cons :quasi  (:lambda (expr list)
                              (lib:cons () (lib:append list `(,(prelude:%qq-read stream))))))))))
 
-(lib:intern :prelude "%qq-compile"
+(lib:intern prelude "%qq-compile"
    (:lambda (qq-expr)
      ((:lambda (type expr compiler-map)
         ((:lambda (type-fn)
@@ -128,6 +128,6 @@
          ,(lib:cons :qquote   (:lambda (expr)
                                `(:quote ,(prelude:%qq-compile expr))))))))
 
-(lib:intern :prelude "%qq-reader"
+(lib:intern prelude "%qq-reader"
    (:lambda (char stream)
      `(%quasi% ,(prelude:%qq-read stream))))

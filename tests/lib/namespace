@@ -4,7 +4,7 @@
 (lib:find (lib:find-ns "lib") "eq")	lib:eq
 (lib:find (lib:find-ns "lib") "foo")	:nil
 (lib:intern (lib:find-ns "") "foo" "foo")	foo
-(lib:make-ns "mu")	#<:ns mu>
+(lib:make-ns "mu")	#<:ns "mu">
 (lib:type-of (lib:symbols (lib:find-ns "")))	:null
 (lib:type-of (lib:symbols (lib:find-ns "keyword")))	:null
 (lib:type-of (lib:symbols (lib:find-ns "lib")))	:cons

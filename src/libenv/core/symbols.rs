@@ -96,8 +96,9 @@ lazy_static! {
         ( "intern",  3, Namespace::lib_intern ),
         ( "make-ns", 1, Namespace::lib_make_ns ),
         ( "ns-map",  0, Namespace::lib_ns_map ),
+        ( "ns-name",  1, Namespace::lib_ns_name ),
         ( "symbols", 1, Namespace::lib_symbols ),
-        ( "untern",  2, Namespace::lib_unbound ),
+        ( "untern",  2, Namespace::lib_untern ),
         // read/write
         ( "read",    3, Env::lib_read ),
         ( "write",   3, Env::lib_write ),

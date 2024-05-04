@@ -4,26 +4,26 @@
 ;;;
 ;;; format
 ;;;
-(lib:intern :prelude "%fmt-tilde"
+(lib:intern prelude "%fmt-tilde"
   (:lambda (dest arg-list)
     (prelude:write-char #\~ dest)
     arg-list))
 
-(lib:intern :prelude "%fmt-tab"
+(lib:intern prelude "%fmt-tab"
   (:lambda (dest arg-list)
     (prelude:write-char #\tab dest)
     arg-list))
 
-(lib:intern :prelude "%fmt-percent"
+(lib:intern prelude "%fmt-percent"
   (:lambda (dest arg-list)
     (prelude:write-char #\linefeed dest)
     arg-list))
 
-(lib:intern :prelude "%fmt-bang"
+(lib:intern prelude "%fmt-bang"
   (:lambda (dest arg-list)
     (lib:cdr arg-list)))
 
-(lib:intern :prelude "%fmt-decimal"
+(lib:intern prelude "%fmt-decimal"
   (:lambda (dest arg-list)
      (:if (prelude:fixnump (lib:car arg-list))
           ((:lambda ()
@@ -31,7 +31,7 @@
               (lib:cdr arg-list)))
           (prelude:raise (lib:car arg-list) 'prelude:format "argument to ~D not a fixnum"))))
 
-(lib:intern :prelude "%fmt-hex"
+(lib:intern prelude "%fmt-hex"
   (:lambda (dest arg-list)
      ((:lambda (fx)
        (:if (prelude:fixnump fx)
@@ -63,12 +63,12 @@
             (prelude:raise fx 'prelude:format "argument to ~X not a fixnum")))
       (lib:car arg-list))))
 
-(lib:intern :prelude "%fmt-aesthetic"
+(lib:intern prelude "%fmt-aesthetic"
   (:lambda (dest arg-list)
     (prelude:write (lib:car arg-list) () dest)
     (lib:cdr arg-list)))
 
-(lib:intern :prelude "%fmt-standard"
+(lib:intern prelude "%fmt-standard"
   (:lambda (dest arg-list)
     (prelude:write (lib:car arg-list) :t dest)
     (lib:cdr arg-list)))
@@ -76,11 +76,11 @@
 ;;;
 ;;; control ops
 ;;;
-(lib:intern :prelude "%fmt-op"
+(lib:intern prelude "%fmt-op"
   (:lambda (dir dest arg-list)
     ((:lambda (fn)
        (:if fn
-            (prelude:apply (lib:sy-val fn) `(,dest ,arg-list))
+            (prelude:apply (lib:symbol-value fn) `(,dest ,arg-list))
             (prelude:raise dir 'prelude:format "unrecognized format directive")))
      (lib:cdr
       (prelude:%assoc
@@ -94,7 +94,7 @@
          (#\% . prelude:%fmt-percent)
          (#\! . prelude:%fmt-bang)))))))
 
-(lib:intern :prelude "%fmt-loop"
+(lib:intern prelude "%fmt-loop"
   (:lambda (stream dest fmt arg-list)
     (lib:fix
      (:lambda (loop)
@@ -115,7 +115,7 @@
          (prelude:get-output-stream-string dest)
          ())))
 
-(lib:intern :prelude "format"
+(lib:intern prelude "format"
    (:lambda (stream format-string arg-list)
       (:if (prelude:stringp format-string)
            (:if (prelude:listp arg-list)

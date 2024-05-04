@@ -4,12 +4,12 @@
 ;;;
 ;;; streams
 ;;;
-(lib:intern :prelude "streamp" (:lambda (t) (lib:eq :stream (lib:type-of t))))
+(lib:intern prelude "streamp" (:lambda (t) (lib:eq :stream (lib:type-of t))))
 
 ;;;
 ;;; utilities
 ;;;
-(lib:intern :prelude "%write-stream-designator"
+(lib:intern prelude "%write-stream-designator"
   (:lambda (designator)
     (:if (prelude:null designator)
          lib:std-out
@@ -19,7 +19,7 @@
                           'prelude:%write-stream-designator
                           "not a stream designator")))))
 
-(lib:intern :prelude "%read-stream-designator"
+(lib:intern prelude "%read-stream-designator"
   (:lambda (designator)
     (:if (prelude:null designator)
          lib:std-in
@@ -34,7 +34,7 @@
 ;;;
 ;;; constructors
 ;;;
-(lib:intern :prelude "make-string-stream"
+(lib:intern prelude "make-string-stream"
    (:lambda (dir init)
       (:if (prelude:keywordp dir)
            (:if (prelude:stringp init)
@@ -48,7 +48,7 @@
                 (prelude:raise dir 'prelude:make-string-stream "not a direction keyword"))
            (prelude:raise init 'prelude:make-string-stream "not a string initializer"))))
 
-(lib:intern :prelude "open"
+(lib:intern prelude "open"
   (:lambda (dir path)
      (:if (prelude:stringp path)
           (:if (prelude:keywordp dir)
@@ -60,13 +60,13 @@
                (prelude:raise path 'prelude:open "not a path string"))
           (prelude:raise dir 'prelude:open "not a direction keyword"))))
 
-(lib:intern :prelude "close"
+(lib:intern prelude "close"
    (:lambda (stream)
       (:if (prelude:streamp stream)
            (lib:close stream)
            (prelude:raise stream 'prelude:close "not a stream"))))
 
-(lib:intern :prelude "with-open-stream"
+(lib:intern prelude "with-open-stream"
    (:lambda (type dir specifier fn)
      (:if (prelude:functionp fn)
           (:if (prelude:stringp specifier)
@@ -87,27 +87,27 @@
 ;;;
 ;;; chars, bytes, and unread
 ;;;
-(lib:intern :prelude "write-char"
+(lib:intern prelude "write-char"
    (:lambda (ch designator)
      (lib:wr-char ch (prelude:%write-stream-designator designator))))
 
-(lib:intern :prelude "write-byte"
+(lib:intern prelude "write-byte"
    (:lambda (byte designator)
      (lib:wr-byte byte (prelude:%write-stream-designator designator))))
 
-(lib:intern :prelude "read-char"
+(lib:intern prelude "read-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
        (lib:rd-char stream error-eofp eof-value))
      (prelude:%read-stream-designator designator))))
 
-(lib:intern :prelude "read-byte"
+(lib:intern prelude "read-byte"
    (:lambda (designator error-eofp eof-value)
      ((:lambda (stream)
         (lib:rd-byte stream error-eofp eof-value))
       (prelude:%read-stream-designator designator))))
 
-(lib:intern :prelude "peek-char"
+(lib:intern prelude "peek-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
        (lib:un-char
@@ -115,7 +115,7 @@
         stream))
      (prelude:%read-stream-designator designator))))
 
-(lib:intern :prelude "unread-char"
+(lib:intern prelude "unread-char"
    (:lambda (ch designator)
      (:if (prelude:charp ch)
           (lib:un-char ch (prelude:%write-stream-designator designator))
@@ -124,7 +124,7 @@
 ;;;
 ;;; read/read-line/write
 ;;;
-(lib:intern :prelude "read"
+(lib:intern prelude "read"
    (:lambda (designator eof-error eof-value)
      ((:lambda (stream)
         ((:lambda (form)
@@ -138,7 +138,7 @@
          (prelude:%read stream)))
       (prelude:%read-stream-designator designator))))
 
-(lib:intern :prelude "read-line"
+(lib:intern prelude "read-line"
    (:lambda (stream eof-error-p eof-value)
      ((:lambda (line)
         ((:lambda (value)
@@ -159,7 +159,7 @@
          ())))
       (lib:open :string :output ""))))
 
-(lib:intern :prelude "write"
+(lib:intern prelude "write"
    (:lambda (object escape designator)
       ((:lambda (stream)
           (:if (prelude:%andf (prelude:vectorp object) (prelude:%prelude-type-p object))
