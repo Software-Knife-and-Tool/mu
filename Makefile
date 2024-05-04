@@ -39,7 +39,7 @@ help:
 	@echo "    footprint/commit - condensed footprint report"
 
 tags:
-	@etags `find src/libenv -name '*.rs' -print`
+	@etags `find src/librt -name '*.rs' -print`
 
 emacs:
 	@echo '((nil . ((compile-command . "make -C ~/projects/mu release"))))' > .dir-locals.el

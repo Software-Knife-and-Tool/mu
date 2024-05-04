@@ -17,7 +17,7 @@ use {
             function::Function,
             indirect_vector::{TypedVector, VecType},
             namespace::Namespace,
-            streambuilder::StreamBuilder,
+            stream::StreamBuilder,
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
         },
