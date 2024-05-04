@@ -1,1 +1,1 @@
-(lib:sv-ref #(:t 1) 0)
+(lib:vector-ref #(:t 1) 0)

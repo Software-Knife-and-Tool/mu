@@ -233,17 +233,10 @@ pub trait Core {
 impl Core for Namespace {
     fn write(env: &Env, ns: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         if escape {
-            match env.write_string("#<:ns \"", stream) {
-                Ok(_) => (),
-                Err(e) => return Err(e),
-            }
-
-            match env.write_string(&Namespace::ns_name(env, ns).unwrap(), stream) {
-                Ok(_) => (),
-                Err(e) => return Err(e),
-            }
-
-            match env.write_string("\">", stream) {
+            match env.write_string(
+                &format!("#<:ns \"{}\">", Namespace::ns_name(env, ns).unwrap()),
+                stream,
+            ) {
                 Ok(_) => (),
                 Err(e) => return Err(e),
             }
@@ -266,11 +259,11 @@ pub trait CoreFunction {
     fn lib_find(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns_map(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_untern(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_unintern(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Namespace {
-    fn lib_untern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_unintern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
         let name = fp.argv[1];
 

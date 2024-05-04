@@ -23,7 +23,7 @@
                loop
                (prelude:with-exception
                 (:lambda (exception)
-                     (prelude:%exceptf lib:err-out "load exception: ~A~%" () exception))
+                     (prelude:%exceptf lib:error-output "load exception: ~A~%" () exception))
                 (:lambda ()
                    ((:lambda (form)
                       (:if (prelude:eof ifs)

@@ -1,10 +1,10 @@
 (lib:boundp 'lib:foo)	:nil
-(lib:boundp 'lib:std-in)	lib:std-in
-(lib:symbol-name 'lib:std-in)	"std-in"
-(lib:symbol-ns 'lib:std-in)	#<:ns "lib">
+(lib:boundp 'lib:standard-input)	lib:standard-input
+(lib:symbol-name 'lib:standard-input)	"standard-input"
+(lib:symbol-ns 'lib:standard-input)	#<:ns "lib">
 (lib:symbol-ns 'std-in)	#<:ns "">
 (lib:symbol-ns :std-in)	#<:ns "keyword">
 (lib:symbol-ns ())	#<:ns "">
 (lib:symbol-ns :nil)	#<:ns "">
-(lib:symbol-value 'lib:std-in)	#<stream: id: 0 type: std-in dir: :input state: open>
+(lib:symbol-value 'lib:standard-input)	#<stream: 0 :standard-input :input :open>
 (lib:make-symbol "abcde")	abcde

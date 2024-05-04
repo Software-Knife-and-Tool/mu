@@ -76,7 +76,7 @@
   (elf64-write :u64 0 out))  ;;; 118 sh_entsize
 
 (defun elf64-read-header (elf64)
-  (lib:unwind
+  (lib:unwind-protect
       (lambda (ex)
         (format t "error: exception while reading header~%")
         (print-except ex "read-header")

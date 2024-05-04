@@ -43,7 +43,7 @@
 (lib:intern prelude "make-keyword"
    (:lambda (name)
       (:if (prelude:stringp name)
-           (:if (lib:fx-lt (lib:sv-len name) 8)
+           (:if (lib:fx-lt (lib:vector-len name) 8)
                 (lib:intern (lib:find-ns "keyword") name ())
                 (prelude:raise name 'prelude:make-keyword "not a legal name"))
            (prelude:raise name 'prelude:make-keyword "not a legal name"))))

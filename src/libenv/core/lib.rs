@@ -46,7 +46,7 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.54";
+    pub const VERSION: &'static str = "0.1.55";
 
     pub fn new() -> Self {
         Lib {
@@ -127,9 +127,9 @@ impl Lib {
         )
         .unwrap();
 
-        Namespace::intern(env, env.lib_ns, "std-in".to_string(), LIB.stdin()).unwrap();
-        Namespace::intern(env, env.lib_ns, "std-out".to_string(), LIB.stdout()).unwrap();
-        Namespace::intern(env, env.lib_ns, "err-out".to_string(), LIB.errout()).unwrap();
+        Namespace::intern(env, env.lib_ns, "standard-input".to_string(), LIB.stdin()).unwrap();
+        Namespace::intern(env, env.lib_ns, "standard-output".to_string(), LIB.stdout()).unwrap();
+        Namespace::intern(env, env.lib_ns, "error-output".to_string(), LIB.errout()).unwrap();
 
         for (name, nreqs, fn_) in &*LIB_SYMBOLS {
             let vec = vec![

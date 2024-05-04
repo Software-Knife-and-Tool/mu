@@ -9,12 +9,12 @@
 (lib:type-of prelude:unread-char)	:func
 (lib:type-of prelude:write)	:func
 (lib:type-of prelude:write-byte)	:func
-(lib:write 1 () lib:std-out)	11
-(lib:write (lib:fx-add 1 2) () lib:std-out)	33
-(lib:write (prelude:string= "" "") () lib:std-out)	:t:t
-(lib:write (prelude:string= "" "1") () lib:std-out)	:nil:nil
-(lib:write (prelude:string= "1" "1") () lib:std-out)	:t:t
-(lib:write (prelude:string= "123" "1") () lib:std-out)	:nil:nil
-(lib:write (prelude:string= "" "ci") () lib:std-out)	:nil:nil
-(lib:write (prelude:string= "ci" "") () lib:std-out)	:nil:nil
-(lib:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () lib:std-out)	f#\f
+(lib:write 1 () lib:standard-output)	11
+(lib:write (lib:fx-add 1 2) () lib:standard-output)	33
+(lib:write (prelude:string= "" "") () lib:standard-output)	:t:t
+(lib:write (prelude:string= "" "1") () lib:standard-output)	:nil:nil
+(lib:write (prelude:string= "1" "1") () lib:standard-output)	:t:t
+(lib:write (prelude:string= "123" "1") () lib:standard-output)	:nil:nil
+(lib:write (prelude:string= "" "ci") () lib:standard-output)	:nil:nil
+(lib:write (prelude:string= "ci" "") () lib:standard-output)	:nil:nil
+(lib:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () lib:standard-output)	f#\f

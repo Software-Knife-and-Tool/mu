@@ -156,7 +156,8 @@ impl Compile {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
                 let lex_ref = vec![
-                    Namespace::intern(env, env.lib_ns, "fr-ref".to_string(), Tag::nil()).unwrap(),
+                    Namespace::intern(env, env.lib_ns, "frame-ref".to_string(), Tag::nil())
+                        .unwrap(),
                     Tag::from(tag.as_u64() as i64),
                     Tag::from(nth as i64),
                 ];

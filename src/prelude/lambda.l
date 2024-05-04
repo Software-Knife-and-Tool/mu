@@ -121,7 +121,7 @@
             ((:lambda (offset)
                (:if offset
                     (lib:compile
-                     `(lib:fr-ref
+                     `(lib:frame-ref
                        ,(lib:cdr (prelude:%type-ref :func frame))
                        ,offset))
                     ()))

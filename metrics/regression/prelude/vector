@@ -4,5 +4,5 @@
 (prelude:vector-length (prelude:make-vector '(1 2 3)))
 (prelude:vector-ref (prelude:make-vector '(1 2 3)) 1)
 (prelude:vectorp (prelude:make-vector '(1 2 3)))
-(prelude:vectorp (lib:vector :t '(1 2 3)))
+(prelude:vectorp (lib:make-vector :t '(1 2 3)))
 (prelude:vector-ref (prelude:slice (prelude:make-vector '(1 2 3)) 1 2) 0)

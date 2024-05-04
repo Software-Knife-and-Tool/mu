@@ -20,7 +20,7 @@
                loop
                (prelude:with-exception
                 (:lambda (ex)
-                   (prelude:%exceptf lib:err-out "compile exception: ~A on ~A by ~S ~A~%" () ex)
+                   (prelude:%exceptf lib:error-output "compile exception: ~A on ~A by ~S ~A~%" () ex)
                    loop)
                 (:lambda ()
                    ((:lambda (form)

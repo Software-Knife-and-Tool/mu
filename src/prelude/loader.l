@@ -27,7 +27,7 @@
                                 prelude:%eof%
                                 (prelude:with-exception
                                     (:lambda (except)
-                                      (prelude:%exceptf lib:err-out "loader exception: ~A on ~A by ~S, ~A~%" () except))
+                                      (prelude:%exceptf lib:error-output "loader exception: ~A on ~A by ~S, ~A~%" () except))
                                     (:lambda ()
                                       ((:lambda (form)
                                           (:if (lib:eq prelude:%eof% form)

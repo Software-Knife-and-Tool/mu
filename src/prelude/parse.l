@@ -12,7 +12,7 @@
   (:lambda (digits base)
     (:if (prelude:stringp digits)
          (:if (prelude:fixnump base)
-              (:if (prelude:zerop (lib:sv-len digits))
+              (:if (prelude:zerop (lib:vector-len digits))
                    ()
                    ((:lambda (sign)
                        ((:lambda (integer)
@@ -27,7 +27,7 @@
                              (:if (prelude:null loop)
                                   ()
                                   ((:lambda (index acc)
-                                      (:if (lib:fx-lt (lib:fx-sub (lib:sv-len digits) 1) index)
+                                      (:if (lib:fx-lt (lib:fx-sub (lib:vector-len digits) 1) index)
                                            loop
                                            ((:lambda (n)
                                                (:if (prelude:null n)

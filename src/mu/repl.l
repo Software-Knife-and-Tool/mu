@@ -10,7 +10,7 @@
      (format t ":h for commands~%")
      (format t "inspecting ~A~%" object)
      ((lambda (loop)
-        (unwind
+        (unwind-protect
           (lambda (ex)
             (print-except ex "inspect")
             (break ex))
@@ -52,7 +52,7 @@
 (defun repl (ns)
   (errorp-unless namespacep ns "repl: not a namespace")
   (flet ((repl (repl)
-          (unwind
+          (unwind-protect
               (lambda (ex)  ;; catch exception and break
                 (print-except ex "lib:repl")
                 (break ex)

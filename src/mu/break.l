@@ -11,7 +11,7 @@
 #|
 (lib:intern lib::ns :extern "make-exception"
   (:lambda (obj condition source)
-    (lib:struct :except
+    (lib:make-struct :except
       (lib:cons obj
         (lib:cons condition
           (lib:cons source
@@ -23,9 +23,9 @@
        (lib:format stream 
                     ";;; exception raised on ~A, condition ~A by ~A~%"
                     (lib::list-3 obj source condition)))
-     (lib:sv-ref (lib:st-vec exception) 0)
-     (lib:sv-ref (lib:st-vec exception) 1)
-     (lib:sv-ref (lib:st-vec exception) 2))))
+     (lib:vector-ref (lib:struct-vec exception) 0)
+     (lib:vector-ref (lib:struct-vec exception) 1)
+     (lib:vector-ref (lib:struct-vec exception) 2))))
      
 (lib:intern lib::ns :intern "print-frames"
   (:lambda (frames)
@@ -36,19 +36,19 @@
 
 (lib:intern lib::ns :intern "eprinc"
   (:lambda (obj)
-    (lib:write obj () lib:err-out)))           
+    (lib:write obj () lib:error-output)))           
 
 (lib:intern lib::ns :intern "eprint"
   (:lambda (obj)
-    (lib:write obj :t lib:err-out)))           
+    (lib:write obj :t lib:error-output)))           
 
 (lib:intern lib::ns :intern "princ"
   (:lambda (obj)
-    (lib:write obj () lib:std-out)))           
+    (lib:write obj () lib:standard-output)))           
 
 (lib:intern lib::ns :intern "print"
   (:lambda (obj)
-    (lib:write obj :t lib:std-out)))           
+    (lib:write obj :t lib:standard-output)))           
 
 (lib:intern lib::ns :extern "raise"
    (:lambda (obj msg)
@@ -56,7 +56,7 @@
      (lib::eprinc msg)
      (lib::eprinc " ")
      (lib::eprint obj)
-     (lib:terpri lib:err-out)
+     (lib:terpri lib:error-output)
      (lib:raise :error obj)))
 
 (lib:intern lib::ns :extern "raise-if"
@@ -67,7 +67,7 @@
              (lib::eprinc msg)
              (lib::eprinc " ")
              (lib::eprint obj)
-             (lib:terpri lib:err-out)
+             (lib:terpri lib:error-output)
              (lib:raise :error obj)))
           obj)))
 
@@ -79,7 +79,7 @@
              (lib::eprinc msg)
              (lib::eprinc " ")
              (lib::eprint obj)
-             (lib:terpri lib:err-out)
+             (lib:terpri lib:error-output)
              (lib:raise :error obj)))
           obj)))
 
@@ -92,7 +92,7 @@
              (lib::eprinc msg)
              (lib::eprinc " ")
              (lib::eprint obj)
-             (lib:terpri lib:err-out)
+             (lib:terpri lib:error-output)
              (lib:raise :error obj))))))
 
 (lib:intern lib::ns :extern "warn"
@@ -101,7 +101,7 @@
      (lib::eprinc msg)
      (lib::eprinc " ")
      (lib::eprint obj)
-     (lib:terpri lib:err-out)
+     (lib:terpri lib:error-output)
      obj))
 
 ;;;

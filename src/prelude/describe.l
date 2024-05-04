@@ -11,9 +11,9 @@
             "function: (~A bytes) :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
             `(,(lib:heap-size fn)
               ,(prelude:type-of fn)
-              ,(lib:sv-ref view 2)
-              ,(lib:sv-ref view 0)
-              ,(lib:sv-ref view 1))))
+              ,(lib:vector-ref view 2)
+              ,(lib:vector-ref view 0)
+              ,(lib:vector-ref view 1))))
        (lib:view fn))))
 
 (lib:intern prelude "%describe-prelude-type"
@@ -22,8 +22,8 @@
        "prelude-type: (~A bytes) :<type> ~A~%    type:  ~A~%    props: ~A~%"
        `(,(lib:heap-size value)
          ,(prelude:type-of value)
-         ,(lib:sv-ref (lib:st-vec value) 0)
-         ,(lib:sv-ref (lib:st-vec value) 0)))))
+         ,(lib:struct-ref (lib:st-vec value) 0)
+         ,(lib:struct-ref (lib:st-vec value) 0)))))
 
 (lib:intern prelude "%describe-struct"
    (:lambda (struct stream)
@@ -49,17 +49,17 @@
                          (prelude:format stream
                           "symbol: (~A bytes) :symbol symbol~%    ns:    ~A~%    name:  ~A~%    value: ~A~%"
                           `(,(lib:heap-size symbol)
-                            ,(lib:sv-ref view 0)
-                            ,(lib:sv-ref view 1)
-                            ,(lib:sv-ref view 2))))
+                            ,(lib:struct-ref view 0)
+                            ,(lib:struct-ref view 1)
+                            ,(lib:struct-ref view 2))))
                       (lib:view symbol))
                      ((:lambda (view)
                          (prelude:format stream
                           "symbol: (~A bytes) :symbol symbol~%    ns:      ~A~%    name:    ~A~%    unbound: :t~%"
                           `(,(lib:heap-size symbol)
-                            ,(lib:sv-ref view 0)
-                            ,(lib:sv-ref view 1)
-                            ,(lib:sv-ref view 2))))
+                            ,(lib:struct-ref view 0)
+                            ,(lib:struct-ref view 1)
+                            ,(lib:struct-ref view 2))))
                       (lib:view symbol)))))))
 
 (lib:intern prelude "%describe-fixnum"
@@ -82,13 +82,13 @@
    (:lambda (str stream)
       (prelude:format stream
        "string: (~A bytes) :vector string~%    format: unsigned 8b character vector~%    length: ~A~%    value:  ~A~%"
-       `(,(lib:heap-size str) ,(lib:sv-len str) ,str))))
+       `(,(lib:heap-size str) ,(lib:struct-len str) ,str))))
 
 (lib:intern prelude "%describe-vector"
    (:lambda (vec stream)
       (prelude:format stream
        "vector: (~A bytes) :vector ~A~%    format: ~A~%    length: ~A~%    elements:  ~A~%"
-       `(,(lib:heap-size vec) ,(prelude:type-of vec) ,(lib:sv-type vec) ,(lib:sv-type vec) ,vec))))
+       `(,(lib:heap-size vec) ,(prelude:type-of vec) ,(lib:struct-type vec) ,(lib:struct-type vec) ,vec))))
 
 (lib:intern prelude "%describe-cons"
    (:lambda (cons stream)

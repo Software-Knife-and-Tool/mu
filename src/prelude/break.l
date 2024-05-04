@@ -58,7 +58,7 @@
                                (lib:exit 0)
                                (:if (lib:eq form :e)
                                     ((:lambda ()
-                                       (prelude:%exceptf lib:std-out "exception: ~A on ~A by ~S, ~A~%" :t except)
+                                       (prelude:%exceptf lib:standard-output "exception: ~A on ~A by ~S, ~A~%" :t except)
                                        (prelude:null loop)))
                                     (:if (lib:eq form :r)
                                          loop
@@ -67,6 +67,6 @@
                                             (prelude:null loop))))))))))
          ((:lambda ()
             (prelude:format :t "prelude:debug> " ())
-            (lib:flush lib:std-out)
+            (lib:flush lib:standard-output)
             (prelude:read :t () prelude:%eof%)))))
      ())))

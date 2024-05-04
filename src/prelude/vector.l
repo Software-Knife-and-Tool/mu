@@ -29,7 +29,7 @@
 (lib:intern prelude "make-vector"
    (:lambda (list)
      (:if (prelude:listp list)
-          (lib:vector (prelude:%specialized-vector-type list) list)
+          (lib:make-vector (prelude:%specialized-vector-type list) list)
           (prelude:raise list 'prelude:make-vector "not a list"))))
 
 (lib:intern prelude "slice"
@@ -52,7 +52,7 @@
           (:if (prelude:bit-vector-p vector)
                (lib:car (prelude:%vector-prop :bitvec vector))
                (:if (prelude:typep vector :vector)
-                    (lib:sv-len vector)
+                    (lib:vector-len vector)
                     (lib:cdr (prelude:%vector-prop :disp vector))))
           (prelude:raise vector 'prelude:vector-length "not a vector"))))
 
@@ -62,8 +62,8 @@
           (:if (prelude:bit-vector-p vector)
                'bit
                (:if (prelude:typep vector :vector)
-                    (lib:sv-type vector)
-                    (lib:sv-type (prelude:%vector-prop :base vector))))
+                    (lib:vector-type vector)
+                    (lib:vector-type (prelude:%vector-prop :base vector))))
           (prelude:raise vector 'prelude:vector-type "not a vector"))))
 
 (lib:intern prelude "vector-ref"
@@ -82,9 +82,9 @@
                           (lib:fx-div nth 8)
                           (lib:fx-sub nth (lib:fx-mul 8 (lib:fx-div nth 8))))
                          (:if (prelude:typep vector :vector)
-                              (lib:sv-ref vector nth)
+                              (lib:vector-ref vector nth)
                               ((:lambda (base start)
-                                 (lib:sv-ref base (lib:fx-add start nth)))
+                                 (lib:vector-ref base (lib:fx-add start nth)))
                                (prelude:%vector-prop :base vector)
                                (lib:car (prelude:%vector-prop :disp vector))))))
                     (prelude:raise nth 'prelude:vector-ref "not a fixnum"))
@@ -163,10 +163,10 @@
     (lib:fix
      (:lambda (nth)
        (:if nth
-            (:if (lib:eq nth (lib:sv-len vector))
+            (:if (lib:eq nth (lib:vector-len vector))
                  ()
                  ((:lambda ()
-                     (prelude:apply fn `(,(lib:sv-ref vector nth)))
+                     (prelude:apply fn `(,(lib:vector-ref vector nth)))
                      (lib:fx-add 1 nth))))
             ()))
      0)))

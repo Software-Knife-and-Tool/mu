@@ -7,10 +7,10 @@
 (lib:intern prelude "stringp"
    (:lambda (string)
       (:if (lib:eq (lib:type-of string) :vector)
-           (lib:eq :char (lib:sv-type string))
+           (lib:eq :char (lib:vector-type string))
            (:if (prelude:%prelude-type-p string)
-                (:if (lib:eq "vector" (lib:sv-ref (lib:st-vec string) 0))
-                     (lib:eq :char (lib:sv-type (prelude:%vector-prop :base string)))
+                (:if (lib:eq "vector" (lib:vector-ref (lib:struct-vec string) 0))
+                     (lib:eq :char (lib:vector-type (prelude:%vector-prop :base string)))
                      ())
                 ()))))
 
@@ -22,7 +22,7 @@
   (:lambda (str index)
      (:if (prelude:stringp str)
           (:if (prelude:fixnump index)
-               (lib:sv-ref str index)
+               (lib:vector-ref str index)
                (prelude:raise index 'prelude:schar "not a string"))
           (prelude:raise str 'prelude:schar "not a string"))))
 
@@ -32,13 +32,13 @@
            (:if (prelude:stringp str-2)
                 (:if (lib:eq str-1 str-2)
                      :t
-                     (:if (lib:eq (lib:sv-len str-1) (lib:sv-len str-2))
+                     (:if (lib:eq (lib:vector-len str-1) (lib:vector-len str-2))
                           (lib:fix
                            (:lambda (nth)
                               (:if (prelude:numberp nth)
-                                   (:if (lib:eq nth (lib:sv-len str-1))
+                                   (:if (lib:eq nth (lib:vector-len str-1))
                                         :t
-                                        (:if (lib:eq (lib:sv-ref str-1 nth) (lib:sv-ref str-2 nth))
+                                        (:if (lib:eq (lib:vector-ref str-1 nth) (lib:vector-ref str-2 nth))
                                              (lib:fx-add 1 nth)
                                              ()))
                                    nth))
@@ -76,7 +76,7 @@
   (:lambda (ch str)
     (:if (prelude:charp ch)
          (:if (prelude:stringp str)
-              (:if (prelude:zerop (lib:sv-len str))
+              (:if (prelude:zerop (lib:vector-len str))
                    ()
                    ((:lambda (len)
                        (lib:fix
@@ -84,12 +84,12 @@
                            (:if (prelude:numberp loop)
                                 (:if (lib:fx-lt (lib:fx-sub len 1) loop)
                                      ()
-                                     (:if (lib:eq ch (lib:sv-ref str loop))
+                                     (:if (lib:eq ch (lib:vector-ref str loop))
                                           loop
                                           (lib:fx-add 1 loop)))
                                 loop))
                         0))
-                    (lib:sv-len str)))
+                    (lib:vector-len str)))
               (prelude:raise str 'prelude:string-position "not a string"))
          (prelude:raise ch 'prelude:string-position "not a char"))))
 
@@ -100,7 +100,7 @@
   (:lambda (ch str)
     (:if (prelude:charp ch)
          (:if (prelude:stringp str)
-              (:if (prelude:zerop (lib:sv-len str))
+              (:if (prelude:zerop (lib:vector-len str))
                    ()
                    ((:lambda (len)
                        (lib:fix
@@ -108,12 +108,12 @@
                            (:if (prelude:numberp loop)
                                 (:if (lib:fx-lt (lib:fx-sub len 1) loop)
                                      ()
-                                     (:if (lib:eq ch (lib:sv-ref str loop))
+                                     (:if (lib:eq ch (lib:vector-ref str loop))
                                           ch
                                           (lib:fx-add 1 loop)))
                                 loop))
                         0))
-                    (lib:sv-len str)))
+                    (lib:vector-len str)))
               (prelude:raise str 'prelude:string-find "not a string"))
          (prelude:raise ch 'prelude:string-find "not a char"))))
 
@@ -127,7 +127,7 @@
          (:if (lib:eq :symbol (lib:type-of designator))
               (lib:symbol-name designator)
               (:if (prelude:charp designator)
-                   (lib:vector :char `(,designator))
+                   (lib:make-vector :char `(,designator))
                    (prelude:raise designator 'prelude:string "not a string designator"))))))
 
 (lib:intern prelude "string-append"
@@ -159,11 +159,11 @@
                         (lib:fix
                          (:lambda (nth)
                             (:if (prelude:numberp nth)
-                                 (:if (lib:eq nth (lib:sv-len str))
+                                 (:if (lib:eq nth (lib:vector-len str))
                                       ()
                                       (:if (lib:fx-lt nth (lib:fx-add 1 end))
                                            ((:lambda ()
-                                               (lib:write (lib:sv-ref str nth) () substr)
+                                               (lib:write (lib:vector-ref str nth) () substr)
                                                (lib:fx-add 1 nth)))
                                            ()))
                                  nth))

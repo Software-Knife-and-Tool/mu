@@ -9,22 +9,22 @@
 
 (lib:intern :arm "parse"
    (:lambda (line)
-      (:if (prelude:zerop (lib:sv-len line))
+      (:if (prelude:zerop (lib:vector-len line))
            ()
            ((:lambda ()
                (lib:wr-char #\( arm:parser)
                (lib:fix
                   (:lambda (index)
-                    (:if (lib:fx-lt index (lib:sv-len line))
+                    (:if (lib:fx-lt index (lib:vector-len line))
                          ((:lambda (char)
                             (:if (prelude:%orf (lib:eq #\, char) (lib:eq #\# char))
                                  (prelude:1+ index)
                                  (:if (lib:eq #\/ char)
-                                      (lib:sv-len line)
+                                      (lib:vector-len line)
                                       ((:lambda ()
                                          (lib:wr-char char arm:parser)
                                          (prelude:1+ index))))))
-                          (lib:sv-ref line index))
+                          (lib:vector-ref line index))
                          index))
                   0)
                (lib:wr-char #\) arm:parser))))
@@ -54,9 +54,9 @@
 (lib:intern :arm "as"
    (:lambda (path)
       (:if (prelude:stringp path)
-           (lib:unwind
+           (lib:unwind-protect
                (:lambda (exception)
-                 (prelude:%exceptf lib:err-out () () exception))
+                 (prelude:%exceptf lib:error-output () () exception))
                (:lambda ()
                  (arm:assemble-file (lib:open :file :input path))))
            (prelude:error "arm:as: path ~A is not a string" `(,path)))))

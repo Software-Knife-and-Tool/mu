@@ -108,9 +108,9 @@
 (lib:intern prelude "%funct-apply"
    (:lambda (funct arg-list)
       ((:lambda (env)
-        (prelude:%mapc lib:fr-push env)
+        (prelude:%mapc lib:frame-push env)
         ((:lambda (value)
-           (prelude:%mapc (:lambda (frame) (lib:fr-pop (lib:car frame))) env)
+           (prelude:%mapc (:lambda (frame) (lib:frame-pop (lib:car frame))) env)
            value)
          ((:lambda (mu-fn)
              (lib:apply mu-fn (lib:eval (prelude:%lambda-arg-list funct arg-list))))
@@ -120,9 +120,9 @@
 (lib:intern prelude "%funct-apply-quoted"
    (:lambda (funct arg-list)
       ((:lambda (env)
-        (prelude:%mapc lib:fr-push env)
+        (prelude:%mapc lib:frame-push env)
         ((:lambda (value)
-           (prelude:%mapc (:lambda (frame) (lib:fr-pop (lib:car frame))) env)
+           (prelude:%mapc (:lambda (frame) (lib:frame-pop (lib:car frame))) env)
            value)
          ((:lambda (mu-fn)
              (lib:apply mu-fn arg-list))

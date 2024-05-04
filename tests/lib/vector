@@ -1,23 +1,23 @@
-(lib:sv-len "abcde")	5
-(lib:sv-len "abcdeghi")	8
-(lib:sv-len "abcdegh")	7
-(lib:sv-ref "abcde" 2)	#\c
-(lib:sv-type "abcde")	:char
-(lib:sv-len #(:t 1 a -3))	3
-(lib:sv-ref #(:t 1 a -3) 1)	a
-(lib:sv-type #(:byte 1 2 3))	:byte
-(lib:sv-len #(:byte 1 2 3))	3
-(lib:sv-ref #(:byte 1 2 3) 1)	2
-(lib:sv-type #(:char #\1 #\2 #\3))	:char
-(lib:sv-len #(:char #\1 #\2 #\3))	3
-(lib:sv-ref #(:char #\1 #\2 #\3) 1)	#\2
-(lib:sv-len #(:fixnum 1 2 -3))	3
-(lib:sv-ref #(:fixnum 1 2 -3) 1)	2
-(lib:sv-type #(:fixnum 1 2 -3))	:fixnum
-(lib:sv-len #(:float 1.0 2.0 -3.0))	3
-(lib:sv-ref #(:float 1.0 2.0 -3.0) 1)	2.0000
-(lib:sv-type #(:float 1.0 2.0 -3.0))	:float
-(lib:vector :byte '(1 2 3))	#(:byte 1 2 3)
-(lib:vector :t '(1 2 3))	#(:t 1 2 3)
-(lib:vector :fixnum '(1 2 3))	#(:fixnum 1 2 3)
-(lib:vector :float '(1.0 2.0 -3.0))	#(:float 1.0000 2.0000 -3.0000)
+(lib:vector-len "abcde")	5
+(lib:vector-len "abcdeghi")	8
+(lib:vector-len "abcdegh")	7
+(lib:vector-ref "abcde" 2)	#\c
+(lib:vector-type "abcde")	:char
+(lib:vector-len #(:t 1 a -3))	3
+(lib:vector-ref #(:t 1 a -3) 1)	a
+(lib:vector-type #(:byte 1 2 3))	:byte
+(lib:vector-len #(:byte 1 2 3))	3
+(lib:vector-ref #(:byte 1 2 3) 1)	2
+(lib:vector-type #(:char #\1 #\2 #\3))	:char
+(lib:vector-len #(:char #\1 #\2 #\3))	3
+(lib:vector-ref #(:char #\1 #\2 #\3) 1)	#\2
+(lib:vector-len #(:fixnum 1 2 -3))	3
+(lib:vector-ref #(:fixnum 1 2 -3) 1)	2
+(lib:vector-type #(:fixnum 1 2 -3))	:fixnum
+(lib:vector-len #(:float 1.0 2.0 -3.0))	3
+(lib:vector-ref #(:float 1.0 2.0 -3.0) 1)	2.0000
+(lib:vector-type #(:float 1.0 2.0 -3.0))	:float
+(lib:make-vector :byte '(1 2 3))	#(:byte 1 2 3)
+(lib:make-vector :t '(1 2 3))	#(:t 1 2 3)
+(lib:make-vector :fixnum '(1 2 3))	#(:fixnum 1 2 3)
+(lib:make-vector :float '(1.0 2.0 -3.0))	#(:float 1.0000 2.0000 -3.0000)

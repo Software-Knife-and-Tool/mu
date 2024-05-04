@@ -11,7 +11,7 @@
       (:if (prelude:sequencep seq)
            (:if (prelude:listp seq)
                 (lib:length seq)
-                (lib:sv-len seq))
+                (lib:vector-len seq))
            (prelude:raise seq 'prelude:length "not a sequence"))))
 
 (lib:intern :prelude "elt"
@@ -20,6 +20,6 @@
            (:if (prelude:fixnump nth)
                 (:if (prelude:listp seq)
                      (lib:nth nth seq)
-                     (lib:sv-ref seq nth))
+                     (lib:vector-ref seq nth))
                 (prelude:raise seq 'prelude:elt "not a sequence"))
            (prelude:raise nth 'prelude:elt "not a fixnum"))))
