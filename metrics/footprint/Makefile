@@ -20,9 +20,7 @@ help:
 	@echo "    summary/current - summary metrics"
 
 report:
-	@sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF)
-	@python3 $(BIN)/report.py $(TMPF)
-	@rm -f $(TMPF)
+	@paste *.report
 
 verbose:
 	@sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF)

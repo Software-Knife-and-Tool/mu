@@ -7,11 +7,11 @@
 ;;;
 ;;; predicates
 ;;;
-(lib:intern :prelude "%prelude-function-p"
+(lib:intern prelude "%prelude-function-p"
    (:lambda (fn)
       (lib:eq 'funct (prelude:type-of fn))))
 
-(lib:intern :prelude "functionp"
+(lib:intern prelude "functionp"
    (:lambda (function)
       (:if (lib:eq :func (lib:type-of function))
            :t
@@ -27,7 +27,7 @@
 ;;;
 ;;; function
 ;;;
-(lib:intern :prelude "%make-funct"
+(lib:intern prelude "%make-funct"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
           (prelude:%make-type "funct"
@@ -39,7 +39,7 @@
         (lib:length (prelude:%lambda-prop :bound lambda))
         (:if (prelude:%lambda-prop :rest lambda) 1 0)))))
 
-(lib:intern :prelude "%funct-prop"
+(lib:intern prelude "%funct-prop"
    (:lambda (prop funct)
       (:if (prelude:findl (:lambda (funct-prop) (lib:eq prop funct-prop)) '(:lambda :arity :fn :env))
            ((:lambda (ref)
@@ -53,7 +53,7 @@
 ;;;
 ;;; retruns env
 ;;;
-(lib:intern :prelude "%closure-env"
+(lib:intern prelude "%closure-env"
    (:lambda (lambda body env)
       ((:lambda (bound-symbols)
           (prelude:%foldl
@@ -92,7 +92,7 @@
 ;;; lib:frames => list of [*frame descriptor*] (function . vector)
 ;;; env => list of (symbol . lambda)
 ;;;
-(lib:intern :prelude "%close-env"
+(lib:intern prelude "%close-env"
   (:lambda (closure env)
      ((:lambda (lambda fn env)
          (prelude:%make-funct lambda fn env))
@@ -105,7 +105,7 @@
 ;;;
 ;;; compile closed lambda => function
 ;;;
-(lib:intern :prelude "%compile-function"
+(lib:intern prelude "%compile-function"
    (:lambda (form env)
       ((:lambda (lambda)
           ((:lambda (fn)

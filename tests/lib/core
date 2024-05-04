@@ -16,8 +16,9 @@
 (lib:type-of lib:std-in)	:stream
 (lib:type-of lib:heap-info)	:func
 (lib:type-of "type-of")	:vector
-(lib:view ())	#(:t :nil nil :nil)
-(lib:view :keyword)	#(:t :keyword keyword :keyword)
+(lib:type-of (lib:find-ns "lib"))	:ns
+(lib:view ())	#(:t "" nil :nil)
+(lib:view :keyword)	#(:t "keyword" keyword :keyword)
 (lib:view #\a)	#(:t a)
 (lib:view "abcdefg")	#(:t 7 :char)
 (lib:view "abcdefgh")	#(:t 8 :char)
@@ -26,9 +27,9 @@
 (lib:view 1.0)	#(:t 1.0000)
 (lib:view #(:t 1 2))	#(:t 2 :t)
 (lib:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
-(lib:view 'a)	#(:t :nil a :UNBOUND)
-(lib:view 'lib:eq)	#(:t :lib eq #<:function :lib [req:2, form:eq]>)
-(lib:view lib:eq)	#(:t 2 #(:t :lib eq 0))
+(lib:view 'a)	#(:t "" a :UNBOUND)
+(lib:view 'lib:eq)	#(:t "lib" eq #<:function :lib [req:2, form:eq]>)
+(lib:view lib:eq)	#(:t 2 #(:t lib eq 0))
 (lib:view lib:std-in)	#(:t 0 :input :nil)
 (lib:heap-size ())	8
 (lib:heap-size :keyword)	8
@@ -46,9 +47,10 @@
 (lib:heap-size lib:std-in)	8
 (lib:unwind (:lambda (cond obj) (lib:write cond () lib:std-out)) (:lambda () (lib:fx-div 1 1)))	1
 (lib:repr :t (lib:repr :vector :t))	:t
-(lib:type-of lib:unbound)	:func
+(lib:type-of lib:find)	:func
+(lib:type-of lib:find-ns)	:func
 (lib:type-of lib:intern)	:func
 (lib:type-of lib:make-ns)	:func
-(lib:type-of lib:ns-syms)	:func
-(lib:type-of lib:ns-find)	:func
 (lib:type-of lib:ns-map)	:func
+(lib:type-of lib:symbols)	:func
+(lib:type-of lib:untern)	:func

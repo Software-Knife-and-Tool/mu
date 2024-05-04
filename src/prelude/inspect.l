@@ -4,7 +4,7 @@
 ;;;
 ;;; inspect
 ;;;
-(lib:intern :prelude "%inspect-function"
+(lib:intern prelude "%inspect-function"
    (:lambda (obj)
       ((:lambda (view)
           ((:lambda (tags)
@@ -13,7 +13,7 @@
              ,(lib:cons :body (lib:sv-ref view 1)))))
        (lib:view obj))))
 
-(lib:intern :prelude "%inspect-type"
+(lib:intern prelude "%inspect-type"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)
@@ -22,7 +22,7 @@
             ,(lib:cons :values (lib:sv-ref (lib:st-vec obj) 1)))))
       (lib:view obj))))
 
-(lib:intern :prelude "%inspect-struct"
+(lib:intern prelude "%inspect-struct"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
@@ -31,7 +31,7 @@
             ,(lib:cons :values (lib:st-vec obj)))))
       (lib:view obj))))
 
-(lib:intern :prelude "%inspect-symbol"
+(lib:intern prelude "%inspect-symbol"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
@@ -41,25 +41,25 @@
             ,(lib:cons :value (lib:sv-ref view 2)))))
       (lib:view obj))))
 
-(lib:intern :prelude "%inspect-const"
+(lib:intern prelude "%inspect-const"
    (:lambda (obj)
      (lib:struct :inspect `(,(prelude:type-of obj) ,(lib:heap-size obj) ()))))
 
-(lib:intern :prelude "%inspect-vector"
+(lib:intern prelude "%inspect-vector"
    (:lambda (obj)
      ((:lambda (tags)          
          (lib:struct :inspect `(vector ,(lib:heap-size obj) ,tags)))
       `(,(lib:cons :type (lib:sv-type obj))
         ,(lib:cons :length (lib:sv-len obj))))))
 
-(lib:intern :prelude "%inspect-cons"
+(lib:intern prelude "%inspect-cons"
    (:lambda (obj)
      ((:lambda (tags)          
          (lib:struct :inspect `(cons ,(lib:heap-size obj) ,tags)))
       `(,(lib:cons :car (lib:car obj))
         ,(lib:cons :cdr (lib:cdr obj))))))
 
-(lib:intern :prelude "%inspect"
+(lib:intern prelude "%inspect"
    (:lambda (value)
       (lib:fix
        (:lambda (loop)

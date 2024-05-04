@@ -4,7 +4,7 @@
 ;;;
 ;;; time function
 ;;;
-(lib:intern :prelude "time"
+(lib:intern prelude "time"
    (:lambda (fn args)
       (:if (prelude:functionp fn)
            (:if (prelude:listp args)

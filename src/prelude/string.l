@@ -4,7 +4,7 @@
 ;;;
 ;;; strings
 ;;;
-(lib:intern :prelude "stringp"
+(lib:intern prelude "stringp"
    (:lambda (string)
       (:if (lib:eq (lib:type-of string) :vector)
            (lib:eq :char (lib:sv-type string))
@@ -14,11 +14,11 @@
                      ())
                 ()))))
 
-(lib:intern :prelude "get-output-stream-string"
+(lib:intern prelude "get-output-stream-string"
    (:lambda (stream)
       (lib:get-str stream)))
 
-(lib:intern :prelude "schar"
+(lib:intern prelude "schar"
   (:lambda (str index)
      (:if (prelude:stringp str)
           (:if (prelude:fixnump index)
@@ -26,7 +26,7 @@
                (prelude:raise index 'prelude:schar "not a string"))
           (prelude:raise str 'prelude:schar "not a string"))))
 
-(lib:intern :prelude "string="
+(lib:intern prelude "string="
    (:lambda (str-1 str-2)
       (:if (prelude:stringp str-1)
            (:if (prelude:stringp str-2)
@@ -47,7 +47,7 @@
                 (prelude:raise str-2 'prelude:string= "not a string"))
            (prelude:raise str-1 'prelude:string= "not a string"))))
 
-(lib:intern :prelude "%string-write"
+(lib:intern prelude "%string-write"
    (:lambda (string escape stream)
       (:if (lib:eq :vector (lib:type-of string))
            (lib:write string escape stream)
@@ -72,7 +72,7 @@
 ;;;
 ;;; string-position
 ;;;
-(lib:intern :prelude "string-position"
+(lib:intern prelude "string-position"
   (:lambda (ch str)
     (:if (prelude:charp ch)
          (:if (prelude:stringp str)
@@ -96,7 +96,7 @@
 ;;;
 ;;; string-find
 ;;;
-(lib:intern :prelude "string-find"
+(lib:intern prelude "string-find"
   (:lambda (ch str)
     (:if (prelude:charp ch)
          (:if (prelude:stringp str)
@@ -120,17 +120,17 @@
 ;;;
 ;;; string construction
 ;;;
-(lib:intern :prelude "string"
+(lib:intern prelude "string"
    (:lambda (designator)
       (:if (prelude:stringp designator)
          designator
          (:if (lib:eq :symbol (lib:type-of designator))
-              (lib:sy-name designator)
+              (lib:symbol-name designator)
               (:if (prelude:charp designator)
                    (lib:vector :char `(,designator))
                    (prelude:raise designator 'prelude:string "not a string designator"))))))
 
-(lib:intern :prelude "string-append"
+(lib:intern prelude "string-append"
    (:lambda (list)
       (:if (prelude:listp list)
            ((:lambda (stream)
@@ -150,7 +150,7 @@
             (lib:open :string :output ""))
            (prelude:raise list 'prelude:string "is not a list"))))
 
-(lib:intern :prelude "substr"
+(lib:intern prelude "substr"
   (:lambda (str start end)
      (:if (prelude:stringp str)
           (:if (prelude:fixnump start)
@@ -175,7 +175,7 @@
           (prelude:raise start 'prelude:substr "start is not a fixnum"))))
 
 #|
-(lib:intern :prelude "substr-"
+(lib:intern prelude "substr-"
   (:lambda (str start end)
      (:if (prelude:stringp str)
           (:if (prelude:fixnump start)
@@ -189,7 +189,7 @@
 ;;;
 ;;; read line
 ;;;
-(lib:intern :prelude "read-line"
+(lib:intern prelude "read-line"
    (:lambda (stream eof-error eof-value)
       (:if (prelude:streamp stream)
            ((:lambda (sstream)
@@ -211,8 +211,8 @@
 ;;;
 ;;; read from string
 ;;;
-(lib:intern :prelude "%read-string%" (lib:open :string :bidir ""))
-(lib:intern :prelude "read-string"
+(lib:intern prelude "%read-string%" (lib:open :string :bidir ""))
+(lib:intern prelude "read-string"
    (:lambda (str eof-error eof-value)
       (:if (prelude:stringp str)
            ((:lambda ()
@@ -223,7 +223,7 @@
 ;;;
 ;;; write string
 ;;;
-(lib:intern :prelude "write-string"
+(lib:intern prelude "write-string"
    (:lambda (str designator)
       (:if (prelude:stringp str)
            ((:lambda (stream)
@@ -234,7 +234,7 @@
 ;;;
 ;;; write line
 ;;;
-(lib:intern :prelude "write-line"
+(lib:intern prelude "write-line"
    (:lambda (str designator)
       ((:lambda (stream)          
          (prelude:write-string str stream)

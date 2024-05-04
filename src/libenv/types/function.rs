@@ -14,7 +14,7 @@ use crate::{
     types::{
         fixnum::Fixnum,
         indirect_vector::{TypedVector, VecType},
-        symbol::Symbol,
+        namespace::Namespace,
         vector::{Core as _, Vector},
     },
 };
@@ -133,7 +133,7 @@ impl Core for Function {
                         let name = Vector::ref_(env, form, 1).unwrap();
 
                         (
-                            Vector::as_string(env, Symbol::name(env, ns)).to_string(),
+                            Namespace::ns_name(env, ns).unwrap(),
                             Vector::as_string(env, name).to_string(),
                         )
                     }

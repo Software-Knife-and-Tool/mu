@@ -13,7 +13,6 @@ use {
             gc::Core as _,
             heap::{Core as _, Heap},
             indirect::IndirectTag,
-            namespace::Namespace,
             readtable::{map_char_syntax, SyntaxType},
             types::{Tag, TagType, Type},
         },
@@ -21,6 +20,7 @@ use {
         types::{
             core_stream::{Core as _, Stream},
             indirect_vector::{TypedVector, VecType},
+            namespace::Namespace,
             vector::{Core as _, Vector},
         },
     },
@@ -49,13 +49,21 @@ impl Symbol {
     pub fn new(env: &Env, namespace: Tag, name: &str, value: Tag) -> Self {
         let str = name.as_bytes();
 
-        match str[0] as char {
-            ':' => Symbol::Keyword(Self::keyword(&name[1..])),
-            _ => Symbol::Symbol(SymbolImage {
+        if name.is_empty() {
+            Symbol::Symbol(SymbolImage {
                 namespace,
                 name: Vector::from_string(name).evict(env),
                 value,
-            }),
+            })
+        } else {
+            match str[0] as char {
+                ':' => Symbol::Keyword(Self::keyword(&name[1..])),
+                _ => Symbol::Symbol(SymbolImage {
+                    namespace,
+                    name: Vector::from_string(name).evict(env),
+                    value,
+                }),
+            }
         }
     }
 
@@ -101,6 +109,7 @@ impl Symbol {
                 _ => panic!(),
             },
             Type::Symbol => Self::to_image(env, symbol).name,
+            Type::Namespace => panic!("namespace"),
             _ => panic!(),
         }
     }
@@ -128,7 +137,11 @@ pub trait Core {
 impl Core for Symbol {
     fn view(env: &Env, symbol: Tag) -> Tag {
         let vec = vec![
-            Self::namespace(env, symbol),
+            Vector::from_string(&format!(
+                "\"{}\"",
+                Namespace::ns_name(env, Self::namespace(env, symbol)).unwrap()
+            ))
+            .evict(env),
             Self::name(env, symbol),
             if !Self::is_bound(env, symbol) {
                 Symbol::keyword("UNBOUND")
@@ -242,8 +255,8 @@ impl Core for Symbol {
                     ));
                 }
 
-                match Namespace::is_ns(env, Symbol::keyword(&ns)) {
-                    Some(ns) => Ok(Namespace::intern_symbol(env, ns, name, *UNBOUND)),
+                match Namespace::map_ns(env, &ns) {
+                    Some(ns) => Ok(Namespace::intern(env, ns, name, *UNBOUND).unwrap()),
                     None => Err(Exception::new(
                         Condition::Namespace,
                         "read:sy",
@@ -251,7 +264,7 @@ impl Core for Symbol {
                     )),
                 }
             }
-            None => Ok(Namespace::intern_symbol(env, env.null_ns, token, *UNBOUND)),
+            None => Ok(Namespace::intern(env, env.null_ns, token, *UNBOUND).unwrap()),
         }
     }
 
@@ -277,9 +290,9 @@ impl Core for Symbol {
                     let ns = Self::namespace(env, symbol);
 
                     if !Tag::null_(&ns) && !env.null_ns.eq_(&ns) {
-                        match env.write_stream(Symbol::name(env, ns), false, stream) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
+                        match Namespace::ns_name(env, ns) {
+                            Some(str) => env.write_string(&str, stream).unwrap(),
+                            None => panic!(),
                         }
 
                         match env.write_string(":", stream) {
@@ -305,7 +318,6 @@ pub trait CoreFunction {
     fn lib_value(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_boundp(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_symbol(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_keyword(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Symbol {
@@ -365,23 +377,6 @@ impl CoreFunction for Symbol {
         };
 
         Ok(())
-    }
-
-    fn lib_keyword(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let symbol = fp.argv[0];
-
-        match symbol.type_of() {
-            Type::Keyword => {
-                fp.value = symbol;
-                Ok(())
-            }
-            Type::Vector => {
-                let str = Vector::as_string(env, symbol);
-                fp.value = Self::keyword(&str);
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "keyword", symbol)),
-        }
     }
 
     fn lib_symbol(env: &Env, fp: &mut Frame) -> exception::Result<()> {

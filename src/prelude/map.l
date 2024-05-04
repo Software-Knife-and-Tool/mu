@@ -4,7 +4,7 @@
 ;;;
 ;;; folds and maps
 ;;;
-(lib:intern :prelude "%foldl"
+(lib:intern prelude "%foldl"
   (:lambda (function init list)
      (lib:cdr
       (lib:fix
@@ -18,7 +18,7 @@
            (lib:cdr arg)))
        `(,list ,@init)))))
 
-(lib:intern :prelude "foldl"
+(lib:intern prelude "foldl"
   (:lambda (function init list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
@@ -37,7 +37,7 @@
                (prelude:raise list 'prelude:foldl "not a list"))
           (prelude:raise function 'prelude:foldl "not a function"))))
 
-(lib:intern :prelude "foldr"
+(lib:intern prelude "foldr"
    (:lambda (function init list)
     (:if (prelude:functionp function)
          (:if (prelude:listp list)
@@ -48,7 +48,7 @@
 ;;;
 ;;; maps
 ;;;
-(lib:intern :prelude "%mapc"
+(lib:intern prelude "%mapc"
    (:lambda (function list)
      (lib:fix
       (:lambda (list-cdr)
@@ -60,7 +60,7 @@
       list)
      list))
 
-(lib:intern :prelude "mapc"
+(lib:intern prelude "mapc"
    (:lambda (function list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
@@ -69,7 +69,7 @@
           (prelude:raise function 'prelude:mapc "not a function"))
      list))
 
-(lib:intern :prelude "%mapcar"
+(lib:intern prelude "%mapcar"
    (:lambda (function list)
       (prelude:%foldl
        (:lambda (elt acc)
@@ -77,7 +77,7 @@
        ()
        list)))
 
-(lib:intern :prelude "mapcar"
+(lib:intern prelude "mapcar"
    (:lambda (function list)
      (:if (prelude:functionp function)
           (:if (prelude:listp list)
@@ -85,7 +85,7 @@
                (prelude:raise list 'prelude:mapcar "not a list"))
           (prelude:raise function 'prelude:mapcar "not a function"))))
 
-(lib:intern :prelude "mapl"
+(lib:intern prelude "mapl"
    (:lambda (function list)
       (:if (prelude:functionp function)
            (:if (prelude:listp list)
@@ -101,7 +101,7 @@
            (prelude:raise function 'prelude:mapl "not a function"))
       list))
 
-(lib:intern :prelude "maplist"
+(lib:intern prelude "maplist"
    (:lambda (function list)
       (:if (prelude:functionp function)
            (:if (prelude:listp list)
@@ -120,7 +120,7 @@
                 (prelude:raise list 'prelude:maplist "not a list"))
            (prelude:raise function 'prelude:maplist "not a function"))))
 
-(lib:intern :prelude "%assoc"
+(lib:intern prelude "%assoc"
    (:lambda (item alist)
       (lib:car
        (lib:fix
@@ -137,7 +137,7 @@
                 ()))
         alist))))
 
-(lib:intern :prelude "assoc"
+(lib:intern prelude "assoc"
    (:lambda (item alist)
      (:if (prelude:listp alist)
           (prelude:%assoc item alist)

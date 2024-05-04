@@ -4,19 +4,19 @@
 ;;;
 ;;; fixnums
 ;;;
-(lib:intern :prelude "1+"
+(lib:intern prelude "1+"
    (:lambda (n)
      (:if (prelude:fixnump n)
           (lib:fx-add n 1)
           (prelude:raise n 'prelude:1+ "not a fixnum"))))
 
-(lib:intern :prelude "1-"
+(lib:intern prelude "1-"
    (:lambda (n)
      (:if (prelude:fixnump n)
           (lib:fx-sub n 1)
           (prelude:raise n 'prelude:1- "not a fixnum"))))
 
-(lib:intern :prelude "truncate"
+(lib:intern prelude "truncate"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
@@ -25,7 +25,7 @@
           (prelude:raise n 'prelude:truncate "not a fixnum"))))
 
 ;;; round to negative infinity
-(lib:intern :prelude "floor"
+(lib:intern prelude "floor"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
@@ -34,7 +34,7 @@
           (prelude:raise n 'prelude:floor "not a fixnum"))))
 
 ;;; round to positive infinity
-(lib:intern :prelude "ceiling"
+(lib:intern prelude "ceiling"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
@@ -42,7 +42,7 @@
                (prelude:raise m 'prelude:ceiling "not a fixnum"))
           (prelude:raise n 'prelude:ceiling "not a fixnum"))))
 
-(lib:intern :prelude "mod"
+(lib:intern prelude "mod"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
@@ -50,7 +50,7 @@
                (prelude:raise m 'prelude:mod "not a fixnum"))
           (prelude:raise n 'prelude:mod "not a fixnum"))))
 
-(lib:intern :prelude "rem"
+(lib:intern prelude "rem"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
@@ -59,7 +59,7 @@
           (prelude:raise n 'prelude:rem "not a fixnum"))))
 
 ;;; round to nearest
-(lib:intern :prelude "round"
+(lib:intern prelude "round"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)

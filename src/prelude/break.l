@@ -4,23 +4,23 @@
 ;;;
 ;;; debugging
 ;;;
-(lib:intern :prelude "%debug-map-symbol"
+(lib:intern prelude "%debug-map-symbol"
    (:lambda (value)
       (:if (lib:boundp 'prelude:%debug-symbols%)
            ()
-           (lib:intern :prelude "%debug-symbols%" (lib:ns-syms :list :prelude)))
+           (lib:intern prelude "%debug-symbols%" (lib:ns-syms :list prelude)))
       (lib:fix
        (:lambda (list)
           (:if (prelude:consp list)
                ((:lambda (symbol)
-                   (:if (lib:eq (lib:sy-val symbol) value)
+                   (:if (lib:eq (lib:symbol-value symbol) value)
                         symbol
                         (lib:cdr list)))
                 (lib:car list))
                list))
        prelude:%debug-symbols%)))
 
-(lib:intern :prelude "%format-mapped-symbol"
+(lib:intern prelude "%format-mapped-symbol"
    (:lambda (value)
      ((:lambda (symbol)
         (:if (prelude:null symbol)
@@ -31,7 +31,7 @@
 ;;;
 ;;; break loop
 ;;;
-(lib:intern :prelude "break"
+(lib:intern prelude "break"
    (:lambda (except)
      (prelude:format :t ";;; entering break loop with exception~%" ())
      (prelude:%exceptf :t ";;; ~A on ~A by ~S, ~A~%" () except)

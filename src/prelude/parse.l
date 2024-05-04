@@ -8,7 +8,7 @@
 ;;;
 ;;; number reader
 ;;;
-(lib:intern :prelude "parse-integer"
+(lib:intern prelude "parse-integer"
   (:lambda (digits base)
     (:if (prelude:stringp digits)
          (:if (prelude:fixnump base)
@@ -51,7 +51,7 @@
               (prelude:raise base 'prelude:parse-integer "not a fixnum"))
          (prelude:raise digits 'prelude:parse-integer "not a string"))))
 
-(lib:intern :prelude "parse-float"
+(lib:intern prelude "parse-float"
   (:lambda (str)
     ((:lambda (stream)
        ((:lambda (float)

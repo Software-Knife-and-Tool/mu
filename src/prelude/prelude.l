@@ -4,20 +4,20 @@
 ;;;
 ;;; namespace
 ;;;
-(lib:make-ns :prelude)
+(lib:intern (lib:find-ns "") "prelude" (lib:make-ns "prelude"))
 
 ;;;
 ;;; types
 ;;;
-(lib:intern :prelude "%init-ns"
-   (:lambda ()
+(lib:intern prelude "%init-ns"
+    (:lambda ()
       ;;; function
       (prelude:define-type "funct"
           '((:lambda  . :struct)
             (:arity   . :fixnum)
             (:fn      . :func)
             (:env     . :listp)))
-
+      
       ;;; lambda
       (prelude:define-type "lambda"
           '((:bound  . :listp)
@@ -47,17 +47,17 @@
             (:disp    . :listp)
             (:bitvec  . :listp)))
 
-      (lib:intern :prelude "%char-macro-ns%" (prelude:%gen-anon-ns))
-      (lib:intern :prelude "%macro-ns%" (prelude:%gen-anon-ns))
-      (lib:intern :prelude "%symbol-macro-ns%" (prelude:%gen-anon-ns))))
+      (lib:intern prelude "%char-macro-ns%" (prelude:%gen-anon-ns))
+      (lib:intern prelude "%macro-ns%" (prelude:%gen-anon-ns))
+      (lib:intern prelude "%symbol-macro-ns%" (prelude:%gen-anon-ns))))
 
 ;;;
 ;;; predicates
 ;;;
-(lib:intern :prelude "not" (:lambda (value) (prelude:null value)))
-(lib:intern :prelude "atom" (:lambda (value) (prelude:not (prelude:consp value))))
+(lib:intern prelude "not" (:lambda (value) (prelude:null value)))
+(lib:intern prelude "atom" (:lambda (value) (prelude:not (prelude:consp value))))
 
-(lib:intern :prelude "constantp"
+(lib:intern prelude "constantp"
    (:lambda (value)
       (:if (prelude:%orf (prelude:null value) (prelude:keywordp value))
            :t
@@ -65,13 +65,13 @@
                 (lib:eq :quote (lib:car value))
                 (prelude:not (prelude:symbolp value))))))
 
-(lib:intern :prelude "numberp"
+(lib:intern prelude "numberp"
   (:lambda (n)
      (:if (prelude:fixnump n)
           :t
           (prelude:floatp n))))
 
-(lib:intern :prelude "zerop"
+(lib:intern prelude "zerop"
    (:lambda (n)
      (:if (prelude:numberp n)
           (:if (lib:eq 0 n)
@@ -79,7 +79,7 @@
                (lib:eq 0.0 n))
           (prelude:raise n 'prelude:zerop "not a number"))))
 
-(lib:intern :prelude "minusp"
+(lib:intern prelude "minusp"
    (:lambda (n)
       (:if (prelude:numberp n)
            (:if (prelude:floatp n)
@@ -87,7 +87,7 @@
                 (lib:fx-lt n 0))
            (prelude:raise n 'prelude:minusp "not a number"))))
 
-(lib:intern :prelude "plusp"
+(lib:intern prelude "plusp"
    (:lambda (n)
       (:if (prelude:numberp n)
            (:if (prelude:floatp n)
@@ -98,26 +98,26 @@
 ;;;
 ;;; system classes
 ;;;
-(lib:intern :prelude "charp" (:lambda (t) (lib:eq :char (lib:type-of t))))
-(lib:intern :prelude "fixnump" (:lambda (t) (lib:eq :fixnum (lib:type-of t))))
-(lib:intern :prelude "floatp" (:lambda (t) (lib:eq :float (lib:type-of t))))
-(lib:intern :prelude "structp" (:lambda (t) (lib:eq :struct (lib:type-of t))))
+(lib:intern prelude "charp" (:lambda (t) (lib:eq :char (lib:type-of t))))
+(lib:intern prelude "fixnump" (:lambda (t) (lib:eq :fixnum (lib:type-of t))))
+(lib:intern prelude "floatp" (:lambda (t) (lib:eq :float (lib:type-of t))))
+(lib:intern prelude "structp" (:lambda (t) (lib:eq :struct (lib:type-of t))))
 
 ;;;
 ;;; syntactic sugar
 ;;;
-(lib:intern :prelude "%orf"
+(lib:intern prelude "%orf"
    (:lambda (arg arg1)
      (:if arg arg arg1)))
 
-(lib:intern :prelude "%andf"
+(lib:intern prelude "%andf"
    (:lambda (arg arg1)
      (:if arg arg1 ())))
 
 ;;;
 ;;; apply
 ;;;
-(lib:intern :prelude "apply"
+(lib:intern prelude "apply"
    (:lambda (function arg-list)
      (:if (prelude:functionp function)
           (:if (prelude:%prelude-function-p function)
@@ -128,6 +128,6 @@
 ;;;
 ;;; namespace components
 ;;;
-(lib:intern :prelude "%gen-anon-ns"
+(lib:intern prelude "%gen-anon-ns"
    (:lambda ()
-      (lib:make-ns (prelude:genkeyword #\%))))
+      (lib:make-ns (lib:symbol-name (prelude:genkeyword #\%)))))

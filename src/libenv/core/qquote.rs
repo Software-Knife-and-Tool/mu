@@ -7,7 +7,6 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         lib::Lib,
-        namespace::Namespace,
         reader::Core as _,
         types::{Tag, Type},
     },
@@ -15,6 +14,7 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         core_stream::{Core as _, Stream},
+        namespace::Namespace,
         symbol::{Core as _, Symbol},
     },
 };
@@ -53,8 +53,8 @@ impl QqReader {
     pub fn new(env: &Env, stream: Tag) -> Self {
         Self {
             stream,
-            cons: Namespace::intern_symbol(env, env.lib_ns, "cons".to_string(), Tag::nil()),
-            qappend: Namespace::intern_symbol(env, env.lib_ns, "append".to_string(), Tag::nil()),
+            cons: Namespace::intern(env, env.lib_ns, "cons".to_string(), Tag::nil()).unwrap(),
+            qappend: Namespace::intern(env, env.lib_ns, "append".to_string(), Tag::nil()).unwrap(),
         }
     }
 

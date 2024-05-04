@@ -8,11 +8,11 @@
 ;;;
 ;;; namespace implementation
 ;;;
-(lib:intern :prelude "namespacep"
+(lib:intern prelude "namespacep"
    (:lambda (ns)
       (lib:eq (prelude:type-of ns) 'namespace)))
 
-(lib:intern :prelude "%make-namespc"
+(lib:intern prelude "%make-namespc"
    (:lambda (name uses)
      (prelude:%make-type "namespc"
        `(,(lib:cons :name name)
@@ -22,7 +22,7 @@
           ,(lib:cons :sy-mac (lib:make-ns))
           ,(lib:cons :uses uses)))))
 
-(lib:intern :prelude "%namespace-prop"
+(lib:intern prelude "%namespace-prop"
    (:lambda (prop namespace)
       (:if (prelude:findl
             (:lambda (lambda-prop)
@@ -34,7 +34,7 @@
 ;;;
 ;;; namespace functions
 ;;;
-(lib:intern :prelude "make-namespace"
+(lib:intern prelude "make-namespace"
    (:lambda (name uses)
       (:if (prelude:stringp name)
            (:if (prelude:listp uses)
@@ -42,19 +42,19 @@
                 (prelude:raise uses 'prelude:make-namespace "not a uses list"))
            (prelude:raise name 'prelude:make-namespace "not a name string"))))
 
-(lib:intern :prelude "intern"
+(lib:intern prelude "intern"
    (:lambda (symbol value)          
       (:if (prelude:uninternedp symbol)
            ((:lambda (sym)
                (:if sym
                     (:if (prelude:boundp sym)
                          symbol
-                         (lib:intern (prelude:%reader-get-ns) (lib:sy-name symbol) value))
-                    (lib:intern (prelude:%reader-get-ns) (lib:sy-name symbol) value)))
-            (lib:ns-find (prelude:%reader-get-ns) (lib:sy-name symbol)))
+                         (lib:intern (prelude:%reader-get-ns) (lib:symbol-name symbol) value))
+                    (lib:intern (prelude:%reader-get-ns) (lib:symbol-name symbol) value)))
+            (lib:find (prelude:%reader-get-ns) (lib:symbol-name symbol)))
            ((:lambda (name)
                (lib:intern
                 (prelude:%reader-get-ns)
                 name
                 value))
-            (lib:sy-name symbol)))))
+            (lib:symbol-name symbol)))))

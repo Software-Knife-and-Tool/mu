@@ -30,6 +30,12 @@ pub struct AllocatorImageInfo {
     pub image_type: B4, // tag type
 }
 
+impl Default for AllocatorImageInfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl fmt::Display for AllocatorImageInfo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(

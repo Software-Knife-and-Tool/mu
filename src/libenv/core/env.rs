@@ -11,14 +11,15 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             lib::Lib,
-            namespace::{Namespace, NsRwLockIndex},
             types::{Tag, Type},
         },
         types::{
             cons::{Cons, Core as _},
+            namespace::Namespace,
             symbol::{Core as _, Symbol},
             vector::VecCacheMap,
         },
+        LIB,
     },
     cpu_time::ProcessTime,
     std::collections::HashMap,
@@ -41,10 +42,9 @@ pub struct Env {
     pub dynamic: RwLock<Vec<(u64, usize)>>,
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
-    // map
-    pub ns_map: NsRwLockIndex,
-
     // namespaces
+    pub ns_map: RwLock<Vec<(Tag, String, Namespace)>>,
+
     pub keyword_ns: Tag,
     pub lib_ns: Tag,
     pub null_ns: Tag,
@@ -71,7 +71,7 @@ impl Core for Env {
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
             lib_ns: Tag::nil(),
-            ns_map: RwLock::new(HashMap::new()),
+            ns_map: RwLock::new(Vec::new()),
             null_ns: Tag::nil(),
             start_time: ProcessTime::now(),
             tag: RwLock::new(Tag::nil()),
@@ -79,22 +79,23 @@ impl Core for Env {
         };
 
         // establish namespaces
-        env.keyword_ns = Symbol::keyword("keyword");
-
-        env.null_ns = Tag::nil();
-        match Namespace::add_ns(&env, env.null_ns) {
-            Ok(_) => (),
+        env.null_ns = match Namespace::add_ns(&env, "") {
+            Ok(ns) => ns,
             Err(_) => panic!(),
         };
 
-        env.lib_ns = Symbol::keyword("lib");
-        match Namespace::add_static_ns(&env, env.lib_ns, Lib::symbols()) {
-            Ok(_) => (),
+        env.keyword_ns = match Namespace::add_static_ns(&env, "keyword", &LIB.keywords) {
+            Ok(ns) => ns,
+            Err(_) => panic!(),
+        };
+
+        env.lib_ns = match Namespace::add_static_ns(&env, "lib", &LIB.symbols) {
+            Ok(ns) => ns,
             Err(_) => panic!(),
         };
 
         // initialize lib namespaces
-        Lib::lib_symbols(&env);
+        Lib::namespaces(&env);
 
         env
     }

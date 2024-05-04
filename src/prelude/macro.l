@@ -17,42 +17,39 @@
 ;;;
 ;;; macro environment
 ;;;
-(lib:intern :prelude "%map-macro-symbol-ns"
+(lib:intern prelude "%map-macro-symbol-ns"
    (:lambda (symbol)
-      ((:lambda (ns-name)
-          (lib:ns-find prelude:%macro-ns% ns-name))
-       (lib:sy-name (lib:sy-ns symbol)))))
+      ((:lambda (ns)
+          (lib:find prelude:%macro-ns% (lib:ns-name ns)))
+       (lib:symbol-ns symbol))))
 
-(lib:intern :prelude "%make-macro-ns"
+(lib:intern prelude "%make-macro-ns"
    (:lambda (ns)
-      ((:lambda (macro-ns)
-          (lib:intern prelude:%macro-ns% (lib:sy-name ns) macro-ns)
+       ((:lambda (macro-ns)
+          (lib:intern prelude:%macro-ns% (lib:ns-name ns) macro-ns)
           macro-ns)
        (prelude:%gen-anon-ns))))
 
-(lib:intern :prelude "%defmacro"
+(lib:intern prelude "%defmacro"
    (:lambda (symbol macro-function)
       ((:lambda (macro-ns symbol-ns)
          (:if macro-ns
               (lib:intern macro-ns symbol-ns macro-function)
-              (lib:intern (prelude:%make-macro-ns symbol-ns) (lib:sy-name symbol) macro-function))
+              (lib:intern (prelude:%make-macro-ns symbol-ns) (lib:symbol-name symbol) macro-function))
          symbol)
        (prelude:%map-macro-symbol-ns symbol)
-       (lib:sy-ns symbol))))
+       (lib:symbol-ns symbol))))
 
-(lib:intern :prelude "%find-macro"
-   (:lambda (symbol env)
-      ((:lambda (macro-ns symbol-ns symbol-name)
+(lib:intern prelude "%find-macro"
+    (:lambda (symbol env)
+      ((:lambda (macro-ns symbol-name)
           (:if macro-ns
-               (lib:ns-find (lib:sy-val macro-ns) symbol-name)
+               (lib:find (lib:symbol-value macro-ns) symbol-name)
                ()))
-       (lib:ns-find
-        prelude:%macro-ns%
-        (lib:sy-name (lib:sy-ns symbol)))
-       (lib:sy-name (lib:sy-ns symbol))
-       (lib:sy-name symbol))))
+       (lib:find prelude:%macro-ns% (lib:ns-name (lib:symbol-ns symbol)))
+       (lib:symbol-name symbol))))
 
-(lib:intern :prelude "%compile-macro-call"
+(lib:intern prelude "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
        ((:lambda (macro-function)
           ((:lambda (expanded-form)
@@ -67,7 +64,7 @@
 ;;;
 ;;; macroexpand-1 expands a macro call once.
 ;;;
-(lib:intern :prelude "macroexpand-1"
+(lib:intern prelude "macroexpand-1"
    (:lambda (form env)
      (:if (prelude:consp form)
           ((:lambda (fn-symbol arg-list)
@@ -87,7 +84,7 @@
 ;;;
 ;;; macroexpand: expand a form until it is no longer a macro call
 ;;;
-(lib:intern :prelude "macroexpand"
+(lib:intern prelude "macroexpand"
    (:lambda (form env)
      ((:lambda (expanded)
           (:if (lib:eq form expanded)
@@ -100,12 +97,12 @@
 ;;;
 ;;; acts as a predicate
 ;;;
-(lib:intern :prelude "macro-function"
+(lib:intern prelude "macro-function"
    (:lambda (symbol env)
       (:if (lib:eq :symbol (lib:type-of symbol))
            ((:lambda (macro)
                (:if macro
-                    (lib:sy-val macro)
+                    (lib:symbol-value macro)
                     ()))
             (prelude:%find-macro symbol env))
           ())))

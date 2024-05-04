@@ -23,6 +23,12 @@ pub struct DirectTag {
     pub data: B56,
 }
 
+impl Default for DirectTag {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(BitfieldSpecifier, Copy, Clone, Eq, PartialEq)]
 pub enum DirectType {
     Ext = 0,
@@ -38,6 +44,7 @@ pub enum ExtType {
     Float = 1,
     Cons = 2,
     Stream = 3,
+    Namespace = 4,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -52,6 +59,7 @@ impl DirectTag {
                                       //                    1.17549435E-38 to 3.40282347E+38
     pub const EXT_TYPE_CONS: u8 = 2;
     pub const EXT_TYPE_STREAM: u8 = 3;
+    pub const EXT_TYPE_NAMESPACE: u8 = 4;
 
     pub const DIRECT_STR_MAX: usize = 7;
 

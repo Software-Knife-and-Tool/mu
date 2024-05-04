@@ -15,18 +15,18 @@
 ;;; rest:   rest symbol or nil
 ;;; lexenv: lexical environment, list of lambdas
 ;;;
-(lib:intern :prelude "%lambdap"
+(lib:intern prelude "%lambdap"
    (:lambda (fn)
       (lib:eq (prelude:type-of fn) 'lambda)))
 
-(lib:intern :prelude "%make-lambda"
+(lib:intern prelude "%make-lambda"
    (:lambda (lambda-list rest-sym env)
       (prelude:%make-type "lambda"
          `(,(lib:cons :bound  lambda-list)
            ,(lib:cons :rest   rest-sym)
            ,(lib:cons :lexenv env)))))
 
-(lib:intern :prelude "%lambda-prop"
+(lib:intern prelude "%lambda-prop"
    (:lambda (prop lambda)
       (:if (prelude:findl (:lambda (lambda-prop) (lib:eq prop lambda-prop)) '(:bound :rest :lexenv))
            ((:lambda (ref)
@@ -43,7 +43,7 @@
 ;;;
 ;;; `returns:` lambda descriptor
 ;;;
-(lib:intern :prelude "%compile-lambda-list"
+(lib:intern prelude "%compile-lambda-list"
    (:lambda (lambda env)
       (:if (prelude:findl (:lambda (el) (prelude:null (lib:eq :symbol (lib:type-of el)))) lambda)
            (prelude:raise lambda 'prelude:%compile-lambda-list "list syntax")
@@ -78,7 +78,7 @@
 ;;;
 ;;; `returns:` compiled body/closure
 ;;;
-(lib:intern :prelude "%compile-lambda-body"
+(lib:intern prelude "%compile-lambda-body"
    (:lambda (lambda-desc body env)
       (:if (prelude:null body)
            ()
@@ -112,7 +112,7 @@
 ;;;
 ;;; `returns:` *frame-ref* or *nil*
 ;;;
-(lib:intern :prelude "%frame-ref"
+(lib:intern prelude "%frame-ref"
   (:lambda (symbol env)
     (prelude:%foldl
      (:lambda (frame acc)

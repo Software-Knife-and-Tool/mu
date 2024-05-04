@@ -8,7 +8,7 @@
 ;;;
 ;;; argument lists
 ;;;
-(lib:intern :prelude "%arg-list"
+(lib:intern prelude "%arg-list"
     (:lambda (arg-list)
       (prelude:foldr
        (:lambda (elt acc)
@@ -16,7 +16,7 @@
        ()
        arg-list)))
 
-(lib:intern :prelude "%lambda-arg-list"
+(lib:intern prelude "%lambda-arg-list"
    (:lambda (function arg-list)
       (:if (prelude:%prelude-function-p function)
            ((:lambda (rest nreqs)
@@ -30,7 +30,7 @@
             (prelude:%funct-prop :arity function))
            (prelude:%arg-list arg-list))))
 
-(lib:intern :prelude "%quoted-lambda-arg-list"
+(lib:intern prelude "%quoted-lambda-arg-list"
   (:lambda (fn args)
     (:if (prelude:%prelude-function-p fn)
          (:if (prelude:%funct-prop :rest fn)
@@ -48,7 +48,7 @@
 ;;;
 ;;; compiled argument lists
 ;;;
-(lib:intern :prelude "%compile-arg-list"
+(lib:intern prelude "%compile-arg-list"
    (:lambda (arg-list env)
       (prelude:foldr
        (:lambda (elt acc)
@@ -59,11 +59,11 @@
            (prelude:%compile form env))
         arg-list))))
 
-(lib:intern :prelude "%compile-lambda-arg-list"
+(lib:intern prelude "%compile-lambda-arg-list"
    (:lambda (function arg-list env)
      (prelude:%lambda-arg-list function (prelude:%mapcar (:lambda (elt) (prelude:%compile elt env)) arg-list))))
 
-(lib:intern :prelude "%compile-quoted-lambda-arg-list"
+(lib:intern prelude "%compile-quoted-lambda-arg-list"
    (:lambda (function arg-list env)
      (prelude:%compile-lambda-arg-list function (prelude:%mapcar (:lambda (elt) (prelude:%compile elt env)) arg-list))))
 
@@ -72,7 +72,7 @@
 ;;;
 ;;; compile function applications to mu-appliable forms
 ;;;
-(lib:intern :prelude "%compile-lambda-call"
+(lib:intern prelude "%compile-lambda-call"
    (:lambda (lambda-form arg-list env)
       ((:lambda (compiled-function)
         (:if (prelude:functionp compiled-function)
@@ -82,7 +82,7 @@
              (prelude:raise compiled-function 'prelude:%compile-lambda-call "illegal function call")))
      (prelude:%compile lambda-form env))))
 
-(lib:intern :prelude "%compile-symbol-call"
+(lib:intern prelude "%compile-symbol-call"
    (:lambda (function-symbol arg-list env)
       (:if (prelude:boundp function-symbol)
            ((:lambda (function)
@@ -94,7 +94,7 @@
             (prelude:symbol-value function-symbol))
            `(prelude:apply ,function-symbol ,(prelude:%compile-arg-list arg-list env)))))
 
-(lib:intern :prelude "%compile-funcall"
+(lib:intern prelude "%compile-funcall"
    (:lambda (function-form arg-list env)
       (:if (prelude:consp function-form)
            (prelude:%compile-lambda-call function-form arg-list env)
@@ -105,7 +105,7 @@
 ;;;
 ;;; apply closure to argument list
 ;;;
-(lib:intern :prelude "%funct-apply"
+(lib:intern prelude "%funct-apply"
    (:lambda (funct arg-list)
       ((:lambda (env)
         (prelude:%mapc lib:fr-push env)
@@ -117,7 +117,7 @@
           (prelude:%funct-prop :fn funct))))
         (prelude:%funct-prop :env funct))))
 
-(lib:intern :prelude "%funct-apply-quoted"
+(lib:intern prelude "%funct-apply-quoted"
    (:lambda (funct arg-list)
       ((:lambda (env)
         (prelude:%mapc lib:fr-push env)

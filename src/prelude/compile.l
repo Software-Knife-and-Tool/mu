@@ -14,7 +14,7 @@
 ;;;
 ;;; returns the compiled function
 ;;;
-(lib:intern :prelude "%compile-lambda"
+(lib:intern prelude "%compile-lambda"
    (:lambda (form env)
       (:if (lib:eq (lib:length form) 1)
            (prelude:raise form 'prelude:%compile-lambda "malformed lambda expression")
@@ -42,7 +42,7 @@
 ;;;
 ;;; returns the macro symbol
 ;;;
-(lib:intern :prelude "%compile-defmacro"
+(lib:intern prelude "%compile-defmacro"
    (:lambda (form env)
       ((:lambda (macro-symbol lambda-form)
           (:if (prelude:symbolp macro-symbol)
@@ -57,13 +57,13 @@
 ;;;
 ;;; returns an application of the if form
 ;;;
-(lib:intern :prelude "%make-thunk"
+(lib:intern prelude "%make-thunk"
   (:lambda (form env)
     (prelude:%compile
      `(:lambda () ,form)
      env)))
 
-(lib:intern :prelude "%compile-if"
+(lib:intern prelude "%compile-if"
    (:lambda (form env)
       ((:lambda (length)
           (:if (prelude:%orf (lib:eq length 3) (lib:eq length 4))
@@ -81,7 +81,7 @@
 ;;;
 ;;; compile a quasiquote form
 ;;;
-(lib:intern :prelude "%compile-quasi"
+(lib:intern prelude "%compile-quasi"
    (:lambda (form env)
      (prelude:compile (prelude:%qq-compile (lib:nth 1 form)))))               
    
@@ -93,7 +93,7 @@
 ;;;
 ;;; returns a mu form or funct type (in the case of a define-prelude-lambda)
 ;;;
-(lib:intern :prelude "%compile"
+(lib:intern prelude "%compile"
    (:lambda (form env)
       (:if (prelude:consp form)
            ((:lambda (function-form arg-list)
@@ -102,7 +102,7 @@
                     (:if (lib:eq :symbol (lib:type-of function-form)) ; special form or macro
                          ((:lambda (special)
                              (:if special
-                                  (lib:apply (lib:sy-val special) `(,form ,env))
+                                  (lib:apply (lib:symbol-value special) `(,form ,env))
                                   ((:lambda (macro-function)
                                       (:if macro-function
                                            (prelude:%compile-macro-call function-form arg-list env)
@@ -123,6 +123,6 @@
 ;;; the external compile interface, compiles in
 ;;; the null environment
 ;;;
-(lib:intern :prelude "compile"
+(lib:intern prelude "compile"
    (:lambda (form)
      (prelude:%compile form ())))

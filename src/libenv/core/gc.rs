@@ -8,12 +8,12 @@ use crate::{
         env::Env,
         exception,
         frame::Frame,
-        namespace::Namespace,
         types::{Tag, Type},
     },
     types::{
         cons::{Cons, Core as _},
         function::{Core as _, Function},
+        namespace::Namespace,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
@@ -103,8 +103,8 @@ impl Core for Env {
     fn gc_namespaces(&self) {
         let ns_index_ref = block_on(self.ns_map.read());
 
-        for (_, ns) in ns_index_ref.iter() {
-            let hash_ref = block_on(match ns.1 {
+        for (_, _, ns_cache) in &*ns_index_ref {
+            let hash_ref = block_on(match ns_cache {
                 Namespace::Static(hash) => hash.read(),
                 Namespace::Dynamic(ref hash) => hash.read(),
             });

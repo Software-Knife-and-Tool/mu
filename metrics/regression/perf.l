@@ -5,8 +5,9 @@
 ;;; return the elapsed process time in usec
 ;;; from applying fn to args
 ;;;
-(lib:make-ns :perf)
-(lib:intern :perf "%tdelta"
+(lib:intern (lib:find-ns "") "perf" (lib:make-ns "perf"))
+
+(lib:intern perf "time-delta"
   (:lambda (fn args)
     ((:lambda (start stop)
        (lib:fx-sub stop start))
@@ -19,7 +20,7 @@
 ;;; return an vector of storage consumed
 ;;; by applying fn to args
 ;;;
-(lib:intern :perf "%sdelta"
+(lib:intern perf "storage-delta"
   (:lambda (fn args)
     ((:lambda (start-vec stop-vec)
        (lib:fix

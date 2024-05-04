@@ -4,7 +4,7 @@
 ;;;
 ;;; repl
 ;;;
-(lib:intern :prelude "repl"
+(lib:intern prelude "repl"
    (:lambda ()
      (lib:fix
        (:lambda (loop)

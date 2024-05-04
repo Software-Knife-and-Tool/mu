@@ -21,6 +21,12 @@ pub struct IndirectTag {
     pub image_id: B59,
 }
 
+impl Default for IndirectTag {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 lazy_static! {
     static ref TYPEMAP: Vec<(Tag, Type)> = vec![
         (Symbol::keyword("cons"), Type::Cons),

@@ -1,14 +1,11 @@
+(lib:boundp (lib:intern (lib:find-ns "") "foo" ()))	foo
+(lib:boundp (lib:untern (lib:find-ns "lib") "foo"))	:nil
 (lib:eq :func (lib:type-of lib:make-ns))	:t
-(lib:boundp (lib:intern () "foo" ()))	foo
-(lib:intern () "foo" "foo")	foo
-(lib:unbound :lib "foo")	lib:foo
-(lib:boundp (lib:unbound :lib "foo"))	:nil
-(lib:make-ns :mu)	:mu
-(lib:ns-find :lib "eq")	lib:eq
-(lib:ns-find :lib "foo")	:nil
-(lib:type-of (lib:ns-syms :list :lib))	:cons
-(lib:type-of (lib:ns-syms :vector :lib))	:vector
-(lib:type-of (lib:ns-syms :list :nil))	:null
-(lib:type-of (lib:ns-syms :vector :nil))	:vector
-(lib:type-of (lib:ns-syms :list ()))	:null
-(lib:type-of (lib:ns-syms :vector ()))	:vector
+(lib:find (lib:find-ns "lib") "eq")	lib:eq
+(lib:find (lib:find-ns "lib") "foo")	:nil
+(lib:intern (lib:find-ns "") "foo" "foo")	foo
+(lib:make-ns "mu")	#<:ns "mu">
+(lib:type-of (lib:symbols (lib:find-ns "")))	:null
+(lib:type-of (lib:symbols (lib:find-ns "keyword")))	:null
+(lib:type-of (lib:symbols (lib:find-ns "lib")))	:cons
+(lib:untern (lib:find-ns "lib") "foo")	lib:foo
