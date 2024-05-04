@@ -8,12 +8,12 @@
    (:lambda (value)
       ((:lambda (type)
           (:if (lib:eq type :struct)
-               (:if (lib:eq :<type> (lib:st-type value))
-                    (lib:untern (lib:find-ns "") (lib:sv-ref (lib:st-vec value) 0))
-                    (lib:st-type value))
+               (:if (lib:eq :<type> (lib:struct-type value))
+                    (lib:unintern (lib:find-ns "") (lib:vector-ref (lib:struct-vec value) 0))
+                    (lib:struct-type value))
                (:if (prelude:stringp value)
                     'string
-                    (lib:untern (lib:find-ns "") (lib:symbol-name type)))))
+                    (lib:unintern (lib:find-ns "") (lib:symbol-name type)))))
        (lib:type-of value))))
 
 ;;;

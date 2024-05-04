@@ -41,7 +41,7 @@
    (:lambda (ch stream)
       ((:lambda (type)
           (:if (prelude:keywordp type)
-               (lib:vector type (prelude:%read-list #\( stream))
+               (lib:make-vector type (prelude:%read-list #\( stream))
                (prelude:raise type 'prelude:%read-sharp-vector "not a type keyword")))
           (prelude:%read stream))))
 
@@ -85,7 +85,7 @@
                  (:if (prelude:consp byte-descriptor)
                       ((:lambda (length byte)
                          (prelude:%make-vector
-                          (lib:vector :byte (prelude:reverse `(,byte ,@loop)))
+                          (lib:make-vector :byte (prelude:reverse `(,byte ,@loop)))
                           ()
                           `(,(lib:fx-add length (lib:fx-mul 8 (lib:length loop))))))
                        (lib:car byte-descriptor)
@@ -250,14 +250,14 @@
               (:if macro-symbol
                    (prelude:symbol-value macro-symbol)
                    ()))
-           (lib:find prelude:%char-macro-ns% (lib:vector :char `(,char))))
+           (lib:find prelude:%char-macro-ns% (lib:make-vector :char `(,char))))
           (prelude:raise char 'prelude:get-macro-character "not a character"))))
 
 (lib:intern prelude "set-macro-character"
    (:lambda (char fn non-terminating)
       (:if (prelude:charp char)
          (:if (prelude:functionp fn)
-              (lib:intern prelude:%char-macro-ns% (lib:vector :char `(char)) `(,fn ,@non-terminating))
+              (lib:intern prelude:%char-macro-ns% (lib:make-vector :char `(char)) `(,fn ,@non-terminating))
               (prelude:raise fn 'prelude:set-macro-character "not a function"))
          (prelude:raise char 'prelude:set-macro-character "not a character"))
       :t))

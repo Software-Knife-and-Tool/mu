@@ -12,7 +12,7 @@
 (lib:intern prelude "%write-stream-designator"
   (:lambda (designator)
     (:if (prelude:null designator)
-         lib:std-out
+         lib:standard-output
          (:if (prelude:streamp designator)
               designator
               (prelude:raise designator
@@ -22,9 +22,9 @@
 (lib:intern prelude "%read-stream-designator"
   (:lambda (designator)
     (:if (prelude:null designator)
-         lib:std-in
+         lib:standard-input
          (:if (lib:eq :t designator)
-              lib:std-in
+              lib:standard-input
               (:if (prelude:streamp designator)
                    designator
                    (prelude:raise designator
@@ -75,7 +75,7 @@
                     (:if (prelude:%orf (lib:eq :input dir)
                                     (lib:eq :output dir))
                          ((:lambda (stream)
-                             (lib:unwind
+                             (lib:unwind-protect
                               (:lambda (ex) (lib:close stream) ex)
                               (:lambda () (prelude:apply fn `(,stream)))))
                           (lib:open type dir specifier))

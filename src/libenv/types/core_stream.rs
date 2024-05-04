@@ -148,14 +148,14 @@ impl Core for Stream {
 
                         env.write_string(
                             format!(
-                                "#<stream: id: {} type: {} dir: {} state: {}>",
+                                "#<stream: {} {} {} {}>",
                                 stream.index,
                                 match stream.system {
                                     SystemStream::Reader(_) | SystemStream::Writer(_) => ":file",
                                     SystemStream::String(_) => ":string",
-                                    SystemStream::StdInput => "std-in",
-                                    SystemStream::StdOutput => "std-out",
-                                    SystemStream::StdError => "err-out",
+                                    SystemStream::StdInput => ":standard-input",
+                                    SystemStream::StdOutput => ":standard-output",
+                                    SystemStream::StdError => ":error-output",
                                 },
                                 if Symbol::keyword("input").eq_(&stream.direction) {
                                     ":input"
@@ -167,9 +167,9 @@ impl Core for Stream {
                                     panic!()
                                 },
                                 if Self::is_open(env, tag) {
-                                    "open"
+                                    ":open"
                                 } else {
-                                    "close"
+                                    ":close"
                                 },
                             )
                             .as_str(),

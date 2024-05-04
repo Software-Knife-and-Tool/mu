@@ -40,8 +40,8 @@
                                (lib:fx-add 2 colon)
                                (lib:fx-add 1 colon))
                           (:if (lib:eq #\: (prelude:schar name (lib:fx-add 1 colon)))
-                               (lib:fx-add colon (lib:fx-sub (lib:sv-len name) colon))
-                               (lib:fx-add colon (lib:fx-sub (lib:sv-len name) (lib:fx-add 1 colon)))))))
+                               (lib:fx-add colon (lib:fx-sub (lib:vector-len name) colon))
+                               (lib:fx-add colon (lib:fx-sub (lib:vector-len name) (lib:fx-add 1 colon)))))))
      (prelude:string-position #\: name))))
 
 (lib:intern prelude "%read-symbol"
@@ -50,8 +50,8 @@
           (prelude:make-keyword (prelude:%read-symbol-name symbol))
           ((:lambda (ns name)
              (:if (prelude:null ns)
-                  (lib:untern (lib:find-ns "") name)
-                  (lib:untern ns name)))
+                  (lib:unintern (lib:find-ns "") name)
+                  (lib:unintern ns name)))
            (prelude:%read-symbol-ns symbol)
            (prelude:%read-symbol-name symbol)))))
 

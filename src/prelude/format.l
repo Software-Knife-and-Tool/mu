@@ -57,7 +57,7 @@
                           ((:lambda ()
                               (lib:write (prelude:schar hexstr (lib:fx-sub len 1)) () dest)
                               (lib:fx-sub len 1)))))
-                   (lib:sv-len hexstr)))
+                   (lib:vector-len hexstr)))
                   (lib:get-str str-stream)))
              (lib:open :string :output "")))
             (prelude:raise fx 'prelude:format "argument to ~X not a fixnum")))
@@ -99,7 +99,7 @@
     (lib:fix
      (:lambda (loop)
        ((:lambda (nth argl)
-          (:if (lib:eq nth (lib:sv-len fmt))
+          (:if (lib:eq nth (lib:vector-len fmt))
                loop
                ((:lambda (ch)
                   (:if (lib:eq ch #\~)
@@ -119,7 +119,7 @@
    (:lambda (stream format-string arg-list)
       (:if (prelude:stringp format-string)
            (:if (prelude:listp arg-list)
-                (:if (prelude:zerop (lib:sv-len format-string))
+                (:if (prelude:zerop (lib:vector-len format-string))
                      (:if stream
                           ""
                           ())
@@ -127,7 +127,7 @@
                       (:if (prelude:null stream)
                            (lib:open :string :output "")
                            (:if (lib:eq stream :t)
-                                lib:std-out
+                                lib:standard-output
                                 (:if (prelude:streamp stream)
                                      stream
                                      (prelude:raise stream 'prelude:format "not a stream designator"))))))

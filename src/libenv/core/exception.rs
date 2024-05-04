@@ -157,7 +157,7 @@ impl Core for Exception {
 }
 
 pub trait CoreFunction {
-    fn lib_unwind(env: &Env, fp: &mut Frame) -> Result<()>;
+    fn lib_unwind_protect(env: &Env, fp: &mut Frame) -> Result<()>;
     fn lib_raise(env: &Env, fp: &mut Frame) -> Result<()>;
 }
 
@@ -175,7 +175,7 @@ impl CoreFunction for Exception {
         }
     }
 
-    fn lib_unwind(env: &Env, fp: &mut Frame) -> Result<()> {
+    fn lib_unwind_protect(env: &Env, fp: &mut Frame) -> Result<()> {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 

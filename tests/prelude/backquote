@@ -3,7 +3,7 @@
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`\"abc\"") () ())))	"abc"
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`#\\a") () ())))	#\a
-(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`lib:std-out") () ())))	lib:std-out
+(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`lib:standard-output") () ())))	lib:standard-output
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`1234") () ())))	1234
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(,(lib:cons 'satisfies ()))") () ())))	((satisfies))
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(\"abc\")") () ())))	("abc")
@@ -31,7 +31,7 @@
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,`\"abc\"") () ())))	"abc"
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,`#\\a") () ())))	#\a
-(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,`lib:std-out") () ())))	lib:std-out
+(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,`lib:standard-output") () ())))	lib:standard-output
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,`1234") () ())))	1234
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,`(1234)") () ())))	(1234)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "``1234") () ())))	`1234

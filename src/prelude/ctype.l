@@ -9,7 +9,7 @@
 (lib:intern prelude "%prelude-type-p"
    (:lambda (value)
       (:if (prelude:structp value)
-           (lib:eq :<type> (lib:st-type value))
+           (lib:eq :<type> (lib:struct-type value))
            ())))
 
 ;;;
@@ -23,7 +23,7 @@
           (:if (prelude:listp properties)
                ((:lambda (symbol)
                    (:if (prelude:null symbol)
-                        (lib:intern (lib:find-ns "%types") str (lib:struct :<type> `(,str ,properties)))
+                        (lib:intern (lib:find-ns "%types") str (lib:make-struct :<type> `(,str ,properties)))
                         (prelude:raise symbol 'prelude:define-type "type symbol bound")))
                 (lib:find (lib:find-ns "%types") str))
                (prelude:raise properties 'prelude:define-type "not a property list")))
@@ -67,10 +67,10 @@
                          (lib:cdr property-def)
                          (lib:cdr property-value))
                         ()))
-                (lib:sv-ref (lib:st-vec (lib:symbol-value type-symbol)) 1)))
+                (lib:vector-ref (lib:struct-vec (lib:symbol-value type-symbol)) 1)))
             property-values))
         (lib:find prelude:%types-ns name))
-       (lib:struct :<type> `(,name ,property-values))))
+       (lib:make-struct :<type> `(,name ,property-values))))
 
 ;;;
 ;;; returns () if not found
@@ -79,6 +79,6 @@
    (:lambda (prop-name struct)
       (:if (prelude:%prelude-type-p struct)
            (:if (prelude:keywordp prop-name)
-                (prelude:%assoc prop-name (lib:sv-ref (lib:st-vec struct) 1))
+                (prelude:%assoc prop-name (lib:vector-ref (lib:struct-vec struct) 1))
                 (prelude:raise struct 'prelude:%type-ref "not a prelude type"))
            (prelude:raise prop-name 'prelude:%type-ref "not a property name"))))

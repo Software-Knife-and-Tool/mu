@@ -14,7 +14,7 @@
                (prelude:null loop))
            (:lambda ()
              (prelude:format :t "prelude> " ())
-             (lib:flush lib:std-out)
+             (lib:flush lib:standard-output)
              ((:lambda (form)
                 (:if (lib:eq form prelude:%eof%)
                      loop

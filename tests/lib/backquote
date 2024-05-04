@@ -3,7 +3,7 @@
 `"abc"	"abc"
 `#(:t 1 2 3)	#(:t 1 2 3)
 `#\a	#\a
-`lib:std-out	lib:std-out
+`lib:standard-output	lib:standard-output
 `1234	1234
 `(,(lib:cons 'satisfies ()))	((satisfies))
 `("abc")	("abc")
@@ -31,7 +31,7 @@
 `,`"abc"	"abc"
 `,`#(:t 1 2 3)	#(:t 1 2 3)
 `,`#\a	#\a
-`,`lib:std-out	lib:std-out
+`,`lib:standard-output	lib:standard-output
 `,`1234	1234
 `,`(1234)	(1234)
 ``1234	`1234

@@ -4,7 +4,7 @@
 ;;;
 ;;; exceptions
 ;;;
-(lib:untern prelude "%debug-symbols%")
+(lib:unintern prelude "%debug-symbols%")
 
 ;;;
 ;;; [*exception descriptor*] #s(:except cond value source reason env)
@@ -59,7 +59,7 @@
 
 (lib:intern prelude "with-exception"
   (:lambda (handler thunk)
-     (lib:unwind
+     (lib:unwind-protect
       (:lambda (value condition source)
          (:if (lib:eq condition :except)
               (prelude:apply handler `(,value))
@@ -78,7 +78,7 @@
 
 (lib:intern prelude "error"
    (:lambda (value format-string arg-list)
-      (prelude:format lib:err-out format-string arg-list)
+      (prelude:format lib:error-output format-string arg-list)
       (lib:raise
        (prelude:%make-except :error value :error "" ())
        :except)))
@@ -97,14 +97,14 @@
 
 (lib:intern prelude "debug"
    (:lambda (value message)
-     (lib:write ";;; debug: " () lib:err-out)          
-     (lib:write value () lib:err-out)
-     (lib:write " " () lib:err-out)
-     (lib:write message () lib:err-out)
-     (lib:wr-char #\linefeed lib:err-out)
+     (lib:write ";;; debug: " () lib:error-output)          
+     (lib:write value () lib:error-output)
+     (lib:write " " () lib:error-output)
+     (lib:write message () lib:error-output)
+     (lib:wr-char #\linefeed lib:error-output)
      value))
 
 (lib:intern prelude "warn"
    (:lambda (value message)
-     (prelude:format lib:err-out ";;; warning: ~S ~A~%" `(,value ,message))
+     (prelude:format lib:error-output ";;; warning: ~S ~A~%" `(,value ,message))
     value))

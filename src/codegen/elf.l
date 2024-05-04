@@ -23,7 +23,7 @@
 (lib:intern :arm "elf64-read-bytes"
    (:lambda (nbytes stream)
       ((:lambda (list)
-          (lib:sv-list :byte (lib:cdr list)))
+          (lib:vector-list :byte (lib:cdr list)))
        (lib:fix
         (:lambda (loop)
            ((:lambda (nbytes list)
@@ -105,10 +105,10 @@
 
 (lib:intern :arm "elf64-read-header"
    (:lambda (stream)
-      (lib:unwind
+      (lib:unwind-protect
        (:lambda (ex)
           (prelude:%exceptf
-           lib:err-out
+           lib:error-output
            "elf64-read-header exception: ~A on ~A by ~S from ~A~%"
            ()
            ex))
