@@ -91,15 +91,17 @@ impl fmt::Display for Exception {
 }
 
 impl Exception {
-    pub fn new(condition: Condition, src: &str, object: Tag) -> Self {
+    pub fn new(env: &Env, condition: Condition, symbol: &str, object: Tag) -> Self {
+        let source = Symbol::parse(env, symbol.to_string()).unwrap();
+
         Exception {
             object,
             condition,
-            source: Symbol::keyword(src),
+            source,
         }
     }
 
-    fn map_condition(keyword: Tag) -> Result<Condition> {
+    fn map_condition(env: &Env, keyword: Tag) -> Result<Condition> {
         #[allow(clippy::unnecessary_to_owned)]
         let condmap = CONDMAP
             .to_vec()
@@ -109,6 +111,7 @@ impl Exception {
         match condmap {
             Some(entry) => Ok(entry.1),
             _ => Err(Exception::new(
+                env,
                 Condition::Syntax,
                 "exception::map_condition",
                 keyword,
@@ -132,7 +135,7 @@ impl Exception {
 
 pub trait Core {
     fn signal_exception();
-    fn on_signal() -> Result<()>;
+    fn on_signal(_: &Env) -> Result<()>;
 }
 
 impl Core for Exception {
@@ -144,12 +147,12 @@ impl Core for Exception {
         .expect("Error setting Ctrl-C handler");
     }
 
-    fn on_signal() -> Result<()> {
+    fn on_signal(env: &Env) -> Result<()> {
         let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
 
         if *signal_ref {
             *signal_ref = false;
-            Err(Exception::new(Condition::SigInt, "sigint", Tag::nil()))
+            Err(Exception::new(env, Condition::SigInt, "sigint", Tag::nil()))
         } else {
             Ok(())
         }
@@ -166,10 +169,10 @@ impl CoreFunction for Exception {
         let src = fp.argv[0];
         let condition = fp.argv[1];
 
-        match env.fp_argv_check("raise", &[Type::T, Type::Keyword], fp) {
-            Ok(_) => match Self::map_condition(condition) {
-                Ok(cond) => Err(Self::new(cond, "raise", src)),
-                Err(_) => Err(Self::new(Condition::Type, "raise", condition)),
+        match env.fp_argv_check("lib:raise", &[Type::T, Type::Keyword], fp) {
+            Ok(_) => match Self::map_condition(env, condition) {
+                Ok(cond) => Err(Self::new(env, cond, "raise", src)),
+                Err(_) => Err(Self::new(env, Condition::Type, "lib:raise", condition)),
             },
             Err(e) => Err(e),
         }
@@ -179,36 +182,37 @@ impl CoreFunction for Exception {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("unwind", &[Type::Function, Type::Function], fp) {
-            Ok(_) => {
-                let frame_stack_len;
+        fp.value =
+            match env.fp_argv_check("lib:unwind-protect", &[Type::Function, Type::Function], fp) {
+                Ok(_) => {
+                    let frame_stack_len;
 
-                {
-                    let dynamic_ref = block_on(env.dynamic.read());
+                    {
+                        let dynamic_ref = block_on(env.dynamic.read());
 
-                    frame_stack_len = dynamic_ref.len();
-                }
+                        frame_stack_len = dynamic_ref.len();
+                    }
 
-                match env.apply(thunk, Tag::nil()) {
-                    Ok(value) => value,
-                    Err(e) => {
-                        let args =
-                            vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
+                    match env.apply(thunk, Tag::nil()) {
+                        Ok(value) => value,
+                        Err(e) => {
+                            let args =
+                                vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
 
-                        match env.apply_(handler, args) {
-                            Ok(value) => {
-                                let mut dynamic_ref = block_on(env.dynamic.write());
+                            match env.apply_(handler, args) {
+                                Ok(value) => {
+                                    let mut dynamic_ref = block_on(env.dynamic.write());
 
-                                dynamic_ref.resize(frame_stack_len, (0, 0));
-                                value
+                                    dynamic_ref.resize(frame_stack_len, (0, 0));
+                                    value
+                                }
+                                Err(e) => return Err(e),
                             }
-                            Err(e) => return Err(e),
                         }
                     }
                 }
-            }
-            Err(e) => return Err(e),
-        };
+                Err(e) => return Err(e),
+            };
 
         Ok(())
     }

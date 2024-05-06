@@ -1,2 +1,2 @@
 (lib:close lib:error-output)
-(lib:get-str (lib:open :string :output (lib:symbol-name 'abcdef)))
+(lib:get-string (lib:open :string :output (lib:symbol-name 'abcdef)))

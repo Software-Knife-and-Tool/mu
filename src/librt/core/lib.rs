@@ -46,7 +46,7 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.55";
+    pub const VERSION: &'static str = "0.1.57";
 
     pub fn new() -> Self {
         Lib {
@@ -76,17 +76,17 @@ impl Lib {
     pub fn stdio(self) -> Self {
         let mut stdio = block_on(self.stdio.write());
 
-        let stdin = match StreamBuilder::new().stdin().build(&self) {
+        let stdin = match StreamBuilder::new().stdin().std_build(&self) {
             Ok(stream) => stream,
             Err(_) => panic!(),
         };
 
-        let stdout = match StreamBuilder::new().stdout().build(&self) {
+        let stdout = match StreamBuilder::new().stdout().std_build(&self) {
             Ok(stream) => stream,
             Err(_) => panic!(),
         };
 
-        let errout = match StreamBuilder::new().errout().build(&self) {
+        let errout = match StreamBuilder::new().errout().std_build(&self) {
             Ok(stream) => stream,
             Err(_) => panic!(),
         };

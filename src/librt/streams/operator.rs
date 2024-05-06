@@ -7,6 +7,7 @@ use {
     crate::{
         core::{
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
+            env::Env,
             exception::{self, Condition, Exception},
             lib::{Lib, LIB},
             types::Tag,
@@ -29,13 +30,13 @@ use futures::executor::block_on;
 use futures_locks::RwLock;
 
 pub trait Core {
-    fn open_file(_: &str, _: bool) -> exception::Result<Tag>;
-    fn open_input_file(_: &str) -> exception::Result<Tag>;
-    fn open_output_file(_: &str) -> exception::Result<Tag>;
-    fn open_string(_: &str, _: StringDirection) -> exception::Result<Tag>;
-    fn open_input_string(_: &str) -> exception::Result<Tag>;
-    fn open_output_string(_: &str) -> exception::Result<Tag>;
-    fn open_bidir_string(_: &str) -> exception::Result<Tag>;
+    fn open_file(_: &Env, _: &str, _: bool) -> exception::Result<Tag>;
+    fn open_input_file(_: &Env, _: &str) -> exception::Result<Tag>;
+    fn open_output_file(_: &Env, _: &str) -> exception::Result<Tag>;
+    fn open_string(_: &Env, _: &str, _: StringDirection) -> exception::Result<Tag>;
+    fn open_input_string(_: &Env, _: &str) -> exception::Result<Tag>;
+    fn open_output_string(_: &Env, _: &str) -> exception::Result<Tag>;
+    fn open_bidir_string(_: &Env, _: &str) -> exception::Result<Tag>;
     fn open_std_stream(_: SystemStream, _: &Lib) -> exception::Result<Tag>;
 }
 
@@ -100,7 +101,7 @@ impl SystemStream {
 }
 
 impl Core for SystemStream {
-    fn open_file(path: &str, is_input: bool) -> exception::Result<Tag> {
+    fn open_file(env: &Env, path: &str, is_input: bool) -> exception::Result<Tag> {
         let system_stream = if is_input {
             SystemStreamBuilder::new()
                 .file(path.to_string())
@@ -114,7 +115,7 @@ impl Core for SystemStream {
         };
 
         match system_stream {
-            None => Err(Exception::new(Condition::Open, "env:open", Tag::nil())),
+            None => Err(Exception::new(env, Condition::Open, "lib:open", Tag::nil())),
             Some(_) => {
                 let mut streams_ref = block_on(LIB.streams.write());
                 let index = streams_ref.len();
@@ -136,15 +137,15 @@ impl Core for SystemStream {
         }
     }
 
-    fn open_input_file(path: &str) -> exception::Result<Tag> {
-        Self::open_file(path, true)
+    fn open_input_file(env: &Env, path: &str) -> exception::Result<Tag> {
+        Self::open_file(env, path, true)
     }
 
-    fn open_output_file(path: &str) -> exception::Result<Tag> {
-        Self::open_file(path, false)
+    fn open_output_file(env: &Env, path: &str) -> exception::Result<Tag> {
+        Self::open_file(env, path, false)
     }
 
-    fn open_string(contents: &str, dir: StringDirection) -> exception::Result<Tag> {
+    fn open_string(env: &Env, contents: &str, dir: StringDirection) -> exception::Result<Tag> {
         let system_stream = match dir {
             StringDirection::Input => SystemStreamBuilder::new()
                 .string(contents.to_string())
@@ -161,7 +162,7 @@ impl Core for SystemStream {
         };
 
         match system_stream {
-            None => Err(Exception::new(Condition::Open, "env:open", Tag::nil())),
+            None => Err(Exception::new(env, Condition::Open, "env:open", Tag::nil())),
             Some(_) => {
                 let mut streams_ref = block_on(LIB.streams.write());
                 let index = streams_ref.len();
@@ -187,16 +188,16 @@ impl Core for SystemStream {
         }
     }
 
-    fn open_input_string(path: &str) -> exception::Result<Tag> {
-        Self::open_string(path, StringDirection::Input)
+    fn open_input_string(env: &Env, path: &str) -> exception::Result<Tag> {
+        Self::open_string(env, path, StringDirection::Input)
     }
 
-    fn open_output_string(path: &str) -> exception::Result<Tag> {
-        Self::open_string(path, StringDirection::Output)
+    fn open_output_string(env: &Env, path: &str) -> exception::Result<Tag> {
+        Self::open_string(env, path, StringDirection::Output)
     }
 
-    fn open_bidir_string(path: &str) -> exception::Result<Tag> {
-        Self::open_string(path, StringDirection::Bidir)
+    fn open_bidir_string(env: &Env, path: &str) -> exception::Result<Tag> {
+        Self::open_string(env, path, StringDirection::Bidir)
     }
 
     fn open_std_stream(std_stream: SystemStream, lib: &Lib) -> exception::Result<Tag> {

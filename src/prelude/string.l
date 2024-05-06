@@ -16,7 +16,7 @@
 
 (lib:intern prelude "get-output-stream-string"
    (:lambda (stream)
-      (lib:get-str stream)))
+      (lib:get-string stream)))
 
 (lib:intern prelude "schar"
   (:lambda (str index)
@@ -146,7 +146,7 @@
                             (lib:cdr list)))
                         ()))
                 list)
-               (lib:get-str stream))
+               (lib:get-string stream))
             (lib:open :string :output ""))
            (prelude:raise list 'prelude:string "is not a list"))))
 
@@ -168,7 +168,7 @@
                                            ()))
                                  nth))
                          start)
-                        (lib:get-str substr))
+                        (lib:get-string substr))
                      (lib:open :string :output ""))
                     (prelude:raise end 'prelude:substr "end is not a fixnum"))
                (prelude:raise str 'prelude:substr "is not a string"))
@@ -199,9 +199,9 @@
                         loop
                         ((:lambda (ch)
                             (:if (lib:eq ch #\linefeed)
-                                 (lib:get-str sstream)
+                                 (lib:get-string sstream)
                                  ((:lambda ()
-                                     (lib:wr-char ch sstream)
+                                     (lib:write-char ch sstream)
                                      (prelude:null loop)))))
                          (prelude:read-char stream eof-error eof-value))))
                 ()))

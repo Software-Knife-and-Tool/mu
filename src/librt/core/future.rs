@@ -168,7 +168,7 @@ impl CoreFunction for Future {
                     Future::Lazy(func, args) => env.apply(func, args).unwrap(),
                 }
             }
-            Ok(_) => return Err(Exception::new(Condition::Type, "fwait", future)),
+            Ok(_) => return Err(Exception::new(env, Condition::Type, "fwait", future)),
             Err(e) => return Err(e),
         };
 
@@ -186,7 +186,7 @@ impl CoreFunction for Future {
                     Tag::nil()
                 }
             }
-            Ok(_) => return Err(Exception::new(Condition::Type, "poll", future)),
+            Ok(_) => return Err(Exception::new(env, Condition::Type, "poll", future)),
             Err(e) => return Err(e),
         };
 
@@ -200,7 +200,7 @@ impl CoreFunction for Future {
         fp.value = match env.fp_argv_check("defer", &[Type::Function, Type::List], fp) {
             Ok(_) => match Self::make_defer_future(env, func, args) {
                 Ok(future) => future,
-                Err(_) => return Err(Exception::new(Condition::Type, "defer", Tag::nil())),
+                Err(_) => return Err(Exception::new(env, Condition::Type, "defer", Tag::nil())),
             },
             Err(e) => return Err(e),
         };
@@ -215,7 +215,7 @@ impl CoreFunction for Future {
         fp.value = match env.fp_argv_check("detach", &[Type::Function, Type::List], fp) {
             Ok(_) => match Self::make_detach_future(env, func, args) {
                 Ok(future) => future,
-                Err(_) => return Err(Exception::new(Condition::Type, "detach", Tag::nil())),
+                Err(_) => return Err(Exception::new(env, Condition::Type, "detach", Tag::nil())),
             },
             Err(e) => return Err(e),
         };

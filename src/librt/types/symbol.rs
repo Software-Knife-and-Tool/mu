@@ -224,7 +224,12 @@ impl Core for Symbol {
             match map_char_syntax(ch) {
                 Some(SyntaxType::Constituent) => (),
                 _ => {
-                    return Err(Exception::new(Condition::Range, "symbol", Tag::from(ch)));
+                    return Err(Exception::new(
+                        env,
+                        Condition::Range,
+                        "symbol",
+                        Tag::from(ch),
+                    ));
                 }
             }
         }
@@ -235,6 +240,7 @@ impl Core for Symbol {
                     && (token.len() > DirectTag::DIRECT_STR_MAX + 1 || token.len() == 1)
                 {
                     return Err(Exception::new(
+                        env,
                         Condition::Syntax,
                         "read:sy",
                         Vector::from_string(&token).evict(env),
@@ -249,6 +255,7 @@ impl Core for Symbol {
 
                 if sym.len() != 2 {
                     return Err(Exception::new(
+                        env,
                         Condition::Syntax,
                         "read:sy",
                         Vector::from_string(&token).evict(env),
@@ -258,6 +265,7 @@ impl Core for Symbol {
                 match Namespace::map_ns(env, &ns) {
                     Some(ns) => Ok(Namespace::intern(env, ns, name, *UNBOUND).unwrap()),
                     None => Err(Exception::new(
+                        env,
                         Condition::Namespace,
                         "read:sy",
                         Vector::from_string(sym[0]).evict(env),
@@ -326,7 +334,7 @@ impl CoreFunction for Symbol {
 
         fp.value = match symbol.type_of() {
             Type::Null | Type::Keyword | Type::Symbol => Symbol::name(env, symbol),
-            _ => return Err(Exception::new(Condition::Type, "sy:name", symbol)),
+            _ => return Err(Exception::new(env, Condition::Type, "sy:name", symbol)),
         };
 
         Ok(())
@@ -337,7 +345,7 @@ impl CoreFunction for Symbol {
 
         fp.value = match symbol.type_of() {
             Type::Symbol | Type::Keyword | Type::Null => Symbol::namespace(env, symbol),
-            _ => return Err(Exception::new(Condition::Type, "sy:ns", symbol)),
+            _ => return Err(Exception::new(env, Condition::Type, "sy:ns", symbol)),
         };
 
         Ok(())
@@ -351,11 +359,11 @@ impl CoreFunction for Symbol {
                 if Symbol::is_bound(env, symbol) {
                     Symbol::value(env, symbol)
                 } else {
-                    return Err(Exception::new(Condition::Type, "sy-val", symbol));
+                    return Err(Exception::new(env, Condition::Type, "sy-val", symbol));
                 }
             }
             Type::Keyword => symbol,
-            _ => return Err(Exception::new(Condition::Type, "sy-ns", symbol)),
+            _ => return Err(Exception::new(env, Condition::Type, "sy-ns", symbol)),
         };
 
         Ok(())
@@ -373,7 +381,7 @@ impl CoreFunction for Symbol {
                     symbol
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "unboundp", symbol)),
+            _ => return Err(Exception::new(env, Condition::Type, "unboundp", symbol)),
         };
 
         Ok(())

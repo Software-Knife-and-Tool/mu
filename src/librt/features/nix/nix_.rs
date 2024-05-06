@@ -47,7 +47,14 @@ pub trait CoreFunction {
 impl CoreFunction for Nix {
     fn uname(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match nix::sys::utsname::uname() {
-            Err(_) => return Err(Exception::new(Condition::Type, "uname", Tag::nil())),
+            Err(_) => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "features:uname",
+                    Tag::nil(),
+                ))
+            }
             Ok(info) => {
                 let uname = vec![Cons::vlist(
                     env,

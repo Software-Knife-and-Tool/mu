@@ -133,21 +133,21 @@ impl Core for Env {
                             let fn_ = Symbol::value(self, func);
                             match fn_.type_of() {
                                 Type::Function => self.apply(fn_, args),
-                                _ => Err(Exception::new(Condition::Type, "eval", func)),
+                                _ => Err(Exception::new(self, Condition::Type, "lib:eval", func)),
                             }
                         } else {
-                            Err(Exception::new(Condition::Unbound, "eval", func))
+                            Err(Exception::new(self, Condition::Unbound, "lib:eval", func))
                         }
                     }
                     Type::Function => self.apply(func, args),
-                    _ => Err(Exception::new(Condition::Type, "eval", func)),
+                    _ => Err(Exception::new(self, Condition::Type, "lib:eval", func)),
                 }
             }
             Type::Symbol => {
                 if Symbol::is_bound(self, expr) {
                     Ok(Symbol::value(self, expr))
                 } else {
-                    Err(Exception::new(Condition::Unbound, "eval", expr))
+                    Err(Exception::new(self, Condition::Unbound, "lib:eval", expr))
                 }
             }
             _ => Ok(expr),

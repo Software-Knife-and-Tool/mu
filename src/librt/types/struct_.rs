@@ -147,12 +147,17 @@ impl<'a> Core<'a> for Struct {
                     let vec_list = match Cons::read(env, stream) {
                         Ok(list) => {
                             if list.null_() {
-                                return Err(Exception::new(Condition::Type, "read:st", Tag::nil()));
+                                return Err(Exception::new(
+                                    env,
+                                    Condition::Type,
+                                    "read:st",
+                                    Tag::nil(),
+                                ));
                             }
                             list
                         }
                         Err(_) => {
-                            return Err(Exception::new(Condition::Syntax, "read:st", stream));
+                            return Err(Exception::new(env, Condition::Syntax, "read:st", stream));
                         }
                     };
 
@@ -165,12 +170,12 @@ impl<'a> Core<'a> for Struct {
                                 .map(|cons| Cons::car(env, cons))
                                 .collect::<Vec<Tag>>(),
                         )),
-                        _ => Err(Exception::new(Condition::Type, "read:st", stype)),
+                        _ => Err(Exception::new(env, Condition::Type, "read:st", stype)),
                     }
                 }
-                _ => Err(Exception::new(Condition::Eof, "read:st", stream)),
+                _ => Err(Exception::new(env, Condition::Eof, "read:st", stream)),
             },
-            Ok(None) => Err(Exception::new(Condition::Eof, "read:st", stream)),
+            Ok(None) => Err(Exception::new(env, Condition::Eof, "read:st", stream)),
             Err(e) => Err(e),
         }
     }

@@ -69,7 +69,14 @@ impl CoreFunction for Std {
                             let str = Vector::as_string(env, string);
                             argv.push(str)
                         }
-                        _ => return Err(Exception::new(Condition::Type, "command", string)),
+                        _ => {
+                            return Err(Exception::new(
+                                env,
+                                Condition::Type,
+                                "features:command",
+                                string,
+                            ))
+                        }
                     }
                 }
 
@@ -78,7 +85,14 @@ impl CoreFunction for Std {
                     .status();
 
                 match status {
-                    Err(_) => return Err(Exception::new(Condition::Open, "command", command)),
+                    Err(_) => {
+                        return Err(Exception::new(
+                            env,
+                            Condition::Open,
+                            "features:command",
+                            command,
+                        ))
+                    }
                     Ok(exit_status) => Fixnum::as_tag(exit_status.code().unwrap() as i64),
                 }
             }
@@ -89,12 +103,12 @@ impl CoreFunction for Std {
         Ok(())
     }
 
-    fn std_exit(_: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn std_exit(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let rc = fp.argv[0];
 
         match rc.type_of() {
             Type::Fixnum => std::process::exit(Fixnum::as_i64(rc) as i32),
-            _ => Err(Exception::new(Condition::Type, "exit", rc)),
+            _ => Err(Exception::new(env, Condition::Type, "features:exit", rc)),
         }
     }
 
@@ -130,7 +144,14 @@ impl CoreFunction for Std {
 
                 std::thread::sleep(us)
             }
-            _ => return Err(Exception::new(Condition::Type, "exit", interval)),
+            _ => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "features:exit",
+                    interval,
+                ))
+            }
         }
 
         Ok(())

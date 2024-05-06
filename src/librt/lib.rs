@@ -160,7 +160,7 @@ impl Env {
         match StreamBuilder::new()
             .string(str.to_string())
             .input()
-            .build(&LIB)
+            .build(env, &LIB)
         {
             Ok(stream) => env.read_stream(stream, true, Tag::nil(), false),
             Err(e) => Err(e),
@@ -191,7 +191,7 @@ impl Env {
         let str_stream = match StreamBuilder::new()
             .string("".to_string())
             .output()
-            .build(&LIB)
+            .build(env, &LIB)
         {
             Ok(stream) => {
                 let str_tag = stream;
@@ -245,10 +245,10 @@ impl Env {
     }
 
     pub fn load(&self, file_path: &str) -> exception::Result<bool> {
-        if fs::metadata(file_path).is_ok() {
-            let env_ref = block_on(LIB.env_map.read());
-            let env = env_ref.get(&self.0.as_u64()).unwrap();
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
 
+        if fs::metadata(file_path).is_ok() {
             let load_form = format!("(lib:open :file :input \"{}\")", file_path);
             let istream = env.eval(self.read_str(&load_form).unwrap()).unwrap();
             let eof_value = self.read_str(":eof").unwrap(); // need make_symbol here
@@ -273,6 +273,7 @@ impl Env {
             }
         } else {
             Err(Exception::new(
+                env,
                 Condition::Open,
                 "sys:lf",
                 self.read_str(&format!("\"{}\"", file_path)).unwrap(),

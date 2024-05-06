@@ -45,7 +45,7 @@ impl Core for Env {
         match Lib::read_ws(self, stream) {
             Ok(None) => {
                 return if eof_error_p {
-                    Err(Exception::new(Condition::Eof, "read", stream))
+                    Err(Exception::new(self, Condition::Eof, "read", stream))
                 } else {
                     Ok(eof_value)
                 }
@@ -57,7 +57,7 @@ impl Core for Env {
         match Stream::read_char(self, stream) {
             Ok(None) => {
                 if eof_error_p {
-                    Err(Exception::new(Condition::Eof, "read", stream))
+                    Err(Exception::new(self, Condition::Eof, "read", stream))
                 } else {
                     Ok(eof_value)
                 }
@@ -74,6 +74,7 @@ impl Core for Env {
                             Err(e) => Err(e),
                         },
                         _ => Err(Exception::new(
+                            self,
                             Condition::Type,
                             "read",
                             Tag::from(ch as i64),
@@ -99,7 +100,7 @@ impl Core for Env {
                             if recursivep {
                                 Ok(*EOL)
                             } else {
-                                Err(Exception::new(Condition::Syntax, "read", stream))
+                                Err(Exception::new(self, Condition::Syntax, "read", stream))
                             }
                         }
                         ';' => match Lib::read_comment(self, stream) {
@@ -108,12 +109,22 @@ impl Core for Env {
                             }
                             Err(e) => Err(e),
                         },
-                        ',' => Err(Exception::new(Condition::Range, "read", Tag::from(ch))),
-                        _ => Err(Exception::new(Condition::Range, "read", Tag::from(ch))),
+                        ',' => Err(Exception::new(
+                            self,
+                            Condition::Range,
+                            "read",
+                            Tag::from(ch),
+                        )),
+                        _ => Err(Exception::new(
+                            self,
+                            Condition::Range,
+                            "read",
+                            Tag::from(ch),
+                        )),
                     },
-                    _ => Err(Exception::new(Condition::Read, "read", Tag::from(ch))),
+                    _ => Err(Exception::new(self, Condition::Read, "read", Tag::from(ch))),
                 },
-                _ => Err(Exception::new(Condition::Read, "read", Tag::from(ch))),
+                _ => Err(Exception::new(self, Condition::Read, "read", Tag::from(ch))),
             },
             Err(e) => Err(e),
         }

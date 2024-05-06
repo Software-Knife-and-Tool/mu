@@ -40,7 +40,7 @@ pub struct Compile {}
 impl Compile {
     pub fn if_(env: &Env, args: Tag, lexenv: &mut LexicalEnv) -> exception::Result<Tag> {
         if Cons::length(env, args) != Some(3) {
-            return Err(Exception::new(Condition::Syntax, ":if", args));
+            return Err(Exception::new(env, Condition::Syntax, ":if", args));
         }
 
         let lambda = Symbol::keyword("lambda");
@@ -57,7 +57,7 @@ impl Compile {
 
     pub fn quoted_list(env: &Env, list: Tag, _: &mut LexicalEnv) -> exception::Result<Tag> {
         if Cons::length(env, list) != Some(1) {
-            return Err(Exception::new(Condition::Syntax, ":quote", list));
+            return Err(Exception::new(env, Condition::Syntax, ":quote", list));
         }
 
         Ok(Cons::new(Symbol::keyword("quote"), list).evict(env))
@@ -71,7 +71,7 @@ impl Compile {
     ) -> exception::Result<Tag> {
         match SPECMAP.iter().copied().find(|spec| name.eq_(&spec.0)) {
             Some(spec) => spec.1(env, args, lexenv),
-            None => Err(Exception::new(Condition::Syntax, "specf", args)),
+            None => Err(Exception::new(env, Condition::Syntax, "specf", args)),
         }
     }
 
@@ -96,12 +96,12 @@ impl Compile {
                 if symbol.type_of() == Type::Symbol {
                     match symvec.iter().rev().position(|lex| symbol.eq_(lex)) {
                         Some(_) => {
-                            return Err(Exception::new(Condition::Syntax, "lexical", symbol))
+                            return Err(Exception::new(env, Condition::Syntax, "lexical", symbol))
                         }
                         _ => symvec.push(symbol),
                     }
                 } else {
-                    return Err(Exception::new(Condition::Type, "lexical", symbol));
+                    return Err(Exception::new(env, Condition::Type, "lexical", symbol));
                 }
             }
 
@@ -114,10 +114,10 @@ impl Compile {
 
                 match lambda.type_of() {
                     Type::Null | Type::Cons => (lambda, Cons::cdr(env, args)),
-                    _ => return Err(Exception::new(Condition::Type, "lambda", args)),
+                    _ => return Err(Exception::new(env, Condition::Type, "lambda", args)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Syntax, "lambda", args)),
+            _ => return Err(Exception::new(env, Condition::Syntax, "lambda", args)),
         };
 
         let func = Function::new(
@@ -198,7 +198,7 @@ impl Compile {
                                 let fn_ = Symbol::value(env, func);
                                 match fn_.type_of() {
                                     Type::Function => Ok(Cons::new(fn_, args).evict(env)),
-                                    _ => Err(Exception::new(Condition::Type, "compile", func)),
+                                    _ => Err(Exception::new(env, Condition::Type, "compile", func)),
                                 }
                             } else {
                                 Ok(Cons::new(func, args).evict(env))
@@ -214,13 +214,13 @@ impl Compile {
                         Ok(arglist) => match Self::compile(env, func, lexenv) {
                             Ok(fn_) => match fn_.type_of() {
                                 Type::Function => Ok(Cons::new(fn_, arglist).evict(env)),
-                                _ => Err(Exception::new(Condition::Type, "compile", func)),
+                                _ => Err(Exception::new(env, Condition::Type, "compile", func)),
                             },
                             Err(e) => Err(e),
                         },
                         Err(e) => Err(e),
                     },
-                    _ => Err(Exception::new(Condition::Type, "compile", func)),
+                    _ => Err(Exception::new(env, Condition::Type, "compile", func)),
                 }
             }
             _ => Ok(expr),
