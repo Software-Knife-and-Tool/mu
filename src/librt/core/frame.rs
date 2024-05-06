@@ -148,7 +148,7 @@ impl Frame {
                 if Symbol::is_bound(env, func) {
                     self.apply(env, Symbol::value(env, func))
                 } else {
-                    Err(Exception::new(env, Condition::Unbound, "apply", func))
+                    Err(Exception::new(env, Condition::Unbound, "lib:apply", func))
                 }
             }
             Type::Function => match Function::form(env, func).type_of() {
@@ -158,7 +158,7 @@ impl Frame {
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
-                        return Err(Exception::new(env, Condition::Arity, "apply", func));
+                        return Err(Exception::new(env, Condition::Arity, "lib:apply", func));
                     }
 
                     let offset =
@@ -174,7 +174,7 @@ impl Frame {
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
-                        return Err(Exception::new(env, Condition::Arity, "apply", func));
+                        return Err(Exception::new(env, Condition::Arity, "lib:apply", func));
                     }
 
                     let mut value = Tag::nil();
@@ -195,9 +195,9 @@ impl Frame {
 
                     Ok(value)
                 }
-                _ => Err(Exception::new(env, Condition::Type, "apply", func)),
+                _ => Err(Exception::new(env, Condition::Type, "lib:apply", func)),
             },
-            _ => Err(Exception::new(env, Condition::Type, "apply", func)),
+            _ => Err(Exception::new(env, Condition::Type, "lib:apply", func)),
         }
     }
 }
@@ -210,7 +210,7 @@ pub trait CoreFunction {
 
 impl CoreFunction for Frame {
     fn lib_fr_pop(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match env.fp_argv_check("fr-pop", &[Type::Function], fp) {
+        fp.value = match env.fp_argv_check("lib:frame-pop", &[Type::Function], fp) {
             Ok(_) => {
                 Self::frame_stack_pop(env, fp.argv[0]);
                 fp.argv[0]
@@ -222,7 +222,7 @@ impl CoreFunction for Frame {
     }
 
     fn lib_fr_push(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match env.fp_argv_check("fr-push", &[Type::Vector], fp) {
+        fp.value = match env.fp_argv_check("lib:frame-push", &[Type::Vector], fp) {
             Ok(_) => {
                 Self::from_tag(env, fp.value).frame_stack_push(env);
                 fp.argv[0]
@@ -237,14 +237,14 @@ impl CoreFunction for Frame {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fr-ref", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:frame-ref", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => match Frame::frame_ref(
                 env,
                 Fixnum::as_i64(frame) as u64,
                 Fixnum::as_i64(offset) as usize,
             ) {
                 Some(tag) => tag,
-                None => return Err(Exception::new(env, Condition::Type, "fr-ref", frame)),
+                None => return Err(Exception::new(env, Condition::Type, "lib:frame-ref", frame)),
             },
             Err(e) => return Err(e),
         };

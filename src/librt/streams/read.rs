@@ -45,7 +45,7 @@ impl Core for Env {
         match Lib::read_ws(self, stream) {
             Ok(None) => {
                 return if eof_error_p {
-                    Err(Exception::new(self, Condition::Eof, "read", stream))
+                    Err(Exception::new(self, Condition::Eof, "lib:read", stream))
                 } else {
                     Ok(eof_value)
                 }
@@ -57,7 +57,7 @@ impl Core for Env {
         match Stream::read_char(self, stream) {
             Ok(None) => {
                 if eof_error_p {
-                    Err(Exception::new(self, Condition::Eof, "read", stream))
+                    Err(Exception::new(self, Condition::Eof, "lib:read", stream))
                 } else {
                     Ok(eof_value)
                 }
@@ -76,7 +76,7 @@ impl Core for Env {
                         _ => Err(Exception::new(
                             self,
                             Condition::Type,
-                            "read",
+                            "lib:read",
                             Tag::from(ch as i64),
                         )),
                     },
@@ -100,7 +100,7 @@ impl Core for Env {
                             if recursivep {
                                 Ok(*EOL)
                             } else {
-                                Err(Exception::new(self, Condition::Syntax, "read", stream))
+                                Err(Exception::new(self, Condition::Syntax, "lib:read", stream))
                             }
                         }
                         ';' => match Lib::read_comment(self, stream) {
@@ -112,19 +112,29 @@ impl Core for Env {
                         ',' => Err(Exception::new(
                             self,
                             Condition::Range,
-                            "read",
+                            "lib:read",
                             Tag::from(ch),
                         )),
                         _ => Err(Exception::new(
                             self,
                             Condition::Range,
-                            "read",
+                            "lib:read",
                             Tag::from(ch),
                         )),
                     },
-                    _ => Err(Exception::new(self, Condition::Read, "read", Tag::from(ch))),
+                    _ => Err(Exception::new(
+                        self,
+                        Condition::Read,
+                        "lib:read",
+                        Tag::from(ch),
+                    )),
                 },
-                _ => Err(Exception::new(self, Condition::Read, "read", Tag::from(ch))),
+                _ => Err(Exception::new(
+                    self,
+                    Condition::Read,
+                    "lib:read",
+                    Tag::from(ch),
+                )),
             },
             Err(e) => Err(e),
         }
@@ -141,7 +151,7 @@ impl CoreFunction for Env {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("read", &[Type::Stream], fp) {
+        fp.value = match env.fp_argv_check("lib:read", &[Type::Stream], fp) {
             Ok(_) => match Self::read_stream(env, stream, !eof_error_p.null_(), eof_value, false) {
                 Ok(tag) => tag,
                 Err(e) => return Err(e),

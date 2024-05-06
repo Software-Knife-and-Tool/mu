@@ -227,7 +227,7 @@ impl Core for Symbol {
                     return Err(Exception::new(
                         env,
                         Condition::Range,
-                        "symbol",
+                        "lib:read",
                         Tag::from(ch),
                     ));
                 }
@@ -242,7 +242,7 @@ impl Core for Symbol {
                     return Err(Exception::new(
                         env,
                         Condition::Syntax,
-                        "read:sy",
+                        "lib:read",
                         Vector::from_string(&token).evict(env),
                     ));
                 }
@@ -257,7 +257,7 @@ impl Core for Symbol {
                     return Err(Exception::new(
                         env,
                         Condition::Syntax,
-                        "read:sy",
+                        "lib:read",
                         Vector::from_string(&token).evict(env),
                     ));
                 }
@@ -267,7 +267,7 @@ impl Core for Symbol {
                     None => Err(Exception::new(
                         env,
                         Condition::Namespace,
-                        "read:sy",
+                        "lib:read",
                         Vector::from_string(sym[0]).evict(env),
                     )),
                 }
@@ -334,7 +334,14 @@ impl CoreFunction for Symbol {
 
         fp.value = match symbol.type_of() {
             Type::Null | Type::Keyword | Type::Symbol => Symbol::name(env, symbol),
-            _ => return Err(Exception::new(env, Condition::Type, "sy:name", symbol)),
+            _ => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "lib:symbol-name",
+                    symbol,
+                ))
+            }
         };
 
         Ok(())
@@ -345,7 +352,14 @@ impl CoreFunction for Symbol {
 
         fp.value = match symbol.type_of() {
             Type::Symbol | Type::Keyword | Type::Null => Symbol::namespace(env, symbol),
-            _ => return Err(Exception::new(env, Condition::Type, "sy:ns", symbol)),
+            _ => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "lib:symbol-ns",
+                    symbol,
+                ))
+            }
         };
 
         Ok(())
@@ -359,11 +373,23 @@ impl CoreFunction for Symbol {
                 if Symbol::is_bound(env, symbol) {
                     Symbol::value(env, symbol)
                 } else {
-                    return Err(Exception::new(env, Condition::Type, "sy-val", symbol));
+                    return Err(Exception::new(
+                        env,
+                        Condition::Type,
+                        "lib:symbol-value",
+                        symbol,
+                    ));
                 }
             }
             Type::Keyword => symbol,
-            _ => return Err(Exception::new(env, Condition::Type, "sy-ns", symbol)),
+            _ => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "lib:symbol-value",
+                    symbol,
+                ))
+            }
         };
 
         Ok(())
@@ -381,7 +407,7 @@ impl CoreFunction for Symbol {
                     symbol
                 }
             }
-            _ => return Err(Exception::new(env, Condition::Type, "unboundp", symbol)),
+            _ => return Err(Exception::new(env, Condition::Type, "lib:boundp", symbol)),
         };
 
         Ok(())
@@ -390,7 +416,7 @@ impl CoreFunction for Symbol {
     fn lib_symbol(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("symbol", &[Type::String], fp) {
+        fp.value = match env.fp_argv_check("lib:make-symbol", &[Type::String], fp) {
             Ok(_) => {
                 let str = Vector::as_string(env, name);
 

@@ -275,7 +275,7 @@ impl Env {
             Err(Exception::new(
                 env,
                 Condition::Open,
-                "sys:lf",
+                "lib:open",
                 self.read_str(&format!("\"{}\"", file_path)).unwrap(),
             ))
         }

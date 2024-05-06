@@ -167,7 +167,7 @@ impl QqReader {
                     Ok(None) => Err(Exception::new(
                         env,
                         Condition::Syntax,
-                        "qquote",
+                        "lib:read",
                         Symbol::keyword("eof"),
                     )),
                     Ok(Some(ch)) => {
@@ -208,7 +208,7 @@ impl QqReader {
                     return Err(Exception::new(
                         env,
                         Condition::Syntax,
-                        "qquote",
+                        "lib:read",
                         Symbol::keyword("eof"),
                     ))
                 }
@@ -262,7 +262,7 @@ impl QqReader {
             Ok(None) => Err(Exception::new(
                 env,
                 Condition::Syntax,
-                "qquote",
+                "lib:read",
                 Symbol::keyword("eof"),
             )),
             Ok(Some(syntax)) => match syntax {
@@ -281,13 +281,13 @@ impl QqReader {
                 QqSyntax::CommaAt => Err(Exception::new(
                     env,
                     Condition::Syntax,
-                    "qquote",
+                    "lib:read",
                     Symbol::keyword(",@"),
                 )),
                 QqSyntax::List_ => Err(Exception::new(
                     env,
                     Condition::Syntax,
-                    "qquote",
+                    "lib:read",
                     Symbol::keyword(")"),
                 )),
                 QqSyntax::List => match self.parse_list(env) {

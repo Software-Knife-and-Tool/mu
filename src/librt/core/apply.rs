@@ -129,7 +129,7 @@ impl CoreFunction for Env {
 
                 Ok(())
             }
-            _ => Err(Exception::new(env, Condition::Type, "fix", func)),
+            _ => Err(Exception::new(env, Condition::Type, "lib:fix", func)),
         }
     }
 }

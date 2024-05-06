@@ -110,12 +110,7 @@ impl Exception {
 
         match condmap {
             Some(entry) => Ok(entry.1),
-            _ => Err(Exception::new(
-                env,
-                Condition::Syntax,
-                "exception::map_condition",
-                keyword,
-            )),
+            _ => Err(Exception::new(env, Condition::Syntax, "lib:raise", keyword)),
         }
     }
 
@@ -152,7 +147,12 @@ impl Core for Exception {
 
         if *signal_ref {
             *signal_ref = false;
-            Err(Exception::new(env, Condition::SigInt, "sigint", Tag::nil()))
+            Err(Exception::new(
+                env,
+                Condition::SigInt,
+                "lib:raise",
+                Tag::nil(),
+            ))
         } else {
             Ok(())
         }

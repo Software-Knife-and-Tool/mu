@@ -93,7 +93,7 @@ pub trait CoreFunction {
     fn lib_fxadd(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fxdiv(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fxlt(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_fxenvl(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_fxmul(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fxsub(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_logand(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_lognot(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -102,7 +102,7 @@ pub trait CoreFunction {
 
 impl CoreFunction for Fixnum {
     fn lib_ash(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match env.fp_argv_check("ash", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:ash", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {
                 let value = Self::as_i64(fp.argv[0]);
                 let shift = Self::as_i64(fp.argv[1]);
@@ -119,7 +119,7 @@ impl CoreFunction for Fixnum {
                     return Err(Exception::new(
                         env,
                         Condition::Over,
-                        "ash",
+                        "lib:ash",
                         Cons::new(fp.argv[0], fp.argv[1]).evict(env),
                     ));
                 }
@@ -134,16 +134,16 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fx-add", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:fx-add", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
                 Some(sum) => {
                     if Self::is_i56(sum) {
                         Self::as_tag(sum)
                     } else {
-                        return Err(Exception::new(env, Condition::Over, "fx-add", fx0));
+                        return Err(Exception::new(env, Condition::Over, "lib:fx-add", fx0));
                     }
                 }
-                None => return Err(Exception::new(env, Condition::Over, "fx-add", fx1)),
+                None => return Err(Exception::new(env, Condition::Over, "lib:fx-add", fx1)),
             },
             Err(e) => return Err(e),
         };
@@ -155,16 +155,16 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fx-sub", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:fx-sub", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
                 Some(diff) => {
                     if Self::is_i56(diff) {
                         Self::as_tag(diff)
                     } else {
-                        return Err(Exception::new(env, Condition::Over, "fx-sub", fx1));
+                        return Err(Exception::new(env, Condition::Over, "lib:fx-sub", fx1));
                     }
                 }
-                None => return Err(Exception::new(env, Condition::Over, "fx-sub", fx1)),
+                None => return Err(Exception::new(env, Condition::Over, "lib:fx-sub", fx1)),
             },
             Err(e) => return Err(e),
         };
@@ -172,20 +172,20 @@ impl CoreFunction for Fixnum {
         Ok(())
     }
 
-    fn lib_fxenvl(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_fxmul(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fx-envl", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:fx-mul", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
                 Some(prod) => {
                     if Self::is_i56(prod) {
                         Self::as_tag(prod)
                     } else {
-                        return Err(Exception::new(env, Condition::Over, "fx-envl", fx1));
+                        return Err(Exception::new(env, Condition::Over, "lib:fx-mul", fx1));
                     }
                 }
-                None => return Err(Exception::new(env, Condition::Over, "fx-envl", fx1)),
+                None => return Err(Exception::new(env, Condition::Over, "lib:fx-mul", fx1)),
             },
             Err(e) => return Err(e),
         };
@@ -197,10 +197,15 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fx-div", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:fx-div", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {
                 if Self::as_i64(fx1) == 0 {
-                    return Err(Exception::new(env, Condition::ZeroDivide, "fx-div", fx0));
+                    return Err(Exception::new(
+                        env,
+                        Condition::ZeroDivide,
+                        "lib:fx-div",
+                        fx0,
+                    ));
                 }
 
                 match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
@@ -208,10 +213,10 @@ impl CoreFunction for Fixnum {
                         if Self::is_i56(div) {
                             Self::as_tag(div)
                         } else {
-                            return Err(Exception::new(env, Condition::Over, "fx-div", fx1));
+                            return Err(Exception::new(env, Condition::Over, "lib:fx-div", fx1));
                         }
                     }
-                    None => return Err(Exception::new(env, Condition::Over, "fx-div", fx1)),
+                    None => return Err(Exception::new(env, Condition::Over, "lib:fx-div", fx1)),
                 }
             }
             Err(e) => return Err(e),
@@ -224,7 +229,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fx-lt", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:fx-lt", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {
                 if Self::as_i64(fx0) < Self::as_i64(fx1) {
                     Symbol::keyword("t")
@@ -242,7 +247,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("logand", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:logand", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => Self::as_tag(Self::as_i64(fx0) & Self::as_i64(fx1)),
             Err(e) => return Err(e),
         };
@@ -254,7 +259,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("logor", &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:logor", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => Self::as_tag(Self::as_i64(fx0) | Self::as_i64(fx1)),
             Err(e) => return Err(e),
         };
@@ -265,7 +270,7 @@ impl CoreFunction for Fixnum {
     fn lib_lognot(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let fx = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("lognot", &[Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:lognot", &[Type::Fixnum], fp) {
             Ok(_) => {
                 let mut val = Self::as_i64(fx);
                 for nth_bit in 0..64 {

@@ -85,7 +85,7 @@ impl Core for Float {
 pub trait CoreFunction {
     fn lib_fladd(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_flsub(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_flenvl(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_flmul(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fllt(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_fldiv(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
@@ -95,11 +95,11 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fl-add", &[Type::Float, Type::Float], fp) {
+        fp.value = match env.fp_argv_check("lib:fl-add", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 let sum = Self::as_f32(env, fl0).add(Self::as_f32(env, fl1));
                 if sum.is_nan() {
-                    return Err(Exception::new(env, Condition::Over, "fl-add", fl1));
+                    return Err(Exception::new(env, Condition::Over, "lib:fl-add", fl1));
                 } else {
                     Self::as_tag(sum)
                 }
@@ -114,11 +114,11 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fl-sub", &[Type::Float, Type::Float], fp) {
+        fp.value = match env.fp_argv_check("lib:fl-sub", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 let diff = Self::as_f32(env, fl0).sub(Self::as_f32(env, fl1));
                 if diff.is_nan() {
-                    return Err(Exception::new(env, Condition::Under, "fl-sub", fl1));
+                    return Err(Exception::new(env, Condition::Under, "lib:fl-sub", fl1));
                 } else {
                     Self::as_tag(diff)
                 }
@@ -129,16 +129,16 @@ impl CoreFunction for Float {
         Ok(())
     }
 
-    fn lib_flenvl(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn lib_flmul(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fl-envl", &[Type::Float, Type::Float], fp) {
+        fp.value = match env.fp_argv_check("lib:fl-envl", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 let prod = Self::as_f32(env, fl0).mul(Self::as_f32(env, fl1));
 
                 if prod.is_nan() {
-                    return Err(Exception::new(env, Condition::Over, "fl-envl", fl1));
+                    return Err(Exception::new(env, Condition::Over, "lib:fl-mul", fl1));
                 } else {
                     Self::as_tag(prod)
                 }
@@ -153,7 +153,7 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fl-div", &[Type::Float, Type::Float], fp) {
+        fp.value = match env.fp_argv_check("lib:fl-div", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 if Self::as_f32(env, fl1) == 0.0 {
                     return Err(Exception::new(env, Condition::ZeroDivide, "fl-div", fl1));
@@ -161,7 +161,7 @@ impl CoreFunction for Float {
 
                 let div = Self::as_f32(env, fl0).div(Self::as_f32(env, fl1));
                 if div.is_nan() {
-                    return Err(Exception::new(env, Condition::Under, "fl-div", fl1));
+                    return Err(Exception::new(env, Condition::Under, "lib:fl-div", fl1));
                 } else {
                     Self::as_tag(div)
                 }
@@ -176,7 +176,7 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("fl-lt", &[Type::Float, Type::Float], fp) {
+        fp.value = match env.fp_argv_check("lib:fl-lt", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 if Self::as_f32(env, fl0) < Self::as_f32(env, fl1) {
                     Symbol::keyword("t")

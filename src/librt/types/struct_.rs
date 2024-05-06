@@ -150,14 +150,14 @@ impl<'a> Core<'a> for Struct {
                                 return Err(Exception::new(
                                     env,
                                     Condition::Type,
-                                    "read:st",
+                                    "lib:read",
                                     Tag::nil(),
                                 ));
                             }
                             list
                         }
                         Err(_) => {
-                            return Err(Exception::new(env, Condition::Syntax, "read:st", stream));
+                            return Err(Exception::new(env, Condition::Syntax, "lib:read", stream));
                         }
                     };
 
@@ -170,12 +170,12 @@ impl<'a> Core<'a> for Struct {
                                 .map(|cons| Cons::car(env, cons))
                                 .collect::<Vec<Tag>>(),
                         )),
-                        _ => Err(Exception::new(env, Condition::Type, "read:st", stype)),
+                        _ => Err(Exception::new(env, Condition::Type, "lib:read", stype)),
                     }
                 }
-                _ => Err(Exception::new(env, Condition::Eof, "read:st", stream)),
+                _ => Err(Exception::new(env, Condition::Eof, "lib:read", stream)),
             },
-            Ok(None) => Err(Exception::new(env, Condition::Eof, "read:st", stream)),
+            Ok(None) => Err(Exception::new(env, Condition::Eof, "lib:read", stream)),
             Err(e) => Err(e),
         }
     }
@@ -204,7 +204,7 @@ impl CoreFunction for Struct {
     fn lib_struct_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("st-type", &[Type::Struct], fp) {
+        fp.value = match env.fp_argv_check("lib:struct-type", &[Type::Struct], fp) {
             Ok(_) => Self::to_image(env, tag).stype,
             Err(e) => return Err(e),
         };
@@ -215,7 +215,7 @@ impl CoreFunction for Struct {
     fn lib_struct_vector(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("st-vec", &[Type::Struct], fp) {
+        fp.value = match env.fp_argv_check("lib:struct-vec", &[Type::Struct], fp) {
             Ok(_) => Self::to_image(env, tag).vector,
             Err(e) => return Err(e),
         };
@@ -227,7 +227,7 @@ impl CoreFunction for Struct {
         let stype = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("struct", &[Type::Keyword, Type::List], fp) {
+        fp.value = match env.fp_argv_check("lib:make-struct", &[Type::Keyword, Type::List], fp) {
             Ok(_) => {
                 let vec = Cons::iter(env, list)
                     .map(|cons| Cons::car(env, cons))
