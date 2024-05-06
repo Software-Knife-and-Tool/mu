@@ -19,7 +19,7 @@
                            (:if (prelude:fixnump integer)
                                 (:if (prelude:null sign)
                                      integer
-                                     (lib:fx-mul sign integer))
+                                     (lib:product sign integer))
                                 ()))
                         (lib:cdr
                          (lib:fix
@@ -27,14 +27,14 @@
                              (:if (prelude:null loop)
                                   ()
                                   ((:lambda (index acc)
-                                      (:if (lib:fx-lt (lib:fx-sub (lib:vector-len digits) 1) index)
+                                      (:if (lib:less-than (lib:difference (lib:vector-len digits) 1) index)
                                            loop
                                            ((:lambda (n)
                                                (:if (prelude:null n)
                                                     ()
-                                                    (:if (lib:fx-lt (lib:fx-sub base 1) n)
+                                                    (:if (lib:less-than (lib:difference base 1) n)
                                                          ()
-                                                         `(,(lib:fx-add 1 index) ,@(lib:fx-add n (lib:fx-mul acc base))))))
+                                                         `(,(lib:sum 1 index) ,@(lib:sum n (lib:product acc base))))))
                                             (prelude:string-position (prelude:schar digits index) "0123456789abcdef"))))
                                    (lib:car loop)
                                    (lib:cdr loop))))

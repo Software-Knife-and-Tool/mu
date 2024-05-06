@@ -35,7 +35,7 @@
                ,(lib:cons :arity  nargs)
                ,(lib:cons :fn     fn)
                ,(lib:cons :env    env))))
-       (lib:fx-sub
+       (lib:difference
         (lib:length (prelude:%lambda-prop :bound lambda))
         (:if (prelude:%lambda-prop :rest lambda) 1 0)))))
 

@@ -56,13 +56,13 @@
                 (:if (prelude:%lambdap acc)
                      acc
                      (:if (lib:eq '&rest el)
-                          (:if (lib:eq (lib:length lambda) (lib:fx-add 2 acc))
+                          (:if (lib:eq (lib:length lambda) (lib:sum 2 acc))
                                (prelude:%make-lambda
-                                `(,@(prelude:dropr lambda 2) ,@(prelude:dropl lambda (lib:fx-sub (lib:length lambda) 1)))
-                                (lib:nth (lib:fx-sub (lib:length lambda) 1) lambda)
+                                `(,@(prelude:dropr lambda 2) ,@(prelude:dropl lambda (lib:difference (lib:length lambda) 1)))
+                                (lib:nth (lib:difference (lib:length lambda) 1) lambda)
                                 env)
                                (prelude:raise lambda 'prelude:%compile-lambda-list "rest botch"))
-                          (lib:fx-add 1 acc))))
+                          (lib:sum 1 acc))))
              0
              lambda)))))
 

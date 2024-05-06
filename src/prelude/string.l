@@ -39,7 +39,7 @@
                                    (:if (lib:eq nth (lib:vector-len str-1))
                                         :t
                                         (:if (lib:eq (lib:vector-ref str-1 nth) (lib:vector-ref str-2 nth))
-                                             (lib:fx-add 1 nth)
+                                             (lib:sum 1 nth)
                                              ()))
                                    nth))
                            0)
@@ -57,7 +57,7 @@
                     ())
                (lib:fix
                 (:lambda (index)
-                   (:if (lib:fx-lt index length)
+                   (:if (lib:less-than index length)
                         ((:lambda ()
                             (prelude:write (prelude:vector-ref string index) () stream)
                             (prelude:1+ index)))
@@ -82,11 +82,11 @@
                        (lib:fix
                         (:lambda (loop)
                            (:if (prelude:numberp loop)
-                                (:if (lib:fx-lt (lib:fx-sub len 1) loop)
+                                (:if (lib:less-than (lib:difference len 1) loop)
                                      ()
                                      (:if (lib:eq ch (lib:vector-ref str loop))
                                           loop
-                                          (lib:fx-add 1 loop)))
+                                          (lib:sum 1 loop)))
                                 loop))
                         0))
                     (lib:vector-len str)))
@@ -106,11 +106,11 @@
                        (lib:fix
                         (:lambda (loop)
                            (:if (prelude:numberp loop)
-                                (:if (lib:fx-lt (lib:fx-sub len 1) loop)
+                                (:if (lib:less-than (lib:difference len 1) loop)
                                      ()
                                      (:if (lib:eq ch (lib:vector-ref str loop))
                                           ch
-                                          (lib:fx-add 1 loop)))
+                                          (lib:sum 1 loop)))
                                 loop))
                         0))
                     (lib:vector-len str)))
@@ -161,10 +161,10 @@
                             (:if (prelude:numberp nth)
                                  (:if (lib:eq nth (lib:vector-len str))
                                       ()
-                                      (:if (lib:fx-lt nth (lib:fx-add 1 end))
+                                      (:if (lib:less-than nth (lib:sum 1 end))
                                            ((:lambda ()
                                                (lib:write (lib:vector-ref str nth) () substr)
-                                               (lib:fx-add 1 nth)))
+                                               (lib:sum 1 nth)))
                                            ()))
                                  nth))
                          start)

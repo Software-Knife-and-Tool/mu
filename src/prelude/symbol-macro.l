@@ -17,7 +17,7 @@
      ((:lambda (colon)
         (:if (prelude:null colon)
              :extern
-             (:if (lib:eq #\: (prelude:schar name (lib:fx-add 1 colon)))
+             (:if (lib:eq #\: (prelude:schar name (lib:sum 1 colon)))
                   :intern
                   :extern)))
         (prelude:string-position #\: name))))
@@ -27,7 +27,7 @@
     ((:lambda (colon)
        (:if (prelude:null colon)
             ()
-            (lib:find-ns (prelude:substr name 0 (lib:fx-sub colon 1)))))
+            (lib:find-ns (prelude:substr name 0 (lib:difference colon 1)))))
      (prelude:string-position #\: name))))
 
 (lib:intern prelude "%read-symbol-name"
@@ -36,12 +36,12 @@
         (:if (prelude:null colon)
              name
              (prelude:substr name
-                (:if (lib:eq #\: (prelude:schar name (lib:fx-add 1 colon)))
-                     (lib:fx-add 2 colon)
-                     (lib:fx-add 1 colon))
-                (:if (lib:eq #\: (prelude:schar name (lib:fx-add 1 colon)))
-                     (lib:fx-add colon (lib:fx-sub (lib:vector-len name) colon))
-                     (lib:fx-add colon (lib:fx-sub (lib:vector-len name) (lib:fx-add 1 colon)))))))
+                (:if (lib:eq #\: (prelude:schar name (lib:sum 1 colon)))
+                     (lib:sum 2 colon)
+                     (lib:sum 1 colon))
+                (:if (lib:eq #\: (prelude:schar name (lib:sum 1 colon)))
+                     (lib:sum colon (lib:difference (lib:vector-len name) colon))
+                     (lib:sum colon (lib:difference (lib:vector-len name) (lib:sum 1 colon)))))))
       (prelude:string-position #\: name))))
 
 (lib:intern prelude "%read-symbol"

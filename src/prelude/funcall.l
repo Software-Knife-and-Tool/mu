@@ -24,7 +24,7 @@
                     `(lib:cons ,(prelude:%arg-list arg-list) ())
                     ((:lambda (reqs rest)
                         (prelude:%arg-list `(,@reqs ,(prelude:%arg-list rest))))
-                     (prelude:dropr arg-list (lib:fx-sub (lib:length arg-list) nreqs))
+                     (prelude:dropr arg-list (lib:difference (lib:length arg-list) nreqs))
                      (prelude:dropl arg-list nreqs))))
             (prelude:%funct-prop :rest function)
             (prelude:%funct-prop :arity function))
@@ -40,7 +40,7 @@
                       (prelude:append
                        reqs
                        `(,rest)))
-                    (prelude:dropr args (lib:fx-sub (lib:length args) (prelude:%funct-prop :arity fn)))
+                    (prelude:dropr args (lib:difference (lib:length args) (prelude:%funct-prop :arity fn)))
                     (prelude:dropl args (prelude:%funct-prop :arity fn))))
               args)
          args)))

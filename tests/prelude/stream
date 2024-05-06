@@ -10,7 +10,7 @@
 (lib:type-of prelude:write)	:func
 (lib:type-of prelude:write-byte)	:func
 (lib:write 1 () lib:standard-output)	11
-(lib:write (lib:fx-add 1 2) () lib:standard-output)	33
+(lib:write (lib:sum 1 2) () lib:standard-output)	33
 (lib:write (prelude:string= "" "") () lib:standard-output)	:t:t
 (lib:write (prelude:string= "" "1") () lib:standard-output)	:nil:nil
 (lib:write (prelude:string= "1" "1") () lib:standard-output)	:t:t

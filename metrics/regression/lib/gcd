@@ -1,1 +1,1 @@
-((:lambda (g) (lib:apply g (lib:cons g (lib:cons 101010101 (lib:cons 11011 ()))))) (:lambda (g a b) (:if (lib:eq 0 b) a (lib:apply g (lib:cons g (lib:cons b (lib:cons (lib:fx-sub a (lib:fx-mul b (lib:fx-div a b))) ())))))))
+((:lambda (g) (lib:apply g (lib:cons g (lib:cons 101010101 (lib:cons 11011 ()))))) (:lambda (g a b) (:if (lib:eq 0 b) a (lib:apply g (lib:cons g (lib:cons b (lib:cons (lib:difference a (lib:product b (lib:quotient a b))) ())))))))

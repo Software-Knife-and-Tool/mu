@@ -65,4 +65,4 @@
 (prelude:read (prelude:make-string-stream :input "'prelude:abc") () ())	(:quote prelude:abc)
 (prelude:read (prelude:make-string-stream :input "'abcdefgh") () ())	(:quote abcdefgh)
 (prelude:read (prelude:make-string-stream :input "#.1") () ())	1
-(prelude:read (prelude:make-string-stream :input "#.(lib:fx-add 1 2)") () ())	3
+(prelude:read (prelude:make-string-stream :input "#.(lib:sum 1 2)") () ())	3

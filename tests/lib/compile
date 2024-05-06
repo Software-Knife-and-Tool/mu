@@ -1,7 +1,7 @@
 ((:lambda (fn)(lib:apply (:lambda (fn) (lib:eq :func (lib:type-of fn))) (lib:cons fn ()))) lib:eq)	:t
-(lib:apply (lib:compile '(:lambda (a) ((:lambda (a) (lib:fx-add a a)) (lib:fx-add a 2)))) '(1))	6
-(lib:apply (lib:compile '(:lambda (a) ((:lambda (b) (lib:fx-add a b)) (lib:fx-add a 2)))) '(1))	4
-(lib:apply (lib:compile '(:lambda (a) (lib:fx-add a a))) '(1))	2
+(lib:apply (lib:compile '(:lambda (a) ((:lambda (a) (lib:sum a a)) (lib:sum a 2)))) '(1))	6
+(lib:apply (lib:compile '(:lambda (a) ((:lambda (b) (lib:sum a b)) (lib:sum a 2)))) '(1))	4
+(lib:apply (lib:compile '(:lambda (a) (lib:sum a a))) '(1))	2
 (lib:compile #\a)	#\a
 (lib:compile 1)	1
 (lib:compile :compile)	:compile

@@ -1,4 +1,4 @@
-(lib:eq 'lib:fx-add (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,lib:fx-add") () ()))))	:t
+(lib:eq 'lib:sum (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,lib:sum") () ()))))	:t
 (lib:eq 'lib:version (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,lib:version") () ()))))	:t
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`\"abc\"") () ())))	"abc"
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
@@ -13,11 +13,11 @@
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`((1234) 1234 symbol)") () ())))	((1234) 1234 symbol)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`((a b) c)") () ())))	((a b) c)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`()") () ())))	:nil
-(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(,(lib:fx-add 1 2))") () ())))	(3)
+(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(,(lib:sum 1 2))") () ())))	(3)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(,1 (2) 3)") () ())))	(1 (2) 3)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(,1234 ,@'(a b c))") () ())))	(1234 a b c)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(,@'(a b c))") () ())))	(a b c)
-(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(,@(lib:fx-add 1 2))")) () ()))	3
+(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(,@(lib:sum 1 2))")) () ()))	3
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(0 ,@'(a b c) 1)") () ())))	(0 a b c 1)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(1 2 ,@3)") () ())))	(1 2 . 3)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(1 2 3)") () ())))	(1 2 3)
@@ -25,7 +25,7 @@
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(1234 symbol)") () ())))	(1234 symbol)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(1234)") () ())))	(1234)
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`(a b c)") () ())))	(a b c)
-(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,(lib:fx-add 1 2)") () ())))	3
+(lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,(lib:sum 1 2)") () ())))	3
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,(lib:type-of 'symbol)") () ())))	:symbol
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,1234") () ())))	1234
 (lib:eval (prelude:compile (prelude:read (lib:open :string :input "`,`\"abc\"") () ())))	"abc"
