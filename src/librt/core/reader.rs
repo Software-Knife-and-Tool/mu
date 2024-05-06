@@ -87,7 +87,7 @@ impl Core for Lib {
                         break;
                     }
                 }
-                Ok(None) => return Err(Exception::new(env, Condition::Eof, "read:;", stream)),
+                Ok(None) => return Err(Exception::new(env, Condition::Eof, "lib:read", stream)),
                 Err(e) => return Err(e),
             }
         }
@@ -113,13 +113,13 @@ impl Core for Lib {
                                 }
                             }
                             Ok(None) => {
-                                return Err(Exception::new(env, Condition::Eof, "read:#|", stream))
+                                return Err(Exception::new(env, Condition::Eof, "lib:read", stream))
                             }
                             Err(e) => return Err(e),
                         }
                     }
                 }
-                Ok(None) => return Err(Exception::new(env, Condition::Eof, "read:#|", stream)),
+                Ok(None) => return Err(Exception::new(env, Condition::Eof, "lib:read", stream)),
                 Err(e) => return Err(e),
             }
         }
@@ -144,9 +144,9 @@ impl Core for Lib {
                             Stream::unread_char(env, stream, ch).unwrap();
                             break;
                         }
-                        _ => return Err(Exception::new(env, Condition::Range, "read:tk", stream)),
+                        _ => return Err(Exception::new(env, Condition::Range, "lib:read", stream)),
                     },
-                    None => return Err(Exception::new(env, Condition::Range, "read:tk", stream)),
+                    None => return Err(Exception::new(env, Condition::Range, "lib:read", stream)),
                 },
                 Ok(None) => {
                     break;
@@ -181,7 +181,7 @@ impl Core for Lib {
                             return Err(Exception::new(
                                 env,
                                 Condition::Range,
-                                "read:at",
+                                "lib:read",
                                 Tag::from(ch),
                             ))
                         }
@@ -190,7 +190,7 @@ impl Core for Lib {
                         return Err(Exception::new(
                             env,
                             Condition::Range,
-                            "read:at",
+                            "lib:read",
                             Tag::from(ch),
                         ))
                     }
@@ -210,7 +210,7 @@ impl Core for Lib {
                     Err(Exception::new(
                         env,
                         Condition::Over,
-                        "read:at",
+                        "lib:read",
                         Vector::from_string(&token).evict(env),
                     ))
                 }
@@ -250,13 +250,13 @@ impl Core for Lib {
                                         _ => Err(Exception::new(
                                             env,
                                             Condition::Type,
-                                            "read:ch",
+                                            "lib:read",
                                             Vector::from_string(&phrase).evict(env),
                                         )),
                                     }
                                 }
                                 Ok(None) => {
-                                    Err(Exception::new(env, Condition::Eof, "read:ch", stream))
+                                    Err(Exception::new(env, Condition::Eof, "lib:read", stream))
                                 }
                                 Err(e) => Err(e),
                             }
@@ -266,12 +266,12 @@ impl Core for Lib {
                             Ok(Some(Tag::from(ch)))
                         }
                     },
-                    None => Err(Exception::new(env, Condition::Syntax, "read:ch", stream)),
+                    None => Err(Exception::new(env, Condition::Syntax, "lib:read", stream)),
                 },
                 Ok(None) => Ok(Some(Tag::from(ch))),
                 Err(e) => Err(e),
             },
-            Ok(None) => Err(Exception::new(env, Condition::Eof, "read:ch", stream)),
+            Ok(None) => Err(Exception::new(env, Condition::Eof, "lib:read", stream)),
             Err(e) => Err(e),
         }
     }
@@ -288,11 +288,11 @@ impl Core for Lib {
                     Ok(Some(ch)) => match Self::read_atom(env, ch, stream) {
                         Ok(atom) => match atom.type_of() {
                             Type::Symbol => Ok(Some(atom)),
-                            _ => Err(Exception::new(env, Condition::Type, "read:#", stream)),
+                            _ => Err(Exception::new(env, Condition::Type, "lib:read", stream)),
                         },
                         Err(e) => Err(e),
                     },
-                    Ok(None) => Err(Exception::new(env, Condition::Eof, "read:#", stream)),
+                    Ok(None) => Err(Exception::new(env, Condition::Eof, "lib:read", stream)),
                     Err(e) => Err(e),
                 },
                 '|' => match Self::read_block_comment(env, stream) {
@@ -318,7 +318,7 @@ impl Core for Lib {
                                     Err(Exception::new(
                                         env,
                                         Condition::Over,
-                                        "read:#x",
+                                        "lib:read",
                                         Vector::from_string(&hex).evict(env),
                                     ))
                                 }
@@ -326,7 +326,7 @@ impl Core for Lib {
                             Err(_) => Err(Exception::new(
                                 env,
                                 Condition::Syntax,
-                                "read:#",
+                                "lib:read",
                                 Tag::from(ch),
                             )),
                         },
@@ -335,18 +335,18 @@ impl Core for Lib {
                     Err(_) => Err(Exception::new(
                         env,
                         Condition::Syntax,
-                        "read:#",
+                        "lib:read",
                         Tag::from(ch),
                     )),
                 },
                 _ => Err(Exception::new(
                     env,
                     Condition::Type,
-                    "read:#",
+                    "lib:read",
                     Tag::from(ch),
                 )),
             },
-            Ok(None) => Err(Exception::new(env, Condition::Eof, "read:#", stream)),
+            Ok(None) => Err(Exception::new(env, Condition::Eof, "lib:read", stream)),
             Err(e) => Err(e),
         }
     }

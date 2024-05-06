@@ -51,7 +51,7 @@ impl CoreFunction for Nix {
                 return Err(Exception::new(
                     env,
                     Condition::Type,
-                    "features:uname",
+                    "nix:uname",
                     Tag::nil(),
                 ))
             }

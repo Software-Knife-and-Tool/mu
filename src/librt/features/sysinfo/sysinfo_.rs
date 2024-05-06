@@ -53,7 +53,7 @@ impl CoreFunction for Sysinfo {
                 return Err(Exception::new(
                     env,
                     Condition::Type,
-                    "features:sysinfo",
+                    "sysinfo:sysinfo",
                     Tag::nil(),
                 ))
             }

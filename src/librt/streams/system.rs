@@ -139,7 +139,12 @@ impl Core for SystemStream {
                             Ok(Some(buf[0]))
                         }
                     }
-                    Err(_) => Err(Exception::new(env, Condition::Read, "rd-byte", Tag::nil())),
+                    Err(_) => Err(Exception::new(
+                        env,
+                        Condition::Read,
+                        "lib:read-byte",
+                        Tag::nil(),
+                    )),
                 }
             }
             Self::Reader(file) => {
@@ -155,7 +160,12 @@ impl Core for SystemStream {
                             Ok(Some(buf[0]))
                         }
                     }
-                    Err(_) => Err(Exception::new(env, Condition::Read, "rd-byte", Tag::nil())),
+                    Err(_) => Err(Exception::new(
+                        env,
+                        Condition::Read,
+                        "lib:read-byte",
+                        Tag::nil(),
+                    )),
                 }
             }
             SystemStream::String(string) => {
@@ -181,7 +191,12 @@ impl Core for SystemStream {
 
                 match task {
                     Ok(_) => Ok(None),
-                    Err(_) => Err(Exception::new(env, Condition::Write, "wr-byte", Tag::nil())),
+                    Err(_) => Err(Exception::new(
+                        env,
+                        Condition::Write,
+                        "lib:write-byte",
+                        Tag::nil(),
+                    )),
                 }
             }
             Self::StdError => {
@@ -190,7 +205,12 @@ impl Core for SystemStream {
 
                 match task {
                     Ok(_) => Ok(None),
-                    Err(_) => Err(Exception::new(env, Condition::Write, "wr-byte", Tag::nil())),
+                    Err(_) => Err(Exception::new(
+                        env,
+                        Condition::Write,
+                        "lib:write-byte",
+                        Tag::nil(),
+                    )),
                 }
             }
             SystemStream::Writer(file) => {
@@ -199,7 +219,12 @@ impl Core for SystemStream {
 
                 match task {
                     Ok(_) => Ok(None),
-                    Err(_) => Err(Exception::new(env, Condition::Write, "wr-byte", Tag::nil())),
+                    Err(_) => Err(Exception::new(
+                        env,
+                        Condition::Write,
+                        "lib:write-byte",
+                        Tag::nil(),
+                    )),
                 }
             }
             SystemStream::String(string) => {

@@ -380,7 +380,7 @@ impl<'a> Core<'a> for Vector {
                                     return Err(Exception::new(
                                         env,
                                         Condition::Eof,
-                                        "read:sv",
+                                        "lib:read",
                                         stream,
                                     ));
                                 }
@@ -391,7 +391,7 @@ impl<'a> Core<'a> for Vector {
                             _ => str.push(ch),
                         },
                         Ok(None) => {
-                            return Err(Exception::new(env, Condition::Eof, "read:sv", stream));
+                            return Err(Exception::new(env, Condition::Eof, "lib:read", stream));
                         }
                         Err(e) => return Err(e),
                     }
@@ -406,14 +406,14 @@ impl<'a> Core<'a> for Vector {
                             return Err(Exception::new(
                                 env,
                                 Condition::Type,
-                                "read:sv",
+                                "lib:read",
                                 Tag::nil(),
                             ));
                         }
                         list
                     }
                     Err(_) => {
-                        return Err(Exception::new(env, Condition::Syntax, "read:sv", stream));
+                        return Err(Exception::new(env, Condition::Syntax, "lib:read", stream));
                     }
                 };
 
@@ -435,7 +435,12 @@ impl<'a> Core<'a> for Vector {
                                         if ch.type_of() == Type::Char {
                                             Ok(Char::as_char(env, ch))
                                         } else {
-                                            Err(Exception::new(env, Condition::Type, "read:sv", ch))
+                                            Err(Exception::new(
+                                                env,
+                                                Condition::Type,
+                                                "lib:read",
+                                                ch,
+                                            ))
                                         }
                                     })
                                     .collect();
@@ -458,14 +463,19 @@ impl<'a> Core<'a> for Vector {
                                                 Err(Exception::new(
                                                     env,
                                                     Condition::Range,
-                                                    "read:sv",
+                                                    "lib:read",
                                                     fx,
                                                 ))
                                             } else {
                                                 Ok(byte as u8)
                                             }
                                         } else {
-                                            Err(Exception::new(env, Condition::Type, "read:sv", fx))
+                                            Err(Exception::new(
+                                                env,
+                                                Condition::Type,
+                                                "lib:read",
+                                                fx,
+                                            ))
                                         }
                                     })
                                     .collect();
@@ -485,7 +495,12 @@ impl<'a> Core<'a> for Vector {
                                         if fx.type_of() == Type::Fixnum {
                                             Ok(Fixnum::as_i64(fx))
                                         } else {
-                                            Err(Exception::new(env, Condition::Type, "read:sv", fx))
+                                            Err(Exception::new(
+                                                env,
+                                                Condition::Type,
+                                                "lib:read",
+                                                fx,
+                                            ))
                                         }
                                     })
                                     .collect();
@@ -505,7 +520,12 @@ impl<'a> Core<'a> for Vector {
                                         if fl.type_of() == Type::Float {
                                             Ok(Float::as_f32(env, fl))
                                         } else {
-                                            Err(Exception::new(env, Condition::Type, "read:sv", fl))
+                                            Err(Exception::new(
+                                                env,
+                                                Condition::Type,
+                                                "lib:read",
+                                                fl,
+                                            ))
                                         }
                                     })
                                     .collect();
@@ -519,7 +539,7 @@ impl<'a> Core<'a> for Vector {
                         }
                         _ => panic!(),
                     },
-                    None => Err(Exception::new(env, Condition::Type, "read:sv", vec_type)),
+                    None => Err(Exception::new(env, Condition::Type, "lib:read", vec_type)),
                 }
             }
             _ => panic!(),
@@ -584,7 +604,14 @@ impl CoreFunction for Vector {
 
         fp.value = match Self::to_type(type_sym) {
             Some(vtype) => match vtype {
-                Type::Null => return Err(Exception::new(env, Condition::Type, "vector", type_sym)),
+                Type::Null => {
+                    return Err(Exception::new(
+                        env,
+                        Condition::Type,
+                        "lib:make-vector",
+                        type_sym,
+                    ))
+                }
                 Type::T => {
                     let vec = Cons::iter(env, list)
                         .map(|cons| Cons::car(env, cons))
@@ -599,7 +626,7 @@ impl CoreFunction for Vector {
                             if ch.type_of() == Type::Char {
                                 Ok(Char::as_char(env, ch))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "vector", ch))
+                                Err(Exception::new(env, Condition::Type, "lib:make-vector", ch))
                             }
                         })
                         .collect();
@@ -616,12 +643,17 @@ impl CoreFunction for Vector {
                             if fx.type_of() == Type::Fixnum {
                                 let byte = Fixnum::as_i64(fx);
                                 if !(0..255).contains(&byte) {
-                                    Err(Exception::new(env, Condition::Range, "read:sv", fx))
+                                    Err(Exception::new(
+                                        env,
+                                        Condition::Range,
+                                        "lib:make-vector",
+                                        fx,
+                                    ))
                                 } else {
                                     Ok(byte as u8)
                                 }
                             } else {
-                                Err(Exception::new(env, Condition::Type, "vector", fx))
+                                Err(Exception::new(env, Condition::Type, "lib:make-vector", fx))
                             }
                         })
                         .collect();
@@ -638,7 +670,7 @@ impl CoreFunction for Vector {
                             if fx.type_of() == Type::Fixnum {
                                 Ok(Fixnum::as_i64(fx))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "vector", fx))
+                                Err(Exception::new(env, Condition::Type, "lib:make-vector", fx))
                             }
                         })
                         .collect();
@@ -655,7 +687,7 @@ impl CoreFunction for Vector {
                             if fl.type_of() == Type::Float {
                                 Ok(Float::as_f32(env, fl))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "vector", fl))
+                                Err(Exception::new(env, Condition::Type, "lib:make-vector", fl))
                             }
                         })
                         .collect();
@@ -666,11 +698,21 @@ impl CoreFunction for Vector {
                     }
                 }
                 _ => {
-                    return Err(Exception::new(env, Condition::Type, "make-sv", type_sym));
+                    return Err(Exception::new(
+                        env,
+                        Condition::Type,
+                        "lib:make-vector",
+                        type_sym,
+                    ));
                 }
             },
             None => {
-                return Err(Exception::new(env, Condition::Type, "make-sv", type_sym));
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "lib:make-vector",
+                    type_sym,
+                ));
             }
         };
 
@@ -681,12 +723,17 @@ impl CoreFunction for Vector {
         let vector = fp.argv[0];
         let index = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("sv-ref", &[Type::Vector, Type::Fixnum], fp) {
+        fp.value = match env.fp_argv_check("lib:sv-ref", &[Type::Vector, Type::Fixnum], fp) {
             Ok(_) => {
                 let nth = Fixnum::as_i64(index);
 
                 if nth < 0 || nth as usize >= Self::length(env, vector) {
-                    return Err(Exception::new(env, Condition::Range, "sv-ref", index));
+                    return Err(Exception::new(
+                        env,
+                        Condition::Range,
+                        "lib:vector-ref",
+                        index,
+                    ));
                 }
 
                 match Self::ref_(env, vector, nth as usize) {
@@ -703,7 +750,7 @@ impl CoreFunction for Vector {
     fn lib_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("sv-type", &[Type::Vector], fp) {
+        fp.value = match env.fp_argv_check("lib:sv-type", &[Type::Vector], fp) {
             Ok(_) => match Tag::type_key(Self::type_of(env, vector)) {
                 Some(key) => key,
                 None => panic!(),
@@ -717,7 +764,7 @@ impl CoreFunction for Vector {
     fn lib_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("sv-len", &[Type::Vector], fp) {
+        fp.value = match env.fp_argv_check("lib:sv-len", &[Type::Vector], fp) {
             Ok(_) => Tag::from(Self::length(env, vector) as i64),
             Err(e) => return Err(e),
         };

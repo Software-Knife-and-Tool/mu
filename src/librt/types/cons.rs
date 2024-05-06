@@ -192,7 +192,7 @@ impl Core for Cons {
                                 Ok(cdr) => match env.read_stream(stream, false, Tag::nil(), true) {
                                     Ok(eol) if EOL.eq_(&eol) => Ok(cdr),
                                     Ok(_) => {
-                                        Err(Exception::new(env, Condition::Eof, "car", stream))
+                                        Err(Exception::new(env, Condition::Eof, "lib:car", stream))
                                     }
                                     Err(e) => Err(e),
                                 },
@@ -346,7 +346,7 @@ impl CoreFunction for Cons {
         fp.value = match list.type_of() {
             Type::Null => list,
             Type::Cons => Self::car(env, list),
-            _ => return Err(Exception::new(env, Condition::Type, "car", list)),
+            _ => return Err(Exception::new(env, Condition::Type, "lib:car", list)),
         };
 
         Ok(())
@@ -358,7 +358,7 @@ impl CoreFunction for Cons {
         fp.value = match list.type_of() {
             Type::Null => list,
             Type::Cons => Self::cdr(env, list),
-            _ => return Err(Exception::new(env, Condition::Type, "cdr", list)),
+            _ => return Err(Exception::new(env, Condition::Type, "lib:cdr", list)),
         };
 
         Ok(())
@@ -376,9 +376,9 @@ impl CoreFunction for Cons {
             Type::Null => Tag::from(0i64),
             Type::Cons => match Cons::length(env, list) {
                 Some(len) => Tag::from(len as i64),
-                None => return Err(Exception::new(env, Condition::Type, "length", list)),
+                None => return Err(Exception::new(env, Condition::Type, "lib:length", list)),
             },
-            _ => return Err(Exception::new(env, Condition::Type, "length", list)),
+            _ => return Err(Exception::new(env, Condition::Type, "lib:length", list)),
         };
 
         Ok(())
@@ -388,17 +388,17 @@ impl CoreFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("nth", &[Type::Fixnum, Type::List], fp) {
+        fp.value = match env.fp_argv_check("lib:nth", &[Type::Fixnum, Type::List], fp) {
             Ok(_) => {
                 if Fixnum::as_i64(nth) < 0 {
-                    return Err(Exception::new(env, Condition::Type, "nth", nth));
+                    return Err(Exception::new(env, Condition::Type, "lib:nth", nth));
                 }
 
                 match list.type_of() {
                     Type::Null => Tag::nil(),
                     Type::Cons => match Self::nth(env, Fixnum::as_i64(nth) as usize, list) {
                         Some(tag) => tag,
-                        None => return Err(Exception::new(env, Condition::Type, "nth", list)),
+                        None => return Err(Exception::new(env, Condition::Type, "lib:nth", list)),
                     },
                     _ => panic!(),
                 }
@@ -413,17 +413,19 @@ impl CoreFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("nthcdr", &[Type::Fixnum, Type::List], fp) {
+        fp.value = match env.fp_argv_check("lib:nthcdr", &[Type::Fixnum, Type::List], fp) {
             Ok(_) => {
                 if Fixnum::as_i64(nth) < 0 {
-                    return Err(Exception::new(env, Condition::Type, "nth", nth));
+                    return Err(Exception::new(env, Condition::Type, "lib:nthcdr", nth));
                 }
 
                 match list.type_of() {
                     Type::Null => Tag::nil(),
                     Type::Cons => match Self::nthcdr(env, Fixnum::as_i64(nth) as usize, list) {
                         Some(tag) => tag,
-                        None => return Err(Exception::new(env, Condition::Type, "nthcdr", list)),
+                        None => {
+                            return Err(Exception::new(env, Condition::Type, "lib:nthcdr", list))
+                        }
                     },
                     _ => panic!(),
                 }

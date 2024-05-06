@@ -158,7 +158,7 @@ impl CoreFunction for Future {
     fn lib_future_force(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("fwait", &[Type::Struct], fp) {
+        fp.value = match env.fp_argv_check("lib:force", &[Type::Struct], fp) {
             Ok(_) if Struct::stype(env, future).eq_(&Symbol::keyword("future")) => {
                 let mut futures_ref = block_on(LIB.futures.write());
                 let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
@@ -168,7 +168,7 @@ impl CoreFunction for Future {
                     Future::Lazy(func, args) => env.apply(func, args).unwrap(),
                 }
             }
-            Ok(_) => return Err(Exception::new(env, Condition::Type, "fwait", future)),
+            Ok(_) => return Err(Exception::new(env, Condition::Type, "lib:force", future)),
             Err(e) => return Err(e),
         };
 
@@ -178,7 +178,7 @@ impl CoreFunction for Future {
     fn lib_future_poll(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let future = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("fpoll", &[Type::Struct], fp) {
+        fp.value = match env.fp_argv_check("lib:poll", &[Type::Struct], fp) {
             Ok(_) if Struct::stype(env, future).eq_(&Symbol::keyword("future")) => {
                 if Self::is_future_complete(env, future) {
                     future
@@ -186,7 +186,7 @@ impl CoreFunction for Future {
                     Tag::nil()
                 }
             }
-            Ok(_) => return Err(Exception::new(env, Condition::Type, "poll", future)),
+            Ok(_) => return Err(Exception::new(env, Condition::Type, "lib:poll", future)),
             Err(e) => return Err(e),
         };
 
@@ -197,10 +197,17 @@ impl CoreFunction for Future {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("defer", &[Type::Function, Type::List], fp) {
+        fp.value = match env.fp_argv_check("lib:defer", &[Type::Function, Type::List], fp) {
             Ok(_) => match Self::make_defer_future(env, func, args) {
                 Ok(future) => future,
-                Err(_) => return Err(Exception::new(env, Condition::Type, "defer", Tag::nil())),
+                Err(_) => {
+                    return Err(Exception::new(
+                        env,
+                        Condition::Type,
+                        "lib:defer",
+                        Tag::nil(),
+                    ))
+                }
             },
             Err(e) => return Err(e),
         };
@@ -212,10 +219,17 @@ impl CoreFunction for Future {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("detach", &[Type::Function, Type::List], fp) {
+        fp.value = match env.fp_argv_check("lib:detach", &[Type::Function, Type::List], fp) {
             Ok(_) => match Self::make_detach_future(env, func, args) {
                 Ok(future) => future,
-                Err(_) => return Err(Exception::new(env, Condition::Type, "detach", Tag::nil())),
+                Err(_) => {
+                    return Err(Exception::new(
+                        env,
+                        Condition::Type,
+                        "lib:detach",
+                        Tag::nil(),
+                    ))
+                }
             },
             Err(e) => return Err(e),
         };

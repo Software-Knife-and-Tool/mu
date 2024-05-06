@@ -39,7 +39,7 @@ impl Namespace {
             return Err(Exception::new(
                 env,
                 Condition::Type,
-                "make-ns",
+                "lib:make-ns",
                 Vector::from_string(name).evict(env),
             ));
         }
@@ -71,7 +71,7 @@ impl Namespace {
             return Err(Exception::new(
                 env,
                 Condition::Type,
-                "make-ns",
+                "lib:make-ns",
                 Vector::from_string(name).evict(env),
             ));
         }
@@ -335,7 +335,7 @@ impl CoreFunction for Namespace {
     fn lib_unintern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("unintern", &[Type::Symbol], fp) {
+        fp.value = match env.fp_argv_check("lib:unintern", &[Type::Symbol], fp) {
             Ok(_) => match Self::map_symbol(
                 env,
                 Symbol::namespace(env, symbol),
@@ -358,14 +358,14 @@ impl CoreFunction for Namespace {
         let name = fp.argv[1];
         let value = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("intern", &[Type::Namespace, Type::String, Type::T], fp)
-        {
-            Ok(_) => match Self::intern(env, ns, Vector::as_string(env, name), value) {
-                Some(ns) => ns,
-                None => return Err(Exception::new(env, Condition::Range, "intern", name)),
-            },
-            Err(e) => return Err(e),
-        };
+        fp.value =
+            match env.fp_argv_check("lib:intern", &[Type::Namespace, Type::String, Type::T], fp) {
+                Ok(_) => match Self::intern(env, ns, Vector::as_string(env, name), value) {
+                    Some(ns) => ns,
+                    None => return Err(Exception::new(env, Condition::Range, "lib:intern", name)),
+                },
+                Err(e) => return Err(e),
+            };
 
         Ok(())
     }
@@ -373,7 +373,7 @@ impl CoreFunction for Namespace {
     fn lib_makunbound(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("intern", &[Type::Symbol], fp) {
+        fp.value = match env.fp_argv_check("lib:makunbound", &[Type::Symbol], fp) {
             Ok(_) => Self::makunbound(env, symbol),
             Err(e) => return Err(e),
         };
@@ -384,7 +384,7 @@ impl CoreFunction for Namespace {
     fn lib_make_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("make-ns", &[Type::String], fp) {
+        fp.value = match env.fp_argv_check("lib:make-ns", &[Type::String], fp) {
             Ok(_) => Self::add_ns(env, &Vector::as_string(env, name)).unwrap(),
             Err(e) => return Err(e),
         };
@@ -395,7 +395,7 @@ impl CoreFunction for Namespace {
     fn lib_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("ns-name", &[Type::Namespace], fp) {
+        fp.value = match env.fp_argv_check("lib:ns-name", &[Type::Namespace], fp) {
             Ok(_) => Vector::from_string(&Self::ns_name(env, ns).unwrap()).evict(env),
             Err(e) => return Err(e),
         };
@@ -406,10 +406,10 @@ impl CoreFunction for Namespace {
     fn lib_find_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("find-ns", &[Type::String], fp) {
+        fp.value = match env.fp_argv_check("lib:find-ns", &[Type::String], fp) {
             Ok(_) => match Self::map_ns(env, &Vector::as_string(env, name)) {
                 Some(ns) => ns,
-                None => return Err(Exception::new(env, Condition::Type, "find-ns", name)),
+                None => return Err(Exception::new(env, Condition::Type, "lib:find-ns", name)),
             },
             Err(e) => return Err(e),
         };
@@ -421,7 +421,7 @@ impl CoreFunction for Namespace {
         let ns_tag = fp.argv[0];
         let name = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("find", &[Type::Namespace, Type::String], fp) {
+        fp.value = match env.fp_argv_check("lib:find", &[Type::Namespace, Type::String], fp) {
             Ok(_) => {
                 let ns_ref = block_on(env.ns_map.read());
                 match ns_ref.iter().find_map(
@@ -437,10 +437,10 @@ impl CoreFunction for Namespace {
                         Some(sym) => sym,
                         None => Tag::nil(),
                     },
-                    None => return Err(Exception::new(env, Condition::Type, "find", ns_tag)),
+                    None => return Err(Exception::new(env, Condition::Type, "lib:find", ns_tag)),
                 }
             }
-            _ => return Err(Exception::new(env, Condition::Type, "find", ns_tag)),
+            _ => return Err(Exception::new(env, Condition::Type, "lib:find", ns_tag)),
         };
 
         Ok(())
@@ -449,7 +449,7 @@ impl CoreFunction for Namespace {
     fn lib_symbols(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("symbols", &[Type::Namespace], fp) {
+        fp.value = match env.fp_argv_check("lib:symbols", &[Type::Namespace], fp) {
             Ok(_) => match Self::is_ns(ns) {
                 Some(_) => {
                     let ns_ref = block_on(env.ns_map.read());
@@ -476,7 +476,7 @@ impl CoreFunction for Namespace {
                         None => panic!(),
                     }
                 }
-                _ => return Err(Exception::new(env, Condition::Type, "symbols", ns)),
+                _ => return Err(Exception::new(env, Condition::Type, "lib:symbols", ns)),
             },
             Err(e) => return Err(e),
         };

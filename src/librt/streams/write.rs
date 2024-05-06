@@ -78,7 +78,7 @@ impl CoreFunction for Env {
         let escape = fp.argv[1];
         let stream = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("write", &[Type::T, Type::T, Type::Stream], fp) {
+        fp.value = match env.fp_argv_check("lib:write", &[Type::T, Type::T, Type::Stream], fp) {
             Ok(_) => match env.write_stream(value, !escape.null_(), stream) {
                 Ok(_) => value,
                 Err(e) => return Err(e),

@@ -79,7 +79,7 @@ lazy_static! {
         ( "fx-add",  2, Fixnum::lib_fxadd ),
         ( "fx-sub",  2, Fixnum::lib_fxsub ),
         ( "fx-lt",   2, Fixnum::lib_fxlt ),
-        ( "fx-mul",  2, Fixnum::lib_fxenvl ),
+        ( "fx-mul",  2, Fixnum::lib_fxmul ),
         ( "fx-div",  2, Fixnum::lib_fxdiv ),
         ( "logand",  2, Fixnum::lib_logand ),
         ( "logor",   2, Fixnum::lib_logor ),
@@ -88,7 +88,7 @@ lazy_static! {
         ( "fl-add",  2, Float::lib_fladd ),
         ( "fl-sub",  2, Float::lib_flsub ),
         ( "fl-lt",   2, Float::lib_fllt ),
-        ( "fl-mul",  2, Float::lib_flenvl ),
+        ( "fl-mul",  2, Float::lib_flmul ),
         ( "fl-div",  2, Float::lib_fldiv ),
         // namespaces
         ( "find",      2, Namespace::lib_find ),

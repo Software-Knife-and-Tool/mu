@@ -57,7 +57,7 @@ impl CoreFunction for Std {
         let command = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("command", &[Type::String, Type::List], fp) {
+        fp.value = match env.fp_argv_check("std:command", &[Type::String, Type::List], fp) {
             Ok(_) => {
                 let mut argv = vec![];
 
@@ -70,12 +70,7 @@ impl CoreFunction for Std {
                             argv.push(str)
                         }
                         _ => {
-                            return Err(Exception::new(
-                                env,
-                                Condition::Type,
-                                "features:command",
-                                string,
-                            ))
+                            return Err(Exception::new(env, Condition::Type, "std:command", string))
                         }
                     }
                 }
@@ -86,12 +81,7 @@ impl CoreFunction for Std {
 
                 match status {
                     Err(_) => {
-                        return Err(Exception::new(
-                            env,
-                            Condition::Open,
-                            "features:command",
-                            command,
-                        ))
+                        return Err(Exception::new(env, Condition::Open, "std:command", command))
                     }
                     Ok(exit_status) => Fixnum::as_tag(exit_status.code().unwrap() as i64),
                 }
@@ -108,7 +98,7 @@ impl CoreFunction for Std {
 
         match rc.type_of() {
             Type::Fixnum => std::process::exit(Fixnum::as_i64(rc) as i32),
-            _ => Err(Exception::new(env, Condition::Type, "features:exit", rc)),
+            _ => Err(Exception::new(env, Condition::Type, "std:exit", rc)),
         }
     }
 
@@ -144,14 +134,7 @@ impl CoreFunction for Std {
 
                 std::thread::sleep(us)
             }
-            _ => {
-                return Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "features:exit",
-                    interval,
-                ))
-            }
+            _ => return Err(Exception::new(env, Condition::Type, "std:exit", interval)),
         }
 
         Ok(())

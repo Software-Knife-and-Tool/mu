@@ -250,7 +250,7 @@ impl CoreFunction for Stream {
     fn lib_flush(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("flush", &[Type::Stream], fp) {
+        fp.value = match env.fp_argv_check("lib:flush", &[Type::Stream], fp) {
             Ok(_) => {
                 if Self::is_open(env, tag) {
                     let streams_ref = block_on(LIB.streams.read());
@@ -364,7 +364,7 @@ impl CoreFunction for Stream {
         let byte = fp.argv[0];
         let stream = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("wr-byte", &[Type::Byte, Type::Stream], fp) {
+        fp.value = match env.fp_argv_check("lib:write-byte", &[Type::Byte, Type::Stream], fp) {
             Ok(_) => match Self::write_byte(env, stream, Fixnum::as_i64(byte) as u8) {
                 Ok(_) => byte,
                 Err(e) => return Err(e),

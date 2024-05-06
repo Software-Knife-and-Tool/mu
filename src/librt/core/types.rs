@@ -231,7 +231,7 @@ impl CoreFunction for Tag {
         let type_ = fp.argv[0];
         let arg = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("repr", &[Type::Keyword, Type::T], fp) {
+        fp.value = match env.fp_argv_check("lib:repr", &[Type::Keyword, Type::T], fp) {
             Ok(_) => {
                 if type_.eq_(&Symbol::keyword("vector")) {
                     let slice = arg.as_slice();
@@ -256,10 +256,10 @@ impl CoreFunction for Tag {
 
                         Tag::from(&u64_.to_le_bytes())
                     } else {
-                        return Err(Exception::new(env, Condition::Type, "repr", arg));
+                        return Err(Exception::new(env, Condition::Type, "lib:repr", arg));
                     }
                 } else {
-                    return Err(Exception::new(env, Condition::Type, "repr", type_));
+                    return Err(Exception::new(env, Condition::Type, "lib:repr", type_));
                 }
             }
             Err(e) => return Err(e),
