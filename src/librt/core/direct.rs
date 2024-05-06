@@ -37,7 +37,7 @@ pub enum DirectType {
     String = 3,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, TryFromPrimitive)]
+#[derive(Copy, Clone, PartialOrd, Ord, Eq, PartialEq, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ExtType {
     Fixnum = 0,
@@ -54,12 +54,9 @@ pub enum DirectInfo {
 }
 
 impl DirectTag {
-    pub const EXT_TYPE_FIXNUM: u8 = 0; // 56 bits: -36028797018963967 to 36028797018963968
-    pub const EXT_TYPE_FLOAT: u8 = 1; // 32 bit IEEE float: -3.40282347E+38 to -1.17549435E-38,
-                                      //                    1.17549435E-38 to 3.40282347E+38
-    pub const EXT_TYPE_CONS: u8 = 2;
-    pub const EXT_TYPE_STREAM: u8 = 3;
-    pub const EXT_TYPE_NAMESPACE: u8 = 4;
+    // 56 bit fixnum:     -36028797018963967 to 36028797018963968
+    // 32 bit IEEE float: -3.40282347E+38    to -1.17549435E-38,
+    //                     1.17549435E-38    to  3.40282347E+38
 
     pub const DIRECT_STR_MAX: usize = 7;
 
@@ -127,8 +124,8 @@ impl DirectTag {
     pub fn car(cons: Tag) -> Tag {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.info() {
-                    Self::EXT_TYPE_CONS => {
+                DirectType::Ext => match dtag.info().try_into() {
+                    Ok(ExtType::Cons) => {
                         let mask_32: u64 = 0xffffffff;
                         let mut u64_: u64 = dtag.data() >> 28;
                         let sign = (u64_ >> 27) & 1;
@@ -150,9 +147,9 @@ impl DirectTag {
     pub fn cdr(cons: Tag) -> Tag {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.info() {
-                    Self::EXT_TYPE_CONS => {
-                        let mask_28: u64 = 0xfffffff;
+                DirectType::Ext => match dtag.info().try_into() {
+                    Ok(ExtType::Cons) => {
+                        let mask_28: u64 = 0x0fffffff;
                         let mask_32: u64 = 0xffffffff;
 
                         let mut u64_: u64 = dtag.data() & mask_28;
