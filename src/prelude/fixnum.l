@@ -7,20 +7,20 @@
 (lib:intern prelude "1+"
    (:lambda (n)
      (:if (prelude:fixnump n)
-          (lib:fx-add n 1)
+          (lib:sum n 1)
           (prelude:raise n 'prelude:1+ "not a fixnum"))))
 
 (lib:intern prelude "1-"
    (:lambda (n)
      (:if (prelude:fixnump n)
-          (lib:fx-sub n 1)
+          (lib:difference n 1)
           (prelude:raise n 'prelude:1- "not a fixnum"))))
 
 (lib:intern prelude "truncate"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(lib:fx-div n m) ,@(lib:fx-sub n (lib:fx-mul m (lib:fx-div n m))))
+               `(,(lib:quotient n m) ,@(lib:difference n (lib:product m (lib:quotient n m))))
                (prelude:raise m 'prelude:truncate "not a fixnum"))
           (prelude:raise n 'prelude:truncate "not a fixnum"))))
 
@@ -29,7 +29,7 @@
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(lib:fx-div n m) ,@(lib:fx-sub n (lib:fx-mul m (lib:fx-div n m))))
+               `(,(lib:quotient n m) ,@(lib:difference n (lib:product m (lib:quotient n m))))
                (prelude:raise m 'prelude:rem "not a fixnum"))
           (prelude:raise n 'prelude:floor "not a fixnum"))))
 
@@ -38,7 +38,7 @@
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(lib:fx-div n m) ,@(lib:fx-sub n (lib:fx-mul m (lib:fx-div n m))))
+               `(,(lib:quotient n m) ,@(lib:difference n (lib:product m (lib:quotient n m))))
                (prelude:raise m 'prelude:ceiling "not a fixnum"))
           (prelude:raise n 'prelude:ceiling "not a fixnum"))))
 
@@ -63,6 +63,6 @@
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               (lib:fx-sub (lib:fx-div n m) (lib:fx-sub n (lib:fx-mul m (lib:fx-div n m))))
+               (lib:difference (lib:quotient n m) (lib:difference n (lib:product m (lib:quotient n m))))
                (prelude:raise m 'prelude:round "not a fixnum"))
           (prelude:raise n 'prelude:round "not a fixnum"))))

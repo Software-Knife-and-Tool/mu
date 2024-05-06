@@ -1,4 +1,4 @@
 (lib:write 1000 () (lib:open :string :output ""))
-(lib:write (lib:fx-mul 100 200) () (lib:open :string :output ""))
+(lib:write (lib:product 100 200) () (lib:open :string :output ""))
 (lib:write (prelude:string= "" "") () (lib:open :string :output ""))
 (lib:write (prelude:string= "ci" "") () (lib:open :string :output ""))

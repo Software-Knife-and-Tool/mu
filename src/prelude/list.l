@@ -54,7 +54,7 @@
                            (:lambda (loop)
                               (:if (prelude:listp loop)
                                    loop
-                                   (:if (lib:fx-lt length loop)
+                                   (:if (lib:less-than length loop)
                                         ()
                                         (:if (prelude:apply function `(,(lib:nth loop list)))
                                              `(,loop)
@@ -76,12 +76,12 @@
                        (:lambda (loop)
                           (:if (prelude:listp loop)
                                loop
-                               (:if (lib:fx-lt loop 0)
+                               (:if (lib:less-than loop 0)
                                     ()
                                     (:if (prelude:apply function `(,(lib:nth loop list)))
                                          `(,loop)
                                          (prelude:1- loop)))))
-                       (lib:fx-sub (lib:length list) 1))))
+                       (lib:difference (lib:length list) 1))))
                 (prelude:raise list 'prelude:positionr "not a list"))
            (prelude:raise function 'prelude:positionr "not a function"))))
 
@@ -124,7 +124,7 @@
                  ((:lambda (length)
                      (prelude:foldl
                       (:lambda (el last)
-                         (:if (lib:fx-lt (lib:length last) (lib:fx-sub length n))
+                         (:if (lib:less-than (lib:length last) (lib:difference length n))
                               `(,el ,@last)
                               last))
                       ()

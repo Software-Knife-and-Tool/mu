@@ -5,7 +5,7 @@
 (lib:fix (:lambda (l) (:if l ((:lambda () (lib:write (lib:car l) () lib:standard-output) (lib:cdr l))) ())) '(1 2 3 4))	1234:nil
 (lib:fix (:lambda (l) (:if l ((:lambda () (lib:write (lib:car (lib:car l)) () lib:standard-output) (lib:cdr l))) ())) '((0 . 1) (2 . 3)))	02:nil
 (lib:apply lib:eq '(1 2))	:nil
-(lib:apply lib:fx-add '(1 2))	3
+(lib:apply lib:sum '(1 2))	3
 (lib:type-of #\a)	:char
 (lib:type-of '(1 2 3))	:cons
 (lib:type-of '(:lambda ()))	:cons
@@ -45,7 +45,7 @@
 (lib:heap-size 'lib:eq)	45
 (lib:heap-size lib:eq)	18
 (lib:heap-size lib:standard-input)	8
-(lib:unwind-protect (:lambda (cond obj) (lib:write cond () lib:standard-output)) (:lambda () (lib:fx-div 1 1)))	1
+(lib:unwind-protect (:lambda (cond obj) (lib:write cond () lib:standard-output)) (:lambda () (lib:quotient 1 1)))	1
 (lib:repr :t (lib:repr :vector :t))	:t
 (lib:type-of lib:find)	:func
 (lib:type-of lib:find-ns)	:func

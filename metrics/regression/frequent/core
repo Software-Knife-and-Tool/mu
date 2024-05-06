@@ -33,7 +33,7 @@
 (lib:eval 'lib:version)
 (lib:intern (lib:find-ns "") "a" ())
 (lib:fix (:lambda (a) ()) ())
-(lib:fix (:lambda (a) (:if (lib:eq 0 a) 0 (lib:fx-sub a 1))) 100)
+(lib:fix (:lambda (a) (:if (lib:eq 0 a) 0 (lib:difference a 1))) 100)
 (lib:type-of ())
 (lib:type-of 1)
 (lib:eq () ())

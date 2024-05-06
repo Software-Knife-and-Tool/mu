@@ -32,13 +32,13 @@
 (prelude:foldl (:lambda (el acc) (lib:cons el acc)) () '(1 2 3 4))	(4 3 2 1)
 (prelude:foldl (:lambda (el acc) (lib:cons el acc)) () '(1))	(1)
 (prelude:foldl (:lambda (el acc) (lib:cons el acc)) () ())	:nil
-(prelude:foldl (:lambda (x y) (lib:fx-add x y)) 0 '(1 2 3))	6
+(prelude:foldl (:lambda (x y) (lib:sum x y)) 0 '(1 2 3))	6
 (prelude:foldr (:lambda (el acc) (:if (prelude:null acc) :nil (prelude:symbolp el))) :t '(1 2 3))	:nil
 (prelude:foldr (:lambda (el acc) (:if (prelude:null acc) :nil (prelude:symbolp el))) :t '(a b c))	:t
 (prelude:foldr (:lambda (el acc) (lib:cons el acc)) () '(1 2 3 4))	(1 2 3 4)
 (prelude:foldr (:lambda (el acc) (lib:cons el acc)) () '(1))	(1)
 (prelude:foldr (:lambda (el acc) (lib:cons el acc)) () ())	:nil
-(prelude:foldr (:lambda (x y) (lib:fx-add x y)) 0 '(1 2 3))	6
+(prelude:foldr (:lambda (x y) (lib:sum x y)) 0 '(1 2 3))	6
 (prelude:last '(1 2 . 3))	(2 . 3)
 (prelude:last '(1 2 3))	(3)
 (prelude:last '(1))	(1)

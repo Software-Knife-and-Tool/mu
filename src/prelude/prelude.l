@@ -84,7 +84,7 @@
       (:if (prelude:numberp n)
            (:if (prelude:floatp n)
                 (lib:fl-lt n 0.0)
-                (lib:fx-lt n 0))
+                (lib:less-than n 0))
            (prelude:raise n 'prelude:minusp "not a number"))))
 
 (lib:intern prelude "plusp"
@@ -92,7 +92,7 @@
       (:if (prelude:numberp n)
            (:if (prelude:floatp n)
                 (lib:fl-lt 0.0 n)
-                (lib:fx-lt 0 n))
+                (lib:less-than 0 n))
            (prelude:raise n 'prelude:plusp "not a number"))))
 
 ;;;
