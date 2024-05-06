@@ -246,6 +246,34 @@ impl Namespace {
         }
     }
 
+    pub fn intern_static(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
+        let symbol = Symbol::new(env, ns, &name, value).evict(env);
+        let ns_ref = block_on(env.ns_map.read());
+
+        match ns_ref.iter().find_map(
+            |(tag, _, ns_map)| {
+                if ns.eq_(tag) {
+                    Some(ns_map)
+                } else {
+                    None
+                }
+            },
+        ) {
+            Some(ns_map) => {
+                let name = Vector::as_string(env, Symbol::name(env, symbol));
+                let mut hash = block_on(match ns_map {
+                    Namespace::Static(hash) => hash.write(),
+                    Namespace::Dynamic(_) => return None,
+                });
+
+                hash.insert(name, symbol);
+            }
+            None => return None,
+        }
+
+        Some(symbol)
+    }
+
     pub fn unintern(env: &Env, symbol: Tag) -> Option<Tag> {
         let ns = Symbol::namespace(env, symbol);
 
@@ -281,7 +309,7 @@ impl Namespace {
             Some(ns_map) => {
                 let name = Vector::as_string(env, Symbol::name(env, symbol));
                 let mut hash = block_on(match ns_map {
-                    Namespace::Static(hash) => hash.write(),
+                    Namespace::Static(_) => return None,
                     Namespace::Dynamic(hash) => hash.write(),
                 });
 

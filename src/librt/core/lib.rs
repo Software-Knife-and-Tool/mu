@@ -119,7 +119,7 @@ impl Lib {
     pub fn namespaces(env: &Env) {
         let mut functions = block_on(LIB.functions.write());
 
-        Namespace::intern(
+        Namespace::intern_static(
             env,
             env.lib_ns,
             "version".to_string(),
@@ -127,9 +127,12 @@ impl Lib {
         )
         .unwrap();
 
-        Namespace::intern(env, env.lib_ns, "standard-input".to_string(), LIB.stdin()).unwrap();
-        Namespace::intern(env, env.lib_ns, "standard-output".to_string(), LIB.stdout()).unwrap();
-        Namespace::intern(env, env.lib_ns, "error-output".to_string(), LIB.errout()).unwrap();
+        Namespace::intern_static(env, env.lib_ns, "standard-input".to_string(), LIB.stdin())
+            .unwrap();
+        Namespace::intern_static(env, env.lib_ns, "standard-output".to_string(), LIB.stdout())
+            .unwrap();
+        Namespace::intern_static(env, env.lib_ns, "error-output".to_string(), LIB.errout())
+            .unwrap();
 
         for (name, nreqs, fn_) in &*LIB_SYMBOLS {
             let vec = vec![
@@ -141,7 +144,7 @@ impl Lib {
             let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
             let func = Function::new(Tag::from(*nreqs as i64), fn_vec).evict(env);
 
-            Namespace::intern(env, env.lib_ns, name.to_string(), func).unwrap();
+            Namespace::intern_static(env, env.lib_ns, name.to_string(), func).unwrap();
 
             functions.push(*fn_)
         }
