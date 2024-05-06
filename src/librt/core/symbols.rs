@@ -98,7 +98,8 @@ lazy_static! {
         ( "ns-map",    0, Namespace::lib_ns_map ),
         ( "ns-name",   1, Namespace::lib_ns_name ),
         ( "symbols",   1, Namespace::lib_symbols ),
-        ( "unintern",  2, Namespace::lib_unintern ),
+        ( "unintern",  1, Namespace::lib_unintern ),
+        ( "makunbound",  1, Namespace::lib_makunbound ),
         // read/write
         ( "read",    3, Env::lib_read ),
         ( "write",   3, Env::lib_write ),
@@ -120,14 +121,14 @@ lazy_static! {
         // streams
         ( "close",   1, Stream::lib_close ),
         ( "flush",   1, Stream::lib_flush ),
-        ( "get-str", 1, Stream::lib_get_string ),
+        ( "get-string", 1, Stream::lib_get_string ),
         ( "open",    3, Stream::lib_open ),
         ( "openp",   1, Stream::lib_openp ),
-        ( "rd-byte", 3, Stream::lib_read_byte ),
-        ( "rd-char", 3, Stream::lib_read_char ),
-        ( "un-char", 2, Stream::lib_unread_char ),
-        ( "wr-byte", 2, Stream::lib_write_byte ),
-        ( "wr-char", 2, Stream::lib_write_char ),
+        ( "read-byte", 3, Stream::lib_read_byte ),
+        ( "read-char", 3, Stream::lib_read_char ),
+        ( "unread-char", 2, Stream::lib_unread_char ),
+        ( "write-byte", 2, Stream::lib_write_byte ),
+        ( "write-char", 2, Stream::lib_write_char ),
         // utime
         ( "utime",   0, Env::lib_utime ),
     ];

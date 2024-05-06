@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env symbol namespaces
+//! env namespaces
 use {
     crate::{
         core::{
@@ -37,6 +37,7 @@ impl Namespace {
 
         if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
             return Err(Exception::new(
+                env,
                 Condition::Type,
                 "make-ns",
                 Vector::from_string(name).evict(env),
@@ -68,6 +69,7 @@ impl Namespace {
 
         if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
             return Err(Exception::new(
+                env,
                 Condition::Type,
                 "make-ns",
                 Vector::from_string(name).evict(env),
@@ -160,6 +162,26 @@ impl Namespace {
         }
     }
 
+    pub fn makunbound(env: &Env, symbol: Tag) -> Tag {
+        let image = Symbol::to_image(env, symbol);
+        let slices: &[[u8; 8]] = &[
+            image.namespace.as_slice(),
+            image.name.as_slice(),
+            UNBOUND.as_slice(),
+        ];
+
+        let offset = match symbol {
+            Tag::Indirect(heap) => heap.image_id(),
+            _ => panic!(),
+        } as usize;
+
+        let mut heap_ref = block_on(env.heap.write());
+
+        heap_ref.write_image(slices, offset);
+
+        symbol
+    }
+
     pub fn intern(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
         if env.keyword_ns.eq_(&ns) {
             if name.len() > DirectTag::DIRECT_STR_MAX {
@@ -209,7 +231,6 @@ impl Namespace {
                 ) {
                     Some(ns_map) => {
                         let name = Vector::as_string(env, Symbol::name(env, symbol));
-
                         let mut hash = block_on(match ns_map {
                             Namespace::Static(hash) => hash.write(),
                             Namespace::Dynamic(hash) => hash.write(),
@@ -223,6 +244,53 @@ impl Namespace {
                 Some(symbol)
             }
         }
+    }
+
+    pub fn unintern(env: &Env, symbol: Tag) -> Option<Tag> {
+        let ns = Symbol::namespace(env, symbol);
+
+        let image = Symbol::to_image(env, symbol);
+        let slices: &[[u8; 8]] = &[
+            Tag::nil().as_slice(),
+            image.name.as_slice(),
+            image.value.as_slice(),
+        ];
+
+        let offset = match symbol {
+            Tag::Indirect(heap) => heap.image_id(),
+            _ => panic!(),
+        } as usize;
+
+        {
+            let mut heap_ref = block_on(env.heap.write());
+
+            heap_ref.write_image(slices, offset);
+        }
+
+        let ns_ref = block_on(env.ns_map.read());
+
+        match ns_ref.iter().find_map(
+            |(tag, _, ns_map)| {
+                if ns.eq_(tag) {
+                    Some(ns_map)
+                } else {
+                    None
+                }
+            },
+        ) {
+            Some(ns_map) => {
+                let name = Vector::as_string(env, Symbol::name(env, symbol));
+                let mut hash = block_on(match ns_map {
+                    Namespace::Static(hash) => hash.write(),
+                    Namespace::Dynamic(hash) => hash.write(),
+                });
+
+                hash.remove(&name);
+            }
+            None => return None,
+        }
+
+        Some(symbol)
     }
 }
 
@@ -252,23 +320,33 @@ impl Core for Namespace {
 }
 
 pub trait CoreFunction {
-    fn lib_intern(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_make_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn lib_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()>;
-    fn lib_find_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_find(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_find_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_intern(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_makunbound(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_make_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_ns_map(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn lib_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()>;
     fn lib_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn lib_unintern(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Namespace {
     fn lib_unintern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let ns = fp.argv[0];
-        let name = fp.argv[1];
+        let symbol = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("unbound", &[Type::Namespace, Type::String], fp) {
-            Ok(_) => Self::intern(env, ns, Vector::as_string(env, name), *UNBOUND).unwrap(),
+        fp.value = match env.fp_argv_check("unintern", &[Type::Symbol], fp) {
+            Ok(_) => match Self::map_symbol(
+                env,
+                Symbol::namespace(env, symbol),
+                &Vector::as_string(env, Symbol::name(env, symbol)),
+            ) {
+                Some(_) => match Self::unintern(env, symbol) {
+                    Some(_) => symbol,
+                    None => Tag::nil(),
+                },
+                None => Tag::nil(),
+            },
             Err(e) => return Err(e),
         };
 
@@ -284,8 +362,19 @@ impl CoreFunction for Namespace {
         {
             Ok(_) => match Self::intern(env, ns, Vector::as_string(env, name), value) {
                 Some(ns) => ns,
-                None => return Err(Exception::new(Condition::Range, "intern", name)),
+                None => return Err(Exception::new(env, Condition::Range, "intern", name)),
             },
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn lib_makunbound(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let symbol = fp.argv[0];
+
+        fp.value = match env.fp_argv_check("intern", &[Type::Symbol], fp) {
+            Ok(_) => Self::makunbound(env, symbol),
             Err(e) => return Err(e),
         };
 
@@ -317,10 +406,10 @@ impl CoreFunction for Namespace {
     fn lib_find_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("make-ns", &[Type::String], fp) {
+        fp.value = match env.fp_argv_check("find-ns", &[Type::String], fp) {
             Ok(_) => match Self::map_ns(env, &Vector::as_string(env, name)) {
                 Some(ns) => ns,
-                None => return Err(Exception::new(Condition::Type, "find-ns", name)),
+                None => return Err(Exception::new(env, Condition::Type, "find-ns", name)),
             },
             Err(e) => return Err(e),
         };
@@ -332,7 +421,7 @@ impl CoreFunction for Namespace {
         let ns_tag = fp.argv[0];
         let name = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("ns-find", &[Type::Namespace, Type::String], fp) {
+        fp.value = match env.fp_argv_check("find", &[Type::Namespace, Type::String], fp) {
             Ok(_) => {
                 let ns_ref = block_on(env.ns_map.read());
                 match ns_ref.iter().find_map(
@@ -348,10 +437,10 @@ impl CoreFunction for Namespace {
                         Some(sym) => sym,
                         None => Tag::nil(),
                     },
-                    None => return Err(Exception::new(Condition::Type, "find", ns_tag)),
+                    None => return Err(Exception::new(env, Condition::Type, "find", ns_tag)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "find", ns_tag)),
+            _ => return Err(Exception::new(env, Condition::Type, "find", ns_tag)),
         };
 
         Ok(())
@@ -360,7 +449,7 @@ impl CoreFunction for Namespace {
     fn lib_symbols(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("ns-syms", &[Type::Namespace], fp) {
+        fp.value = match env.fp_argv_check("symbols", &[Type::Namespace], fp) {
             Ok(_) => match Self::is_ns(ns) {
                 Some(_) => {
                     let ns_ref = block_on(env.ns_map.read());
@@ -387,7 +476,7 @@ impl CoreFunction for Namespace {
                         None => panic!(),
                     }
                 }
-                _ => return Err(Exception::new(Condition::Type, "symbols", ns)),
+                _ => return Err(Exception::new(env, Condition::Type, "symbols", ns)),
             },
             Err(e) => return Err(e),
         };

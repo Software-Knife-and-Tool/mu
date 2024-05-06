@@ -165,6 +165,7 @@ impl QqReader {
                 ',' => match Stream::read_char(env, stream) {
                     Err(e) => Err(e),
                     Ok(None) => Err(Exception::new(
+                        env,
                         Condition::Syntax,
                         "qquote",
                         Symbol::keyword("eof"),
@@ -205,6 +206,7 @@ impl QqReader {
                 Err(e) => return Err(e),
                 Ok(None) => {
                     return Err(Exception::new(
+                        env,
                         Condition::Syntax,
                         "qquote",
                         Symbol::keyword("eof"),
@@ -258,6 +260,7 @@ impl QqReader {
         match Self::read_syntax(self, env, self.stream) {
             Err(e) => Err(e),
             Ok(None) => Err(Exception::new(
+                env,
                 Condition::Syntax,
                 "qquote",
                 Symbol::keyword("eof"),
@@ -276,11 +279,13 @@ impl QqReader {
                     },
                 },
                 QqSyntax::CommaAt => Err(Exception::new(
+                    env,
                     Condition::Syntax,
                     "qquote",
                     Symbol::keyword(",@"),
                 )),
                 QqSyntax::List_ => Err(Exception::new(
+                    env,
                     Condition::Syntax,
                     "qquote",
                     Symbol::keyword(")"),

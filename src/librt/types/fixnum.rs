@@ -117,6 +117,7 @@ impl CoreFunction for Fixnum {
                     Self::as_tag(result)
                 } else {
                     return Err(Exception::new(
+                        env,
                         Condition::Over,
                         "ash",
                         Cons::new(fp.argv[0], fp.argv[1]).evict(env),
@@ -139,10 +140,10 @@ impl CoreFunction for Fixnum {
                     if Self::is_i56(sum) {
                         Self::as_tag(sum)
                     } else {
-                        return Err(Exception::new(Condition::Over, "fx-add", fx0));
+                        return Err(Exception::new(env, Condition::Over, "fx-add", fx0));
                     }
                 }
-                None => return Err(Exception::new(Condition::Over, "fx-add", fx1)),
+                None => return Err(Exception::new(env, Condition::Over, "fx-add", fx1)),
             },
             Err(e) => return Err(e),
         };
@@ -160,10 +161,10 @@ impl CoreFunction for Fixnum {
                     if Self::is_i56(diff) {
                         Self::as_tag(diff)
                     } else {
-                        return Err(Exception::new(Condition::Over, "fx-sub", fx1));
+                        return Err(Exception::new(env, Condition::Over, "fx-sub", fx1));
                     }
                 }
-                None => return Err(Exception::new(Condition::Over, "fx-sub", fx1)),
+                None => return Err(Exception::new(env, Condition::Over, "fx-sub", fx1)),
             },
             Err(e) => return Err(e),
         };
@@ -181,10 +182,10 @@ impl CoreFunction for Fixnum {
                     if Self::is_i56(prod) {
                         Self::as_tag(prod)
                     } else {
-                        return Err(Exception::new(Condition::Over, "fx-envl", fx1));
+                        return Err(Exception::new(env, Condition::Over, "fx-envl", fx1));
                     }
                 }
-                None => return Err(Exception::new(Condition::Over, "fx-envl", fx1)),
+                None => return Err(Exception::new(env, Condition::Over, "fx-envl", fx1)),
             },
             Err(e) => return Err(e),
         };
@@ -199,7 +200,7 @@ impl CoreFunction for Fixnum {
         fp.value = match env.fp_argv_check("fx-div", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {
                 if Self::as_i64(fx1) == 0 {
-                    return Err(Exception::new(Condition::ZeroDivide, "fx-div", fx0));
+                    return Err(Exception::new(env, Condition::ZeroDivide, "fx-div", fx0));
                 }
 
                 match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
@@ -207,10 +208,10 @@ impl CoreFunction for Fixnum {
                         if Self::is_i56(div) {
                             Self::as_tag(div)
                         } else {
-                            return Err(Exception::new(Condition::Over, "fx-div", fx1));
+                            return Err(Exception::new(env, Condition::Over, "fx-div", fx1));
                         }
                     }
-                    None => return Err(Exception::new(Condition::Over, "fx-div", fx1)),
+                    None => return Err(Exception::new(env, Condition::Over, "fx-div", fx1)),
                 }
             }
             Err(e) => return Err(e),

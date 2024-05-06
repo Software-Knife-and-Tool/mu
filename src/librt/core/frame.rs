@@ -138,7 +138,7 @@ impl Frame {
 
     // apply
     pub fn apply(mut self, env: &Env, func: Tag) -> exception::Result<Tag> {
-        match Exception::on_signal() {
+        match Exception::on_signal(env) {
             Ok(_) => (),
             Err(e) => return Err(e),
         }
@@ -148,7 +148,7 @@ impl Frame {
                 if Symbol::is_bound(env, func) {
                     self.apply(env, Symbol::value(env, func))
                 } else {
-                    Err(Exception::new(Condition::Unbound, "apply", func))
+                    Err(Exception::new(env, Condition::Unbound, "apply", func))
                 }
             }
             Type::Function => match Function::form(env, func).type_of() {
@@ -158,7 +158,7 @@ impl Frame {
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
-                        return Err(Exception::new(Condition::Arity, "apply", func));
+                        return Err(Exception::new(env, Condition::Arity, "apply", func));
                     }
 
                     let offset =
@@ -174,7 +174,7 @@ impl Frame {
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
-                        return Err(Exception::new(Condition::Arity, "apply", func));
+                        return Err(Exception::new(env, Condition::Arity, "apply", func));
                     }
 
                     let mut value = Tag::nil();
@@ -195,9 +195,9 @@ impl Frame {
 
                     Ok(value)
                 }
-                _ => Err(Exception::new(Condition::Type, "apply", func)),
+                _ => Err(Exception::new(env, Condition::Type, "apply", func)),
             },
-            _ => Err(Exception::new(Condition::Type, "apply", func)),
+            _ => Err(Exception::new(env, Condition::Type, "apply", func)),
         }
     }
 }
@@ -244,7 +244,7 @@ impl CoreFunction for Frame {
                 Fixnum::as_i64(offset) as usize,
             ) {
                 Some(tag) => tag,
-                None => return Err(Exception::new(Condition::Type, "fr-ref", frame)),
+                None => return Err(Exception::new(env, Condition::Type, "fr-ref", frame)),
             },
             Err(e) => return Err(e),
         };

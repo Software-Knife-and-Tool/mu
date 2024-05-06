@@ -21,7 +21,7 @@ pub trait Core {
 }
 
 impl Core for Env {
-    fn fp_argv_check(&self, fn_name: &str, types: &[Type], fp: &Frame) -> exception::Result<()> {
+    fn fp_argv_check(&self, source: &str, types: &[Type], fp: &Frame) -> exception::Result<()> {
         for (index, arg_type) in types.iter().enumerate() {
             let fp_arg = fp.argv[index];
             let fp_arg_type = fp_arg.type_of();
@@ -32,27 +32,27 @@ impl Core for Env {
                         let n = Fixnum::as_i64(fp_arg);
 
                         if !(0..=255).contains(&n) {
-                            return Err(Exception::new(Condition::Type, fn_name, fp_arg));
+                            return Err(Exception::new(self, Condition::Type, source, fp_arg));
                         }
                     }
-                    _ => return Err(Exception::new(Condition::Type, fn_name, fp_arg)),
+                    _ => return Err(Exception::new(self, Condition::Type, source, fp_arg)),
                 },
                 Type::List => match fp_arg_type {
                     Type::Cons | Type::Null => (),
-                    _ => return Err(Exception::new(Condition::Type, fn_name, fp_arg)),
+                    _ => return Err(Exception::new(self, Condition::Type, source, fp_arg)),
                 },
                 Type::String => match fp_arg_type {
                     Type::Vector => {
                         if Vector::type_of(self, fp.argv[index]) != Type::Char {
-                            return Err(Exception::new(Condition::Type, fn_name, fp_arg));
+                            return Err(Exception::new(self, Condition::Type, source, fp_arg));
                         }
                     }
-                    _ => return Err(Exception::new(Condition::Type, fn_name, fp_arg)),
+                    _ => return Err(Exception::new(self, Condition::Type, source, fp_arg)),
                 },
                 Type::T => (),
                 _ => {
                     if fp_arg_type != *arg_type {
-                        return Err(Exception::new(Condition::Type, fn_name, fp_arg));
+                        return Err(Exception::new(self, Condition::Type, source, fp_arg));
                     }
                 }
             }
@@ -129,7 +129,7 @@ impl CoreFunction for Env {
 
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "fix", func)),
+            _ => Err(Exception::new(env, Condition::Type, "fix", func)),
         }
     }
 }

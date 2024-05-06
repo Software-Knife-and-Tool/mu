@@ -58,7 +58,7 @@
                               (lib:write (prelude:schar hexstr (lib:fx-sub len 1)) () dest)
                               (lib:fx-sub len 1)))))
                    (lib:vector-len hexstr)))
-                  (lib:get-str str-stream)))
+                  (lib:get-string str-stream)))
              (lib:open :string :output "")))
             (prelude:raise fx 'prelude:format "argument to ~X not a fixnum")))
       (lib:car arg-list))))

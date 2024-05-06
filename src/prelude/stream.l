@@ -89,28 +89,28 @@
 ;;;
 (lib:intern prelude "write-char"
    (:lambda (ch designator)
-     (lib:wr-char ch (prelude:%write-stream-designator designator))))
+     (lib:write-char ch (prelude:%write-stream-designator designator))))
 
 (lib:intern prelude "write-byte"
    (:lambda (byte designator)
-     (lib:wr-byte byte (prelude:%write-stream-designator designator))))
+     (lib:write-byte byte (prelude:%write-stream-designator designator))))
 
 (lib:intern prelude "read-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
-       (lib:rd-char stream error-eofp eof-value))
+       (lib:read-char stream error-eofp eof-value))
      (prelude:%read-stream-designator designator))))
 
 (lib:intern prelude "read-byte"
    (:lambda (designator error-eofp eof-value)
      ((:lambda (stream)
-        (lib:rd-byte stream error-eofp eof-value))
+        (lib:read-byte stream error-eofp eof-value))
       (prelude:%read-stream-designator designator))))
 
 (lib:intern prelude "peek-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
-       (lib:un-char
+       (lib:unread-char
         (prelude:read-char stream error-eofp eof-value)
         stream))
      (prelude:%read-stream-designator designator))))
@@ -118,7 +118,7 @@
 (lib:intern prelude "unread-char"
    (:lambda (ch designator)
      (:if (prelude:charp ch)
-          (lib:un-char ch (prelude:%write-stream-designator designator))
+          (lib:unread-char ch (prelude:%write-stream-designator designator))
           (prelude:raise ch 'prelude:unread-char "not a char"))))
 
 ;;;
@@ -144,7 +144,7 @@
         ((:lambda (value)
            (:if (lib:eq value prelude:%eof%)
                 eof-value
-                (lib:get-str line)))              
+                (lib:get-string line)))              
          (lib:fix
           (:lambda (loop)
             ((:lambda (ch)
@@ -153,7 +153,7 @@
                     (:if (lib:eq #\linefeed ch)
                          loop
                          ((:lambda ()
-                            (lib:wr-char ch line)
+                            (lib:write-char ch line)
                             (prelude:null loop))))))
              (prelude:read-char stream eof-error-p prelude:%eof%)))
          ())))

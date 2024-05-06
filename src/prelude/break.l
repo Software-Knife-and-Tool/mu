@@ -4,6 +4,7 @@
 ;;;
 ;;; debugging
 ;;;
+#|
 (lib:intern prelude "%debug-map-symbol"
    (:lambda (value)
       (:if (lib:boundp 'prelude:%debug-symbols%)
@@ -27,6 +28,7 @@
              value
              symbol))
        (prelude:%debug-map-symbol value))))
+|#
 
 ;;;
 ;;; break loop

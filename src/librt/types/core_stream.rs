@@ -122,7 +122,7 @@ impl Core for Stream {
 
     fn get_string(env: &Env, tag: Tag) -> exception::Result<String> {
         if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "get-str", tag));
+            return Err(Exception::new(env, Condition::Open, "lib:get-string", tag));
         }
 
         let streams_ref = block_on(LIB.streams.read());
@@ -185,7 +185,7 @@ impl Core for Stream {
 
     fn read_char(env: &Env, tag: Tag) -> exception::Result<Option<char>> {
         if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "rd-char", tag));
+            return Err(Exception::new(env, Condition::Open, "lib:read-char", tag));
         }
 
         let streams_ref = block_on(LIB.streams.read());
@@ -195,11 +195,11 @@ impl Core for Stream {
                 let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(Condition::Stream, "rd-char", tag));
+                    return Err(Exception::new(env, Condition::Stream, "rd-char", tag));
                 }
 
                 if stream.unch.null_() {
-                    match SystemStream::read_byte(&stream.system) {
+                    match stream.system.read_byte(env) {
                         Ok(opt) => match opt {
                             Some(byte) => Ok(Some(byte as char)),
                             None => Ok(None),
@@ -219,7 +219,7 @@ impl Core for Stream {
 
     fn read_byte(env: &Env, tag: Tag) -> exception::Result<Option<u8>> {
         if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "rd-byte", tag));
+            return Err(Exception::new(env, Condition::Open, "rd-byte", tag));
         }
 
         let streams_ref = block_on(LIB.streams.read());
@@ -229,11 +229,11 @@ impl Core for Stream {
                 let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(Condition::Stream, "rd-byte", tag));
+                    return Err(Exception::new(env, Condition::Stream, "rd-byte", tag));
                 }
 
                 if stream.unch.null_() {
-                    match SystemStream::read_byte(&stream.system) {
+                    match stream.system.read_byte(env) {
                         Ok(opt) => match opt {
                             Some(byte) => Ok(Some(byte)),
                             None => Ok(None),
@@ -254,7 +254,7 @@ impl Core for Stream {
 
     fn unread_char(env: &Env, tag: Tag, ch: char) -> exception::Result<Option<()>> {
         if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "un-char", tag));
+            return Err(Exception::new(env, Condition::Open, "un-char", tag));
         }
 
         let streams_ref = block_on(LIB.streams.read());
@@ -266,7 +266,7 @@ impl Core for Stream {
                 SystemStream::close(&stream.system);
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(Condition::Type, "un-char", tag));
+                    return Err(Exception::new(env, Condition::Type, "un-char", tag));
                 }
 
                 if stream.unch.null_() {
@@ -274,7 +274,12 @@ impl Core for Stream {
 
                     Ok(None)
                 } else {
-                    Err(Exception::new(Condition::Stream, "un-char", stream.unch))
+                    Err(Exception::new(
+                        env,
+                        Condition::Stream,
+                        "un-char",
+                        stream.unch,
+                    ))
                 }
             }
             None => panic!(),
@@ -283,7 +288,7 @@ impl Core for Stream {
 
     fn write_char(env: &Env, tag: Tag, ch: char) -> exception::Result<Option<()>> {
         if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "wr-char", tag));
+            return Err(Exception::new(env, Condition::Open, "wr-char", tag));
         }
 
         let streams_ref = block_on(LIB.streams.read());
@@ -293,10 +298,10 @@ impl Core for Stream {
                 let stream = block_on(stream_ref.read());
 
                 if stream.direction.eq_(&Symbol::keyword("input")) {
-                    return Err(Exception::new(Condition::Type, "wr-char", tag));
+                    return Err(Exception::new(env, Condition::Type, "wr-char", tag));
                 }
 
-                SystemStream::write_byte(&stream.system, ch as u8)
+                stream.system.write_byte(env, ch as u8)
             }
             None => panic!(),
         }
@@ -304,7 +309,7 @@ impl Core for Stream {
 
     fn write_byte(env: &Env, tag: Tag, byte: u8) -> exception::Result<Option<()>> {
         if !Self::is_open(env, tag) {
-            return Err(Exception::new(Condition::Open, "wr-byte", tag));
+            return Err(Exception::new(env, Condition::Open, "wr-byte", tag));
         }
 
         let streams_ref = block_on(LIB.streams.read());
@@ -314,10 +319,10 @@ impl Core for Stream {
                 let stream = block_on(stream_ref.read());
 
                 if stream.direction.eq_(&Symbol::keyword("input")) {
-                    return Err(Exception::new(Condition::Type, "wr-byte", tag));
+                    return Err(Exception::new(env, Condition::Type, "wr-byte", tag));
                 }
 
-                SystemStream::write_byte(&stream.system, byte)
+                stream.system.write_byte(env, byte)
             }
             None => panic!(),
         }

@@ -4,7 +4,6 @@
 ;;;
 ;;; exceptions
 ;;;
-(lib:unintern prelude "%debug-symbols%")
 
 ;;;
 ;;; [*exception descriptor*] #s(:except cond value source reason env)
@@ -101,7 +100,7 @@
      (lib:write value () lib:error-output)
      (lib:write " " () lib:error-output)
      (lib:write message () lib:error-output)
-     (lib:wr-char #\linefeed lib:error-output)
+     (lib:write-char #\linefeed lib:error-output)
      value))
 
 (lib:intern prelude "warn"

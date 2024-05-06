@@ -99,7 +99,7 @@ impl CoreFunction for Float {
             Ok(_) => {
                 let sum = Self::as_f32(env, fl0).add(Self::as_f32(env, fl1));
                 if sum.is_nan() {
-                    return Err(Exception::new(Condition::Over, "fl-add", fl1));
+                    return Err(Exception::new(env, Condition::Over, "fl-add", fl1));
                 } else {
                     Self::as_tag(sum)
                 }
@@ -118,7 +118,7 @@ impl CoreFunction for Float {
             Ok(_) => {
                 let diff = Self::as_f32(env, fl0).sub(Self::as_f32(env, fl1));
                 if diff.is_nan() {
-                    return Err(Exception::new(Condition::Under, "fl-sub", fl1));
+                    return Err(Exception::new(env, Condition::Under, "fl-sub", fl1));
                 } else {
                     Self::as_tag(diff)
                 }
@@ -138,7 +138,7 @@ impl CoreFunction for Float {
                 let prod = Self::as_f32(env, fl0).mul(Self::as_f32(env, fl1));
 
                 if prod.is_nan() {
-                    return Err(Exception::new(Condition::Over, "fl-envl", fl1));
+                    return Err(Exception::new(env, Condition::Over, "fl-envl", fl1));
                 } else {
                     Self::as_tag(prod)
                 }
@@ -156,12 +156,12 @@ impl CoreFunction for Float {
         fp.value = match env.fp_argv_check("fl-div", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 if Self::as_f32(env, fl1) == 0.0 {
-                    return Err(Exception::new(Condition::ZeroDivide, "fl-div", fl1));
+                    return Err(Exception::new(env, Condition::ZeroDivide, "fl-div", fl1));
                 }
 
                 let div = Self::as_f32(env, fl0).div(Self::as_f32(env, fl1));
                 if div.is_nan() {
-                    return Err(Exception::new(Condition::Under, "fl-div", fl1));
+                    return Err(Exception::new(env, Condition::Under, "fl-div", fl1));
                 } else {
                     Self::as_tag(div)
                 }

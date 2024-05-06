@@ -256,10 +256,10 @@ impl CoreFunction for Tag {
 
                         Tag::from(&u64_.to_le_bytes())
                     } else {
-                        return Err(Exception::new(Condition::Type, "repr", arg));
+                        return Err(Exception::new(env, Condition::Type, "repr", arg));
                     }
                 } else {
-                    return Err(Exception::new(Condition::Type, "repr", type_));
+                    return Err(Exception::new(env, Condition::Type, "repr", type_));
                 }
             }
             Err(e) => return Err(e),

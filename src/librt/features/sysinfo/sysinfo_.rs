@@ -49,7 +49,14 @@ pub trait CoreFunction {
 impl CoreFunction for Sysinfo {
     fn sysinfo(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match sysinfo_dot_h::try_collect() {
-            Err(_) => return Err(Exception::new(Condition::Type, "sysinfo", Tag::nil())),
+            Err(_) => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "features:sysinfo",
+                    Tag::nil(),
+                ))
+            }
             Ok(sysinfo) => {
                 let sysinfo = vec![Cons::vlist(
                     env,

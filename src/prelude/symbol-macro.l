@@ -36,13 +36,13 @@
         (:if (prelude:null colon)
              name
              (prelude:substr name
-                          (:if (lib:eq #\: (prelude:schar name (lib:fx-add 1 colon)))
-                               (lib:fx-add 2 colon)
-                               (lib:fx-add 1 colon))
-                          (:if (lib:eq #\: (prelude:schar name (lib:fx-add 1 colon)))
-                               (lib:fx-add colon (lib:fx-sub (lib:vector-len name) colon))
-                               (lib:fx-add colon (lib:fx-sub (lib:vector-len name) (lib:fx-add 1 colon)))))))
-     (prelude:string-position #\: name))))
+                (:if (lib:eq #\: (prelude:schar name (lib:fx-add 1 colon)))
+                     (lib:fx-add 2 colon)
+                     (lib:fx-add 1 colon))
+                (:if (lib:eq #\: (prelude:schar name (lib:fx-add 1 colon)))
+                     (lib:fx-add colon (lib:fx-sub (lib:vector-len name) colon))
+                     (lib:fx-add colon (lib:fx-sub (lib:vector-len name) (lib:fx-add 1 colon)))))))
+      (prelude:string-position #\: name))))
 
 (lib:intern prelude "%read-symbol"
    (:lambda (symbol)
@@ -50,10 +50,18 @@
           (prelude:make-keyword (prelude:%read-symbol-name symbol))
           ((:lambda (ns name)
              (:if (prelude:null ns)
-                  (lib:unintern (lib:find-ns "") name)
-                  (lib:unintern ns name)))
-           (prelude:%read-symbol-ns symbol)
-           (prelude:%read-symbol-name symbol)))))
+                  ((:lambda (symbol)
+                     (:if (prelude:null symbol)
+                          (lib:makunbound (lib:intern (lib:find-ns "") name ()))
+                          symbol))
+                   (lib:find (lib:find-ns "") name))
+                  ((:lambda (symbol)
+                     (:if (prelude:null symbol)
+                          (lib:makunbound (lib:intern ns name ()))
+                          symbol))
+                   (lib:find ns name))))
+             (prelude:%read-symbol-ns symbol)
+             (prelude:%read-symbol-name symbol)))))
 
 ;;;
 ;;; symbol macros
