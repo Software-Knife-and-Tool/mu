@@ -5,7 +5,7 @@
 use crate::{
     core::{
         apply::Core as _,
-        direct::{DirectInfo, DirectTag, DirectType},
+        direct::{DirectInfo, DirectTag, DirectType, ExtType},
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -150,8 +150,8 @@ impl Core for Cons {
     fn heap_size(_: &Env, cons: Tag) -> usize {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.info() {
-                    DirectTag::EXT_TYPE_CONS => std::mem::size_of::<DirectTag>(),
+                DirectType::Ext => match dtag.info().try_into() {
+                    Ok(ExtType::Cons) => std::mem::size_of::<DirectTag>(),
                     _ => panic!(),
                 },
                 _ => panic!(),
