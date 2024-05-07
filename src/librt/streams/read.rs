@@ -66,7 +66,7 @@ impl Core for Env {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => Lib::read_atom(self, ch, stream),
                     SyntaxType::Macro => match ch {
-                        '#' => match Lib::sharp_macro(self, stream) {
+                        '#' => match Lib::sharpsign_macro(self, stream) {
                             Ok(Some(tag)) => Ok(tag),
                             Ok(None) => {
                                 Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)

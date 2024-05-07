@@ -5,12 +5,13 @@
 use crate::{
     core::{
         direct::{DirectInfo, DirectTag, DirectType},
-        env::Env,
+        env::{Core as _, Env},
         exception::{self, Condition, Exception},
         lib::Lib,
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
     },
+    streams::read::Core as _,
     types::{
         core_stream::{Core as _, Stream},
         fixnum::Fixnum,
@@ -39,7 +40,7 @@ pub trait Core {
     fn read_char_literal(_: &Env, _: Tag) -> exception::Result<Option<Tag>>;
     fn read_comment(_: &Env, _: Tag) -> exception::Result<Option<()>>;
     fn read_ws(_: &Env, _: Tag) -> exception::Result<Option<()>>;
-    fn sharp_macro(_: &Env, _: Tag) -> exception::Result<Option<Tag>>;
+    fn sharpsign_macro(_: &Env, _: Tag) -> exception::Result<Option<Tag>>;
     fn read_token(_: &Env, _: Tag) -> exception::Result<Option<String>>;
 }
 
@@ -276,12 +277,12 @@ impl Core for Lib {
         }
     }
 
-    // sharp_macro returns:
+    // sharpsign_macro returns:
     //
     //     Err exception if I/O problem or syntax error
     //     Ok(tag) if the read succeeded,
     //
-    fn sharp_macro(env: &Env, stream: Tag) -> exception::Result<Option<Tag>> {
+    fn sharpsign_macro(env: &Env, stream: Tag) -> exception::Result<Option<Tag>> {
         match Stream::read_char(env, stream) {
             Ok(Some(ch)) => match ch {
                 ':' => match Stream::read_char(env, stream) {
@@ -293,6 +294,13 @@ impl Core for Lib {
                         Err(e) => Err(e),
                     },
                     Ok(None) => Err(Exception::new(env, Condition::Eof, "lib:read", stream)),
+                    Err(e) => Err(e),
+                },
+                '.' => match env.read_stream(stream, false, Tag::nil(), false) {
+                    Ok(expr) => match env.eval(expr) {
+                        Ok(value) => Ok(Some(value)),
+                        Err(e) => Err(e),
+                    },
                     Err(e) => Err(e),
                 },
                 '|' => match Self::read_block_comment(env, stream) {
