@@ -11,6 +11,7 @@
 (prelude:read (prelude:make-string-stream :input "a #||#") () ())	a
 (prelude:read (prelude:make-string-stream :input "#||# a;a") () ())	a
 (prelude:read (prelude:make-string-stream :input "#||# a ;a") () ())	a
+(prelude:read (prelude:make-string-stream :input "#:abc") () ())	abc
 (prelude:read (prelude:make-string-stream :input "prelude:a") () ())	prelude:a
 (prelude:read (prelude:make-string-stream :input "abcdefgh") () ())	abcdefgh
 (prelude:read (prelude:make-string-stream :input "prelude:abcdefgh") () ())	prelude:abcdefgh

@@ -98,13 +98,17 @@
    (:lambda (ch stream)
       (lib:eval (prelude:compile (prelude:read stream () ())))))
 
-(lib:intern prelude "%read-sharp-symbol"
+(lib:intern prelude "%read-sharp-colon"
    (:lambda (ch stream)
-     ((:lambda (symbol)
-          (:if (lib:eq :symbol (lib:type-of symbol))
-               (lib:make-symbol (lib:symbol-name symbol))
-               (prelude:raise symbol 'prelude:%read-sharp-symbol "not a symbol")))
-       (prelude:%read-atom ch stream))))
+     ((:lambda (ch)
+        (:if ch
+             ((:lambda (symbol)
+                (:if (lib:eq :symbol (lib:type-of symbol))
+                     (lib:make-symbol (lib:symbol-name symbol))
+                     (prelude:raise symbol 'prelude:%read-sharp-colon "not a symbol")))
+              (prelude:%read-atom ch stream))              
+             (prelude:raise () 'prelude:%read-sharp-colon "early eof")))
+     (prelude:read-char stream () ()))))
 
 (lib:intern prelude "%read-sharp-number"
   (:lambda (base stream)
@@ -150,7 +154,7 @@
        (#\b . prelude:%read-sharp-number)
        (#\x . prelude:%read-sharp-number)
        (#\d . prelude:%read-sharp-number)
-       (#\: . prelude:%read-sharp-symbol)))))
+       (#\: . prelude:%read-sharp-colon)))))
 
 ;;;
 ;;; list reader
