@@ -25,7 +25,6 @@ PRELUDE=(	       	\
       prelude.l		\
       break.l		\
       compile.l		\
-      ctype.l		\
       describe.l       	\
       environment.l	\
       exception.l	\

@@ -9,16 +9,18 @@
 ;;;
 (lib:intern prelude "%prelude-function-p"
    (:lambda (fn)
-      (lib:eq 'funct (prelude:type-of fn))))
+     (prelude:%andf
+      (prelude:%prelude-type-p fn)
+      (lib:eq '%fn (prelude:type-of fn)))))
 
 (lib:intern prelude "functionp"
-   (:lambda (function)
-      (:if (lib:eq :func (lib:type-of function))
+   (:lambda (fn)
+      (:if (lib:eq :func (lib:type-of fn))
            :t
-           (lib:eq 'funct (prelude:type-of function)))))
+           (prelude:%prelude-function-p fn))))
 
 ;;;
-;;; [*function descriptor*] #s(:<type> :funct (lambda narg-list fn env))
+;;; [*function descriptor*] #s(:<type> :%fn (lambda narg-list fn env))
 ;;;
 ;;; lambda: lambda type
 ;;; nargs:  number of reqs plus rest
@@ -27,10 +29,10 @@
 ;;;
 ;;; function
 ;;;
-(lib:intern prelude "%make-funct"
+(lib:intern prelude "%make-fn"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
-          (prelude:%make-type "funct"
+          (prelude:%make-type "%fn"
              `(,(lib:cons :lambda lambda)
                ,(lib:cons :arity  nargs)
                ,(lib:cons :fn     fn)
@@ -39,14 +41,14 @@
         (lib:length (prelude:%lambda-prop :bound lambda))
         (:if (prelude:%lambda-prop :rest lambda) 1 0)))))
 
-(lib:intern prelude "%funct-prop"
-   (:lambda (prop funct)
-      (:if (prelude:findl (:lambda (funct-prop) (lib:eq prop funct-prop)) '(:lambda :arity :fn :env))
+(lib:intern prelude "%fn-prop"
+   (:lambda (prop fn)
+      (:if (prelude:findl (:lambda (fn-prop) (lib:eq prop fn-prop)) '(:lambda :arity :fn :env))
            ((:lambda (ref)
                ;;; (prelude:raise-when prelude:null prop 'prelude:%function-prop "property not bound")
                (lib:cdr ref))
-            (prelude:%type-ref prop funct))
-           (prelude:%lambda-prop prop (prelude:%funct-prop :lambda funct)))))
+            (prelude:%type-ref prop fn))
+           (prelude:%lambda-prop prop (prelude:%fn-prop :lambda fn)))))
 
 ;;;
 ;;; create closed environment
@@ -95,12 +97,12 @@
 (lib:intern prelude "%close-env"
   (:lambda (closure env)
      ((:lambda (lambda fn env)
-         (prelude:%make-funct lambda fn env))
+         (prelude:%make-fn lambda fn env))
       (prelude:%make-lambda
        (prelude:%lambda-prop :bound fn)
        (prelude:%lambda-prop :rest fn)
        (lib:frames))
-      (prelude:%funct-prop :fn fn))))
+      (prelude:%fn-prop :fn fn))))
 
 ;;;
 ;;; compile closed lambda => function
@@ -109,7 +111,7 @@
    (:lambda (form env)
       ((:lambda (lambda)
           ((:lambda (fn)
-              (prelude:%make-funct lambda fn ()))
+              (prelude:%make-fn lambda fn ()))
            (lib:compile
             `(:lambda
               ,(prelude:%lambda-prop :bound lambda)

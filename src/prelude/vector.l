@@ -8,12 +8,12 @@
    (:lambda (vector)
      (:if (lib:eq :vector (lib:type-of vector))
           :t
-          (lib:eq 'vector (prelude:type-of vector)))))
+          (lib:eq '%vector (prelude:type-of vector)))))
 
 (lib:intern prelude "bit-vector-p"
    (:lambda (vector)
      (:if (prelude:%prelude-type-p vector)
-          (:if (lib:eq 'vector (prelude:type-of vector))
+          (:if (lib:eq '%vector (prelude:type-of vector))
                (prelude:not (prelude:null (prelude:%vector-prop :bitvec vector)))
                ())
           ())))
@@ -21,7 +21,7 @@
 (lib:intern prelude "vector-displaced-p"
    (:lambda (vector)
      (:if (prelude:%prelude-type-p vector)
-          (:if (lib:eq 'vector (prelude:type-of vector))
+          (:if (lib:eq '%vector (prelude:type-of vector))
                (prelude:%vector-prop :disp vector)
                ())
           ())))
@@ -119,7 +119,7 @@
 ;;;
 (lib:intern prelude "%make-vector"
    (:lambda (vector displace bitvec)
-     (prelude:%make-type "vector"
+     (prelude:%make-type "%vector"
        `(,(lib:cons :base   vector)
          ,(lib:cons :disp   displace)
          ,(lib:cons :bitvec bitvec)))))

@@ -12,20 +12,20 @@
 (lib:intern prelude "%init-ns"
     (:lambda ()
       ;;; function
-      (prelude:define-type "funct"
+      (prelude:define-type "%fn"
           '((:lambda  . :struct)
             (:arity   . :fixnum)
             (:fn      . :func)
             (:env     . :listp)))
       
       ;;; lambda
-      (prelude:define-type "lambda"
+      (prelude:define-type "%lambda"
           '((:bound  . :listp)
             (:rest   . :symbolp)
             (:lexenv . :listp)))
 
       ;;; exception
-      (prelude:define-type "except"
+      (prelude:define-type "%except"
           '((:cond   . :symbolp)
             (:value . :t)
             (:source . :symbolp)
@@ -33,7 +33,7 @@
             (:env    . :listp)))
 
       ;;; namespace
-      (prelude:define-type "namespc"
+      (prelude:define-type "%ns"
           '((:name    . :string)
             (:intern  . :keyword)
             (:extern  . :keyword)
@@ -42,7 +42,7 @@
             (:uses    . :listp)))
 
       ;;; vector
-      (prelude:define-type "vector"
+      (prelude:define-type "%vector"
           '((:base    . :vector)
             (:disp    . :listp)
             (:bitvec  . :listp)))
@@ -121,7 +121,7 @@
    (:lambda (function arg-list)
      (:if (prelude:functionp function)
           (:if (prelude:%prelude-function-p function)
-               (prelude:%funct-apply function arg-list)
+               (prelude:%fn-apply function arg-list)
                (lib:apply function arg-list))
           (prelude:raise function 'prelude:apply "not a function designator"))))
 

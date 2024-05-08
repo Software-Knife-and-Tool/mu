@@ -16,12 +16,14 @@
 ;;; lexenv: lexical environment, list of lambdas
 ;;;
 (lib:intern prelude "%lambdap"
-   (:lambda (fn)
-      (lib:eq (prelude:type-of fn) 'lambda)))
+    (:lambda (fn)
+      (prelude:%andf
+       (prelude:%prelude-type-p fn)
+       (lib:eq '%lambda (prelude:type-of fn)))))
 
 (lib:intern prelude "%make-lambda"
    (:lambda (lambda-list rest-sym env)
-      (prelude:%make-type "lambda"
+      (prelude:%make-type "%lambda"
          `(,(lib:cons :bound  lambda-list)
            ,(lib:cons :rest   rest-sym)
            ,(lib:cons :lexenv env)))))
