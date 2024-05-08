@@ -58,23 +58,24 @@
 ;;; returns an application of the if form
 ;;;
 (lib:intern prelude "%make-thunk"
-  (:lambda (form env)
-    (prelude:%compile
-     `(:lambda () ,form)
-     env)))
+   (:lambda (form env)
+     (prelude:%compile `(lambda () ,form) env)))
+
+(lib:intern prelude "%if"
+   (:lambda (testf t-thunk f-thunk)
+     (:if (prelude:apply testf ())
+          (prelude:apply t-thunk ())
+          (prelude:apply f-thunk ()))))
 
 (lib:intern prelude "%compile-if"
    (:lambda (form env)
       ((:lambda (length)
           (:if (prelude:%orf (lib:eq length 3) (lib:eq length 4))
-               ((:lambda (t-arm f-arm)
-                  (lib:compile `(:if ,(lib:nth 1 form) ,t-arm ,f-arm)))
-                (:if (prelude:constantp (lib:nth 2 form))
-                     (lib:nth 2 form)
-                     `(prelude:apply ,(prelude:%make-thunk (lib:nth 2 form) env) ()))
-                (:if (prelude:constantp (lib:nth 3 form))
-                     (lib:nth 3 form)
-                     `(prelude:apply ,(prelude:%make-thunk (lib:nth 3 form) env) ())))
+               ((:lambda (test t-arm f-arm)
+                  (lib:compile `(prelude:%if ,test ,t-arm ,f-arm)))
+                (prelude:%make-thunk (lib:nth 1 form) env)
+                (prelude:%make-thunk (lib:nth 2 form) env)
+                (prelude:%make-thunk (lib:nth 3 form) env))
                (prelude:raise form 'prelude:%compile-if "takes two or three arguments")))
        (lib:length form))))
 
