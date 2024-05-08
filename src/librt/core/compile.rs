@@ -47,7 +47,7 @@ impl Compile {
 
         let if_vec = vec![
             Namespace::intern(env, env.lib_ns, "%if".to_string(), Tag::nil()).unwrap(),
-            Cons::nth(env, 0, args).unwrap(),
+            Cons::vlist(env, &[lambda, Tag::nil(), Cons::nth(env, 0, args).unwrap()]),
             Cons::vlist(env, &[lambda, Tag::nil(), Cons::nth(env, 1, args).unwrap()]),
             Cons::vlist(env, &[lambda, Tag::nil(), Cons::nth(env, 2, args).unwrap()]),
         ];
@@ -251,9 +251,13 @@ impl CoreFunction for Compile {
 
         fp.value =
             match env.fp_argv_check("lib:%if", &[Type::T, Type::Function, Type::Function], fp) {
-                Ok(_) => match env.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil())
-                {
-                    Ok(tag) => tag,
+                Ok(_) => match env.apply(test, Tag::nil()) {
+                    Ok(result) => match env
+                        .apply(if result.null_() { false_fn } else { true_fn }, Tag::nil())
+                    {
+                        Ok(tag) => tag,
+                        Err(e) => return Err(e),
+                    },
                     Err(e) => return Err(e),
                 },
                 Err(e) => return Err(e),
