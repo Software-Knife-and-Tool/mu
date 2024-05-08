@@ -24,7 +24,7 @@
                        (:if (prelude:%orf
                              (prelude:%lambda-prop :lexenv lambda-desc)
                              (prelude:%lambda-prop :rest lambda-desc))
-                            (prelude:%make-funct lambda-desc compiled-function ())
+                            (prelude:%make-fn lambda-desc compiled-function ())
                             compiled-function))
                     (lib:compile
                      `(:lambda
@@ -92,7 +92,7 @@
 ;;; rewrites a function call/special call/macro call against an environment
 ;;; into something the runtime can execute. constants compile to themselves.
 ;;;
-;;; returns a mu form or funct type (in the case of a define-prelude-lambda)
+;;; returns a mu form or %fn type (in the case of a define-prelude-lambda)
 ;;;
 (lib:intern prelude "%compile"
    (:lambda (form env)

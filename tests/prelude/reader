@@ -58,9 +58,9 @@
 (prelude:read (prelude:make-string-stream :input "#(:fixnum 1 2 3)") () ())	#(:fixnum 1 2 3)
 (prelude:read (prelude:make-string-stream :input "#(:char #\\a #\\b #\\c)") () ())	"abc"
 (prelude:read (prelude:make-string-stream :input "#(:float 1.0 2.0 3.0)") () ())	#(:float 1.0000 2.0000 3.0000)
-(prelude:read (prelude:make-string-stream :input "#*") () ())	#s(:<type> "vector" ((:base . #(:byte 0)) (:disp) (:bitvec 0)))
-(prelude:read (prelude:make-string-stream :input "#*1111") () ())	#s(:<type> "vector" ((:base . #(:byte 240)) (:disp) (:bitvec 4)))
-(prelude:read (prelude:make-string-stream :input "#*111100001111") () ())	#s(:<type> "vector" ((:base . #(:byte 240 240)) (:disp) (:bitvec 12)))
+(prelude:read (prelude:make-string-stream :input "#*") () ())	#s(:<type> "%vector" ((:base . #(:byte 0)) (:disp) (:bitvec 0)))
+(prelude:read (prelude:make-string-stream :input "#*1111") () ())	#s(:<type> "%vector" ((:base . #(:byte 240)) (:disp) (:bitvec 4)))
+(prelude:read (prelude:make-string-stream :input "#*111100001111") () ())	#s(:<type> "%vector" ((:base . #(:byte 240 240)) (:disp) (:bitvec 12)))
 (prelude:read (prelude:make-string-stream :input "'prelude:a") () ())	(:quote prelude:a)
 (prelude:read (prelude:make-string-stream :input "'abc") () ())	(:quote abc)
 (prelude:read (prelude:make-string-stream :input "'prelude:abc") () ())	(:quote prelude:abc)

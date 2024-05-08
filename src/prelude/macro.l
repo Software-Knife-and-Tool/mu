@@ -55,7 +55,7 @@
           ((:lambda (expanded-form)
              (prelude:%compile expanded-form env))
            (:if (prelude:%prelude-function-p macro-function)
-                (prelude:%funct-apply-quoted
+                (prelude:%fn-apply-quoted
                  macro-function
                  (lib:eval (prelude:%compile-lambda-arg-list macro-function arg-list env)))
                 (lib:apply macro-function arg-list))))
@@ -72,7 +72,7 @@
                   ((:lambda (macro-function)
                      (:if macro-function
                           (:if (prelude:%prelude-function-p macro-function)
-                               (prelude:%funct-apply-quoted macro-function (prelude:%quoted-lambda-arg-list macro-function arg-list))
+                               (prelude:%fn-apply-quoted macro-function (prelude:%quoted-lambda-arg-list macro-function arg-list))
                                (lib:apply macro-function arg-list))
                           form))
                    (prelude:macro-function fn-symbol env))

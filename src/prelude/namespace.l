@@ -12,9 +12,9 @@
    (:lambda (ns)
       (lib:eq (prelude:type-of ns) 'namespace)))
 
-(lib:intern prelude "%make-namespc"
+(lib:intern prelude "%make-namespace"
    (:lambda (name uses)
-     (prelude:%make-type "namespc"
+     (prelude:%make-type "%ns"
        `(,(lib:cons :name name)
           ,(lib:cons :intern (lib:make-ns))
           ,(lib:cons :extern (lib:make-ns))
@@ -38,7 +38,7 @@
    (:lambda (name uses)
       (:if (prelude:stringp name)
            (:if (prelude:listp uses)
-                (prelude:%make-namespc name uses)
+                (prelude:%make-namespace name uses)
                 (prelude:raise uses 'prelude:make-namespace "not a uses list"))
            (prelude:raise name 'prelude:make-namespace "not a name string"))))
 

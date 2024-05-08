@@ -6,7 +6,7 @@
 ;;;
 
 ;;;
-;;; [*exception descriptor*] #s(:except cond value source reason env)
+;;; [*exception descriptor*] #s(:%except cond value source reason env)
 ;;;
 ;;; cond:   condition type symbol
 ;;; value:  exception raised on value
@@ -15,12 +15,14 @@
 ;;; env:    dynamic environment, list of frames
 ;;;
 (lib:intern prelude "exceptp"
-   (:lambda (ex)
-      (lib:eq (prelude:type-of ex) 'except)))
+    (:lambda (ex)
+      (prelude:%andf
+       (prelude:%prelude-type-p ex)
+       (lib:eq '%except (prelude:type-of ex)))))
 
 (lib:intern prelude "%make-except"
    (:lambda (cond value source reason env)
-      (prelude:%make-type "except"
+      (prelude:%make-type "%except"
         `(,(lib:cons :cond   cond)
           ,(lib:cons :value  value)
           ,(lib:cons :source source)
