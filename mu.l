@@ -22,8 +22,7 @@
              (lib:cons (lib:car args) (list+ (lib:cdr args)))
              (lib:car args)))))
 
-(define-macro progn (&rest body)
-  (list (list* 'lambda () body)))
+(define-macro progn (&rest body) (list (list* 'lambda () body)))
 
 #|
 (define-macro when (test &rest body)

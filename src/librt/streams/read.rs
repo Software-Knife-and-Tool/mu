@@ -9,7 +9,7 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         lib::Lib,
-        qquote::QqReader,
+        quasi::QuasiReader,
         reader::{Core as _, EOL},
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
@@ -81,7 +81,7 @@ impl Core for Env {
                         )),
                     },
                     SyntaxType::Tmacro => match ch {
-                        '`' => QqReader::read(self, false, stream, false),
+                        '`' => QuasiReader::read(self, false, stream, false),
                         '\'' => {
                             match Self::read_stream(self, stream, false, Tag::nil(), recursivep) {
                                 Ok(tag) => Ok(Cons::vlist(self, &[Symbol::keyword("quote"), tag])),
