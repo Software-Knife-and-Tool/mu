@@ -32,10 +32,11 @@ pub enum Namespace {
 impl Namespace {
     pub fn add_ns(env: &Env, name: &str) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
-
         let len = ns_ref.len();
 
         if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
+            drop(ns_ref);
+
             return Err(Exception::new(
                 env,
                 Condition::Type,
@@ -413,7 +414,10 @@ impl CoreFunction for Namespace {
         let name = fp.argv[0];
 
         fp.value = match env.fp_argv_check("lib:make-ns", &[Type::String], fp) {
-            Ok(_) => Self::add_ns(env, &Vector::as_string(env, name)).unwrap(),
+            Ok(_) => match Self::add_ns(env, &Vector::as_string(env, name)) {
+                Ok(ns) => ns,
+                Err(e) => return Err(e),
+            },
             Err(e) => return Err(e),
         };
 

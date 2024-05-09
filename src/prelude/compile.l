@@ -57,10 +57,6 @@
 ;;;
 ;;; returns an application of the if form
 ;;;
-(lib:intern prelude "%make-thunk"
-   (:lambda (form env)
-     (prelude:%compile `(lambda () ,form) env)))
-
 (lib:intern prelude "%if"
    (:lambda (testf t-thunk f-thunk)
      (:if (prelude:apply testf ())
@@ -73,9 +69,9 @@
           (:if (prelude:%orf (lib:eq length 3) (lib:eq length 4))
                ((:lambda (test t-arm f-arm)
                   (lib:compile `(prelude:%if ,test ,t-arm ,f-arm)))
-                (prelude:%make-thunk (lib:nth 1 form) env)
-                (prelude:%make-thunk (lib:nth 2 form) env)
-                (prelude:%make-thunk (lib:nth 3 form) env))
+                (prelude:%compile `(lambda () ,(lib:nth 1 form)) env)
+                (prelude:%compile `(lambda () ,(lib:nth 2 form)) env)
+                (prelude:%compile `(lambda () ,(lib:nth 3 form)) env))
                (prelude:raise form 'prelude:%compile-if "takes two or three arguments")))
        (lib:length form))))
 
@@ -99,7 +95,7 @@
       (:if (prelude:consp form)
            ((:lambda (function-form arg-list)
                (:if (prelude:keywordp function-form)
-                    (lib:compile form)                    ; mu special form (:key ...)
+                    (lib:compile form)                    ; lib special form (:key ...)
                     (:if (lib:eq :symbol (lib:type-of function-form)) ; special form or macro
                          ((:lambda (special)
                              (:if special

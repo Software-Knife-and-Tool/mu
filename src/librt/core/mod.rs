@@ -17,7 +17,7 @@ pub mod heap;
 pub mod image;
 pub mod indirect;
 pub mod lib;
-pub mod qquote;
+pub mod quasi;
 pub mod reader;
 pub mod readtable;
 pub mod symbols;

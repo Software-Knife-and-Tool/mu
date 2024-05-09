@@ -17,18 +17,18 @@
        arg-list)))
 
 (lib:intern prelude "%lambda-arg-list"
-   (:lambda (function arg-list)
+    (:lambda (function arg-list)
       (:if (prelude:%prelude-function-p function)
-           ((:lambda (rest nreqs)
-               (:if (prelude:%andf rest (prelude:zerop nreqs))
-                    `(lib:cons ,(prelude:%arg-list arg-list) ())
-                    ((:lambda (reqs rest)
-                        (prelude:%arg-list `(,@reqs ,(prelude:%arg-list rest))))
-                     (prelude:dropr arg-list (lib:difference (lib:length arg-list) nreqs))
-                     (prelude:dropl arg-list nreqs))))
-            (prelude:%fn-prop :rest function)
-            (prelude:%fn-prop :arity function))
-           (prelude:%arg-list arg-list))))
+                ((:lambda (rest nreqs)
+                   (:if (prelude:%andf rest (prelude:zerop nreqs))
+                        `(lib:cons ,(prelude:%arg-list arg-list) ())
+                        ((:lambda (reqs rest)
+                           (prelude:%arg-list `(,@reqs ,(prelude:%arg-list rest))))
+                         (prelude:dropr arg-list (lib:difference (lib:length arg-list) nreqs))
+                         (prelude:dropl arg-list nreqs))))
+                 (prelude:%fn-prop :rest function)
+                 (prelude:%fn-prop :arity function))
+                (prelude:%arg-list arg-list))))
 
 (lib:intern prelude "%quoted-lambda-arg-list"
   (:lambda (fn args)
@@ -70,7 +70,7 @@
 ;;;
 ;;; compile-funcall
 ;;;
-;;; compile function applications to mu-appliable forms
+;;; compile function applications to lib-appliable forms
 ;;;
 (lib:intern prelude "%compile-lambda-call"
    (:lambda (lambda-form arg-list env)
@@ -107,24 +107,26 @@
 ;;;
 (lib:intern prelude "%fn-apply"
    (:lambda (fn arg-list)
+      ;; (prelude:warn `(,fn ,arg-list) "%fn-apply")
       ((:lambda (env)
         (prelude:%mapc lib:frame-push env)
-        ((:lambda (value)
-           (prelude:%mapc (:lambda (frame) (lib:frame-pop (lib:car frame))) env)
-           value)
-         ((:lambda (mu-fn)
-             (lib:apply mu-fn (lib:eval (prelude:%lambda-arg-list fn arg-list))))
-          (prelude:%fn-prop :fn fn))))
-        (prelude:%fn-prop :env fn))))
+         ((:lambda (value)
+            (prelude:%mapc (:lambda (frame) (lib:frame-pop (lib:car frame))) env)
+            value)
+          ((:lambda (lib-fn)
+             (lib:apply lib-fn (lib:eval (prelude:%lambda-arg-list fn arg-list))))
+           (prelude:%fn-prop :fn fn))))
+       (prelude:%fn-prop :env fn))))
 
 (lib:intern prelude "%fn-apply-quoted"
    (:lambda (fn arg-list)
+      ;; (prelude:warn `(,fn ,arg-list) "%fn-apply-quoted")
       ((:lambda (env)
         (prelude:%mapc lib:frame-push env)
         ((:lambda (value)
            (prelude:%mapc (:lambda (frame) (lib:frame-pop (lib:car frame))) env)
            value)
-         ((:lambda (mu-fn)
-             (lib:apply mu-fn arg-list))
+         ((:lambda (lib-fn)
+             (lib:apply lib-fn arg-list))
           (prelude:%fn-prop :fn fn))))
         (prelude:%fn-prop :env fn))))
