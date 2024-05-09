@@ -84,15 +84,15 @@
 ;;;
 (lib:intern prelude "%compile-quasi"
    (:lambda (form env)
-     (prelude:compile (prelude:%qq-compile (lib:nth 1 form)))))               
+     (prelude:compile (prelude:%quasi-compile (lib:nth 1 form)))))               
    
 ;;;
 ;;; prelude compiler
 ;;;
 ;;; rewrites a function call/special call/macro call against an environment
-;;; into something the runtime can execute. constants compile to themselves.
+;;; into something the runtime can execute.
 ;;;
-;;; returns a mu form or %fn type (in the case of a define-prelude-lambda)
+;;; returns a lib form or %fn type (in the case of a define-prelude-lambda)
 ;;;
 (lib:intern prelude "%compile"
    (:lambda (form env)
@@ -121,8 +121,7 @@
            form)))
 
 ;;;
-;;; the external compile interface, compiles in
-;;; the null environment
+;;; repl's compile interface, compiles in the null environment
 ;;;
 (lib:intern prelude "compile"
    (:lambda (form)

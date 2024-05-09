@@ -10,11 +10,11 @@
    (:lambda (form)
      `(,form)))
 
-(lib:intern prelude "%qq-func-map"
+(lib:intern prelude "%quasi-func-map"
    (:lambda (key map)
      (lib:cdr (prelude:assoc key map))))
 
-(lib:intern prelude "%qq-read"
+(lib:intern prelude "%quasi-read"
    (:lambda (stream)
      ((:lambda (ch syntax-map)
         (:if (prelude:null ch)
@@ -25,7 +25,7 @@
                      (lib:apply (lib:cdr type-map) ())))
                 (prelude:assoc ch syntax-map))))
         (prelude:%read-consume-ws stream)
-        `(,(lib:cons #\( (:lambda () `(:list ,(prelude:%qq-read-list stream))))
+        `(,(lib:cons #\( (:lambda () `(:list ,(prelude:%quasi-read-list stream))))
            ,(lib:cons #\) (:lambda () `(:list-)))
            ,(lib:cons #\, (:lambda ()
                            ((:lambda (ch)
@@ -37,10 +37,10 @@
                                           (prelude:unread-char ch stream)
                                           `(:form ,(prelude:read stream () ())))))))
                             (prelude:read-char stream () ()))))
-           ,(lib:cons #\' (:lambda () `(:qquote ,(prelude:%qq-read stream))))
+           ,(lib:cons #\' (:lambda () `(:qquote ,(prelude:%quasi-read stream))))
            ,(lib:cons #\` (:lambda () `(:quasi ,(prelude:read stream () ()))))))))
 
-(lib:intern prelude "%qq-read-list"
+(lib:intern prelude "%quasi-read-list"
    (:lambda (stream)
      ((:lambda (syntax-map)
          (lib:cdr
@@ -55,10 +55,10 @@
                                 (prelude:error stream "qquote: early end of file~%" ())
                                 ((:lambda (type-fn)
                                    (lib:apply type-fn `(,expr ,list)))
-                                 (prelude:%qq-func-map type syntax-map))))
+                                 (prelude:%quasi-func-map type syntax-map))))
                          (lib:car syntax)
                          (lib:cdr syntax)))
-                      (prelude:%qq-read stream))))
+                      (prelude:%quasi-read stream))))
               (lib:car loop)
               (lib:cdr loop)))
            ())))
@@ -79,18 +79,18 @@
          ,(lib:cons :list-  (:lambda (expr list)
                              (lib:cons :t list)))
          ,(lib:cons :quasi  (:lambda (expr list)
-                             (lib:cons () (lib:append list `(,(prelude:%qq-read stream))))))))))
+                             (lib:cons () (lib:append list `(,(prelude:%quasi-read stream))))))))))
 
-(lib:intern prelude "%qq-compile"
-   (:lambda (qq-expr)
+(lib:intern prelude "%quasi-compile"
+   (:lambda (quasi-expr)
      ((:lambda (type expr compiler-map)
         ((:lambda (type-fn)
            (:if (prelude:null type-fn)
                 (prelude:error type "backquote: unmapped type ~A~%" `(,type))
                 (lib:apply type-fn `(,expr))))
-         (prelude:%qq-func-map type compiler-map)))
-      (lib:nth 0 qq-expr)
-      (lib:nth 1 qq-expr)
+         (prelude:%quasi-func-map type compiler-map)))
+      (lib:nth 0 quasi-expr)
+      (lib:nth 1 quasi-expr)
       `(,(lib:cons :l-comma  (:lambda (expr) `(lib:cons ,expr ())))
          ,(lib:cons :l-list  (:lambda (expr)
                               ((:lambda (loop)
@@ -99,7 +99,7 @@
                                  (:if (prelude:null list)
                                       list
                                       `(lib:append
-                                        ,(prelude:%qq-compile (lib:car list))
+                                        ,(prelude:%quasi-compile (lib:car list))
                                         ,(lib:apply loop `(,loop ,(lib:cdr list)))))))))
          ,(lib:cons :l-form  (:lambda (expr)
                               ((:lambda (quote)
@@ -113,7 +113,7 @@
                                  (:if (prelude:null list)
                                       list
                                       `(lib:append
-                                        ,(prelude:%qq-compile (lib:car list))
+                                        ,(prelude:%quasi-compile (lib:car list))
                                         ,(lib:apply loop `(,loop ,(lib:cdr list)))))))))
          ,(lib:cons :form    (:lambda (expr)
                               `(:quote ,expr)))
@@ -122,12 +122,12 @@
                                  (:if (lib:eq :form type)
                                       (lib:cdr expr)
                                       (:if (lib:eq :quote type)
-                                           (prelude:%qq-compile expr)
+                                           (prelude:%quasi-compile expr)
                                            ())))
                                (lib:car expr))))
          ,(lib:cons :qquote   (:lambda (expr)
-                               `(:quote ,(prelude:%qq-compile expr))))))))
+                               `(:quote ,(prelude:%quasi-compile expr))))))))
 
-(lib:intern prelude "%qq-reader"
+(lib:intern prelude "%read-quasi"
    (:lambda (char stream)
-     `(%quasi% ,(prelude:%qq-read stream))))
+     `(%quasi% ,(prelude:%quasi-read stream))))
