@@ -239,7 +239,7 @@
        '((#\" . prelude:%read-string)
          (#\# . prelude:%read-sharp)
          (#\' . prelude:%read-quote)
-         (#\` . prelude:%qq-reader)
+         (#\` . prelude:%read-quasi)
          (#\( . prelude:%read-list)
          (#\) . prelude:%read-list-eol)
          (#\; . prelude:%read-line-comment)))))
