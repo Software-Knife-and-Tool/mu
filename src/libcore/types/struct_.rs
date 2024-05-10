@@ -157,7 +157,12 @@ impl<'a> Core<'a> for Struct {
                             list
                         }
                         Err(_) => {
-                            return Err(Exception::new(env, Condition::Syntax, "core:read", stream));
+                            return Err(Exception::new(
+                                env,
+                                Condition::Syntax,
+                                "core:read",
+                                stream,
+                            ));
                         }
                     };
 

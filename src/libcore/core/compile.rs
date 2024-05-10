@@ -224,7 +224,9 @@ impl Compile {
                         Ok(arglist) => match Self::compile(env, func, lexenv) {
                             Ok(fn_) => match fn_.type_of() {
                                 Type::Function => Ok(Cons::new(fn_, arglist).evict(env)),
-                                _ => Err(Exception::new(env, Condition::Type, "core:compile", func)),
+                                _ => {
+                                    Err(Exception::new(env, Condition::Type, "core:compile", func))
+                                }
                             },
                             Err(e) => Err(e),
                         },

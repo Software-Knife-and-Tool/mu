@@ -110,7 +110,12 @@ impl Exception {
 
         match condmap {
             Some(entry) => Ok(entry.1),
-            _ => Err(Exception::new(env, Condition::Syntax, "core:raise", keyword)),
+            _ => Err(Exception::new(
+                env,
+                Condition::Syntax,
+                "core:raise",
+                keyword,
+            )),
         }
     }
 

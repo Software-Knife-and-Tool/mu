@@ -115,7 +115,12 @@ impl Core for SystemStream {
         };
 
         match system_stream {
-            None => Err(Exception::new(env, Condition::Open, "core:open", Tag::nil())),
+            None => Err(Exception::new(
+                env,
+                Condition::Open,
+                "core:open",
+                Tag::nil(),
+            )),
             Some(_) => {
                 let mut streams_ref = block_on(LIB.streams.write());
                 let index = streams_ref.len();

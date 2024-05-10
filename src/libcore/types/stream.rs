@@ -294,12 +294,18 @@ impl CoreFunction for Stream {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("core:read-char", &[Type::Stream, Type::T, Type::T], fp) {
+        fp.value = match env.fp_argv_check("core:read-char", &[Type::Stream, Type::T, Type::T], fp)
+        {
             Ok(_) => match Self::read_char(env, stream) {
                 Ok(Some(ch)) => Tag::from(ch),
                 Ok(None) if eof_error_p.null_() => eof_value,
                 Ok(None) => {
-                    return Err(Exception::new(env, Condition::Eof, "core:read-char", stream))
+                    return Err(Exception::new(
+                        env,
+                        Condition::Eof,
+                        "core:read-char",
+                        stream,
+                    ))
                 }
                 Err(e) => return Err(e),
             },
@@ -314,12 +320,18 @@ impl CoreFunction for Stream {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("core:read-byte", &[Type::Stream, Type::T, Type::T], fp) {
+        fp.value = match env.fp_argv_check("core:read-byte", &[Type::Stream, Type::T, Type::T], fp)
+        {
             Ok(_) => match Self::read_byte(env, stream) {
                 Ok(Some(byte)) => Tag::from(byte as i64),
                 Ok(None) if eof_error_p.null_() => eof_value,
                 Ok(None) => {
-                    return Err(Exception::new(env, Condition::Eof, "core:read-byte", stream))
+                    return Err(Exception::new(
+                        env,
+                        Condition::Eof,
+                        "core:read-byte",
+                        stream,
+                    ))
                 }
                 Err(e) => return Err(e),
             },

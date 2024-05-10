@@ -46,7 +46,7 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.59";
+    pub const VERSION: &'static str = "0.1.60";
 
     pub fn new() -> Self {
         Lib {
@@ -129,8 +129,13 @@ impl Lib {
 
         Namespace::intern_static(env, env.core_ns, "standard-input".to_string(), LIB.stdin())
             .unwrap();
-        Namespace::intern_static(env, env.core_ns, "standard-output".to_string(), LIB.stdout())
-            .unwrap();
+        Namespace::intern_static(
+            env,
+            env.core_ns,
+            "standard-output".to_string(),
+            LIB.stdout(),
+        )
+        .unwrap();
         Namespace::intern_static(env, env.core_ns, "error-output".to_string(), LIB.errout())
             .unwrap();
 

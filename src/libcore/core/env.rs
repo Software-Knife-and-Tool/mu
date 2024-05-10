@@ -10,7 +10,7 @@ use {
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            lib::{Lib},
+            lib::Lib,
             types::{Tag, Type},
         },
         types::{

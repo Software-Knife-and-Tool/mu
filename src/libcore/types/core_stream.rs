@@ -195,7 +195,12 @@ impl Core for Stream {
                 let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(env, Condition::Stream, "core:read-char", tag));
+                    return Err(Exception::new(
+                        env,
+                        Condition::Stream,
+                        "core:read-char",
+                        tag,
+                    ));
                 }
 
                 if stream.unch.null_() {
@@ -229,7 +234,12 @@ impl Core for Stream {
                 let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(env, Condition::Stream, "core:read-byte", tag));
+                    return Err(Exception::new(
+                        env,
+                        Condition::Stream,
+                        "core:read-byte",
+                        tag,
+                    ));
                 }
 
                 if stream.unch.null_() {
@@ -254,7 +264,12 @@ impl Core for Stream {
 
     fn unread_char(env: &Env, tag: Tag, ch: char) -> exception::Result<Option<()>> {
         if !Self::is_open(env, tag) {
-            return Err(Exception::new(env, Condition::Open, "core:unread-char", tag));
+            return Err(Exception::new(
+                env,
+                Condition::Open,
+                "core:unread-char",
+                tag,
+            ));
         }
 
         let streams_ref = block_on(LIB.streams.read());
@@ -266,7 +281,12 @@ impl Core for Stream {
                 SystemStream::close(&stream.system);
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    return Err(Exception::new(env, Condition::Type, "core:unread-char", tag));
+                    return Err(Exception::new(
+                        env,
+                        Condition::Type,
+                        "core:unread-char",
+                        tag,
+                    ));
                 }
 
                 if stream.unch.null_() {

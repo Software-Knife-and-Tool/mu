@@ -244,7 +244,14 @@ impl CoreFunction for Frame {
                 Fixnum::as_i64(offset) as usize,
             ) {
                 Some(tag) => tag,
-                None => return Err(Exception::new(env, Condition::Type, "core:frame-ref", frame)),
+                None => {
+                    return Err(Exception::new(
+                        env,
+                        Condition::Type,
+                        "core:frame-ref",
+                        frame,
+                    ))
+                }
             },
             Err(e) => return Err(e),
         };

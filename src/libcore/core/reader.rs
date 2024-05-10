@@ -114,7 +114,12 @@ impl Core for Lib {
                                 }
                             }
                             Ok(None) => {
-                                return Err(Exception::new(env, Condition::Eof, "core:read", stream))
+                                return Err(Exception::new(
+                                    env,
+                                    Condition::Eof,
+                                    "core:read",
+                                    stream,
+                                ))
                             }
                             Err(e) => return Err(e),
                         }
@@ -145,7 +150,9 @@ impl Core for Lib {
                             Stream::unread_char(env, stream, ch).unwrap();
                             break;
                         }
-                        _ => return Err(Exception::new(env, Condition::Range, "core:read", stream)),
+                        _ => {
+                            return Err(Exception::new(env, Condition::Range, "core:read", stream))
+                        }
                     },
                     None => return Err(Exception::new(env, Condition::Range, "core:read", stream)),
                 },
