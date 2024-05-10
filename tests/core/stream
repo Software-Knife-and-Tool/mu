@@ -1,0 +1,9 @@
+(core:close core:error-output)	:t
+(core:flush core:standard-output)	:nil
+(core:get-string (core:open :string :output "abcdef"))	"abcdef"
+(core:openp core:error-output)	#<stream: 2 :error-output :output :open>
+(core:write "abc" () core:standard-output)	abc"abc"
+(core:write "abc" :t core:standard-output)	"abc""abc"
+(core:write () () core:standard-output)	:nil:nil
+(core:write :abcde :t core:standard-output)	:abcde:abcde
+(core:write-char #\a core:standard-output)	a#\a

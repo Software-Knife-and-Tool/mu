@@ -1,4 +1,4 @@
-(lib:write 1000 () (lib:open :string :output ""))
-(lib:write (lib:product 100 200) () (lib:open :string :output ""))
-(lib:write (prelude:string= "" "") () (lib:open :string :output ""))
-(lib:write (prelude:string= "ci" "") () (lib:open :string :output ""))
+(core:write 1000 () (core:open :string :output ""))
+(core:write (core:product 100 200) () (core:open :string :output ""))
+(core:write (prelude:string= "" "") () (core:open :string :output ""))
+(core:write (prelude:string= "ci" "") () (core:open :string :output ""))

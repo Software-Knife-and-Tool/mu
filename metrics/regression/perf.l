@@ -5,45 +5,45 @@
 ;;; return the elapsed process time in usec
 ;;; from applying fn to args
 ;;;
-(lib:intern (lib:find-ns "") "perf" (lib:make-ns "perf"))
+(core:intern (core:find-ns "") "perf" (core:make-ns "perf"))
 
-(lib:intern perf "time-delta"
+(core:intern perf "time-delta"
   (:lambda (fn args)
     ((:lambda (start stop)
-       (lib:difference stop start))
-       (lib:utime)
+       (core:difference stop start))
+       (core:utime)
        ((:lambda ()
-          (lib:apply fn args)
-          (lib:utime))))))
+          (core:apply fn args)
+          (core:utime))))))
 
 ;;;
 ;;; return an vector of storage consumed
 ;;; by applying fn to args
 ;;;
-(lib:intern perf "storage-delta"
+(core:intern perf "storage-delta"
   (:lambda (fn args)
     ((:lambda (start-vec stop-vec)
-       (lib:fix
+       (core:fix
         (:lambda (loop)
-          (:if (lib:eq :vector (lib:type-of loop))
+          (:if (core:eq :vector (core:type-of loop))
                loop
                ((:lambda (list n)
                   ((:lambda (offset)
-                     (:if (lib:less-than offset (lib:vector-len start-vec))
+                     (:if (core:less-than offset (core:vector-len start-vec))
                           ((:lambda (type total alloc in-use)
                              ((:lambda (type-stats)
-                                (lib:cons `(,@list ,@type-stats) (lib:sum 1 n)))
+                                (core:cons `(,@list ,@type-stats) (core:sum 1 n)))
                               `(,type ,total ,alloc ,in-use)))
-                           (lib:vector-ref start-vec (lib:sum offset 0))
-                           (lib:difference (lib:vector-ref stop-vec (lib:sum offset 1)) (lib:vector-ref start-vec (lib:sum offset 1)))
-                           (lib:difference (lib:vector-ref stop-vec (lib:sum offset 2)) (lib:vector-ref start-vec (lib:sum offset 2)))
-                           (lib:difference (lib:vector-ref stop-vec (lib:sum offset 3)) (lib:vector-ref start-vec (lib:sum offset 3))))
-                          (lib:make-vector :t list)))
-                         (lib:product n 4)))
-                 (lib:car loop)
-                 (lib:cdr loop))))
-         (lib:cons () 1)))
-     (lib:heap-stat)
+                           (core:vector-ref start-vec (core:sum offset 0))
+                           (core:difference (core:vector-ref stop-vec (core:sum offset 1)) (core:vector-ref start-vec (core:sum offset 1)))
+                           (core:difference (core:vector-ref stop-vec (core:sum offset 2)) (core:vector-ref start-vec (core:sum offset 2)))
+                           (core:difference (core:vector-ref stop-vec (core:sum offset 3)) (core:vector-ref start-vec (core:sum offset 3))))
+                          (core:make-vector :t list)))
+                         (core:product n 4)))
+                 (core:car loop)
+                 (core:cdr loop))))
+         (core:cons () 1)))
+     (core:heap-stat)
      ((:lambda ()
-         (lib:apply fn args)
-         (lib:heap-stat))))))
+         (core:apply fn args)
+         (core:heap-stat))))))

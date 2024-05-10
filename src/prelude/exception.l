@@ -14,28 +14,28 @@
 ;;; reason: extended condition, usually a string
 ;;; env:    dynamic environment, list of frames
 ;;;
-(lib:intern prelude "exceptp"
+(core:intern prelude "exceptp"
     (:lambda (ex)
       (prelude:%andf
        (prelude:%prelude-type-p ex)
-       (lib:eq '%except (prelude:type-of ex)))))
+       (core:eq '%except (prelude:type-of ex)))))
 
-(lib:intern prelude "%make-except"
+(core:intern prelude "%make-except"
    (:lambda (cond value source reason env)
       (prelude:%make-type "%except"
-        `(,(lib:cons :cond   cond)
-          ,(lib:cons :value  value)
-          ,(lib:cons :source source)
-          ,(lib:cons :reason reason)
-          ,(lib:cons :env    env)))))
+        `(,(core:cons :cond   cond)
+          ,(core:cons :value  value)
+          ,(core:cons :source source)
+          ,(core:cons :reason reason)
+          ,(core:cons :env    env)))))
 
-(lib:intern prelude "%except-prop"
+(core:intern prelude "%except-prop"
    (:lambda (prop except)
-      (:if (prelude:findl (:lambda (lambda-prop) (lib:eq prop lambda-prop)) '(:cond :value :source :reason :env))
+      (:if (prelude:findl (:lambda (lambda-prop) (core:eq prop lambda-prop)) '(:cond :value :source :reason :env))
            (prelude:%type-ref prop except)
            (prelude:raise prop 'prelude:%except-prop "not an except property"))))
 
-(lib:intern prelude "%exceptf"
+(core:intern prelude "%exceptf"
    (:lambda (stream format-string printenv except)
      ((:lambda (cond value source reason env)
          (:if (prelude:null format-string)
@@ -47,10 +47,10 @@
                   (prelude:%mapc
                    (:lambda (frame)
                       (prelude:format stream "  ~A~T(~A ~A)~%"
-                                   `(,(prelude:%format-mapped-symbol (lib:car frame))
-                                     ,(lib:car frame)
-                                     ,(lib:cdr frame))))
-                   (lib:cdr env))))
+                                   `(,(prelude:%format-mapped-symbol (core:car frame))
+                                     ,(core:car frame)
+                                     ,(core:cdr frame))))
+                   (core:cdr env))))
               ()))
       (prelude:%except-prop :cond except)
       (prelude:%except-prop :value except)
@@ -58,54 +58,54 @@
       (prelude:%except-prop :reason except)
       (prelude:%except-prop :env except))))
 
-(lib:intern prelude "with-exception"
+(core:intern prelude "with-exception"
   (:lambda (handler thunk)
-     (lib:unwind-protect
+     (core:unwind-protect
       (:lambda (value condition source)
-         (:if (lib:eq condition :except)
+         (:if (core:eq condition :except)
               (prelude:apply handler `(,value))
               (prelude:apply handler `(,(prelude:%make-except
                                       condition
                                       value
                                       source
-                                      "lib:raise"
-                                      (lib:frames))))))
+                                      "core:raise"
+                                      (core:frames))))))
       (:lambda () (prelude:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
 ;;;
-(lib:intern prelude "make-exception" prelude:%make-except)
+(core:intern prelude "make-exception" prelude:%make-except)
 
-(lib:intern prelude "error"
+(core:intern prelude "error"
    (:lambda (value format-string arg-list)
-      (prelude:format lib:error-output format-string arg-list)
-      (lib:raise
+      (prelude:format core:error-output format-string arg-list)
+      (core:raise
        (prelude:%make-except :error value :error "" ())
        :except)))
 
-(lib:intern prelude "raise-env"
+(core:intern prelude "raise-env"
    (:lambda (value source reason)
-     (lib:raise
-      (prelude:%make-except :error value source reason (lib:frames))
+     (core:raise
+      (prelude:%make-except :error value source reason (core:frames))
       :except)))
 
-(lib:intern prelude "raise"
+(core:intern prelude "raise"
    (:lambda (value source reason)
-     (lib:raise
+     (core:raise
       (prelude:%make-except :error value source reason ())
       :except)))
 
-(lib:intern prelude "debug"
+(core:intern prelude "debug"
    (:lambda (value message)
-     (lib:write ";;; debug: " () lib:error-output)          
-     (lib:write value () lib:error-output)
-     (lib:write " " () lib:error-output)
-     (lib:write message () lib:error-output)
-     (lib:write-char #\linefeed lib:error-output)
+     (core:write ";;; debug: " () core:error-output)          
+     (core:write value () core:error-output)
+     (core:write " " () core:error-output)
+     (core:write message () core:error-output)
+     (core:write-char #\linefeed core:error-output)
      value))
 
-(lib:intern prelude "warn"
+(core:intern prelude "warn"
    (:lambda (value message)
-     (prelude:format lib:error-output ";;; warning: ~S ~A~%" `(,value ,message))
+     (prelude:format core:error-output ";;; warning: ~S ~A~%" `(,value ,message))
     value))

@@ -1,2 +1,0 @@
-(lib:struct-type (lib:make-struct :foo ()))
-(lib:struct-vec (lib:make-struct :foo '(1 2 3 4)))

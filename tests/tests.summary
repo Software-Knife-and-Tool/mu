@@ -1,21 +1,21 @@
 Namespace Test Summary:
 -----------------------
-lib        backquote      total: 37       pass: 36       fail: 1        exceptions: 0       
-lib        compile        total: 8        pass: 8        fail: 0        exceptions: 0       
-lib        core           total: 56       pass: 56       fail: 0        exceptions: 0       
-lib        exception      total: 4        pass: 4        fail: 0        exceptions: 0       
-lib        future         total: 9        pass: 9        fail: 0        exceptions: 0       
-lib        list           total: 24       pass: 24       fail: 0        exceptions: 0       
-lib        namespace      total: 11       pass: 11       fail: 0        exceptions: 0       
-lib        number         total: 41       pass: 41       fail: 0        exceptions: 0       
-lib        reader         total: 52       pass: 52       fail: 0        exceptions: 0       
-lib        special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
-lib        stream         total: 9        pass: 9        fail: 0        exceptions: 0       
-lib        struct         total: 7        pass: 7        fail: 0        exceptions: 0       
-lib        symbol         total: 10       pass: 10       fail: 0        exceptions: 0       
-lib        vector         total: 23       pass: 23       fail: 0        exceptions: 0       
+core       backquote      total: 37       pass: 36       fail: 1        exceptions: 0       
+core       compile        total: 8        pass: 8        fail: 0        exceptions: 0       
+core       core           total: 56       pass: 56       fail: 0        exceptions: 0       
+core       exception      total: 4        pass: 4        fail: 0        exceptions: 0       
+core       future         total: 9        pass: 9        fail: 0        exceptions: 0       
+core       list           total: 24       pass: 24       fail: 0        exceptions: 0       
+core       namespace      total: 11       pass: 11       fail: 0        exceptions: 0       
+core       number         total: 41       pass: 41       fail: 0        exceptions: 0       
+core       reader         total: 52       pass: 52       fail: 0        exceptions: 0       
+core       special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
+core       stream         total: 9        pass: 9        fail: 0        exceptions: 0       
+core       struct         total: 7        pass: 7        fail: 0        exceptions: 0       
+core       symbol         total: 10       pass: 10       fail: 0        exceptions: 0       
+core       vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-lib                       total: 302      pass: 301      fail: 1        exceptions: 0         
+core                      total: 302      pass: 301      fail: 1        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------

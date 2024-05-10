@@ -13,7 +13,7 @@
 (prelude:not :t)
 (prelude:null '())
 (prelude:plusp 4)
-(prelude:streamp lib:standard-input)
+(prelude:streamp core:standard-input)
 (prelude:stringp "abc")
 (prelude:symbolp 'core)
 (prelude:vectorp #(:t 1 2 3))

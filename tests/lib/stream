@@ -1,9 +1,0 @@
-(lib:close lib:error-output)	:t
-(lib:flush lib:standard-output)	:nil
-(lib:get-string (lib:open :string :output "abcdef"))	"abcdef"
-(lib:openp lib:error-output)	#<stream: 2 :error-output :output :open>
-(lib:write "abc" () lib:standard-output)	abc"abc"
-(lib:write "abc" :t lib:standard-output)	"abc""abc"
-(lib:write () () lib:standard-output)	:nil:nil
-(lib:write :abcde :t lib:standard-output)	:abcde:abcde
-(lib:write-char #\a lib:standard-output)	a#\a

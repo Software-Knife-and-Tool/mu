@@ -8,7 +8,7 @@
 ;;;
 ;;; loader
 ;;;
-(lib:intern prelude "load"
+(core:intern prelude "load"
   (:lambda (path verbose)
     (:if (prelude:stringp path)
          ((:lambda (ifs)
@@ -18,28 +18,28 @@
                          (prelude:format :t ";;; loading ~A~%" `(,path))
                          ())
                     ((:lambda (status)
-                       (:if (lib:eq prelude:%eof% status)
+                       (:if (core:eq prelude:%eof% status)
                             :t
                             ()))
-                     (lib:fix
+                     (core:fix
                         (:lambda (loop)
-                           (:if (lib:eq prelude:%eof% loop)
+                           (:if (core:eq prelude:%eof% loop)
                                 prelude:%eof%
                                 (prelude:with-exception
                                     (:lambda (except)
-                                      (prelude:%exceptf lib:error-output "loader exception: ~A on ~A by ~S, ~A~%" () except))
+                                      (prelude:%exceptf core:error-output "loader exception: ~A on ~A by ~S, ~A~%" () except))
                                     (:lambda ()
                                       ((:lambda (form)
-                                          (:if (lib:eq prelude:%eof% form)
+                                          (:if (core:eq prelude:%eof% form)
                                                prelude:%eof%
                                                ((:lambda (value)
                                                   (:if verbose
                                                        (prelude:format :t "~A~%" `(,value))
                                                        ())
                                                   (prelude:null loop))
-                                                (lib:eval (prelude:compile form)))))
-                                       (lib:read ifs () prelude:%eof%))))))
+                                                (core:eval (prelude:compile form)))))
+                                       (core:read ifs () prelude:%eof%))))))
                        ()))))
                   (prelude:raise prelude:streamp ifs 'prelude:load "cannot open input file")))
-            (lib:open :file :input path))
+            (core:open :file :input path))
           (prelude:raise path 'prelude:load "not a file designator"))))

@@ -1,22 +1,22 @@
-(lib:eq :func (lib:type-of prelude:compile))	:t
-(lib:eq :func (lib:type-of (prelude:compile '(lambda () 1))))	:t
-(lib:eq :func (lib:type-of (prelude:compile '(lambda (a b) b))))	:t
-(lib:eq :func (lib:type-of (prelude:compile '(lambda (a) "hoo"))))	:t
-(lib:eq :func (lib:type-of (prelude:compile '(lambda (a) a))))	:t
-(lib:eval (prelude:compile '(if :t :t ())))	:t
-(lib:eval (prelude:compile '(if () () :t)))	:t
-(lib:eval (prelude:compile '(if :t () :t)))	:nil
-(lib:eval (prelude:compile '(if () :t ())))	:nil
-(lib:eval (prelude:compile '(if :t :t ())))	:t
-(lib:eval (prelude:compile '(if :t :t :t)))	:t
-(lib:eval (prelude:compile '(if () ())))	:nil
-(lib:eval (prelude:compile '(if () :t)))	:nil
-(lib:eval (prelude:compile '(if :t ())))	:nil
-(lib:eval (prelude:compile '(if :t :t)))	:t
-(lib:eval (prelude:compile '(if () (lib:sum 0 1) (lib:sum 0 0))))	0
-(lib:eval (prelude:compile '(if :t (lib:sum 0 1) (lib:sum 0 0))))	1
-(lib:eval (prelude:compile '(if (prelude:null ()) (lib:sum 0 1) (lib:sum 0 0))))	1
-(lib:eval (prelude:compile '(if (prelude:not (prelude:null :t)) (lib:sum 0 1) (lib:sum 0 0))))	1
-(lib:eval (prelude:compile '(if (prelude:null ()) (lib:sum 0 1) (prelude:write "should not eval" () ()))))	1
-(lib:eval (prelude:compile '(if (prelude:null :t) (prelude:write "should not eval" () ()) (lib:sum 0 0))))	0
-(lib:eval (prelude:compile '((:lambda (fn) (prelude:apply (:lambda (fn) (lib:eq :func (lib:type-of fn))) `(,fn))) lib:eq)))	:t
+(core:eq :func (core:type-of prelude:compile))	:t
+(core:eq :func (core:type-of (prelude:compile '(lambda () 1))))	:t
+(core:eq :func (core:type-of (prelude:compile '(lambda (a b) b))))	:t
+(core:eq :func (core:type-of (prelude:compile '(lambda (a) "hoo"))))	:t
+(core:eq :func (core:type-of (prelude:compile '(lambda (a) a))))	:t
+(core:eval (prelude:compile '(if :t :t ())))	:t
+(core:eval (prelude:compile '(if () () :t)))	:t
+(core:eval (prelude:compile '(if :t () :t)))	:nil
+(core:eval (prelude:compile '(if () :t ())))	:nil
+(core:eval (prelude:compile '(if :t :t ())))	:t
+(core:eval (prelude:compile '(if :t :t :t)))	:t
+(core:eval (prelude:compile '(if () ())))	:nil
+(core:eval (prelude:compile '(if () :t)))	:nil
+(core:eval (prelude:compile '(if :t ())))	:nil
+(core:eval (prelude:compile '(if :t :t)))	:t
+(core:eval (prelude:compile '(if () (core:sum 0 1) (core:sum 0 0))))	0
+(core:eval (prelude:compile '(if :t (core:sum 0 1) (core:sum 0 0))))	1
+(core:eval (prelude:compile '(if (prelude:null ()) (core:sum 0 1) (core:sum 0 0))))	1
+(core:eval (prelude:compile '(if (prelude:not (prelude:null :t)) (core:sum 0 1) (core:sum 0 0))))	1
+(core:eval (prelude:compile '(if (prelude:null ()) (core:sum 0 1) (prelude:write "should not eval" () ()))))	1
+(core:eval (prelude:compile '(if (prelude:null :t) (prelude:write "should not eval" () ()) (core:sum 0 0))))	0
+(core:eval (prelude:compile '((:lambda (fn) (prelude:apply (:lambda (fn) (core:eq :func (core:type-of fn))) `(,fn))) core:eq)))	:t

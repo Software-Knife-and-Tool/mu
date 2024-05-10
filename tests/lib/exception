@@ -1,4 +1,0 @@
-(lib:unwind-protect (:lambda (obj cond src) (lib:write cond () lib:standard-output)) (:lambda () (lib:raise () :except)))	:except:except
-(lib:unwind-protect (:lambda (obj cond src) (lib:write obj () lib:standard-output)) (:lambda () (lib:raise 1 :except)))	11
-(lib:unwind-protect (:lambda (obj cond src) (lib:write cond () lib:standard-output)) (:lambda () (lib:quotient 1 0)))	:div0:div0
-(lib:unwind-protect (:lambda (obj cond src) (lib:write obj () lib:standard-output)) (:lambda () 1))	1

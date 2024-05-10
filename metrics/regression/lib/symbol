@@ -1,5 +1,0 @@
-(lib:boundp 'lib:foo)
-(lib:boundp 'lib:standard-input)
-(lib:eq :keyword (lib:type-of 'abcd))
-(lib:eq :keyword (lib:type-of :abcd))
-(lib:symbol-value 'lib:standard-input)

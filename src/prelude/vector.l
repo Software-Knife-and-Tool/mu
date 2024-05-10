@@ -4,107 +4,107 @@
 ;;;
 ;;; vectors
 ;;;
-(lib:intern prelude "vectorp"
+(core:intern prelude "vectorp"
    (:lambda (vector)
-     (:if (lib:eq :vector (lib:type-of vector))
+     (:if (core:eq :vector (core:type-of vector))
           :t
-          (lib:eq '%vector (prelude:type-of vector)))))
+          (core:eq '%vector (prelude:type-of vector)))))
 
-(lib:intern prelude "bit-vector-p"
+(core:intern prelude "bit-vector-p"
    (:lambda (vector)
      (:if (prelude:%prelude-type-p vector)
-          (:if (lib:eq '%vector (prelude:type-of vector))
+          (:if (core:eq '%vector (prelude:type-of vector))
                (prelude:not (prelude:null (prelude:%vector-prop :bitvec vector)))
                ())
           ())))
 
-(lib:intern prelude "vector-displaced-p"
+(core:intern prelude "vector-displaced-p"
    (:lambda (vector)
      (:if (prelude:%prelude-type-p vector)
-          (:if (lib:eq '%vector (prelude:type-of vector))
+          (:if (core:eq '%vector (prelude:type-of vector))
                (prelude:%vector-prop :disp vector)
                ())
           ())))
 
-(lib:intern prelude "make-vector"
+(core:intern prelude "make-vector"
    (:lambda (list)
      (:if (prelude:listp list)
-          (lib:make-vector (prelude:%specialized-vector-type list) list)
+          (core:make-vector (prelude:%specialized-vector-type list) list)
           (prelude:raise list 'prelude:make-vector "not a list"))))
 
-(lib:intern prelude "slice"
+(core:intern prelude "slice"
    (:lambda (vector start length)
      (:if (prelude:typep vector :vector)
           (:if (prelude:fixnump start)
-               (:if (prelude:%orf (prelude:minusp start) (lib:less-than (prelude:vector-length vector) start))
+               (:if (prelude:%orf (prelude:minusp start) (core:less-than (prelude:vector-length vector) start))
                     (prelude:raise start 'prelude:slice "illegal start")
                     (:if (prelude:fixnump length)
-                         (:if (prelude:%orf (prelude:minusp length) (lib:less-than (prelude:vector-length vector) length))
+                         (:if (prelude:%orf (prelude:minusp length) (core:less-than (prelude:vector-length vector) length))
                               (prelude:raise length 'prelude:slice "illegal length")
                               (prelude:%make-vector vector `(,start ,@length) ()))
                          (prelude:raise start 'prelude:slice "not a fixnum")))
                (prelude:raise length 'prelude:slice "not a fixnum"))
           (prelude:raise vector 'prelude:slice "not a base vector"))))
 
-(lib:intern prelude "vector-length"
+(core:intern prelude "vector-length"
    (:lambda (vector)
      (:if (prelude:vectorp vector)
           (:if (prelude:bit-vector-p vector)
-               (lib:car (prelude:%vector-prop :bitvec vector))
+               (core:car (prelude:%vector-prop :bitvec vector))
                (:if (prelude:typep vector :vector)
-                    (lib:vector-len vector)
-                    (lib:cdr (prelude:%vector-prop :disp vector))))
+                    (core:vector-len vector)
+                    (core:cdr (prelude:%vector-prop :disp vector))))
           (prelude:raise vector 'prelude:vector-length "not a vector"))))
 
-(lib:intern prelude "vector-type"
+(core:intern prelude "vector-type"
    (:lambda (vector)
      (:if (prelude:vectorp vector)
           (:if (prelude:bit-vector-p vector)
                'bit
                (:if (prelude:typep vector :vector)
-                    (lib:vector-type vector)
-                    (lib:vector-type (prelude:%vector-prop :base vector))))
+                    (core:vector-type vector)
+                    (core:vector-type (prelude:%vector-prop :base vector))))
           (prelude:raise vector 'prelude:vector-type "not a vector"))))
 
-(lib:intern prelude "vector-ref"
+(core:intern prelude "vector-ref"
    (:lambda (vector nth)
      (:if (prelude:vectorp vector)
           (:if (prelude:fixnump nth)
-               (:if (prelude:%orf (prelude:minusp nth) (lib:less-than (prelude:vector-length vector) nth))
+               (:if (prelude:%orf (prelude:minusp nth) (core:less-than (prelude:vector-length vector) nth))
                     (prelude:raise length 'prelude:vector-ref "illegal index")
                     (:if (prelude:bit-vector-p vector)
                          ((:lambda (nth-byte offset)
                             ((:lambda (byte)
-                               (:if (prelude:zerop (lib:logand byte (lib:ash 1 (lib:difference 7 offset))))
+                               (:if (prelude:zerop (core:logand byte (core:ash 1 (core:difference 7 offset))))
                                     0
                                     1))
                                (prelude:vector-ref (prelude:%vector-prop :base vector) nth-byte)))
-                          (lib:quotient nth 8)
-                          (lib:difference nth (lib:product 8 (lib:quotient nth 8))))
+                          (core:quotient nth 8)
+                          (core:difference nth (core:product 8 (core:quotient nth 8))))
                          (:if (prelude:typep vector :vector)
-                              (lib:vector-ref vector nth)
+                              (core:vector-ref vector nth)
                               ((:lambda (base start)
-                                 (lib:vector-ref base (lib:sum start nth)))
+                                 (core:vector-ref base (core:sum start nth)))
                                (prelude:%vector-prop :base vector)
-                               (lib:car (prelude:%vector-prop :disp vector))))))
+                               (core:car (prelude:%vector-prop :disp vector))))))
                     (prelude:raise nth 'prelude:vector-ref "not a fixnum"))
           (prelude:raise prop 'prelude:vector-ref "not a vector"))))
 
 ;;;
 ;;; write
 ;;;
-(lib:intern prelude "%vector-write"
+(core:intern prelude "%vector-write"
    (:lambda (vector escape stream)
        (:if (prelude:typep vector :vector)
-           (lib:write vector escape stream)
+           (core:write vector escape stream)
            ((:lambda (length)
                (prelude:format stream "#(" ())
-               (lib:fix
+               (core:fix
                 (:lambda (index)
-                   (:if (lib:less-than index length)
+                   (:if (core:less-than index length)
                         ((:lambda ()
                             (prelude:write (prelude:vector-ref vector index) escape stream)
-                            (:if (lib:less-than index (prelude:1- length))
+                            (:if (core:less-than index (prelude:1- length))
                                  (prelude:format stream " " ())
                                  ())
                             (prelude:1+ index)))
@@ -117,25 +117,25 @@
 ;;;
 ;;; implementations
 ;;;
-(lib:intern prelude "%make-vector"
+(core:intern prelude "%make-vector"
    (:lambda (vector displace bitvec)
      (prelude:%make-type "%vector"
-       `(,(lib:cons :base   vector)
-         ,(lib:cons :disp   displace)
-         ,(lib:cons :bitvec bitvec)))))
+       `(,(core:cons :base   vector)
+         ,(core:cons :disp   displace)
+         ,(core:cons :bitvec bitvec)))))
 
-(lib:intern prelude "%specialized-vector-type"
+(core:intern prelude "%specialized-vector-type"
    (:lambda (list)
      ((:lambda (type)
-        (:if (prelude:findl (:lambda (stype) (lib:eq type stype)) '(:t :char :fixnum :float))
-             (:if (lib:eq type :fixnum)
+        (:if (prelude:findl (:lambda (stype) (core:eq type stype)) '(:t :char :fixnum :float))
+             (:if (core:eq type :fixnum)
                   ((:lambda (is-byte)
                      (:if is-byte
                           :byte
                           :fixnum))
                    (prelude:foldl
                     (:lambda (elt acc)
-                      (:if (prelude:%andf (prelude:not (prelude:minusp elt)) (lib:less-than elt 256))
+                      (:if (prelude:%andf (prelude:not (prelude:minusp elt)) (core:less-than elt 256))
                            acc
                            ()))
                       :t
@@ -144,29 +144,29 @@
              :t))
       (prelude:foldl
        (:lambda (elt acc)
-          (:if (lib:eq :t acc)
+          (:if (core:eq :t acc)
                :t
-               (:if (lib:eq acc (lib:type-of elt))
+               (:if (core:eq acc (core:type-of elt))
                     acc
                     ())))
-      (lib:type-of (lib:car list))
-      (lib:cdr list)))))
+      (core:type-of (core:car list))
+      (core:cdr list)))))
 
-(lib:intern prelude "%vector-prop"
+(core:intern prelude "%vector-prop"
    (:lambda (prop vector)
-      (:if (prelude:findl (:lambda (vec-prop) (lib:eq prop vec-prop)) '(:base :disp :bitvec))
-           (lib:cdr (prelude:%type-ref prop vector))
+      (:if (prelude:findl (:lambda (vec-prop) (core:eq prop vec-prop)) '(:base :disp :bitvec))
+           (core:cdr (prelude:%type-ref prop vector))
            (prelude:raise prop 'prelude:%vector-prop "not a vector property"))))
 
-(lib:intern prelude "%map-vector"
+(core:intern prelude "%map-vector"
   (:lambda (fn vector)
-    (lib:fix
+    (core:fix
      (:lambda (nth)
        (:if nth
-            (:if (lib:eq nth (lib:vector-len vector))
+            (:if (core:eq nth (core:vector-len vector))
                  ()
                  ((:lambda ()
-                     (prelude:apply fn `(,(lib:vector-ref vector nth)))
-                     (lib:sum 1 nth))))
+                     (prelude:apply fn `(,(core:vector-ref vector nth)))
+                     (core:sum 1 nth))))
             ()))
      0)))
