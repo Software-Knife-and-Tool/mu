@@ -152,6 +152,7 @@ impl Core for Exception {
 
         if *signal_ref {
             *signal_ref = false;
+
             Err(Exception::new(
                 env,
                 Condition::SigInt,

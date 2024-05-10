@@ -195,6 +195,8 @@ impl Core for Stream {
                 let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
+                    drop(streams_ref);
+                    drop(stream);
                     return Err(Exception::new(
                         env,
                         Condition::Stream,
@@ -234,6 +236,9 @@ impl Core for Stream {
                 let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
+                    drop(streams_ref);
+                    drop(stream);
+
                     return Err(Exception::new(
                         env,
                         Condition::Stream,
@@ -281,6 +286,9 @@ impl Core for Stream {
                 SystemStream::close(&stream.system);
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
+                    drop(streams_ref);
+                    drop(stream);
+
                     return Err(Exception::new(
                         env,
                         Condition::Type,
@@ -318,6 +326,9 @@ impl Core for Stream {
                 let stream = block_on(stream_ref.read());
 
                 if stream.direction.eq_(&Symbol::keyword("input")) {
+                    drop(streams_ref);
+                    drop(stream);
+
                     return Err(Exception::new(env, Condition::Type, "core:write-char", tag));
                 }
 
@@ -339,6 +350,9 @@ impl Core for Stream {
                 let stream = block_on(stream_ref.read());
 
                 if stream.direction.eq_(&Symbol::keyword("input")) {
+                    drop(streams_ref);
+                    drop(stream);
+
                     return Err(Exception::new(env, Condition::Type, "core:write-byte", tag));
                 }
 

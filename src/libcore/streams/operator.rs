@@ -72,12 +72,12 @@ impl SystemStream {
     pub fn close(&self) -> Option<()> {
         match self {
             Self::StdInput | Self::StdOutput | Self::StdError => (),
-            Self::Reader(file) => std::mem::drop(block_on(file.read())),
+            Self::Reader(file) => drop(block_on(file.read())),
             Self::Writer(file) => {
                 let mut file = block_on(file.write());
                 let _unused = task::block_on(async { file.flush().await });
 
-                std::mem::drop(file)
+                drop(file)
             }
             SystemStream::String(_) => (),
         };
