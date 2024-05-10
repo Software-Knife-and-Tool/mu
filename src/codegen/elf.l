@@ -4,7 +4,7 @@
 ;;;
 ;;; elf64 utilities
 ;;;
-(lib:intern :arm "elf64-write-bytes"
+(core:intern :arm "elf64-write-bytes"
    (:lambda (stream bytes)
       (prelude:%mapc
        (:lambda (byte)
@@ -20,60 +20,60 @@
                       byte))))))
        bytes)))
 
-(lib:intern :arm "elf64-read-bytes"
+(core:intern :arm "elf64-read-bytes"
    (:lambda (nbytes stream)
       ((:lambda (list)
-          (lib:vector-list :byte (lib:cdr list)))
-       (lib:fix
+          (core:vector-list :byte (core:cdr list)))
+       (core:fix
         (:lambda (loop)
            ((:lambda (nbytes list)
                (:if (prelude:zerop nbytes)
                     loop
-                    (lib:cons
-                     (lib:fx-sub nbytes 1)
+                    (core:cons
+                     (core:fx-sub nbytes 1)
                      `(,@list ,@(prelude:read-byte stream :t ())))))
-            (lib:car loop)
-            (lib:cdr loop)))
-        (lib:cons nbytes ())))))
+            (core:car loop)
+            (core:cdr loop)))
+        (core:cons nbytes ())))))
 
-(lib:intern :arm "elf64-read"
+(core:intern :arm "elf64-read"
    (:lambda (type stream)
-      (:if (lib:eq type :half)
-           (lib:fx-add
+      (:if (core:eq type :half)
+           (core:fx-add
             (prelude:read-byte stream t ())
-            (lib:ash (prelude:read-byte stream :t ()) 8))
-           (:if (lib:eq type :word)
-                (lib:fx-add
+            (core:ash (prelude:read-byte stream :t ()) 8))
+           (:if (core:eq type :word)
+                (core:fx-add
                  (prelude:elf64-read :half stream)
-                 (lib:ash (prelude:elf64-read :half stream) 16))
-                (:if (lib:eq type :u64)
-                     (lib:fx-add
+                 (core:ash (prelude:elf64-read :half stream) 16))
+                (:if (core:eq type :u64)
+                     (core:fx-add
                       (prelude:elf64-read :word stream)
-                      (lib:ash (prelude:elf64-read :word stream) 32))
-                     (:if (lib:eq type :tag)
-                          (lib:%repr :t (prelude:elf64-read-bytes 8 stream))
+                      (core:ash (prelude:elf64-read :word stream) 32))
+                     (:if (core:eq type :tag)
+                          (core:%repr :t (prelude:elf64-read-bytes 8 stream))
                           (prelude:raise size 'prelude:elf64-read "not a legal type")))))))
 
-(lib:intern :arm "elf64-write"
+(core:intern :arm "elf64-write"
    (:lambda (type n stream)
-      (:if (lib:eq type :half)
+      (:if (core:eq type :half)
            (prelude:elf64-write-bytes
             stream
-            (lib:logand n #xff)
-            (lib:logand (lib:ash n -8) #xff))
-           (:if (lib:eq type :word)
+            (core:logand n #xff)
+            (core:logand (core:ash n -8) #xff))
+           (:if (core:eq type :word)
                 ((:lambda ()
                  (prelude:elf64-write :half n stream)
-                 (prelude:elf64-write :half (lib:ash n -16) stream)))
-                (:if (lib:eq type :u64)
+                 (prelude:elf64-write :half (core:ash n -16) stream)))
+                (:if (core:eq type :u64)
                      ((:lambda ()
                       (prelude:elf64-write :half n stream)
-                      (prelude:elf64-write :half (lib:ash n -32) stream)))
-                     (:if (lib:eq type :tag)
-                          (prelude:elf64-write :u64 (lib:tag-of n) stream)
+                      (prelude:elf64-write :half (core:ash n -32) stream)))
+                     (:if (core:eq type :tag)
+                          (prelude:elf64-write :u64 (core:tag-of n) stream)
                           (t (prelude:raise size 'el64-write "not a legal type"))))))))
 
-(lib:intern :arm "elf64-write-header"
+(core:intern :arm "elf64-write-header"
    (:lambda (out size)
       ;;; (prelude:raise prelude:streamp out 'elf64-write-header "not a stream designator")
       ;;; header 64 bit little endian current version
@@ -103,62 +103,62 @@
       (prelude:elf64-write :u64 0 out)      ; 110 sh_addralign
       (prelude:elf64-write :u64 0 out)))    ; 118 sh_entsize
 
-(lib:intern :arm "elf64-read-header"
+(core:intern :arm "elf64-read-header"
    (:lambda (stream)
-      (lib:unwind-protect
+      (core:unwind-protect
        (:lambda (ex)
           (prelude:%exceptf
-           lib:error-output
+           core:error-output
            "elf64-read-header exception: ~A on ~A by ~S from ~A~%"
            ()
            ex))
        (:lambda ()
-          `(,(lib:cons "magic" (prelude:elf64-read :u64 elf64))
-            ,(lib:cons "class" (prelude:read-byte elf64 :t ()))
-            ,(lib:cons "data-encoding" (prelude:read-byte elf64 :t ()))
-            ,(lib:cons "file-version" (prelude:read-byte elf64 t ()))
-            ,(lib:cons "OS-ABI" (prelude:read-byte elf64 :t ()))
-            ,(lib:cons "ABI-version" (prelude:read-byte elf64 :t ()))
-            ,(lib:cons "e_value" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_machine" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_version" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_entry" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_phoff" (prelude:elf64-read :u64 elf64))
-            ,(lib:cons "e_shoff" (prelude:elf64-read :u64 elf64))
-            ,(lib:cons "e_flags" (prelude:elf64-read :word elf64))
-            ,(lib:cons "e_ehsize" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_phentsize" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_phnum" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_shentsize" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_shnum" (prelude:elf64-read :half elf64))
-            ,(lib:cons "e_shstrndx" (prelude:elf64-read :half elf64))
-            ,(lib:cons "sh_name" (prelude:elf64-read :word elf64))
-            ,(lib:cons "sh_type" (prelude:elf64-read :word elf64))
-            ,(lib:cons "sh_flags" (prelude:elf64-read :u64 elf64))
-            ,(lib:cons "sh_addr" (prelude:elf64-read :u64 elf64))
-            ,(lib:cons "sh_offset" (prelude:elf64-read :u64 elf64))
-            ,(lib:cons "sh_size" (prelude:elf64-read :u64 elf64))
-            ,(lib:cons "sh_link" (prelude:elf64-read :word elf64))
-            ,(lib:cons "sh_info" (prelude:elf64-read :word elf64))
-            ,(lib:cons "sh_addralign" (prelude:elf64-read :u64 elf64))
-            ,(lib:cons "sh_entsize" (prelude:elf64-read :u64 elf64)))))))
+          `(,(core:cons "magic" (prelude:elf64-read :u64 elf64))
+            ,(core:cons "class" (prelude:read-byte elf64 :t ()))
+            ,(core:cons "data-encoding" (prelude:read-byte elf64 :t ()))
+            ,(core:cons "file-version" (prelude:read-byte elf64 t ()))
+            ,(core:cons "OS-ABI" (prelude:read-byte elf64 :t ()))
+            ,(core:cons "ABI-version" (prelude:read-byte elf64 :t ()))
+            ,(core:cons "e_value" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_machine" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_version" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_entry" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_phoff" (prelude:elf64-read :u64 elf64))
+            ,(core:cons "e_shoff" (prelude:elf64-read :u64 elf64))
+            ,(core:cons "e_flags" (prelude:elf64-read :word elf64))
+            ,(core:cons "e_ehsize" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_phentsize" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_phnum" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_shentsize" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_shnum" (prelude:elf64-read :half elf64))
+            ,(core:cons "e_shstrndx" (prelude:elf64-read :half elf64))
+            ,(core:cons "sh_name" (prelude:elf64-read :word elf64))
+            ,(core:cons "sh_type" (prelude:elf64-read :word elf64))
+            ,(core:cons "sh_flags" (prelude:elf64-read :u64 elf64))
+            ,(core:cons "sh_addr" (prelude:elf64-read :u64 elf64))
+            ,(core:cons "sh_offset" (prelude:elf64-read :u64 elf64))
+            ,(core:cons "sh_size" (prelude:elf64-read :u64 elf64))
+            ,(core:cons "sh_link" (prelude:elf64-read :word elf64))
+            ,(core:cons "sh_info" (prelude:elf64-read :word elf64))
+            ,(core:cons "sh_addralign" (prelude:elf64-read :u64 elf64))
+            ,(core:cons "sh_entsize" (prelude:elf64-read :u64 elf64)))))))
 
-(lib:intern :arm "elf64-print-header"
+(core:intern :arm "elf64-print-header"
   (:lambda (elf64-header)
      ;;; (prelude:raise prelude:consp elf64-header 'prelude:elf64-print-header "not an association list")
      (prelude:%mapc
       (:lambda (entry)
-         (prelude:format t "    ~A: ~A~%" `(,(lib:car entry) ,(lib:cdr entry))))
+         (prelude:format t "    ~A: ~A~%" `(,(core:car entry) ,(core:cdr entry))))
       elf64-header)))
 
 #|
-(lib:intern :arm "elf64-dump"
+(core:intern :arm "elf64-dump"
    (:lambda (path)
       ;;; (prelude:raise prelude:stringp path 'prelude:elf64-dump "not a pathname")
       ((:lambda (elf64)
           ((:lambda (magic)
               ;;; (prelude:raise prelude:null magic 'prelude:elf64-dump "error reading magic")
-              ;;; (prelude:raise (:lambda (magic) (lib:eq #x7f magic)) magic 'prelude:elf64-dump "wrong magic")
+              ;;; (prelude:raise (:lambda (magic) (core:eq #x7f magic)) magic 'prelude:elf64-dump "wrong magic")
               (prelude:format :t "~A: elf64 file (magic #x~X ~A~A~A)~%"
                            `(path
                              magic
@@ -168,7 +168,7 @@
               (prelude:format :t "~A: elf64 file header~%" `(path))
               (prelude:elf64-print-header (prelude:elf64-read-header elf64))
               (prelude:format t "~A: body:~%" path)
-              (lib:fix
+              (core:fix
                (:lambda (loop)
                   (:if (prelude:eof elf64)
                        loop
@@ -178,5 +178,5 @@
                         (prelude:elf64-read :tag elf64))))
                ()))
              (prelude:read-byte elf64 () ()))
-(lib:open :file :input path)))))
+(core:open :file :input path)))))
 |#

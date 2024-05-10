@@ -12,11 +12,11 @@
      ((and (vectorp x) (vectorp y))
         (and (eq (vector-type x) (vector-type y))
              (eq (vector-length x) (vector-length y))
-             (lib::funcall eql (vector-to-list x) (vector-to-list y))))
+             (core::funcall eql (vector-to-list x) (vector-to-list y))))
      ((consp x)
         (and (eq (length x) (length y))
-             (lib::funcall eql (car x) (car y))
-             (lib::funcall eql (cdr x) (cdr y))))
+             (core::funcall eql (car x) (car y))
+             (core::funcall eql (cdr x) (cdr y))))
      (t ())))
 
 ;;;
@@ -34,7 +34,7 @@
     (list (list 'lambda (list limit-gsym)
                 (list 'if (list 'fixnum< limit-gsym 0)
                       ()
-                      (list 'lib::fix
+                      (list 'core::fix
                             (list 'lambda (list count-var)
                                   (list 'if (list 'eq count-var limit-gsym)
                                         count-var
@@ -64,7 +64,7 @@
 ;;; with-open-file macro
 ;;;
 (defmacro with-open-file (symbol path dir &rest body)
-  (list 'let (list (list symbol (list lib:open-file dir path)))
+  (list 'let (list (list symbol (list core:open-file dir path)))
     (list 'unwind-protect
       (list 'lambda (list 'ex)
         (list 'print-except 'ex "with-open-file")

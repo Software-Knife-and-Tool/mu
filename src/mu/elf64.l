@@ -18,7 +18,7 @@
    bytes))
 
 (defun elf64-read (type elf64)
-  (let ((elf64-read (lambda (type stream) (funcall lib:elf64-read type stream))))
+  (let ((elf64-read (lambda (type stream) (funcall core:elf64-read type stream))))
     (cond
       ((eq type :half)
        (fixnum+ (read-byte elf64 t ()) (ash (read-byte elf64 t ()) 8)))
@@ -27,11 +27,11 @@
       ((eq type :u64)
        (fixnum+ (elf64-read :word elf64) (ash (elf64-read :word elf64) 32)))
       ((eq type :tag)
-       (lib::of-tag (elf64-read :u64 elf64)))
+       (core::of-tag (elf64-read :u64 elf64)))
       (t (error size "elf64-read: not a legal type")))))
 
 (defun elf64-write (type n stream)
-  (let ((elf64-write (lambda (type n stream) (funcall lib:elf64-write type n stream))))
+  (let ((elf64-write (lambda (type n stream) (funcall core:elf64-write type n stream))))
     (cond
       ((eq type :half)
        (elf64-write-bytes stream
@@ -44,7 +44,7 @@
        (elf64-write :half n stream)
        (elf64-write :half (ash n -32) stream))
       ((eq type :tag)
-       (elf64-write :u64 (lib::tag-of n) stream))
+       (elf64-write :u64 (core::tag-of n) stream))
       (t (error size "el64-write: not a legal type")))))
 
 (defun elf64-write-header (out size)
@@ -76,7 +76,7 @@
   (elf64-write :u64 0 out))  ;;; 118 sh_entsize
 
 (defun elf64-read-header (elf64)
-  (lib:unwind-protect
+  (core:unwind-protect
       (lambda (ex)
         (format t "error: exception while reading header~%")
         (print-except ex "read-header")

@@ -4,24 +4,24 @@
 ;;;
 ;;; mu require
 ;;;
-(defconst lib::require-ns (lib:ns (symbol-name (gensym)) (env:find-ns "mu")))
-(lib:in-namespace lib::require-ns)
+(defconst core::require-ns (core:ns (symbol-name (gensym)) (env:find-ns "mu")))
+(core:in-namespace core::require-ns)
 
-(defmacro lib:require-lib (lib-sym)
-  (errorp-unless symbolp lib-sym "require-lib: not a symbol")
+(defmacro core:require-lib (lib-sym)
+  (errorp-unless symbolp lib-sym "require-core: not a symbol")
   (let ((lib (symbol-name lib-sym)))
-    (if (lib:ns-find lib::require-ns :extern lib)
+    (if (core:ns-find core::require-ns :extern lib)
       ()
-      (let ((lib-path (lib:format () "~A/~A:~A.l" (list lib::require-path "eko" lib))))
-        (lib:intern lib::require-ns :extern lib)
-        (lib:load lib-path () ())))))
+      (let ((lib-path (core:format () "~A/~A:~A.l" (list core::require-path "eko" lib))))
+        (core:intern core::require-ns :extern lib)
+        (core:load lib-path () ())))))
 
-(defmacro lib:require-lib-verbose (lib-sym)
+(defmacro core:require-lib-verbose (lib-sym)
   (errorp-unless symbolp lib-sym "require-lib not a symbol")
   (let ((lib (symbol-name lib-sym)))
-    (if (lib:ns-find lib::require-ns :extern lib)
+    (if (core:ns-find core::require-ns :extern lib)
       ()
-      (let ((lib-path (lib:format () "~A/~A:~A.l" (list lib::require-path "eko" lib))))
-        (lib:intern lib::require-ns :extern lib)
-        (lib:load lib-path :t ())))))
+      (let ((lib-path (core:format () "~A/~A:~A.l" (list core::require-path "eko" lib))))
+        (core:intern core::require-ns :extern lib)
+        (core:load lib-path :t ())))))
 
