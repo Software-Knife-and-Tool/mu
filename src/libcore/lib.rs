@@ -258,17 +258,30 @@ impl Env {
                 match self.read(istream, false, eof_value) {
                     Ok(form) => {
                         if self.eq(form, eof_value) {
+                            drop(env_ref);
                             return Ok(true);
                         }
                         match self.compile(form) {
                             Ok(form) => match self.eval(form) {
                                 Ok(_) => (),
-                                Err(e) => return Err(e),
+                                Err(e) => {
+                                    drop(env_ref);
+
+                                    return Err(e);
+                                }
                             },
-                            Err(e) => return Err(e),
+                            Err(e) => {
+                                drop(env_ref);
+
+                                return Err(e);
+                            }
                         }
                     }
-                    Err(e) => return Err(e),
+                    Err(e) => {
+                        drop(env_ref);
+
+                        return Err(e);
+                    }
                 }
             }
         } else {

@@ -69,6 +69,8 @@ impl Namespace {
         let len = ns_ref.len();
 
         if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
+            drop(ns_ref);
+
             return Err(Exception::new(
                 env,
                 Condition::Type,
@@ -469,7 +471,11 @@ impl CoreFunction for Namespace {
                         Some(sym) => sym,
                         None => Tag::nil(),
                     },
-                    None => return Err(Exception::new(env, Condition::Type, "core:find", ns_tag)),
+                    None => {
+                        drop(ns_ref);
+
+                        return Err(Exception::new(env, Condition::Type, "core:find", ns_tag));
+                    }
                 }
             }
             _ => return Err(Exception::new(env, Condition::Type, "core:find", ns_tag)),
