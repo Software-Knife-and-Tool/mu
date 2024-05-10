@@ -1,0 +1,2 @@
+(core:close core:error-output)
+(core:get-string (core:open :string :output (core:symbol-name 'abcdef)))

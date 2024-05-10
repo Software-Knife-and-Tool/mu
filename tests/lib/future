@@ -1,9 +1,0 @@
-(lib:type-of lib:defer)	:func
-(lib:type-of lib:force)	:func
-(lib:type-of lib:poll)	:func
-(lib:type-of (lib:defer lib:sum '(1 2)))	:struct
-(lib:force (lib:defer lib:sum '(1 2)))	3
-(lib:type-of (lib:detach lib:sum '(1 2)))	:struct
-(lib:force (lib:detach lib:sum '(1 2)))	3
-(lib:type-of (lib:poll (lib:detach lib:sum '(1 2))))	:null
-(lib:type-of (lib:poll (lib:defer lib:sum '(1 2))))	:null

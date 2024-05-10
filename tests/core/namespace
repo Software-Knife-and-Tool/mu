@@ -1,0 +1,11 @@
+(core:boundp (core:intern (core:find-ns "") "foo" ()))	foo
+(core:eq :func (core:type-of core:make-ns))	:t
+(core:find (core:find-ns "core") "eq")	core:eq
+(core:find (core:find-ns "core") "foo")	:nil
+(core:intern (core:find-ns "") "foo" "foo")	foo
+(core:intern (core:find-ns "core") "foo" ())	core:foo
+(core:make-ns "mu")	#<:ns "mu">
+(core:type-of (core:symbols (core:find-ns "")))	:null
+(core:type-of (core:symbols (core:find-ns "keyword")))	:null
+(core:type-of (core:symbols (core:find-ns "core")))	:cons
+(core:type-of (core:unintern (core:intern (core:find-ns "") "foo" ())))	:symbol

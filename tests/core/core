@@ -1,0 +1,56 @@
+(core:eq 1 1)	:t
+(core:eq 1 2)	:nil
+(core:eval 'core:standard-input)	#<stream: 0 :standard-input :input :open>
+(core:eval ())	:nil
+(core:fix (:lambda (l) (:if l ((:lambda () (core:write (core:car l) () core:standard-output) (core:cdr l))) ())) '(1 2 3 4))	1234:nil
+(core:fix (:lambda (l) (:if l ((:lambda () (core:write (core:car (core:car l)) () core:standard-output) (core:cdr l))) ())) '((0 . 1) (2 . 3)))	02:nil
+(core:apply core:eq '(1 2))	:nil
+(core:apply core:sum '(1 2))	3
+(core:type-of #\a)	:char
+(core:type-of '(1 2 3))	:cons
+(core:type-of '(:lambda ()))	:cons
+(core:type-of 'core:apply)	:symbol
+(core:type-of ())	:null
+(core:type-of 1)	:fixnum
+(core:type-of :typeof)	:keyword
+(core:type-of core:standard-input)	:stream
+(core:type-of core:heap-info)	:func
+(core:type-of "type-of")	:vector
+(core:type-of (core:find-ns "core"))	:ns
+(core:view ())	#(:t "" nil :nil)
+(core:view :keyword)	#(:t "keyword" keyword :keyword)
+(core:view #\a)	#(:t a)
+(core:view "abcdefg")	#(:t 7 :char)
+(core:view "abcdefgh")	#(:t 8 :char)
+(core:view '(1 2))	#(:t 1 (2))
+(core:view 1234)	#(:t 1234)
+(core:view 1.0)	#(:t 1.0000)
+(core:view #(:t 1 2))	#(:t 2 :t)
+(core:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
+(core:view 'a)	#(:t "" a :UNBOUND)
+(core:view 'core:eq)	#(:t "core" eq #<:function :core [req:2, form:eq]>)
+(core:view core:eq)	#(:t 2 #(:t core eq 0))
+(core:view core:standard-input)	#(:t 0 :input :nil)
+(core:heap-size ())	8
+(core:heap-size :keyword)	8
+(core:heap-size #\a)	8
+(core:heap-size '(1 2))	8
+(core:heap-size 1234)	8
+(core:heap-size 1.0)	8
+(core:heap-size #s(:foo 1 2))	52
+(core:heap-size "abcdefg")	8
+(core:heap-size "abcdefgh")	26
+(core:heap-size #(:t 1 2))	34
+(core:heap-size 'a)	27
+(core:heap-size 'core:eq)	45
+(core:heap-size core:eq)	18
+(core:heap-size core:standard-input)	8
+(core:unwind-protect (:lambda (cond obj) (core:write cond () core:standard-output)) (:lambda () (core:quotient 1 1)))	1
+(core:repr :t (core:repr :vector :t))	:t
+(core:type-of core:find)	:func
+(core:type-of core:find-ns)	:func
+(core:type-of core:intern)	:func
+(core:type-of core:make-ns)	:func
+(core:type-of core:ns-map)	:func
+(core:type-of core:symbols)	:func
+(core:type-of core:unintern)	:func

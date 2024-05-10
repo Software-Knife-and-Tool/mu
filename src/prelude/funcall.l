@@ -8,29 +8,29 @@
 ;;;
 ;;; argument lists
 ;;;
-(lib:intern prelude "%arg-list"
+(core:intern prelude "%arg-list"
     (:lambda (arg-list)
       (prelude:foldr
        (:lambda (elt acc)
-         `(lib:cons ,elt ,acc))
+         `(core:cons ,elt ,acc))
        ()
        arg-list)))
 
-(lib:intern prelude "%lambda-arg-list"
+(core:intern prelude "%lambda-arg-list"
     (:lambda (function arg-list)
       (:if (prelude:%prelude-function-p function)
                 ((:lambda (rest nreqs)
                    (:if (prelude:%andf rest (prelude:zerop nreqs))
-                        `(lib:cons ,(prelude:%arg-list arg-list) ())
+                        `(core:cons ,(prelude:%arg-list arg-list) ())
                         ((:lambda (reqs rest)
                            (prelude:%arg-list `(,@reqs ,(prelude:%arg-list rest))))
-                         (prelude:dropr arg-list (lib:difference (lib:length arg-list) nreqs))
+                         (prelude:dropr arg-list (core:difference (core:length arg-list) nreqs))
                          (prelude:dropl arg-list nreqs))))
                  (prelude:%fn-prop :rest function)
                  (prelude:%fn-prop :arity function))
                 (prelude:%arg-list arg-list))))
 
-(lib:intern prelude "%quoted-lambda-arg-list"
+(core:intern prelude "%quoted-lambda-arg-list"
   (:lambda (fn args)
     (:if (prelude:%prelude-function-p fn)
          (:if (prelude:%fn-prop :rest fn)
@@ -40,7 +40,7 @@
                       (prelude:append
                        reqs
                        `(,rest)))
-                    (prelude:dropr args (lib:difference (lib:length args) (prelude:%fn-prop :arity fn)))
+                    (prelude:dropr args (core:difference (core:length args) (prelude:%fn-prop :arity fn)))
                     (prelude:dropl args (prelude:%fn-prop :arity fn))))
               args)
          args)))
@@ -48,22 +48,22 @@
 ;;;
 ;;; compiled argument lists
 ;;;
-(lib:intern prelude "%compile-arg-list"
+(core:intern prelude "%compile-arg-list"
    (:lambda (arg-list env)
       (prelude:foldr
        (:lambda (elt acc)
-          `(lib:cons ,@(lib:cons elt `(,acc))))
+          `(core:cons ,@(core:cons elt `(,acc))))
        ()
        (prelude:mapcar
         (:lambda (form)
            (prelude:%compile form env))
         arg-list))))
 
-(lib:intern prelude "%compile-lambda-arg-list"
+(core:intern prelude "%compile-lambda-arg-list"
    (:lambda (function arg-list env)
      (prelude:%lambda-arg-list function (prelude:%mapcar (:lambda (elt) (prelude:%compile elt env)) arg-list))))
 
-(lib:intern prelude "%compile-quoted-lambda-arg-list"
+(core:intern prelude "%compile-quoted-lambda-arg-list"
    (:lambda (function arg-list env)
      (prelude:%compile-lambda-arg-list function (prelude:%mapcar (:lambda (elt) (prelude:%compile elt env)) arg-list))))
 
@@ -72,61 +72,61 @@
 ;;;
 ;;; compile function applications to lib-appliable forms
 ;;;
-(lib:intern prelude "%compile-lambda-call"
+(core:intern prelude "%compile-lambda-call"
    (:lambda (lambda-form arg-list env)
       ((:lambda (compiled-function)
         (:if (prelude:functionp compiled-function)
              (:if (prelude:%prelude-function-p compiled-function)
                   `(prelude:%fn-apply-quoted ,compiled-function ,(prelude:%compile-lambda-arg-list compiled-function arg-list env))
-                  `(lib:apply ,compiled-function ,(prelude:%compile-arg-list arg-list env)))
+                  `(core:apply ,compiled-function ,(prelude:%compile-arg-list arg-list env)))
              (prelude:raise compiled-function 'prelude:%compile-lambda-call "illegal function call")))
      (prelude:%compile lambda-form env))))
 
-(lib:intern prelude "%compile-symbol-call"
+(core:intern prelude "%compile-symbol-call"
    (:lambda (function-symbol arg-list env)
       (:if (prelude:boundp function-symbol)
            ((:lambda (function)
                (:if (prelude:functionp function)
                     (:if (prelude:%prelude-function-p function)
                          `(prelude:%fn-apply-quoted ,function ,(prelude:%compile-lambda-arg-list function arg-list env))
-                         `(lib:apply ,function ,(prelude:%compile-arg-list arg-list env)))
+                         `(core:apply ,function ,(prelude:%compile-arg-list arg-list env)))
                     (prelude:raise function 'prelude:%compile-symbol-call "illegal function call")))
             (prelude:symbol-value function-symbol))
            `(prelude:apply ,function-symbol ,(prelude:%compile-arg-list arg-list env)))))
 
-(lib:intern prelude "%compile-funcall"
+(core:intern prelude "%compile-funcall"
    (:lambda (function-form arg-list env)
       (:if (prelude:consp function-form)
            (prelude:%compile-lambda-call function-form arg-list env)
-           (:if (lib:eq :symbol (lib:type-of function-form))
+           (:if (core:eq :symbol (core:type-of function-form))
                 (prelude:%compile-symbol-call function-form arg-list env)
                 (prelude:raise function-form 'prelude:%compile-funcall "illegal function call")))))
 
 ;;;
 ;;; apply closure to argument list
 ;;;
-(lib:intern prelude "%fn-apply"
+(core:intern prelude "%fn-apply"
    (:lambda (fn arg-list)
       ;; (prelude:warn `(,fn ,arg-list) "%fn-apply")
       ((:lambda (env)
-        (prelude:%mapc lib:frame-push env)
+        (prelude:%mapc core:frame-push env)
          ((:lambda (value)
-            (prelude:%mapc (:lambda (frame) (lib:frame-pop (lib:car frame))) env)
+            (prelude:%mapc (:lambda (frame) (core:frame-pop (core:car frame))) env)
             value)
           ((:lambda (lib-fn)
-             (lib:apply lib-fn (lib:eval (prelude:%lambda-arg-list fn arg-list))))
+             (core:apply lib-fn (core:eval (prelude:%lambda-arg-list fn arg-list))))
            (prelude:%fn-prop :fn fn))))
        (prelude:%fn-prop :env fn))))
 
-(lib:intern prelude "%fn-apply-quoted"
+(core:intern prelude "%fn-apply-quoted"
    (:lambda (fn arg-list)
       ;; (prelude:warn `(,fn ,arg-list) "%fn-apply-quoted")
       ((:lambda (env)
-        (prelude:%mapc lib:frame-push env)
+        (prelude:%mapc core:frame-push env)
         ((:lambda (value)
-           (prelude:%mapc (:lambda (frame) (lib:frame-pop (lib:car frame))) env)
+           (prelude:%mapc (:lambda (frame) (core:frame-pop (core:car frame))) env)
            value)
          ((:lambda (lib-fn)
-             (lib:apply lib-fn arg-list))
+             (core:apply lib-fn arg-list))
           (prelude:%fn-prop :fn fn))))
         (prelude:%fn-prop :env fn))))

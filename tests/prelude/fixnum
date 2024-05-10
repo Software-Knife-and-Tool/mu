@@ -1,11 +1,11 @@
-(lib:type-of prelude:1+)	:func
-(lib:type-of prelude:1-)	:func
-(lib:type-of prelude:ceiling)	:func
-(lib:type-of prelude:floor)	:func
-(lib:type-of prelude:mod)	:func
-(lib:type-of prelude:rem)	:func
-(lib:type-of prelude:round)	:func
-(lib:type-of prelude:truncate)	:func
+(core:type-of prelude:1+)	:func
+(core:type-of prelude:1-)	:func
+(core:type-of prelude:ceiling)	:func
+(core:type-of prelude:floor)	:func
+(core:type-of prelude:mod)	:func
+(core:type-of prelude:rem)	:func
+(core:type-of prelude:round)	:func
+(core:type-of prelude:truncate)	:func
 (prelude:1+ 10)	11
 (prelude:1- 10)	9
 (prelude:ceiling 5 2)	(2 . 1)

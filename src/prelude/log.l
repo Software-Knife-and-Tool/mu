@@ -4,34 +4,34 @@
 ;;;
 ;;; logging
 ;;;
-(lib:intern prelude "%logf"
+(core:intern prelude "%logf"
    (:lambda (stream format-satring arg-list)
       (prelude:apply prelude:format `(,stream ,format-string ,arg-list))))
 
-(lib:intern prelude "logf"
+(core:intern prelude "logf"
    (:lambda (env format-string arg-list)
       ((:lambda (stream)
           (prelude:apply prelude:format `(,stream ,format-string ,arg-list))))
       (prelude:%env-prop :log env)))
 
-(lib:intern prelude "%open-log-file"
+(core:intern prelude "%open-log-file"
    (:lambda (file-name env)
-      (lib:open :file :output file-name)))
+      (core:open :file :output file-name)))
 
 ;;;
 ;;; exception flavors
 ;;;
-(lib:intern prelude "log-error"
+(core:intern prelude "log-error"
    (:lambda (format-string value env)
       (prelude:logf env format-string `(,value))
       (prelude:error format-string value)))
 
-(lib:intern prelude "log-raise"
+(core:intern prelude "log-raise"
    (:lambda (format-string value source reason env)
       (prelude:logf env format-string `(,value ,source ,reason ,env))
       (prelude:raise value source reason)))
 
-(lib:intern prelude "log-warn"
+(core:intern prelude "log-warn"
    (:lambda (value message env)
       (prelude:logf env ";;; warning: ~S ~A~%" `(,value ,message))
       value))

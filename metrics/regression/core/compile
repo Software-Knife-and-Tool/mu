@@ -1,0 +1,4 @@
+((:lambda (fn) (core:apply (:lambda (fn) (core:eq :func (core:type-of fn))) (core:cons fn ()))) core:eq)
+(core:apply (core:compile '(:lambda (a) ((:lambda (a) (core:sum a a)) (core:sum a 2)))) '(1))
+(core:apply (core:compile '(:lambda (a) (core:sum a a))) '(1))
+(core:compile '(:lambda ()))

@@ -8,43 +8,43 @@
 ;;;
 ;;; symbol readers
 ;;;
-(lib:intern prelude "%read-keywordp"
+(core:intern prelude "%read-keywordp"
   (:lambda (name)
-      (lib:eq #\: (prelude:schar name 0))))
+      (core:eq #\: (prelude:schar name 0))))
 
-(lib:intern prelude "%read-symbol-scope"
+(core:intern prelude "%read-symbol-scope"
   (:lambda (name)
      ((:lambda (colon)
         (:if (prelude:null colon)
              :extern
-             (:if (lib:eq #\: (prelude:schar name (lib:sum 1 colon)))
+             (:if (core:eq #\: (prelude:schar name (core:sum 1 colon)))
                   :intern
                   :extern)))
         (prelude:string-position #\: name))))
 
-(lib:intern prelude "%read-symbol-ns"
+(core:intern prelude "%read-symbol-ns"
   (:lambda (name)
     ((:lambda (colon)
        (:if (prelude:null colon)
             ()
-            (lib:find-ns (prelude:substr name 0 (lib:difference colon 1)))))
+            (core:find-ns (prelude:substr name 0 (core:difference colon 1)))))
      (prelude:string-position #\: name))))
 
-(lib:intern prelude "%read-symbol-name"
+(core:intern prelude "%read-symbol-name"
    (:lambda (name)
      ((:lambda (colon)
         (:if (prelude:null colon)
              name
              (prelude:substr name
-                (:if (lib:eq #\: (prelude:schar name (lib:sum 1 colon)))
-                     (lib:sum 2 colon)
-                     (lib:sum 1 colon))
-                (:if (lib:eq #\: (prelude:schar name (lib:sum 1 colon)))
-                     (lib:sum colon (lib:difference (lib:vector-len name) colon))
-                     (lib:sum colon (lib:difference (lib:vector-len name) (lib:sum 1 colon)))))))
+                (:if (core:eq #\: (prelude:schar name (core:sum 1 colon)))
+                     (core:sum 2 colon)
+                     (core:sum 1 colon))
+                (:if (core:eq #\: (prelude:schar name (core:sum 1 colon)))
+                     (core:sum colon (core:difference (core:vector-len name) colon))
+                     (core:sum colon (core:difference (core:vector-len name) (core:sum 1 colon)))))))
       (prelude:string-position #\: name))))
 
-(lib:intern prelude "%read-symbol"
+(core:intern prelude "%read-symbol"
    (:lambda (symbol)
      (:if (prelude:%read-keywordp symbol)
           (prelude:make-keyword (prelude:%read-symbol-name symbol))
@@ -52,42 +52,42 @@
              (:if (prelude:null ns)
                   ((:lambda (symbol)
                      (:if (prelude:null symbol)
-                          (lib:makunbound (lib:intern (lib:find-ns "") name ()))
+                          (core:makunbound (core:intern (core:find-ns "") name ()))
                           symbol))
-                   (lib:find (lib:find-ns "") name))
+                   (core:find (core:find-ns "") name))
                   ((:lambda (symbol)
                      (:if (prelude:null symbol)
-                          (lib:makunbound (lib:intern ns name ()))
+                          (core:makunbound (core:intern ns name ()))
                           symbol))
-                   (lib:find ns name))))
+                   (core:find ns name))))
              (prelude:%read-symbol-ns symbol)
              (prelude:%read-symbol-name symbol)))))
 
 ;;;
 ;;; symbol macros
 ;;;
-(lib:intern prelude "%symbol-macro-expand"
+(core:intern prelude "%symbol-macro-expand"
    (:lambda (symbol)
      (:if (prelude:%orf (prelude:null symbol) (prelude:keywordp symbol))
           symbol
           (:if (prelude:uninternedp symbol)
                ((:lambda (sym)
                   (:if sym
-                       (lib:eval (prelude:symbol-value sym))
+                       (core:eval (prelude:symbol-value sym))
                        symbol))
                 (prelude:%get-symbol-macro symbol))
                symbol))))
 
-(lib:intern prelude "%get-symbol-macro"
+(core:intern prelude "%get-symbol-macro"
    (:lambda (symbol)
-      (:if (lib:eq :symbol (lib:type-of symbol))
-           (lib:find prelude:%symbol-macro-ns% (prelude:symbol-name symbol))
+      (:if (core:eq :symbol (core:type-of symbol))
+           (core:find prelude:%symbol-macro-ns% (prelude:symbol-name symbol))
            (prelude:raise symbol 'prelude:%get-symbol-macro "not a symbol"))))
 
-(lib:intern prelude "define-symbol-macro"
+(core:intern prelude "define-symbol-macro"
    (:lambda (symbol form)
-      (:if (lib:eq :symbol (lib:type-of symbol))
-           (lib:intern prelude:%symbol-macro-ns% (lib:symbol-name symbol) form)
+      (:if (core:eq :symbol (core:type-of symbol))
+           (core:intern prelude:%symbol-macro-ns% (core:symbol-name symbol) form)
            (prelude:raise symbol 'prelude:define-symbol-macro "not a symbol"))))
 
 ;;; (prelude:define-symbol-macro 't :t)

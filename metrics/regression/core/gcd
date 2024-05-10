@@ -1,0 +1,1 @@
+((:lambda (g) (core:apply g (core:cons g (core:cons 101010101 (core:cons 11011 ()))))) (:lambda (g a b) (:if (core:eq 0 b) a (core:apply g (core:cons g (core:cons b (core:cons (core:difference a (core:product b (core:quotient a b))) ())))))))

@@ -1,7 +1,7 @@
-(lib:type-of prelude:add-env)	:func
-(lib:type-of prelude:envp)	:func
-(lib:type-of prelude:get-env)	:func
-(lib:type-of prelude:make-env)	:func
+(core:type-of prelude:add-env)	:func
+(core:type-of prelude:envp)	:func
+(core:type-of prelude:get-env)	:func
+(core:type-of prelude:make-env)	:func
 (prelude:type-of (prelude:make-env ()))	env
 (prelude:envp (prelude:make-env ()))	:t
 (prelude:add-env (prelude:make-env ()) 'a 'b)	(a . b)

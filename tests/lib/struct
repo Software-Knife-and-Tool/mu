@@ -1,7 +1,0 @@
-(lib:type-of lib:make-struct)	:func
-(lib:type-of lib:struct-type)	:func
-(lib:type-of lib:struct-vec)	:func
-(lib:type-of (lib:make-struct :foo ()))	:struct
-(lib:struct-type (lib:make-struct :foo ()))	:foo
-(lib:struct-vec (lib:make-struct :foo ()))	#(:t)
-(lib:struct-vec (lib:make-struct :foo '(1 2 3 4)))	#(:t 1 2 3 4)
