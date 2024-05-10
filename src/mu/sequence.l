@@ -4,22 +4,22 @@
 ;;;
 ;;; sequences
 ;;;
-(lib:intern :prelude "sequencep" (:lambda (t) (:if (prelude:listp t) :t (prelude:vectorp t))))
+(core:intern :prelude "sequencep" (:lambda (t) (:if (prelude:listp t) :t (prelude:vectorp t))))
 
-(lib:intern :prelude "length"
+(core:intern :prelude "length"
    (:lambda (seq)
       (:if (prelude:sequencep seq)
            (:if (prelude:listp seq)
-                (lib:length seq)
-                (lib:vector-len seq))
+                (core:length seq)
+                (core:vector-len seq))
            (prelude:raise seq 'prelude:length "not a sequence"))))
 
-(lib:intern :prelude "elt"
+(core:intern :prelude "elt"
    (:lambda (seq nth)
       (:if (prelude:sequencep seq)
            (:if (prelude:fixnump nth)
                 (:if (prelude:listp seq)
-                     (lib:nth nth seq)
-                     (lib:vector-ref seq nth))
+                     (core:nth nth seq)
+                     (core:vector-ref seq nth))
                 (prelude:raise seq 'prelude:elt "not a sequence"))
            (prelude:raise nth 'prelude:elt "not a fixnum"))))

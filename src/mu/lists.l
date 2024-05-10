@@ -9,7 +9,7 @@
   (errorp-unless listp list-2 "zip: not a list")
   (letf ((loop (l1 l2)
           (when l1
-            (lib::append
+            (core::append
              (list (list (car l1) (car l2)))
              (loop (cdr l1) (cdr l2))))))
     (loop list-1 list-2)))
@@ -25,7 +25,7 @@
   (errorp-unless listp list "reverse: not a list")
   (letf ((loop (list)
       (when list
-        (lib::append (loop (cdr list)) (cons (car list) ())))))
+        (core::append (loop (cdr list)) (cons (car list) ())))))
     (loop list)))
   
 (defun filter (predicate list)
