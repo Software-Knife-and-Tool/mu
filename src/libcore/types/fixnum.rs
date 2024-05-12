@@ -102,30 +102,27 @@ pub trait CoreFunction {
 
 impl CoreFunction for Fixnum {
     fn core_ash(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match env.fp_argv_check("core:ash", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => {
-                let value = Self::as_i64(fp.argv[0]);
-                let shift = Self::as_i64(fp.argv[1]);
+        env.fp_argv_check("core:ash", &[Type::Fixnum, Type::Fixnum], fp)?;
 
-                let result = if shift < 0 {
-                    value >> shift.abs()
-                } else {
-                    value << shift
-                };
+        let value = Self::as_i64(fp.argv[0]);
+        let shift = Self::as_i64(fp.argv[1]);
 
-                if Self::is_i56(result) {
-                    Self::as_tag(result)
-                } else {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Over,
-                        "core:ash",
-                        Cons::new(fp.argv[0], fp.argv[1]).evict(env),
-                    ));
-                }
-            }
-            Err(e) => return Err(e),
+        let result = if shift < 0 {
+            value >> shift.abs()
+        } else {
+            value << shift
         };
+
+        if Self::is_i56(result) {
+            fp.value = Self::as_tag(result)
+        } else {
+            return Err(Exception::new(
+                env,
+                Condition::Over,
+                "core:ash",
+                Cons::new(fp.argv[0], fp.argv[1]).evict(env),
+            ));
+        }
 
         Ok(())
     }
@@ -134,18 +131,17 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fx-add", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
-                Some(sum) => {
-                    if Self::is_i56(sum) {
-                        Self::as_tag(sum)
-                    } else {
-                        return Err(Exception::new(env, Condition::Over, "core:fx-add", fx0));
-                    }
+        env.fp_argv_check("core:sum", &[Type::Fixnum, Type::Fixnum], fp)?;
+
+        fp.value = match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
+            Some(sum) => {
+                if Self::is_i56(sum) {
+                    Self::as_tag(sum)
+                } else {
+                    return Err(Exception::new(env, Condition::Over, "core:sum", fx0));
                 }
-                None => return Err(Exception::new(env, Condition::Over, "core:fx-add", fx1)),
-            },
-            Err(e) => return Err(e),
+            }
+            None => return Err(Exception::new(env, Condition::Over, "core:sum", fx1)),
         };
 
         Ok(())
@@ -155,18 +151,17 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fx-sub", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
-                Some(diff) => {
-                    if Self::is_i56(diff) {
-                        Self::as_tag(diff)
-                    } else {
-                        return Err(Exception::new(env, Condition::Over, "core:fx-sub", fx1));
-                    }
+        env.fp_argv_check("core:difference", &[Type::Fixnum, Type::Fixnum], fp)?;
+
+        fp.value = match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
+            Some(diff) => {
+                if Self::is_i56(diff) {
+                    Self::as_tag(diff)
+                } else {
+                    return Err(Exception::new(env, Condition::Over, "core:difference", fx1));
                 }
-                None => return Err(Exception::new(env, Condition::Over, "core:fx-sub", fx1)),
-            },
-            Err(e) => return Err(e),
+            }
+            None => return Err(Exception::new(env, Condition::Over, "core:difference", fx1)),
         };
 
         Ok(())
@@ -176,18 +171,17 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fx-mul", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
-                Some(prod) => {
-                    if Self::is_i56(prod) {
-                        Self::as_tag(prod)
-                    } else {
-                        return Err(Exception::new(env, Condition::Over, "core:fx-mul", fx1));
-                    }
+        env.fp_argv_check("core:product", &[Type::Fixnum, Type::Fixnum], fp)?;
+
+        fp.value = match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
+            Some(prod) => {
+                if Self::is_i56(prod) {
+                    Self::as_tag(prod)
+                } else {
+                    return Err(Exception::new(env, Condition::Over, "core:product", fx1));
                 }
-                None => return Err(Exception::new(env, Condition::Over, "core:fx-mul", fx1)),
-            },
-            Err(e) => return Err(e),
+            }
+            None => return Err(Exception::new(env, Condition::Over, "core:product", fx1)),
         };
 
         Ok(())
@@ -197,29 +191,26 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fx-div", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => {
-                if Self::as_i64(fx1) == 0 {
-                    return Err(Exception::new(
-                        env,
-                        Condition::ZeroDivide,
-                        "core:fx-div",
-                        fx0,
-                    ));
-                }
+        env.fp_argv_check("core:quotient", &[Type::Fixnum, Type::Fixnum], fp)?;
 
-                match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
-                    Some(div) => {
-                        if Self::is_i56(div) {
-                            Self::as_tag(div)
-                        } else {
-                            return Err(Exception::new(env, Condition::Over, "core:fx-div", fx1));
-                        }
-                    }
-                    None => return Err(Exception::new(env, Condition::Over, "core:fx-div", fx1)),
+        if Self::as_i64(fx1) == 0 {
+            return Err(Exception::new(
+                env,
+                Condition::ZeroDivide,
+                "core:fx-div",
+                fx0,
+            ));
+        }
+
+        fp.value = match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
+            Some(div) => {
+                if Self::is_i56(div) {
+                    Self::as_tag(div)
+                } else {
+                    return Err(Exception::new(env, Condition::Over, "core:quotient", fx1));
                 }
             }
-            Err(e) => return Err(e),
+            None => return Err(Exception::new(env, Condition::Over, "core:quotient", fx1)),
         };
 
         Ok(())
@@ -229,15 +220,12 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fx-lt", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => {
-                if Self::as_i64(fx0) < Self::as_i64(fx1) {
-                    Symbol::keyword("t")
-                } else {
-                    Tag::nil()
-                }
-            }
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:less-than", &[Type::Fixnum, Type::Fixnum], fp)?;
+
+        fp.value = if Self::as_i64(fx0) < Self::as_i64(fx1) {
+            Symbol::keyword("t")
+        } else {
+            Tag::nil()
         };
 
         Ok(())
@@ -247,10 +235,8 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:logand", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => Self::as_tag(Self::as_i64(fx0) & Self::as_i64(fx1)),
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:logand", &[Type::Fixnum, Type::Fixnum], fp)?;
+        fp.value = Self::as_tag(Self::as_i64(fx0) & Self::as_i64(fx1));
 
         Ok(())
     }
@@ -259,10 +245,8 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:logor", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => Self::as_tag(Self::as_i64(fx0) | Self::as_i64(fx1)),
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:logor", &[Type::Fixnum, Type::Fixnum], fp)?;
+        fp.value = Self::as_tag(Self::as_i64(fx0) | Self::as_i64(fx1));
 
         Ok(())
     }
@@ -270,22 +254,20 @@ impl CoreFunction for Fixnum {
     fn core_lognot(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let fx = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:lognot", &[Type::Fixnum], fp) {
-            Ok(_) => {
-                let mut val = Self::as_i64(fx);
-                for nth_bit in 0..64 {
-                    let mask = 1 << nth_bit;
-                    if val & mask == 0 {
-                        val |= mask
-                    } else {
-                        val &= !mask
-                    }
-                }
+        env.fp_argv_check("core:lognot", &[Type::Fixnum], fp)?;
 
-                Self::as_tag(val)
+        let mut val = Self::as_i64(fx);
+        for nth_bit in 0..64 {
+            let mask = 1 << nth_bit;
+
+            if val & mask == 0 {
+                val |= mask
+            } else {
+                val &= !mask
             }
-            Err(e) => return Err(e),
-        };
+        }
+
+        fp.value = Self::as_tag(val);
 
         Ok(())
     }

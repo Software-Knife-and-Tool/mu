@@ -54,23 +54,19 @@ impl Core for Char {
 
             let phrase = match ch {
                 0x20 => "space",
-                0x9 => "tab",
-                0xa => "linefeed",
-                0xc => "page",
-                0xd => "return",
+                0x09 => "tab",
+                0x0a => "linefeed",
+                0x0c => "page",
+                0x0d => "return",
                 _ => (ch as char).encode_utf8(&mut tmp),
             };
 
-            match env.write_string(phrase, stream) {
-                Ok(_) => Ok(()),
-                Err(e) => Err(e),
-            }
+            env.write_string(phrase, stream)?;
         } else {
-            match Stream::write_char(env, stream, ch as char) {
-                Ok(_) => Ok(()),
-                Err(e) => Err(e),
-            }
+            Stream::write_char(env, stream, ch as char)?;
         }
+
+        Ok(())
     }
 
     fn view(env: &Env, chr: Tag) -> Tag {

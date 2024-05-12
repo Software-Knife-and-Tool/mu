@@ -95,17 +95,14 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fl-add", &[Type::Float, Type::Float], fp) {
-            Ok(_) => {
-                let sum = Self::as_f32(env, fl0).add(Self::as_f32(env, fl1));
-                if sum.is_nan() {
-                    return Err(Exception::new(env, Condition::Over, "core:fl-add", fl1));
-                } else {
-                    Self::as_tag(sum)
-                }
-            }
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:fl-add", &[Type::Float, Type::Float], fp)?;
+
+        let sum = Self::as_f32(env, fl0).add(Self::as_f32(env, fl1));
+        if sum.is_nan() {
+            return Err(Exception::new(env, Condition::Over, "core:fl-add", fl1));
+        } else {
+            fp.value = Self::as_tag(sum)
+        }
 
         Ok(())
     }
@@ -114,17 +111,14 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fl-sub", &[Type::Float, Type::Float], fp) {
-            Ok(_) => {
-                let diff = Self::as_f32(env, fl0).sub(Self::as_f32(env, fl1));
-                if diff.is_nan() {
-                    return Err(Exception::new(env, Condition::Under, "core:fl-sub", fl1));
-                } else {
-                    Self::as_tag(diff)
-                }
-            }
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:fl-sub", &[Type::Float, Type::Float], fp)?;
+
+        let diff = Self::as_f32(env, fl0).sub(Self::as_f32(env, fl1));
+        if diff.is_nan() {
+            return Err(Exception::new(env, Condition::Under, "core:fl-sub", fl1));
+        } else {
+            fp.value = Self::as_tag(diff)
+        }
 
         Ok(())
     }
@@ -133,18 +127,14 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fl-envl", &[Type::Float, Type::Float], fp) {
-            Ok(_) => {
-                let prod = Self::as_f32(env, fl0).mul(Self::as_f32(env, fl1));
+        env.fp_argv_check("core:fl-mul", &[Type::Float, Type::Float], fp)?;
 
-                if prod.is_nan() {
-                    return Err(Exception::new(env, Condition::Over, "core:fl-mul", fl1));
-                } else {
-                    Self::as_tag(prod)
-                }
-            }
-            Err(e) => return Err(e),
-        };
+        let prod = Self::as_f32(env, fl0).mul(Self::as_f32(env, fl1));
+        if prod.is_nan() {
+            return Err(Exception::new(env, Condition::Over, "core:fl-mul", fl1));
+        } else {
+            fp.value = Self::as_tag(prod)
+        }
 
         Ok(())
     }
@@ -153,20 +143,18 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fl-div", &[Type::Float, Type::Float], fp) {
-            Ok(_) => {
-                if Self::as_f32(env, fl1) == 0.0 {
-                    return Err(Exception::new(env, Condition::ZeroDivide, "fl-div", fl1));
-                }
+        env.fp_argv_check("core:fl-div", &[Type::Float, Type::Float], fp)?;
 
-                let div = Self::as_f32(env, fl0).div(Self::as_f32(env, fl1));
-                if div.is_nan() {
-                    return Err(Exception::new(env, Condition::Under, "core:fl-div", fl1));
-                } else {
-                    Self::as_tag(div)
-                }
-            }
-            Err(e) => return Err(e),
+        if Self::as_f32(env, fl1) == 0.0 {
+            return Err(Exception::new(env, Condition::ZeroDivide, "fl-div", fl1));
+        }
+
+        let div = Self::as_f32(env, fl0).div(Self::as_f32(env, fl1));
+
+        fp.value = if div.is_nan() {
+            return Err(Exception::new(env, Condition::Under, "core:fl-div", fl1));
+        } else {
+            Self::as_tag(div)
         };
 
         Ok(())
@@ -176,15 +164,11 @@ impl CoreFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:fl-lt", &[Type::Float, Type::Float], fp) {
-            Ok(_) => {
-                if Self::as_f32(env, fl0) < Self::as_f32(env, fl1) {
-                    Symbol::keyword("t")
-                } else {
-                    Tag::nil()
-                }
-            }
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:fl-lt", &[Type::Float, Type::Float], fp)?;
+        fp.value = if Self::as_f32(env, fl0) < Self::as_f32(env, fl1) {
+            Symbol::keyword("t")
+        } else {
+            Tag::nil()
         };
 
         Ok(())

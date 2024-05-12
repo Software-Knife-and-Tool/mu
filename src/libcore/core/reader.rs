@@ -55,8 +55,8 @@ impl Core for Lib {
     //
     fn read_ws(env: &Env, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match Stream::read_char(env, stream) {
-                Ok(Some(ch)) => {
+            match Stream::read_char(env, stream)? {
+                Some(ch) => {
                     if let Some(stype) = map_char_syntax(ch) {
                         match stype {
                             SyntaxType::Whitespace => (),
@@ -67,8 +67,7 @@ impl Core for Lib {
                         }
                     }
                 }
-                Ok(None) => return Ok(None),
-                Err(e) => return Err(e),
+                None => return Ok(None),
             }
         }
 
@@ -82,14 +81,13 @@ impl Core for Lib {
     //
     fn read_comment(env: &Env, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match Stream::read_char(env, stream) {
-                Ok(Some(ch)) => {
+            match Stream::read_char(env, stream)? {
+                Some(ch) => {
                     if ch == '\n' {
                         break;
                     }
                 }
-                Ok(None) => return Err(Exception::new(env, Condition::Eof, "core:read", stream)),
-                Err(e) => return Err(e),
+                None => return Err(Exception::new(env, Condition::Eof, "core:read", stream)),
             }
         }
 
@@ -104,16 +102,16 @@ impl Core for Lib {
     //
     fn read_block_comment(env: &Env, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match Stream::read_char(env, stream) {
-                Ok(Some(ch)) => {
+            match Stream::read_char(env, stream)? {
+                Some(ch) => {
                     if ch == '|' {
-                        match Stream::read_char(env, stream) {
-                            Ok(Some(ch)) => {
+                        match Stream::read_char(env, stream)? {
+                            Some(ch) => {
                                 if ch == '#' {
                                     break;
                                 }
                             }
-                            Ok(None) => {
+                            None => {
                                 return Err(Exception::new(
                                     env,
                                     Condition::Eof,
@@ -121,12 +119,10 @@ impl Core for Lib {
                                     stream,
                                 ))
                             }
-                            Err(e) => return Err(e),
                         }
                     }
                 }
-                Ok(None) => return Err(Exception::new(env, Condition::Eof, "core:read", stream)),
-                Err(e) => return Err(e),
+                None => return Err(Exception::new(env, Condition::Eof, "core:read", stream)),
             }
         }
 
@@ -141,25 +137,17 @@ impl Core for Lib {
     fn read_token(env: &Env, stream: Tag) -> exception::Result<Option<String>> {
         let mut token = String::new();
 
-        loop {
-            match Stream::read_char(env, stream) {
-                Ok(Some(ch)) => match map_char_syntax(ch) {
-                    Some(stype) => match stype {
-                        SyntaxType::Constituent => token.push(ch),
-                        SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                            Stream::unread_char(env, stream, ch).unwrap();
-                            break;
-                        }
-                        _ => {
-                            return Err(Exception::new(env, Condition::Range, "core:read", stream))
-                        }
-                    },
-                    None => return Err(Exception::new(env, Condition::Range, "core:read", stream)),
+        while let Some(ch) = Stream::read_char(env, stream)? {
+            match map_char_syntax(ch) {
+                Some(stype) => match stype {
+                    SyntaxType::Constituent => token.push(ch),
+                    SyntaxType::Whitespace | SyntaxType::Tmacro => {
+                        Stream::unread_char(env, stream, ch).unwrap();
+                        break;
+                    }
+                    _ => return Err(Exception::new(env, Condition::Range, "core:read", stream)),
                 },
-                Ok(None) => {
-                    break;
-                }
-                Err(e) => return Err(e),
+                None => return Err(Exception::new(env, Condition::Range, "core:read", stream)),
             }
         }
 
@@ -176,25 +164,16 @@ impl Core for Lib {
         let mut token = String::new();
 
         token.push(ch);
-        loop {
-            match Stream::read_char(env, stream) {
-                Ok(Some(ch)) => match map_char_syntax(ch) {
-                    Some(stype) => match stype {
-                        SyntaxType::Constituent => token.push(ch),
-                        SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                            Stream::unread_char(env, stream, ch).unwrap();
-                            break;
-                        }
-                        _ => {
-                            return Err(Exception::new(
-                                env,
-                                Condition::Range,
-                                "core:read",
-                                Tag::from(ch),
-                            ))
-                        }
-                    },
-                    None => {
+
+        while let Some(ch) = Stream::read_char(env, stream)? {
+            match map_char_syntax(ch) {
+                Some(stype) => match stype {
+                    SyntaxType::Constituent => token.push(ch),
+                    SyntaxType::Whitespace | SyntaxType::Tmacro => {
+                        Stream::unread_char(env, stream, ch).unwrap();
+                        break;
+                    }
+                    _ => {
                         return Err(Exception::new(
                             env,
                             Condition::Range,
@@ -203,10 +182,14 @@ impl Core for Lib {
                         ))
                     }
                 },
-                Ok(None) => {
-                    break;
+                None => {
+                    return Err(Exception::new(
+                        env,
+                        Condition::Range,
+                        "core:read",
+                        Tag::from(ch),
+                    ))
                 }
-                Err(e) => return Err(e),
             }
         }
 
@@ -225,10 +208,7 @@ impl Core for Lib {
             }
             Err(_) => match token.parse::<f32>() {
                 Ok(fl) => Ok(Tag::from(fl)),
-                Err(_) => match Symbol::parse(env, token) {
-                    Ok(sym) => Ok(sym),
-                    Err(e) => Err(e),
-                },
+                Err(_) => Ok(Symbol::parse(env, token)?),
             },
         }
     }
@@ -239,9 +219,9 @@ impl Core for Lib {
     //     Ok(tag) if the read succeeded,
     //
     fn read_char_literal(env: &Env, stream: Tag) -> exception::Result<Option<Tag>> {
-        match Stream::read_char(env, stream) {
-            Ok(Some(ch)) => match Stream::read_char(env, stream) {
-                Ok(Some(space)) => match map_char_syntax(space) {
+        match Stream::read_char(env, stream)? {
+            Some(ch) => match Stream::read_char(env, stream)? {
+                Some(space) => match map_char_syntax(space) {
                     Some(sp_type) => match sp_type {
                         SyntaxType::Whitespace => Ok(Some(Tag::from(ch))),
                         SyntaxType::Constituent => {
@@ -276,11 +256,9 @@ impl Core for Lib {
                     },
                     None => Err(Exception::new(env, Condition::Syntax, "core:read", stream)),
                 },
-                Ok(None) => Ok(Some(Tag::from(ch))),
-                Err(e) => Err(e),
+                None => Ok(Some(Tag::from(ch))),
             },
-            Ok(None) => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
-            Err(e) => Err(e),
+            None => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
         }
     }
 
@@ -290,39 +268,32 @@ impl Core for Lib {
     //     Ok(tag) if the read succeeded,
     //
     fn sharpsign_macro(env: &Env, stream: Tag) -> exception::Result<Option<Tag>> {
-        match Stream::read_char(env, stream) {
-            Ok(Some(ch)) => match ch {
-                ':' => match Stream::read_char(env, stream) {
-                    Ok(Some(ch)) => match Self::read_atom(env, ch, stream) {
-                        Ok(atom) => match atom.type_of() {
+        match Stream::read_char(env, stream)? {
+            Some(ch) => match ch {
+                ':' => match Stream::read_char(env, stream)? {
+                    Some(ch) => {
+                        let atom = Self::read_atom(env, ch, stream)?;
+
+                        match atom.type_of() {
                             Type::Symbol => Ok(Some(atom)),
                             _ => Err(Exception::new(env, Condition::Type, "core:read", stream)),
-                        },
-                        Err(e) => Err(e),
-                    },
-                    Ok(None) => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
-                    Err(e) => Err(e),
+                        }
+                    }
+                    None => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
                 },
-                '.' => match env.read_stream(stream, false, Tag::nil(), false) {
-                    Ok(expr) => match env.eval(expr) {
-                        Ok(value) => Ok(Some(value)),
-                        Err(e) => Err(e),
-                    },
-                    Err(e) => Err(e),
-                },
-                '|' => match Self::read_block_comment(env, stream) {
-                    Ok(_) => Ok(None),
-                    Err(e) => Err(e),
-                },
+                '.' => {
+                    let expr = env.read_stream(stream, false, Tag::nil(), false)?;
+
+                    Ok(Some(env.eval(expr)?))
+                }
+                '|' => {
+                    Self::read_block_comment(env, stream)?;
+
+                    Ok(None)
+                }
                 '\\' => Self::read_char_literal(env, stream),
-                'S' | 's' => match Struct::read(env, stream) {
-                    Ok(tag) => Ok(Some(tag)),
-                    Err(e) => Err(e),
-                },
-                '(' => match Vector::read(env, '(', stream) {
-                    Ok(tag) => Ok(Some(tag)),
-                    Err(e) => Err(e),
-                },
+                'S' | 's' => Ok(Some(Struct::read(env, stream)?)),
+                '(' => Ok(Some(Vector::read(env, '(', stream)?)),
                 'x' => match Self::read_token(env, stream) {
                     Ok(token) => match token {
                         Some(hex) => match i64::from_str_radix(&hex, 16) {
@@ -361,8 +332,7 @@ impl Core for Lib {
                     Tag::from(ch),
                 )),
             },
-            Ok(None) => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
-            Err(e) => Err(e),
+            None => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
         }
     }
 }

@@ -118,18 +118,21 @@ impl From<&[u8; 8]> for Tag {
 
 impl Tag {
     pub const NTYPES: u8 = 15;
-    pub fn data(&self, env: &Env) -> u64 {
-        let heap_ref = block_on(env.heap.read());
 
+    pub fn data(&self, env: &Env) -> u64 {
         match self {
             Tag::Direct(tag) => tag.data(),
-            Tag::Indirect(heap) => match heap_ref.image_info(heap.image_id() as usize) {
-                Some(info) => match Type::try_from(info.image_type()) {
-                    Ok(etype) => etype as u64,
-                    Err(_) => panic!(),
-                },
-                None => panic!(),
-            },
+            Tag::Indirect(heap) => {
+                let heap_ref = block_on(env.heap.read());
+
+                match heap_ref.image_info(heap.image_id() as usize) {
+                    Some(info) => match Type::try_from(info.image_type()) {
+                        Ok(etype) => etype as u64,
+                        Err(_) => panic!(),
+                    },
+                    None => panic!(),
+                }
+            }
         }
     }
 
@@ -231,38 +234,35 @@ impl CoreFunction for Tag {
         let type_ = fp.argv[0];
         let arg = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:repr", &[Type::Keyword, Type::T], fp) {
-            Ok(_) => {
-                if type_.eq_(&Symbol::keyword("vector")) {
-                    let slice = arg.as_slice();
+        env.fp_argv_check("core:repr", &[Type::Keyword, Type::T], fp)?;
 
-                    TypedVector::<Vec<u8>> {
-                        vec: slice.to_vec(),
-                    }
-                    .vec
-                    .to_vector()
-                    .evict(env)
-                } else if type_.eq_(&Symbol::keyword("t")) {
-                    if Vector::type_of(env, arg) == Type::Byte && Vector::length(env, arg) == 8 {
-                        let mut u64_: u64 = 0;
+        fp.value = if type_.eq_(&Symbol::keyword("vector")) {
+            let slice = arg.as_slice();
 
-                        for index in (0..8).rev() {
-                            u64_ <<= 8;
-                            u64_ |= match Vector::ref_(env, arg, index as usize) {
-                                Some(byte) => Fixnum::as_i64(byte) as u64,
-                                None => panic!(),
-                            }
-                        }
-
-                        Tag::from(&u64_.to_le_bytes())
-                    } else {
-                        return Err(Exception::new(env, Condition::Type, "core:repr", arg));
-                    }
-                } else {
-                    return Err(Exception::new(env, Condition::Type, "core:repr", type_));
-                }
+            TypedVector::<Vec<u8>> {
+                vec: slice.to_vec(),
             }
-            Err(e) => return Err(e),
+            .vec
+            .to_vector()
+            .evict(env)
+        } else if type_.eq_(&Symbol::keyword("t")) {
+            if Vector::type_of(env, arg) == Type::Byte && Vector::length(env, arg) == 8 {
+                let mut u64_: u64 = 0;
+
+                for index in (0..8).rev() {
+                    u64_ <<= 8;
+                    u64_ |= match Vector::ref_(env, arg, index as usize) {
+                        Some(byte) => Fixnum::as_i64(byte) as u64,
+                        None => panic!(),
+                    }
+                }
+
+                Tag::from(&u64_.to_le_bytes())
+            } else {
+                return Err(Exception::new(env, Condition::Type, "core:repr", arg));
+            }
+        } else {
+            return Err(Exception::new(env, Condition::Type, "core:repr", type_));
         };
 
         Ok(())

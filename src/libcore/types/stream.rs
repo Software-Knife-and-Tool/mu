@@ -164,16 +164,13 @@ impl CoreFunction for Stream {
     fn core_close(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:close", &[Type::Stream], fp) {
-            Ok(_) => {
-                if Self::is_open(env, stream) {
-                    Self::close(env, stream);
-                    Symbol::keyword("t")
-                } else {
-                    Tag::nil()
-                }
-            }
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:close", &[Type::Stream], fp)?;
+
+        fp.value = if Self::is_open(env, stream) {
+            Self::close(env, stream);
+            Symbol::keyword("t")
+        } else {
+            Tag::nil()
         };
 
         Ok(())
@@ -182,15 +179,11 @@ impl CoreFunction for Stream {
     fn core_openp(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:openp", &[Type::Stream], fp) {
-            Ok(_) => {
-                if Self::is_open(env, stream) {
-                    stream
-                } else {
-                    Tag::nil()
-                }
-            }
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:openp", &[Type::Stream], fp)?;
+        fp.value = if Self::is_open(env, stream) {
+            stream
+        } else {
+            Tag::nil()
         };
 
         Ok(())
@@ -201,47 +194,40 @@ impl CoreFunction for Stream {
         let st_dir = fp.argv[1];
         let st_arg = fp.argv[2];
 
-        fp.value = match env.fp_argv_check(
+        env.fp_argv_check(
             "core:open",
             &[Type::Keyword, Type::Keyword, Type::String],
             fp,
-        ) {
-            Ok(_) if st_type.eq_(&Symbol::keyword("file")) => {
-                let arg = Vector::as_string(env, st_arg);
+        )?;
 
-                let stream = if st_dir.eq_(&Symbol::keyword("input")) {
-                    StreamBuilder::new().file(arg).input().build(env, &LIB)
-                } else if st_dir.eq_(&Symbol::keyword("output")) {
-                    StreamBuilder::new().file(arg).output().build(env, &LIB)
-                } else {
-                    return Err(Exception::new(env, Condition::Type, "core:open", st_dir));
-                };
+        fp.value = if st_type.eq_(&Symbol::keyword("file")) {
+            let arg = Vector::as_string(env, st_arg);
 
-                match stream {
-                    Err(e) => return Err(e),
-                    Ok(stream) => stream,
-                }
-            }
-            Ok(_) if st_type.eq_(&Symbol::keyword("string")) => {
-                let arg = Vector::as_string(env, st_arg);
+            let stream = if st_dir.eq_(&Symbol::keyword("input")) {
+                StreamBuilder::new().file(arg).input().build(env, &LIB)
+            } else if st_dir.eq_(&Symbol::keyword("output")) {
+                StreamBuilder::new().file(arg).output().build(env, &LIB)
+            } else {
+                return Err(Exception::new(env, Condition::Type, "core:open", st_dir));
+            };
 
-                let stream = if st_dir.eq_(&Symbol::keyword("input")) {
-                    StreamBuilder::new().string(arg).input().build(env, &LIB)
-                } else if st_dir.eq_(&Symbol::keyword("output")) {
-                    StreamBuilder::new().string(arg).output().build(env, &LIB)
-                } else if st_dir.eq_(&Symbol::keyword("bidir")) {
-                    StreamBuilder::new().string(arg).bidir().build(env, &LIB)
-                } else {
-                    return Err(Exception::new(env, Condition::Type, "core:open", st_dir));
-                };
+            stream?
+        } else if st_type.eq_(&Symbol::keyword("string")) {
+            let arg = Vector::as_string(env, st_arg);
 
-                match stream {
-                    Err(e) => return Err(e),
-                    Ok(stream) => stream,
-                }
-            }
-            Ok(_) => return Err(Exception::new(env, Condition::Type, "core:open", st_type)),
-            Err(e) => return Err(e),
+            let stream = if st_dir.eq_(&Symbol::keyword("input")) {
+                StreamBuilder::new().string(arg).input().build(env, &LIB)
+            } else if st_dir.eq_(&Symbol::keyword("output")) {
+                StreamBuilder::new().string(arg).output().build(env, &LIB)
+            } else if st_dir.eq_(&Symbol::keyword("bidir")) {
+                StreamBuilder::new().string(arg).bidir().build(env, &LIB)
+            } else {
+                return Err(Exception::new(env, Condition::Type, "core:open", st_dir));
+            };
+
+            stream?
+        } else {
+            return Err(Exception::new(env, Condition::Type, "core:open", st_type));
         };
 
         Ok(())
@@ -250,26 +236,25 @@ impl CoreFunction for Stream {
     fn core_flush(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:flush", &[Type::Stream], fp) {
-            Ok(_) => {
+        env.fp_argv_check("core:flush", &[Type::Stream], fp)?;
+
+        let streams_ref = block_on(LIB.streams.read());
+
+        fp.value = match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+            Some(stream_ref) => {
                 if Self::is_open(env, tag) {
-                    let streams_ref = block_on(LIB.streams.read());
+                    let stream = block_on(stream_ref.read());
 
-                    match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
-                        Some(stream_ref) => {
-                            let stream = block_on(stream_ref.read());
-
-                            if stream.direction.eq_(&Symbol::keyword("output")) {
-                                SystemStream::flush(&stream.system).unwrap()
-                            }
-                        }
-                        None => panic!(),
+                    if stream.direction.eq_(&Symbol::keyword("output")) {
+                        SystemStream::flush(&stream.system).unwrap()
                     }
-                }
 
-                Tag::nil()
+                    tag
+                } else {
+                    Tag::nil()
+                }
             }
-            Err(e) => return Err(e),
+            None => panic!(),
         };
 
         Ok(())
@@ -278,13 +263,10 @@ impl CoreFunction for Stream {
     fn core_get_string(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:get-string", &[Type::Stream], fp) {
-            Ok(_) => match Self::get_string(env, stream) {
-                Ok(string) => Vector::from_string(&string).evict(env),
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:get-string", &[Type::Stream], fp)?;
+
+        let string = Self::get_string(env, stream)?;
+        fp.value = Vector::from_string(&string).evict(env);
 
         Ok(())
     }
@@ -294,22 +276,18 @@ impl CoreFunction for Stream {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("core:read-char", &[Type::Stream, Type::T, Type::T], fp)
-        {
-            Ok(_) => match Self::read_char(env, stream) {
-                Ok(Some(ch)) => Tag::from(ch),
-                Ok(None) if eof_error_p.null_() => eof_value,
-                Ok(None) => {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Eof,
-                        "core:read-char",
-                        stream,
-                    ))
-                }
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:read-char", &[Type::Stream, Type::T, Type::T], fp)?;
+        fp.value = match Self::read_char(env, stream)? {
+            Some(ch) => Tag::from(ch),
+            None if eof_error_p.null_() => eof_value,
+            None => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Eof,
+                    "core:read-char",
+                    stream,
+                ))
+            }
         };
 
         Ok(())
@@ -320,22 +298,18 @@ impl CoreFunction for Stream {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("core:read-byte", &[Type::Stream, Type::T, Type::T], fp)
-        {
-            Ok(_) => match Self::read_byte(env, stream) {
-                Ok(Some(byte)) => Tag::from(byte as i64),
-                Ok(None) if eof_error_p.null_() => eof_value,
-                Ok(None) => {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Eof,
-                        "core:read-byte",
-                        stream,
-                    ))
-                }
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:read-byte", &[Type::Stream, Type::T, Type::T], fp)?;
+        fp.value = match Self::read_byte(env, stream)? {
+            Some(byte) => Tag::from(byte as i64),
+            None if eof_error_p.null_() => eof_value,
+            None => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Eof,
+                    "core:read-byte",
+                    stream,
+                ))
+            }
         };
 
         Ok(())
@@ -345,13 +319,10 @@ impl CoreFunction for Stream {
         let ch = fp.argv[0];
         let stream = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:unread-char", &[Type::Char, Type::Stream], fp) {
-            Ok(_) => match Self::unread_char(env, stream, Char::as_char(env, ch)) {
-                Ok(Some(_)) => panic!(),
-                Ok(None) => ch,
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:unread-char", &[Type::Char, Type::Stream], fp)?;
+        fp.value = match Self::unread_char(env, stream, Char::as_char(env, ch))? {
+            Some(_) => panic!(),
+            None => ch,
         };
 
         Ok(())
@@ -361,13 +332,9 @@ impl CoreFunction for Stream {
         let ch = fp.argv[0];
         let stream = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:write-char", &[Type::Char, Type::Stream], fp) {
-            Ok(_) => match Self::write_char(env, stream, Char::as_char(env, ch)) {
-                Ok(_) => ch,
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:write-char", &[Type::Char, Type::Stream], fp)?;
+        Self::write_char(env, stream, Char::as_char(env, ch))?;
+        fp.value = ch;
 
         Ok(())
     }
@@ -376,13 +343,9 @@ impl CoreFunction for Stream {
         let byte = fp.argv[0];
         let stream = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:write-byte", &[Type::Byte, Type::Stream], fp) {
-            Ok(_) => match Self::write_byte(env, stream, Fixnum::as_i64(byte) as u8) {
-                Ok(_) => byte,
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:write-byte", &[Type::Byte, Type::Stream], fp)?;
+        Self::write_byte(env, stream, Fixnum::as_i64(byte) as u8)?;
+        fp.value = byte;
 
         Ok(())
     }
