@@ -2,6 +2,9 @@
 //  SPDX-License-Identifier: MIT
 
 //! std interface
+#![allow(unreachable_code)]
+#![allow(clippy::diverging_sub_expression)]
+
 use crate::{
     core::{
         apply::Core as _,
@@ -57,37 +60,29 @@ impl CoreFunction for Std {
         let command = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("std:command", &[Type::String, Type::List], fp) {
-            Ok(_) => {
-                let mut argv = vec![];
+        env.fp_argv_check("std:command", &[Type::String, Type::List], fp)?;
 
-                for cons in Cons::iter(env, args) {
-                    let string = Cons::car(env, cons);
+        let mut argv = vec![];
 
-                    match string.type_of() {
-                        Type::Vector if Vector::type_of(env, string) == Type::Char => {
-                            let str = Vector::as_string(env, string);
-                            argv.push(str)
-                        }
-                        _ => {
-                            return Err(Exception::new(env, Condition::Type, "std:command", string))
-                        }
-                    }
+        for cons in Cons::iter(env, args) {
+            let string = Cons::car(env, cons);
+
+            match string.type_of() {
+                Type::Vector if Vector::type_of(env, string) == Type::Char => {
+                    let str = Vector::as_string(env, string);
+                    argv.push(str)
                 }
-
-                let status = std::process::Command::new(Vector::as_string(env, command))
-                    .args(argv)
-                    .status();
-
-                match status {
-                    Err(_) => {
-                        return Err(Exception::new(env, Condition::Open, "std:command", command))
-                    }
-                    Ok(exit_status) => Fixnum::as_tag(exit_status.code().unwrap() as i64),
-                }
+                _ => return Err(Exception::new(env, Condition::Type, "std:command", string)),
             }
+        }
 
-            Err(e) => return Err(e),
+        let status = std::process::Command::new(Vector::as_string(env, command))
+            .args(argv)
+            .status();
+
+        fp.value = match status {
+            Err(_) => return Err(Exception::new(env, Condition::Open, "std:command", command)),
+            Ok(exit_status) => Fixnum::as_tag(exit_status.code().unwrap() as i64),
         };
 
         Ok(())
@@ -96,10 +91,11 @@ impl CoreFunction for Std {
     fn std_exit(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let rc = fp.argv[0];
 
-        match rc.type_of() {
-            Type::Fixnum => std::process::exit(Fixnum::as_i64(rc) as i32),
-            _ => Err(Exception::new(env, Condition::Type, "std:exit", rc)),
-        }
+        env.fp_argv_check("std:exit", &[Type::Fixnum], fp)?;
+
+        fp.value = std::process::exit(Fixnum::as_i64(rc) as i32);
+
+        Ok(())
     }
 
     fn std_env(env: &Env, fp: &mut Frame) -> exception::Result<()> {
@@ -123,19 +119,13 @@ impl CoreFunction for Std {
     }
 
     fn std_sleep(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let interval = fp.argv[0];
+        fp.value = fp.argv[0];
 
-        fp.value = interval;
+        env.fp_argv_check("std:sleep", &[Type::Float], fp)?;
 
-        match interval.type_of() {
-            Type::Float => {
-                let us =
-                    std::time::Duration::from_micros((1e6 * Float::as_f32(env, interval)) as u64);
-
-                std::thread::sleep(us)
-            }
-            _ => return Err(Exception::new(env, Condition::Type, "std:exit", interval)),
-        }
+        std::thread::sleep(std::time::Duration::from_micros(
+            (1e6 * Float::as_f32(env, fp.value)) as u64,
+        ));
 
         Ok(())
     }

@@ -68,21 +68,23 @@ impl Symbol {
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> SymbolImage {
-        let heap_ref = block_on(env.heap.read());
-
         match tag.type_of() {
             Type::Symbol => match tag {
-                Tag::Indirect(main) => SymbolImage {
-                    namespace: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize).unwrap(),
-                    ),
-                    name: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
-                    ),
-                    value: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
-                    ),
-                },
+                Tag::Indirect(main) => {
+                    let heap_ref = block_on(env.heap.read());
+
+                    SymbolImage {
+                        namespace: Tag::from_slice(
+                            heap_ref.image_slice(main.image_id() as usize).unwrap(),
+                        ),
+                        name: Tag::from_slice(
+                            heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                        ),
+                        value: Tag::from_slice(
+                            heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
+                        ),
+                    }
+                }
                 _ => panic!(),
             },
             _ => panic!(),

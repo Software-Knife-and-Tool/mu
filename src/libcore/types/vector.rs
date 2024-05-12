@@ -110,10 +110,9 @@ impl Vector {
     }
 
     pub fn cache(env: &Env, vector: Tag) {
-        let mut cache = block_on(env.vector_map.write());
-
         let vtype = Self::type_of(env, vector);
         let length = Self::length(env, vector) as i32;
+        let mut cache = block_on(env.vector_map.write());
 
         match (*cache).get(&(vtype, length)) {
             Some(vec_map) => {
@@ -602,6 +601,8 @@ impl CoreFunction for Vector {
         let type_sym = fp.argv[0];
         let list = fp.argv[1];
 
+        env.fp_argv_check("core:make-vector", &[Type::Keyword, Type::List], fp)?;
+
         fp.value = match Self::to_type(type_sym) {
             Some(vtype) => match vtype {
                 Type::Null => {
@@ -723,25 +724,22 @@ impl CoreFunction for Vector {
         let vector = fp.argv[0];
         let index = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:sv-ref", &[Type::Vector, Type::Fixnum], fp) {
-            Ok(_) => {
-                let nth = Fixnum::as_i64(index);
+        env.fp_argv_check("core:vector-ref", &[Type::Vector, Type::Fixnum], fp)?;
 
-                if nth < 0 || nth as usize >= Self::length(env, vector) {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Range,
-                        "core:vector-ref",
-                        index,
-                    ));
-                }
+        let nth = Fixnum::as_i64(index);
 
-                match Self::ref_(env, vector, nth as usize) {
-                    Some(nth) => nth,
-                    None => panic!(),
-                }
-            }
-            Err(e) => return Err(e),
+        if nth < 0 || nth as usize >= Self::length(env, vector) {
+            return Err(Exception::new(
+                env,
+                Condition::Range,
+                "core:vector-ref",
+                index,
+            ));
+        }
+
+        fp.value = match Self::ref_(env, vector, nth as usize) {
+            Some(nth) => nth,
+            None => panic!(),
         };
 
         Ok(())
@@ -750,12 +748,10 @@ impl CoreFunction for Vector {
     fn core_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:sv-type", &[Type::Vector], fp) {
-            Ok(_) => match Tag::type_key(Self::type_of(env, vector)) {
-                Some(key) => key,
-                None => panic!(),
-            },
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:vector-type", &[Type::Vector], fp)?;
+        fp.value = match Tag::type_key(Self::type_of(env, vector)) {
+            Some(key) => key,
+            None => panic!(),
         };
 
         Ok(())
@@ -764,10 +760,8 @@ impl CoreFunction for Vector {
     fn core_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:sv-len", &[Type::Vector], fp) {
-            Ok(_) => Tag::from(Self::length(env, vector) as i64),
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:vector-len", &[Type::Vector], fp)?;
+        fp.value = Tag::from(Self::length(env, vector) as i64);
 
         Ok(())
     }

@@ -70,10 +70,7 @@ pub trait CoreFunction {
 
 impl CoreFunction for Env {
     fn core_eval(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match env.eval(fp.argv[0]) {
-            Ok(tag) => tag,
-            Err(e) => return Err(e),
-        };
+        fp.value = env.eval(fp.argv[0])?;
 
         Ok(())
     }
@@ -82,55 +79,36 @@ impl CoreFunction for Env {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("apply", &[Type::Function, Type::List], fp) {
-            Ok(_) => {
-                match (Frame {
-                    func,
-                    argv: Cons::iter(env, args)
-                        .map(|cons| Cons::car(env, cons))
-                        .collect::<Vec<Tag>>(),
-                    value: Tag::nil(),
-                })
-                .apply(env, func)
-                {
-                    Ok(value) => value,
-                    Err(e) => return Err(e),
-                }
-            }
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:apply", &[Type::Function, Type::List], fp)?;
+        fp.value = Frame {
+            func,
+            argv: Cons::iter(env, args)
+                .map(|cons| Cons::car(env, cons))
+                .collect::<Vec<Tag>>(),
+            value: Tag::nil(),
+        }
+        .apply(env, func)?;
 
         Ok(())
     }
 
     fn core_fix(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let func = fp.argv[0];
+        let mut value = fp.argv[1];
 
-        fp.value = fp.argv[1];
+        env.fp_argv_check("core:fix", &[Type::Function, Type::T], fp)?;
 
-        match func.type_of() {
-            Type::Function => {
-                loop {
-                    let value = Tag::nil();
-                    let argv = vec![fp.value];
-                    let result = Frame { func, argv, value }.apply(env, func);
+        fp.value = loop {
+            let last_value = value;
+            let argv = vec![value];
 
-                    fp.value = match result {
-                        Ok(value) => {
-                            if value.eq_(&fp.value) {
-                                break;
-                            }
-
-                            value
-                        }
-                        Err(e) => return Err(e),
-                    };
-                }
-
-                Ok(())
+            value = Frame { func, argv, value }.apply(env, func)?;
+            if last_value.eq_(&value) {
+                break value;
             }
-            _ => Err(Exception::new(env, Condition::Type, "core:fix", func)),
-        }
+        };
+
+        Ok(())
     }
 }
 

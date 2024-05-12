@@ -209,10 +209,8 @@ impl CoreFunction for Struct {
     fn core_struct_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:struct-type", &[Type::Struct], fp) {
-            Ok(_) => Self::to_image(env, tag).stype,
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:struct-type", &[Type::Struct], fp)?;
+        fp.value = Self::to_image(env, tag).stype;
 
         Ok(())
     }
@@ -220,10 +218,8 @@ impl CoreFunction for Struct {
     fn core_struct_vector(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:struct-vec", &[Type::Struct], fp) {
-            Ok(_) => Self::to_image(env, tag).vector,
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:struct-vec", &[Type::Struct], fp)?;
+        fp.value = Self::to_image(env, tag).vector;
 
         Ok(())
     }
@@ -232,17 +228,15 @@ impl CoreFunction for Struct {
         let stype = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:make-struct", &[Type::Keyword, Type::List], fp) {
-            Ok(_) => {
-                let vec = Cons::iter(env, list)
-                    .map(|cons| Cons::car(env, cons))
-                    .collect::<Vec<Tag>>();
-                let vector = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+        env.fp_argv_check("core:make-struct", &[Type::Keyword, Type::List], fp)?;
 
-                Struct { stype, vector }.evict(env)
-            }
-            Err(e) => return Err(e),
-        };
+        let vec = Cons::iter(env, list)
+            .map(|cons| Cons::car(env, cons))
+            .collect::<Vec<Tag>>();
+
+        let vector = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+
+        fp.value = Struct { stype, vector }.evict(env);
 
         Ok(())
     }

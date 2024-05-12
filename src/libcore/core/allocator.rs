@@ -3,6 +3,7 @@
 
 //! env allocators
 //!    Env
+use futures::executor::block_on;
 use {
     crate::{
         allocators::{bump_allocator::BumpAllocator, stack_allocator::StackAllocator},
@@ -15,8 +16,6 @@ use {
     modular_bitfield::specifiers::{B11, B4},
     std::fmt,
 };
-
-use futures::executor::block_on;
 
 #[bitfield]
 #[repr(align(8))]

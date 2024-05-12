@@ -7,21 +7,10 @@ use crate::{
         env::Env,
         exception::{self},
         frame::Frame,
-        types::Tag,
     },
     types::fixnum::Fixnum,
 };
 use cpu_time::ProcessTime;
-
-pub trait Core {
-    fn utime(_: &Env, _: String) -> exception::Result<Tag>;
-}
-
-impl Core for Env {
-    fn utime(_: &Env, _: String) -> exception::Result<Tag> {
-        Ok(Tag::nil())
-    }
-}
 
 pub trait CoreFunction {
     fn core_utime(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -30,11 +19,11 @@ pub trait CoreFunction {
 impl CoreFunction for Env {
     fn core_utime(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match ProcessTime::try_now() {
-            Err(_) => panic!(),
             Ok(_) => match env.start_time.try_elapsed() {
-                Err(_) => panic!(),
                 Ok(delta) => Fixnum::as_tag(delta.as_micros() as i64),
+                Err(_) => panic!(),
             },
+            Err(_) => panic!(),
         };
 
         Ok(())

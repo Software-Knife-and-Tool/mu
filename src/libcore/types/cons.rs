@@ -191,9 +191,12 @@ impl Core for Cons {
                                 Ok(cdr) if EOL.eq_(&cdr) => Ok(Tag::nil()),
                                 Ok(cdr) => match env.read_stream(stream, false, Tag::nil(), true) {
                                     Ok(eol) if EOL.eq_(&eol) => Ok(cdr),
-                                    Ok(_) => {
-                                        Err(Exception::new(env, Condition::Eof, "core:car", stream))
-                                    }
+                                    Ok(_) => Err(Exception::new(
+                                        env,
+                                        Condition::Eof,
+                                        "core:read",
+                                        stream,
+                                    )),
                                     Err(e) => Err(e),
                                 },
                                 Err(e) => Err(e),
@@ -343,10 +346,11 @@ impl CoreFunction for Cons {
     fn core_car(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
+        env.fp_argv_check("core:car", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => list,
             Type::Cons => Self::car(env, list),
-            _ => return Err(Exception::new(env, Condition::Type, "core:car", list)),
+            _ => panic!(),
         };
 
         Ok(())
@@ -355,10 +359,11 @@ impl CoreFunction for Cons {
     fn core_cdr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
+        env.fp_argv_check("core:cdr", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => list,
             Type::Cons => Self::cdr(env, list),
-            _ => return Err(Exception::new(env, Condition::Type, "core:cdr", list)),
+            _ => panic!(),
         };
 
         Ok(())
@@ -372,13 +377,14 @@ impl CoreFunction for Cons {
     fn core_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
+        env.fp_argv_check("core:length", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => Tag::from(0i64),
             Type::Cons => match Cons::length(env, list) {
                 Some(len) => Tag::from(len as i64),
                 None => return Err(Exception::new(env, Condition::Type, "core:length", list)),
             },
-            _ => return Err(Exception::new(env, Condition::Type, "core:length", list)),
+            _ => panic!(),
         };
 
         Ok(())
@@ -388,22 +394,19 @@ impl CoreFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:nth", &[Type::Fixnum, Type::List], fp) {
-            Ok(_) => {
-                if Fixnum::as_i64(nth) < 0 {
-                    return Err(Exception::new(env, Condition::Type, "core:nth", nth));
-                }
+        env.fp_argv_check("core:nth", &[Type::Fixnum, Type::List], fp)?;
 
-                match list.type_of() {
-                    Type::Null => Tag::nil(),
-                    Type::Cons => match Self::nth(env, Fixnum::as_i64(nth) as usize, list) {
-                        Some(tag) => tag,
-                        None => return Err(Exception::new(env, Condition::Type, "core:nth", list)),
-                    },
-                    _ => panic!(),
-                }
-            }
-            Err(e) => return Err(e),
+        if Fixnum::as_i64(nth) < 0 {
+            return Err(Exception::new(env, Condition::Type, "core:nth", nth));
+        }
+
+        fp.value = match list.type_of() {
+            Type::Null => Tag::nil(),
+            Type::Cons => match Self::nth(env, Fixnum::as_i64(nth) as usize, list) {
+                Some(tag) => tag,
+                None => return Err(Exception::new(env, Condition::Type, "core:nth", list)),
+            },
+            _ => panic!(),
         };
 
         Ok(())
@@ -413,24 +416,19 @@ impl CoreFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:nthcdr", &[Type::Fixnum, Type::List], fp) {
-            Ok(_) => {
-                if Fixnum::as_i64(nth) < 0 {
-                    return Err(Exception::new(env, Condition::Type, "core:nthcdr", nth));
-                }
+        env.fp_argv_check("core:nthcdr", &[Type::Fixnum, Type::List], fp)?;
 
-                match list.type_of() {
-                    Type::Null => Tag::nil(),
-                    Type::Cons => match Self::nthcdr(env, Fixnum::as_i64(nth) as usize, list) {
-                        Some(tag) => tag,
-                        None => {
-                            return Err(Exception::new(env, Condition::Type, "core:nthcdr", list))
-                        }
-                    },
-                    _ => panic!(),
-                }
-            }
-            Err(e) => return Err(e),
+        if Fixnum::as_i64(nth) < 0 {
+            return Err(Exception::new(env, Condition::Type, "core:nthcdr", nth));
+        }
+
+        fp.value = match list.type_of() {
+            Type::Null => Tag::nil(),
+            Type::Cons => match Self::nthcdr(env, Fixnum::as_i64(nth) as usize, list) {
+                Some(tag) => tag,
+                None => return Err(Exception::new(env, Condition::Type, "core:nthcdr", list)),
+            },
+            _ => panic!(),
         };
 
         Ok(())

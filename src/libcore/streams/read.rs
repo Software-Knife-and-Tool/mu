@@ -42,27 +42,23 @@ impl Core for Env {
         eof_value: Tag,
         recursivep: bool,
     ) -> exception::Result<Tag> {
-        match Lib::read_ws(self, stream) {
-            Ok(None) => {
-                return if eof_error_p {
-                    Err(Exception::new(self, Condition::Eof, "core:read", stream))
-                } else {
-                    Ok(eof_value)
-                }
-            }
-            Ok(_) => (),
-            Err(e) => return Err(e),
+        if Lib::read_ws(self, stream)?.is_none() {
+            return if eof_error_p {
+                Err(Exception::new(self, Condition::Eof, "core:read", stream))
+            } else {
+                Ok(eof_value)
+            };
         };
 
-        match Stream::read_char(self, stream) {
-            Ok(None) => {
+        match Stream::read_char(self, stream)? {
+            None => {
                 if eof_error_p {
                     Err(Exception::new(self, Condition::Eof, "core:read", stream))
                 } else {
                     Ok(eof_value)
                 }
             }
-            Ok(Some(ch)) => match map_char_syntax(ch) {
+            Some(ch) => match map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => Lib::read_atom(self, ch, stream),
                     SyntaxType::Macro => match ch {
@@ -136,7 +132,6 @@ impl Core for Env {
                     Tag::from(ch),
                 )),
             },
-            Err(e) => Err(e),
         }
     }
 }

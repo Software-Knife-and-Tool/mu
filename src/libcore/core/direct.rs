@@ -109,16 +109,15 @@ impl DirectTag {
     }
 
     pub fn cons(car: Tag, cdr: Tag) -> Option<Tag> {
-        match Self::sext_from_tag(car) {
-            Some(car_) => Self::sext_from_tag(cdr).map(|cdr_| {
-                Self::to_direct(
-                    (car_ as u64) << 28 | cdr_ as u64,
-                    DirectInfo::ExtType(ExtType::Cons),
-                    DirectType::Ext,
-                )
-            }),
-            None => None,
-        }
+        let car_ = Self::sext_from_tag(car)?;
+
+        Self::sext_from_tag(cdr).map(|cdr_| {
+            Self::to_direct(
+                (car_ as u64) << 28 | cdr_ as u64,
+                DirectInfo::ExtType(ExtType::Cons),
+                DirectType::Ext,
+            )
+        })
     }
 
     pub fn car(cons: Tag) -> Tag {

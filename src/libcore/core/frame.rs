@@ -26,7 +26,6 @@ use crate::{
         vector::{Core as _, Vector},
     },
 };
-
 use {futures::executor::block_on, futures_locks::RwLock};
 
 pub struct Frame {
@@ -138,10 +137,7 @@ impl Frame {
 
     // apply
     pub fn apply(mut self, env: &Env, func: Tag) -> exception::Result<Tag> {
-        match Exception::on_signal(env) {
-            Ok(_) => (),
-            Err(e) => return Err(e),
-        }
+        Exception::on_signal(env)?;
 
         match func.type_of() {
             Type::Symbol => {
@@ -210,25 +206,21 @@ pub trait CoreFunction {
 
 impl CoreFunction for Frame {
     fn core_fr_pop(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match env.fp_argv_check("core:frame-pop", &[Type::Function], fp) {
-            Ok(_) => {
-                Self::frame_stack_pop(env, fp.argv[0]);
-                fp.argv[0]
-            }
-            Err(e) => return Err(e),
-        };
+        fp.value = fp.argv[0];
+
+        env.fp_argv_check("core:frame-pop", &[Type::Function], fp)?;
+
+        Self::frame_stack_pop(env, fp.value);
 
         Ok(())
     }
 
     fn core_fr_push(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match env.fp_argv_check("core:frame-push", &[Type::Vector], fp) {
-            Ok(_) => {
-                Self::from_tag(env, fp.value).frame_stack_push(env);
-                fp.argv[0]
-            }
-            Err(e) => return Err(e),
-        };
+        fp.value = fp.argv[0];
+
+        env.fp_argv_check("core:frame-push", &[Type::Vector], fp)?;
+
+        Self::from_tag(env, fp.value).frame_stack_push(env);
 
         Ok(())
     }
@@ -237,23 +229,22 @@ impl CoreFunction for Frame {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 
-        fp.value = match env.fp_argv_check("core:frame-ref", &[Type::Fixnum, Type::Fixnum], fp) {
-            Ok(_) => match Frame::frame_ref(
-                env,
-                Fixnum::as_i64(frame) as u64,
-                Fixnum::as_i64(offset) as usize,
-            ) {
-                Some(tag) => tag,
-                None => {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Type,
-                        "core:frame-ref",
-                        frame,
-                    ))
-                }
-            },
-            Err(e) => return Err(e),
+        env.fp_argv_check("core:frame-ref", &[Type::Fixnum, Type::Fixnum], fp)?;
+
+        fp.value = match Frame::frame_ref(
+            env,
+            Fixnum::as_i64(frame) as u64,
+            Fixnum::as_i64(offset) as usize,
+        ) {
+            Some(tag) => tag,
+            None => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "core:frame-ref",
+                    frame,
+                ))
+            }
         };
 
         Ok(())

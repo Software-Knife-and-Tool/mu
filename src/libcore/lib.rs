@@ -253,36 +253,18 @@ impl Env {
             let istream = env.eval(self.read_str(&load_form).unwrap()).unwrap();
             let eof_value = self.read_str(":eof").unwrap(); // need make_symbol here
 
-            #[allow(clippy::while_let_loop)]
+            drop(env_ref);
+
             loop {
-                match self.read(istream, false, eof_value) {
-                    Ok(form) => {
-                        if self.eq(form, eof_value) {
-                            drop(env_ref);
-                            return Ok(true);
-                        }
-                        match self.compile(form) {
-                            Ok(form) => match self.eval(form) {
-                                Ok(_) => (),
-                                Err(e) => {
-                                    drop(env_ref);
+                let form = self.read(istream, false, eof_value)?;
 
-                                    return Err(e);
-                                }
-                            },
-                            Err(e) => {
-                                drop(env_ref);
-
-                                return Err(e);
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        drop(env_ref);
-
-                        return Err(e);
-                    }
+                if self.eq(form, eof_value) {
+                    break Ok(true);
                 }
+
+                let compiled_form = self.compile(form)?;
+
+                self.eval(compiled_form)?;
             }
         } else {
             Err(Exception::new(

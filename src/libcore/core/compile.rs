@@ -22,13 +22,12 @@ use crate::{
 
 // special forms
 type SpecFn = fn(&Env, Tag, &mut Vec<(Tag, Vec<Tag>)>) -> exception::Result<Tag>;
-type SpecMap = (Tag, SpecFn);
 
 // lexical environment
 type LexicalEnv = Vec<(Tag, Vec<Tag>)>;
 
 lazy_static! {
-    static ref SPECMAP: Vec<SpecMap> = vec![
+    static ref SPECMAP: Vec<(Tag, SpecFn)> = vec![
         (Symbol::keyword("if"), Compile::if_),
         (Symbol::keyword("lambda"), Compile::lambda),
         (Symbol::keyword("quote"), Compile::quoted_list),
@@ -81,10 +80,7 @@ impl Compile {
             .map(|cons| Self::compile(env, Cons::car(env, cons), lexenv))
             .collect();
 
-        match compile_results {
-            Ok(vec) => Ok(Cons::vlist(env, &vec)),
-            Err(e) => Err(e),
-        }
+        Ok(Cons::vlist(env, &compile_results?))
     }
 
     pub fn lambda(env: &Env, args: Tag, lexenv: &mut LexicalEnv) -> exception::Result<Tag> {
@@ -106,7 +102,7 @@ impl Compile {
                         _ => symvec.push(symbol),
                     }
                 } else {
-                    return Err(Exception::new(env, Condition::Type, "lin:compile", symbol));
+                    return Err(Exception::new(env, Condition::Type, "core:compile", symbol));
                 }
             }
 
@@ -131,28 +127,17 @@ impl Compile {
         )
         .evict(env);
 
-        match compile_frame_symbols(env, lambda) {
-            Ok(lexicals) => {
-                lexenv.push((func, lexicals));
-            }
-            Err(e) => return Err(e),
-        };
+        lexenv.push((func, compile_frame_symbols(env, lambda)?));
 
-        let form = match Self::list(env, body, lexenv) {
-            Ok(form) => {
-                let mut function = Function::to_image(env, func);
+        let form = Self::list(env, body, lexenv)?;
+        let mut function = Function::to_image(env, func);
 
-                function.form = form;
-                Function::update(env, &function, func);
-
-                Ok(func)
-            }
-            Err(e) => Err(e),
-        };
+        function.form = form;
+        Function::update(env, &function, func);
 
         lexenv.pop();
 
-        form
+        Ok(func)
     }
 
     pub fn lexical(env: &Env, symbol: Tag, lexenv: &mut LexicalEnv) -> exception::Result<Tag> {
@@ -167,10 +152,7 @@ impl Compile {
                     Tag::from(nth as i64),
                 ];
 
-                match Self::compile(env, Cons::vlist(env, &lex_ref), lexenv) {
-                    Ok(lexref) => return Ok(lexref),
-                    Err(e) => return Err(e),
-                }
+                return Self::compile(env, Cons::vlist(env, &lex_ref), lexenv);
             }
         }
 
@@ -193,45 +175,34 @@ impl Compile {
                 let args = Cons::cdr(env, expr);
 
                 match func.type_of() {
-                    Type::Keyword => match Self::special_form(env, func, args, lexenv) {
-                        Ok(form) => Ok(form),
-                        Err(e) => Err(e),
-                    },
-                    Type::Symbol => match Self::list(env, args, lexenv) {
-                        Ok(args) => {
-                            if Symbol::is_bound(env, func) {
-                                let fn_ = Symbol::value(env, func);
-                                match fn_.type_of() {
-                                    Type::Function => Ok(Cons::new(fn_, args).evict(env)),
-                                    _ => Err(Exception::new(
-                                        env,
-                                        Condition::Type,
-                                        "core:compile",
-                                        func,
-                                    )),
-                                }
-                            } else {
-                                Ok(Cons::new(func, args).evict(env))
-                            }
-                        }
-                        Err(e) => Err(e),
-                    },
-                    Type::Function => match Self::list(env, args, lexenv) {
-                        Ok(args) => Ok(Cons::new(func, args).evict(env)),
-                        Err(e) => Err(e),
-                    },
-                    Type::Cons => match Self::list(env, args, lexenv) {
-                        Ok(arglist) => match Self::compile(env, func, lexenv) {
-                            Ok(fn_) => match fn_.type_of() {
-                                Type::Function => Ok(Cons::new(fn_, arglist).evict(env)),
+                    Type::Keyword => Ok(Self::special_form(env, func, args, lexenv)?),
+                    Type::Symbol => {
+                        let args = Self::list(env, args, lexenv)?;
+
+                        if Symbol::is_bound(env, func) {
+                            let fn_ = Symbol::value(env, func);
+                            match fn_.type_of() {
+                                Type::Function => Ok(Cons::new(fn_, args).evict(env)),
                                 _ => {
                                     Err(Exception::new(env, Condition::Type, "core:compile", func))
                                 }
-                            },
-                            Err(e) => Err(e),
-                        },
-                        Err(e) => Err(e),
-                    },
+                            }
+                        } else {
+                            Ok(Cons::new(func, args).evict(env))
+                        }
+                    }
+                    Type::Function => {
+                        Ok(Cons::new(func, Self::list(env, args, lexenv)?).evict(env))
+                    }
+                    Type::Cons => {
+                        let arglist = Self::list(env, args, lexenv)?;
+                        let fn_ = Self::compile(env, func, lexenv)?;
+
+                        match fn_.type_of() {
+                            Type::Function => Ok(Cons::new(fn_, arglist).evict(env)),
+                            _ => Err(Exception::new(env, Condition::Type, "core:compile", func)),
+                        }
+                    }
                     _ => Err(Exception::new(env, Condition::Type, "core:compile", func)),
                 }
             }
@@ -251,19 +222,14 @@ impl CoreFunction for Compile {
         let true_fn = fp.argv[1];
         let false_fn = fp.argv[2];
 
-        fp.value =
-            match env.fp_argv_check("core:%if", &[Type::T, Type::Function, Type::Function], fp) {
-                Ok(_) => match env.apply(test, Tag::nil()) {
-                    Ok(result) => match env
-                        .apply(if result.null_() { false_fn } else { true_fn }, Tag::nil())
-                    {
-                        Ok(tag) => tag,
-                        Err(e) => return Err(e),
-                    },
-                    Err(e) => return Err(e),
-                },
-                Err(e) => return Err(e),
-            };
+        env.fp_argv_check("core:%if", &[Type::T, Type::Function, Type::Function], fp)?;
+        let test = if env.apply(test, Tag::nil())?.null_() {
+            false_fn
+        } else {
+            true_fn
+        };
+
+        fp.value = env.apply(test, Tag::nil())?;
 
         Ok(())
     }
@@ -271,10 +237,7 @@ impl CoreFunction for Compile {
     fn core_compile(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let mut lexenv: LexicalEnv = vec![];
 
-        fp.value = match Self::compile(env, fp.argv[0], &mut lexenv) {
-            Ok(tag) => tag,
-            Err(e) => return Err(e),
-        };
+        fp.value = Self::compile(env, fp.argv[0], &mut lexenv)?;
 
         Ok(())
     }

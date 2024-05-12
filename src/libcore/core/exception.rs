@@ -175,12 +175,10 @@ impl CoreFunction for Exception {
         let src = fp.argv[0];
         let condition = fp.argv[1];
 
-        match env.fp_argv_check("core:raise", &[Type::T, Type::Keyword], fp) {
-            Ok(_) => match Self::map_condition(env, condition) {
-                Ok(cond) => Err(Self::new(env, cond, "raise", src)),
-                Err(_) => Err(Self::new(env, Condition::Type, "core:raise", condition)),
-            },
-            Err(e) => Err(e),
+        env.fp_argv_check("core:raise", &[Type::T, Type::Keyword], fp)?;
+        match Self::map_condition(env, condition) {
+            Ok(cond) => Err(Self::new(env, cond, "core:raise", src)),
+            Err(_) => Err(Self::new(env, Condition::Type, "core:raise", condition)),
         }
     }
 
@@ -188,37 +186,27 @@ impl CoreFunction for Exception {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        fp.value =
-            match env.fp_argv_check("core:unwind-protect", &[Type::Function, Type::Function], fp) {
-                Ok(_) => {
-                    let frame_stack_len;
+        env.fp_argv_check("core:unwind-protect", &[Type::Function, Type::Function], fp)?;
 
-                    {
-                        let dynamic_ref = block_on(env.dynamic.read());
+        let dynamic_ref = block_on(env.dynamic.read());
 
-                        frame_stack_len = dynamic_ref.len();
-                    }
+        let frame_stack_len = dynamic_ref.len();
 
-                    match env.apply(thunk, Tag::nil()) {
-                        Ok(value) => value,
-                        Err(e) => {
-                            let args =
-                                vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
+        drop(dynamic_ref);
 
-                            match env.apply_(handler, args) {
-                                Ok(value) => {
-                                    let mut dynamic_ref = block_on(env.dynamic.write());
+        fp.value = match env.apply(thunk, Tag::nil()) {
+            Ok(value) => value,
+            Err(e) => {
+                let args = vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
 
-                                    dynamic_ref.resize(frame_stack_len, (0, 0));
-                                    value
-                                }
-                                Err(e) => return Err(e),
-                            }
-                        }
-                    }
-                }
-                Err(e) => return Err(e),
-            };
+                let value = env.apply_(handler, args)?;
+                let mut dynamic_ref = block_on(env.dynamic.write());
+
+                dynamic_ref.resize(frame_stack_len, (0, 0));
+
+                value
+            }
+        };
 
         Ok(())
     }

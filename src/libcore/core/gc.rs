@@ -63,7 +63,9 @@ impl Core for Env {
 
         Frame::gc_lexical(self);
 
-        let _ = root_ref.iter().map(|tag| Self::mark(self, *tag));
+        for tag in &*root_ref {
+            Self::mark(self, *tag)
+        }
 
         {
             let mut heap_ref = block_on(self.heap.write());
@@ -122,9 +124,9 @@ pub trait CoreFunction {
 
 impl CoreFunction for Gc {
     fn core_gc(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match env.gc() {
-            Ok(_) => Symbol::keyword("t"),
-            Err(e) => return Err(e),
+        fp.value = {
+            env.gc()?;
+            Symbol::keyword("t")
         };
 
         Ok(())

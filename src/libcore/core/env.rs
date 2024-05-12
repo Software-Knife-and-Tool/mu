@@ -113,10 +113,9 @@ impl Core for Env {
             .map(|cons| self.eval(Cons::car(self, cons)))
             .collect();
 
-        match eval_results {
-            Ok(argv) => Frame { func, argv, value }.apply(self, func),
-            Err(e) => Err(e),
-        }
+        let argv = eval_results?;
+
+        Frame { func, argv, value }.apply(self, func)
     }
 
     fn eval(&self, expr: Tag) -> exception::Result<Tag> {
@@ -124,6 +123,7 @@ impl Core for Env {
             Type::Cons => {
                 let func = Cons::car(self, expr);
                 let args = Cons::cdr(self, expr);
+
                 match func.type_of() {
                     Type::Keyword if func.eq_(&Symbol::keyword("quote")) => {
                         Ok(Cons::car(self, args))

@@ -104,6 +104,7 @@ impl CoreFunction for Heap {
         }
 
         fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+
         Ok(())
     }
 
@@ -117,6 +118,7 @@ impl CoreFunction for Heap {
         ];
 
         fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+
         Ok(())
     }
 

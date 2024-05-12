@@ -22,7 +22,6 @@ def stats():
         '-l', '../../src/prelude/prelude.l',
         '-l', '../../src/prelude/break.l',
         '-l', '../../src/prelude/compile.l',
-        '-l', '../../src/prelude/ctype.l',
         '-l', '../../src/prelude/describe.l',
         '-l', '../../src/prelude/environment.l',
         '-l', '../../src/prelude/exception.l',

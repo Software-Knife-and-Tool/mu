@@ -176,6 +176,9 @@ impl BumpAllocator {
 
                         alloc_type.free -= 1;
 
+                        drop(alloc_ref);
+                        drop(alloc_type);
+
                         return Some(self.free_map[id as usize].remove(index));
                     }
                 }
