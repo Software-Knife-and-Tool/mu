@@ -5,18 +5,18 @@
 //!    Env
 use crate::{
     core::{
-        env::Env,
+        env::{Env, HeapRef},
         exception,
         frame::Frame,
         types::{Tag, Type},
     },
     types::{
-        cons::{Cons, Core as _},
-        function::{Core as _, Function},
+        cons::Cons,
+        function::Function,
         namespace::Namespace,
-        struct_::{Core as _, Struct},
+        struct_::Struct,
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vector::Vector,
     },
 };
 
@@ -31,63 +31,30 @@ pub enum GcMode {
     Demand,
 }
 
-pub trait Core {
-    fn gc(&self) -> exception::Result<bool>;
-    fn mark(&self, _: Tag);
-    fn add_gc_root(&self, _: Tag);
-    fn gc_namespaces(&self);
-    fn mark_image(&self, _: Tag) -> Option<bool>;
-}
-
-impl Core for Env {
-    fn mark(&self, tag: Tag) {
+impl Gc {
+    pub fn mark(env: &Env, heap_ref: HeapRef, tag: Tag) {
         match tag.type_of() {
-            Type::Cons => Cons::mark(self, tag),
-            Type::Function => Function::mark(self, tag),
-            Type::Struct => Struct::mark(self, tag),
-            Type::Symbol => Symbol::mark(self, tag),
-            Type::Vector => Vector::mark(self, tag),
+            Type::Cons => Cons::mark(env, heap_ref, tag),
+            Type::Function => Function::mark(env, heap_ref, tag),
+            Type::Struct => Struct::mark(env, heap_ref, tag),
+            Type::Symbol => Symbol::mark(env, heap_ref, tag),
+            Type::Vector => Vector::mark(env, heap_ref, tag),
             _ => (),
         }
     }
 
-    fn gc(&self) -> exception::Result<bool> {
-        let root_ref = block_on(self.gc_root.write());
-
-        {
-            let mut heap_ref = block_on(self.heap.write());
-            heap_ref.clear_marks();
-        }
-
-        self.gc_namespaces();
-
-        Frame::gc_lexical(self);
-
-        for tag in &*root_ref {
-            Self::mark(self, *tag)
-        }
-
-        {
-            let mut heap_ref = block_on(self.heap.write());
-            heap_ref.sweep();
-        }
-
-        Ok(true)
-    }
-
-    fn add_gc_root(&self, tag: Tag) {
-        let mut root_ref = block_on(self.gc_root.write());
+    fn add_root(env: &Env, tag: Tag) {
+        let mut root_ref = block_on(env.gc_root.write());
 
         root_ref.push(tag);
     }
 
-    fn mark_image(&self, tag: Tag) -> Option<bool> {
+    pub fn mark_image(heap_ref: HeapRef, tag: Tag) -> Option<bool> {
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => {
-                let mut heap_ref = block_on(self.heap.write());
-
                 let marked = heap_ref.get_image_mark(indirect.image_id() as usize);
+
                 match marked {
                     None => (),
                     Some(mark) => {
@@ -102,8 +69,26 @@ impl Core for Env {
         }
     }
 
-    fn gc_namespaces(&self) {
-        let ns_index_ref = block_on(self.ns_map.read());
+    fn lexicals(env: &Env, heap_ref: HeapRef) {
+        let lexical_ref = block_on(env.lexical.read());
+
+        for frame_vec in (*lexical_ref).values() {
+            let frame_vec_ref = block_on(frame_vec.read());
+
+            for frame in frame_vec_ref.iter() {
+                Self::mark(env, heap_ref, frame.func);
+
+                for arg in &frame.argv {
+                    Self::mark(env, heap_ref, *arg)
+                }
+
+                Self::mark(env, heap_ref, frame.value);
+            }
+        }
+    }
+
+    fn namespaces(env: &Env, heap_ref: HeapRef) {
+        let ns_index_ref = block_on(env.ns_map.read());
 
         for (_, _, ns_cache) in &*ns_index_ref {
             let hash_ref = block_on(match ns_cache {
@@ -112,9 +97,33 @@ impl Core for Env {
             });
 
             for (_, symbol) in hash_ref.iter() {
-                self.mark(*symbol)
+                Self::mark(env, heap_ref, *symbol)
             }
         }
+    }
+}
+
+pub trait Core {
+    fn gc(_: &Env) -> exception::Result<bool>;
+}
+
+impl Core for Gc {
+    fn gc(env: &Env) -> exception::Result<bool> {
+        let mut heap_ref = block_on(env.heap.write());
+        let root_ref = block_on(env.gc_root.write());
+
+        heap_ref.clear_marks();
+
+        Self::namespaces(env, &mut heap_ref);
+        Self::lexicals(env, &mut heap_ref);
+
+        for tag in &*root_ref {
+            Self::mark(env, &mut heap_ref, *tag)
+        }
+
+        heap_ref.sweep();
+
+        Ok(true)
     }
 }
 
@@ -124,10 +133,9 @@ pub trait CoreFunction {
 
 impl CoreFunction for Gc {
     fn core_gc(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = {
-            env.gc()?;
-            Symbol::keyword("t")
-        };
+        Self::gc(env)?;
+
+        fp.value = Symbol::keyword("t");
 
         Ok(())
     }

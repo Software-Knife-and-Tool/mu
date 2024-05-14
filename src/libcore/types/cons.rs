@@ -6,10 +6,10 @@ use crate::{
     core::{
         apply::Core as _,
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
-        env::Env,
+        env::{Env, HeapRef},
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc::Core as _,
+        gc::Gc,
         indirect::IndirectTag,
         reader::EOL,
         types::{Tag, TagType, Type},
@@ -102,13 +102,28 @@ impl Cons {
             _ => panic!("cons::length"),
         }
     }
+
+    pub fn mark(env: &Env, heap_ref: HeapRef, cons: Tag) {
+        match cons {
+            Tag::Direct(_) => {
+                Gc::mark(env, heap_ref, Self::car(env, cons));
+                Gc::mark(env, heap_ref, Self::cdr(env, cons))
+            }
+            Tag::Indirect(_) => {
+                let mark = Gc::mark_image(heap_ref, cons).unwrap();
+                if !mark {
+                    Gc::mark(env, heap_ref, Self::car(env, cons));
+                    Gc::mark(env, heap_ref, Self::cdr(env, cons))
+                }
+            }
+        }
+    }
 }
 
 // core operations
 pub trait Core {
     fn evict(&self, _: &Env) -> Tag;
     fn heap_size(_: &Env, _: Tag) -> usize;
-    fn mark(_: &Env, _: Tag);
     fn iter(_: &Env, _: Tag) -> ConsIter;
     fn nth(_: &Env, _: usize, _: Tag) -> Option<Tag>;
     fn nthcdr(_: &Env, _: usize, _: Tag) -> Option<Tag>;
@@ -124,23 +139,6 @@ impl Core for Cons {
         let vec = vec![Self::car(env, cons), Self::cdr(env, cons)];
 
         TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
-    }
-
-    fn mark(env: &Env, cons: Tag) {
-        match cons {
-            Tag::Direct(_) => {
-                env.mark(Self::car(env, cons));
-                env.mark(Self::cdr(env, cons))
-            }
-            Tag::Indirect(_) => {
-                let mark = env.mark_image(cons).unwrap();
-
-                if !mark {
-                    env.mark(Self::car(env, cons));
-                    env.mark(Self::cdr(env, cons))
-                }
-            }
-        }
     }
 
     fn iter(env: &Env, cons: Tag) -> ConsIter {
@@ -180,36 +178,33 @@ impl Core for Cons {
     fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
         let dot = DirectTag::to_direct('.' as u64, DirectInfo::Length(1), DirectType::ByteVector);
 
-        match env.read_stream(stream, false, Tag::nil(), true) {
-            Ok(car) => {
-                if EOL.eq_(&car) {
-                    Ok(Tag::nil())
-                } else {
-                    match car.type_of() {
-                        Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
-                            match env.read_stream(stream, false, Tag::nil(), true) {
-                                Ok(cdr) if EOL.eq_(&cdr) => Ok(Tag::nil()),
-                                Ok(cdr) => match env.read_stream(stream, false, Tag::nil(), true) {
-                                    Ok(eol) if EOL.eq_(&eol) => Ok(cdr),
-                                    Ok(_) => Err(Exception::new(
-                                        env,
-                                        Condition::Eof,
-                                        "core:read",
-                                        stream,
-                                    )),
-                                    Err(e) => Err(e),
-                                },
-                                Err(e) => Err(e),
-                            }
+        let car = env.read_stream(stream, false, Tag::nil(), true)?;
+
+        if EOL.eq_(&car) {
+            Ok(Tag::nil())
+        } else {
+            match car.type_of() {
+                Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
+                    let cdr = env.read_stream(stream, false, Tag::nil(), true)?;
+
+                    if EOL.eq_(&cdr) {
+                        Ok(Tag::nil())
+                    } else {
+                        let eol = env.read_stream(stream, false, Tag::nil(), true)?;
+
+                        if EOL.eq_(&eol) {
+                            Ok(cdr)
+                        } else {
+                            Err(Exception::new(env, Condition::Eof, "core:read", stream))
                         }
-                        _ => match Self::read(env, stream) {
-                            Ok(cdr) => Ok(Cons::new(car, cdr).evict(env)),
-                            Err(e) => Err(e),
-                        },
                     }
                 }
+                _ => {
+                    let cdr = Self::read(env, stream)?;
+
+                    Ok(Cons::new(car, cdr).evict(env))
+                }
             }
-            Err(e) => Err(e),
         }
     }
 

@@ -206,12 +206,9 @@ impl Core for Stream {
                 }
 
                 if stream.unch.null_() {
-                    match stream.system.read_byte(env) {
-                        Ok(opt) => match opt {
-                            Some(byte) => Ok(Some(byte as char)),
-                            None => Ok(None),
-                        },
-                        Err(e) => Err(e),
+                    match stream.system.read_byte(env)? {
+                        Some(byte) => Ok(Some(byte as char)),
+                        None => Ok(None),
                     }
                 } else {
                     let unch = stream.unch;
@@ -248,12 +245,9 @@ impl Core for Stream {
                 }
 
                 if stream.unch.null_() {
-                    match stream.system.read_byte(env) {
-                        Ok(opt) => match opt {
-                            Some(byte) => Ok(Some(byte)),
-                            None => Ok(None),
-                        },
-                        Err(e) => Err(e),
+                    match stream.system.read_byte(env)? {
+                        Some(byte) => Ok(Some(byte)),
+                        None => Ok(None),
                     }
                 } else {
                     let unch = stream.unch;

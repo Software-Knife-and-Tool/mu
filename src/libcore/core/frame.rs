@@ -12,7 +12,6 @@ use crate::{
         apply::Core as _,
         env::{Core as _, Env},
         exception::{self, Condition, Core as _, Exception},
-        gc::Core as _,
         symbols::CORE_SYMBOLS,
         types::{Tag, Type},
     },
@@ -65,24 +64,6 @@ impl Frame {
                 }
             }
             _ => panic!(),
-        }
-    }
-
-    pub fn gc_lexical(env: &Env) {
-        let lexical_ref = block_on(env.lexical.read());
-
-        for frame_vec in (*lexical_ref).values() {
-            let frame_vec_ref = block_on(frame_vec.read());
-
-            for frame in frame_vec_ref.iter() {
-                Env::mark(env, frame.func);
-
-                for arg in &frame.argv {
-                    Env::mark(env, *arg)
-                }
-
-                Env::mark(env, frame.value);
-            }
         }
     }
 
@@ -160,10 +141,9 @@ impl Frame {
                     let offset =
                         Fixnum::as_i64(Vector::ref_(env, Function::form(env, func), 2).unwrap());
 
-                    match CORE_SYMBOLS[offset as usize].2(env, &mut self) {
-                        Ok(_) => Ok(self.value),
-                        Err(e) => Err(e),
-                    }
+                    CORE_SYMBOLS[offset as usize].2(env, &mut self)?;
+
+                    Ok(self.value)
                 }
                 Type::Cons => {
                     let nreqs = Fixnum::as_i64(Function::arity(env, func)) as usize;

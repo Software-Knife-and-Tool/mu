@@ -7,10 +7,10 @@ use {
         core::{
             apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType},
-            env::Env,
+            env::{Env, HeapRef},
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc::Core as _,
+            gc::Gc,
             readtable::{map_char_syntax, SyntaxType},
             types::{Tag, Type},
         },
@@ -175,6 +175,21 @@ impl Vector {
             None => None,
         }
     }
+
+    pub fn mark(env: &Env, heap_ref: HeapRef, vector: Tag) {
+        match vector {
+            Tag::Direct(_) => (),
+            Tag::Indirect(_) => {
+                let marked = Gc::mark_image(heap_ref, vector).unwrap();
+
+                if !marked && Self::type_of(env, vector) == Type::T {
+                    for index in 0..Self::length(env, vector) {
+                        Gc::mark(env, heap_ref, Self::ref_(env, vector, index).unwrap())
+                    }
+                }
+            }
+        }
+    }
 }
 
 // core
@@ -182,7 +197,6 @@ pub trait Core<'a> {
     fn as_string(_: &Env, _: Tag) -> String;
     fn evict(&self, _: &Env) -> Tag;
     fn from_string(_: &str) -> Vector;
-    fn mark(_: &Env, _: Tag);
     fn heap_size(_: &Env, _: Tag) -> usize;
     fn read(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
     fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
@@ -270,21 +284,6 @@ impl<'a> Core<'a> for Vector {
                 }
             },
             _ => panic!(),
-        }
-    }
-
-    fn mark(env: &Env, vector: Tag) {
-        match vector {
-            Tag::Direct(_) => (),
-            Tag::Indirect(_) => {
-                let marked = env.mark_image(vector).unwrap();
-
-                if !marked && Self::type_of(env, vector) == Type::T {
-                    for index in 0..Self::length(env, vector) {
-                        env.mark(Self::ref_(env, vector, index).unwrap())
-                    }
-                }
-            }
         }
     }
 
@@ -444,12 +443,10 @@ impl<'a> Core<'a> for Vector {
                                     })
                                     .collect();
 
-                            match vec {
-                                Ok(vec) => {
-                                    Ok(TypedVector::<String> { vec }.vec.to_vector().evict(env))
-                                }
-                                Err(e) => Err(e),
-                            }
+                            Ok(TypedVector::<String> { vec: vec? }
+                                .vec
+                                .to_vector()
+                                .evict(env))
                         }
                         Type::Byte => {
                             let vec: exception::Result<Vec<u8>> =
@@ -479,12 +476,10 @@ impl<'a> Core<'a> for Vector {
                                     })
                                     .collect();
 
-                            match vec {
-                                Ok(vec) => {
-                                    Ok(TypedVector::<Vec<u8>> { vec }.vec.to_vector().evict(env))
-                                }
-                                Err(e) => Err(e),
-                            }
+                            Ok(TypedVector::<Vec<u8>> { vec: vec? }
+                                .vec
+                                .to_vector()
+                                .evict(env))
                         }
                         Type::Fixnum => {
                             let vec: exception::Result<Vec<i64>> =
@@ -504,12 +499,10 @@ impl<'a> Core<'a> for Vector {
                                     })
                                     .collect();
 
-                            match vec {
-                                Ok(vec) => {
-                                    Ok(TypedVector::<Vec<i64>> { vec }.vec.to_vector().evict(env))
-                                }
-                                Err(e) => Err(e),
-                            }
+                            Ok(TypedVector::<Vec<i64>> { vec: vec? }
+                                .vec
+                                .to_vector()
+                                .evict(env))
                         }
                         Type::Float => {
                             let vec: exception::Result<Vec<f32>> =
@@ -529,12 +522,10 @@ impl<'a> Core<'a> for Vector {
                                     })
                                     .collect();
 
-                            match vec {
-                                Ok(vec) => {
-                                    Ok(TypedVector::<Vec<f32>> { vec }.vec.to_vector().evict(env))
-                                }
-                                Err(e) => Err(e),
-                            }
+                            Ok(TypedVector::<Vec<f32>> { vec: vec? }
+                                .vec
+                                .to_vector()
+                                .evict(env))
                         }
                         _ => panic!(),
                     },

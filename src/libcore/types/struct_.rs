@@ -5,10 +5,10 @@
 use crate::{
     core::{
         apply::Core as _,
-        env::Env,
+        env::{Env, HeapRef},
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc::Core as _,
+        gc::Gc,
         indirect::IndirectTag,
         types::{Tag, TagType, Type},
     },
@@ -69,6 +69,14 @@ impl Struct {
             _ => panic!(),
         }
     }
+
+    pub fn mark(env: &Env, heap_ref: HeapRef, struct_: Tag) {
+        let mark = Gc::mark_image(heap_ref, struct_).unwrap();
+
+        if !mark {
+            Gc::mark(env, heap_ref, Self::vector(env, struct_))
+        }
+    }
 }
 
 // core
@@ -77,7 +85,6 @@ pub trait Core<'a> {
     fn read(_: &Env, _: Tag) -> exception::Result<Tag>;
     fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn evict(&self, _: &Env) -> Tag;
-    fn mark(_: &Env, _: Tag);
     fn view(_: &Env, _: Tag) -> Tag;
     fn heap_size(_: &Env, _: Tag) -> usize;
 }
@@ -87,14 +94,6 @@ impl<'a> Core<'a> for Struct {
         Struct {
             stype: Symbol::keyword(key),
             vector: TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env),
-        }
-    }
-
-    fn mark(env: &Env, struct_: Tag) {
-        let mark = env.mark_image(struct_).unwrap();
-
-        if !mark {
-            Env::mark(env, Self::vector(env, struct_))
         }
     }
 
@@ -141,47 +140,38 @@ impl<'a> Core<'a> for Struct {
     }
 
     fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
-        match Stream::read_char(env, stream) {
-            Ok(Some(ch)) => match ch {
-                '(' => {
-                    let vec_list = match Cons::read(env, stream) {
-                        Ok(list) => {
-                            if list.null_() {
-                                return Err(Exception::new(
-                                    env,
-                                    Condition::Type,
-                                    "core:read",
-                                    Tag::nil(),
-                                ));
-                            }
-                            list
-                        }
-                        Err(_) => {
+        match Stream::read_char(env, stream)? {
+            Some('(') => {
+                let vec_list = match Cons::read(env, stream) {
+                    Ok(list) => {
+                        if list.null_() {
                             return Err(Exception::new(
                                 env,
-                                Condition::Syntax,
+                                Condition::Type,
                                 "core:read",
-                                stream,
+                                Tag::nil(),
                             ));
                         }
-                    };
-
-                    let stype = Cons::car(env, vec_list);
-                    match stype.type_of() {
-                        Type::Keyword => Ok(Self::to_tag(
-                            env,
-                            stype,
-                            Cons::iter(env, Cons::cdr(env, vec_list))
-                                .map(|cons| Cons::car(env, cons))
-                                .collect::<Vec<Tag>>(),
-                        )),
-                        _ => Err(Exception::new(env, Condition::Type, "core:read", stype)),
+                        list
                     }
+                    Err(_) => {
+                        return Err(Exception::new(env, Condition::Syntax, "core:read", stream));
+                    }
+                };
+
+                let stype = Cons::car(env, vec_list);
+                match stype.type_of() {
+                    Type::Keyword => Ok(Self::to_tag(
+                        env,
+                        stype,
+                        Cons::iter(env, Cons::cdr(env, vec_list))
+                            .map(|cons| Cons::car(env, cons))
+                            .collect::<Vec<Tag>>(),
+                    )),
+                    _ => Err(Exception::new(env, Condition::Type, "core:read", stype)),
                 }
-                _ => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
-            },
-            Ok(None) => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
-            Err(e) => Err(e),
+            }
+            _ => Err(Exception::new(env, Condition::Eof, "core:read", stream)),
         }
     }
 

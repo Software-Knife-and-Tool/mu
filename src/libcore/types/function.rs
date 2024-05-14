@@ -4,9 +4,9 @@
 //! env function type
 use crate::{
     core::{
-        env::Env,
+        env::{Env, HeapRef},
         exception,
-        gc::Core as _,
+        gc::Gc,
         indirect::IndirectTag,
         types::{Tag, TagType, Type},
     },
@@ -85,24 +85,23 @@ impl Function {
     pub fn form(env: &Env, func: Tag) -> Tag {
         Self::to_image(env, func).form
     }
+
+    pub fn mark(env: &Env, heap_ref: HeapRef, function: Tag) {
+        let mark = Gc::mark_image(heap_ref, function).unwrap();
+
+        if !mark {
+            Gc::mark(env, heap_ref, Self::form(env, function))
+        }
+    }
 }
 
 pub trait Core {
-    fn mark(_: &Env, _: Tag);
     fn heap_size(_: &Env, _: Tag) -> usize;
     fn view(_: &Env, _: Tag) -> Tag;
     fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
 impl Core for Function {
-    fn mark(env: &Env, function: Tag) {
-        let mark = env.mark_image(function).unwrap();
-
-        if !mark {
-            env.mark(Self::form(env, function))
-        }
-    }
-
     fn view(env: &Env, func: Tag) -> Tag {
         let vec = vec![Self::arity(env, func), Self::form(env, func)];
 
