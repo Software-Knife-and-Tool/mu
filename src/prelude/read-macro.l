@@ -143,7 +143,7 @@
   (:lambda (ch stream)
     ((:lambda (ch sharp-table)
        (core:apply
-        (core:symbol-value (core:cdr (prelude:%assoc ch sharp-table)))
+        (core:symbol-value (core:cdr (prelude:%assq ch sharp-table)))
         `(,ch ,stream)))
      (prelude:read-char stream () ())
      '((#\| . prelude:%read-sharp-comment)
@@ -234,7 +234,7 @@
   (:lambda (ch stream)
      ((:lambda (macro-table)
        (core:apply
-            (core:symbol-value (core:cdr (prelude:%assoc ch macro-table)))
+            (core:symbol-value (core:cdr (prelude:%assq ch macro-table)))
             `(,ch ,stream)))
        '((#\" . prelude:%read-string)
          (#\# . prelude:%read-sharp)

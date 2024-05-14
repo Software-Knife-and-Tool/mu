@@ -30,10 +30,10 @@
      (prelude:warn `(,range ,arg) "emit-reg")
      ((:lambda (reg-map offset size)
         (prelude:warn (core:fx-sub offset (prelude:1- size)) "shift")
-        (prelude:warn (prelude:assoc (core:make-keyword (core:symbol-name (core:cdr arg))) reg-map) "reg value")
-        (core:ash (core:cdr (prelude:assoc (core:make-keyword (core:symbol-name (core:cdr arg))) reg-map))
+        (prelude:warn (prelude:assq (core:make-keyword (core:symbol-name (core:cdr arg))) reg-map) "reg value")
+        (core:ash (core:cdr (prelude:assq (core:make-keyword (core:symbol-name (core:cdr arg))) reg-map))
                 (core:fx-sub offset (prelude:1- size))))
-      (core:cdr (prelude:assoc :regs arm:armv8-aarch64))
+      (core:cdr (prelude:assq :regs arm:armv8-aarch64))
       (core:car range)
       (core:cdr range))))
 
@@ -69,8 +69,8 @@
            (:if (prelude:null inst-field)
                 (core:apply emitter `(,range ,(core:cons tag value)))
                 (core:apply emitter `(,range ,inst-field))))
-         (prelude:assoc tag instruction-args)
-         (core:eval (core:cdr (prelude:assoc tag arm:field-emitter)))))
+         (prelude:assq tag instruction-args)
+         (core:eval (core:cdr (prelude:assq tag arm:field-emitter)))))
       (core:nth 0 field-descriptor)
       (core:nth 1 field-descriptor)
       (core:nth 2 field-descriptor))))
@@ -95,7 +95,7 @@
                  (core:car loop)
                  (core:cdr loop))))
          (core:cons 0 opcode-fields)))
-      (core:cdr (prelude:assoc :config arm:armv8-aarch64)))))     
+      (core:cdr (prelude:assq :config arm:armv8-aarch64)))))     
 
 ;;;
 ;;; assemble an instruction from the instruction's opcode
@@ -139,10 +139,10 @@
                                         `(,(core:car instruction)
                                            ,(core:length opcode-format)
                                            ,(core:length instruction))))))
-            (core:cdr (prelude:assoc :format opcode-descriptor))
-            (core:cdr (prelude:assoc :fields opcode-descriptor))))
-         (core:cdr (prelude:assoc (core:car instruction) opcodes))))
-      (core:cdr (prelude:assoc :opcodes arm:armv8-aarch64)))))
+            (core:cdr (prelude:assq :format opcode-descriptor))
+            (core:cdr (prelude:assq :fields opcode-descriptor))))
+         (core:cdr (prelude:assq (core:car instruction) opcodes))))
+      (core:cdr (prelude:assqxs :opcodes arm:armv8-aarch64)))))
 
 (core:intern :arm "armv8-aarch64"
    '((:config . ((:arch :aarch64)))

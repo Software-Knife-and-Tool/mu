@@ -105,7 +105,7 @@
                                            (prelude:%compile-macro-call function-form arg-list env)
                                            (prelude:%compile-funcall function-form arg-list env)))
                                    (prelude:macro-function function-form env))))
-                          (core:cdr (prelude:%assoc
+                          (core:cdr (prelude:%assq
                                    function-form
                                    '((define-macro . prelude:%compile-defmacro)
                                      (if           . prelude:%compile-if)

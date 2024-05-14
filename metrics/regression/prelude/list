@@ -39,5 +39,5 @@
 (prelude:positionr prelude:zerop '(0 1 2 3 4))
 (prelude:positionr prelude:zerop '(2 3 4 5 0))
 (prelude:reverse '(1 2 3 4))
-(core:cdr (prelude:assoc #\a '((#\a . foo))))
-(core:cdr (prelude:assoc #\a '(() (#\a . foo))))
+(core:cdr (prelude:assq #\a '((#\a . foo))))
+(core:cdr (prelude:assq #\a '(() (#\a . foo))))

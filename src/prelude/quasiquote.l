@@ -12,7 +12,7 @@
 
 (core:intern prelude "%quasi-func-map"
    (:lambda (key map)
-     (core:cdr (prelude:assoc key map))))
+     (core:cdr (prelude:assq key map))))
 
 (core:intern prelude "%quasi-read"
    (:lambda (stream)
@@ -23,7 +23,7 @@
                 (:if (prelude:null type-map)
                      `(:form ,(prelude:%read-dispatch ch stream))
                      (core:apply (core:cdr type-map) ())))
-                (prelude:assoc ch syntax-map))))
+                (prelude:assq ch syntax-map))))
         (prelude:%read-consume-ws stream)
         `(,(core:cons #\( (:lambda () `(:list ,(prelude:%quasi-read-list stream))))
            ,(core:cons #\) (:lambda () `(:list-)))
