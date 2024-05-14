@@ -111,26 +111,12 @@ impl<'a> Core<'a> for Struct {
     fn write(env: &Env, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match tag {
             Tag::Indirect(_) => {
-                match env.write_string("#s(", stream) {
-                    Ok(_) => (),
-                    Err(e) => return Err(e),
-                }
-
-                match env.write_stream(Self::to_image(env, tag).stype, true, stream) {
-                    Ok(_) => (),
-                    Err(e) => return Err(e),
-                }
+                env.write_string("#s(", stream)?;
+                env.write_stream(Self::to_image(env, tag).stype, true, stream)?;
 
                 for tag in VectorIter::new(env, Self::to_image(env, tag).vector) {
-                    match env.write_string(" ", stream) {
-                        Ok(_) => (),
-                        Err(e) => return Err(e),
-                    }
-
-                    match env.write_stream(tag, true, stream) {
-                        Ok(_) => (),
-                        Err(e) => return Err(e),
-                    }
+                    env.write_string(" ", stream)?;
+                    env.write_stream(tag, true, stream)?;
                 }
 
                 env.write_string(")", stream)

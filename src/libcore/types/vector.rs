@@ -296,10 +296,7 @@ impl<'a> Core<'a> for Vector {
                     }
 
                     for nth in 0..DirectTag::length(vector) {
-                        match Stream::write_char(env, stream, s.as_bytes()[nth] as char) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
-                        }
+                        Stream::write_char(env, stream, s.as_bytes()[nth] as char)?;
                     }
 
                     if escape {
@@ -313,48 +310,26 @@ impl<'a> Core<'a> for Vector {
             Tag::Indirect(_) => match Self::type_of(env, vector) {
                 Type::Char => {
                     if escape {
-                        match env.write_string("\"", stream) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
-                        }
+                        env.write_string("\"", stream)?;
                     }
 
                     for ch in VectorIter::new(env, vector) {
-                        match env.write_stream(ch, false, stream) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
-                        }
+                        env.write_stream(ch, false, stream)?;
                     }
 
                     if escape {
-                        match env.write_string("\"", stream) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
-                        }
+                        env.write_string("\"", stream)?;
                     }
 
                     Ok(())
                 }
                 _ => {
-                    match env.write_string("#(", stream) {
-                        Ok(_) => (),
-                        Err(e) => return Err(e),
-                    }
-                    match env.write_stream(Self::to_image(env, vector).vtype, true, stream) {
-                        Ok(_) => (),
-                        Err(e) => return Err(e),
-                    }
+                    env.write_string("#(", stream)?;
+                    env.write_stream(Self::to_image(env, vector).vtype, true, stream)?;
 
                     for tag in VectorIter::new(env, vector) {
-                        match env.write_string(" ", stream) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
-                        }
-
-                        match env.write_stream(tag, false, stream) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
-                        }
+                        env.write_string(" ", stream)?;
+                        env.write_stream(tag, false, stream)?;
                     }
 
                     env.write_string(")", stream)
@@ -369,12 +344,12 @@ impl<'a> Core<'a> for Vector {
                 let mut str: String = String::new();
 
                 loop {
-                    match Stream::read_char(env, stream) {
-                        Ok(Some('"')) => break,
-                        Ok(Some(ch)) => match map_char_syntax(ch).unwrap() {
-                            SyntaxType::Escape => match Stream::read_char(env, stream) {
-                                Ok(Some(ch)) => str.push(ch),
-                                Ok(None) => {
+                    match Stream::read_char(env, stream)? {
+                        Some('"') => break,
+                        Some(ch) => match map_char_syntax(ch).unwrap() {
+                            SyntaxType::Escape => match Stream::read_char(env, stream)? {
+                                Some(ch) => str.push(ch),
+                                None => {
                                     return Err(Exception::new(
                                         env,
                                         Condition::Eof,
@@ -382,16 +357,12 @@ impl<'a> Core<'a> for Vector {
                                         stream,
                                     ));
                                 }
-                                Err(e) => {
-                                    return Err(e);
-                                }
                             },
                             _ => str.push(ch),
                         },
-                        Ok(None) => {
+                        None => {
                             return Err(Exception::new(env, Condition::Eof, "core:read", stream));
                         }
-                        Err(e) => return Err(e),
                     }
                 }
 
@@ -623,10 +594,10 @@ impl CoreFunction for Vector {
                         })
                         .collect();
 
-                    match vec {
-                        Ok(vec) => TypedVector::<String> { vec }.vec.to_vector().evict(env),
-                        Err(e) => return Err(e),
-                    }
+                    TypedVector::<String> { vec: vec? }
+                        .vec
+                        .to_vector()
+                        .evict(env)
                 }
                 Type::Byte => {
                     let vec: exception::Result<Vec<u8>> = Cons::iter(env, list)
@@ -650,10 +621,10 @@ impl CoreFunction for Vector {
                         })
                         .collect();
 
-                    match vec {
-                        Ok(vec) => TypedVector::<Vec<u8>> { vec }.vec.to_vector().evict(env),
-                        Err(e) => return Err(e),
-                    }
+                    TypedVector::<Vec<u8>> { vec: vec? }
+                        .vec
+                        .to_vector()
+                        .evict(env)
                 }
                 Type::Fixnum => {
                     let vec: exception::Result<Vec<i64>> = Cons::iter(env, list)
@@ -667,10 +638,10 @@ impl CoreFunction for Vector {
                         })
                         .collect();
 
-                    match vec {
-                        Ok(vec) => TypedVector::<Vec<i64>> { vec }.vec.to_vector().evict(env),
-                        Err(e) => return Err(e),
-                    }
+                    TypedVector::<Vec<i64>> { vec: vec? }
+                        .vec
+                        .to_vector()
+                        .evict(env)
                 }
                 Type::Float => {
                     let vec: exception::Result<Vec<f32>> = Cons::iter(env, list)
@@ -684,10 +655,10 @@ impl CoreFunction for Vector {
                         })
                         .collect();
 
-                    match vec {
-                        Ok(vec) => TypedVector::<Vec<f32>> { vec }.vec.to_vector().evict(env),
-                        Err(e) => return Err(e),
-                    }
+                    TypedVector::<Vec<f32>> { vec: vec? }
+                        .vec
+                        .to_vector()
+                        .evict(env)
                 }
                 _ => {
                     return Err(Exception::new(

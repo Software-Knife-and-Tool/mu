@@ -283,11 +283,9 @@ impl Core for Symbol {
                 Ok(s) => {
                     Stream::write_char(env, stream, ':').unwrap();
                     for nth in 0..DirectTag::length(symbol) {
-                        match Stream::write_char(env, stream, s.as_bytes()[nth] as char) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
-                        }
+                        Stream::write_char(env, stream, s.as_bytes()[nth] as char)?;
                     }
+
                     Ok(())
                 }
                 Err(_) => panic!(),
@@ -304,10 +302,7 @@ impl Core for Symbol {
                             None => panic!(),
                         }
 
-                        match env.write_string(":", stream) {
-                            Ok(_) => (),
-                            Err(e) => return Err(e),
-                        }
+                        env.write_string(":", stream)?;
                     }
                 }
                 env.write_stream(name, false, stream)
@@ -417,14 +412,11 @@ impl CoreFunction for Symbol {
     fn core_symbol(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:make-symbol", &[Type::String], fp) {
-            Ok(_) => {
-                let str = Vector::as_string(env, name);
+        env.fp_argv_check("core:make-symbol", &[Type::String], fp)?;
 
-                Self::new(env, Tag::nil(), &str, *UNBOUND).evict(env)
-            }
-            Err(e) => return Err(e),
-        };
+        let str = Vector::as_string(env, name);
+
+        fp.value = Self::new(env, Tag::nil(), &str, *UNBOUND).evict(env);
 
         Ok(())
     }
