@@ -45,10 +45,7 @@ impl Core for Char {
         let ch: u8 = (chr.data(env) & 0xff) as u8;
 
         if escape {
-            match env.write_string("#\\", stream) {
-                Ok(_) => (),
-                Err(e) => return Err(e),
-            }
+            env.write_string("#\\", stream)?;
 
             let mut tmp = [0; 4];
 

@@ -393,10 +393,9 @@ impl CoreFunction for Namespace {
     fn core_makunbound(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match env.fp_argv_check("core:makunbound", &[Type::Symbol], fp) {
-            Ok(_) => Self::makunbound(env, symbol),
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:makunbound", &[Type::Symbol], fp)?;
+
+        fp.value = Self::makunbound(env, symbol);
 
         Ok(())
     }

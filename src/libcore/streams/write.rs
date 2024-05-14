@@ -58,10 +58,7 @@ impl Core for Env {
         }
 
         for ch in str.chars() {
-            match Stream::write_char(self, stream, ch) {
-                Ok(_) => (),
-                Err(e) => return Err(e),
-            }
+            Stream::write_char(self, stream, ch)?;
         }
 
         Ok(())
@@ -74,17 +71,12 @@ pub trait CoreFunction {
 
 impl CoreFunction for Env {
     fn core_write(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let value = fp.argv[0];
+        fp.value = fp.argv[0];
         let escape = fp.argv[1];
         let stream = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("core:write", &[Type::T, Type::T, Type::Stream], fp) {
-            Ok(_) => match env.write_stream(value, !escape.null_(), stream) {
-                Ok(_) => value,
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:write", &[Type::T, Type::T, Type::Stream], fp)?;
+        env.write_stream(fp.value, !escape.null_(), stream)?;
 
         Ok(())
     }

@@ -138,13 +138,8 @@ impl CoreFunction for Env {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value = match env.fp_argv_check("core:read", &[Type::Stream], fp) {
-            Ok(_) => match Self::read_stream(env, stream, !eof_error_p.null_(), eof_value, false) {
-                Ok(tag) => tag,
-                Err(e) => return Err(e),
-            },
-            Err(e) => return Err(e),
-        };
+        env.fp_argv_check("core:read", &[Type::Stream], fp)?;
+        fp.value = Self::read_stream(env, stream, !eof_error_p.null_(), eof_value, false)?;
 
         Ok(())
     }

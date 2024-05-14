@@ -160,10 +160,7 @@ impl Frame {
                     self.frame_stack_push(env);
 
                     for cons in Cons::iter(env, Function::form(env, func)) {
-                        value = match env.eval(Cons::car(env, cons)) {
-                            Ok(value) => value,
-                            Err(e) => return Err(e),
-                        };
+                        value = env.eval(Cons::car(env, cons))?;
                     }
 
                     Self::frame_stack_pop(env, func);
