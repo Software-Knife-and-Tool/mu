@@ -157,14 +157,12 @@ impl Env {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
-        match StreamBuilder::new()
+        let stream = StreamBuilder::new()
             .string(str.to_string())
             .input()
-            .build(env, &LIB)
-        {
-            Ok(stream) => env.read_stream(stream, true, Tag::nil(), false),
-            Err(e) => Err(e),
-        }
+            .build(env, &LIB)?;
+
+        env.read_stream(stream, true, Tag::nil(), false)
     }
 
     /// write an s-expression to a lib stream
@@ -225,13 +223,7 @@ impl Env {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
-        match self.read_str(expr) {
-            Ok(expr) => match self.compile(expr) {
-                Ok(expr) => env.eval(expr),
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(e),
-        }
+        env.eval(self.compile(self.read_str(expr)?)?)
     }
 
     /// format exception

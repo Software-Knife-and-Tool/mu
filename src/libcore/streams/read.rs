@@ -62,12 +62,11 @@ impl Core for Env {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => Lib::read_atom(self, ch, stream),
                     SyntaxType::Macro => match ch {
-                        '#' => match Lib::sharpsign_macro(self, stream) {
-                            Ok(Some(tag)) => Ok(tag),
-                            Ok(None) => {
+                        '#' => match Lib::sharpsign_macro(self, stream)? {
+                            Some(tag) => Ok(tag),
+                            None => {
                                 Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
                             }
-                            Err(e) => Err(e),
                         },
                         _ => Err(Exception::new(
                             self,
@@ -79,19 +78,13 @@ impl Core for Env {
                     SyntaxType::Tmacro => match ch {
                         '`' => QuasiReader::read(self, false, stream, false),
                         '\'' => {
-                            match Self::read_stream(self, stream, false, Tag::nil(), recursivep) {
-                                Ok(tag) => Ok(Cons::vlist(self, &[Symbol::keyword("quote"), tag])),
-                                Err(e) => Err(e),
-                            }
+                            let tag =
+                                Self::read_stream(self, stream, false, Tag::nil(), recursivep)?;
+
+                            Ok(Cons::vlist(self, &[Symbol::keyword("quote"), tag]))
                         }
-                        '"' => match Vector::read(self, '"', stream) {
-                            Ok(tag) => Ok(tag),
-                            Err(e) => Err(e),
-                        },
-                        '(' => match Cons::read(self, stream) {
-                            Ok(cons) => Ok(cons),
-                            Err(e) => Err(e),
-                        },
+                        '"' => Ok(Vector::read(self, '"', stream)?),
+                        '(' => Ok(Cons::read(self, stream)?),
                         ')' => {
                             if recursivep {
                                 Ok(*EOL)
@@ -99,12 +92,11 @@ impl Core for Env {
                                 Err(Exception::new(self, Condition::Syntax, "core:read", stream))
                             }
                         }
-                        ';' => match Lib::read_comment(self, stream) {
-                            Ok(_) => {
-                                Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
-                            }
-                            Err(e) => Err(e),
-                        },
+                        ';' => {
+                            Lib::read_comment(self, stream)?;
+
+                            Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
+                        }
                         ',' => Err(Exception::new(
                             self,
                             Condition::Range,

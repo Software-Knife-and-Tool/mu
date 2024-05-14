@@ -7,10 +7,10 @@ use {
         core::{
             apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType},
-            env::Env,
+            env::{Env, HeapRef},
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc::Core as _,
+            gc::Gc,
             heap::{Core as _, Heap},
             indirect::IndirectTag,
             readtable::{map_char_syntax, SyntaxType},
@@ -123,11 +123,24 @@ impl Symbol {
             _ => panic!(),
         }
     }
+
+    pub fn mark(env: &Env, heap_ref: HeapRef, symbol: Tag) {
+        match symbol {
+            Tag::Direct(_) => (), // keyword
+            Tag::Indirect(_) => {
+                let mark = Gc::mark_image(heap_ref, symbol).unwrap();
+
+                if !mark {
+                    Gc::mark(env, heap_ref, Self::name(env, symbol));
+                    Gc::mark(env, heap_ref, Self::value(env, symbol));
+                }
+            }
+        }
+    }
 }
 
 pub trait Core {
     fn evict(&self, _: &Env) -> Tag;
-    fn mark(_: &Env, _: Tag);
     fn heap_size(_: &Env, _: Tag) -> usize;
     fn is_bound(_: &Env, _: Tag) -> bool;
     fn keyword(_: &str) -> Tag;
@@ -162,20 +175,6 @@ impl Core for Symbol {
         std::mem::size_of::<Symbol>()
             + if name_sz > 8 { name_sz } else { 0 }
             + if value_sz > 8 { value_sz } else { 0 }
-    }
-
-    fn mark(env: &Env, symbol: Tag) {
-        match symbol {
-            Tag::Direct(_) => (), // keyword
-            Tag::Indirect(_) => {
-                let mark = env.mark_image(symbol).unwrap();
-
-                if !mark {
-                    env.mark(Self::name(env, symbol));
-                    env.mark(Self::value(env, symbol));
-                }
-            }
-        }
     }
 
     fn evict(&self, env: &Env) -> Tag {

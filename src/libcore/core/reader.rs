@@ -226,8 +226,8 @@ impl Core for Lib {
                         SyntaxType::Whitespace => Ok(Some(Tag::from(ch))),
                         SyntaxType::Constituent => {
                             Stream::unread_char(env, stream, space).unwrap();
-                            match Self::read_token(env, stream) {
-                                Ok(Some(str)) => {
+                            match Self::read_token(env, stream)? {
+                                Some(str) => {
                                     let phrase = ch.to_string() + &str;
                                     match phrase.as_str() {
                                         "tab" => Ok(Some(Tag::from('\t'))),
@@ -243,10 +243,9 @@ impl Core for Lib {
                                         )),
                                     }
                                 }
-                                Ok(None) => {
+                                None => {
                                     Err(Exception::new(env, Condition::Eof, "core:read", stream))
                                 }
-                                Err(e) => Err(e),
                             }
                         }
                         _ => {
