@@ -32,7 +32,7 @@
 ;;;
 (core:intern prelude "%read-char-syntax"
    (:lambda (ch)
-     ((:lambda (read-table) (core:cdr (prelude:%assoc ch read-table)))
+     ((:lambda (read-table) (core:cdr (prelude:%assq ch read-table)))
       '((#\return . :wspace) (#\linefeed . :wspace) (#\page . :wspace)
         (#\tab . :wspace) (#\space . :wspace)
         (#\0 . :const)  (#\1 . :const)  (#\2 . :const)  (#\3 . :const)
@@ -111,7 +111,7 @@
   (:lambda (ch stream)
     ((:lambda (dispatch-table)
        (core:apply
-        (core:symbol-value (core:cdr (prelude:%assoc (prelude:%read-char-syntax ch) dispatch-table)))
+        (core:symbol-value (core:cdr (prelude:%assq (prelude:%read-char-syntax ch) dispatch-table)))
         `(,ch ,stream)))
      '((:const   . prelude:%read-atom)
        (:escape  . prelude:%read-atom)

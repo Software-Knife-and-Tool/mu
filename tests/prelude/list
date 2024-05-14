@@ -1,5 +1,5 @@
 (core:type-of prelude:append)	:func
-(core:type-of prelude:assoc)	:func
+(core:type-of prelude:assq)	:func
 (core:type-of prelude:dropl)	:func
 (core:type-of prelude:dropr)	:func
 (core:type-of prelude:findl)	:func
@@ -14,6 +14,7 @@
 (core:type-of prelude:positionl)	:func
 (core:type-of prelude:positionr)	:func
 (core:type-of prelude:reverse)	:func
+(core:type-of prelude:rassq)	:func
 (prelude:append '(() ()))	:nil
 (prelude:append '(() (1 2 3)))	(1 2 3)
 (prelude:append '((1 2 3) ()))	(1 2 3)
@@ -71,6 +72,9 @@
 (prelude:positionr prelude:zerop '(0 2 0 4 5))	2
 (prelude:positionr prelude:zerop '(0 2 3 4 5))	0
 (prelude:reverse '(1 2 3 4))	(4 3 2 1)
-(core:cdr (prelude:assoc #\a '((#\a . foo))))	foo
-(core:cdr (prelude:assoc #\a '(() (#\a . foo))))	foo
-(core:cdr (prelude:assoc #\a ()))	:nil
+(core:cdr (prelude:assq #\a '((#\a . foo))))	foo
+(core:cdr (prelude:assq #\a '(() (#\a . foo))))	foo
+(core:cdr (prelude:assq #\a ()))	:nil
+(core:car (prelude:rassq 'foo '((#\a . foo))))	#\a
+(core:car (prelude:rassq 'foo '(() (#\a . foo))))	#\a
+(core:cdr (prelude:rassq #\a ()))	:nil

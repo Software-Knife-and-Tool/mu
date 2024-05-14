@@ -120,7 +120,7 @@
                 (prelude:raise list 'prelude:maplist "not a list"))
            (prelude:raise function 'prelude:maplist "not a function"))))
 
-(core:intern prelude "%assoc"
+(core:intern prelude "%assq"
    (:lambda (item alist)
       (core:car
        (core:fix
@@ -137,8 +137,31 @@
                 ()))
         alist))))
 
-(core:intern prelude "assoc"
+(core:intern prelude "assq"
    (:lambda (item alist)
      (:if (prelude:listp alist)
-          (prelude:%assoc item alist)
-          (prelude:raise alist 'prelude:assoc "not an alist"))))
+          (prelude:%assq item alist)
+          (prelude:raise alist 'prelude:assq "not an alist"))))
+
+(core:intern prelude "%rassq"
+   (:lambda (item alist)
+      (core:car
+       (core:fix
+        (:lambda (lst)
+           (:if lst
+                ((:lambda (entry cdr)
+                    (:if entry
+                         (:if (core:eq item (core:cdr entry))
+                              lst
+                              cdr)
+                         cdr))
+                 (core:car lst)
+                 (core:cdr lst))
+                ()))
+        alist))))
+
+(core:intern prelude "rassq"
+   (:lambda (item alist)
+     (:if (prelude:listp alist)
+          (prelude:%rassq item alist)
+          (prelude:raise alist 'prelude:assq "not an alist"))))

@@ -83,7 +83,7 @@
             (prelude:apply (core:symbol-value fn) `(,dest ,arg-list))
             (prelude:raise dir 'prelude:format "unrecognized format directive")))
      (core:cdr
-      (prelude:%assoc
+      (prelude:%assq
        dir
        '((#\A . prelude:%fmt-aesthetic)
          (#\S . prelude:%fmt-standard)

@@ -27,7 +27,7 @@ prelude    exception      total: 7        pass: 7        fail: 0        exceptio
 prelude    fixnum         total: 16       pass: 16       fail: 0        exceptions: 0       
 prelude    format         total: 15       pass: 15       fail: 0        exceptions: 0       
 prelude    lambda         total: 23       pass: 23       fail: 0        exceptions: 0       
-prelude    list           total: 76       pass: 76       fail: 0        exceptions: 0       
+prelude    list           total: 80       pass: 80       fail: 0        exceptions: 0       
 prelude    macro          total: 13       pass: 13       fail: 0        exceptions: 0       
 prelude    reader         total: 69       pass: 69       fail: 0        exceptions: 0       
 prelude    stream         total: 20       pass: 20       fail: 0        exceptions: 0       
@@ -36,5 +36,5 @@ prelude    symbol         total: 3        pass: 3        fail: 0        exceptio
 prelude    types          total: 43       pass: 43       fail: 0        exceptions: 0       
 prelude    vector         total: 25       pass: 25       fail: 0        exceptions: 0       
 -----------------------
-prelude                   total: 408      pass: 396      fail: 10       exceptions: 2         
+prelude                   total: 412      pass: 400      fail: 10       exceptions: 2         
 
