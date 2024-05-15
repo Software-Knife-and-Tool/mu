@@ -1,9 +1,9 @@
 (core:eq 'core:sum (core:eval (prelude:compile (prelude:read (core:open :string :input "`,core:sum") () ()))))	:t
-(core:eq 'core:version (core:eval (prelude:compile (prelude:read (core:open :string :input "`,core:version") () ()))))	:t
+(core:eq 'core:*version* (core:eval (prelude:compile (prelude:read (core:open :string :input "`,core:*version*") () ()))))	:t
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`\"abc\"") () ())))	"abc"
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`#\\a") () ())))	#\a
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`core:standard-output") () ())))	core:standard-output
+(core:eval (prelude:compile (prelude:read (core:open :string :input "`core:*standard-output*") () ())))	core:*standard-output*
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`1234") () ())))	1234
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`(,(core:cons 'satisfies ()))") () ())))	((satisfies))
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`(\"abc\")") () ())))	("abc")
@@ -31,7 +31,7 @@
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`,`\"abc\"") () ())))	"abc"
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`,`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`,`#\\a") () ())))	#\a
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,`core:standard-output") () ())))	core:standard-output
+(core:eval (prelude:compile (prelude:read (core:open :string :input "`,`core:*standard-output*") () ())))	core:*standard-output*
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`,`1234") () ())))	1234
 (core:eval (prelude:compile (prelude:read (core:open :string :input "`,`(1234)") () ())))	(1234)
 (core:eval (prelude:compile (prelude:read (core:open :string :input "``1234") () ())))	`1234

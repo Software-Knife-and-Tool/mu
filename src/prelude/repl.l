@@ -14,7 +14,7 @@
                (prelude:null loop))
            (:lambda ()
              (prelude:format :t "prelude> " ())
-             (core:flush core:standard-output)
+             (core:flush core:*standard-output*)
              ((:lambda (form)
                 (:if (core:eq form prelude:%eof%)
                      loop

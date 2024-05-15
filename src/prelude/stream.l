@@ -12,7 +12,7 @@
 (core:intern prelude "%write-stream-designator"
   (:lambda (designator)
     (:if (prelude:null designator)
-         core:standard-output
+         core:*standard-output*
          (:if (prelude:streamp designator)
               designator
               (prelude:raise designator
@@ -22,9 +22,9 @@
 (core:intern prelude "%read-stream-designator"
   (:lambda (designator)
     (:if (prelude:null designator)
-         core:standard-input
+         core:*standard-input*
          (:if (core:eq :t designator)
-              core:standard-input
+              core:*standard-input*
               (:if (prelude:streamp designator)
                    designator
                    (prelude:raise designator

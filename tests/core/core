@@ -1,9 +1,9 @@
 (core:eq 1 1)	:t
 (core:eq 1 2)	:nil
-(core:eval 'core:standard-input)	#<stream: 0 :standard-input :input :open>
+(core:eval 'core:*standard-input*)	#<stream: 0 :standard-input :input :open>
 (core:eval ())	:nil
-(core:fix (:lambda (l) (:if l ((:lambda () (core:write (core:car l) () core:standard-output) (core:cdr l))) ())) '(1 2 3 4))	1234:nil
-(core:fix (:lambda (l) (:if l ((:lambda () (core:write (core:car (core:car l)) () core:standard-output) (core:cdr l))) ())) '((0 . 1) (2 . 3)))	02:nil
+(core:fix (:lambda (l) (:if l ((:lambda () (core:write (core:car l) () core:*standard-output*) (core:cdr l))) ())) '(1 2 3 4))	1234:nil
+(core:fix (:lambda (l) (:if l ((:lambda () (core:write (core:car (core:car l)) () core:*standard-output*) (core:cdr l))) ())) '((0 . 1) (2 . 3)))	02:nil
 (core:apply core:eq '(1 2))	:nil
 (core:apply core:sum '(1 2))	3
 (core:type-of #\a)	:char
@@ -13,7 +13,7 @@
 (core:type-of ())	:null
 (core:type-of 1)	:fixnum
 (core:type-of :typeof)	:keyword
-(core:type-of core:standard-input)	:stream
+(core:type-of core:*standard-input*)	:stream
 (core:type-of core:heap-info)	:func
 (core:type-of "type-of")	:vector
 (core:type-of (core:find-ns "core"))	:ns
@@ -30,7 +30,7 @@
 (core:view 'a)	#(:t "" a :UNBOUND)
 (core:view 'core:eq)	#(:t "core" eq #<:function :core [req:2, form:eq]>)
 (core:view core:eq)	#(:t 2 #(:t core eq 0))
-(core:view core:standard-input)	#(:t 0 :input :nil)
+(core:view core:*standard-input*)	#(:t 0 :input :nil)
 (core:heap-size ())	8
 (core:heap-size :keyword)	8
 (core:heap-size #\a)	8
@@ -44,8 +44,8 @@
 (core:heap-size 'a)	27
 (core:heap-size 'core:eq)	45
 (core:heap-size core:eq)	18
-(core:heap-size core:standard-input)	8
-(core:unwind-protect (:lambda (cond obj) (core:write cond () core:standard-output)) (:lambda () (core:quotient 1 1)))	1
+(core:heap-size core:*standard-input*)	8
+(core:unwind-protect (:lambda (cond obj) (core:write cond () core:*standard-output*)) (:lambda () (core:quotient 1 1)))	1
 (core:repr :t (core:repr :vector :t))	:t
 (core:type-of core:find)	:func
 (core:type-of core:find-ns)	:func

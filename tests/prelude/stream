@@ -9,12 +9,12 @@
 (core:type-of prelude:unread-char)	:func
 (core:type-of prelude:write)	:func
 (core:type-of prelude:write-byte)	:func
-(core:write 1 () core:standard-output)	11
-(core:write (core:sum 1 2) () core:standard-output)	33
-(core:write (prelude:string= "" "") () core:standard-output)	:t:t
-(core:write (prelude:string= "" "1") () core:standard-output)	:nil:nil
-(core:write (prelude:string= "1" "1") () core:standard-output)	:t:t
-(core:write (prelude:string= "123" "1") () core:standard-output)	:nil:nil
-(core:write (prelude:string= "" "ci") () core:standard-output)	:nil:nil
-(core:write (prelude:string= "ci" "") () core:standard-output)	:nil:nil
-(core:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () core:standard-output)	f#\f
+(core:write 1 () core:*standard-output*)	11
+(core:write (core:sum 1 2) () core:*standard-output*)	33
+(core:write (prelude:string= "" "") () core:*standard-output*)	:t:t
+(core:write (prelude:string= "" "1") () core:*standard-output*)	:nil:nil
+(core:write (prelude:string= "1" "1") () core:*standard-output*)	:t:t
+(core:write (prelude:string= "123" "1") () core:*standard-output*)	:nil:nil
+(core:write (prelude:string= "" "ci") () core:*standard-output*)	:nil:nil
+(core:write (prelude:string= "ci" "") () core:*standard-output*)	:nil:nil
+(core:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () core:*standard-output*)	f#\f

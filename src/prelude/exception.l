@@ -79,7 +79,7 @@
 
 (core:intern prelude "error"
    (:lambda (value format-string arg-list)
-      (prelude:format core:error-output format-string arg-list)
+      (prelude:format core:*error-output* format-string arg-list)
       (core:raise
        (prelude:%make-except :error value :error "" ())
        :except)))
@@ -98,14 +98,14 @@
 
 (core:intern prelude "debug"
    (:lambda (value message)
-     (core:write ";;; debug: " () core:error-output)          
-     (core:write value () core:error-output)
-     (core:write " " () core:error-output)
-     (core:write message () core:error-output)
-     (core:write-char #\linefeed core:error-output)
+     (core:write ";;; debug: " () core:*error-output*)          
+     (core:write value () core:*error-output*)
+     (core:write " " () core:*error-output*)
+     (core:write message () core:*error-output*)
+     (core:write-char #\linefeed core:*error-output*)
      value))
 
 (core:intern prelude "warn"
    (:lambda (value message)
-     (prelude:format core:error-output ";;; warning: ~S ~A~%" `(,value ,message))
+     (prelude:format core:*error-output* ";;; warning: ~S ~A~%" `(,value ,message))
     value))
