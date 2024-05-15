@@ -1,4 +1,4 @@
-(core:unwind-protect (:lambda (obj cond src) (core:write cond () core:standard-output)) (:lambda () (core:raise () :except)))	:except:except
-(core:unwind-protect (:lambda (obj cond src) (core:write obj () core:standard-output)) (:lambda () (core:raise 1 :except)))	11
-(core:unwind-protect (:lambda (obj cond src) (core:write cond () core:standard-output)) (:lambda () (core:quotient 1 0)))	:div0:div0
-(core:unwind-protect (:lambda (obj cond src) (core:write obj () core:standard-output)) (:lambda () 1))	1
+(core:unwind-protect (:lambda (obj cond src) (core:write cond () core:*standard-output*)) (:lambda () (core:raise () :except)))	:except:except
+(core:unwind-protect (:lambda (obj cond src) (core:write obj () core:*standard-output*)) (:lambda () (core:raise 1 :except)))	11
+(core:unwind-protect (:lambda (obj cond src) (core:write cond () core:*standard-output*)) (:lambda () (core:quotient 1 0)))	:div0:div0
+(core:unwind-protect (:lambda (obj cond src) (core:write obj () core:*standard-output*)) (:lambda () 1))	1

@@ -122,21 +122,26 @@ impl Lib {
         Namespace::intern_static(
             env,
             env.core_ns,
-            "version".to_string(),
+            "*version*".to_string(),
             Vector::from_string(LIB.version).evict(env),
         )
         .unwrap();
 
-        Namespace::intern_static(env, env.core_ns, "standard-input".to_string(), LIB.stdin())
-            .unwrap();
         Namespace::intern_static(
             env,
             env.core_ns,
-            "standard-output".to_string(),
+            "*standard-input*".to_string(),
+            LIB.stdin(),
+        )
+        .unwrap();
+        Namespace::intern_static(
+            env,
+            env.core_ns,
+            "*standard-output*".to_string(),
             LIB.stdout(),
         )
         .unwrap();
-        Namespace::intern_static(env, env.core_ns, "error-output".to_string(), LIB.errout())
+        Namespace::intern_static(env, env.core_ns, "*error-output*".to_string(), LIB.errout())
             .unwrap();
 
         for (name, nreqs, fn_) in &*CORE_SYMBOLS {

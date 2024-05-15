@@ -30,7 +30,7 @@
 (core:apply (:lambda (a b) (core:eq a b)) '(1 2))
 (core:eval ())
 (core:eval 1)
-(core:eval 'core:version)
+(core:eval 'core:*version*)
 (core:intern (core:find-ns "") "a" ())
 (core:fix (:lambda (a) ()) ())
 (core:fix (:lambda (a) (:if (core:eq 0 a) 0 (core:difference a 1))) 100)

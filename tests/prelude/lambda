@@ -19,5 +19,5 @@
 (prelude:apply (prelude:compile '(lambda (a b c &rest e) e)) '(1 2 3 4 5))	(4 5)
 (prelude:apply (prelude:compile '(lambda (a b c d &rest e) e)) '(1 2 3 4 5))	(5)
 (prelude:apply (prelude:compile '(lambda (a b c d e &rest f) f)) '(1 2 3 4 5))	:nil
-(prelude:apply (prelude:compile '(lambda (a b c d &rest f) (core:write f () core:standard-output))) '(1 2 3 4 5))	(5)(5)
+(prelude:apply (prelude:compile '(lambda (a b c d &rest f) (core:write f () core:*standard-output*))) '(1 2 3 4 5))	(5)(5)
 (core:type-of (prelude:apply (prelude:compile '(lambda (a) (a))) (core:cons (:lambda () 1) ())))	:fixnum

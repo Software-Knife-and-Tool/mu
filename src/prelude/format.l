@@ -127,7 +127,7 @@
                       (:if (prelude:null stream)
                            (core:open :string :output "")
                            (:if (core:eq stream :t)
-                                core:standard-output
+                                core:*standard-output*
                                 (:if (prelude:streamp stream)
                                      stream
                                      (prelude:raise stream 'prelude:format "not a stream designator"))))))

@@ -60,7 +60,7 @@
                                (core:exit 0)
                                (:if (core:eq form :e)
                                     ((:lambda ()
-                                       (prelude:%exceptf core:standard-output "exception: ~A on ~A by ~S, ~A~%" :t except)
+                                       (prelude:%exceptf core:*standard-output* "exception: ~A on ~A by ~S, ~A~%" :t except)
                                        (prelude:null loop)))
                                     (:if (core:eq form :r)
                                          loop
@@ -69,6 +69,6 @@
                                             (prelude:null loop))))))))))
          ((:lambda ()
             (prelude:format :t "prelude:debug> " ())
-            (core:flush core:standard-output)
+            (core:flush core:*standard-output*)
             (prelude:read :t () prelude:%eof%)))))
      ())))

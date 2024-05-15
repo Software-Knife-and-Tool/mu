@@ -36,19 +36,19 @@
 
 (core:intern core::ns :intern "eprinc"
   (:lambda (obj)
-    (core:write obj () core:error-output)))           
+    (core:write obj () core:*error-output*)))           
 
 (core:intern core::ns :intern "eprint"
   (:lambda (obj)
-    (core:write obj :t core:error-output)))           
+    (core:write obj :t core:*error-output*)))           
 
 (core:intern core::ns :intern "princ"
   (:lambda (obj)
-    (core:write obj () core:standard-output)))           
+    (core:write obj () core:*standard-output*)))           
 
 (core:intern core::ns :intern "print"
   (:lambda (obj)
-    (core:write obj :t core:standard-output)))           
+    (core:write obj :t core:*standard-output*)))           
 
 (core:intern core::ns :extern "raise"
    (:lambda (obj msg)
@@ -56,7 +56,7 @@
      (core::eprinc msg)
      (core::eprinc " ")
      (core::eprint obj)
-     (core:terpri core:error-output)
+     (core:terpri core:*error-output*)
      (core:raise :error obj)))
 
 (core:intern core::ns :extern "raise-if"
@@ -67,7 +67,7 @@
              (core::eprinc msg)
              (core::eprinc " ")
              (core::eprint obj)
-             (core:terpri core:error-output)
+             (core:terpri core:*error-output*)
              (core:raise :error obj)))
           obj)))
 
@@ -79,7 +79,7 @@
              (core::eprinc msg)
              (core::eprinc " ")
              (core::eprint obj)
-             (core:terpri core:error-output)
+             (core:terpri core:*error-output*)
              (core:raise :error obj)))
           obj)))
 
@@ -92,7 +92,7 @@
              (core::eprinc msg)
              (core::eprinc " ")
              (core::eprint obj)
-             (core:terpri core:error-output)
+             (core:terpri core:*error-output*)
              (core:raise :error obj))))))
 
 (core:intern core::ns :extern "warn"
@@ -101,7 +101,7 @@
      (core::eprinc msg)
      (core::eprinc " ")
      (core::eprint obj)
-     (core:terpri core:error-output)
+     (core:terpri core:*error-output*)
      obj))
 
 ;;;
