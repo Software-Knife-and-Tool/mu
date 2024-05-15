@@ -27,10 +27,10 @@ use {
             symbol::{Core as _, Symbol},
         },
     },
+    futures::executor::block_on,
+    futures_locks::RwLock,
     std::{collections::HashMap, str},
 };
-
-use {futures::executor::block_on, futures_locks::RwLock};
 
 pub type VecCacheMap = HashMap<(Type, i32), RwLock<Vec<Tag>>>;
 

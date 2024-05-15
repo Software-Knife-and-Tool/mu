@@ -2,17 +2,17 @@
 //  SPDX-License-Identifier: MIT
 
 //!
-//! The lib machine is the implementation surface for the [`mu programming environment`].
+//! The core machine is the implementation surface for the [`mu programming environment`].
 //!
-//! As much as is practible, lib's functions and data types resemble Common Lisp in preference to
+//! As much as is practible, core's functions and data types resemble Common Lisp in preference to
 //! Scheme/Clojure in order to be immediately familiar to the traditional LISP programmer.
 //!
-//! lib is an immutable, lexically scoped LISP-1 kernel meant as a porting layer for an ascending
+//! core is an immutable, lexically scoped LISP-1 kernel meant as a porting layer for an ascending
 //! tower of LISP languages. While it is possible to do some useful application work directly in the
-//! lib language, lib defers niceties like macros, closures, and rest functions to a compiler
+//! core language, core defers niceties like macros, closures, and rest functions to a compiler
 //! layered on it. See [`mu programming environment`] for details.
 //!
-//! lib characteristics:
+//! core characteristics:
 //! - mostly-safe Rust
 //! - 64 bit tagged objects
 //! - garbage collected heap
@@ -22,7 +22,7 @@
 //! - s-expression reader/printer
 //! - symbol namespaces
 //!
-//! lib data types:
+//! core data types:
 //!    56 bit fixnums (immediate)
 //!    Lisp-1 symbols
 //!    character, string, and byte streams
@@ -35,7 +35,7 @@
 //!    single float 32 bit IEEE float (immediate)
 //!    structs
 //!
-//! lib documentation:
+//! core documentation:
 //!    see doc/refcards and doc/rustdoc
 //!
 //! [`mu programming environment`]: <https://github.com/Software-Knife-and-Tool/mu>
@@ -73,22 +73,22 @@ use {
     std::fs,
 };
 
-/// The lib API
+/// The core API
 ///
-/// The lib API exposes these types:
+/// The core API exposes these types:
 /// - Condition, enumeration of possible exceptional conditions
 /// - Exception, exception state
 /// - Lib, environment and API namespace
 /// - Result, specialized result for API functions that can fail
 /// - Tag, tagged data representation
 
-/// the tagged data representation
+/// tagged data representation
 pub type Tag = core::types::Tag;
-/// the API function Result
+/// API function Result
 pub type Result = core::exception::Result<Tag>;
-/// the condition enumeration
+/// condition enumeration
 pub type Condition = core::exception::Condition;
-/// the Exception representation
+/// Exception representation
 pub type Exception = core::exception::Exception;
 
 /// the Env struct abstracts the library struct
@@ -144,7 +144,7 @@ impl Env {
         Compile::compile(env, expr, &mut vec![])
     }
 
-    /// read a tagged s-expression from a lib stream
+    /// read a tagged s-expression from a core stream
     pub fn read(&self, stream: Tag, eof_error_p: bool, eof_value: Tag) -> exception::Result<Tag> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -152,7 +152,7 @@ impl Env {
         env.read_stream(stream, eof_error_p, eof_value, false)
     }
 
-    /// convert a rust String to a tagged s-expression
+    /// convert a String to a tagged s-expression
     pub fn read_str(&self, str: &str) -> exception::Result<Tag> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -165,7 +165,7 @@ impl Env {
         env.read_stream(stream, true, Tag::nil(), false)
     }
 
-    /// write an s-expression to a lib stream
+    /// write an s-expression to a core stream
     pub fn write(&self, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -173,7 +173,7 @@ impl Env {
         env.write_stream(expr, escape, stream)
     }
 
-    /// write a rust String to a lib stream
+    /// write a rust String to a core stream
     pub fn write_str(&self, str: &str, stream: Tag) -> exception::Result<()> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -203,17 +203,17 @@ impl Env {
         Stream::get_string(env, str_stream).unwrap()
     }
 
-    /// return the standard-input lib stream
+    /// return the standard-input core stream
     pub fn std_in(&self) -> Tag {
         LIB.stdin()
     }
 
-    /// return the standard-output lib stream
+    /// return the standard-output core stream
     pub fn std_out(&self) -> Tag {
         LIB.stdout()
     }
 
-    /// return the error-output lib stream
+    /// return the error-output core stream
     pub fn err_out(&self) -> Tag {
         LIB.errout()
     }
