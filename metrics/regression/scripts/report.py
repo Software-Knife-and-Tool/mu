@@ -40,7 +40,7 @@ def report(info_list):
             b = '*'
 
         t = ' '
-        if time_ratio >= 1.20 or time_ratio <= .80:
+        if time_ratio > 1 + .15 or time_ratio < 1 - .15:
             ntimes += 1
             t = "*"
 
