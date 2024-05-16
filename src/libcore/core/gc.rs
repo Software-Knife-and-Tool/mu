@@ -5,7 +5,7 @@
 //!    Env
 use crate::{
     core::{
-        env::{Env, HeapRef},
+        env::Env,
         exception,
         frame::Frame,
         types::{Tag, Type},
@@ -32,13 +32,13 @@ pub enum GcMode {
 }
 
 impl Gc {
-    pub fn mark(env: &Env, heap_ref: HeapRef, tag: Tag) {
+    pub fn mark(env: &Env, tag: Tag) {
         match tag.type_of() {
-            Type::Cons => Cons::mark(env, heap_ref, tag),
-            Type::Function => Function::mark(env, heap_ref, tag),
-            Type::Struct => Struct::mark(env, heap_ref, tag),
-            Type::Symbol => Symbol::mark(env, heap_ref, tag),
-            Type::Vector => Vector::mark(env, heap_ref, tag),
+            Type::Cons => Cons::mark(env, tag),
+            Type::Function => Function::mark(env, tag),
+            Type::Struct => Struct::mark(env, tag),
+            Type::Symbol => Symbol::mark(env, tag),
+            Type::Vector => Vector::mark(env, tag),
             _ => (),
         }
     }
@@ -49,7 +49,9 @@ impl Gc {
         root_ref.push(tag);
     }
 
-    pub fn mark_image(heap_ref: HeapRef, tag: Tag) -> Option<bool> {
+    pub fn mark_image(env: &Env, tag: Tag) -> Option<bool> {
+        let mut heap_ref = block_on(env.heap.write());
+
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => {
@@ -69,35 +71,34 @@ impl Gc {
         }
     }
 
-    fn lexicals(env: &Env, heap_ref: HeapRef) {
+    fn lexicals(env: &Env) {
         let lexical_ref = block_on(env.lexical.read());
 
         for frame_vec in (*lexical_ref).values() {
             let frame_vec_ref = block_on(frame_vec.read());
 
             for frame in frame_vec_ref.iter() {
-                Self::mark(env, heap_ref, frame.func);
+                Self::mark(env, frame.func);
 
                 for arg in &frame.argv {
-                    Self::mark(env, heap_ref, *arg)
+                    Self::mark(env, *arg)
                 }
 
-                Self::mark(env, heap_ref, frame.value);
+                Self::mark(env, frame.value);
             }
         }
     }
 
-    fn namespaces(env: &Env, heap_ref: HeapRef) {
-        let ns_index_ref = block_on(env.ns_map.read());
+    fn namespaces(env: &Env) {
+        let ns_map_ref = block_on(env.ns_map.read());
 
-        for (_, _, ns_cache) in &*ns_index_ref {
+        for (_, _, ns_cache) in &*ns_map_ref {
             let hash_ref = block_on(match ns_cache {
                 Namespace::Static(hash) => hash.read(),
                 Namespace::Dynamic(ref hash) => hash.read(),
             });
-
             for (_, symbol) in hash_ref.iter() {
-                Self::mark(env, heap_ref, *symbol)
+                Self::mark(env, *symbol)
             }
         }
     }
@@ -109,19 +110,26 @@ pub trait Core {
 
 impl Core for Gc {
     fn gc(env: &Env) -> exception::Result<bool> {
-        let mut heap_ref = block_on(env.heap.write());
         let root_ref = block_on(env.gc_root.write());
 
-        heap_ref.clear_marks();
-
-        Self::namespaces(env, &mut heap_ref);
-        Self::lexicals(env, &mut heap_ref);
-
-        for tag in &*root_ref {
-            Self::mark(env, &mut heap_ref, *tag)
+        {
+            let mut heap_ref = block_on(env.heap.write());
+            heap_ref.clear_marks();
         }
 
-        heap_ref.sweep();
+        Self::namespaces(env);
+
+        Self::lexicals(env);
+
+        for tag in &*root_ref {
+            Self::mark(env, *tag)
+        }
+
+        {
+            let mut heap_ref = block_on(env.heap.write());
+
+            heap_ref.sweep();
+        }
 
         Ok(true)
     }
