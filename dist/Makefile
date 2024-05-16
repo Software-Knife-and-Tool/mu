@@ -37,7 +37,7 @@ dist:
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
 	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
 
-	@strip $(MU_SYS)
+#	@strip $(MU_SYS)
 	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
 	@rm -rf $(BASE)
 

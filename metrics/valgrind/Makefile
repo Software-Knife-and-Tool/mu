@@ -1,7 +1,7 @@
 #
 # valgrind makefile
 #
-VALGRIND='((:lambda (g) (mu:apply g (mu:cons g (mu:cons 101010101 (mu:cons 11011 ()))))) (:lambda (g a b) (:if (mu:eq 0 b) a (mu:apply g (mu:cons g (mu:cons b (mu:cons (mu:fx-sub a (mu:fx-mul b (mu:fx-div a b))) ()))))))) '
+VALGRIND='((:lambda (g) (core:apply g (core:cons g (core:cons 101010101 (core:cons 11011 ()))))) (:lambda (g a b) (:if (core:eq 0 b) a (core:apply g (core:cons g (core:cons b (core:cons (core:difference a (core:product b (core:quotient a b))) ()))))))) '
 
 MU_SYS = ../../dist/mu-sys
 
