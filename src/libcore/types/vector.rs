@@ -7,7 +7,7 @@ use {
         core::{
             apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType},
-            env::{Env, HeapRef},
+            env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::Gc,
@@ -176,15 +176,15 @@ impl Vector {
         }
     }
 
-    pub fn mark(env: &Env, heap_ref: HeapRef, vector: Tag) {
+    pub fn mark(env: &Env, vector: Tag) {
         match vector {
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
-                let marked = Gc::mark_image(heap_ref, vector).unwrap();
+                let marked = Gc::mark_image(env, vector).unwrap();
 
                 if !marked && Self::type_of(env, vector) == Type::T {
                     for index in 0..Self::length(env, vector) {
-                        Gc::mark(env, heap_ref, Self::ref_(env, vector, index).unwrap())
+                        Gc::mark(env, Self::ref_(env, vector, index).unwrap())
                     }
                 }
             }

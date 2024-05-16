@@ -5,7 +5,7 @@
 use crate::{
     core::{
         apply::Core as _,
-        env::{Env, HeapRef},
+        env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         gc::Gc,
@@ -70,11 +70,11 @@ impl Struct {
         }
     }
 
-    pub fn mark(env: &Env, heap_ref: HeapRef, struct_: Tag) {
-        let mark = Gc::mark_image(heap_ref, struct_).unwrap();
+    pub fn mark(env: &Env, struct_: Tag) {
+        let mark = Gc::mark_image(env, struct_).unwrap();
 
         if !mark {
-            Gc::mark(env, heap_ref, Self::vector(env, struct_))
+            Gc::mark(env, Self::vector(env, struct_))
         }
     }
 }

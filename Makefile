@@ -41,10 +41,10 @@ help:
 tags:
 	@etags `find src/libcore -name '*.rs' -print`
 
-emacs:
+emacs: tags
 	@echo '((nil . ((compile-command . "make -C ~/projects/mu release"))))' > .dir-locals.el
 
-release: tags
+release:
 	@cargo build --release --bin mu-exec
 	@cp target/release/mu-exec dist
 	@cargo build --release --bin mu-sys

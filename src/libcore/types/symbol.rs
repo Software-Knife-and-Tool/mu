@@ -7,7 +7,7 @@ use {
         core::{
             apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType},
-            env::{Env, HeapRef},
+            env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::Gc,
@@ -111,7 +111,6 @@ impl Symbol {
                 _ => panic!(),
             },
             Type::Symbol => Self::to_image(env, symbol).name,
-            Type::Namespace => panic!("namespace"),
             _ => panic!(),
         }
     }
@@ -124,15 +123,15 @@ impl Symbol {
         }
     }
 
-    pub fn mark(env: &Env, heap_ref: HeapRef, symbol: Tag) {
+    pub fn mark(env: &Env, symbol: Tag) {
         match symbol {
             Tag::Direct(_) => (), // keyword
             Tag::Indirect(_) => {
-                let mark = Gc::mark_image(heap_ref, symbol).unwrap();
+                let mark = Gc::mark_image(env, symbol).unwrap();
 
                 if !mark {
-                    Gc::mark(env, heap_ref, Self::name(env, symbol));
-                    Gc::mark(env, heap_ref, Self::value(env, symbol));
+                    Gc::mark(env, Self::name(env, symbol));
+                    Gc::mark(env, Self::value(env, symbol));
                 }
             }
         }

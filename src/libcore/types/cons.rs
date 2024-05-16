@@ -6,7 +6,7 @@ use crate::{
     core::{
         apply::Core as _,
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
-        env::{Env, HeapRef},
+        env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         gc::Gc,
@@ -103,17 +103,17 @@ impl Cons {
         }
     }
 
-    pub fn mark(env: &Env, heap_ref: HeapRef, cons: Tag) {
+    pub fn mark(env: &Env, cons: Tag) {
         match cons {
             Tag::Direct(_) => {
-                Gc::mark(env, heap_ref, Self::car(env, cons));
-                Gc::mark(env, heap_ref, Self::cdr(env, cons))
+                Gc::mark(env, Self::car(env, cons));
+                Gc::mark(env, Self::cdr(env, cons))
             }
             Tag::Indirect(_) => {
-                let mark = Gc::mark_image(heap_ref, cons).unwrap();
+                let mark = Gc::mark_image(env, cons).unwrap();
                 if !mark {
-                    Gc::mark(env, heap_ref, Self::car(env, cons));
-                    Gc::mark(env, heap_ref, Self::cdr(env, cons))
+                    Gc::mark(env, Self::car(env, cons));
+                    Gc::mark(env, Self::cdr(env, cons))
                 }
             }
         }

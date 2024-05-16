@@ -4,7 +4,7 @@
 //! env function type
 use crate::{
     core::{
-        env::{Env, HeapRef},
+        env::Env,
         exception,
         gc::Gc,
         indirect::IndirectTag,
@@ -86,11 +86,11 @@ impl Function {
         Self::to_image(env, func).form
     }
 
-    pub fn mark(env: &Env, heap_ref: HeapRef, function: Tag) {
-        let mark = Gc::mark_image(heap_ref, function).unwrap();
+    pub fn mark(env: &Env, function: Tag) {
+        let mark = Gc::mark_image(env, function).unwrap();
 
         if !mark {
-            Gc::mark(env, heap_ref, Self::form(env, function))
+            Gc::mark(env, Self::form(env, function))
         }
     }
 }
