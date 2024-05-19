@@ -7,6 +7,7 @@ use {
         core::{
             direct::{DirectInfo, DirectTag, DirectType},
             env::Env,
+            gc::Gc,
             indirect::IndirectTag,
             types::{Tag, TagType, Type},
         },
@@ -47,7 +48,8 @@ pub trait IVector {
 
     fn image(_: &VectorImage) -> Vec<[u8; 8]>;
     fn evict(&self, _: &Env) -> Tag;
-    fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
+    fn ref_heap(_: &Env, _: Tag, _: usize) -> Option<Tag>;
+    fn gc_ref(_: &mut Gc, _: Tag, _: usize) -> Option<Tag>;
 }
 
 impl<'a> IVector for IndirectVector<'a> {
@@ -133,7 +135,65 @@ impl<'a> IVector for IndirectVector<'a> {
         )
     }
 
-    fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
+    fn gc_ref(gc: &mut Gc, vector: Tag, index: usize) -> Option<Tag> {
+        let image = Vector::gc_ref_image(&mut gc.lock, vector);
+
+        if index >= Fixnum::as_i64(image.length) as usize {
+            return None;
+        }
+
+        let vimage = match vector {
+            Tag::Indirect(image) => image,
+            _ => panic!(),
+        };
+
+        match Vector::to_type(image.vtype).unwrap() {
+            Type::Byte => {
+                let slice = gc
+                    .lock
+                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
+                    .unwrap();
+
+                Some(Tag::from(slice[0] as i64))
+            }
+            Type::Char => {
+                let slice = gc
+                    .lock
+                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
+                    .unwrap();
+
+                Some(Tag::from(slice[0] as char))
+            }
+            Type::T => Some(Tag::from_slice(
+                gc.lock
+                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
+                    .unwrap(),
+            )),
+            Type::Fixnum => {
+                let slice = gc
+                    .lock
+                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
+                    .unwrap();
+
+                Some(Tag::from(i64::from_le_bytes(
+                    slice[0..8].try_into().unwrap(),
+                )))
+            }
+            Type::Float => {
+                let slice = gc
+                    .lock
+                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 4, 4)
+                    .unwrap();
+
+                Some(Tag::from(f32::from_le_bytes(
+                    slice[0..4].try_into().unwrap(),
+                )))
+            }
+            _ => panic!(),
+        }
+    }
+
+    fn ref_heap(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         let image = Vector::to_image(env, vector);
 
         if index >= Fixnum::as_i64(image.length) as usize {
@@ -290,7 +350,7 @@ impl<'a> Iterator for VectorIter<'a> {
         if self.index >= Vector::length(self.env, self.vec) {
             None
         } else {
-            let el = Vector::ref_(self.env, self.vec, self.index);
+            let el = Vector::ref_heap(self.env, self.vec, self.index);
             self.index += 1;
 
             Some(el.unwrap())

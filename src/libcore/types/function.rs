@@ -4,7 +4,7 @@
 //! env function type
 use crate::{
     core::{
-        env::Env,
+        env::{Env, HeapGcRef},
         exception,
         gc::Gc,
         indirect::IndirectTag,
@@ -45,20 +45,31 @@ impl Function {
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> Self {
+        let heap_ref = block_on(env.heap.read());
+
         match tag.type_of() {
             Type::Function => match tag {
-                Tag::Indirect(fn_) => {
-                    let heap_ref = block_on(env.heap.read());
+                Tag::Indirect(fn_) => Function {
+                    arity: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
+                    form: Tag::from_slice(
+                        heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap(),
+                    ),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
 
-                    Function {
-                        arity: Tag::from_slice(
-                            heap_ref.image_slice(fn_.image_id() as usize).unwrap(),
-                        ),
-                        form: Tag::from_slice(
-                            heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap(),
-                        ),
-                    }
-                }
+    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
+        match tag.type_of() {
+            Type::Function => match tag {
+                Tag::Indirect(fn_) => Function {
+                    arity: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
+                    form: Tag::from_slice(
+                        heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap(),
+                    ),
+                },
                 _ => panic!(),
             },
             _ => panic!(),
@@ -78,6 +89,10 @@ impl Function {
         heap_ref.write_image(slices, offset);
     }
 
+    pub fn ref_form(gc: &mut Gc, func: Tag) -> Tag {
+        Self::gc_ref_image(&mut gc.lock, func).form
+    }
+
     pub fn arity(env: &Env, func: Tag) -> Tag {
         Self::to_image(env, func).arity
     }
@@ -86,11 +101,13 @@ impl Function {
         Self::to_image(env, func).form
     }
 
-    pub fn mark(env: &Env, function: Tag) {
-        let mark = Gc::mark_image(env, function).unwrap();
+    pub fn mark(gc: &mut Gc, env: &Env, function: Tag) {
+        let mark = gc.mark_image(function).unwrap();
 
         if !mark {
-            Gc::mark(env, Self::form(env, function))
+            let form = Self::ref_form(gc, function);
+
+            gc.mark(env, form)
         }
     }
 }
@@ -128,8 +145,8 @@ impl Core for Function {
                         ("lambda".to_string(), format!("{:x}", form.as_u64()))
                     }
                     Type::Vector => {
-                        let ns = Vector::ref_(env, form, 0).unwrap();
-                        let name = Vector::ref_(env, form, 1).unwrap();
+                        let ns = Vector::ref_heap(env, form, 0).unwrap();
+                        let name = Vector::ref_heap(env, form, 1).unwrap();
 
                         (
                             Namespace::ns_name(env, ns).unwrap(),

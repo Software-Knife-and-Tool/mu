@@ -7,7 +7,7 @@ use {
         core::{
             apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType},
-            env::Env,
+            env::{Env, HeapGcRef},
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::Gc,
@@ -68,23 +68,41 @@ impl Symbol {
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> SymbolImage {
+        let heap_ref = block_on(env.heap.read());
+
         match tag.type_of() {
             Type::Symbol => match tag {
-                Tag::Indirect(main) => {
-                    let heap_ref = block_on(env.heap.read());
+                Tag::Indirect(main) => SymbolImage {
+                    namespace: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize).unwrap(),
+                    ),
+                    name: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                    ),
+                    value: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
+                    ),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
 
-                    SymbolImage {
-                        namespace: Tag::from_slice(
-                            heap_ref.image_slice(main.image_id() as usize).unwrap(),
-                        ),
-                        name: Tag::from_slice(
-                            heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
-                        ),
-                        value: Tag::from_slice(
-                            heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
-                        ),
-                    }
-                }
+    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> SymbolImage {
+        match tag.type_of() {
+            Type::Symbol => match tag {
+                Tag::Indirect(main) => SymbolImage {
+                    namespace: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize).unwrap(),
+                    ),
+                    name: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                    ),
+                    value: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
+                    ),
+                },
                 _ => panic!(),
             },
             _ => panic!(),
@@ -123,15 +141,41 @@ impl Symbol {
         }
     }
 
-    pub fn mark(env: &Env, symbol: Tag) {
+    pub fn ref_name(gc: &mut Gc, symbol: Tag) -> Tag {
+        match symbol.type_of() {
+            Type::Null | Type::Keyword => match symbol {
+                Tag::Direct(dir) => DirectTag::to_direct(
+                    dir.data(),
+                    DirectInfo::Length(dir.info() as usize),
+                    DirectType::ByteVector,
+                ),
+                _ => panic!(),
+            },
+            Type::Symbol => Self::gc_ref_image(&mut gc.lock, symbol).name,
+            _ => panic!(),
+        }
+    }
+
+    pub fn ref_value(gc: &mut Gc, symbol: Tag) -> Tag {
+        match symbol.type_of() {
+            Type::Null | Type::Keyword => symbol,
+            Type::Symbol => Self::gc_ref_image(&mut gc.lock, symbol).value,
+            _ => panic!(),
+        }
+    }
+
+    pub fn mark(gc: &mut Gc, env: &Env, symbol: Tag) {
         match symbol {
-            Tag::Direct(_) => (), // keyword
+            Tag::Direct(_) => (),
             Tag::Indirect(_) => {
-                let mark = Gc::mark_image(env, symbol).unwrap();
+                let mark = gc.mark_image(symbol).unwrap();
 
                 if !mark {
-                    Gc::mark(env, Self::name(env, symbol));
-                    Gc::mark(env, Self::value(env, symbol));
+                    let name = Self::ref_name(gc, symbol);
+                    let value = Self::ref_value(gc, symbol);
+
+                    gc.mark(env, name);
+                    gc.mark(env, value);
                 }
             }
         }

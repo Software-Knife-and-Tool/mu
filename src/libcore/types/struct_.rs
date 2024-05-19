@@ -5,7 +5,7 @@
 use crate::{
     core::{
         apply::Core as _,
-        env::Env,
+        env::{Env, HeapGcRef},
         exception::{self, Condition, Exception},
         frame::Frame,
         gc::Gc,
@@ -32,20 +32,35 @@ pub struct Struct {
 
 impl Struct {
     pub fn to_image(env: &Env, tag: Tag) -> Self {
+        let heap_ref = block_on(env.heap.read());
+
         match tag.type_of() {
             Type::Struct => match tag {
-                Tag::Indirect(image) => {
-                    let heap_ref = block_on(env.heap.read());
+                Tag::Indirect(image) => Struct {
+                    stype: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
+                    ),
+                    vector: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                    ),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
 
-                    Struct {
-                        stype: Tag::from_slice(
-                            heap_ref.image_slice(image.image_id() as usize).unwrap(),
-                        ),
-                        vector: Tag::from_slice(
-                            heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
-                        ),
-                    }
-                }
+    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
+        match tag.type_of() {
+            Type::Struct => match tag {
+                Tag::Indirect(image) => Struct {
+                    stype: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
+                    ),
+                    vector: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                    ),
+                },
                 _ => panic!(),
             },
             _ => panic!(),
@@ -70,11 +85,13 @@ impl Struct {
         }
     }
 
-    pub fn mark(env: &Env, struct_: Tag) {
-        let mark = Gc::mark_image(env, struct_).unwrap();
+    pub fn mark(gc: &mut Gc, env: &Env, struct_: Tag) {
+        let mark = gc.mark_image(struct_).unwrap();
 
         if !mark {
-            Gc::mark(env, Self::vector(env, struct_))
+            let vector = Self::gc_ref_image(&mut gc.lock, struct_).vector;
+
+            gc.mark(env, vector)
         }
     }
 }

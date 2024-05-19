@@ -166,7 +166,9 @@ impl Namespace {
     }
 
     pub fn makunbound(env: &Env, symbol: Tag) -> Tag {
-        let image = Symbol::to_image(env, symbol);
+        let mut heap_ref = block_on(env.heap.write());
+
+        let image = Symbol::gc_ref_image(&mut heap_ref, symbol);
         let slices: &[[u8; 8]] = &[
             image.namespace.as_slice(),
             image.name.as_slice(),
@@ -177,8 +179,6 @@ impl Namespace {
             Tag::Indirect(heap) => heap.image_id(),
             _ => panic!(),
         } as usize;
-
-        let mut heap_ref = block_on(env.heap.write());
 
         heap_ref.write_image(slices, offset);
 

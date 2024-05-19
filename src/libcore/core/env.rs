@@ -28,7 +28,7 @@ use {
 // locking protocols
 use futures_locks::RwLock;
 
-pub type HeapRef<'a> = &'a mut futures_locks::RwLockWriteGuard<BumpAllocator>;
+pub type HeapGcRef = futures_locks::RwLockWriteGuard<BumpAllocator>;
 
 // env environment
 pub struct Env {
