@@ -6,7 +6,7 @@ use crate::{
     core::{
         apply::Core as _,
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
-        env::Env,
+        env::{Env, HeapGcRef},
         exception::{self, Condition, Exception},
         frame::Frame,
         gc::Gc,
@@ -37,20 +37,31 @@ impl Cons {
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> Self {
+        let heap_ref = block_on(env.heap.read());
+
         match tag.type_of() {
             Type::Cons => match tag {
-                Tag::Indirect(main) => {
-                    let heap_ref = block_on(env.heap.read());
+                Tag::Indirect(main) => Cons {
+                    car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
+                    cdr: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                    ),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
 
-                    Cons {
-                        car: Tag::from_slice(
-                            heap_ref.image_slice(main.image_id() as usize).unwrap(),
-                        ),
-                        cdr: Tag::from_slice(
-                            heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
-                        ),
-                    }
-                }
+    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
+        match tag.type_of() {
+            Type::Cons => match tag {
+                Tag::Indirect(main) => Cons {
+                    car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
+                    cdr: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                    ),
+                },
                 _ => panic!(),
             },
             _ => panic!(),
@@ -73,6 +84,28 @@ impl Cons {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Indirect(_) => Self::to_image(env, cons).cdr,
+                Tag::Direct(_) => DirectTag::cdr(cons),
+            },
+            _ => panic!(),
+        }
+    }
+
+    pub fn ref_car(gc: &mut Gc, cons: Tag) -> Tag {
+        match cons.type_of() {
+            Type::Null => cons,
+            Type::Cons => match cons {
+                Tag::Direct(_) => DirectTag::car(cons),
+                Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).car,
+            },
+            _ => panic!(),
+        }
+    }
+
+    pub fn ref_cdr(gc: &mut Gc, cons: Tag) -> Tag {
+        match cons.type_of() {
+            Type::Null => cons,
+            Type::Cons => match cons {
+                Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).cdr,
                 Tag::Direct(_) => DirectTag::cdr(cons),
             },
             _ => panic!(),
@@ -103,17 +136,23 @@ impl Cons {
         }
     }
 
-    pub fn mark(env: &Env, cons: Tag) {
+    pub fn mark(gc: &mut Gc, env: &Env, cons: Tag) {
         match cons {
             Tag::Direct(_) => {
-                Gc::mark(env, Self::car(env, cons));
-                Gc::mark(env, Self::cdr(env, cons))
+                let car = Self::ref_car(gc, cons);
+                let cdr = Self::ref_cdr(gc, cons);
+
+                gc.mark(env, car);
+                gc.mark(env, cdr)
             }
             Tag::Indirect(_) => {
-                let mark = Gc::mark_image(env, cons).unwrap();
+                let mark = gc.mark_image(cons).unwrap();
                 if !mark {
-                    Gc::mark(env, Self::car(env, cons));
-                    Gc::mark(env, Self::cdr(env, cons))
+                    let car = Self::ref_car(gc, cons);
+                    let cdr = Self::ref_cdr(gc, cons);
+
+                    gc.mark(env, car);
+                    gc.mark(env, cdr)
                 }
             }
         }

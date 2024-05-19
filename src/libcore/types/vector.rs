@@ -7,7 +7,7 @@ use {
         core::{
             apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType},
-            env::Env,
+            env::{Env, HeapGcRef},
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::Gc,
@@ -61,20 +61,35 @@ impl Vector {
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> VectorImage {
+        let heap_ref = block_on(env.heap.read());
+
         match tag.type_of() {
             Type::Vector => match tag {
-                Tag::Indirect(image) => {
-                    let heap_ref = block_on(env.heap.read());
+                Tag::Indirect(image) => VectorImage {
+                    vtype: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
+                    ),
+                    length: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                    ),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
 
-                    VectorImage {
-                        vtype: Tag::from_slice(
-                            heap_ref.image_slice(image.image_id() as usize).unwrap(),
-                        ),
-                        length: Tag::from_slice(
-                            heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
-                        ),
-                    }
-                }
+    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> VectorImage {
+        match tag.type_of() {
+            Type::Vector => match tag {
+                Tag::Indirect(image) => VectorImage {
+                    vtype: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
+                    ),
+                    length: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                    ),
+                },
                 _ => panic!(),
             },
             _ => panic!(),
@@ -104,6 +119,34 @@ impl Vector {
             Tag::Direct(direct) => direct.info() as usize,
             Tag::Indirect(_) => {
                 let image = Self::to_image(env, vector);
+                Fixnum::as_i64(image.length) as usize
+            }
+        }
+    }
+
+    pub fn ref_type_of(gc: &mut Gc, vector: Tag) -> Type {
+        match vector {
+            Tag::Direct(_) => Type::Char,
+            Tag::Indirect(_) => {
+                let image = Self::gc_ref_image(&mut gc.lock, vector);
+
+                match VTYPEMAP
+                    .iter()
+                    .copied()
+                    .find(|desc| image.vtype.eq_(&desc.0))
+                {
+                    Some(desc) => desc.1,
+                    None => panic!(),
+                }
+            }
+        }
+    }
+
+    pub fn ref_length(gc: &mut Gc, vector: Tag) -> usize {
+        match vector {
+            Tag::Direct(direct) => direct.info() as usize,
+            Tag::Indirect(_) => {
+                let image = Self::gc_ref_image(&mut gc.lock, vector);
                 Fixnum::as_i64(image.length) as usize
             }
         }
@@ -151,7 +194,8 @@ impl Vector {
                 let tag = match ivec {
                     IVec::Byte(u8_vec) => tag_vec.iter().find(|src| {
                         u8_vec.iter().enumerate().all(|(index, byte)| {
-                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
+                            *byte as i64
+                                == Fixnum::as_i64(Vector::ref_heap(env, **src, index).unwrap())
                         })
                     }),
                     IVec::Char(string) => tag_vec
@@ -159,12 +203,13 @@ impl Vector {
                         .find(|src| *string == Vector::as_string(env, **src)),
                     IVec::Fixnum(i64_vec) => tag_vec.iter().find(|src| {
                         i64_vec.iter().enumerate().all(|(index, fixnum)| {
-                            *fixnum == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
+                            *fixnum == Fixnum::as_i64(Vector::ref_heap(env, **src, index).unwrap())
                         })
                     }),
                     IVec::Float(float_vec) => tag_vec.iter().find(|src| {
                         float_vec.iter().enumerate().all(|(index, float)| {
-                            *float == Float::as_f32(env, Vector::ref_(env, **src, index).unwrap())
+                            *float
+                                == Float::as_f32(env, Vector::ref_heap(env, **src, index).unwrap())
                         })
                     }),
                     _ => panic!(),
@@ -176,15 +221,17 @@ impl Vector {
         }
     }
 
-    pub fn mark(env: &Env, vector: Tag) {
+    pub fn mark(gc: &mut Gc, env: &Env, vector: Tag) {
         match vector {
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
-                let marked = Gc::mark_image(env, vector).unwrap();
+                let marked = gc.mark_image(vector).unwrap();
 
-                if !marked && Self::type_of(env, vector) == Type::T {
-                    for index in 0..Self::length(env, vector) {
-                        Gc::mark(env, Self::ref_(env, vector, index).unwrap())
+                if !marked && Self::ref_type_of(gc, vector) == Type::T {
+                    for index in 0..Self::ref_length(gc, vector) {
+                        let value = Self::gc_ref(gc, env, vector, index).unwrap();
+
+                        gc.mark(env, value)
                     }
                 }
             }
@@ -199,7 +246,8 @@ pub trait Core<'a> {
     fn from_string(_: &str) -> Vector;
     fn heap_size(_: &Env, _: Tag) -> usize;
     fn read(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
-    fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
+    fn ref_heap(_: &Env, _: Tag, _: usize) -> Option<Tag>;
+    fn gc_ref(_: &mut Gc, _: &Env, _: Tag, _: usize) -> Option<Tag>;
     fn view(_: &Env, _: Tag) -> Tag;
     fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
@@ -535,13 +583,27 @@ impl<'a> Core<'a> for Vector {
         }
     }
 
-    fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
+    fn gc_ref(gc: &mut Gc, env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         match vector.type_of() {
             Type::Vector => match vector {
                 Tag::Direct(_direct) => {
                     Some(Tag::from(vector.data(env).to_le_bytes()[index] as char))
                 }
-                Tag::Indirect(_) => IndirectVector::ref_(env, vector, index),
+                Tag::Indirect(_) => IndirectVector::gc_ref(gc, vector, index),
+            },
+            _ => {
+                panic!()
+            }
+        }
+    }
+
+    fn ref_heap(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
+        match vector.type_of() {
+            Type::Vector => match vector {
+                Tag::Direct(_direct) => {
+                    Some(Tag::from(vector.data(env).to_le_bytes()[index] as char))
+                }
+                Tag::Indirect(_) => IndirectVector::ref_heap(env, vector, index),
             },
             _ => {
                 panic!()
@@ -699,7 +761,7 @@ impl CoreFunction for Vector {
             ));
         }
 
-        fp.value = match Self::ref_(env, vector, nth as usize) {
+        fp.value = match Self::ref_heap(env, vector, nth as usize) {
             Some(nth) => nth,
             None => panic!(),
         };

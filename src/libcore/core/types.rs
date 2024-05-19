@@ -251,7 +251,7 @@ impl CoreFunction for Tag {
 
                 for index in (0..8).rev() {
                     u64_ <<= 8;
-                    u64_ |= match Vector::ref_(env, arg, index as usize) {
+                    u64_ |= match Vector::ref_heap(env, arg, index as usize) {
                         Some(byte) => Fixnum::as_i64(byte) as u64,
                         None => panic!(),
                     }

@@ -51,13 +51,7 @@ impl FuturePool {
     }
 }
 
-trait Core {
-    fn make_defer_future(_: &Env, _: Tag, _: Tag) -> exception::Result<Tag>;
-    fn make_detach_future(_: &Env, _: Tag, _: Tag) -> exception::Result<Tag>;
-    fn is_future_complete(_: &Env, _: Tag) -> bool;
-}
-
-impl Core for Future {
+impl Future {
     fn make_defer_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
         let mut futures_ref = block_on(LIB.futures.write());
         let mut future_id_ref = block_on(LIB.future_id.write());
@@ -136,7 +130,7 @@ impl Core for Future {
     fn is_future_complete(env: &Env, future: Tag) -> bool {
         let futures_ref = block_on(LIB.futures.read());
 
-        let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
+        let index = Vector::ref_heap(env, Struct::vector(env, future), 0).unwrap();
 
         let join_id = match &futures_ref.get(&(Fixnum::as_i64(index) as u64)).unwrap() {
             Future::Eager(join_id) => join_id,
@@ -162,7 +156,7 @@ impl CoreFunction for Future {
 
         fp.value = if Struct::stype(env, future).eq_(&Symbol::keyword("future")) {
             let mut futures_ref = block_on(LIB.futures.write());
-            let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
+            let index = Vector::ref_heap(env, Struct::vector(env, future), 0).unwrap();
 
             match futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap() {
                 Future::Eager(join_id) => join_id.join().unwrap(),

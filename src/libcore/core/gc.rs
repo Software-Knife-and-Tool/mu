@@ -5,7 +5,7 @@
 //!    Env
 use crate::{
     core::{
-        env::Env,
+        env::{Env, HeapGcRef},
         exception,
         frame::Frame,
         types::{Tag, Type},
@@ -22,7 +22,9 @@ use crate::{
 
 use futures::executor::block_on;
 
-pub struct Gc {}
+pub struct Gc {
+    pub lock: HeapGcRef,
+}
 
 #[derive(Debug, Copy, Clone)]
 pub enum GcMode {
@@ -32,36 +34,34 @@ pub enum GcMode {
 }
 
 impl Gc {
-    pub fn mark(env: &Env, tag: Tag) {
-        match tag.type_of() {
-            Type::Cons => Cons::mark(env, tag),
-            Type::Function => Function::mark(env, tag),
-            Type::Struct => Struct::mark(env, tag),
-            Type::Symbol => Symbol::mark(env, tag),
-            Type::Vector => Vector::mark(env, tag),
-            _ => (),
-        }
-    }
-
     fn add_root(env: &Env, tag: Tag) {
         let mut root_ref = block_on(env.gc_root.write());
 
         root_ref.push(tag);
     }
 
-    pub fn mark_image(env: &Env, tag: Tag) -> Option<bool> {
-        let mut heap_ref = block_on(env.heap.write());
+    pub fn mark(&mut self, env: &Env, tag: Tag) {
+        match tag.type_of() {
+            Type::Cons => Cons::mark(self, env, tag),
+            Type::Function => Function::mark(self, env, tag),
+            Type::Struct => Struct::mark(self, env, tag),
+            Type::Symbol => Symbol::mark(self, env, tag),
+            Type::Vector => Vector::mark(self, env, tag),
+            _ => (),
+        }
+    }
 
+    pub fn mark_image(&mut self, tag: Tag) -> Option<bool> {
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => {
-                let marked = heap_ref.get_image_mark(indirect.image_id() as usize);
+                let marked = self.lock.get_image_mark(indirect.image_id() as usize);
 
                 match marked {
                     None => (),
                     Some(mark) => {
                         if !mark {
-                            heap_ref.set_image_mark(indirect.image_id() as usize)
+                            self.lock.set_image_mark(indirect.image_id() as usize)
                         }
                     }
                 }
@@ -71,25 +71,25 @@ impl Gc {
         }
     }
 
-    fn lexicals(env: &Env) {
+    fn lexicals(&mut self, env: &Env) {
         let lexical_ref = block_on(env.lexical.read());
 
         for frame_vec in (*lexical_ref).values() {
             let frame_vec_ref = block_on(frame_vec.read());
 
             for frame in frame_vec_ref.iter() {
-                Self::mark(env, frame.func);
+                self.mark(env, frame.func);
 
                 for arg in &frame.argv {
-                    Self::mark(env, *arg)
+                    self.mark(env, *arg)
                 }
 
-                Self::mark(env, frame.value);
+                self.mark(env, frame.value);
             }
         }
     }
 
-    fn namespaces(env: &Env) {
+    fn namespaces(&mut self, env: &Env) {
         let ns_map_ref = block_on(env.ns_map.read());
 
         for (_, _, ns_cache) in &*ns_map_ref {
@@ -97,8 +97,9 @@ impl Gc {
                 Namespace::Static(hash) => hash.read(),
                 Namespace::Dynamic(ref hash) => hash.read(),
             });
+
             for (_, symbol) in hash_ref.iter() {
-                Self::mark(env, *symbol)
+                self.mark(env, *symbol)
             }
         }
     }
@@ -111,25 +112,20 @@ pub trait Core {
 impl Core for Gc {
     fn gc(env: &Env) -> exception::Result<bool> {
         let root_ref = block_on(env.gc_root.write());
+        let mut gc = Gc {
+            lock: block_on(env.heap.write()),
+        };
 
-        {
-            let mut heap_ref = block_on(env.heap.write());
-            heap_ref.clear_marks();
-        }
+        gc.lock.clear_marks();
 
-        Self::namespaces(env);
-
-        Self::lexicals(env);
+        gc.namespaces(env);
+        gc.lexicals(env);
 
         for tag in &*root_ref {
-            Self::mark(env, *tag)
+            gc.mark(env, *tag)
         }
 
-        {
-            let mut heap_ref = block_on(env.heap.write());
-
-            heap_ref.sweep();
-        }
+        gc.lock.sweep();
 
         Ok(true)
     }
