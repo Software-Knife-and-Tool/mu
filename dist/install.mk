@@ -3,7 +3,7 @@
 #
 .PHONY: install release uninstall help
 
-VERSION != grep VERSION: ../src/libcore/core/lib.rs | sed 's/.* "//' | sed 's/".*//'
+VERSION != grep VERSION: ../src/mu-core/core/lib.rs | sed 's/.* "//' | sed 's/".*//'
 ROOT = /opt
 BASE = mu
 

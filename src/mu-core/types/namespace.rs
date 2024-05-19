@@ -120,7 +120,7 @@ impl Namespace {
 
     pub fn is_ns(tag: Tag) -> Option<Tag> {
         match tag.type_of() {
-            Type::Null | Type::Namespace => Some(tag),
+            Type::Namespace => Some(tag),
             _ => None,
         }
     }
