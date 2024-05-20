@@ -14,9 +14,11 @@ use crate::{
         gc::{CoreFunction as _, Gc},
         heap::{CoreFunction as _, Heap},
         types::{CoreFunction as _, Tag},
-        utime::CoreFunction as _,
     },
     streams::{read::CoreFunction as _, write::CoreFunction as _},
+    system::{
+        utime::{CoreFunction as _}
+    },
     types::{
         cons::{Cons, CoreFunction as _},
         core_stream::Stream,
@@ -129,7 +131,7 @@ lazy_static! {
         ( "unread-char", 2, Stream::core_unread_char ),
         ( "write-byte", 2, Stream::core_write_byte ),
         ( "write-char", 2, Stream::core_write_char ),
-        // utime
+        // system
         ( "utime",   0, Env::core_utime ),
     ];
 }

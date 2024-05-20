@@ -52,6 +52,7 @@ mod allocators;
 mod core;
 mod features;
 mod streams;
+mod system;
 mod types;
 
 use futures::executor::block_on;
@@ -269,11 +270,17 @@ impl Env {
     }
 
     // image management
-    pub fn load_image(&self, _file_path: &str) -> exception::Result<()> {
-        Ok(())
+    pub fn load_image(&self, file_path: &str) -> exception::Result<()> {
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
+        <core::env::Env as system::image::Image>::load_image(env, file_path.to_string())
     }
 
-    pub fn save_and_exit(&self, _file_path: &str) -> exception::Result<()> {
-        Ok(())
+    pub fn save_and_exit(&self, file_path: &str) -> exception::Result<()> {
+        let env_ref = block_on(LIB.env_map.read());
+        let env = env_ref.get(&self.0.as_u64()).unwrap();
+
+        <core::env::Env as system::image::Image>::save_and_exit(env, file_path.to_string())
     }
 }
