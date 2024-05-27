@@ -6,10 +6,10 @@ use crate::{
     core::{
         apply::Core as _,
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
-        env::{Env, HeapGcRef},
+        env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc::Gc,
+        gc::{Gc, HeapGcRef},
         indirect::IndirectTag,
         reader::EOL,
         types::{Tag, TagType, Type},

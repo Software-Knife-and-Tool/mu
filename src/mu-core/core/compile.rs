@@ -245,20 +245,19 @@ impl CoreFunction for Compile {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{
-        compile::Compile,
-        env::{Core, Env},
-        types::{Tag, Type},
+    use crate::{
+        core::{
+            compile::Compile,
+            env::{Core, Env},
+            types::{Tag, Type},
+        },
+        system::config::Config,
     };
 
     #[test]
     fn compile_test() {
-        let config = match Env::config(None) {
-            Some(config) => config,
-            None => return assert!(false),
-        };
-
-        let env: &Env = &Core::new(&config);
+        let config = Config::new(None);
+        let env: &Env = &Core::new(config.unwrap());
 
         match Compile::compile(env, Tag::nil(), &mut vec![]) {
             Ok(form) => match form.type_of() {

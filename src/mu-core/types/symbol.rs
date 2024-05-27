@@ -7,10 +7,10 @@ use {
         core::{
             apply::Core as _,
             direct::{DirectInfo, DirectTag, DirectType},
-            env::{Env, HeapGcRef},
+            env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc::Gc,
+            gc::{Gc, HeapGcRef},
             heap::{Core as _, Heap},
             indirect::IndirectTag,
             readtable::{map_char_syntax, SyntaxType},

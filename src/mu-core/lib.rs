@@ -60,18 +60,21 @@ use {
     crate::{
         core::{
             compile::Compile,
-            config::Config,
-            env::{self, Core},
+            env::Core as _,
             exception::{self, Core as _},
             lib::LIB,
         },
         streams::{read::Core as _, write::Core as _},
+        system::{
+            config::Config,
+            image::{Core as _, Image},
+        },
         types::{
             core_stream::{Core as _, Stream},
             stream::StreamBuilder,
         },
     },
-    std::fs,
+    std::{fs, io::Write},
 };
 
 /// The core API
@@ -106,11 +109,11 @@ impl Env {
 
     /// config
     pub fn config(config: Option<String>) -> Option<Config> {
-        core::env::Env::config(config)
+        Config::new(config)
     }
 
     /// constructor
-    pub fn new(config: &Config) -> Self {
+    pub fn new(config: Config) -> Self {
         Env(<core::env::Env as core::lib::Core>::add_env(
             core::env::Env::new(config),
         ))
@@ -270,17 +273,26 @@ impl Env {
     }
 
     // image management
-    pub fn load_image(&self, file_path: &str) -> exception::Result<()> {
+    pub fn save_image(&self, path: &str) -> exception::Result<()> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
-        <core::env::Env as system::image::Image>::load_image(env, file_path.to_string())
-    }
-
-    pub fn save_and_exit(&self, file_path: &str) -> exception::Result<()> {
-        let env_ref = block_on(LIB.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
-        <core::env::Env as system::image::Image>::save_and_exit(env, file_path.to_string())
+        match fs::File::create(path) {
+            Ok(mut file) => match file.write(&Image::image(env)) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(Exception::new(
+                    env,
+                    Condition::Write,
+                    "save-image",
+                    Tag::nil(),
+                )),
+            },
+            Err(_) => Err(Exception::new(
+                env,
+                Condition::Open,
+                "save-image",
+                Tag::nil(),
+            )),
+        }
     }
 }

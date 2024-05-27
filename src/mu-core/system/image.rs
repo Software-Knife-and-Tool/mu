@@ -1,31 +1,25 @@
-//  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
 //! image management
-use crate::core::{
-    env::Env,
-    exception::{self},
+use futures::executor::block_on;
+use {
+    crate::core::env::Env,
+    //    object::elf,
 };
-use std::fs;
 
-pub trait Image {
-    fn save_and_exit(_: &Env, _: String) -> exception::Result<()>;
-    fn load_image(_: &Env, _: String) -> exception::Result<()>;
+pub struct Image {}
+
+pub trait Core {
+    fn image(_: &Env) -> Vec<u8>;
 }
 
-impl Image for Env {
-    fn save_and_exit(_env: &Env, path: String) -> exception::Result<()> {
-        match fs::File::create(path) {
-            Ok(_) => std::process::exit(0),
-            Err(_) => Ok(())
-        }
-    }
-    
-    fn load_image(_: &Env, path: String) -> exception::Result<()> {
-        match fs::File::open(path) {
-            Ok(_) => std::process::exit(0),
-            Err(_) => Ok(())
-        }
+impl Core for Image {
+    fn image(env: &Env) -> Vec<u8> {
+        let heap_ref = block_on(env.heap.write());
+        let image = heap_ref.heap_slice();
+
+        image.to_vec()
     }
 }
 

@@ -5,10 +5,10 @@
 use crate::{
     core::{
         apply::Core as _,
-        env::{Env, HeapGcRef},
+        env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc::Gc,
+        gc::{Gc, HeapGcRef},
         indirect::IndirectTag,
         types::{Tag, TagType, Type},
     },

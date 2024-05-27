@@ -5,7 +5,6 @@
 pub mod allocator;
 pub mod apply;
 pub mod compile;
-pub mod config;
 pub mod direct;
 pub mod dynamic;
 pub mod env;

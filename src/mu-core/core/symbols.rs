@@ -16,9 +16,7 @@ use crate::{
         types::{CoreFunction as _, Tag},
     },
     streams::{read::CoreFunction as _, write::CoreFunction as _},
-    system::{
-        utime::{CoreFunction as _}
-    },
+    system::utime::CoreFunction as _,
     types::{
         cons::{Cons, CoreFunction as _},
         core_stream::Stream,

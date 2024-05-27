@@ -4,8 +4,9 @@
 //! env gc
 //!    Env
 use crate::{
+    allocators::bump_allocator::BumpAllocator,
     core::{
-        env::{Env, HeapGcRef},
+        env::Env,
         exception,
         frame::Frame,
         types::{Tag, Type},
@@ -21,6 +22,8 @@ use crate::{
 };
 
 use futures::executor::block_on;
+
+pub type HeapGcRef = futures_locks::RwLockWriteGuard<BumpAllocator>;
 
 pub struct Gc {
     pub lock: HeapGcRef,

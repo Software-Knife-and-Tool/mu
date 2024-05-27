@@ -4,9 +4,9 @@
 //! env function type
 use crate::{
     core::{
-        env::{Env, HeapGcRef},
+        env::Env,
         exception,
-        gc::Gc,
+        gc::{Gc, HeapGcRef},
         indirect::IndirectTag,
         types::{Tag, TagType, Type},
     },

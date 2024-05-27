@@ -181,7 +181,7 @@ pub fn main() {
     Env::signal_exception();
 
     let env = match Env::config(_config) {
-        Some(config) => Env::new(&config),
+        Some(config) => Env::new(config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)
