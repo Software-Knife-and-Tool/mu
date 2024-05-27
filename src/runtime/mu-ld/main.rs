@@ -11,7 +11,6 @@ static GLOBAL: Jemalloc = Jemalloc;
 
 extern crate mu_core;
 
-mod bump_allocator;
 mod image;
 mod reader;
 mod writer;

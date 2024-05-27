@@ -4,7 +4,7 @@
 //! image reader
 #[allow(unused_imports)]
 use {
-    crate::bump_allocator::{BumpAllocatorImage, BumpAllocatorImageBuilder},
+    crate::image::ImageBuilder,
     object::{
         build::elf,
         elf::{FileHeader64, SectionHeader64, Sym64, SHT_SYMTAB},

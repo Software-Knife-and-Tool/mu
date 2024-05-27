@@ -4,7 +4,7 @@
 //! image writer
 #[allow(unused_imports)]
 use {
-    crate::bump_allocator::{BumpAllocatorImage, BumpAllocatorImageBuilder},
+    crate::image::{Image, ImageBuilder},
     object::{
         build::elf,
         elf::{FileHeader64, SectionHeader64},
@@ -21,14 +21,14 @@ use {
 
 pub struct Writer {
     pub path: String,
-    pub image: BumpAllocatorImage,
+    pub image: Image,
 }
 
 impl Writer {
-    pub fn with_writer(path: &str, allocator: BumpAllocatorImage) -> Result<Self> {
+    pub fn with_writer(path: &str, image: Image) -> Result<Self> {
         Ok(Writer {
             path: path.to_string(),
-            image: allocator,
+            image,
         })
     }
 
@@ -41,15 +41,15 @@ impl Writer {
 
         elf.set_section_data(image_id, self.image.image.clone(), 8);
 
-        let allocator_data: Vec<u8> = self.image.to_json().unwrap().into_bytes();
+        let image_data: Vec<u8> = self.image.to_json().unwrap().into_bytes();
 
-        let allocator_id = elf.add_section(
+        let image_id = elf.add_section(
             elf.segment_name(StandardSegment::Data).to_vec(),
             ".allocator".as_bytes().to_vec(),
             SectionKind::Data,
         );
 
-        elf.set_section_data(allocator_id, allocator_data, 8);
+        elf.set_section_data(image_id, image_data, 8);
     }
 
     pub fn write(&self) -> Result<()> {
