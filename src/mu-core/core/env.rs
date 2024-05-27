@@ -7,12 +7,12 @@ use {
     crate::{
         allocators::bump_allocator::BumpAllocator,
         core::{
-            config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
             lib::Lib,
             types::{Tag, Type},
         },
+        system::config::Config,
         types::{
             cons::{Cons, Core as _},
             namespace::Namespace,
@@ -27,8 +27,6 @@ use {
 
 // locking protocols
 use futures_locks::RwLock;
-
-pub type HeapGcRef = futures_locks::RwLockWriteGuard<BumpAllocator>;
 
 // env environment
 pub struct Env {
@@ -57,22 +55,24 @@ pub struct Env {
 }
 
 pub trait Core {
-    fn new(config: &Config) -> Self;
+    fn new(config: Config) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
 }
 
 impl Core for Env {
-    fn new(config: &Config) -> Self {
+    fn new(config: Config) -> Self {
+        let heap = BumpAllocator::new(config.npages, Tag::NTYPES);
+
         let mut env = Env {
-            config: *config,
+            config,
+            core_ns: Tag::nil(),
             dynamic: RwLock::new(Vec::new()),
             gc_root: RwLock::new(Vec::<Tag>::new()),
-            heap: RwLock::new(BumpAllocator::new(config.npages, Tag::NTYPES)),
+            heap: RwLock::new(heap),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
-            core_ns: Tag::nil(),
             ns_map: RwLock::new(Vec::new()),
             null_ns: Tag::nil(),
             start_time: ProcessTime::now(),

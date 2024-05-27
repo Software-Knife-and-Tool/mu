@@ -2,19 +2,66 @@
 //  SPDX-License-Identifier: MIT
 
 //! env config
-use crate::{core::gc::GcMode, env::Env};
+use crate::{
+    allocators::bump_allocator::BumpAllocator,
+    core::{gc::GcMode, types::Tag},
+};
 
-#[derive(Copy, Clone)]
+// config builder
+pub struct ConfigBuilder {
+    pub npages: Option<usize>,
+    pub gcmode: Option<GcMode>,
+    pub image: Option<Vec<u8>>,
+    pub heap: Option<BumpAllocator>,
+}
+
+impl ConfigBuilder {
+    pub fn new() -> Self {
+        Self {
+            npages: Some(1024),
+            gcmode: Some(GcMode::Auto),
+            image: None,
+            heap: None,
+        }
+    }
+
+    pub fn npages(&mut self, n: usize) -> &mut Self {
+        self.npages = Some(n);
+        self
+    }
+
+    pub fn gcmode(&mut self, mode: GcMode) -> &mut Self {
+        self.gcmode = Some(mode);
+        self
+    }
+
+    pub fn image(&mut self, image: Vec<u8>) -> &mut Self {
+        self.image = Some(image);
+        self
+    }
+
+    pub fn build(&self) -> Option<Config> {
+        Some(Config {
+            npages: 1024,
+            gcmode: GcMode::Auto,
+            heap: Some(BumpAllocator::new(self.npages.unwrap(), Tag::NTYPES)),
+        })
+    }
+}
+
+#[derive(Debug)]
 pub struct Config {
     pub npages: usize,
     pub gcmode: GcMode,
+    pub heap: Option<BumpAllocator>,
 }
 
-impl Env {
-    pub fn config(conf_option: Option<String>) -> Option<Config> {
+impl Config {
+    pub fn new(conf_option: Option<String>) -> Option<Config> {
         let mut config = Config {
             npages: 1024,
             gcmode: GcMode::Auto,
+            heap: None,
         };
 
         match conf_option {

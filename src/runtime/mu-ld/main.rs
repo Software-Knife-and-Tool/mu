@@ -11,8 +11,14 @@ static GLOBAL: Jemalloc = Jemalloc;
 
 extern crate mu_core;
 
+mod bump_allocator;
+mod image;
+mod reader;
+mod writer;
+
 #[allow(unused_imports)]
 use {
+    crate::image::Image,
     getopt::Opt,
     mu_core::{Condition, Env, Result, Tag},
     std::{error::Error, fs, io::Write},
@@ -21,13 +27,28 @@ use {
 #[derive(Debug, PartialEq)]
 enum LoadOpt {
     Config(String),
+    Dump(String),
     Eval(String),
     Load(String),
-    Path(String),
+    Output(String),
+}
+
+fn usage() {
+    println!("env-ld: {}: [-h?vcelqod] [file...]", Env::VERSION);
+    println!("?: usage message");
+    println!("h: usage message");
+    println!("c: [name:value,...]");
+    println!("d: dump [path]");
+    println!("e: eval form");
+    println!("l: load path");
+    println!("o: output [path]");
+    println!("v: print version and exit");
+
+    std::process::exit(0);
 }
 
 fn options(mut argv: Vec<String>) -> Option<Vec<LoadOpt>> {
-    let mut opts = getopt::Parser::new(&argv, "h?vc:e:l:");
+    let mut opts = getopt::Parser::new(&argv, "h?vc:e:l:o:d:");
     let mut optv = Vec::new();
 
     loop {
@@ -53,7 +74,10 @@ fn options(mut argv: Vec<String>) -> Option<Vec<LoadOpt>> {
                         optv.push(LoadOpt::Eval(expr));
                     }
                     Opt('o', Some(path)) => {
-                        optv.push(LoadOpt::Path(path));
+                        optv.push(LoadOpt::Output(path));
+                    }
+                    Opt('d', Some(path)) => {
+                        optv.push(LoadOpt::Dump(path));
                     }
                     Opt('l', Some(path)) => {
                         optv.push(LoadOpt::Load(path));
@@ -73,19 +97,6 @@ fn options(mut argv: Vec<String>) -> Option<Vec<LoadOpt>> {
     }
 
     Some(optv)
-}
-
-fn usage() {
-    println!("env-ld: {}: [-h?vcelq] [file...]", Env::VERSION);
-    println!("?: usage message");
-    println!("h: usage message");
-    println!("c: [name:value,...]");
-    println!("e: eval form");
-    println!("l: load path");
-    println!("o: output path");
-    println!("v: print version and exit");
-
-    std::process::exit(0);
 }
 
 pub fn main() {
@@ -109,7 +120,7 @@ pub fn main() {
     }
 
     let env = match Env::config(_config) {
-        Some(config) => Env::new(&config),
+        Some(config) => Env::new(config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)
@@ -138,8 +149,9 @@ pub fn main() {
                             std::process::exit(-1);
                         }
                     },
-                    LoadOpt::Path(path) => _opath = path,
                     LoadOpt::Config(_) => (),
+                    LoadOpt::Output(path) => Image::output(&path),
+                    LoadOpt::Dump(path) => Image::dump(&path),
                 }
             }
         }

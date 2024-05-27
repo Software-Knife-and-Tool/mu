@@ -87,7 +87,7 @@ pub fn main() {
     let mut _path = String::new();
 
     let _env = match Env::config(None) {
-        Some(config) => Env::new(&config),
+        Some(config) => Env::new(config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)

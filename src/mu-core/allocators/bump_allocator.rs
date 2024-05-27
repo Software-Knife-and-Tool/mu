@@ -44,7 +44,6 @@ impl BumpAllocator {
         f.write_all(&[0]).unwrap();
         f.rewind().unwrap();
 
-        // unavoidable
         let data = unsafe {
             memmap::MmapOptions::new()
                 .map_mut(&f)
@@ -257,6 +256,12 @@ impl BumpAllocator {
             let data = &self.mmap;
             Some(&data[off..off + 8])
         }
+    }
+
+    pub fn heap_slice(&self) -> &[u8] {
+        let data = &self.mmap;
+
+        &data[0..self.size]
     }
 
     // gc
