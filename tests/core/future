@@ -1,9 +1,0 @@
-(core:type-of core:defer)	:func
-(core:type-of core:force)	:func
-(core:type-of core:poll)	:func
-(core:type-of (core:defer core:sum '(1 2)))	:struct
-(core:force (core:defer core:sum '(1 2)))	3
-(core:type-of (core:detach core:sum '(1 2)))	:struct
-(core:force (core:detach core:sum '(1 2)))	3
-(core:type-of (core:poll (core:detach core:sum '(1 2))))	:null
-(core:type-of (core:poll (core:defer core:sum '(1 2))))	:null

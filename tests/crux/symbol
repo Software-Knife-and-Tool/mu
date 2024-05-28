@@ -1,0 +1,10 @@
+(crux:boundp 'crux:foo)	:nil
+(crux:boundp 'crux:*standard-input*)	crux:*standard-input*
+(crux:symbol-name 'crux:*standard-input*)	"*standard-input*"
+(crux:symbol-ns 'crux:*standard-input*)	#<:ns "crux">
+(crux:symbol-ns 'std-in)	#<:ns "">
+(crux:symbol-ns :std-in)	#<:ns "keyword">
+(crux:symbol-ns ())	#<:ns "">
+(crux:symbol-ns :nil)	#<:ns "">
+(crux:symbol-value 'crux:*standard-input*)	#<stream: 0 :standard-input :input :open>
+(crux:make-symbol "abcde")	abcde

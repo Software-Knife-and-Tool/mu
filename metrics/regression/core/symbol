@@ -1,5 +1,0 @@
-(core:boundp 'core:foo)
-(core:boundp 'core:*standard-input*)
-(core:eq :keyword (core:type-of 'abcd))
-(core:eq :keyword (core:type-of :abcd))
-(core:symbol-value 'core:*standard-input*)

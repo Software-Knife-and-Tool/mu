@@ -8,7 +8,7 @@
 ;;;
 ;;; loader
 ;;;
-(core:intern prelude "load"
+(crux:intern prelude "load"
   (:lambda (path verbose)
     (:if (prelude:stringp path)
          ((:lambda (ifs)
@@ -18,28 +18,28 @@
                          (prelude:format :t ";;; loading ~A~%" `(,path))
                          ())
                     ((:lambda (status)
-                       (:if (core:eq prelude:%eof% status)
+                       (:if (crux:eq prelude:%eof% status)
                             :t
                             ()))
-                     (core:fix
+                     (crux:fix
                         (:lambda (loop)
-                           (:if (core:eq prelude:%eof% loop)
+                           (:if (crux:eq prelude:%eof% loop)
                                 prelude:%eof%
                                 (prelude:with-exception
                                     (:lambda (except)
-                                      (prelude:%exceptf core:error-output "loader exception: ~A on ~A by ~S, ~A~%" () except))
+                                      (prelude:%exceptf crux:error-output "loader exception: ~A on ~A by ~S, ~A~%" () except))
                                     (:lambda ()
                                       ((:lambda (form)
-                                          (:if (core:eq prelude:%eof% form)
+                                          (:if (crux:eq prelude:%eof% form)
                                                prelude:%eof%
                                                ((:lambda (value)
                                                   (:if verbose
                                                        (prelude:format :t "~A~%" `(,value))
                                                        ())
                                                   (prelude:null loop))
-                                                (core:eval (prelude:compile form)))))
-                                       (core:read ifs () prelude:%eof%))))))
+                                                (crux:eval (prelude:compile form)))))
+                                       (crux:read ifs () prelude:%eof%))))))
                        ()))))
                   (prelude:raise prelude:streamp ifs 'prelude:load "cannot open input file")))
-            (core:open :file :input path))
+            (crux:open :file :input path))
           (prelude:raise path 'prelude:load "not a file designator"))))

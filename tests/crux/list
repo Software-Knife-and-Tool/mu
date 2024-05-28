@@ -1,0 +1,24 @@
+(crux:append '(1) 1)	(1 . 1)
+(crux:append '(1) '(1))	(1 1)
+(crux:car '(1))	1
+(crux:car ())	:nil
+(crux:cdr '(1 2))	(2)
+(crux:cdr ())	:nil
+(crux:cons 1 ())	(1)
+(crux:cons 1 2)	(1 . 2)
+(crux:length '(1))	1
+(crux:length ())	0
+(crux:nth 0 '(1 . 2))	1
+(crux:nth 0 '(1 2))	1
+(crux:nth 0 ())	:nil
+(crux:nth 1 '(1 . 2))	2
+(crux:nth 1 '(1 2))	2
+(crux:nth 1 ())	:nil
+(crux:nth 3 '(1 2))	:nil
+(crux:nthcdr 0 '(1 . 2))	(1 . 2)
+(crux:nthcdr 0 '(1 2))	(1 2)
+(crux:nthcdr 0 ())	:nil
+(crux:nthcdr 1 '(1 . 2))	2
+(crux:nthcdr 1 '(1 2))	(2)
+(crux:nthcdr 1 ())	:nil
+(crux:nthcdr 3 '(1 2))	:nil

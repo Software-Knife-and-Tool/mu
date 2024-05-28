@@ -15,7 +15,7 @@ mu_sys = '../../dist/mu-sys'
 with open(os.path.join(ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
 
 def storage(ns, group, line, test):
-    if ns == 'core':
+    if ns == 'crux':
         proc = subprocess.Popen([mu_sys,
                                  '-p',
                                  '-l./perf.l',
@@ -52,7 +52,7 @@ def storage(ns, group, line, test):
     return None if len(err) != 0 else storage_
 
 def timing(ns, test):
-    if ns == 'core':
+    if ns == 'crux':
         proc = subprocess.Popen([mu_sys,
                                  '-p',
                                  '-l./perf.l',

@@ -1,8 +1,0 @@
-((:lambda (fn)(core:apply (:lambda (fn) (core:eq :func (core:type-of fn))) (core:cons fn ()))) core:eq)	:t
-(core:apply (core:compile '(:lambda (a) ((:lambda (a) (core:sum a a)) (core:sum a 2)))) '(1))	6
-(core:apply (core:compile '(:lambda (a) ((:lambda (b) (core:sum a b)) (core:sum a 2)))) '(1))	4
-(core:apply (core:compile '(:lambda (a) (core:sum a a))) '(1))	2
-(core:compile #\a)	#\a
-(core:compile 1)	1
-(core:compile :compile)	:compile
-(core:compile "compile")	"compile"

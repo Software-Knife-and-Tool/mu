@@ -1,37 +1,37 @@
-(core:eq 'core:sum (core:eval (prelude:compile (prelude:read (core:open :string :input "`,core:sum") () ()))))	:t
-(core:eq 'core:*version* (core:eval (prelude:compile (prelude:read (core:open :string :input "`,core:*version*") () ()))))	:t
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`\"abc\"") () ())))	"abc"
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`#\\a") () ())))	#\a
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`core:*standard-output*") () ())))	core:*standard-output*
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`1234") () ())))	1234
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(,(core:cons 'satisfies ()))") () ())))	((satisfies))
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(\"abc\")") () ())))	("abc")
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(#(:t 1 2 3))") () ())))	(#(:t 1 2 3))
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(#\\a)") () ())))	(#\a)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(())") () ())))	(:nil)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`((1234) 1234 symbol)") () ())))	((1234) 1234 symbol)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`((a b) c)") () ())))	((a b) c)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`()") () ())))	:nil
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(,(core:sum 1 2))") () ())))	(3)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(,1 (2) 3)") () ())))	(1 (2) 3)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(,1234 ,@'(a b c))") () ())))	(1234 a b c)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(,@'(a b c))") () ())))	(a b c)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(,@(core:sum 1 2))")) () ()))	3
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(0 ,@'(a b c) 1)") () ())))	(0 a b c 1)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(1 2 ,@3)") () ())))	(1 2 . 3)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(1 2 3)") () ())))	(1 2 3)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(1.0 b (2))") () ())))	(1.0000 b (2))
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(1234 symbol)") () ())))	(1234 symbol)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(1234)") () ())))	(1234)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`(a b c)") () ())))	(a b c)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,(core:sum 1 2)") () ())))	3
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,(core:type-of 'symbol)") () ())))	:symbol
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,1234") () ())))	1234
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,`\"abc\"") () ())))	"abc"
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,`#\\a") () ())))	#\a
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,`core:*standard-output*") () ())))	core:*standard-output*
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,`1234") () ())))	1234
-(core:eval (prelude:compile (prelude:read (core:open :string :input "`,`(1234)") () ())))	(1234)
-(core:eval (prelude:compile (prelude:read (core:open :string :input "``1234") () ())))	`1234
+(crux:eq 'crux:sum (crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,crux:sum") () ()))))	:t
+(crux:eq 'crux:*version* (crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,crux:*version*") () ()))))	:t
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`\"abc\"") () ())))	"abc"
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`#\\a") () ())))	#\a
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`crux:*standard-output*") () ())))	crux:*standard-output*
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`1234") () ())))	1234
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(,(crux:cons 'satisfies ()))") () ())))	((satisfies))
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(\"abc\")") () ())))	("abc")
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(#(:t 1 2 3))") () ())))	(#(:t 1 2 3))
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(#\\a)") () ())))	(#\a)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(())") () ())))	(:nil)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`((1234) 1234 symbol)") () ())))	((1234) 1234 symbol)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`((a b) c)") () ())))	((a b) c)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`()") () ())))	:nil
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(,(crux:sum 1 2))") () ())))	(3)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(,1 (2) 3)") () ())))	(1 (2) 3)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(,1234 ,@'(a b c))") () ())))	(1234 a b c)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(,@'(a b c))") () ())))	(a b c)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(,@(crux:sum 1 2))")) () ()))	3
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(0 ,@'(a b c) 1)") () ())))	(0 a b c 1)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(1 2 ,@3)") () ())))	(1 2 . 3)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(1 2 3)") () ())))	(1 2 3)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(1.0 b (2))") () ())))	(1.0000 b (2))
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(1234 symbol)") () ())))	(1234 symbol)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(1234)") () ())))	(1234)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`(a b c)") () ())))	(a b c)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,(crux:sum 1 2)") () ())))	3
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,(crux:type-of 'symbol)") () ())))	:symbol
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,1234") () ())))	1234
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,`\"abc\"") () ())))	"abc"
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,`#\\a") () ())))	#\a
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,`crux:*standard-output*") () ())))	crux:*standard-output*
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,`1234") () ())))	1234
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "`,`(1234)") () ())))	(1234)
+(crux:eval (prelude:compile (prelude:read (crux:open :string :input "``1234") () ())))	`1234

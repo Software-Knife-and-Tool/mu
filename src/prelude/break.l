@@ -5,23 +5,23 @@
 ;;; debugging
 ;;;
 #|
-(core:intern prelude "%debug-map-symbol"
+(crux:intern prelude "%debug-map-symbol"
    (:lambda (value)
-      (:if (core:boundp 'prelude:%debug-symbols%)
+      (:if (crux:boundp 'prelude:%debug-symbols%)
            ()
-           (core:intern prelude "%debug-symbols%" (core:ns-syms :list prelude)))
-      (core:fix
+           (crux:intern prelude "%debug-symbols%" (crux:ns-syms :list prelude)))
+      (crux:fix
        (:lambda (list)
           (:if (prelude:consp list)
                ((:lambda (symbol)
-                   (:if (core:eq (core:symbol-value symbol) value)
+                   (:if (crux:eq (crux:symbol-value symbol) value)
                         symbol
-                        (core:cdr list)))
-                (core:car list))
+                        (crux:cdr list)))
+                (crux:car list))
                list))
        prelude:%debug-symbols%)))
 
-(core:intern prelude "%format-mapped-symbol"
+(crux:intern prelude "%format-mapped-symbol"
    (:lambda (value)
      ((:lambda (symbol)
         (:if (prelude:null symbol)
@@ -33,17 +33,17 @@
 ;;;
 ;;; break loop
 ;;;
-(core:intern prelude "break"
+(crux:intern prelude "break"
    (:lambda (except)
      (prelude:format :t ";;; entering break loop with exception~%" ())
      (prelude:%exceptf :t ";;; ~A on ~A by ~S, ~A~%" () except)
      (prelude:format :t ";;; :h for commands~%" ())
-     (core:fix
+     (crux:fix
       (:lambda (loop)
         ((:lambda (form)
-           (:if (core:eq form prelude:%eof%)
+           (:if (crux:eq form prelude:%eof%)
                 loop
-                (:if (core:eq form :h)
+                (:if (crux:eq form :h)
                      ((:lambda ()
                         (prelude:format :t "break help:~%" ())
                         (prelude:format :t ":d - describe exception value~%" ())
@@ -51,24 +51,24 @@
                         (prelude:format :t ":r - return from break~%" ())
                         (prelude:format :t ":x - exit process~%" ())
                         (prelude:null loop)))
-                     (:if (core:eq form :d)
+                     (:if (crux:eq form :d)
                           ((:lambda (value)
-                             (prelude:describe (core:cdr value) :t)
+                             (prelude:describe (crux:cdr value) :t)
                              (prelude:null loop))
                            (prelude:%except-prop :value except))
-                          (:if (core:eq form :x)
-                               (core:exit 0)
-                               (:if (core:eq form :e)
+                          (:if (crux:eq form :x)
+                               (crux:exit 0)
+                               (:if (crux:eq form :e)
                                     ((:lambda ()
-                                       (prelude:%exceptf core:*standard-output* "exception: ~A on ~A by ~S, ~A~%" :t except)
+                                       (prelude:%exceptf crux:*standard-output* "exception: ~A on ~A by ~S, ~A~%" :t except)
                                        (prelude:null loop)))
-                                    (:if (core:eq form :r)
+                                    (:if (crux:eq form :r)
                                          loop
                                          ((:lambda ()
                                             (prelude:format :t ";;; unrecognized debugger command: h for help~%" ())
                                             (prelude:null loop))))))))))
          ((:lambda ()
             (prelude:format :t "prelude:debug> " ())
-            (core:flush core:*standard-output*)
+            (crux:flush crux:*standard-output*)
             (prelude:read :t () prelude:%eof%)))))
      ())))

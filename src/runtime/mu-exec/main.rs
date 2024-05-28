@@ -13,6 +13,7 @@ extern crate core;
 
 #[allow(unused_imports)]
 use {
+    crux::{Condition, Env, Result, Tag},
     elf::{
         endian::AnyEndian,
         note::{Note, NoteGnuBuildId},
@@ -20,7 +21,6 @@ use {
         ElfBytes,
     },
     getopt::Opt,
-    mu_core::{Condition, Env, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 

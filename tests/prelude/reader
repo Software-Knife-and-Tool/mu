@@ -1,8 +1,8 @@
-(core:type-of prelude:read)	:func
-(core:symbol-name (prelude:read (prelude:make-string-stream :input "a") () ()))	"a"
-(core:symbol-name (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))	"a"
-(core:symbol-ns (prelude:read (prelude:make-string-stream :input "a") () ()))	#<:ns "">
-(core:symbol-ns (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))	#<:ns "prelude">
+(crux:type-of prelude:read)	:func
+(crux:symbol-name (prelude:read (prelude:make-string-stream :input "a") () ()))	"a"
+(crux:symbol-name (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))	"a"
+(crux:symbol-ns (prelude:read (prelude:make-string-stream :input "a") () ()))	#<:ns "">
+(crux:symbol-ns (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))	#<:ns "prelude">
 (prelude:read (prelude:make-string-stream :input "a ;") () ())	a
 (prelude:read (prelude:make-string-stream :input "a ; a") () ())	a
 (prelude:read (prelude:make-string-stream :input "a") () ())	a
@@ -66,4 +66,4 @@
 (prelude:read (prelude:make-string-stream :input "'prelude:abc") () ())	(:quote prelude:abc)
 (prelude:read (prelude:make-string-stream :input "'abcdefgh") () ())	(:quote abcdefgh)
 (prelude:read (prelude:make-string-stream :input "#.1") () ())	1
-(prelude:read (prelude:make-string-stream :input "#.(core:sum 1 2)") () ())	3
+(prelude:read (prelude:make-string-stream :input "#.(crux:sum 1 2)") () ())	3

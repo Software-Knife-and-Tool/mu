@@ -17,39 +17,39 @@
 ;;;
 ;;; macro environment
 ;;;
-(core:intern prelude "%map-macro-symbol-ns"
+(crux:intern prelude "%map-macro-symbol-ns"
    (:lambda (symbol)
       ((:lambda (ns)
-          (core:find prelude:%macro-ns% (core:ns-name ns)))
-       (core:symbol-ns symbol))))
+          (crux:find prelude:%macro-ns% (crux:ns-name ns)))
+       (crux:symbol-ns symbol))))
 
-(core:intern prelude "%make-macro-ns"
+(crux:intern prelude "%make-macro-ns"
    (:lambda (ns)
        ((:lambda (macro-ns)
-          (core:intern prelude:%macro-ns% (core:ns-name ns) macro-ns)
+          (crux:intern prelude:%macro-ns% (crux:ns-name ns) macro-ns)
           macro-ns)
        (prelude:%gen-anon-ns))))
 
-(core:intern prelude "%defmacro"
+(crux:intern prelude "%defmacro"
    (:lambda (symbol macro-function)
       ((:lambda (macro-ns symbol-ns)
          (:if macro-ns
-              (core:intern macro-ns symbol-ns macro-function)
-              (core:intern (prelude:%make-macro-ns symbol-ns) (core:symbol-name symbol) macro-function))
+              (crux:intern macro-ns symbol-ns macro-function)
+              (crux:intern (prelude:%make-macro-ns symbol-ns) (crux:symbol-name symbol) macro-function))
          symbol)
        (prelude:%map-macro-symbol-ns symbol)
-       (core:symbol-ns symbol))))
+       (crux:symbol-ns symbol))))
 
-(core:intern prelude "%find-macro"
+(crux:intern prelude "%find-macro"
     (:lambda (symbol env)
       ((:lambda (macro-ns symbol-name)
           (:if macro-ns
-               (core:find (core:symbol-value macro-ns) symbol-name)
+               (crux:find (crux:symbol-value macro-ns) symbol-name)
                ()))
-       (core:find prelude:%macro-ns% (core:ns-name (core:symbol-ns symbol)))
-       (core:symbol-name symbol))))
+       (crux:find prelude:%macro-ns% (crux:ns-name (crux:symbol-ns symbol)))
+       (crux:symbol-name symbol))))
 
-(core:intern prelude "%compile-macro-call"
+(crux:intern prelude "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
        ((:lambda (macro-function)
           ((:lambda (expanded-form)
@@ -57,37 +57,37 @@
            (:if (prelude:%prelude-function-p macro-function)
                 (prelude:%fn-apply-quoted
                  macro-function
-                 (core:eval (prelude:%compile-lambda-arg-list macro-function arg-list env)))
-                (core:apply macro-function arg-list))))
+                 (crux:eval (prelude:%compile-lambda-arg-list macro-function arg-list env)))
+                (crux:apply macro-function arg-list))))
       (prelude:macro-function macro-symbol env))))
 
 ;;;
 ;;; macroexpand-1 expands a macro call once.
 ;;;
-(core:intern prelude "macroexpand-1"
+(crux:intern prelude "macroexpand-1"
    (:lambda (form env)
      (:if (prelude:consp form)
           ((:lambda (fn-symbol arg-list)
-             (:if (core:eq :symbol (core:type-of fn-symbol))
+             (:if (crux:eq :symbol (crux:type-of fn-symbol))
                   ((:lambda (macro-function)
                      (:if macro-function
                           (:if (prelude:%prelude-function-p macro-function)
                                (prelude:%fn-apply-quoted macro-function (prelude:%quoted-lambda-arg-list macro-function arg-list))
-                               (core:apply macro-function arg-list))
+                               (crux:apply macro-function arg-list))
                           form))
                    (prelude:macro-function fn-symbol env))
                   form))
-           (core:car form)
-           (core:cdr form))
+           (crux:car form)
+           (crux:cdr form))
           form)))
 
 ;;;
 ;;; macroexpand: expand a form until it is no longer a macro call
 ;;;
-(core:intern prelude "macroexpand"
+(crux:intern prelude "macroexpand"
    (:lambda (form env)
      ((:lambda (expanded)
-          (:if (core:eq form expanded)
+          (:if (crux:eq form expanded)
              expanded
              (prelude:macroexpand expanded env)))
        (prelude:macroexpand-1 form env))))
@@ -97,12 +97,12 @@
 ;;;
 ;;; acts as a predicate
 ;;;
-(core:intern prelude "macro-function"
+(crux:intern prelude "macro-function"
    (:lambda (symbol env)
-      (:if (core:eq :symbol (core:type-of symbol))
+      (:if (crux:eq :symbol (crux:type-of symbol))
            ((:lambda (macro)
                (:if macro
-                    (core:symbol-value macro)
+                    (crux:symbol-value macro)
                     ()))
             (prelude:%find-macro symbol env))
           ())))

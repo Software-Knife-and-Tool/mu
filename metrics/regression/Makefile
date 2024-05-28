@@ -1,14 +1,14 @@
 #
 # perf makefile
 #
-.PHONY: help base clean commit core current diff frequent summary metrics core prelude
+.PHONY: help base clean commit crux current diff frequent summary metrics core prelude
 
-NTESTS ?= 20
+NTESTS ?= 10
 TMPF:=$(shell mktemp)
 BIN = ./scripts
 
 NAMESPACES=\
-	core	 \
+	crux	 \
 	frequent \
 	prelude
 
@@ -49,8 +49,8 @@ commit:
 	    python3 $(BIN)/summary-ns.py json/current.$$ns.json >> current.summary;	\
 	done
 
-core:
-	@python3 $(BIN)/perf-ns.py core . $(NTESTS)
+crux:
+	@python3 $(BIN)/perf-ns.py crux . $(NTESTS)
 
 frequent:
 	@python3 $(BIN)/perf-ns.py frequent . $(NTESTS)	

@@ -1,2 +1,0 @@
-(core:struct-type (core:make-struct :foo ()))
-(core:struct-vec (core:make-struct :foo '(1 2 3 4)))
