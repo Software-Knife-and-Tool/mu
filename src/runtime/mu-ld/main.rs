@@ -9,7 +9,7 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate mu_core;
+extern crate crux;
 
 mod image;
 mod reader;
@@ -18,8 +18,8 @@ mod writer;
 #[allow(unused_imports)]
 use {
     crate::image::Image,
+    crux::{Condition, Env, Result, Tag},
     getopt::Opt,
-    mu_core::{Condition, Env, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 

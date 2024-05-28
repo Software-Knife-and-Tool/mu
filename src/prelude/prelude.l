@@ -4,12 +4,12 @@
 ;;;
 ;;; namespace
 ;;;
-(core:intern (core:find-ns "") "prelude" (core:make-ns "prelude"))
+(crux:intern (crux:find-ns "") "prelude" (crux:make-ns "prelude"))
 
 ;;;
 ;;; types
 ;;;
-(core:intern prelude "%init-ns"
+(crux:intern prelude "%init-ns"
     (:lambda ()
       ;;; function
       (prelude:define-type "%fn"
@@ -47,87 +47,87 @@
             (:disp    . :listp)
             (:bitvec  . :listp)))
 
-      (core:intern prelude "%char-macro-ns%" (prelude:%gen-anon-ns))
-      (core:intern prelude "%macro-ns%" (prelude:%gen-anon-ns))
-      (core:intern prelude "%symbol-macro-ns%" (prelude:%gen-anon-ns))))
+      (crux:intern prelude "%char-macro-ns%" (prelude:%gen-anon-ns))
+      (crux:intern prelude "%macro-ns%" (prelude:%gen-anon-ns))
+      (crux:intern prelude "%symbol-macro-ns%" (prelude:%gen-anon-ns))))
 
 ;;;
 ;;; predicates
 ;;;
-(core:intern prelude "not" (:lambda (value) (prelude:null value)))
-(core:intern prelude "atom" (:lambda (value) (prelude:not (prelude:consp value))))
+(crux:intern prelude "not" (:lambda (value) (prelude:null value)))
+(crux:intern prelude "atom" (:lambda (value) (prelude:not (prelude:consp value))))
 
-(core:intern prelude "constantp"
+(crux:intern prelude "constantp"
    (:lambda (value)
       (:if (prelude:%orf (prelude:null value) (prelude:keywordp value))
            :t
            (:if (prelude:consp value)
-                (core:eq :quote (core:car value))
+                (crux:eq :quote (crux:car value))
                 (prelude:not (prelude:symbolp value))))))
 
-(core:intern prelude "numberp"
+(crux:intern prelude "numberp"
   (:lambda (n)
      (:if (prelude:fixnump n)
           :t
           (prelude:floatp n))))
 
-(core:intern prelude "zerop"
+(crux:intern prelude "zerop"
    (:lambda (n)
      (:if (prelude:numberp n)
-          (:if (core:eq 0 n)
+          (:if (crux:eq 0 n)
                :t
-               (core:eq 0.0 n))
+               (crux:eq 0.0 n))
           (prelude:raise n 'prelude:zerop "not a number"))))
 
-(core:intern prelude "minusp"
+(crux:intern prelude "minusp"
    (:lambda (n)
       (:if (prelude:numberp n)
            (:if (prelude:floatp n)
-                (core:fl-lt n 0.0)
-                (core:less-than n 0))
+                (crux:fl-lt n 0.0)
+                (crux:less-than n 0))
            (prelude:raise n 'prelude:minusp "not a number"))))
 
-(core:intern prelude "plusp"
+(crux:intern prelude "plusp"
    (:lambda (n)
       (:if (prelude:numberp n)
            (:if (prelude:floatp n)
-                (core:fl-lt 0.0 n)
-                (core:less-than 0 n))
+                (crux:fl-lt 0.0 n)
+                (crux:less-than 0 n))
            (prelude:raise n 'prelude:plusp "not a number"))))
 
 ;;;
 ;;; system classes
 ;;;
-(core:intern prelude "charp" (:lambda (t) (core:eq :char (core:type-of t))))
-(core:intern prelude "fixnump" (:lambda (t) (core:eq :fixnum (core:type-of t))))
-(core:intern prelude "floatp" (:lambda (t) (core:eq :float (core:type-of t))))
-(core:intern prelude "structp" (:lambda (t) (core:eq :struct (core:type-of t))))
+(crux:intern prelude "charp" (:lambda (t) (crux:eq :char (crux:type-of t))))
+(crux:intern prelude "fixnump" (:lambda (t) (crux:eq :fixnum (crux:type-of t))))
+(crux:intern prelude "floatp" (:lambda (t) (crux:eq :float (crux:type-of t))))
+(crux:intern prelude "structp" (:lambda (t) (crux:eq :struct (crux:type-of t))))
 
 ;;;
 ;;; syntactic sugar
 ;;;
-(core:intern prelude "%orf"
+(crux:intern prelude "%orf"
    (:lambda (arg arg1)
      (:if arg arg arg1)))
 
-(core:intern prelude "%andf"
+(crux:intern prelude "%andf"
    (:lambda (arg arg1)
      (:if arg arg1 ())))
 
 ;;;
 ;;; apply
 ;;;
-(core:intern prelude "apply"
+(crux:intern prelude "apply"
    (:lambda (function arg-list)
      (:if (prelude:functionp function)
           (:if (prelude:%prelude-function-p function)
                (prelude:%fn-apply function arg-list)
-               (core:apply function arg-list))
+               (crux:apply function arg-list))
           (prelude:raise function 'prelude:apply "not a function designator"))))
 
 ;;;
 ;;; namespace components
 ;;;
-(core:intern prelude "%gen-anon-ns"
+(crux:intern prelude "%gen-anon-ns"
    (:lambda ()
-      (core:make-ns (core:symbol-name (prelude:genkeyword #\%)))))
+      (crux:make-ns (crux:symbol-name (prelude:genkeyword #\%)))))

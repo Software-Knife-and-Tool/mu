@@ -1,10 +1,10 @@
 #
 # tests makefile
 #
-.PHONY: help cargo core clean commit namespaces tests summary prelude system
+.PHONY: help cargo crux clean commit namespaces tests summary prelude system
 
 TMPF:=$(shell mktemp)
-NAMESPACES = core prelude
+NAMESPACES = crux prelude
 
 help:
 	@echo "mu test makefile -----------------"
@@ -27,8 +27,8 @@ namespaces:
 list:
 	@cat $$NS/tests
 
-core:
-	@python3 ./test-ns.py core .
+crux:
+	@python3 ./test-ns.py crux .
 
 prelude:
 	@python3 ./test-ns.py prelude .	

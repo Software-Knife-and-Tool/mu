@@ -1,6 +1,6 @@
 [package]
 name = "mu"
-version = "0.1.62"
+version = "0.1.64"
 edition = "2021"
 authors = ["me <putnamjm.design@gmail.com>"]
 
@@ -17,8 +17,8 @@ name = "mu-sys"
 path = "src/runtime/mu-sys/main.rs"
 
 [lib]
-name = "mu_core"
-path = "src/mu-core/lib.rs"
+name = "crux"
+path = "src/crux/lib.rs"
 crate-type = ["lib"]
 bench = false
 

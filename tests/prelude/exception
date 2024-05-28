@@ -1,7 +1,7 @@
-(core:type-of prelude:make-exception)	:func
-(core:type-of prelude:error)	:func
-(core:type-of prelude:raise)	:func
-(core:type-of prelude:warn)	:func
+(crux:type-of prelude:make-exception)	:func
+(crux:type-of prelude:error)	:func
+(crux:type-of prelude:raise)	:func
+(crux:type-of prelude:warn)	:func
 (prelude:structp (prelude:make-exception () :error 'test "exception test" ()))	:t
 (prelude:exceptp (prelude:make-exception () :error 'test "exception test" ()))	:t
 (prelude:with-exception (:lambda (exception) ()) (:lambda () :t))	:t

@@ -14,28 +14,28 @@
 ;;; reason: extended condition, usually a string
 ;;; env:    dynamic environment, list of frames
 ;;;
-(core:intern prelude "exceptp"
+(crux:intern prelude "exceptp"
     (:lambda (ex)
       (prelude:%andf
        (prelude:%prelude-type-p ex)
-       (core:eq '%except (prelude:type-of ex)))))
+       (crux:eq '%except (prelude:type-of ex)))))
 
-(core:intern prelude "%make-except"
+(crux:intern prelude "%make-except"
    (:lambda (cond value source reason env)
       (prelude:%make-type "%except"
-        `(,(core:cons :cond   cond)
-          ,(core:cons :value  value)
-          ,(core:cons :source source)
-          ,(core:cons :reason reason)
-          ,(core:cons :env    env)))))
+        `(,(crux:cons :cond   cond)
+          ,(crux:cons :value  value)
+          ,(crux:cons :source source)
+          ,(crux:cons :reason reason)
+          ,(crux:cons :env    env)))))
 
-(core:intern prelude "%except-prop"
+(crux:intern prelude "%except-prop"
    (:lambda (prop except)
-      (:if (prelude:findl (:lambda (lambda-prop) (core:eq prop lambda-prop)) '(:cond :value :source :reason :env))
+      (:if (prelude:findl (:lambda (lambda-prop) (crux:eq prop lambda-prop)) '(:cond :value :source :reason :env))
            (prelude:%type-ref prop except)
            (prelude:raise prop 'prelude:%except-prop "not an except property"))))
 
-(core:intern prelude "%exceptf"
+(crux:intern prelude "%exceptf"
    (:lambda (stream format-string printenv except)
      ((:lambda (cond value source reason env)
          (:if (prelude:null format-string)
@@ -47,10 +47,10 @@
                   (prelude:%mapc
                    (:lambda (frame)
                       (prelude:format stream "  ~A~T(~A ~A)~%"
-                                   `(,(prelude:%format-mapped-symbol (core:car frame))
-                                     ,(core:car frame)
-                                     ,(core:cdr frame))))
-                   (core:cdr env))))
+                                   `(,(prelude:%format-mapped-symbol (crux:car frame))
+                                     ,(crux:car frame)
+                                     ,(crux:cdr frame))))
+                   (crux:cdr env))))
               ()))
       (prelude:%except-prop :cond except)
       (prelude:%except-prop :value except)
@@ -58,54 +58,54 @@
       (prelude:%except-prop :reason except)
       (prelude:%except-prop :env except))))
 
-(core:intern prelude "with-exception"
+(crux:intern prelude "with-exception"
   (:lambda (handler thunk)
-     (core:unwind-protect
+     (crux:unwind-protect
       (:lambda (value condition source)
-         (:if (core:eq condition :except)
+         (:if (crux:eq condition :except)
               (prelude:apply handler `(,value))
               (prelude:apply handler `(,(prelude:%make-except
                                       condition
                                       value
                                       source
-                                      "core:raise"
-                                      (core:frames))))))
+                                      "crux:raise"
+                                      (crux:frames))))))
       (:lambda () (prelude:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
 ;;;
-(core:intern prelude "make-exception" prelude:%make-except)
+(crux:intern prelude "make-exception" prelude:%make-except)
 
-(core:intern prelude "error"
+(crux:intern prelude "error"
    (:lambda (value format-string arg-list)
-      (prelude:format core:*error-output* format-string arg-list)
-      (core:raise
+      (prelude:format crux:*error-output* format-string arg-list)
+      (crux:raise
        (prelude:%make-except :error value :error "" ())
        :except)))
 
-(core:intern prelude "raise-env"
+(crux:intern prelude "raise-env"
    (:lambda (value source reason)
-     (core:raise
-      (prelude:%make-except :error value source reason (core:frames))
+     (crux:raise
+      (prelude:%make-except :error value source reason (crux:frames))
       :except)))
 
-(core:intern prelude "raise"
+(crux:intern prelude "raise"
    (:lambda (value source reason)
-     (core:raise
+     (crux:raise
       (prelude:%make-except :error value source reason ())
       :except)))
 
-(core:intern prelude "debug"
+(crux:intern prelude "debug"
    (:lambda (value message)
-     (core:write ";;; debug: " () core:*error-output*)          
-     (core:write value () core:*error-output*)
-     (core:write " " () core:*error-output*)
-     (core:write message () core:*error-output*)
-     (core:write-char #\linefeed core:*error-output*)
+     (crux:write ";;; debug: " () crux:*error-output*)          
+     (crux:write value () crux:*error-output*)
+     (crux:write " " () crux:*error-output*)
+     (crux:write message () crux:*error-output*)
+     (crux:write-char #\linefeed crux:*error-output*)
      value))
 
-(core:intern prelude "warn"
+(crux:intern prelude "warn"
    (:lambda (value message)
-     (prelude:format core:*error-output* ";;; warning: ~S ~A~%" `(,value ,message))
+     (prelude:format crux:*error-output* ";;; warning: ~S ~A~%" `(,value ,message))
     value))

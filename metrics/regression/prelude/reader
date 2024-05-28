@@ -1,5 +1,5 @@
-(core:symbol-name (prelude:read (prelude:make-string-stream :input "a") () ()))
-(core:symbol-name (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))
+(crux:symbol-name (prelude:read (prelude:make-string-stream :input "a") () ()))
+(crux:symbol-name (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))
 (prelude:read (prelude:make-string-stream :input "abcdefgh") () ())
 (prelude:read (prelude:make-string-stream :input "prelude:abcdefgh") () ())
 (prelude:read (prelude:make-string-stream :input "(:quote abcdefgh)") () ())

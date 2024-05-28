@@ -9,12 +9,12 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate mu_core;
+extern crate crux;
 
 #[allow(unused_imports)]
 use {
+    crux::{Condition, Env, Result, Tag},
     getopt::Opt,
-    mu_core::{Condition, Env, Result, Tag},
     std::{fs, io::Write},
 };
 
@@ -99,7 +99,7 @@ fn usage() {
 }
 
 fn listener(env: &Env, null: bool) {
-    let eof_value = env.eval_str("(core:make-symbol \"eof\")").unwrap();
+    let eof_value = env.eval_str("(crux:make-symbol \"eof\")").unwrap();
 
     loop {
         match env.read(env.std_in(), false, eof_value) {

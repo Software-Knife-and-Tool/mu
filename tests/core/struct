@@ -1,7 +1,0 @@
-(core:type-of core:make-struct)	:func
-(core:type-of core:struct-type)	:func
-(core:type-of core:struct-vec)	:func
-(core:type-of (core:make-struct :foo ()))	:struct
-(core:struct-type (core:make-struct :foo ()))	:foo
-(core:struct-vec (core:make-struct :foo ()))	#(:t)
-(core:struct-vec (core:make-struct :foo '(1 2 3 4)))	#(:t 1 2 3 4)

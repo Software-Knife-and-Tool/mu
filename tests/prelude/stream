@@ -1,20 +1,20 @@
-(core:type-of prelude:close)	:func
-(core:type-of prelude:get-output-stream-string)	:func
-(core:type-of prelude:make-string-stream)	:func
-(core:type-of prelude:open)	:func
-(core:type-of prelude:with-open-stream)	:func
-(core:type-of prelude:read)	:func
-(core:type-of prelude:read-byte)	:func
-(core:type-of prelude:read-char)	:func
-(core:type-of prelude:unread-char)	:func
-(core:type-of prelude:write)	:func
-(core:type-of prelude:write-byte)	:func
-(core:write 1 () core:*standard-output*)	11
-(core:write (core:sum 1 2) () core:*standard-output*)	33
-(core:write (prelude:string= "" "") () core:*standard-output*)	:t:t
-(core:write (prelude:string= "" "1") () core:*standard-output*)	:nil:nil
-(core:write (prelude:string= "1" "1") () core:*standard-output*)	:t:t
-(core:write (prelude:string= "123" "1") () core:*standard-output*)	:nil:nil
-(core:write (prelude:string= "" "ci") () core:*standard-output*)	:nil:nil
-(core:write (prelude:string= "ci" "") () core:*standard-output*)	:nil:nil
-(core:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () core:*standard-output*)	f#\f
+(crux:type-of prelude:close)	:func
+(crux:type-of prelude:get-output-stream-string)	:func
+(crux:type-of prelude:make-string-stream)	:func
+(crux:type-of prelude:open)	:func
+(crux:type-of prelude:with-open-stream)	:func
+(crux:type-of prelude:read)	:func
+(crux:type-of prelude:read-byte)	:func
+(crux:type-of prelude:read-char)	:func
+(crux:type-of prelude:unread-char)	:func
+(crux:type-of prelude:write)	:func
+(crux:type-of prelude:write-byte)	:func
+(crux:write 1 () crux:*standard-output*)	11
+(crux:write (crux:sum 1 2) () crux:*standard-output*)	33
+(crux:write (prelude:string= "" "") () crux:*standard-output*)	:t:t
+(crux:write (prelude:string= "" "1") () crux:*standard-output*)	:nil:nil
+(crux:write (prelude:string= "1" "1") () crux:*standard-output*)	:t:t
+(crux:write (prelude:string= "123" "1") () crux:*standard-output*)	:nil:nil
+(crux:write (prelude:string= "" "ci") () crux:*standard-output*)	:nil:nil
+(crux:write (prelude:string= "ci" "") () crux:*standard-output*)	:nil:nil
+(crux:write (prelude:with-open-stream :string :input "foo" (:lambda (stream) (prelude:read-char stream () ()))) () crux:*standard-output*)	f#\f

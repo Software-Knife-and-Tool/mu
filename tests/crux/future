@@ -1,0 +1,9 @@
+(crux:type-of crux:defer)	:func
+(crux:type-of crux:force)	:func
+(crux:type-of crux:poll)	:func
+(crux:type-of (crux:defer crux:sum '(1 2)))	:struct
+(crux:force (crux:defer crux:sum '(1 2)))	3
+(crux:type-of (crux:detach crux:sum '(1 2)))	:struct
+(crux:force (crux:detach crux:sum '(1 2)))	3
+(crux:type-of (crux:poll (crux:detach crux:sum '(1 2))))	:null
+(crux:type-of (crux:poll (crux:defer crux:sum '(1 2))))	:null

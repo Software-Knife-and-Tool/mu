@@ -4,85 +4,85 @@
 ;;;
 ;;; format
 ;;;
-(core:intern prelude "%fmt-tilde"
+(crux:intern prelude "%fmt-tilde"
   (:lambda (dest arg-list)
     (prelude:write-char #\~ dest)
     arg-list))
 
-(core:intern prelude "%fmt-tab"
+(crux:intern prelude "%fmt-tab"
   (:lambda (dest arg-list)
     (prelude:write-char #\tab dest)
     arg-list))
 
-(core:intern prelude "%fmt-percent"
+(crux:intern prelude "%fmt-percent"
   (:lambda (dest arg-list)
     (prelude:write-char #\linefeed dest)
     arg-list))
 
-(core:intern prelude "%fmt-bang"
+(crux:intern prelude "%fmt-bang"
   (:lambda (dest arg-list)
-    (core:cdr arg-list)))
+    (crux:cdr arg-list)))
 
-(core:intern prelude "%fmt-decimal"
+(crux:intern prelude "%fmt-decimal"
   (:lambda (dest arg-list)
-     (:if (prelude:fixnump (core:car arg-list))
+     (:if (prelude:fixnump (crux:car arg-list))
           ((:lambda ()
-              (prelude:write (core:car arg-list) () dest)
-              (core:cdr arg-list)))
-          (prelude:raise (core:car arg-list) 'prelude:format "argument to ~D not a fixnum"))))
+              (prelude:write (crux:car arg-list) () dest)
+              (crux:cdr arg-list)))
+          (prelude:raise (crux:car arg-list) 'prelude:format "argument to ~D not a fixnum"))))
 
-(core:intern prelude "%fmt-hex"
+(crux:intern prelude "%fmt-hex"
   (:lambda (dest arg-list)
      ((:lambda (fx)
        (:if (prelude:fixnump fx)
             (:if (prelude:zerop fx)
                  (prelude:write "0" () dest)
                  ((:lambda (str-stream)
-                     (core:fix
+                     (crux:fix
                       (:lambda (n)
-                         (:if (prelude:%orf (prelude:null n) (core:eq 0 n))
+                         (:if (prelude:%orf (prelude:null n) (crux:eq 0 n))
                               ()
                               ((:lambda ()
-                                  (core:write (prelude:schar "0123456789abcdef" (core:logand n #xf)) () str-stream)
-                                  (core:quotient n 16)))))
-                      (:if (core:less-than fx 0) (core:product -1 fx) fx))
-                     (:if (core:less-than fx 0)
-                          (core:write #\- () str-stream)
+                                  (crux:write (prelude:schar "0123456789abcdef" (crux:logand n #xf)) () str-stream)
+                                  (crux:quotient n 16)))))
+                      (:if (crux:less-than fx 0) (crux:product -1 fx) fx))
+                     (:if (crux:less-than fx 0)
+                          (crux:write #\- () str-stream)
                           ())
                      ((:lambda (hexstr)
-                         (core:fix
+                         (crux:fix
                           (:lambda (len)
                              (:if (prelude:zerop len)
                           0
                           ((:lambda ()
-                              (core:write (prelude:schar hexstr (core:difference len 1)) () dest)
-                              (core:difference len 1)))))
-                   (core:vector-len hexstr)))
-                  (core:get-string str-stream)))
-             (core:open :string :output "")))
+                              (crux:write (prelude:schar hexstr (crux:difference len 1)) () dest)
+                              (crux:difference len 1)))))
+                   (crux:vector-len hexstr)))
+                  (crux:get-string str-stream)))
+             (crux:open :string :output "")))
             (prelude:raise fx 'prelude:format "argument to ~X not a fixnum")))
-      (core:car arg-list))))
+      (crux:car arg-list))))
 
-(core:intern prelude "%fmt-aesthetic"
+(crux:intern prelude "%fmt-aesthetic"
   (:lambda (dest arg-list)
-    (prelude:write (core:car arg-list) () dest)
-    (core:cdr arg-list)))
+    (prelude:write (crux:car arg-list) () dest)
+    (crux:cdr arg-list)))
 
-(core:intern prelude "%fmt-standard"
+(crux:intern prelude "%fmt-standard"
   (:lambda (dest arg-list)
-    (prelude:write (core:car arg-list) :t dest)
-    (core:cdr arg-list)))
+    (prelude:write (crux:car arg-list) :t dest)
+    (crux:cdr arg-list)))
 
 ;;;
 ;;; control ops
 ;;;
-(core:intern prelude "%fmt-op"
+(crux:intern prelude "%fmt-op"
   (:lambda (dir dest arg-list)
     ((:lambda (fn)
        (:if fn
-            (prelude:apply (core:symbol-value fn) `(,dest ,arg-list))
+            (prelude:apply (crux:symbol-value fn) `(,dest ,arg-list))
             (prelude:raise dir 'prelude:format "unrecognized format directive")))
-     (core:cdr
+     (crux:cdr
       (prelude:%assq
        dir
        '((#\A . prelude:%fmt-aesthetic)
@@ -94,40 +94,40 @@
          (#\% . prelude:%fmt-percent)
          (#\! . prelude:%fmt-bang)))))))
 
-(core:intern prelude "%fmt-loop"
+(crux:intern prelude "%fmt-loop"
   (:lambda (stream dest fmt arg-list)
-    (core:fix
+    (crux:fix
      (:lambda (loop)
        ((:lambda (nth argl)
-          (:if (core:eq nth (core:vector-len fmt))
+          (:if (crux:eq nth (crux:vector-len fmt))
                loop
                ((:lambda (ch)
-                  (:if (core:eq ch #\~)
-                       `(,(core:sum 2 nth) ,@(prelude:%fmt-op (prelude:schar fmt (core:sum 1 nth)) dest argl))
+                  (:if (crux:eq ch #\~)
+                       `(,(crux:sum 2 nth) ,@(prelude:%fmt-op (prelude:schar fmt (crux:sum 1 nth)) dest argl))
                        ((:lambda ()
                            (prelude:write-char ch dest)
-                           `(,(core:sum 1 nth) ,@argl)))))
+                           `(,(crux:sum 1 nth) ,@argl)))))
                 (prelude:schar fmt nth))))
-        (core:car loop)
-        (core:cdr loop)))
+        (crux:car loop)
+        (crux:cdr loop)))
      `(0 ,@arg-list))
     (:if (prelude:null stream)
          (prelude:get-output-stream-string dest)
          ())))
 
-(core:intern prelude "format"
+(crux:intern prelude "format"
    (:lambda (stream format-string arg-list)
       (:if (prelude:stringp format-string)
            (:if (prelude:listp arg-list)
-                (:if (prelude:zerop (core:vector-len format-string))
+                (:if (prelude:zerop (crux:vector-len format-string))
                      (:if stream
                           ""
                           ())
                      ((:lambda (dest) (prelude:%fmt-loop stream dest format-string arg-list))
                       (:if (prelude:null stream)
-                           (core:open :string :output "")
-                           (:if (core:eq stream :t)
-                                core:*standard-output*
+                           (crux:open :string :output "")
+                           (:if (crux:eq stream :t)
+                                crux:*standard-output*
                                 (:if (prelude:streamp stream)
                                      stream
                                      (prelude:raise stream 'prelude:format "not a stream designator"))))))

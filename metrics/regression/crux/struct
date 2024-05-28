@@ -1,0 +1,2 @@
+(crux:struct-type (crux:make-struct :foo ()))
+(crux:struct-vec (crux:make-struct :foo '(1 2 3 4)))

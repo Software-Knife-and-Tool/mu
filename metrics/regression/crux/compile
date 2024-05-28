@@ -1,0 +1,4 @@
+((:lambda (fn) (crux:apply (:lambda (fn) (crux:eq :func (crux:type-of fn))) (crux:cons fn ()))) crux:eq)
+(crux:apply (crux:compile '(:lambda (a) ((:lambda (a) (crux:sum a a)) (crux:sum a 2)))) '(1))
+(crux:apply (crux:compile '(:lambda (a) (crux:sum a a))) '(1))
+(crux:compile '(:lambda ()))

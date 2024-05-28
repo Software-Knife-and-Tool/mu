@@ -4,7 +4,7 @@
 //! runtime loader
 #[allow(unused_imports)]
 use crate::{
-    mu_core::{Condition, Env, Result, Tag},
+    crux::{Condition, Env, Result, Tag},
     reader::Reader,
     writer::Writer,
 };

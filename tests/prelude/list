@@ -1,20 +1,20 @@
-(core:type-of prelude:append)	:func
-(core:type-of prelude:assq)	:func
-(core:type-of prelude:dropl)	:func
-(core:type-of prelude:dropr)	:func
-(core:type-of prelude:findl)	:func
-(core:type-of prelude:findr)	:func
-(core:type-of prelude:foldl)	:func
-(core:type-of prelude:foldr)	:func
-(core:type-of prelude:last)	:func
-(core:type-of prelude:mapc)	:func
-(core:type-of prelude:mapcar)	:func
-(core:type-of prelude:mapl)	:func
-(core:type-of prelude:maplist)	:func
-(core:type-of prelude:positionl)	:func
-(core:type-of prelude:positionr)	:func
-(core:type-of prelude:reverse)	:func
-(core:type-of prelude:rassq)	:func
+(crux:type-of prelude:append)	:func
+(crux:type-of prelude:assq)	:func
+(crux:type-of prelude:dropl)	:func
+(crux:type-of prelude:dropr)	:func
+(crux:type-of prelude:findl)	:func
+(crux:type-of prelude:findr)	:func
+(crux:type-of prelude:foldl)	:func
+(crux:type-of prelude:foldr)	:func
+(crux:type-of prelude:last)	:func
+(crux:type-of prelude:mapc)	:func
+(crux:type-of prelude:mapcar)	:func
+(crux:type-of prelude:mapl)	:func
+(crux:type-of prelude:maplist)	:func
+(crux:type-of prelude:positionl)	:func
+(crux:type-of prelude:positionr)	:func
+(crux:type-of prelude:reverse)	:func
+(crux:type-of prelude:rassq)	:func
 (prelude:append '(() ()))	:nil
 (prelude:append '(() (1 2 3)))	(1 2 3)
 (prelude:append '((1 2 3) ()))	(1 2 3)
@@ -30,16 +30,16 @@
 (prelude:findl prelude:symbolp '(a b c))	a
 (prelude:foldl (:lambda (el acc) (:if (prelude:null acc) :nil (prelude:symbolp el))) :t '(1 2 3))	:nil
 (prelude:foldl (:lambda (el acc) (:if (prelude:null acc) :nil (prelude:symbolp el))) :t '(a b c))	:t
-(prelude:foldl (:lambda (el acc) (core:cons el acc)) () '(1 2 3 4))	(4 3 2 1)
-(prelude:foldl (:lambda (el acc) (core:cons el acc)) () '(1))	(1)
-(prelude:foldl (:lambda (el acc) (core:cons el acc)) () ())	:nil
-(prelude:foldl (:lambda (x y) (core:sum x y)) 0 '(1 2 3))	6
+(prelude:foldl (:lambda (el acc) (crux:cons el acc)) () '(1 2 3 4))	(4 3 2 1)
+(prelude:foldl (:lambda (el acc) (crux:cons el acc)) () '(1))	(1)
+(prelude:foldl (:lambda (el acc) (crux:cons el acc)) () ())	:nil
+(prelude:foldl (:lambda (x y) (crux:sum x y)) 0 '(1 2 3))	6
 (prelude:foldr (:lambda (el acc) (:if (prelude:null acc) :nil (prelude:symbolp el))) :t '(1 2 3))	:nil
 (prelude:foldr (:lambda (el acc) (:if (prelude:null acc) :nil (prelude:symbolp el))) :t '(a b c))	:t
-(prelude:foldr (:lambda (el acc) (core:cons el acc)) () '(1 2 3 4))	(1 2 3 4)
-(prelude:foldr (:lambda (el acc) (core:cons el acc)) () '(1))	(1)
-(prelude:foldr (:lambda (el acc) (core:cons el acc)) () ())	:nil
-(prelude:foldr (:lambda (x y) (core:sum x y)) 0 '(1 2 3))	6
+(prelude:foldr (:lambda (el acc) (crux:cons el acc)) () '(1 2 3 4))	(1 2 3 4)
+(prelude:foldr (:lambda (el acc) (crux:cons el acc)) () '(1))	(1)
+(prelude:foldr (:lambda (el acc) (crux:cons el acc)) () ())	:nil
+(prelude:foldr (:lambda (x y) (crux:sum x y)) 0 '(1 2 3))	6
 (prelude:last '(1 2 . 3))	(2 . 3)
 (prelude:last '(1 2 3))	(3)
 (prelude:last '(1))	(1)
@@ -57,24 +57,24 @@
 (prelude:maplist (:lambda (el) el) '(1 2 3))	((1 2 3) (2 3) (3))
 (prelude:maplist (:lambda (el) el) '(1))	((1))
 (prelude:maplist (:lambda (el) el) ())	:nil
-(prelude:positionl (:lambda (el) (core:eq el 'foo)) ())	:nil
-(prelude:positionl (:lambda (el) (core:eq el 'foo)) '(1))	:nil
-(prelude:positionl (:lambda (el) (core:eq el 'foo)) '(foo))	0
-(prelude:positionl (:lambda (el) (core:eq el 'foo)) '(1 foo))	1
+(prelude:positionl (:lambda (el) (crux:eq el 'foo)) ())	:nil
+(prelude:positionl (:lambda (el) (crux:eq el 'foo)) '(1))	:nil
+(prelude:positionl (:lambda (el) (crux:eq el 'foo)) '(foo))	0
+(prelude:positionl (:lambda (el) (crux:eq el 'foo)) '(1 foo))	1
 (prelude:positionl prelude:zerop '(1 2 0 4 5))	2
 (prelude:positionl prelude:zerop '(0 2 0 4 5))	0
 (prelude:positionl prelude:zerop '(1 2 3 4 0))	4
-(prelude:positionr (:lambda (el) (core:eq el 'foo)) ())	:nil
-(prelude:positionr (:lambda (el) (core:eq el 'foo)) '(1))	:nil
-(prelude:positionr (:lambda (el) (core:eq el 'foo)) '(foo))	0
-(prelude:positionr (:lambda (el) (core:eq el 'foo)) '(1 foo))	1
+(prelude:positionr (:lambda (el) (crux:eq el 'foo)) ())	:nil
+(prelude:positionr (:lambda (el) (crux:eq el 'foo)) '(1))	:nil
+(prelude:positionr (:lambda (el) (crux:eq el 'foo)) '(foo))	0
+(prelude:positionr (:lambda (el) (crux:eq el 'foo)) '(1 foo))	1
 (prelude:positionr prelude:zerop '(1 2 0 4 5))	2
 (prelude:positionr prelude:zerop '(0 2 0 4 5))	2
 (prelude:positionr prelude:zerop '(0 2 3 4 5))	0
 (prelude:reverse '(1 2 3 4))	(4 3 2 1)
-(core:cdr (prelude:assq #\a '((#\a . foo))))	foo
-(core:cdr (prelude:assq #\a '(() (#\a . foo))))	foo
-(core:cdr (prelude:assq #\a ()))	:nil
-(core:car (prelude:rassq 'foo '((#\a . foo))))	#\a
-(core:car (prelude:rassq 'foo '(() (#\a . foo))))	#\a
-(core:cdr (prelude:rassq #\a ()))	:nil
+(crux:cdr (prelude:assq #\a '((#\a . foo))))	foo
+(crux:cdr (prelude:assq #\a '(() (#\a . foo))))	foo
+(crux:cdr (prelude:assq #\a ()))	:nil
+(crux:car (prelude:rassq 'foo '((#\a . foo))))	#\a
+(crux:car (prelude:rassq 'foo '(() (#\a . foo))))	#\a
+(crux:cdr (prelude:rassq #\a ()))	:nil

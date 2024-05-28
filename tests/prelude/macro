@@ -1,13 +1,13 @@
 (prelude:macro-function prelude:macro-function ())	:nil
-(core:type-of prelude:macroexpand-1)	:func
-(core:type-of prelude:macroexpand)	:func
-(core:type-of prelude:macro-function)	:func
+(crux:type-of prelude:macroexpand-1)	:func
+(crux:type-of prelude:macroexpand)	:func
+(crux:type-of prelude:macro-function)	:func
 (prelude:compile '(define-macro prelude:a-macro ()))	(:quote prelude:a-macro)
-(core:type-of ((:lambda () (prelude:compile '(define-macro a-macro () a-macro)) (prelude:macro-function 'a-macro ()))))	:func
+(crux:type-of ((:lambda () (prelude:compile '(define-macro a-macro () a-macro)) (prelude:macro-function 'a-macro ()))))	:func
 ((:lambda () (prelude:compile '(define-macro no-arg-macro () ''no-arg-macro)) (prelude:macroexpand '(no-arg-macro) ())))	(:quote no-arg-macro)
-((:lambda () (prelude:compile '(define-macro no-arg-macro () ''no-arg-macro)) (core:eval (prelude:compile '(no-arg-macro)))))	no-arg-macro
-((:lambda () (prelude:compile '(define-macro arg-macro (arg) arg)) (prelude:macroexpand '(arg-macro (core:sum 1 2)) ())))	(core:sum 1 2)
-((:lambda () (prelude:compile '(define-macro arg-macro (arg) arg)) (core:eval (prelude:compile '(arg-macro (core:sum 1 2))))))	3
-((:lambda () (prelude:compile '(define-macro rest-macro (&rest args) (core:cons '(lambda (&rest rest) rest) args))) (core:eval (prelude:compile '(rest-macro (core:sum 1 2))))))	(3)
-((:lambda () (prelude:compile '(define-macro rest-macro (&rest args) (core:cons '(lambda (&rest rest) rest) args))) (core:eval (prelude:compile '(rest-macro (core:sum 1 2) (core:sum 3 4))))))	(3 7)
-((:lambda () (prelude:compile '(define-macro rest-macro (&rest args) (core:cons '(lambda (&rest rest) rest) args))) (core:eval (prelude:compile '(rest-macro 1 2 3)))))	(1 2 3)
+((:lambda () (prelude:compile '(define-macro no-arg-macro () ''no-arg-macro)) (crux:eval (prelude:compile '(no-arg-macro)))))	no-arg-macro
+((:lambda () (prelude:compile '(define-macro arg-macro (arg) arg)) (prelude:macroexpand '(arg-macro (crux:sum 1 2)) ())))	(crux:sum 1 2)
+((:lambda () (prelude:compile '(define-macro arg-macro (arg) arg)) (crux:eval (prelude:compile '(arg-macro (crux:sum 1 2))))))	3
+((:lambda () (prelude:compile '(define-macro rest-macro (&rest args) (crux:cons '(lambda (&rest rest) rest) args))) (crux:eval (prelude:compile '(rest-macro (crux:sum 1 2))))))	(3)
+((:lambda () (prelude:compile '(define-macro rest-macro (&rest args) (crux:cons '(lambda (&rest rest) rest) args))) (crux:eval (prelude:compile '(rest-macro (crux:sum 1 2) (crux:sum 3 4))))))	(3 7)
+((:lambda () (prelude:compile '(define-macro rest-macro (&rest args) (crux:cons '(lambda (&rest rest) rest) args))) (crux:eval (prelude:compile '(rest-macro 1 2 3)))))	(1 2 3)

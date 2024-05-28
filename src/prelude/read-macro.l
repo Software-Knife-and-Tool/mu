@@ -8,23 +8,23 @@
 ;;;
 ;;; sharpsign readers
 ;;;
-(core:intern prelude "%read-sharp-char"
+(crux:intern prelude "%read-sharp-char"
    (:lambda (ch stream)
       (prelude:read-char stream () ())))
 
-(core:intern prelude "%read-sharp-comment"
+(crux:intern prelude "%read-sharp-comment"
    (:lambda (ch stream)
-      (core:fix
+      (crux:fix
        (:lambda (loop)
          (:if (prelude:streamp loop)
               loop
               ((:lambda (ch)
-                 (:if (core:eq ch #\|)
+                 (:if (crux:eq ch #\|)
                       ((:lambda (ch)
                          ((:lambda (ch)
                             (:if (prelude:null ch)
                                  (prelude:raise stream 'prelude:%read-sharp-comment "unexpected end of file")
-                                 (:if (core:eq ch #\#)
+                                 (:if (crux:eq ch #\#)
                                       stream
                                       (prelude:null loop))))
                           (prelude:read-char stream () ())))
@@ -37,47 +37,47 @@
                     (prelude:read-char stream () ())))))
        ())))
 
-(core:intern prelude "%read-sharp-vector"
+(crux:intern prelude "%read-sharp-vector"
    (:lambda (ch stream)
       ((:lambda (type)
           (:if (prelude:keywordp type)
-               (core:make-vector type (prelude:%read-list #\( stream))
+               (crux:make-vector type (prelude:%read-list #\( stream))
                (prelude:raise type 'prelude:%read-sharp-vector "not a type keyword")))
           (prelude:%read stream))))
 
-(core:intern prelude "%read-byte-bits"
+(crux:intern prelude "%read-byte-bits"
    (:lambda (stream)
-     (core:cdr
-      (core:fix
+     (crux:cdr
+      (crux:fix
        (:lambda (loop)
          ((:lambda (nbits byte)
             (:if (prelude:zerop nbits)
                  loop
                  ((:lambda (ch)                   
                     (:if (prelude:null ch)
-                         (core:cons 0 `(,(core:difference 8 nbits) ,@(core:ash byte nbits)))
+                         (crux:cons 0 `(,(crux:difference 8 nbits) ,@(crux:ash byte nbits)))
                          ((:lambda (syntax)
-                            (:if (prelude:%orf (core:eq :tmacro syntax) (core:eq :wspace syntax))
+                            (:if (prelude:%orf (crux:eq :tmacro syntax) (crux:eq :wspace syntax))
                                  ((:lambda ()
-                                    (:if (core:eq :tmacro syntax)
+                                    (:if (crux:eq :tmacro syntax)
                                          (prelude:unread-char ch stream)
                                          ())
-                                    (core:cons 0 `(,(core:difference 8 nbits) ,@(core:ash byte nbits)))))
-                                 (:if (prelude:%orf (core:eq #\0 ch) (core:eq #\1 ch))
+                                    (crux:cons 0 `(,(crux:difference 8 nbits) ,@(crux:ash byte nbits)))))
+                                 (:if (prelude:%orf (crux:eq #\0 ch) (crux:eq #\1 ch))
                                       `(,(prelude:1- nbits)
-                                        ,@(core:logor
-                                           (:if (core:eq #\1 ch) 1 0)
-                                           (core:product byte 2)))
+                                        ,@(crux:logor
+                                           (:if (crux:eq #\1 ch) 1 0)
+                                           (crux:product byte 2)))
                                       (prelude:raise ch 'prelude:%read-sharp-bit-vector "not a bit designator"))))
                           (prelude:%read-char-syntax ch))))
                   (prelude:read-char stream () ()))))
-          (core:car loop)
-          (core:cdr loop)))
+          (crux:car loop)
+          (crux:cdr loop)))
         '(8 . 0)))))
              
-(core:intern prelude "%read-sharp-bit-vector"
+(crux:intern prelude "%read-sharp-bit-vector"
    (:lambda (ch stream)
-     (core:fix
+     (crux:fix
        (:lambda (loop)
          (:if (prelude:vectorp loop)
               loop
@@ -85,65 +85,65 @@
                  (:if (prelude:consp byte-descriptor)
                       ((:lambda (length byte)
                          (prelude:%make-vector
-                          (core:make-vector :byte (prelude:reverse `(,byte ,@loop)))
+                          (crux:make-vector :byte (prelude:reverse `(,byte ,@loop)))
                           ()
-                          `(,(core:sum length (core:product 8 (core:length loop))))))
-                       (core:car byte-descriptor)
-                       (core:cdr byte-descriptor))
+                          `(,(crux:sum length (crux:product 8 (crux:length loop))))))
+                       (crux:car byte-descriptor)
+                       (crux:cdr byte-descriptor))
                        `(,byte-descriptor ,@loop)))
                (prelude:%read-byte-bits stream))))
        ())))
 
-(core:intern prelude "%read-sharp-dot"
+(crux:intern prelude "%read-sharp-dot"
    (:lambda (ch stream)
-      (core:eval (prelude:compile (prelude:read stream () ())))))
+      (crux:eval (prelude:compile (prelude:read stream () ())))))
 
-(core:intern prelude "%read-sharp-colon"
+(crux:intern prelude "%read-sharp-colon"
    (:lambda (ch stream)
      ((:lambda (ch)
         (:if ch
              ((:lambda (symbol)
-                (:if (core:eq :symbol (core:type-of symbol))
-                     (core:make-symbol (core:symbol-name symbol))
+                (:if (crux:eq :symbol (crux:type-of symbol))
+                     (crux:make-symbol (crux:symbol-name symbol))
                      (prelude:raise symbol 'prelude:%read-sharp-colon "not a symbol")))
               (prelude:%read-atom ch stream))              
              (prelude:raise () 'prelude:%read-sharp-colon "early eof")))
      (prelude:read-char stream () ()))))
 
-(core:intern prelude "%read-sharp-number"
+(crux:intern prelude "%read-sharp-number"
   (:lambda (base stream)
-    (core:fix
+    (crux:fix
       (:lambda (loop)
         (:if (prelude:numberp loop)
              loop
              ((:lambda (ch)
                 (:if (prelude:null ch)
-                     (:if (core:eq base #\x)
-                          (prelude:parse-integer (core:get-string prelude:%reader-stream%) 16)
-                          (:if (core:eq base #\b)
-                               (prelude:parse-integer (core:get-string prelude:%reader-stream%) 2)
-                               (prelude:parse-integer (core:get-string prelude:%reader-stream%) 10)))
+                     (:if (crux:eq base #\x)
+                          (prelude:parse-integer (crux:get-string prelude:%reader-stream%) 16)
+                          (:if (crux:eq base #\b)
+                               (prelude:parse-integer (crux:get-string prelude:%reader-stream%) 2)
+                               (prelude:parse-integer (crux:get-string prelude:%reader-stream%) 10)))
                      ((:lambda (syntax-type)
-                        (:if (core:eq syntax-type :const)
+                        (:if (crux:eq syntax-type :const)
                              ((:lambda ()
                                 (prelude:write-char ch prelude:%reader-stream%)
                                 (prelude:null loop)))
                              ((:lambda ()
                                 (prelude:unread-char ch stream)
-                                (:if (core:eq base #\x)
-                                     (prelude:parse-integer (core:get-string prelude:%reader-stream%) 16)
-                                     (:if (core:eq base #\b)
-                                          (prelude:parse-integer (core:get-string prelude:%reader-stream%) 2)
-                                          (prelude:parse-integer (core:get-string prelude:%reader-stream%) 10)))))))
+                                (:if (crux:eq base #\x)
+                                     (prelude:parse-integer (crux:get-string prelude:%reader-stream%) 16)
+                                     (:if (crux:eq base #\b)
+                                          (prelude:parse-integer (crux:get-string prelude:%reader-stream%) 2)
+                                          (prelude:parse-integer (crux:get-string prelude:%reader-stream%) 10)))))))
                      (prelude:%read-char-syntax ch))))
               (prelude:read-char stream () ()))))
       ())))
 
-(core:intern prelude "%read-sharp"
+(crux:intern prelude "%read-sharp"
   (:lambda (ch stream)
     ((:lambda (ch sharp-table)
-       (core:apply
-        (core:symbol-value (core:cdr (prelude:%assq ch sharp-table)))
+       (crux:apply
+        (crux:symbol-value (crux:cdr (prelude:%assq ch sharp-table)))
         `(,ch ,stream)))
      (prelude:read-char stream () ())
      '((#\| . prelude:%read-sharp-comment)
@@ -159,28 +159,28 @@
 ;;;
 ;;; list reader
 ;;;
-(core:intern prelude "%read-list-eol%" (core:make-symbol "eol"))
+(crux:intern prelude "%read-list-eol%" (crux:make-symbol "eol"))
 
-(core:intern prelude "%read-list-eol"
+(crux:intern prelude "%read-list-eol"
    (:lambda (ch stream)
       prelude:%read-list-eol%))
 
-(core:intern prelude "%read-list"
+(crux:intern prelude "%read-list"
    (:lambda (ch stream)
-      (core:fix
+      (crux:fix
        (:lambda (loop)
          ((:lambda (el)
-            (:if (core:eq el prelude:%read-list-eol%)
+            (:if (crux:eq el prelude:%read-list-eol%)
                  loop
-                 (:if (core:eq :symbol (core:type-of el))
-                      (:if (core:eq (core:symbol-name el) ".")
+                 (:if (crux:eq :symbol (crux:type-of el))
+                      (:if (crux:eq (crux:symbol-name el) ".")
                            ((:lambda (dotted)
-                              (:if (core:eq (prelude:%read stream) prelude:%read-list-eol%)
+                              (:if (crux:eq (prelude:%read stream) prelude:%read-list-eol%)
                                    ((:lambda ()
                                       (prelude:unread-char #\) stream)
                                       dotted))
                                    (prelude:raise () 'prelude:%read-list "malformed dotted list")))
-                            (prelude:foldr core:cons (prelude:%read stream) loop))
+                            (prelude:foldr crux:cons (prelude:%read stream) loop))
                            `(,@loop ,el))
                       `(,@loop ,el))))
           (prelude:%read stream)))
@@ -189,14 +189,14 @@
 ;;;
 ;;; string reader
 ;;;
-(core:intern prelude "%read-string"
+(crux:intern prelude "%read-string"
    (:lambda (ch stream)
-     (core:fix
+     (crux:fix
       (:lambda (loop)
         (:if (prelude:stringp loop)
              loop
              ((:lambda (ch)
-                (:if (core:eq ch #\")
+                (:if (crux:eq ch #\")
                      (prelude:get-output-stream-string prelude:%reader-stream%)
                      ((:lambda ()
                         (prelude:write-char ch prelude:%reader-stream%)
@@ -207,21 +207,21 @@
 ;;;
 ;;; quote reader
 ;;;
-(core:intern prelude "%read-quote"
+(crux:intern prelude "%read-quote"
   (:lambda (ch stream)
      `(:quote ,(prelude:%read stream))))
 
 ;;;
 ;;; line comment
 ;;;
-(core:intern prelude "%read-line-comment"
+(crux:intern prelude "%read-line-comment"
     (:lambda (ch stream)
-      (core:fix
+      (crux:fix
        (:lambda (loop)
          (:if (prelude:streamp loop)
               loop
               ((:lambda (ch)
-                 (:if (core:eq ch #\linefeed)
+                 (:if (crux:eq ch #\linefeed)
                       stream
                       (prelude:null loop)))
                (prelude:read-char stream () ()))))
@@ -230,11 +230,11 @@
 ;;;
 ;;; read macros
 ;;;
-(core:intern prelude "%read-macro"
+(crux:intern prelude "%read-macro"
   (:lambda (ch stream)
      ((:lambda (macro-table)
-       (core:apply
-            (core:symbol-value (core:cdr (prelude:%assq ch macro-table)))
+       (crux:apply
+            (crux:symbol-value (crux:cdr (prelude:%assq ch macro-table)))
             `(,ch ,stream)))
        '((#\" . prelude:%read-string)
          (#\# . prelude:%read-sharp)
@@ -247,21 +247,21 @@
 ;;;
 ;;; get/set-macro-character
 ;;;
-(core:intern prelude "get-macro-character"
+(crux:intern prelude "get-macro-character"
    (:lambda (char)
      (:if (prelude:charp char)
           ((:lambda (macro-symbol)
               (:if macro-symbol
                    (prelude:symbol-value macro-symbol)
                    ()))
-           (core:find prelude:%char-macro-ns% (core:make-vector :char `(,char))))
+           (crux:find prelude:%char-macro-ns% (crux:make-vector :char `(,char))))
           (prelude:raise char 'prelude:get-macro-character "not a character"))))
 
-(core:intern prelude "set-macro-character"
+(crux:intern prelude "set-macro-character"
    (:lambda (char fn non-terminating)
       (:if (prelude:charp char)
          (:if (prelude:functionp fn)
-              (core:intern prelude:%char-macro-ns% (core:make-vector :char `(char)) `(,fn ,@non-terminating))
+              (crux:intern prelude:%char-macro-ns% (crux:make-vector :char `(char)) `(,fn ,@non-terminating))
               (prelude:raise fn 'prelude:set-macro-character "not a function"))
          (prelude:raise char 'prelude:set-macro-character "not a character"))
       :t))

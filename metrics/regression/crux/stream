@@ -1,0 +1,2 @@
+(crux:close crux:*error-output*)
+(crux:get-string (crux:open :string :output (crux:symbol-name 'abcdef)))
