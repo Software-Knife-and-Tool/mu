@@ -10,7 +10,7 @@ use {
             symbols::{CoreFn, CRUX_SYMBOLS},
             types::Tag,
         },
-        features::{Core as _, Feature},
+        features::feature::{Core as _, Feature},
         streams::write::Core as _,
         types::{
             core_stream::Stream,
@@ -46,7 +46,7 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.64";
+    pub const VERSION: &'static str = "0.1.65";
 
     pub fn new() -> Self {
         Lib {

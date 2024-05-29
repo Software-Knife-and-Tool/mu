@@ -1,20 +1,20 @@
 [package]
 name = "mu"
-version = "0.1.64"
+version = "0.1.65"
 edition = "2021"
 authors = ["me <putnamjm.design@gmail.com>"]
 
 [[bin]]
 name = "mu-exec"
-path = "src/runtime/mu-exec/main.rs"
+path = "src/mu-exec/main.rs"
 
 [[bin]]
 name = "mu-ld"
-path = "src/runtime/mu-ld/main.rs"
+path = "src/mu-ld/main.rs"
 
 [[bin]]
 name = "mu-sys"
-path = "src/runtime/mu-sys/main.rs"
+path = "src/mu-sys/main.rs"
 
 [lib]
 name = "crux"

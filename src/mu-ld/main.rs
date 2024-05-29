@@ -26,28 +26,28 @@ use {
 #[derive(Debug, PartialEq)]
 enum LoadOpt {
     Config(String),
-    Dump(String),
+    Image(String),
     Eval(String),
     Load(String),
-    Output(String),
+    Write(String),
 }
 
 fn usage() {
-    println!("env-ld: {}: [-h?vcelqod] [file...]", Env::VERSION);
+    println!("env-ld: {}: [-h?vdcelqwi] [file...]", Env::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value,...]");
-    println!("d: dump [path]");
     println!("e: eval form");
+    println!("i: image [path]");
     println!("l: load path");
-    println!("o: output [path]");
     println!("v: print version and exit");
+    println!("w: write image [path]");
 
     std::process::exit(0);
 }
 
 fn options(mut argv: Vec<String>) -> Option<Vec<LoadOpt>> {
-    let mut opts = getopt::Parser::new(&argv, "h?vc:e:l:o:d:");
+    let mut opts = getopt::Parser::new(&argv, "h?vc:e:l:w:i:");
     let mut optv = Vec::new();
 
     loop {
@@ -72,11 +72,11 @@ fn options(mut argv: Vec<String>) -> Option<Vec<LoadOpt>> {
                     Opt('e', Some(expr)) => {
                         optv.push(LoadOpt::Eval(expr));
                     }
-                    Opt('o', Some(path)) => {
-                        optv.push(LoadOpt::Output(path));
+                    Opt('w', Some(path)) => {
+                        optv.push(LoadOpt::Write(path));
                     }
-                    Opt('d', Some(path)) => {
-                        optv.push(LoadOpt::Dump(path));
+                    Opt('i', Some(path)) => {
+                        optv.push(LoadOpt::Image(path));
                     }
                     Opt('l', Some(path)) => {
                         optv.push(LoadOpt::Load(path));
@@ -119,7 +119,7 @@ pub fn main() {
     }
 
     let env = match Env::config(_config) {
-        Some(config) => Env::new(config),
+        Some(config) => Env::new(config, None),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)
@@ -149,8 +149,10 @@ pub fn main() {
                         }
                     },
                     LoadOpt::Config(_) => (),
-                    LoadOpt::Output(path) => Image::output(&path),
-                    LoadOpt::Dump(path) => Image::dump(&path),
+                    LoadOpt::Write(path) => Image::write_image(&env, &path),
+                    LoadOpt::Image(path) => {
+                        Image::load_image(&path).unwrap();
+                    }
                 }
             }
         }

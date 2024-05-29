@@ -14,7 +14,7 @@ use crate::{
         symbols::CoreFnDef,
         types::Type,
     },
-    features::Feature,
+    features::feature::Feature,
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,

@@ -2,14 +2,14 @@
 //  SPDX-License-Identifier: MIT
 
 //! features module
-use crate::core::symbols::CoreFn;
+pub mod feature;
 
 #[cfg(feature = "nix")]
-use crate::features::nix::nix_::{Core as _, Nix};
+use crate::features::nix::nix_::Nix;
 #[cfg(feature = "std")]
-use crate::features::std::std_::{Core as _, Std};
+use crate::features::std::std_::Std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
-use crate::features::sysinfo::sysinfo_::{Core as _, Sysinfo};
+use crate::features::sysinfo::sysinfo_::Sysinfo;
 
 #[cfg(feature = "nix")]
 pub mod nix;
@@ -17,29 +17,3 @@ pub mod nix;
 pub mod std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
 pub mod sysinfo;
-
-#[derive(Clone)]
-pub struct Feature {
-    pub symbols: Vec<(&'static str, u16, CoreFn)>,
-    pub namespace: String,
-}
-
-pub trait Core {
-    fn install_features() -> Vec<Feature>;
-}
-
-impl Core for Feature {
-    fn install_features() -> Vec<Feature> {
-        #[allow(clippy::let_and_return)]
-        let features = vec![
-            #[cfg(feature = "nix")]
-            Nix::feature(),
-            #[cfg(feature = "std")]
-            Std::feature(),
-            #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
-            Sysinfo::feature(),
-        ];
-
-        features
-    }
-}

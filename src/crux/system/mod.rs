@@ -2,7 +2,4 @@
 //  SPDX-License-Identifier: MIT
 
 //! system module
-pub mod bump_allocator;
-pub mod config;
-pub mod image;
 pub mod utime;

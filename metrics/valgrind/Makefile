@@ -1,7 +1,7 @@
 #
 # valgrind makefile
 #
-VALGRIND='((:lambda (g) (core:apply g (core:cons g (core:cons 101010101 (core:cons 11011 ()))))) (:lambda (g a b) (:if (core:eq 0 b) a (core:apply g (core:cons g (core:cons b (core:cons (core:difference a (core:product b (core:quotient a b))) ()))))))) '
+VALGRIND='((:lambda (g) (crux:apply g (crux:cons g (crux:cons 101010101 (crux:cons 11011 ()))))) (:lambda (g a b) (:if (crux:eq 0 b) a (crux:apply g (crux:cons g (crux:cons b (crux:cons (crux:difference a (crux:product b (crux:quotient a b))) ()))))))) '
 
 MU_SYS = ../../dist/mu-sys
 
@@ -16,19 +16,19 @@ valgrind: memcheck callgrind cachegrind clean
 
 memcheck:
 	@valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=10 \
-		--leak-resolution=med --show-leak-kinds=definite \
-		$(MU_SYS) -p      \
+		--leak-resolution=med --show-leak-kinds=definite	\
+		$(MU_SYS) -p      					\
 		    -q $(VALGRIND) > memcheck.report 2>&1 || true
 
 callgrind:
 	@valgrind --tool=callgrind     	\
-		$(MU_SYS) -p      \
+		$(MU_SYS) -p      	\
 		    -q $(VALGRIND) > callgrind.report 2>&1 || true
 	@callgrind_annotate --auto=yes callgrind.out.* >> callgrind.report
 
 cachegrind:
 	@valgrind --tool=cachegrind	\
-		$(MU_SYS) -p      \
+		$(MU_SYS) -p      	\
 		    -q $(VALGRIND) > cachegrind.report 2>&1 || true
 
 clean:

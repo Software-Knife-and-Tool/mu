@@ -1,0 +1,88 @@
+//  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-License-Identifier: MIT
+
+//! image mechanics
+#[allow(unused_imports)]
+use crate::{
+    crux::{Condition, Env, Result, Tag},
+    reader::Reader,
+    writer::Writer,
+};
+
+use json::{self, object};
+
+pub struct Image {
+    pub magic: String,
+    pub version: String,
+}
+
+impl Image {
+    pub const IMAGE_MAGIC: &'static str = "mu-image";
+
+    pub fn load_image(path: &str) -> Option<Image> {
+        let reader = Reader::with_reader(path).unwrap();
+
+        let mut option = None;
+
+        /*
+        let section_names = reader
+            .section_names()
+            .into_iter()
+            .filter(|name| !name.is_empty())
+            .collect::<Vec<String>>();
+         */
+
+        match reader.section_by_name(".ident") {
+            Some(section) => {
+                let image = reader.section_data(section).unwrap();
+                let ident = json::parse(&String::from_utf8(image.to_vec()).unwrap()).unwrap();
+
+                println!("  image path: {path}");
+                println!("  magic:      {}", ident["magic"]);
+                print!("  version:    {}", ident["version"]);
+
+                if ident["version"] != Env::VERSION {
+                    println!("    ! warning: version mismatch, expected {}", Env::VERSION)
+                } else {
+                    println!()
+                }
+
+                option = Some(Image {
+                    magic: ident["magic"].to_string(),
+                    version: ident["version"].to_string(),
+                });
+            }
+            None => println!("     ! .ident section not found"),
+        }
+
+        match reader.section_by_name(".image") {
+            Some(section) => {
+                let size = reader.section_data(section).unwrap().len();
+
+                println!("  image size: {size:?}")
+            }
+            None => println!("     ! .image section not found"),
+        }
+
+        option
+    }
+
+    pub fn write_image(env: &Env, path: &str) {
+        let ident_json = object! {
+            magic: Self::IMAGE_MAGIC.to_string(),
+            version: Env::VERSION.to_string(),
+        };
+
+        let writer = Writer::with_writer(
+            path,
+            ident_json.dump().as_bytes().to_vec(),
+            env.image().unwrap(),
+        )
+        .unwrap();
+
+        writer.write().unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {}

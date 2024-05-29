@@ -4,7 +4,7 @@
 //! env functions
 use crate::{
     core::{
-        env::{Core as _, Env},
+        env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         types::{Tag, Type},
@@ -12,12 +12,16 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
+        symbol::{Core as _, Symbol},
         vector::Vector,
     },
 };
 
 pub trait Core {
     fn fp_argv_check(&self, _: &str, _: &[Type], _: &Frame) -> exception::Result<()>;
+    fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
+    fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
+    fn eval(&self, _: Tag) -> exception::Result<Tag>;
 }
 
 impl Core for Env {
@@ -59,6 +63,60 @@ impl Core for Env {
         }
 
         Ok(())
+    }
+
+    fn apply_(&self, func: Tag, argv: Vec<Tag>) -> exception::Result<Tag> {
+        let value = Tag::nil();
+
+        Frame { func, argv, value }.apply(self, func)
+    }
+
+    fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
+        let value = Tag::nil();
+
+        let eval_results: exception::Result<Vec<Tag>> = Cons::iter(self, args)
+            .map(|cons| self.eval(Cons::car(self, cons)))
+            .collect();
+
+        let argv = eval_results?;
+
+        Frame { func, argv, value }.apply(self, func)
+    }
+
+    fn eval(&self, expr: Tag) -> exception::Result<Tag> {
+        match expr.type_of() {
+            Type::Cons => {
+                let func = Cons::car(self, expr);
+                let args = Cons::cdr(self, expr);
+
+                match func.type_of() {
+                    Type::Keyword if func.eq_(&Symbol::keyword("quote")) => {
+                        Ok(Cons::car(self, args))
+                    }
+                    Type::Symbol => {
+                        if Symbol::is_bound(self, func) {
+                            let fn_ = Symbol::value(self, func);
+                            match fn_.type_of() {
+                                Type::Function => self.apply(fn_, args),
+                                _ => Err(Exception::new(self, Condition::Type, "crux:eval", func)),
+                            }
+                        } else {
+                            Err(Exception::new(self, Condition::Unbound, "crux:eval", func))
+                        }
+                    }
+                    Type::Function => self.apply(func, args),
+                    _ => Err(Exception::new(self, Condition::Type, "crux:eval", func)),
+                }
+            }
+            Type::Symbol => {
+                if Symbol::is_bound(self, expr) {
+                    Ok(Symbol::value(self, expr))
+                } else {
+                    Err(Exception::new(self, Condition::Unbound, "crux:eval", expr))
+                }
+            }
+            _ => Ok(expr),
+        }
     }
 }
 

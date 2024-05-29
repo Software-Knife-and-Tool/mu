@@ -6,7 +6,7 @@
 use crate::{
     core::{
         apply::Core as _,
-        env::{Core as _, Env},
+        env::Env,
         exception::{self, Condition, Core as _, Exception},
         frame::Frame,
         gc::Core as _,

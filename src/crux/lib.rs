@@ -2,40 +2,40 @@
 //  SPDX-License-Identifier: MIT
 
 //!
-//! The core machine is the implementation surface for the [`mu programming environment`].
+//! The core library, *crux*, is the implementation surface for the [`mu programming environment`].
 //!
-//! As much as is practible, core's functions and data types resemble Common Lisp in preference to
-//! Scheme/Clojure in order to be immediately familiar to the traditional LISP programmer.
+//! As much as is practible, *crux's* functions and data types resemble Common Lisp in order to be
+//! familiar to the traditional Lisp programmer.
 //!
-//! core is an immutable, lexically scoped LISP-1 kernel meant as a porting layer for an ascending
-//! tower of LISP languages. While it is possible to do some useful application work directly in the
-//! core language, core defers niceties like macros, closures, and rest functions to a compiler
-//! layered on it. See [`mu programming environment`] for details.
+//! crux is an immutable, lexically scoped Lisp-1 kernel porting layer for an ascending tower of
+//! Lisp languages. While it is possible to do some useful application work directly in the *crux*
+//! language, *crux* defers niceties like macros, closures, and rest functions to libraries and
+//! compilers layered on top of it. See [`mu programming environment`] for details.
 //!
-//! core characteristics:
+//! library characteristics:
 //! - mostly-safe Rust
 //! - 64 bit tagged objects
 //! - garbage collected heap
 //! - lambda compiler
-//! - minimal external dependencies
 //! - multiple independent execution contexts
 //! - s-expression reader/printer
 //! - symbol namespaces
 //!
-//! core data types:
-//!    56 bit fixnums (immediate)
-//!    Lisp-1 symbols
+//! library data types:
+//!    56 bit immediate fixnums
+//!    Lisp-1 namespaced symbols
 //!    character, string, and byte streams
-//!    characters (ASCII immediate)
-//!    conses
+//!    immediate ASCII characters
+//!    conses (can be immediate)
 //!    fixed arity functions
 //!    lambdas with lexical variables
 //!    general and specialized vectors
-//!    keywords (seven character immediate)
-//!    single float 32 bit IEEE float (immediate)
+//!    immediate strings (seven character limit)
+//!    immediate keywords (seven character limit)
+//!    immediate single float 32 bit IEEE float
 //!    structs
 //!
-//! core documentation:
+//! documentation:
 //!    see doc/refcards and doc/rustdoc
 //!
 //! [`mu programming environment`]: <https://github.com/Software-Knife-and-Tool/mu>
@@ -51,6 +51,7 @@ extern crate modular_bitfield;
 mod allocators;
 mod core;
 mod features;
+mod images;
 mod streams;
 mod system;
 mod types;
@@ -59,28 +60,26 @@ use futures::executor::block_on;
 use {
     crate::{
         core::{
+            apply::Core as _,
             compile::Compile,
-            env::Core as _,
+            config::Config,
             exception::{self, Core as _},
             lib::LIB,
         },
+        images::image::Core as _,
         streams::{read::Core as _, write::Core as _},
-        system::{
-            config::Config,
-            image::{Core as _, Image},
-        },
         types::{
             core_stream::{Core as _, Stream},
             stream::StreamBuilder,
         },
     },
-    std::{fs, io::Write},
+    std::fs,
 };
 
 /// The core API
 ///
 /// The core API exposes these types:
-/// - Condition, enumeration of possible exceptional conditions
+/// - Condition, enumeration of exceptional conditions
 /// - Exception, exception state
 /// - Lib, environment and API namespace
 /// - Result, specialized result for API functions that can fail
@@ -102,20 +101,20 @@ impl Env {
     /// current version
     pub const VERSION: &'static str = core::lib::Lib::VERSION;
 
-    /// init
+    /// turn on ^C exception signalling
     pub fn signal_exception() {
         Exception::signal_exception()
     }
 
-    /// config
+    /// environment configuration
     pub fn config(config: Option<String>) -> Option<Config> {
         Config::new(config)
     }
 
     /// constructor
-    pub fn new(config: Config) -> Self {
+    pub fn new(config: Config, image: Option<Vec<u8>>) -> Self {
         Env(<core::env::Env as core::lib::Core>::add_env(
-            core::env::Env::new(config),
+            core::env::Env::new(config, image),
         ))
     }
 
@@ -132,7 +131,7 @@ impl Env {
         tag.eq_(&tag1)
     }
 
-    /// evaluate a tagged s-expression
+    /// evaluate an s-expression
     pub fn eval(&self, expr: Tag) -> exception::Result<Tag> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -140,7 +139,7 @@ impl Env {
         env.eval(expr)
     }
 
-    /// compile a tagged s-expression
+    /// compile an s-expression
     pub fn compile(&self, expr: Tag) -> exception::Result<Tag> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -148,7 +147,7 @@ impl Env {
         Compile::compile(env, expr, &mut vec![])
     }
 
-    /// read a tagged s-expression from a core stream
+    /// read an s-expression from a core stream
     pub fn read(&self, stream: Tag, eof_error_p: bool, eof_value: Tag) -> exception::Result<Tag> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -156,7 +155,7 @@ impl Env {
         env.read_stream(stream, eof_error_p, eof_value, false)
     }
 
-    /// convert a String to a tagged s-expression
+    /// convert a &str to a tagged s-expression
     pub fn read_str(&self, str: &str) -> exception::Result<Tag> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -177,7 +176,7 @@ impl Env {
         env.write_stream(expr, escape, stream)
     }
 
-    /// write a rust String to a core stream
+    /// write an &str to a core stream
     pub fn write_str(&self, str: &str, stream: Tag) -> exception::Result<()> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -185,7 +184,7 @@ impl Env {
         env.write_string(str, stream)
     }
 
-    /// write a tag to a String
+    /// write an s-expression to a String
     pub fn write_to_string(&self, expr: Tag, esc: bool) -> String {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -222,7 +221,7 @@ impl Env {
         LIB.errout()
     }
 
-    // eval &str
+    /// eval &str
     pub fn eval_str(&self, expr: &str) -> exception::Result<Tag> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -240,6 +239,7 @@ impl Env {
         )
     }
 
+    /// load source file
     pub fn load(&self, file_path: &str) -> exception::Result<bool> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
@@ -266,33 +266,17 @@ impl Env {
             Err(Exception::new(
                 env,
                 Condition::Open,
-                "crux:open",
+                "load",
                 self.read_str(&format!("\"{}\"", file_path)).unwrap(),
             ))
         }
     }
 
-    // image management
-    pub fn save_image(&self, path: &str) -> exception::Result<()> {
+    /// get environment image
+    pub fn image(&self) -> exception::Result<Vec<u8>> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
-        match fs::File::create(path) {
-            Ok(mut file) => match file.write(&Image::image(env)) {
-                Ok(_) => Ok(()),
-                Err(_) => Err(Exception::new(
-                    env,
-                    Condition::Write,
-                    "save-image",
-                    Tag::nil(),
-                )),
-            },
-            Err(_) => Err(Exception::new(
-                env,
-                Condition::Open,
-                "save-image",
-                Tag::nil(),
-            )),
-        }
+        Ok(env.image())
     }
 }

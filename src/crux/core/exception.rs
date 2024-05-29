@@ -9,7 +9,7 @@ use {
     crate::{
         core::{
             apply::Core as _,
-            env::{Core as _, Env},
+            env::Env,
             frame::Frame,
             types::{Tag, Type},
         },

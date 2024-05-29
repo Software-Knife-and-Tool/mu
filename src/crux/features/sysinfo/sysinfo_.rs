@@ -10,7 +10,7 @@ use crate::{
         symbols::CoreFnDef,
         types::Tag,
     },
-    features::Feature,
+    features::feature::Feature,
     types::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,

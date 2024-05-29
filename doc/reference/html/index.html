@@ -8,18 +8,25 @@
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" href="./reference.css" />
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">mu/eth - a lightweight LISP environment for
-Rust</h1>
+<h1 class="title">mu/eth - a lightweight LISP environment for Rust</h1>
 </header>
 <h3 id="foreward"><strong>Foreward</strong></h3>
 <hr>
@@ -27,13 +34,13 @@ Rust</h1>
 environment for the Rust language ecosystem.</p>
 <p>Dynamic languages for low overhead environments must be lightweight,
 but developing applications in the target environment can be painful.
-<em>mu/eth</em> is a general development and execution environment
-for containers, shells, and other utilities that need small installation
-and runtime footprints.</p>
-<p><em>mu/eth</em> was designed to operate effectively on
-<em>Raspberry Pi</em> class machines and containers, and consists of a
-small native-code kernel runtime and a set of layered libraries in
-source form.</p>
+<em>mu/eth</em> is a general development and execution environment for
+containers, shells, and other utilities that need small installation and
+runtime footprints.</p>
+<p><em>mu/eth</em> was designed to operate effectively on <em>Raspberry
+Pi</em> class machines and containers, and consists of a small
+native-code kernel runtime and a set of layered libraries in source
+form.</p>
 <p>The <em>mu/eth</em> runtime is a native code library that directly
 interprets <em>mu</em> kernel code. A great deal of useful work can be
 done directly with the limited kernel language, though it lacks the
@@ -42,8 +49,8 @@ advanced language features require the use of the included
 <em>prelude</em> library.</p>
 <p>The <em>mu</em> library provides traditional LISP forms and a
 collection of functional programming features like pattern matching and
-monads. <em>mu/eth</em>, <em>prelude</em>, and <em>preface</em> code
-are human-readable and can be easily modified and extended.</p>
+monads. <em>mu/eth</em>, <em>prelude</em>, and <em>preface</em> code are
+human-readable and can be easily modified and extended.</p>
 <p>Questions? You can contact the author at
 putnamjm.design@gmail.com.</p>
 <div style="page-break-after: always">

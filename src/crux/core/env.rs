@@ -6,19 +6,8 @@
 use {
     crate::{
         allocators::bump_allocator::BumpAllocator,
-        core::{
-            exception::{self, Condition, Exception},
-            frame::Frame,
-            lib::Lib,
-            types::{Tag, Type},
-        },
-        system::config::Config,
-        types::{
-            cons::{Cons, Core as _},
-            namespace::Namespace,
-            symbol::{Core as _, Symbol},
-            vector::VecCacheMap,
-        },
+        core::{config::Config, frame::Frame, lib::Lib, types::Tag},
+        types::{namespace::Namespace, vector::VecCacheMap},
         LIB,
     },
     cpu_time::ProcessTime,
@@ -54,15 +43,8 @@ pub struct Env {
     pub start_time: ProcessTime,
 }
 
-pub trait Core {
-    fn new(config: Config) -> Self;
-    fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
-    fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
-    fn eval(&self, _: Tag) -> exception::Result<Tag>;
-}
-
-impl Core for Env {
-    fn new(config: Config) -> Self {
+impl Env {
+    pub fn new(config: Config, _image: Option<Vec<u8>>) -> Self {
         let heap = BumpAllocator::new(config.npages, Tag::NTYPES);
 
         let mut env = Env {
@@ -100,60 +82,6 @@ impl Core for Env {
         Lib::namespaces(&env);
 
         env
-    }
-
-    fn apply_(&self, func: Tag, argv: Vec<Tag>) -> exception::Result<Tag> {
-        let value = Tag::nil();
-
-        Frame { func, argv, value }.apply(self, func)
-    }
-
-    fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let value = Tag::nil();
-
-        let eval_results: exception::Result<Vec<Tag>> = Cons::iter(self, args)
-            .map(|cons| self.eval(Cons::car(self, cons)))
-            .collect();
-
-        let argv = eval_results?;
-
-        Frame { func, argv, value }.apply(self, func)
-    }
-
-    fn eval(&self, expr: Tag) -> exception::Result<Tag> {
-        match expr.type_of() {
-            Type::Cons => {
-                let func = Cons::car(self, expr);
-                let args = Cons::cdr(self, expr);
-
-                match func.type_of() {
-                    Type::Keyword if func.eq_(&Symbol::keyword("quote")) => {
-                        Ok(Cons::car(self, args))
-                    }
-                    Type::Symbol => {
-                        if Symbol::is_bound(self, func) {
-                            let fn_ = Symbol::value(self, func);
-                            match fn_.type_of() {
-                                Type::Function => self.apply(fn_, args),
-                                _ => Err(Exception::new(self, Condition::Type, "crux:eval", func)),
-                            }
-                        } else {
-                            Err(Exception::new(self, Condition::Unbound, "crux:eval", func))
-                        }
-                    }
-                    Type::Function => self.apply(func, args),
-                    _ => Err(Exception::new(self, Condition::Type, "crux:eval", func)),
-                }
-            }
-            Type::Symbol => {
-                if Symbol::is_bound(self, expr) {
-                    Ok(Symbol::value(self, expr))
-                } else {
-                    Err(Exception::new(self, Condition::Unbound, "crux:eval", expr))
-                }
-            }
-            _ => Ok(expr),
-        }
     }
 }
 
