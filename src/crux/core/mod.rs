@@ -2,7 +2,6 @@
 //  SPDX-License-Identifier: MIT
 
 //! core module
-pub mod allocator;
 pub mod apply;
 pub mod compile;
 pub mod config;

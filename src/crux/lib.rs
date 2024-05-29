@@ -48,7 +48,6 @@ extern crate lazy_static;
 #[macro_use]
 extern crate modular_bitfield;
 
-mod allocators;
 mod core;
 mod features;
 mod images;

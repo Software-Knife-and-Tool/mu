@@ -25,7 +25,7 @@ pub struct Reader {
 }
 
 impl Reader {
-    pub fn with_reader(path: &str) -> Result<Self> {
+    pub fn with(path: &str) -> Result<Self> {
         let data = fs::read(path)?;
 
         match FileHeader64::<Endianness>::parse(&*data) {

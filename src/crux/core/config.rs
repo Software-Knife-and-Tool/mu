@@ -3,8 +3,8 @@
 
 //! env config
 use crate::{
-    allocators::bump_allocator::BumpAllocator,
     core::{gc::GcMode, types::Tag},
+    images::bump_allocator::BumpAllocator,
 };
 
 // config builder

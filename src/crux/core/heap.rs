@@ -4,9 +4,7 @@
 //! env heap interface
 //!    Env
 use crate::{
-    allocators::bump_allocator::BumpAllocator,
     core::{
-        allocator::AllocTypeInfo,
         direct::DirectTag,
         env::Env,
         exception,
@@ -14,6 +12,8 @@ use crate::{
         indirect::{self, IndirectTag},
         types::{Tag, Type},
     },
+    images::allocator::AllocTypeInfo,
+    images::bump_allocator::BumpAllocator,
     types::{
         cons::{Cons, Core as _},
         function::{Core as _, Function},
