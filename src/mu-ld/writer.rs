@@ -26,7 +26,7 @@ pub struct Writer {
 }
 
 impl Writer {
-    pub fn with_writer(path: &str, ident: Vec<u8>, image: Vec<u8>) -> Result<Self> {
+    pub fn with(path: &str, ident: Vec<u8>, image: Vec<u8>) -> Result<Self> {
         Ok(Writer {
             path: path.to_string(),
             ident: ident.clone(),

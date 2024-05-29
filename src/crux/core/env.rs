@@ -5,8 +5,8 @@
 //!    Env
 use {
     crate::{
-        allocators::bump_allocator::BumpAllocator,
         core::{config::Config, frame::Frame, lib::Lib, types::Tag},
+        images::bump_allocator::BumpAllocator,
         types::{namespace::Namespace, vector::VecCacheMap},
         LIB,
     },

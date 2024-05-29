@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! env heap
-use crate::core::allocator::{AllocTypeInfo, AllocatorImageInfo};
+use crate::images::allocator::{AllocTypeInfo, AllocatorImageInfo};
 use {futures::executor::block_on, futures_locks::RwLock};
 
 #[derive(Debug)]

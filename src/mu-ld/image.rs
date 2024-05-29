@@ -20,17 +20,10 @@ impl Image {
     pub const IMAGE_MAGIC: &'static str = "mu-image";
 
     pub fn load_image(path: &str) -> Option<Image> {
-        let reader = Reader::with_reader(path).unwrap();
+        let reader = Reader::with(path).unwrap();
 
+        #[allow(unused_assignments)]
         let mut option = None;
-
-        /*
-        let section_names = reader
-            .section_names()
-            .into_iter()
-            .filter(|name| !name.is_empty())
-            .collect::<Vec<String>>();
-         */
 
         match reader.section_by_name(".ident") {
             Some(section) => {
@@ -42,7 +35,11 @@ impl Image {
                 print!("  version:    {}", ident["version"]);
 
                 if ident["version"] != Env::VERSION {
-                    println!("    ! warning: version mismatch, expected {}", Env::VERSION)
+                    println!(
+                        "    ! warning: version mismatch, {} expected {}",
+                        ident["version"],
+                        Env::VERSION
+                    )
                 } else {
                     println!()
                 }
@@ -52,7 +49,10 @@ impl Image {
                     version: ident["version"].to_string(),
                 });
             }
-            None => println!("     ! .ident section not found"),
+            None => {
+                println!("     ! error: .ident section not found");
+                return None;
+            }
         }
 
         match reader.section_by_name(".image") {
@@ -61,7 +61,10 @@ impl Image {
 
                 println!("  image size: {size:?}")
             }
-            None => println!("     ! .image section not found"),
+            None => {
+                println!("     ! error: .image section not found");
+                return None;
+            }
         }
 
         option
@@ -73,7 +76,7 @@ impl Image {
             version: Env::VERSION.to_string(),
         };
 
-        let writer = Writer::with_writer(
+        let writer = Writer::with(
             path,
             ident_json.dump().as_bytes().to_vec(),
             env.image().unwrap(),

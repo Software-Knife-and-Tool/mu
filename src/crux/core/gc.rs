@@ -4,13 +4,13 @@
 //! env gc
 //!    Env
 use crate::{
-    allocators::bump_allocator::BumpAllocator,
     core::{
         env::Env,
         exception,
         frame::Frame,
         types::{Tag, Type},
     },
+    images::bump_allocator::BumpAllocator,
     types::{
         cons::Cons,
         function::Function,
