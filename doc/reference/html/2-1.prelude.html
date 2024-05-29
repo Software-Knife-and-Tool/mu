@@ -8,10 +8,18 @@
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" href="./reference.css" />
@@ -24,12 +32,11 @@
 library</strong></h4>
 <hr />
 <p><em>prelude</em> is a syntactic and semantic extension library coded
-in the <em>mu</em> language primarily for the benefit of the
-<em>mu</em> library. It adds a complement of functions purposely
-missing from <em>mu</em>, an enhanced exception facility, a compiler for
-lambdas with rest arguments and function closures, and macros.
-<em>preface</em> is intended to be largely, if not wholly coded on
-<em>prelude</em>.</p>
+in the <em>mu</em> language primarily for the benefit of the <em>mu</em>
+library. It adds a complement of functions purposely missing from
+<em>mu</em>, an enhanced exception facility, a compiler for lambdas with
+rest arguments and function closures, and macros. <em>preface</em> is
+intended to be largely, if not wholly coded on <em>prelude</em>.</p>
 <p><em>Prelude</em> symbols reside in the <em>prelude</em> namespace. A
 complete listing of <em>prelude</em> external symbols can be found in
 the <a href="2-12.prelude-symbols.html"><em>prelude symbol

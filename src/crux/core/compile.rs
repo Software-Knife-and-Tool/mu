@@ -7,7 +7,7 @@
 use crate::{
     core::{
         apply::Core as _,
-        env::{Core as _, Env},
+        env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         types::{Tag, Type},
@@ -245,19 +245,17 @@ impl CoreFunction for Compile {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        core::{
-            compile::Compile,
-            env::{Core, Env},
-            types::{Tag, Type},
-        },
-        system::config::Config,
+    use crate::core::{
+        compile::Compile,
+        config::Config,
+        env::Env,
+        types::{Tag, Type},
     };
 
     #[test]
     fn compile_test() {
         let config = Config::new(None);
-        let env: &Env = &Core::new(config.unwrap());
+        let env: &Env = &Env::new(config.unwrap(), None);
 
         match Compile::compile(env, Tag::nil(), &mut vec![]) {
             Ok(form) => match form.type_of() {

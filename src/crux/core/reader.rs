@@ -4,8 +4,9 @@
 //! env reader
 use crate::{
     core::{
+        apply::Core as _,
         direct::{DirectInfo, DirectTag, DirectType},
-        env::{Core as _, Env},
+        env::Env,
         exception::{self, Condition, Exception},
         lib::Lib,
         readtable::{map_char_syntax, SyntaxType},

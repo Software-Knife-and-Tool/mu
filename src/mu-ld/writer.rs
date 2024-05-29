@@ -4,7 +4,7 @@
 //! image writer
 #[allow(unused_imports)]
 use {
-    crate::image::{Image, ImageBuilder},
+    crate::image::Image,
     object::{
         build::elf,
         elf::{FileHeader64, SectionHeader64},
@@ -21,13 +21,15 @@ use {
 
 pub struct Writer {
     pub path: String,
-    pub image: Image,
+    pub ident: Vec<u8>,
+    pub image: Vec<u8>,
 }
 
 impl Writer {
-    pub fn with_writer(path: &str, image: Image) -> Result<Self> {
+    pub fn with_writer(path: &str, ident: Vec<u8>, image: Vec<u8>) -> Result<Self> {
         Ok(Writer {
             path: path.to_string(),
+            ident: ident.clone(),
             image,
         })
     }
@@ -35,21 +37,19 @@ impl Writer {
     fn image(&self, elf: &mut Object) {
         let image_id = elf.add_section(
             elf.segment_name(StandardSegment::Data).to_vec(),
+            ".ident".as_bytes().to_vec(),
+            SectionKind::Data,
+        );
+
+        elf.set_section_data(image_id, self.ident.clone(), 8);
+
+        let image_id = elf.add_section(
+            elf.segment_name(StandardSegment::Data).to_vec(),
             ".image".as_bytes().to_vec(),
             SectionKind::Data,
         );
 
-        elf.set_section_data(image_id, self.image.image.clone(), 8);
-
-        let image_data: Vec<u8> = self.image.to_json().unwrap().into_bytes();
-
-        let image_id = elf.add_section(
-            elf.segment_name(StandardSegment::Data).to_vec(),
-            ".allocator".as_bytes().to_vec(),
-            SectionKind::Data,
-        );
-
-        elf.set_section_data(image_id, image_data, 8);
+        elf.set_section_data(image_id, self.image.clone(), 8);
     }
 
     pub fn write(&self) -> Result<()> {

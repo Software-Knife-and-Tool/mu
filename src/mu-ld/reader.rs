@@ -4,7 +4,6 @@
 //! image reader
 #[allow(unused_imports)]
 use {
-    crate::image::ImageBuilder,
     object::{
         build::elf,
         elf::{FileHeader64, SectionHeader64, Sym64, SHT_SYMTAB},
@@ -61,21 +60,23 @@ impl Reader {
     }
         */
 
-    pub fn symbol_names(&self) -> Option<Vec<String>> {
-        let mut name_vec = Vec::new();
+    /*
+        pub fn symbol_names(&self) -> Option<Vec<String>> {
+            let mut name_vec = Vec::new();
 
-        let endian = self.elf.endian().unwrap();
-        let sections = self.elf.sections(endian, &*self.data).unwrap();
-        let symbols = sections.symbols(endian, &*self.data, SHT_SYMTAB).unwrap();
-        for symbol in symbols.iter() {
-            match symbol.name(endian, symbols.strings()) {
-                Ok(name) => name_vec.push(String::from_utf8(name.to_vec()).unwrap()),
-                Err(_) => return None,
+            let endian = self.elf.endian().unwrap();
+            let sections = self.elf.sections(endian, &*self.data).unwrap();
+            let symbols = sections.symbols(endian, &*self.data, SHT_SYMTAB).unwrap();
+            for symbol in symbols.iter() {
+                match symbol.name(endian, symbols.strings()) {
+                    Ok(name) => name_vec.push(String::from_utf8(name.to_vec()).unwrap()),
+                    Err(_) => return None,
+                }
             }
-        }
 
-        Some(name_vec)
+            Some(name_vec)
     }
+        */
 
     fn string_table(&self) -> StringTable {
         self.elf
@@ -83,20 +84,22 @@ impl Reader {
             .unwrap()
     }
 
-    pub fn section_names(&self) -> Vec<String> {
-        self.sections
-            .iter()
-            .map(|header| {
-                String::from_utf8(
-                    header
-                        .name(self.elf.endian().unwrap(), self.string_table())
-                        .unwrap()
-                        .to_vec(),
-                )
-                .unwrap()
-            })
-            .collect()
+    /*
+        pub fn section_names(&self) -> Vec<String> {
+            self.sections
+                .iter()
+                .map(|header| {
+                    String::from_utf8(
+                        header
+                            .name(self.elf.endian().unwrap(), self.string_table())
+                            .unwrap()
+                            .to_vec(),
+                    )
+                    .unwrap()
+                })
+                .collect()
     }
+        */
 
     pub fn section_by_name(&self, section_name: &str) -> Option<&SectionHeader64<Endianness>> {
         let section = self.sections.iter().find(|section| {
