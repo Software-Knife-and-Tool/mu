@@ -12,7 +12,7 @@ use {
             types::{Tag, TagType, Type},
         },
         types::{
-            fixnum::Fixnum,
+            fixnum::{Core as _, Fixnum},
             symbol::{Core as _, Symbol},
             vector::{Core, Vector},
         },
@@ -177,7 +177,9 @@ impl<'a> IVector for IndirectVector<'a> {
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
                     .unwrap();
 
-                Some(i64::from_le_bytes(slice[0..8].try_into().unwrap()).into())
+                Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
+                    slice[0..8].try_into().unwrap(),
+                )))
             }
             Type::Float => {
                 let slice = gc
@@ -232,7 +234,9 @@ impl<'a> IVector for IndirectVector<'a> {
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
                     .unwrap();
 
-                Some(i64::from_le_bytes(slice[0..8].try_into().unwrap()).into())
+                Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
+                    slice[0..8].try_into().unwrap(),
+                )))
             }
             Type::Float => {
                 let slice = heap_ref
@@ -262,7 +266,7 @@ impl VecType for String {
         if len > DirectTag::DIRECT_STR_MAX {
             let image = VectorImage {
                 vtype: Symbol::keyword("char"),
-                length: self.len().into(),
+                length: Fixnum::with_or_panic(self.len()),
             };
 
             Vector::Indirect(image, IVec::Char(self.to_string()))
@@ -286,7 +290,7 @@ impl VecType for Vec<Tag> {
     fn to_vector(&self) -> Vector {
         let image = VectorImage {
             vtype: Symbol::keyword("t"),
-            length: self.len().into(),
+            length: Fixnum::with_or_panic(self.len()),
         };
 
         Vector::Indirect(image, IVec::T(self.to_vec()))
@@ -297,7 +301,7 @@ impl VecType for Vec<i64> {
     fn to_vector(&self) -> Vector {
         let image = VectorImage {
             vtype: Symbol::keyword("fixnum"),
-            length: self.len().into(),
+            length: Fixnum::with_or_panic(self.len()),
         };
 
         Vector::Indirect(image, IVec::Fixnum(self.to_vec()))
@@ -308,7 +312,7 @@ impl VecType for Vec<u8> {
     fn to_vector(&self) -> Vector {
         let image = VectorImage {
             vtype: Symbol::keyword("byte"),
-            length: self.len().into(),
+            length: Fixnum::with_or_panic(self.len()),
         };
 
         Vector::Indirect(image, IVec::Byte(self.to_vec()))
@@ -319,7 +323,7 @@ impl VecType for Vec<f32> {
     fn to_vector(&self) -> Vector {
         let image = VectorImage {
             vtype: Symbol::keyword("float"),
-            length: self.len().into(),
+            length: Fixnum::with_or_panic(self.len()),
         };
 
         Vector::Indirect(image, IVec::Float(self.to_vec()))

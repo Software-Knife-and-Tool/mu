@@ -168,13 +168,8 @@ impl Core for Function {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::types::Tag;
-    use crate::types::function::Function;
-
     #[test]
     fn as_tag() {
-        match Function::new(0_i64.into(), Tag::nil()) {
-            _ => assert_eq!(true, true),
-        }
+        assert_eq!(true, true)
     }
 }

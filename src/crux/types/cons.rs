@@ -16,7 +16,7 @@ use crate::{
     },
     streams::{read::Core as _, write::Core as _},
     types::{
-        fixnum::Fixnum,
+        fixnum::{Core as _, Fixnum},
         indirect_vector::{TypedVector, VecType},
         symbol::Symbol,
         vector::Core as _,
@@ -413,9 +413,9 @@ impl CoreFunction for Cons {
 
         env.fp_argv_check("crux:length", &[Type::List], fp)?;
         fp.value = match list.type_of() {
-            Type::Null => 0_i64.into(),
+            Type::Null => Fixnum::with_or_panic(0),
             Type::Cons => match Cons::length(env, list) {
-                Some(len) => len.into(),
+                Some(len) => Fixnum::with_or_panic(len),
                 None => return Err(Exception::new(env, Condition::Type, "crux:length", list)),
             },
             _ => panic!(),

@@ -14,6 +14,7 @@ use {
         streams::write::Core as _,
         types::{
             core_stream::Stream,
+            fixnum::{Core as _, Fixnum},
             function::Function,
             indirect_vector::{TypedVector, VecType},
             namespace::Namespace,
@@ -148,7 +149,7 @@ impl Lib {
             let vec = vec![
                 env.crux_ns,
                 Vector::from_string(name).evict(env),
-                functions.len().into(),
+                Fixnum::with_or_panic(functions.len()),
             ];
 
             let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
@@ -171,7 +172,7 @@ impl Lib {
                 let vec = vec![
                     ns,
                     Vector::from_string(name).evict(env),
-                    functions.len().into(),
+                    Fixnum::with_or_panic(functions.len()),
                 ];
 
                 let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);

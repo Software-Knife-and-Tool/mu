@@ -19,7 +19,7 @@ use {
             char::Char,
             cons::{Cons, Core as _},
             core_stream::{Core as _, Stream},
-            fixnum::Fixnum,
+            fixnum::{Core as _, Fixnum},
             float::Float,
             indirect_vector::VectorImage,
             indirect_vector::{IVec, IVector, IndirectVector},
@@ -255,7 +255,7 @@ pub trait Core<'a> {
 impl<'a> Core<'a> for Vector {
     fn view(env: &Env, vector: Tag) -> Tag {
         let vec = vec![
-            Self::length(env, vector).into(),
+            Fixnum::with_or_panic(Self::length(env, vector)),
             match Tag::type_key(Self::type_of(env, vector)) {
                 Some(key) => key,
                 None => panic!(),
@@ -789,7 +789,7 @@ impl CoreFunction for Vector {
         let vector = fp.argv[0];
 
         env.fp_argv_check("crux:vector-len", &[Type::Vector], fp)?;
-        fp.value = Self::length(env, vector).into();
+        fp.value = Fixnum::with_or_panic(Self::length(env, vector));
 
         Ok(())
     }

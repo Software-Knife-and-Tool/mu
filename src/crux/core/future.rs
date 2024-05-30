@@ -15,7 +15,7 @@ use crate::{
     },
     types::{
         cons::{Cons, Core as _},
-        fixnum::Fixnum,
+        fixnum::{Core as _, Fixnum},
         function::Function,
         indirect_vector::{TypedVector, VecType, VectorIter},
         struct_::{Core as _, Struct},
@@ -62,7 +62,7 @@ impl Future {
         let future = Struct {
             stype: Symbol::keyword("future"),
             vector: TypedVector::<Vec<Tag>> {
-                vec: vec![future_id.into()],
+                vec: vec![Fixnum::with_u64_or_panic(future_id)],
             }
             .vec
             .to_vector()
@@ -106,7 +106,7 @@ impl Future {
         let future = Struct {
             stype: Symbol::keyword("future"),
             vector: TypedVector::<Vec<Tag>> {
-                vec: vec![future_id.into()],
+                vec: vec![Fixnum::with_u64_or_panic(future_id)],
             }
             .vec
             .to_vector()

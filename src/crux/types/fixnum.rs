@@ -26,53 +26,36 @@ pub enum Fixnum {
     Direct(u64),
 }
 
-// tag from i64
-impl From<i64> for Tag {
-    fn from(fx: i64) -> Tag {
-        if !Fixnum::is_i56(fx) {
-            panic!("fixnum overflow")
-        }
-
+// tag from u32
+impl From<u32> for Tag {
+    fn from(fx: u32) -> Tag {
         DirectTag::to_direct(
-            (fx & (2_i64.pow(56) - 1)) as u64,
+            ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
             DirectInfo::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
     }
 }
 
-// tag from usize
-impl From<usize> for Tag {
-    fn from(fx: usize) -> Tag {
-        (fx as i64).into()
-    }
-}
-
-// tag from u64
-impl From<u64> for Tag {
-    fn from(fx: u64) -> Tag {
-        (fx as i64).into()
-    }
-}
-
-// tag from u32
-impl From<u32> for Tag {
-    fn from(fx: u32) -> Tag {
-        (fx as i64).into()
-    }
-}
-
 // tag from u16
 impl From<u16> for Tag {
     fn from(fx: u16) -> Tag {
-        (fx as i64).into()
+        DirectTag::to_direct(
+            ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        )
     }
 }
 
 // tag from u8
 impl From<u8> for Tag {
     fn from(fx: u8) -> Tag {
-        (fx as i64).into()
+        DirectTag::to_direct(
+            ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        )
     }
 }
 
@@ -95,11 +78,87 @@ impl Fixnum {
 }
 
 pub trait Core {
+    fn with(_: &Env, _: usize) -> exception::Result<Tag>;
+    fn with_or_panic(_: usize) -> Tag;
+    fn with_i64(env: &Env, fx: i64) -> exception::Result<Tag>;
+    fn with_i64_or_panic(_: i64) -> Tag;
+    fn with_u64(_: &Env, _: u64) -> exception::Result<Tag>;
+    fn with_u64_or_panic(_: u64) -> Tag;
     fn write(_: &Env, _: Tag, _: bool, _: Tag) -> Result<()>;
     fn view(_: &Env, _: Tag) -> Tag;
 }
 
+//
+// assume that u64 and usize are the same size
+// and an as cast works without losing information
+//
 impl Core for Fixnum {
+    fn with_or_panic(fx: usize) -> Tag {
+        Self::with_u64_or_panic(fx as u64)
+    }
+
+    fn with_u64_or_panic(fx: u64) -> Tag {
+        match i64::try_from(fx) {
+            Err(_) => panic!(),
+            Ok(i64_) => {
+                if !Fixnum::is_i56(i64_) {
+                    panic!()
+                }
+
+                DirectTag::to_direct(
+                    (i64_ & (2_i64.pow(56) - 1)) as u64,
+                    DirectInfo::ExtType(ExtType::Fixnum),
+                    DirectType::Ext,
+                )
+            }
+        }
+    }
+
+    fn with_i64_or_panic(fx: i64) -> Tag {
+        if !Fixnum::is_i56(fx) {
+            panic!()
+        }
+
+        DirectTag::to_direct(
+            (fx & (2_i64.pow(56) - 1)) as u64,
+            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        )
+    }
+
+    fn with(env: &Env, fx: usize) -> exception::Result<Tag> {
+        Self::with_u64(env, fx as u64)
+    }
+
+    fn with_i64(env: &Env, fx: i64) -> exception::Result<Tag> {
+        if !Fixnum::is_i56(fx) {
+            return Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil()));
+        }
+
+        Ok(DirectTag::to_direct(
+            (fx & (2_i64.pow(56) - 1)) as u64,
+            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        ))
+    }
+
+    fn with_u64(env: &Env, fx: u64) -> exception::Result<Tag> {
+        match i64::try_from(fx) {
+            Err(_) => Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil())),
+            Ok(i64_) => {
+                if !Fixnum::is_i56(i64_) {
+                    return Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil()));
+                }
+
+                Ok(DirectTag::to_direct(
+                    ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+                    DirectInfo::ExtType(ExtType::Fixnum),
+                    DirectType::Ext,
+                ))
+            }
+        }
+    }
+
     fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> Result<()> {
         env.write_string(&Self::as_i64(tag).to_string(), stream)
     }
@@ -137,7 +196,7 @@ impl CoreFunction for Fixnum {
         };
 
         if Self::is_i56(result) {
-            fp.value = result.into()
+            fp.value = Self::with_i64_or_panic(result)
         } else {
             return Err(Exception::new(
                 env,
@@ -159,7 +218,7 @@ impl CoreFunction for Fixnum {
         fp.value = match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
             Some(sum) => {
                 if Self::is_i56(sum) {
-                    sum.into()
+                    Self::with_i64_or_panic(sum)
                 } else {
                     return Err(Exception::new(env, Condition::Over, "crux:sum", fx0));
                 }
@@ -179,7 +238,7 @@ impl CoreFunction for Fixnum {
         fp.value = match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
             Some(diff) => {
                 if Self::is_i56(diff) {
-                    diff.into()
+                    Self::with_i64_or_panic(diff)
                 } else {
                     return Err(Exception::new(env, Condition::Over, "crux:difference", fx1));
                 }
@@ -199,7 +258,7 @@ impl CoreFunction for Fixnum {
         fp.value = match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
             Some(prod) => {
                 if Self::is_i56(prod) {
-                    prod.into()
+                    Self::with_i64_or_panic(prod)
                 } else {
                     return Err(Exception::new(env, Condition::Over, "crux:product", fx1));
                 }
@@ -228,7 +287,7 @@ impl CoreFunction for Fixnum {
         fp.value = match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
             Some(div) => {
                 if Self::is_i56(div) {
-                    div.into()
+                    Self::with_i64_or_panic(div)
                 } else {
                     return Err(Exception::new(env, Condition::Over, "crux:quotient", fx1));
                 }
@@ -259,7 +318,7 @@ impl CoreFunction for Fixnum {
         let fx1 = fp.argv[1];
 
         env.fp_argv_check("crux:logand", &[Type::Fixnum, Type::Fixnum], fp)?;
-        fp.value = (Self::as_i64(fx0) & Self::as_i64(fx1)).into();
+        fp.value = Self::with_i64_or_panic(Self::as_i64(fx0) & Self::as_i64(fx1));
 
         Ok(())
     }
@@ -269,7 +328,7 @@ impl CoreFunction for Fixnum {
         let fx1 = fp.argv[1];
 
         env.fp_argv_check("crux:logor", &[Type::Fixnum, Type::Fixnum], fp)?;
-        fp.value = (Self::as_i64(fx0) | Self::as_i64(fx1)).into();
+        fp.value = Self::with_i64_or_panic(Self::as_i64(fx0) | Self::as_i64(fx1));
 
         Ok(())
     }
@@ -290,7 +349,7 @@ impl CoreFunction for Fixnum {
             }
         }
 
-        fp.value = val.into();
+        fp.value = Self::with_i64_or_panic(val);
 
         Ok(())
     }
@@ -298,12 +357,8 @@ impl CoreFunction for Fixnum {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::types::Tag;
-
     #[test]
     fn as_tag() {
-        match <i64 as Into<Tag>>::into(0_i64) {
-            _ => assert_eq!(true, true),
-        }
+        assert_eq!(true, true)
     }
 }

@@ -16,6 +16,7 @@ use crate::{
     images::bump_allocator::BumpAllocator,
     types::{
         cons::{Cons, Core as _},
+        fixnum::{Core as _, Fixnum},
         function::{Core as _, Function},
         indirect_vector::{TypedVector, VecType},
         struct_::{Core as _, Struct},
@@ -86,9 +87,9 @@ impl CoreFunction for Heap {
 
         let mut vec = vec![
             Symbol::keyword("heap"),
-            (pagesz * npages).into(),
-            npages.into(),
-            0_i64.into(),
+            Fixnum::with_or_panic(pagesz * npages),
+            Fixnum::with_or_panic(npages),
+            Fixnum::with_or_panic(0),
         ];
 
         for htype in INFOTYPE.iter() {
@@ -97,10 +98,12 @@ impl CoreFunction for Heap {
                 <IndirectTag as indirect::Core>::to_indirect_type(*htype).unwrap(),
             );
 
-            vec.push(*htype);
-            vec.push(type_map.size.into());
-            vec.push(type_map.total.into());
-            vec.push(type_map.free.into());
+            vec.extend(vec![
+                *htype,
+                Fixnum::with_or_panic(type_map.size),
+                Fixnum::with_or_panic(type_map.total),
+                Fixnum::with_or_panic(type_map.free),
+            ])
         }
 
         fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
@@ -111,7 +114,11 @@ impl CoreFunction for Heap {
     fn crux_hp_info(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let (page_size, npages) = Self::heap_info(env);
 
-        let vec = vec![Symbol::keyword("bump"), page_size.into(), npages.into()];
+        let vec = vec![
+            Symbol::keyword("bump"),
+            Fixnum::with_or_panic(page_size),
+            Fixnum::with_or_panic(npages),
+        ];
 
         fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
 
@@ -119,7 +126,7 @@ impl CoreFunction for Heap {
     }
 
     fn crux_hp_size(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Self::heap_size(env, fp.argv[0]).into();
+        fp.value = Fixnum::with_or_panic(Self::heap_size(env, fp.argv[0]));
 
         Ok(())
     }

@@ -21,6 +21,7 @@ use crate::{
     },
     types::{
         char::Char,
+        fixnum::{Core as _, Fixnum},
         indirect_vector::{TypedVector, VecType},
         symbol::{Core as _, Symbol},
         vector::Core as _,
@@ -82,7 +83,11 @@ impl Core for Stream {
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
-                let vec = vec![stream.index.into(), stream.direction, stream.unch];
+                let vec = vec![
+                    Fixnum::with_or_panic(stream.index),
+                    stream.direction,
+                    stream.unch,
+                ];
 
                 TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
             }

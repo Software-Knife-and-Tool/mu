@@ -300,7 +300,7 @@ impl CoreFunction for Stream {
 
         env.fp_argv_check("crux:read-byte", &[Type::Stream, Type::T, Type::T], fp)?;
         fp.value = match Self::read_byte(env, stream)? {
-            Some(byte) => (byte as i64).into(),
+            Some(byte) => byte.into(),
             None if eof_error_p.null_() => eof_value,
             None => {
                 return Err(Exception::new(
