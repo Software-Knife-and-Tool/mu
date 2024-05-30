@@ -160,7 +160,7 @@ impl Tag {
     }
 
     pub fn from_slice(bits: &[u8]) -> Tag {
-        let mut data: [u8; 8] = 0u64.to_le_bytes();
+        let mut data: [u8; 8] = 0_u64.to_le_bytes();
 
         for (src, dst) in bits.iter().zip(data.iter_mut()) {
             *dst = *src
@@ -170,8 +170,8 @@ impl Tag {
         let u64_: u64 = u64::from_le_bytes(data);
 
         match tag {
-            tag if tag == TagType::Direct as u8 => Tag::Direct(DirectTag::from(u64_)),
-            _ => Tag::Indirect(IndirectTag::from(u64_)),
+            tag if tag == TagType::Direct as u8 => Tag::Direct(u64_.into()),
+            _ => Tag::Indirect(u64_.into()),
         }
     }
 
@@ -257,7 +257,7 @@ impl CoreFunction for Tag {
                     }
                 }
 
-                Tag::from(&u64_.to_le_bytes())
+                (&u64_.to_le_bytes()).into()
             } else {
                 return Err(Exception::new(env, Condition::Type, "crux:repr", arg));
             }

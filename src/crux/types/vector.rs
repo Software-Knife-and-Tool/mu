@@ -255,7 +255,7 @@ pub trait Core<'a> {
 impl<'a> Core<'a> for Vector {
     fn view(env: &Env, vector: Tag) -> Tag {
         let vec = vec![
-            Tag::from(Self::length(env, vector) as i64),
+            Self::length(env, vector).into(),
             match Tag::type_key(Self::type_of(env, vector)) {
                 Some(key) => key,
                 None => panic!(),
@@ -291,7 +291,7 @@ impl<'a> Core<'a> for Vector {
             .vec
             .to_vector()
         } else {
-            let mut data: [u8; 8] = 0u64.to_le_bytes();
+            let mut data: [u8; 8] = 0_u64.to_le_bytes();
 
             for (src, dst) in str.as_bytes().iter().zip(data.iter_mut()) {
                 *dst = *src
@@ -587,7 +587,9 @@ impl<'a> Core<'a> for Vector {
         match vector.type_of() {
             Type::Vector => match vector {
                 Tag::Direct(_direct) => {
-                    Some(Tag::from(vector.data(env).to_le_bytes()[index] as char))
+                    let ch: char = vector.data(env).to_le_bytes()[index].into();
+
+                    Some(ch.into())
                 }
                 Tag::Indirect(_) => IndirectVector::gc_ref(gc, vector, index),
             },
@@ -601,7 +603,9 @@ impl<'a> Core<'a> for Vector {
         match vector.type_of() {
             Type::Vector => match vector {
                 Tag::Direct(_direct) => {
-                    Some(Tag::from(vector.data(env).to_le_bytes()[index] as char))
+                    let ch: char = vector.data(env).to_le_bytes()[index].into();
+
+                    Some(ch.into())
                 }
                 Tag::Indirect(_) => IndirectVector::ref_heap(env, vector, index),
             },
@@ -785,7 +789,7 @@ impl CoreFunction for Vector {
         let vector = fp.argv[0];
 
         env.fp_argv_check("crux:vector-len", &[Type::Vector], fp)?;
-        fp.value = Tag::from(Self::length(env, vector) as i64);
+        fp.value = Self::length(env, vector).into();
 
         Ok(())
     }

@@ -2,13 +2,11 @@
 //  SPDX-License-Identifier: MIT
 
 //! process time
-use crate::{
-    core::{
-        env::Env,
-        exception::{self},
-        frame::Frame,
-    },
-    types::fixnum::Fixnum,
+use crate::core::{
+    env::Env,
+    exception::{self},
+    frame::Frame,
+    types::Tag,
 };
 use cpu_time::ProcessTime;
 
@@ -20,7 +18,7 @@ impl CoreFunction for Env {
     fn crux_utime(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match ProcessTime::try_now() {
             Ok(_) => match env.start_time.try_elapsed() {
-                Ok(delta) => Fixnum::as_tag(delta.as_micros() as i64),
+                Ok(delta) => Tag::from(delta.as_micros() as i64), // this is a u128
                 Err(_) => panic!(),
             },
             Err(_) => panic!(),

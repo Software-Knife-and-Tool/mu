@@ -252,7 +252,7 @@ impl Core for Symbol {
             panic!("{} {:?}", std::str::from_utf8(str).unwrap(), str)
         }
 
-        let mut data: [u8; 8] = 0u64.to_le_bytes();
+        let mut data: [u8; 8] = 0_u64.to_le_bytes();
         for (src, dst) in str.iter().zip(data.iter_mut()) {
             *dst = *src
         }
@@ -272,7 +272,7 @@ impl Core for Symbol {
                         env,
                         Condition::Range,
                         "crux:read",
-                        Tag::from(ch),
+                        ch.into(),
                     ));
                 }
             }

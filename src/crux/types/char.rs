@@ -79,7 +79,7 @@ mod tests {
 
     #[test]
     fn as_tag() {
-        match Tag::from('a') {
+        match <char as Into<Tag>>::into('a') {
             _ => assert_eq!(true, true),
         }
     }

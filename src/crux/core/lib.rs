@@ -148,11 +148,11 @@ impl Lib {
             let vec = vec![
                 env.crux_ns,
                 Vector::from_string(name).evict(env),
-                Tag::from(functions.len() as i64),
+                functions.len().into(),
             ];
 
             let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
-            let func = Function::new(Tag::from(*nreqs as i64), fn_vec).evict(env);
+            let func = Function::new((*nreqs).into(), fn_vec).evict(env);
 
             Namespace::intern_static(env, env.crux_ns, name.to_string(), func).unwrap();
 
@@ -171,11 +171,11 @@ impl Lib {
                 let vec = vec![
                     ns,
                     Vector::from_string(name).evict(env),
-                    Tag::from(functions.len() as i64),
+                    functions.len().into(),
                 ];
 
                 let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
-                let func = Function::new(Tag::from(*nreqs as i64), fn_vec).evict(env);
+                let func = Function::new((*nreqs).into(), fn_vec).evict(env);
 
                 Namespace::intern(env, ns, name.to_string(), func).unwrap();
 

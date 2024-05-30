@@ -62,7 +62,7 @@ impl Future {
         let future = Struct {
             stype: Symbol::keyword("future"),
             vector: TypedVector::<Vec<Tag>> {
-                vec: vec![Fixnum::as_tag(future_id as i64)],
+                vec: vec![future_id.into()],
             }
             .vec
             .to_vector()
@@ -106,7 +106,7 @@ impl Future {
         let future = Struct {
             stype: Symbol::keyword("future"),
             vector: TypedVector::<Vec<Tag>> {
-                vec: vec![Fixnum::as_tag(future_id as i64)],
+                vec: vec![future_id.into()],
             }
             .vec
             .to_vector()

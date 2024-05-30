@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn as_tag() {
-        match Function::new(Tag::from(0i64), Tag::nil()) {
+        match Function::new(0_i64.into(), Tag::nil()) {
             _ => assert_eq!(true, true),
         }
     }

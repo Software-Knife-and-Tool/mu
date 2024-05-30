@@ -82,7 +82,7 @@ impl CoreFunction for Std {
 
         fp.value = match status {
             Err(_) => return Err(Exception::new(env, Condition::Open, "std:command", command)),
-            Ok(exit_status) => Fixnum::as_tag(exit_status.code().unwrap() as i64),
+            Ok(exit_status) => (exit_status.code().unwrap() as i64).into(),
         };
 
         Ok(())

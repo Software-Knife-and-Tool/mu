@@ -42,7 +42,7 @@ impl Env {
 
         let (func, offset) = dynamic_ref[index];
 
-        (Tag::from(&func.to_le_bytes()), offset)
+        ((&func.to_le_bytes()).into(), offset)
     }
 }
 
@@ -58,15 +58,15 @@ impl CoreFunction for Env {
         frames.extend(frames_ref.iter().map(|(func, offset)| {
             let mut argv = Vec::new();
 
-            Frame::frame_stack_ref(env, Tag::from(&func.to_le_bytes()), *offset, &mut argv);
+            Frame::frame_stack_ref(env, (&func.to_le_bytes()).into(), *offset, &mut argv);
 
             let vec = argv
                 .into_iter()
-                .map(|f| Tag::from(&f.to_le_bytes()))
+                .map(|f| (&f.to_le_bytes()).into())
                 .collect();
 
             Cons::new(
-                Tag::from(&func.to_le_bytes()),
+                (&func.to_le_bytes()).into(),
                 TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env),
             )
             .evict(env)
