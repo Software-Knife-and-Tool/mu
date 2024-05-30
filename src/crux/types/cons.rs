@@ -413,9 +413,9 @@ impl CoreFunction for Cons {
 
         env.fp_argv_check("crux:length", &[Type::List], fp)?;
         fp.value = match list.type_of() {
-            Type::Null => Tag::from(0i64),
+            Type::Null => 0_i64.into(),
             Type::Cons => match Cons::length(env, list) {
-                Some(len) => Tag::from(len as i64),
+                Some(len) => len.into(),
                 None => return Err(Exception::new(env, Condition::Type, "crux:length", list)),
             },
             _ => panic!(),

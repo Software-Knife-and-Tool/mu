@@ -154,7 +154,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
                     .unwrap();
 
-                Some(Tag::from(slice[0] as i64))
+                Some(slice[0].into())
             }
             Type::Char => {
                 let slice = gc
@@ -162,7 +162,9 @@ impl<'a> IVector for IndirectVector<'a> {
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
                     .unwrap();
 
-                Some(Tag::from(slice[0] as char))
+                let ch: char = slice[0].into();
+
+                Some(ch.into())
             }
             Type::T => Some(Tag::from_slice(
                 gc.lock
@@ -175,9 +177,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
                     .unwrap();
 
-                Some(Tag::from(i64::from_le_bytes(
-                    slice[0..8].try_into().unwrap(),
-                )))
+                Some(i64::from_le_bytes(slice[0..8].try_into().unwrap()).into())
             }
             Type::Float => {
                 let slice = gc
@@ -185,9 +185,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 4, 4)
                     .unwrap();
 
-                Some(Tag::from(f32::from_le_bytes(
-                    slice[0..4].try_into().unwrap(),
-                )))
+                Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())
             }
             _ => panic!(),
         }
@@ -213,14 +211,16 @@ impl<'a> IVector for IndirectVector<'a> {
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
                     .unwrap();
 
-                Some(Tag::from(slice[0] as i64))
+                Some(slice[0].into())
             }
             Type::Char => {
                 let slice = heap_ref
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
                     .unwrap();
 
-                Some(Tag::from(slice[0] as char))
+                let ch: char = slice[0].into();
+
+                Some(ch.into())
             }
             Type::T => Some(Tag::from_slice(
                 heap_ref
@@ -232,18 +232,14 @@ impl<'a> IVector for IndirectVector<'a> {
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
                     .unwrap();
 
-                Some(Tag::from(i64::from_le_bytes(
-                    slice[0..8].try_into().unwrap(),
-                )))
+                Some(i64::from_le_bytes(slice[0..8].try_into().unwrap()).into())
             }
             Type::Float => {
                 let slice = heap_ref
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 4, 4)
                     .unwrap();
 
-                Some(Tag::from(f32::from_le_bytes(
-                    slice[0..4].try_into().unwrap(),
-                )))
+                Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())
             }
             _ => panic!(),
         }
@@ -266,12 +262,12 @@ impl VecType for String {
         if len > DirectTag::DIRECT_STR_MAX {
             let image = VectorImage {
                 vtype: Symbol::keyword("char"),
-                length: Tag::from(self.len() as i64),
+                length: self.len().into(),
             };
 
             Vector::Indirect(image, IVec::Char(self.to_string()))
         } else {
-            let mut data: [u8; 8] = 0u64.to_le_bytes();
+            let mut data: [u8; 8] = 0_u64.to_le_bytes();
 
             for (src, dst) in self.as_bytes().iter().zip(data.iter_mut()) {
                 *dst = *src
@@ -290,7 +286,7 @@ impl VecType for Vec<Tag> {
     fn to_vector(&self) -> Vector {
         let image = VectorImage {
             vtype: Symbol::keyword("t"),
-            length: Tag::from(self.len() as i64),
+            length: self.len().into(),
         };
 
         Vector::Indirect(image, IVec::T(self.to_vec()))
@@ -301,7 +297,7 @@ impl VecType for Vec<i64> {
     fn to_vector(&self) -> Vector {
         let image = VectorImage {
             vtype: Symbol::keyword("fixnum"),
-            length: Tag::from(self.len() as i64),
+            length: self.len().into(),
         };
 
         Vector::Indirect(image, IVec::Fixnum(self.to_vec()))
@@ -312,7 +308,7 @@ impl VecType for Vec<u8> {
     fn to_vector(&self) -> Vector {
         let image = VectorImage {
             vtype: Symbol::keyword("byte"),
-            length: Tag::from(self.len() as i64),
+            length: self.len().into(),
         };
 
         Vector::Indirect(image, IVec::Byte(self.to_vec()))
@@ -323,7 +319,7 @@ impl VecType for Vec<f32> {
     fn to_vector(&self) -> Vector {
         let image = VectorImage {
             vtype: Symbol::keyword("float"),
-            length: Tag::from(self.len() as i64),
+            length: self.len().into(),
         };
 
         Vector::Indirect(image, IVec::Float(self.to_vec()))

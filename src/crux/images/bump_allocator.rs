@@ -203,7 +203,7 @@ impl BumpAllocator {
             None
         } else {
             let data = &self.mmap;
-            let mut info = 0u64.to_le_bytes();
+            let mut info = 0_u64.to_le_bytes();
 
             info.copy_from_slice(&data[(off - 8)..off]);
             Some(AllocatorImageInfo::from_bytes(info))

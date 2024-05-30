@@ -133,7 +133,7 @@ impl DirectTag {
                             u64_ |= mask_32 << 28;
                         }
 
-                        Tag::from(&u64_.to_le_bytes())
+                        (&u64_.to_le_bytes()).into()
                     }
                     _ => panic!(),
                 },
@@ -158,7 +158,7 @@ impl DirectTag {
                             u64_ |= mask_32 << 28;
                         }
 
-                        Tag::from(&u64_.to_le_bytes())
+                        (&u64_.to_le_bytes()).into()
                     }
                     _ => panic!(),
                 },

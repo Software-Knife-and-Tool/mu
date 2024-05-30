@@ -40,15 +40,6 @@ impl From<f32> for Tag {
 }
 
 impl Float {
-    pub fn as_tag(fl: f32) -> Tag {
-        let bytes = fl.to_le_bytes();
-        DirectTag::to_direct(
-            u32::from_le_bytes(bytes) as u64,
-            DirectInfo::ExtType(ExtType::Float),
-            DirectType::Ext,
-        )
-    }
-
     pub fn as_f32(env: &Env, tag: Tag) -> f32 {
         match tag.type_of() {
             Type::Float => {
@@ -101,7 +92,7 @@ impl CoreFunction for Float {
         if sum.is_nan() {
             return Err(Exception::new(env, Condition::Over, "crux:fl-add", fl1));
         } else {
-            fp.value = Self::as_tag(sum)
+            fp.value = sum.into()
         }
 
         Ok(())
@@ -117,7 +108,7 @@ impl CoreFunction for Float {
         if diff.is_nan() {
             return Err(Exception::new(env, Condition::Under, "crux:fl-sub", fl1));
         } else {
-            fp.value = Self::as_tag(diff)
+            fp.value = diff.into()
         }
 
         Ok(())
@@ -133,7 +124,7 @@ impl CoreFunction for Float {
         if prod.is_nan() {
             return Err(Exception::new(env, Condition::Over, "crux:fl-mul", fl1));
         } else {
-            fp.value = Self::as_tag(prod)
+            fp.value = prod.into()
         }
 
         Ok(())
@@ -154,7 +145,7 @@ impl CoreFunction for Float {
         fp.value = if div.is_nan() {
             return Err(Exception::new(env, Condition::Under, "crux:fl-div", fl1));
         } else {
-            Self::as_tag(div)
+            div.into()
         };
 
         Ok(())
@@ -181,7 +172,7 @@ mod tests {
 
     #[test]
     fn as_tag() {
-        match Tag::from(1.0) {
+        match <f32 as Into<Tag>>::into(1.0_f32) {
             _ => assert_eq!(true, true),
         }
     }

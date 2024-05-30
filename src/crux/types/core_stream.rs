@@ -82,11 +82,7 @@ impl Core for Stream {
         match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
-                let vec = vec![
-                    Tag::from(stream.index as i64),
-                    stream.direction,
-                    stream.unch,
-                ];
+                let vec = vec![stream.index.into(), stream.direction, stream.unch];
 
                 TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
             }
@@ -292,7 +288,7 @@ impl Core for Stream {
                 }
 
                 if stream.unch.null_() {
-                    stream.unch = Tag::from(ch);
+                    stream.unch = ch.into();
 
                     Ok(None)
                 } else {

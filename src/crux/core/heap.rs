@@ -86,9 +86,9 @@ impl CoreFunction for Heap {
 
         let mut vec = vec![
             Symbol::keyword("heap"),
-            Tag::from((pagesz * npages) as i64),
-            Tag::from(npages as i64),
-            Tag::from(0_i64),
+            (pagesz * npages).into(),
+            npages.into(),
+            0_i64.into(),
         ];
 
         for htype in INFOTYPE.iter() {
@@ -98,9 +98,9 @@ impl CoreFunction for Heap {
             );
 
             vec.push(*htype);
-            vec.push(Tag::from(type_map.size as i64));
-            vec.push(Tag::from(type_map.total as i64));
-            vec.push(Tag::from(type_map.free as i64));
+            vec.push(type_map.size.into());
+            vec.push(type_map.total.into());
+            vec.push(type_map.free.into());
         }
 
         fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
@@ -111,11 +111,7 @@ impl CoreFunction for Heap {
     fn crux_hp_info(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let (page_size, npages) = Self::heap_info(env);
 
-        let vec = vec![
-            Symbol::keyword("bump"),
-            Tag::from(page_size as i64),
-            Tag::from(npages as i64),
-        ];
+        let vec = vec![Symbol::keyword("bump"), page_size.into(), npages.into()];
 
         fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
 
@@ -123,7 +119,7 @@ impl CoreFunction for Heap {
     }
 
     fn crux_hp_size(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Tag::from(Self::heap_size(env, fp.argv[0]) as i64);
+        fp.value = Self::heap_size(env, fp.argv[0]).into();
 
         Ok(())
     }

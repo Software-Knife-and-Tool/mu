@@ -179,7 +179,7 @@ impl Core for Lib {
                             env,
                             Condition::Range,
                             "crux:read",
-                            Tag::from(ch),
+                            ch.into(),
                         ))
                     }
                 },
@@ -188,7 +188,7 @@ impl Core for Lib {
                         env,
                         Condition::Range,
                         "crux:read",
-                        Tag::from(ch),
+                        ch.into(),
                     ))
                 }
             }
@@ -197,7 +197,7 @@ impl Core for Lib {
         match token.parse::<i64>() {
             Ok(fx) => {
                 if Fixnum::is_i56(fx) {
-                    Ok(Tag::from(fx))
+                    Ok(fx.into())
                 } else {
                     Err(Exception::new(
                         env,
@@ -208,7 +208,7 @@ impl Core for Lib {
                 }
             }
             Err(_) => match token.parse::<f32>() {
-                Ok(fl) => Ok(Tag::from(fl)),
+                Ok(fl) => Ok(fl.into()),
                 Err(_) => Ok(Symbol::parse(env, token)?),
             },
         }
@@ -224,18 +224,18 @@ impl Core for Lib {
             Some(ch) => match Stream::read_char(env, stream)? {
                 Some(space) => match map_char_syntax(space) {
                     Some(sp_type) => match sp_type {
-                        SyntaxType::Whitespace => Ok(Some(Tag::from(ch))),
+                        SyntaxType::Whitespace => Ok(Some(ch.into())),
                         SyntaxType::Constituent => {
                             Stream::unread_char(env, stream, space).unwrap();
                             match Self::read_token(env, stream)? {
                                 Some(str) => {
                                     let phrase = ch.to_string() + &str;
                                     match phrase.as_str() {
-                                        "tab" => Ok(Some(Tag::from('\t'))),
-                                        "linefeed" => Ok(Some(Tag::from('\n'))),
-                                        "space" => Ok(Some(Tag::from(' '))),
-                                        "page" => Ok(Some(Tag::from('\x0c'))),
-                                        "return" => Ok(Some(Tag::from('\r'))),
+                                        "tab" => Ok(Some('\t'.into())),
+                                        "linefeed" => Ok(Some('\n'.into())),
+                                        "space" => Ok(Some(' '.into())),
+                                        "page" => Ok(Some('\x0c'.into())),
+                                        "return" => Ok(Some('\r'.into())),
                                         _ => Err(Exception::new(
                                             env,
                                             Condition::Type,
@@ -251,12 +251,12 @@ impl Core for Lib {
                         }
                         _ => {
                             Stream::unread_char(env, stream, space).unwrap();
-                            Ok(Some(Tag::from(ch)))
+                            Ok(Some(ch.into()))
                         }
                     },
                     None => Err(Exception::new(env, Condition::Syntax, "crux:read", stream)),
                 },
-                None => Ok(Some(Tag::from(ch))),
+                None => Ok(Some(ch.into())),
             },
             None => Err(Exception::new(env, Condition::Eof, "crux:read", stream)),
         }
@@ -299,7 +299,7 @@ impl Core for Lib {
                         Some(hex) => match i64::from_str_radix(&hex, 16) {
                             Ok(fx) => {
                                 if Fixnum::is_i56(fx) {
-                                    Ok(Some(Tag::from(fx)))
+                                    Ok(Some(fx.into()))
                                 } else {
                                     Err(Exception::new(
                                         env,
@@ -313,7 +313,7 @@ impl Core for Lib {
                                 env,
                                 Condition::Syntax,
                                 "crux:read",
-                                Tag::from(ch),
+                                ch.into(),
                             )),
                         },
                         None => panic!(),
@@ -322,15 +322,10 @@ impl Core for Lib {
                         env,
                         Condition::Syntax,
                         "crux:read",
-                        Tag::from(ch),
+                        ch.into(),
                     )),
                 },
-                _ => Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "crux:read",
-                    Tag::from(ch),
-                )),
+                _ => Err(Exception::new(env, Condition::Type, "crux:read", ch.into())),
             },
             None => Err(Exception::new(env, Condition::Eof, "crux:read", stream)),
         }
