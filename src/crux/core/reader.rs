@@ -15,7 +15,7 @@ use crate::{
     streams::read::Core as _,
     types::{
         core_stream::{Core as _, Stream},
-        fixnum::Fixnum,
+        fixnum::{Core as _, Fixnum},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
@@ -197,7 +197,7 @@ impl Core for Lib {
         match token.parse::<i64>() {
             Ok(fx) => {
                 if Fixnum::is_i56(fx) {
-                    Ok(fx.into())
+                    Ok(Fixnum::with_i64_or_panic(fx))
                 } else {
                     Err(Exception::new(
                         env,
@@ -299,7 +299,7 @@ impl Core for Lib {
                         Some(hex) => match i64::from_str_radix(&hex, 16) {
                             Ok(fx) => {
                                 if Fixnum::is_i56(fx) {
-                                    Ok(Some(fx.into()))
+                                    Ok(Some(Fixnum::with_i64_or_panic(fx)))
                                 } else {
                                     Err(Exception::new(
                                         env,

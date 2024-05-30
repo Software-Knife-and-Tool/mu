@@ -14,6 +14,7 @@ use crate::{
     },
     types::{
         cons::{Cons, Core as _},
+        fixnum::{Core as _, Fixnum},
         function::Function,
         namespace::Namespace,
         symbol::{Core as _, Symbol},
@@ -121,7 +122,11 @@ impl Compile {
             _ => return Err(Exception::new(env, Condition::Syntax, "crux:compile", args)),
         };
 
-        let func = Function::new(Cons::length(env, lambda).unwrap().into(), Tag::nil()).evict(env);
+        let func = Function::new(
+            Fixnum::with_or_panic(Cons::length(env, lambda).unwrap()),
+            Tag::nil(),
+        )
+        .evict(env);
 
         lexenv.push((func, compile_frame_symbols(env, lambda)?));
 
@@ -144,8 +149,8 @@ impl Compile {
                 let lex_ref = vec![
                     Namespace::intern(env, env.crux_ns, "frame-ref".to_string(), Tag::nil())
                         .unwrap(),
-                    tag.as_u64().into(),
-                    nth.into(),
+                    Fixnum::with_u64_or_panic(tag.as_u64()),
+                    Fixnum::with_or_panic(nth),
                 ];
 
                 return Self::compile(env, Cons::vlist(env, &lex_ref), lexenv);

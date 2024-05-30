@@ -13,6 +13,7 @@ use crate::{
     features::feature::Feature,
     types::{
         cons::{Cons, Core as _},
+        fixnum::{Core as _, Fixnum},
         indirect_vector::VecType,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
@@ -60,7 +61,11 @@ impl CoreFunction for Sysinfo {
                 let sysinfo = vec![Cons::vlist(
                     env,
                     &[
-                        Cons::new(Symbol::keyword("uptime"), sysinfo.uptime.into()).evict(env),
+                        Cons::new(
+                            Symbol::keyword("uptime"),
+                            Fixnum::with_u64(env, sysinfo.uptime as u64)?,
+                        )
+                        .evict(env),
                         Cons::new(
                             Symbol::keyword("loads"),
                             vec![
@@ -72,15 +77,47 @@ impl CoreFunction for Sysinfo {
                             .evict(env),
                         )
                         .evict(env),
-                        Cons::new(Symbol::keyword("totlram"), sysinfo.totalram.into()).evict(env),
-                        Cons::new(Symbol::keyword("freeram"), sysinfo.freeram.into()).evict(env),
-                        Cons::new(Symbol::keyword("shrdram"), sysinfo.sharedram.into()).evict(env),
-                        Cons::new(Symbol::keyword("bufram"), sysinfo.bufferram.into()).evict(env),
-                        Cons::new(Symbol::keyword("totswap"), sysinfo.totalswap.into()).evict(env),
-                        Cons::new(Symbol::keyword("freswap"), sysinfo.freeswap.into()).evict(env),
+                        Cons::new(
+                            Symbol::keyword("totlram"),
+                            Fixnum::with_u64(env, sysinfo.totalram)?,
+                        )
+                        .evict(env),
+                        Cons::new(
+                            Symbol::keyword("freeram"),
+                            Fixnum::with_u64(env, sysinfo.freeram)?,
+                        )
+                        .evict(env),
+                        Cons::new(
+                            Symbol::keyword("shrdram"),
+                            Fixnum::with_u64(env, sysinfo.sharedram)?,
+                        )
+                        .evict(env),
+                        Cons::new(
+                            Symbol::keyword("bufram"),
+                            Fixnum::with_u64(env, sysinfo.bufferram)?,
+                        )
+                        .evict(env),
+                        Cons::new(
+                            Symbol::keyword("totswap"),
+                            Fixnum::with_u64(env, sysinfo.totalswap)?,
+                        )
+                        .evict(env),
+                        Cons::new(
+                            Symbol::keyword("freswap"),
+                            Fixnum::with_u64(env, sysinfo.freeswap)?,
+                        )
+                        .evict(env),
                         Cons::new(Symbol::keyword("procs"), sysinfo.procs.into()).evict(env),
-                        Cons::new(Symbol::keyword("tothigh"), sysinfo.totalhigh.into()).evict(env),
-                        Cons::new(Symbol::keyword("frehigh"), sysinfo.freehigh.into()).evict(env),
+                        Cons::new(
+                            Symbol::keyword("tothigh"),
+                            Fixnum::with_u64(env, sysinfo.totalhigh)?,
+                        )
+                        .evict(env),
+                        Cons::new(
+                            Symbol::keyword("frehigh"),
+                            Fixnum::with_u64(env, sysinfo.freehigh)?,
+                        )
+                        .evict(env),
                         Cons::new(Symbol::keyword("meenvnit"), sysinfo.mem_unit.into()).evict(env),
                     ],
                 )];

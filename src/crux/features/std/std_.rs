@@ -17,7 +17,7 @@ use crate::{
     features::feature::Feature,
     types::{
         cons::{Cons, Core as _},
-        fixnum::Fixnum,
+        fixnum::{Core as _, Fixnum},
         float::Float,
         vector::{Core as _, Vector},
     },
@@ -82,7 +82,7 @@ impl CoreFunction for Std {
 
         fp.value = match status {
             Err(_) => return Err(Exception::new(env, Condition::Open, "std:command", command)),
-            Ok(exit_status) => (exit_status.code().unwrap() as i64).into(),
+            Ok(exit_status) => Fixnum::with_or_panic(exit_status.code().unwrap() as usize),
         };
 
         Ok(())
