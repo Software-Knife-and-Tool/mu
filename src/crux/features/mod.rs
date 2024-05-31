@@ -3,14 +3,6 @@
 
 //! features module
 pub mod feature;
-
-#[cfg(feature = "nix")]
-use crate::features::nix::nix_::Nix;
-#[cfg(feature = "std")]
-use crate::features::std::std_::Std;
-#[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
-use crate::features::sysinfo::sysinfo_::Sysinfo;
-
 #[cfg(feature = "nix")]
 pub mod nix;
 #[cfg(feature = "std")]

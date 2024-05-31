@@ -2,12 +2,14 @@
 //  SPDX-License-Identifier: MIT
 
 //! features
-use crate::{
-    core::symbols::CoreFn,
-    features::{
-        nix::nix_::Core as _, std::std_::Core as _, sysinfo::sysinfo_::Core as _, Nix, Std, Sysinfo,
-    },
-};
+use crate::core::symbols::CoreFn;
+
+#[cfg(feature = "nix")]
+use crate::features::nix::nix_::{Core as _, Nix};
+#[cfg(feature = "std")]
+use crate::features::std::std_::{Core as _, Std};
+#[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
+use crate::features::sysinfo::sysinfo_::{Core as _, Sysinfo};
 
 #[derive(Clone)]
 pub struct Feature {
