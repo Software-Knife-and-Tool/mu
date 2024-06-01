@@ -14,9 +14,9 @@ use {
         },
         streams::write::Core as _,
         types::{
-            indirect_vector::{TypedVector, VecType},
+            indirect_vector::Core as _,
             symbol::{Core as _, Symbol},
-            vector::Core as _,
+            vector::Vector,
         },
     },
     std::ops::{Add, Div, Mul, Sub},
@@ -63,9 +63,7 @@ pub trait Core {
 
 impl Core for Float {
     fn view(env: &Env, fl: Tag) -> Tag {
-        let vec = vec![fl];
-
-        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        Vector::from(vec![fl]).evict(env)
     }
 
     fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {

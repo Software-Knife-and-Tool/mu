@@ -15,6 +15,7 @@ use {
         streams::write::Core as _,
         types::{
             cons::{Cons, Core as _},
+            indirect_vector::Core as _,
             symbol::{Core as _, Symbol, UNBOUND},
             vector::{Core as _, Vector},
         },
@@ -30,7 +31,7 @@ pub enum Namespace {
 }
 
 impl Namespace {
-    pub fn add_ns(env: &Env, name: &str) -> exception::Result<Tag> {
+    pub fn with(env: &Env, name: &str) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
         let len = ns_ref.len();
 
@@ -41,7 +42,7 @@ impl Namespace {
                 env,
                 Condition::Type,
                 "crux:make-ns",
-                Vector::from_string(name).evict(env),
+                Vector::from(name).evict(env),
             ));
         }
 
@@ -60,7 +61,7 @@ impl Namespace {
         Ok(ns)
     }
 
-    pub fn add_static_ns(
+    pub fn with_static(
         env: &Env,
         name: &str,
         ns_map: &'static RwLock<HashMap<String, Tag>>,
@@ -75,7 +76,7 @@ impl Namespace {
                 env,
                 Condition::Type,
                 "crux:make-ns",
-                Vector::from_string(name).evict(env),
+                Vector::from(name).evict(env),
             ));
         }
 
@@ -90,7 +91,7 @@ impl Namespace {
         Ok(ns)
     }
 
-    fn map_symbol(env: &Env, ns: Tag, name: &str) -> Option<Tag> {
+    fn find_symbol(env: &Env, ns: Tag, name: &str) -> Option<Tag> {
         let ns_ref = block_on(env.ns_map.read());
 
         match ns_ref.iter().find_map(
@@ -118,14 +119,14 @@ impl Namespace {
         }
     }
 
-    pub fn is_ns(tag: Tag) -> Option<Tag> {
+    pub fn is_(tag: Tag) -> Option<Tag> {
         match tag.type_of() {
             Type::Namespace => Some(tag),
             _ => None,
         }
     }
 
-    pub fn map_ns(env: &Env, name: &str) -> Option<Tag> {
+    pub fn find(env: &Env, name: &str) -> Option<Tag> {
         let ns_ref = block_on(env.ns_map.read());
 
         ns_ref
@@ -142,7 +143,7 @@ impl Namespace {
             .copied()
     }
 
-    pub fn ns_name(env: &Env, ns: Tag) -> Option<String> {
+    pub fn name(env: &Env, ns: Tag) -> Option<String> {
         let ns_ref = block_on(env.ns_map.read());
 
         match ns_ref.iter().find_map(
@@ -194,7 +195,7 @@ impl Namespace {
             return Some(Symbol::keyword(&name));
         }
 
-        match Self::map_symbol(env, ns, &name) {
+        match Self::find_symbol(env, ns, &name) {
             Some(symbol) => {
                 if Symbol::is_bound(env, symbol) {
                     Some(symbol)
@@ -333,11 +334,11 @@ impl Core for Namespace {
     fn write(env: &Env, ns: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         if escape {
             env.write_string(
-                &format!("#<:ns \"{}\">", Namespace::ns_name(env, ns).unwrap()),
+                &format!("#<:ns \"{}\">", Namespace::name(env, ns).unwrap()),
                 stream,
             )?
         } else {
-            env.write_string(&Namespace::ns_name(env, ns).unwrap(), stream)?
+            env.write_string(&Namespace::name(env, ns).unwrap(), stream)?
         }
 
         Ok(())
@@ -361,7 +362,7 @@ impl CoreFunction for Namespace {
         let symbol = fp.argv[0];
 
         env.fp_argv_check("crux:unintern", &[Type::Symbol], fp)?;
-        fp.value = match Self::map_symbol(
+        fp.value = match Self::find_symbol(
             env,
             Symbol::namespace(env, symbol),
             &Vector::as_string(env, Symbol::name(env, symbol)),
@@ -394,7 +395,6 @@ impl CoreFunction for Namespace {
         let symbol = fp.argv[0];
 
         env.fp_argv_check("crux:makunbound", &[Type::Symbol], fp)?;
-
         fp.value = Self::makunbound(env, symbol);
 
         Ok(())
@@ -404,7 +404,7 @@ impl CoreFunction for Namespace {
         let name = fp.argv[0];
 
         env.fp_argv_check("crux:make-ns", &[Type::String], fp)?;
-        fp.value = Self::add_ns(env, &Vector::as_string(env, name))?;
+        fp.value = Self::with(env, &Vector::as_string(env, name))?;
 
         Ok(())
     }
@@ -413,7 +413,7 @@ impl CoreFunction for Namespace {
         let ns = fp.argv[0];
 
         env.fp_argv_check("crux:ns-name", &[Type::Namespace], fp)?;
-        fp.value = Vector::from_string(&Self::ns_name(env, ns).unwrap()).evict(env);
+        fp.value = Vector::from(Self::name(env, ns).unwrap()).evict(env);
 
         Ok(())
     }
@@ -422,7 +422,7 @@ impl CoreFunction for Namespace {
         let name = fp.argv[0];
 
         env.fp_argv_check("crux:find-ns", &[Type::String], fp)?;
-        fp.value = match Self::map_ns(env, &Vector::as_string(env, name)) {
+        fp.value = match Self::find(env, &Vector::as_string(env, name)) {
             Some(ns) => ns,
             None => return Err(Exception::new(env, Condition::Type, "crux:find-ns", name)),
         };
@@ -446,7 +446,7 @@ impl CoreFunction for Namespace {
                 }
             },
         ) {
-            Some(_) => match Self::map_symbol(env, ns_tag, &Vector::as_string(env, name)) {
+            Some(_) => match Self::find_symbol(env, ns_tag, &Vector::as_string(env, name)) {
                 Some(sym) => sym,
                 None => Tag::nil(),
             },
@@ -464,45 +464,41 @@ impl CoreFunction for Namespace {
         let ns = fp.argv[0];
 
         env.fp_argv_check("crux:symbols", &[Type::Namespace], fp)?;
-        fp.value = match Self::is_ns(ns) {
-            Some(_) => {
-                let ns_ref = block_on(env.ns_map.read());
 
-                match ns_ref.iter().find_map(
-                    |(tag, _, ns_map)| {
-                        if ns.eq_(tag) {
-                            Some(ns_map)
-                        } else {
-                            None
-                        }
-                    },
-                ) {
-                    Some(ns_map) => {
-                        let hash = block_on(match ns_map {
-                            Namespace::Static(hash) => hash.read(),
-                            Namespace::Dynamic(hash) => hash.read(),
-                        });
+        let ns_ref = block_on(env.ns_map.read());
 
-                        let vec = hash.keys().map(|key| hash[key]).collect::<Vec<Tag>>();
-
-                        Cons::vlist(env, &vec)
-                    }
-                    None => panic!(),
+        fp.value = match ns_ref.iter().find_map(
+            |(tag, _, ns_map)| {
+                if ns.eq_(tag) {
+                    Some(ns_map)
+                } else {
+                    None
                 }
+            },
+        ) {
+            Some(ns_map) => {
+                let hash = block_on(match ns_map {
+                    Namespace::Static(hash) => hash.read(),
+                    Namespace::Dynamic(hash) => hash.read(),
+                });
+
+                let vec = hash.keys().map(|key| hash[key]).collect::<Vec<Tag>>();
+
+                Cons::vlist(env, &vec)
             }
-            _ => return Err(Exception::new(env, Condition::Type, "crux:symbols", ns)),
+            None => panic!(),
         };
 
         Ok(())
     }
 
     fn crux_ns_map(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        env.fp_argv_check("crux:ns-ma", &[], fp)?;
+        env.fp_argv_check("crux:ns-map", &[], fp)?;
 
         let ns_ref = block_on(env.ns_map.read());
         let vec = ns_ref
             .iter()
-            .map(|(_, name, _)| Vector::from_string(name).evict(env))
+            .map(|(_, name, _)| Vector::from((*name).clone()).evict(env))
             .collect::<Vec<Tag>>();
 
         fp.value = Cons::vlist(env, &vec);

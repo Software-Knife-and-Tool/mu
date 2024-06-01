@@ -13,7 +13,7 @@ use crate::{
     streams::write::Core as _,
     types::{
         fixnum::Fixnum,
-        indirect_vector::{TypedVector, VecType},
+        indirect_vector::Core as _,
         namespace::Namespace,
         vector::{Core as _, Vector},
     },
@@ -122,7 +122,7 @@ impl Core for Function {
     fn view(env: &Env, func: Tag) -> Tag {
         let vec = vec![Self::arity(env, func), Self::form(env, func)];
 
-        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        Vector::from(vec).evict(env)
     }
 
     fn heap_size(env: &Env, fn_: Tag) -> usize {
@@ -149,7 +149,7 @@ impl Core for Function {
                         let name = Vector::ref_heap(env, form, 1).unwrap();
 
                         (
-                            Namespace::ns_name(env, ns).unwrap(),
+                            Namespace::name(env, ns).unwrap(),
                             Vector::as_string(env, name).to_string(),
                         )
                     }

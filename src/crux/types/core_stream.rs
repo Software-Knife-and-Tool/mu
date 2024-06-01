@@ -22,9 +22,9 @@ use crate::{
     types::{
         char::Char,
         fixnum::{Core as _, Fixnum},
-        indirect_vector::{TypedVector, VecType},
+        indirect_vector::Core as _,
         symbol::{Core as _, Symbol},
-        vector::Core as _,
+        vector::Vector,
     },
 };
 
@@ -89,7 +89,7 @@ impl Core for Stream {
                     stream.unch,
                 ];
 
-                TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+                Vector::from(vec).evict(env)
             }
             None => panic!(),
         }

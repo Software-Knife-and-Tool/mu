@@ -18,10 +18,10 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
         function::{Core as _, Function},
-        indirect_vector::{TypedVector, VecType},
+        indirect_vector::Core as _,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vector::Vector,
     },
 };
 
@@ -106,7 +106,7 @@ impl CoreFunction for Heap {
             ])
         }
 
-        fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+        fp.value = Vector::from(vec).evict(env);
 
         Ok(())
     }
@@ -120,7 +120,7 @@ impl CoreFunction for Heap {
             Fixnum::with_or_panic(npages),
         ];
 
-        fp.value = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+        fp.value = Vector::from(vec).evict(env);
 
         Ok(())
     }

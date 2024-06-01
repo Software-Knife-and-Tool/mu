@@ -14,10 +14,10 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
-        indirect_vector::VecType,
+        indirect_vector::Core as _,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::Core as _,
+        vector::Vector,
     },
 };
 use sysinfo_dot_h::{self};
@@ -68,12 +68,11 @@ impl CoreFunction for Sysinfo {
                         .evict(env),
                         Cons::new(
                             Symbol::keyword("loads"),
-                            vec![
+                            Vector::from(vec![
                                 sysinfo.loads[0] as f32,
                                 sysinfo.loads[1] as f32,
                                 sysinfo.loads[2] as f32,
-                            ]
-                            .to_vector()
+                            ])
                             .evict(env),
                         )
                         .evict(env),

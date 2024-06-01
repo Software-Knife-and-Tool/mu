@@ -14,9 +14,9 @@ use crate::{
     streams::write::Core as _,
     types::{
         cons::{Cons, Core as _},
-        indirect_vector::{TypedVector, VecType},
+        indirect_vector::Core as _,
         symbol::{Core as _, Symbol},
-        vector::Core as _,
+        vector::Vector,
     },
 };
 
@@ -164,9 +164,7 @@ impl Core for Fixnum {
     }
 
     fn view(env: &Env, fx: Tag) -> Tag {
-        let vec = vec![fx];
-
-        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        Vector::from(vec![fx]).evict(env)
     }
 }
 

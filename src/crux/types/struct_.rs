@@ -16,9 +16,9 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         core_stream::{Core as _, Stream},
-        indirect_vector::{TypedVector, VecType, VectorIter},
+        indirect_vector::Core as _,
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vector::{Vector, VectorIter},
     },
 };
 
@@ -78,7 +78,8 @@ impl Struct {
     pub fn to_tag(env: &Env, stype: Tag, vec: Vec<Tag>) -> Tag {
         match stype.type_of() {
             Type::Keyword => {
-                let vector = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+                let vector = Vector::from(vec).evict(env);
+
                 Struct { stype, vector }.evict(env)
             }
             _ => panic!(),
@@ -110,15 +111,14 @@ impl<'a> Core<'a> for Struct {
     fn new(env: &Env, key: &str, vec: Vec<Tag>) -> Self {
         Struct {
             stype: Symbol::keyword(key),
-            vector: TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env),
+            vector: Vector::from(vec).evict(env),
         }
     }
 
     fn view(env: &Env, tag: Tag) -> Tag {
         let image = Self::to_image(env, tag);
-        let vec = vec![image.stype, image.vector];
 
-        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        Vector::from(vec![image.stype, image.vector]).evict(env)
     }
 
     fn heap_size(env: &Env, struct_: Tag) -> usize {
@@ -218,7 +218,7 @@ impl CoreFunction for Struct {
     }
 
     fn crux_make_struct(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let stype = fp.argv[0];
+        let type_ = fp.argv[0];
         let list = fp.argv[1];
 
         env.fp_argv_check("crux:make-struct", &[Type::Keyword, Type::List], fp)?;
@@ -227,9 +227,11 @@ impl CoreFunction for Struct {
             .map(|cons| Cons::car(env, cons))
             .collect::<Vec<Tag>>();
 
-        let vector = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
-
-        fp.value = Struct { stype, vector }.evict(env);
+        fp.value = Struct {
+            stype: type_,
+            vector: Vector::from(vec).evict(env),
+        }
+        .evict(env);
 
         Ok(())
     }

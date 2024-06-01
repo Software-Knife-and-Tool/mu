@@ -16,8 +16,8 @@ use crate::{
     },
     types::{
         cons::{Cons, Core as _},
-        indirect_vector::{TypedVector, VecType},
-        vector::Core as _,
+        indirect_vector::Core as _,
+        vector::Vector,
     },
 };
 
@@ -60,16 +60,12 @@ impl CoreFunction for Env {
 
             Frame::frame_stack_ref(env, (&func.to_le_bytes()).into(), *offset, &mut argv);
 
-            let vec = argv
+            let vec: Vec<Tag> = argv
                 .into_iter()
                 .map(|f| (&f.to_le_bytes()).into())
                 .collect();
 
-            Cons::new(
-                (&func.to_le_bytes()).into(),
-                TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env),
-            )
-            .evict(env)
+            Cons::new((&func.to_le_bytes()).into(), Vector::from(vec).evict(env)).evict(env)
         }));
 
         fp.value = Cons::vlist(env, &frames);
