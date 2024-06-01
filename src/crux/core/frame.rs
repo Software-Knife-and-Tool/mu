@@ -12,7 +12,6 @@ use crate::{
         apply::Core as _,
         env::Env,
         exception::{self, Condition, Core as _, Exception},
-        symbols::CRUX_SYMBOLS,
         types::{Tag, Type},
     },
     types::{
@@ -24,6 +23,7 @@ use crate::{
         vector::VectorIter,
         vector::{Core as _, Vector},
     },
+    LIB,
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
@@ -142,7 +142,8 @@ impl Frame {
                         Vector::ref_heap(env, Function::form(env, func), 2).unwrap(),
                     );
 
-                    CRUX_SYMBOLS[offset as usize].2(env, &mut self)?;
+                    let functions_ref = block_on(LIB.functions.read());
+                    functions_ref[offset as usize](env, &mut self)?;
 
                     Ok(self.value)
                 }
