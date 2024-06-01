@@ -19,9 +19,9 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
         function::Function,
-        indirect_vector::VectorIter,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
+        vector::VectorIter,
         vector::{Core as _, Vector},
     },
 };

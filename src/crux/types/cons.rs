@@ -17,9 +17,9 @@ use crate::{
     streams::{read::Core as _, write::Core as _},
     types::{
         fixnum::{Core as _, Fixnum},
-        indirect_vector::{TypedVector, VecType},
+        indirect_vector::Core as _,
         symbol::Symbol,
-        vector::Core as _,
+        vector::Vector,
     },
 };
 
@@ -132,7 +132,7 @@ impl Cons {
 
                 Some(n)
             }
-            _ => panic!("cons::length"),
+            _ => panic!(),
         }
     }
 
@@ -177,7 +177,7 @@ impl Core for Cons {
     fn view(env: &Env, cons: Tag) -> Tag {
         let vec = vec![Self::car(env, cons), Self::cdr(env, cons)];
 
-        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        Vector::from(vec).evict(env)
     }
 
     fn iter(env: &Env, cons: Tag) -> ConsIter {
@@ -405,6 +405,7 @@ impl CoreFunction for Cons {
 
     fn crux_cons(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = Self::new(fp.argv[0], fp.argv[1]).evict(env);
+
         Ok(())
     }
 

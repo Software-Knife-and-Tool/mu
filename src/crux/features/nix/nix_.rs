@@ -13,9 +13,10 @@ use crate::{
     features::feature::Feature,
     types::{
         cons::{Cons, Core as _},
+        indirect_vector::Core as _,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vector::Vector,
     },
 };
 use nix::{self};
@@ -61,27 +62,27 @@ impl CoreFunction for Nix {
                     &[
                         Cons::new(
                             Symbol::keyword("sysname"),
-                            Vector::from_string(info.sysname().to_str().unwrap()).evict(env),
+                            Vector::from(info.sysname().to_str().unwrap()).evict(env),
                         )
                         .evict(env),
                         Cons::new(
                             Symbol::keyword("node"),
-                            Vector::from_string(info.nodename().to_str().unwrap()).evict(env),
+                            Vector::from(info.nodename().to_str().unwrap()).evict(env),
                         )
                         .evict(env),
                         Cons::new(
                             Symbol::keyword("release"),
-                            Vector::from_string(info.release().to_str().unwrap()).evict(env),
+                            Vector::from(info.release().to_str().unwrap()).evict(env),
                         )
                         .evict(env),
                         Cons::new(
                             Symbol::keyword("version"),
-                            Vector::from_string(info.version().to_str().unwrap()).evict(env),
+                            Vector::from(info.version().to_str().unwrap()).evict(env),
                         )
                         .evict(env),
                         Cons::new(
                             Symbol::keyword("machine"),
-                            Vector::from_string(info.machine().to_str().unwrap()).evict(env),
+                            Vector::from(info.machine().to_str().unwrap()).evict(env),
                         )
                         .evict(env),
                     ],

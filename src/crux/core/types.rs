@@ -21,7 +21,7 @@ use {
             fixnum::{Core as _, Fixnum},
             float::{Core as _, Float},
             function::{Core as _, Function},
-            indirect_vector::{TypedVector, VecType},
+            indirect_vector::Core as _,
             struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
@@ -235,16 +235,10 @@ impl CoreFunction for Tag {
         let arg = fp.argv[1];
 
         env.fp_argv_check("crux:repr", &[Type::Keyword, Type::T], fp)?;
-
         fp.value = if type_.eq_(&Symbol::keyword("vector")) {
-            let slice = arg.as_slice();
+            let slice = arg.as_slice().to_vec();
 
-            TypedVector::<Vec<u8>> {
-                vec: slice.to_vec(),
-            }
-            .vec
-            .to_vector()
-            .evict(env)
+            Vector::from(slice).evict(env)
         } else if type_.eq_(&Symbol::keyword("t")) {
             if Vector::type_of(env, arg) == Type::Byte && Vector::length(env, arg) == 8 {
                 let mut u64_: u64 = 0;

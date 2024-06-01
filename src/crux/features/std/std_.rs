@@ -19,6 +19,7 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
         float::Float,
+        indirect_vector::Core as _,
         vector::{Core as _, Vector},
     },
 };
@@ -104,11 +105,8 @@ impl CoreFunction for Std {
 
             for (key, value) in std::env::vars() {
                 vars.push(
-                    Cons::new(
-                        Vector::from_string(&key).evict(env),
-                        Vector::from_string(&value).evict(env),
-                    )
-                    .evict(env),
+                    Cons::new(Vector::from(key).evict(env), Vector::from(value).evict(env))
+                        .evict(env),
                 )
             }
 

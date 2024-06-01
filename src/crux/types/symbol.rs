@@ -19,7 +19,7 @@ use {
         streams::write::Core as _,
         types::{
             core_stream::{Core as _, Stream},
-            indirect_vector::{TypedVector, VecType},
+            indirect_vector::Core as _,
             namespace::Namespace,
             vector::{Core as _, Vector},
         },
@@ -52,7 +52,7 @@ impl Symbol {
         if name.is_empty() {
             Symbol::Symbol(SymbolImage {
                 namespace,
-                name: Vector::from_string(name).evict(env),
+                name: Vector::from(name).evict(env),
                 value,
             })
         } else {
@@ -60,7 +60,7 @@ impl Symbol {
                 ':' => Symbol::Keyword(Self::keyword(&name[1..])),
                 _ => Symbol::Symbol(SymbolImage {
                     namespace,
-                    name: Vector::from_string(name).evict(env),
+                    name: Vector::from(name).evict(env),
                     value,
                 }),
             }
@@ -195,20 +195,20 @@ pub trait Core {
 impl Core for Symbol {
     fn view(env: &Env, symbol: Tag) -> Tag {
         let vec = vec![
-            Vector::from_string(&format!(
+            Vector::from(format!(
                 "\"{}\"",
-                Namespace::ns_name(env, Self::namespace(env, symbol)).unwrap()
+                Namespace::name(env, Self::namespace(env, symbol)).unwrap()
             ))
             .evict(env),
             Self::name(env, symbol),
-            if !Self::is_bound(env, symbol) {
-                Symbol::keyword("UNBOUND")
-            } else {
+            if Self::is_bound(env, symbol) {
                 Self::value(env, symbol)
+            } else {
+                Symbol::keyword("UNBOUND")
             },
         ];
 
-        TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env)
+        Vector::from(vec).evict(env)
     }
 
     fn heap_size(env: &Env, symbol: Tag) -> usize {
@@ -287,7 +287,7 @@ impl Core for Symbol {
                         env,
                         Condition::Syntax,
                         "crux:read",
-                        Vector::from_string(&token).evict(env),
+                        Vector::from(token).evict(env),
                     ));
                 }
                 Ok(Symbol::new(env, Tag::nil(), &token, *UNBOUND).evict(env))
@@ -302,17 +302,17 @@ impl Core for Symbol {
                         env,
                         Condition::Syntax,
                         "crux:read",
-                        Vector::from_string(&token).evict(env),
+                        Vector::from(token).evict(env),
                     ));
                 }
 
-                match Namespace::map_ns(env, &ns) {
+                match Namespace::find(env, &ns) {
                     Some(ns) => Ok(Namespace::intern(env, ns, name, *UNBOUND).unwrap()),
                     None => Err(Exception::new(
                         env,
                         Condition::Namespace,
                         "crux:read",
-                        Vector::from_string(sym[0]).evict(env),
+                        Vector::from(sym[0]).evict(env),
                     )),
                 }
             }
@@ -340,7 +340,7 @@ impl Core for Symbol {
                     let ns = Self::namespace(env, symbol);
 
                     if !Tag::null_(&ns) && !env.null_ns.eq_(&ns) {
-                        match Namespace::ns_name(env, ns) {
+                        match Namespace::name(env, ns) {
                             Some(str) => env.write_string(&str, stream).unwrap(),
                             None => panic!(),
                         }

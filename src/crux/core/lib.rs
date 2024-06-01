@@ -16,11 +16,11 @@ use {
             core_stream::Stream,
             fixnum::{Core as _, Fixnum},
             function::Function,
-            indirect_vector::{TypedVector, VecType},
+            indirect_vector::Core as _,
             namespace::Namespace,
             stream::StreamBuilder,
             symbol::{Core as _, Symbol},
-            vector::{Core as _, Vector},
+            vector::Vector,
         },
     },
     std::collections::HashMap,
@@ -34,12 +34,12 @@ lazy_static! {
 pub struct Lib {
     pub version: &'static str,
 
+    pub env_map: RwLock<HashMap<u64, Env>>,
     pub features: RwLock<Vec<Feature>>,
     pub functions: RwLock<Vec<CoreFn>>,
     pub future_id: RwLock<u64>,
     pub futures: RwLock<HashMap<u64, Future>>,
     pub keywords: RwLock<HashMap<String, Tag>>,
-    pub env_map: RwLock<HashMap<u64, Env>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub symbols: RwLock<HashMap<String, Tag>>,
@@ -124,7 +124,7 @@ impl Lib {
             env,
             env.crux_ns,
             "*version*".to_string(),
-            Vector::from_string(LIB.version).evict(env),
+            Vector::from(LIB.version).evict(env),
         )
         .unwrap();
 
@@ -142,17 +142,18 @@ impl Lib {
             LIB.stdout(),
         )
         .unwrap();
+
         Namespace::intern_static(env, env.crux_ns, "*error-output*".to_string(), LIB.errout())
             .unwrap();
 
         for (name, nreqs, fn_) in &*CRUX_SYMBOLS {
             let vec = vec![
                 env.crux_ns,
-                Vector::from_string(name).evict(env),
+                Vector::from(*name).evict(env),
                 Fixnum::with_or_panic(functions.len()),
             ];
 
-            let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+            let fn_vec = Vector::from(vec).evict(env);
             let func = Function::new((*nreqs).into(), fn_vec).evict(env);
 
             Namespace::intern_static(env, env.crux_ns, name.to_string(), func).unwrap();
@@ -163,7 +164,7 @@ impl Lib {
         let features = block_on(LIB.features.read());
 
         for feature in &*features {
-            let ns = match Namespace::add_ns(env, &feature.namespace) {
+            let ns = match Namespace::with(env, &feature.namespace) {
                 Ok(ns) => ns,
                 Err(_) => panic!(),
             };
@@ -171,11 +172,11 @@ impl Lib {
             for (name, nreqs, fn_) in &*feature.symbols {
                 let vec = vec![
                     ns,
-                    Vector::from_string(name).evict(env),
+                    Vector::from(*name).evict(env),
                     Fixnum::with_or_panic(functions.len()),
                 ];
 
-                let fn_vec = TypedVector::<Vec<Tag>> { vec }.vec.to_vector().evict(env);
+                let fn_vec = Vector::from(vec).evict(env);
                 let func = Function::new((*nreqs).into(), fn_vec).evict(env);
 
                 Namespace::intern(env, ns, name.to_string(), func).unwrap();

@@ -17,10 +17,11 @@ use crate::{
         fixnum::{Core as _, Fixnum},
         float::{Core as _, Float},
         function::{Core as _, Function},
+        indirect_vector::Core as _,
         namespace::{Core as _, Namespace},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        vector::Vector,
     },
 };
 

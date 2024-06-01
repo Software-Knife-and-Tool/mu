@@ -16,6 +16,7 @@ use crate::{
     types::{
         core_stream::{Core as _, Stream},
         fixnum::{Core as _, Fixnum},
+        indirect_vector::Core as _,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
@@ -203,7 +204,7 @@ impl Core for Lib {
                         env,
                         Condition::Over,
                         "crux:read",
-                        Vector::from_string(&token).evict(env),
+                        Vector::from(token).evict(env),
                     ))
                 }
             }
@@ -240,7 +241,7 @@ impl Core for Lib {
                                             env,
                                             Condition::Type,
                                             "crux:read",
-                                            Vector::from_string(&phrase).evict(env),
+                                            Vector::from(phrase).evict(env),
                                         )),
                                     }
                                 }
@@ -305,7 +306,7 @@ impl Core for Lib {
                                         env,
                                         Condition::Over,
                                         "crux:read",
-                                        Vector::from_string(&hex).evict(env),
+                                        Vector::from(hex).evict(env),
                                     ))
                                 }
                             }

@@ -63,17 +63,17 @@ impl Env {
         };
 
         // establish namespaces
-        env.null_ns = match Namespace::add_ns(&env, "") {
+        env.null_ns = match Namespace::with(&env, "") {
             Ok(ns) => ns,
             Err(_) => panic!(),
         };
 
-        env.keyword_ns = match Namespace::add_static_ns(&env, "keyword", &LIB.keywords) {
+        env.keyword_ns = match Namespace::with_static(&env, "keyword", &LIB.keywords) {
             Ok(ns) => ns,
             Err(_) => panic!(),
         };
 
-        env.crux_ns = match Namespace::add_static_ns(&env, "crux", &LIB.symbols) {
+        env.crux_ns = match Namespace::with_static(&env, "crux", &LIB.symbols) {
             Ok(ns) => ns,
             Err(_) => panic!(),
         };
