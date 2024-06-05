@@ -143,7 +143,7 @@ impl Env {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
-        Compile::compile(env, expr, &mut vec![])
+        env.compile(expr, &mut vec![])
     }
 
     /// read an s-expression from a core stream

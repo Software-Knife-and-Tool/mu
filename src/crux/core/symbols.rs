@@ -5,7 +5,7 @@
 use crate::{
     core::{
         apply::CoreFunction as _,
-        compile::{Compile, CoreFunction as _},
+        compile::CoreFunction as _,
         dynamic::CoreFunction as _,
         env::Env,
         exception::{self, CoreFunction as _, Exception},
@@ -49,8 +49,8 @@ lazy_static! {
         ( "nth",     2, Cons::crux_nth ),
         ( "nthcdr",  2, Cons::crux_nthcdr ),
         // compiler
-        ( "compile", 1, Compile::crux_compile ),
-        ( "%if",     3, Compile::crux_if),
+        ( "compile", 1, Env::crux_compile ),
+        ( "%if",     3, Env::crux_if),
         // gc
         ( "gc",      0, Gc::crux_gc ),
         // heap
