@@ -159,7 +159,7 @@ impl Core for Fixnum {
         }
     }
 
-    fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> Result<()> {
+    fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
         env.write_string(&Self::as_i64(tag).to_string(), stream)
     }
 
