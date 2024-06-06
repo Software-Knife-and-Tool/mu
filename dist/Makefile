@@ -8,9 +8,6 @@ VERSION != grep VERSION: ../src/crux/core/lib.rs | sed 's/.* "//' | sed 's/".*//
 BASE = mu
 DOCS = ../doc
 DIST = ../dist
-MU_SYS = ./mu-sys
-MU_LD = ./mu-ld
-MU_EXEC = ./mu-exec
 
 dist:
 	@chmod 755 $(DIST)/mu-sys
@@ -28,9 +25,10 @@ dist:
 	@install -m 644 $(DIST)/prelude.l $(BASE)/lib
 	@install -m 644 $(DIST)/mu.l $(BASE)/lib
 
-	@install -m 755 $(MU_EXEC) $(BASE)/bin
-	@install -m 755 $(MU_LD) $(BASE)/bin
-	@install -m 755 $(MU_SYS) $(BASE)/bin
+	@install -m 755 ./mu-bindgen $(BASE)/bin
+	@install -m 755 ./mu-exec $(BASE)/bin
+	@install -m 755 ./mu-ld $(BASE)/bin
+	@install -m 755 ./mu-sys $(BASE)/bin
 	@install -m 755 ./mu.sh $(BASE)/bin/mu
 
 	@install -d $(BASE)/doc/html
