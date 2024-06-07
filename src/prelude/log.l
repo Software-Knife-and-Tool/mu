@@ -4,34 +4,34 @@
 ;;;
 ;;; logging
 ;;;
-(crux:intern prelude "%logf"
+(mu:intern prelude "%logf"
    (:lambda (stream format-satring arg-list)
       (prelude:apply prelude:format `(,stream ,format-string ,arg-list))))
 
-(crux:intern prelude "logf"
+(mu:intern prelude "logf"
    (:lambda (env format-string arg-list)
       ((:lambda (stream)
           (prelude:apply prelude:format `(,stream ,format-string ,arg-list))))
       (prelude:%env-prop :log env)))
 
-(crux:intern prelude "%open-log-file"
+(mu:intern prelude "%open-log-file"
    (:lambda (file-name env)
-      (crux:open :file :output file-name)))
+      (mu:open :file :output file-name)))
 
 ;;;
 ;;; exception flavors
 ;;;
-(crux:intern prelude "log-error"
+(mu:intern prelude "log-error"
    (:lambda (format-string value env)
       (prelude:logf env format-string `(,value))
       (prelude:error format-string value)))
 
-(crux:intern prelude "log-raise"
+(mu:intern prelude "log-raise"
    (:lambda (format-string value source reason env)
       (prelude:logf env format-string `(,value ,source ,reason ,env))
       (prelude:raise value source reason)))
 
-(crux:intern prelude "log-warn"
+(mu:intern prelude "log-warn"
    (:lambda (value message env)
       (prelude:logf env ";;; warning: ~S ~A~%" `(,value ,message))
       value))

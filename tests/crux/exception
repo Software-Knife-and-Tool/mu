@@ -1,4 +1,0 @@
-(crux:unwind-protect (:lambda (obj cond src) (crux:write cond () crux:*standard-output*)) (:lambda () (crux:raise () :except)))	:except:except
-(crux:unwind-protect (:lambda (obj cond src) (crux:write obj () crux:*standard-output*)) (:lambda () (crux:raise 1 :except)))	11
-(crux:unwind-protect (:lambda (obj cond src) (crux:write cond () crux:*standard-output*)) (:lambda () (crux:quotient 1 0)))	:div0:div0
-(crux:unwind-protect (:lambda (obj cond src) (crux:write obj () crux:*standard-output*)) (:lambda () 1))	1

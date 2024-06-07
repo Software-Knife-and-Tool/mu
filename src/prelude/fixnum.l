@@ -4,65 +4,65 @@
 ;;;
 ;;; fixnums
 ;;;
-(crux:intern prelude "1+"
+(mu:intern prelude "1+"
    (:lambda (n)
      (:if (prelude:fixnump n)
-          (crux:sum n 1)
+          (mu:sum n 1)
           (prelude:raise n 'prelude:1+ "not a fixnum"))))
 
-(crux:intern prelude "1-"
+(mu:intern prelude "1-"
    (:lambda (n)
      (:if (prelude:fixnump n)
-          (crux:difference n 1)
+          (mu:difference n 1)
           (prelude:raise n 'prelude:1- "not a fixnum"))))
 
-(crux:intern prelude "truncate"
+(mu:intern prelude "truncate"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(crux:quotient n m) ,@(crux:difference n (crux:product m (crux:quotient n m))))
+               `(,(mu:quotient n m) ,@(mu:difference n (mu:product m (mu:quotient n m))))
                (prelude:raise m 'prelude:truncate "not a fixnum"))
           (prelude:raise n 'prelude:truncate "not a fixnum"))))
 
 ;;; round to negative infinity
-(crux:intern prelude "floor"
+(mu:intern prelude "floor"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(crux:quotient n m) ,@(crux:difference n (crux:product m (crux:quotient n m))))
+               `(,(mu:quotient n m) ,@(mu:difference n (mu:product m (mu:quotient n m))))
                (prelude:raise m 'prelude:rem "not a fixnum"))
           (prelude:raise n 'prelude:floor "not a fixnum"))))
 
 ;;; round to positive infinity
-(crux:intern prelude "ceiling"
+(mu:intern prelude "ceiling"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               `(,(crux:quotient n m) ,@(crux:difference n (crux:product m (crux:quotient n m))))
+               `(,(mu:quotient n m) ,@(mu:difference n (mu:product m (mu:quotient n m))))
                (prelude:raise m 'prelude:ceiling "not a fixnum"))
           (prelude:raise n 'prelude:ceiling "not a fixnum"))))
 
-(crux:intern prelude "mod"
+(mu:intern prelude "mod"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               (crux:cdr (prelude:floor m n))
+               (mu:cdr (prelude:floor m n))
                (prelude:raise m 'prelude:mod "not a fixnum"))
           (prelude:raise n 'prelude:mod "not a fixnum"))))
 
-(crux:intern prelude "rem"
+(mu:intern prelude "rem"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               (crux:cdr (prelude:truncate m n))
+               (mu:cdr (prelude:truncate m n))
                (prelude:raise m 'prelude:rem "not a fixnum"))
           (prelude:raise n 'prelude:rem "not a fixnum"))))
 
 ;;; round to nearest
-(crux:intern prelude "round"
+(mu:intern prelude "round"
    (:lambda (n m)
      (:if (prelude:fixnump n)
           (:if (prelude:fixnump m)
-               (crux:difference (crux:quotient n m) (crux:difference n (crux:product m (crux:quotient n m))))
+               (mu:difference (mu:quotient n m) (mu:difference n (mu:product m (mu:quotient n m))))
                (prelude:raise m 'prelude:round "not a fixnum"))
           (prelude:raise n 'prelude:round "not a fixnum"))))

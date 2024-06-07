@@ -1,0 +1,22 @@
+#(:t 1 2 3)
+#(:byte 1 2 3)
+#(:char #\1 #\2 #\3)
+#(:fixnum 1 2 -3)
+#(:float 1.0 2.0 -3.0)
+#s(:foo 1 2 3)
+'(1 2 3)
+'()
+#\ 
+#\a
+#| hello |# 1234
+'a-long-symbol
+'a-symbol
+'symbol
+'mu:eq
+'s
+(mu:type-of '#:abc)
+:a
+:abcdefg
+1.024e23
+1234
+#xabc

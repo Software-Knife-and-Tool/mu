@@ -1,0 +1,9 @@
+(mu:close mu:*error-output*)	:t
+(mu:type-of (mu:flush mu:*standard-output*))	:stream
+(mu:get-string (mu:open :string :output "abcdef"))	"abcdef"
+(mu:openp mu:*error-output*)	#<stream: 2 :error-output :output :open>
+(mu:write "abc" () mu:*standard-output*)	abc"abc"
+(mu:write "abc" :t mu:*standard-output*)	"abc""abc"
+(mu:write () () mu:*standard-output*)	:nil:nil
+(mu:write :abcde :t mu:*standard-output*)	:abcde:abcde
+(mu:write-char #\a mu:*standard-output*)	a#\a

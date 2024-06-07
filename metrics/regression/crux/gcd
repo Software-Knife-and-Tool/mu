@@ -1,1 +1,0 @@
-((:lambda (g) (crux:apply g (crux:cons g (crux:cons 101010101 (crux:cons 11011 ()))))) (:lambda (g a b) (:if (crux:eq 0 b) a (crux:apply g (crux:cons g (crux:cons b (crux:cons (crux:difference a (crux:product b (crux:quotient a b))) ())))))))

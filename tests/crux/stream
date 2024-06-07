@@ -1,9 +1,0 @@
-(crux:close crux:*error-output*)	:t
-(crux:type-of (crux:flush crux:*standard-output*))	:stream
-(crux:get-string (crux:open :string :output "abcdef"))	"abcdef"
-(crux:openp crux:*error-output*)	#<stream: 2 :error-output :output :open>
-(crux:write "abc" () crux:*standard-output*)	abc"abc"
-(crux:write "abc" :t crux:*standard-output*)	"abc""abc"
-(crux:write () () crux:*standard-output*)	:nil:nil
-(crux:write :abcde :t crux:*standard-output*)	:abcde:abcde
-(crux:write-char #\a crux:*standard-output*)	a#\a

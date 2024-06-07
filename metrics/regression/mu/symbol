@@ -1,0 +1,5 @@
+(mu:boundp 'mu:foo)
+(mu:boundp 'mu:*standard-input*)
+(mu:eq :keyword (mu:type-of 'abcd))
+(mu:eq :keyword (mu:type-of :abcd))
+(mu:symbol-value 'mu:*standard-input*)

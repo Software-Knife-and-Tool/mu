@@ -1,0 +1,2 @@
+(mu:struct-type (mu:make-struct :foo ()))
+(mu:struct-vec (mu:make-struct :foo '(1 2 3 4)))

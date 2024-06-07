@@ -4,9 +4,9 @@
 ;;;
 ;;; repl
 ;;;
-(crux:intern prelude "repl"
+(mu:intern prelude "repl"
    (:lambda ()
-     (crux:fix
+     (mu:fix
        (:lambda (loop)
          (prelude:with-exception
              (:lambda (ex)
@@ -14,13 +14,13 @@
                (prelude:null loop))
            (:lambda ()
              (prelude:format :t "prelude> " ())
-             (crux:flush crux:*standard-output*)
+             (mu:flush mu:*standard-output*)
              ((:lambda (form)
-                (:if (crux:eq form prelude:%eof%)
+                (:if (mu:eq form prelude:%eof%)
                      loop
                      ((:lambda (value)
                         (prelude:format :t "[~A] ~S~%" `(,(prelude:type-of value) ,value))
                         (prelude:null loop))
-                      (crux:eval (prelude:compile form)))))
+                      (mu:eval (prelude:compile form)))))
               (prelude:read :t () prelude:%eof%)))))
        ())))

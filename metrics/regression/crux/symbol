@@ -1,5 +1,0 @@
-(crux:boundp 'crux:foo)
-(crux:boundp 'crux:*standard-input*)
-(crux:eq :keyword (crux:type-of 'abcd))
-(crux:eq :keyword (crux:type-of :abcd))
-(crux:symbol-value 'crux:*standard-input*)

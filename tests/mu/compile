@@ -1,0 +1,8 @@
+((:lambda (fn)(mu:apply (:lambda (fn) (mu:eq :func (mu:type-of fn))) (mu:cons fn ()))) mu:eq)	:t
+(mu:apply (mu:compile '(:lambda (a) ((:lambda (a) (mu:sum a a)) (mu:sum a 2)))) '(1))	6
+(mu:apply (mu:compile '(:lambda (a) ((:lambda (b) (mu:sum a b)) (mu:sum a 2)))) '(1))	4
+(mu:apply (mu:compile '(:lambda (a) (mu:sum a a))) '(1))	2
+(mu:compile #\a)	#\a
+(mu:compile 1)	1
+(mu:compile :compile)	:compile
+(mu:compile "compile")	"compile"

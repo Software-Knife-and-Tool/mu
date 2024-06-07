@@ -5,45 +5,45 @@
 ;;; return the elapsed process time in usec
 ;;; from applying fn to args
 ;;;
-(crux:intern (crux:find-ns "") "perf" (crux:make-ns "perf"))
+(mu:intern (mu:find-ns "") "perf" (mu:make-ns "perf"))
 
-(crux:intern perf "time-delta"
+(mu:intern perf "time-delta"
   (:lambda (fn args)
     ((:lambda (start stop)
-       (crux:difference stop start))
-       (crux:utime)
+       (mu:difference stop start))
+       (mu:utime)
        ((:lambda ()
-          (crux:apply fn args)
-          (crux:utime))))))
+          (mu:apply fn args)
+          (mu:utime))))))
 
 ;;;
 ;;; return an vector of storage consumed
 ;;; by applying fn to args
 ;;;
-(crux:intern perf "storage-delta"
+(mu:intern perf "storage-delta"
   (:lambda (fn args)
     ((:lambda (start-vec stop-vec)
-       (crux:fix
+       (mu:fix
         (:lambda (loop)
-          (:if (crux:eq :vector (crux:type-of loop))
+          (:if (mu:eq :vector (mu:type-of loop))
                loop
                ((:lambda (list n)
                   ((:lambda (offset)
-                     (:if (crux:less-than offset (crux:vector-len start-vec))
+                     (:if (mu:less-than offset (mu:vector-len start-vec))
                           ((:lambda (type total alloc in-use)
                              ((:lambda (type-stats)
-                                (crux:cons `(,@list ,@type-stats) (crux:sum 1 n)))
+                                (mu:cons `(,@list ,@type-stats) (mu:sum 1 n)))
                               `(,type ,total ,alloc ,in-use)))
-                           (crux:vector-ref start-vec (crux:sum offset 0))
-                           (crux:difference (crux:vector-ref stop-vec (crux:sum offset 1)) (crux:vector-ref start-vec (crux:sum offset 1)))
-                           (crux:difference (crux:vector-ref stop-vec (crux:sum offset 2)) (crux:vector-ref start-vec (crux:sum offset 2)))
-                           (crux:difference (crux:vector-ref stop-vec (crux:sum offset 3)) (crux:vector-ref start-vec (crux:sum offset 3))))
-                          (crux:make-vector :t list)))
-                         (crux:product n 4)))
-                 (crux:car loop)
-                 (crux:cdr loop))))
-         (crux:cons () 1)))
-     (crux:heap-stat)
+                           (mu:vector-ref start-vec (mu:sum offset 0))
+                           (mu:difference (mu:vector-ref stop-vec (mu:sum offset 1)) (mu:vector-ref start-vec (mu:sum offset 1)))
+                           (mu:difference (mu:vector-ref stop-vec (mu:sum offset 2)) (mu:vector-ref start-vec (mu:sum offset 2)))
+                           (mu:difference (mu:vector-ref stop-vec (mu:sum offset 3)) (mu:vector-ref start-vec (mu:sum offset 3))))
+                          (mu:make-vector :t list)))
+                         (mu:product n 4)))
+                 (mu:car loop)
+                 (mu:cdr loop))))
+         (mu:cons () 1)))
+     (mu:heap-stat)
      ((:lambda ()
-         (crux:apply fn args)
-         (crux:heap-stat))))))
+         (mu:apply fn args)
+         (mu:heap-stat))))))

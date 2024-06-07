@@ -1,0 +1,7 @@
+(mu:type-of mu:make-struct)	:func
+(mu:type-of mu:struct-type)	:func
+(mu:type-of mu:struct-vec)	:func
+(mu:type-of (mu:make-struct :foo ()))	:struct
+(mu:struct-type (mu:make-struct :foo ()))	:foo
+(mu:struct-vec (mu:make-struct :foo ()))	#(:t)
+(mu:struct-vec (mu:make-struct :foo '(1 2 3 4)))	#(:t 1 2 3 4)

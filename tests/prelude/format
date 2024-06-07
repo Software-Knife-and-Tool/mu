@@ -1,11 +1,11 @@
-(crux:type-of prelude:format)	:func
+(mu:type-of prelude:format)	:func
 (prelude:format :t "prelude:format" ())	prelude:format:nil
 (prelude:format () "prelude:format" ())	"prelude:format"
 (prelude:stringp (prelude:format () "prelude:format" ()))	:t
 (prelude:format :t "prelude:format unqualified ~A symbol arg" '(f-symbol))	prelude:format unqualified f-symbol symbol arg:nil
 (prelude:format :t "prelude:format unqualified ~S symbol arg" '(f-symbol))	prelude:format unqualified f-symbol symbol arg:nil
-(prelude:format :t "prelude:format qualified ~A symbol arg" '(crux:sum))	prelude:format qualified sum symbol arg:nil
-(prelude:format :t "prelude:format qualified ~S symbol arg" '(crux:sum))	prelude:format qualified crux:sum symbol arg:nil
+(prelude:format :t "prelude:format qualified ~A symbol arg" '(mu:sum))	prelude:format qualified sum symbol arg:nil
+(prelude:format :t "prelude:format qualified ~S symbol arg" '(mu:sum))	prelude:format qualified mu:sum symbol arg:nil
 (prelude:format :t "prelude:format ~A string arg" '("f-string"))	prelude:format f-string string arg:nil
 (prelude:format :t "prelude:format ~S string arg" '("f-string"))	prelude:format "f-string" string arg:nil
 (prelude:format :t "prelude:format ~A fixnum arg" '(1))	prelude:format 1 fixnum arg:nil
