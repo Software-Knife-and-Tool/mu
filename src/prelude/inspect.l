@@ -4,81 +4,81 @@
 ;;;
 ;;; inspect
 ;;;
-(crux:intern prelude "%inspect-function"
+(mu:intern prelude "%inspect-function"
    (:lambda (obj)
       ((:lambda (view)
           ((:lambda (tags)
-             (crux:make-struct :inspect `(function ,(crux:heap-size obj) ,tags)))
-           `(,(crux:cons :arity (crux:vector-ref view 0))
-             ,(crux:cons :body (crux:vector-ref view 1)))))
-       (crux:view obj))))
+             (mu:make-struct :inspect `(function ,(mu:heap-size obj) ,tags)))
+           `(,(mu:cons :arity (mu:vector-ref view 0))
+             ,(mu:cons :body (mu:vector-ref view 1)))))
+       (mu:view obj))))
 
-(crux:intern prelude "%inspect-type"
+(mu:intern prelude "%inspect-type"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)
-            (crux:make-struct :inspect `(:<type> ,(crux:heap-size obj) ,tags)))
-          `(,(crux:cons :type (crux:vector-ref (crux:struct-vec obj) 0))
-            ,(crux:cons :values (crux:vector-ref (crux:struct-vec obj) 1)))))
-      (crux:view obj))))
+            (mu:make-struct :inspect `(:<type> ,(mu:heap-size obj) ,tags)))
+          `(,(mu:cons :type (mu:vector-ref (mu:struct-vec obj) 0))
+            ,(mu:cons :values (mu:vector-ref (mu:struct-vec obj) 1)))))
+      (mu:view obj))))
 
-(crux:intern prelude "%inspect-struct"
+(mu:intern prelude "%inspect-struct"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (crux:make-struct :inspect `(struct ,(crux:heap-size obj) ,tags)))
-          `(,(crux:cons :type (crux:struct-type obj))
-            ,(crux:cons :values (crux:struct-vec obj)))))
-      (crux:view obj))))
+            (mu:make-struct :inspect `(struct ,(mu:heap-size obj) ,tags)))
+          `(,(mu:cons :type (mu:struct-type obj))
+            ,(mu:cons :values (mu:struct-vec obj)))))
+      (mu:view obj))))
 
-(crux:intern prelude "%inspect-symbol"
+(mu:intern prelude "%inspect-symbol"
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (crux:make-struct :inspect `(symbol ,(crux:heap-size obj) ,tags)))
-          `(,(crux:cons :ns (crux:vector-ref view 0))
-            ,(crux:cons :name (crux:vector-ref view 1))
-            ,(crux:cons :value (crux:vector-ref view 2)))))
-      (crux:view obj))))
+            (mu:make-struct :inspect `(symbol ,(mu:heap-size obj) ,tags)))
+          `(,(mu:cons :ns (mu:vector-ref view 0))
+            ,(mu:cons :name (mu:vector-ref view 1))
+            ,(mu:cons :value (mu:vector-ref view 2)))))
+      (mu:view obj))))
 
-(crux:intern prelude "%inspect-const"
+(mu:intern prelude "%inspect-const"
    (:lambda (obj)
-     (crux:make-struct :inspect `(,(prelude:type-of obj) ,(crux:heap-size obj) ()))))
+     (mu:make-struct :inspect `(,(prelude:type-of obj) ,(mu:heap-size obj) ()))))
 
-(crux:intern prelude "%inspect-vector"
-   (:lambda (obj)
-     ((:lambda (tags)          
-         (crux:make-struct :inspect `(vector ,(crux:heap-size obj) ,tags)))
-      `(,(crux:cons :type (crux:vector-type obj))
-        ,(crux:cons :length (crux:vector-len obj))))))
-
-(crux:intern prelude "%inspect-cons"
+(mu:intern prelude "%inspect-vector"
    (:lambda (obj)
      ((:lambda (tags)          
-         (crux:make-struct :inspect `(cons ,(crux:heap-size obj) ,tags)))
-      `(,(crux:cons :car (crux:car obj))
-        ,(crux:cons :cdr (crux:cdr obj))))))
+         (mu:make-struct :inspect `(vector ,(mu:heap-size obj) ,tags)))
+      `(,(mu:cons :type (mu:vector-type obj))
+        ,(mu:cons :length (mu:vector-len obj))))))
 
-(crux:intern prelude "%inspect"
+(mu:intern prelude "%inspect-cons"
+   (:lambda (obj)
+     ((:lambda (tags)          
+         (mu:make-struct :inspect `(cons ,(mu:heap-size obj) ,tags)))
+      `(,(mu:cons :car (mu:car obj))
+        ,(mu:cons :cdr (mu:cdr obj))))))
+
+(mu:intern prelude "%inspect"
    (:lambda (value)
-      (crux:fix
+      (mu:fix
        (:lambda (loop)
           (:if (prelude:structp loop)
                loop
                (:if (prelude:null loop)
-                    (crux:make-struct :inspect `(unknown 0 ()))
+                    (mu:make-struct :inspect `(unknown 0 ()))
                     ((:lambda (predicate fn)
-                       (:if (crux:apply predicate `(,value))
-                            (crux:apply fn `(,value))
-                            (crux:cdr loop)))
-                     (crux:car (crux:car loop))
-                     (crux:cdr (crux:car loop))))))
-       `(,(crux:cons prelude:%prelude-type-p prelude:%inspect-type)
-         ,(crux:cons prelude:charp prelude:%inspect-const)
-         ,(crux:cons prelude:consp prelude:%inspect-cons)
-         ,(crux:cons prelude:fixnump prelude:%inspect-const)
-         ,(crux:cons prelude:floatp prelude:%inspect-const)
-         ,(crux:cons prelude:functionp prelude:%inspect-function)
-         ,(crux:cons prelude:structp prelude:%inspect-struct)
-         ,(crux:cons prelude:symbolp prelude:%inspect-symbol)
-         ,(crux:cons prelude:vectorp prelude:%inspect-vector)))))
+                       (:if (mu:apply predicate `(,value))
+                            (mu:apply fn `(,value))
+                            (mu:cdr loop)))
+                     (mu:car (mu:car loop))
+                     (mu:cdr (mu:car loop))))))
+       `(,(mu:cons prelude:%prelude-type-p prelude:%inspect-type)
+         ,(mu:cons prelude:charp prelude:%inspect-const)
+         ,(mu:cons prelude:consp prelude:%inspect-cons)
+         ,(mu:cons prelude:fixnump prelude:%inspect-const)
+         ,(mu:cons prelude:floatp prelude:%inspect-const)
+         ,(mu:cons prelude:functionp prelude:%inspect-function)
+         ,(mu:cons prelude:structp prelude:%inspect-struct)
+         ,(mu:cons prelude:symbolp prelude:%inspect-symbol)
+         ,(mu:cons prelude:vectorp prelude:%inspect-vector)))))

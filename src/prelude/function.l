@@ -7,15 +7,15 @@
 ;;;
 ;;; predicates
 ;;;
-(crux:intern prelude "%prelude-function-p"
+(mu:intern prelude "%prelude-function-p"
    (:lambda (fn)
      (prelude:%andf
       (prelude:%prelude-type-p fn)
-      (crux:eq '%fn (prelude:type-of fn)))))
+      (mu:eq '%fn (prelude:type-of fn)))))
 
-(crux:intern prelude "functionp"
+(mu:intern prelude "functionp"
    (:lambda (fn)
-      (:if (crux:eq :func (crux:type-of fn))
+      (:if (mu:eq :func (mu:type-of fn))
            :t
            (prelude:%prelude-function-p fn))))
 
@@ -29,24 +29,24 @@
 ;;;
 ;;; function
 ;;;
-(crux:intern prelude "%make-fn"
+(mu:intern prelude "%make-fn"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
           (prelude:%make-type "%fn"
-             `(,(crux:cons :lambda lambda)
-               ,(crux:cons :arity  nargs)
-               ,(crux:cons :fn     fn)
-               ,(crux:cons :env    env))))
-       (crux:difference
-        (crux:length (prelude:%lambda-prop :bound lambda))
+             `(,(mu:cons :lambda lambda)
+               ,(mu:cons :arity  nargs)
+               ,(mu:cons :fn     fn)
+               ,(mu:cons :env    env))))
+       (mu:difference
+        (mu:length (prelude:%lambda-prop :bound lambda))
         (:if (prelude:%lambda-prop :rest lambda) 1 0)))))
 
-(crux:intern prelude "%fn-prop"
+(mu:intern prelude "%fn-prop"
    (:lambda (prop fn)
-      (:if (prelude:findl (:lambda (fn-prop) (crux:eq prop fn-prop)) '(:lambda :arity :fn :env))
+      (:if (prelude:findl (:lambda (fn-prop) (mu:eq prop fn-prop)) '(:lambda :arity :fn :env))
            ((:lambda (ref)
                ;;; (prelude:raise-when prelude:null prop 'prelude:%function-prop "property not bound")
-               (crux:cdr ref))
+               (mu:cdr ref))
             (prelude:%type-ref prop fn))
            (prelude:%lambda-prop prop (prelude:%fn-prop :lambda fn)))))
 
@@ -55,7 +55,7 @@
 ;;;
 ;;; retruns env
 ;;;
-(crux:intern prelude "%closure-env"
+(mu:intern prelude "%closure-env"
    (:lambda (lambda body env)
       ((:lambda (bound-symbols)
           (prelude:%foldl
@@ -64,24 +64,24 @@
                    ((:lambda (function-form)
                        (:if (prelude:consp function-form)
                             `(,@(prelude:%closure-env lambda function-form env) ,@acc)
-                            `(,@(prelude:%closure-env lambda (crux:cdr elt) env) ,@acc)))
-                    (crux:car elt))
-                   (:if (crux:eq :symbol (crux:type-of elt))
+                            `(,@(prelude:%closure-env lambda (mu:cdr elt) env) ,@acc)))
+                    (mu:car elt))
+                   (:if (mu:eq :symbol (mu:type-of elt))
                         (:if (prelude:uninternedp elt)
                              ((:lambda (symbol)
                                  (:if symbol
                                       acc
                                       ((:lambda (binding-lambda)
                                           (:if binding-lambda
-                                                `(,(crux:cons form binding-lambda) ,@acc)
+                                                `(,(mu:cons form binding-lambda) ,@acc)
                                                 acc))
                                        (prelude:findl
                                         (:lambda (lambda)
                                            (prelude:findl
-                                            (:lambda (symbol) (crux:eq symbol form))
+                                            (:lambda (symbol) (mu:eq symbol form))
                                             (prelude:%type-ref :bound lambda)))
                                         env))))
-                                 (prelude:findl (:lambda (symbol) (crux:eq symbol form)) bound-symbols))
+                                 (prelude:findl (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
                              acc)
                         acc)))
            ()
@@ -91,29 +91,29 @@
 ;;;
 ;;; %close-env = > closure
 ;;;
-;;; crux:frames => list of [*frame descriptor*] (function . vector)
+;;; mu:frames => list of [*frame descriptor*] (function . vector)
 ;;; env => list of (symbol . lambda)
 ;;;
-(crux:intern prelude "%close-env"
+(mu:intern prelude "%close-env"
   (:lambda (closure env)
      ((:lambda (lambda fn env)
          (prelude:%make-fn lambda fn env))
       (prelude:%make-lambda
        (prelude:%lambda-prop :bound fn)
        (prelude:%lambda-prop :rest fn)
-       (crux:frames))
+       (mu:frames))
       (prelude:%fn-prop :fn fn))))
 
 ;;;
 ;;; compile closed lambda => function
 ;;;
-(crux:intern prelude "%compile-function"
+(mu:intern prelude "%compile-function"
    (:lambda (form env)
       ((:lambda (lambda)
           ((:lambda (fn)
               (prelude:%make-fn lambda fn ()))
-           (crux:compile
+           (mu:compile
             `(:lambda
               ,(prelude:%lambda-prop :bound lambda)
-              ,(prelude:%compile-lambda-body lambda (crux:nthcdr 2 form) env)))))
-       (prelude:%compile-lambda-list (crux:nth 1 form) env))))
+              ,(prelude:%compile-lambda-body lambda (mu:nthcdr 2 form) env)))))
+       (prelude:%compile-lambda-list (mu:nth 1 form) env))))

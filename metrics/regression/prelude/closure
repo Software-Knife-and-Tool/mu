@@ -1,5 +1,5 @@
 (prelude:compile (:quote (lambda ())))
 (prelude:compile (:quote (lambda (a) a)))
 (prelude:compile (:quote (lambda (&rest c))))
-(prelude:compile (:quote ((lambda (a b) (crux:sum a b)) 1 2)))
-(prelude:compile (:quote ((lambda (a b &rest c) (crux:sum a b) c) 1 2)))
+(prelude:compile (:quote ((lambda (a b) (mu:sum a b)) 1 2)))
+(prelude:compile (:quote ((lambda (a b &rest c) (mu:sum a b) c) 1 2)))

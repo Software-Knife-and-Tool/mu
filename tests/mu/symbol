@@ -1,0 +1,10 @@
+(mu:boundp 'mu:foo)	:nil
+(mu:boundp 'mu:*standard-input*)	mu:*standard-input*
+(mu:symbol-name 'mu:*standard-input*)	"*standard-input*"
+(mu:symbol-ns 'mu:*standard-input*)	#<:ns "mu">
+(mu:symbol-ns 'std-in)	#<:ns "">
+(mu:symbol-ns :std-in)	#<:ns "keyword">
+(mu:symbol-ns ())	#<:ns "">
+(mu:symbol-ns :nil)	#<:ns "">
+(mu:symbol-value 'mu:*standard-input*)	#<stream: 0 :standard-input :input :open>
+(mu:make-symbol "abcde")	abcde

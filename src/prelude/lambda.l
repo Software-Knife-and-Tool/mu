@@ -15,25 +15,25 @@
 ;;; rest:   rest symbol or nil
 ;;; lexenv: lexical environment, list of lambdas
 ;;;
-(crux:intern prelude "%lambdap"
+(mu:intern prelude "%lambdap"
     (:lambda (fn)
       (prelude:%andf
        (prelude:%prelude-type-p fn)
-       (crux:eq '%lambda (prelude:type-of fn)))))
+       (mu:eq '%lambda (prelude:type-of fn)))))
 
-(crux:intern prelude "%make-lambda"
+(mu:intern prelude "%make-lambda"
    (:lambda (lambda-list rest-sym env)
       (prelude:%make-type "%lambda"
-         `(,(crux:cons :bound  lambda-list)
-           ,(crux:cons :rest   rest-sym)
-           ,(crux:cons :lexenv env)))))
+         `(,(mu:cons :bound  lambda-list)
+           ,(mu:cons :rest   rest-sym)
+           ,(mu:cons :lexenv env)))))
 
-(crux:intern prelude "%lambda-prop"
+(mu:intern prelude "%lambda-prop"
    (:lambda (prop lambda)
-      (:if (prelude:findl (:lambda (lambda-prop) (crux:eq prop lambda-prop)) '(:bound :rest :lexenv))
+      (:if (prelude:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :rest :lexenv))
            ((:lambda (ref)
                ;;; (prelude:raise-when prelude:null prop 'lambda-prop "property not bound")
-               (crux:cdr ref))
+               (mu:cdr ref))
             (prelude:%type-ref prop lambda))
            (prelude:raise prop 'prelude:%lambda-prop "not a lambda property"))))
 
@@ -45,9 +45,9 @@
 ;;;
 ;;; `returns:` lambda descriptor
 ;;;
-(crux:intern prelude "%compile-lambda-list"
+(mu:intern prelude "%compile-lambda-list"
    (:lambda (lambda env)
-      (:if (prelude:findl (:lambda (el) (prelude:null (crux:eq :symbol (crux:type-of el)))) lambda)
+      (:if (prelude:findl (:lambda (el) (prelude:null (mu:eq :symbol (mu:type-of el)))) lambda)
            (prelude:raise lambda 'prelude:%compile-lambda-list "list syntax")
            ((:lambda (desc)
                (:if (prelude:fixnump desc)
@@ -57,14 +57,14 @@
              (:lambda (el acc)
                 (:if (prelude:%lambdap acc)
                      acc
-                     (:if (crux:eq '&rest el)
-                          (:if (crux:eq (crux:length lambda) (crux:sum 2 acc))
+                     (:if (mu:eq '&rest el)
+                          (:if (mu:eq (mu:length lambda) (mu:sum 2 acc))
                                (prelude:%make-lambda
-                                `(,@(prelude:dropr lambda 2) ,@(prelude:dropl lambda (crux:difference (crux:length lambda) 1)))
-                                (crux:nth (crux:difference (crux:length lambda) 1) lambda)
+                                `(,@(prelude:dropr lambda 2) ,@(prelude:dropl lambda (mu:difference (mu:length lambda) 1)))
+                                (mu:nth (mu:difference (mu:length lambda) 1) lambda)
                                 env)
                                (prelude:raise lambda 'prelude:%compile-lambda-list "rest botch"))
-                          (crux:sum 1 acc))))
+                          (mu:sum 1 acc))))
              0
              lambda)))))
 
@@ -80,24 +80,24 @@
 ;;;
 ;;; `returns:` compiled body/closure
 ;;;
-(crux:intern prelude "%compile-lambda-body"
+(mu:intern prelude "%compile-lambda-body"
    (:lambda (lambda-desc body env)
       (:if (prelude:null body)
            ()
            ((:lambda (env)
                (prelude:maplist
                 (:lambda (body-cdr)
-                   (:if (crux:cdr body-cdr)
+                   (:if (mu:cdr body-cdr)
                         ((:lambda (value)
                             (prelude:%compile value env))
-                            (crux:car body-cdr))
+                            (mu:car body-cdr))
                         ((:lambda (form)
                             (:if (prelude:consp form)
-                                 (:if (crux:eq 'lambda (crux:car form))
+                                 (:if (mu:eq 'lambda (mu:car form))
                                       (prelude:%compile-function form env)
                                       (prelude:%compile form env))
                                  (prelude:%compile form env)))
-                         (crux:car body-cdr))))
+                         (mu:car body-cdr))))
                 body))
           `(,lambda-desc ,@env)))))
 
@@ -114,7 +114,7 @@
 ;;;
 ;;; `returns:` *frame-ref* or *nil*
 ;;;
-(crux:intern prelude "%frame-ref"
+(mu:intern prelude "%frame-ref"
   (:lambda (symbol env)
     (prelude:%foldl
      (:lambda (frame acc)
@@ -122,14 +122,14 @@
             acc
             ((:lambda (offset)
                (:if offset
-                    (crux:compile
-                     `(crux:frame-ref
-                       ,(crux:cdr (prelude:%type-ref :func frame))
+                    (mu:compile
+                     `(mu:frame-ref
+                       ,(mu:cdr (prelude:%type-ref :func frame))
                        ,offset))
                     ()))
             (prelude:positionl
-             (:lambda (el) (crux:eq el symbol))
-             (crux:cdr (prelude:%type-ref :bound frame))))))
+             (:lambda (el) (mu:eq el symbol))
+             (mu:cdr (prelude:%type-ref :bound frame))))))
      ()
      env)))
 |#

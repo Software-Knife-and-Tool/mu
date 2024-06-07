@@ -4,7 +4,7 @@
 //! image mechanics
 #[allow(unused_imports)]
 use crate::{
-    crux::{Condition, Env, Result, Tag},
+    mu::{Condition, Env, Result, Tag},
     reader::Reader,
     writer::Writer,
 };

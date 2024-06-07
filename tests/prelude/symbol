@@ -1,3 +1,3 @@
-(crux:type-of (prelude:make-keyword "abcd"))	:keyword
+(mu:type-of (prelude:make-keyword "abcd"))	:keyword
 (prelude:type-of (prelude:make-keyword "abcd"))	keyword
 (prelude:type-of (prelude:gensym))	symbol

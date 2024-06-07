@@ -1,4 +1,4 @@
-(crux:write 1000 () (crux:open :string :output ""))
-(crux:write (crux:product 100 200) () (crux:open :string :output ""))
-(crux:write (prelude:string= "" "") () (crux:open :string :output ""))
-(crux:write (prelude:string= "ci" "") () (crux:open :string :output ""))
+(mu:write 1000 () (mu:open :string :output ""))
+(mu:write (mu:product 100 200) () (mu:open :string :output ""))
+(mu:write (prelude:string= "" "") () (mu:open :string :output ""))
+(mu:write (prelude:string= "ci" "") () (mu:open :string :output ""))

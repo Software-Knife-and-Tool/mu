@@ -4,17 +4,17 @@
 ;;;
 ;;; cross reference
 ;;;
-(crux:intern (crux:find-ns "prelude") "crossref"
+(mu:intern (mu:find-ns "prelude") "crossref"
    (:lambda (file-name)
       ((:lambda (stream)
           (prelude:mapc
            (:lambda (symbol)
-              (:if (crux:boundp symbol)
+              (:if (mu:boundp symbol)
                    (prelude:format stream "~A~T~A~T~S~%"
-                                `(,(crux:symbol-name symbol)
-                                  ,(prelude:type-of (crux:symbol-value symbol))
-                                  ,(crux:symbol-value symbol)))
-                   (prelude:format stream "unbound~Tunbound~T~A~%" `(,(crux:symbol-name symbol)))))
-           (crux:symbols (crux:find-ns "prelude"))))
-       (crux:open :file :output file-name))
+                                `(,(mu:symbol-name symbol)
+                                  ,(prelude:type-of (mu:symbol-value symbol))
+                                  ,(mu:symbol-value symbol)))
+                   (prelude:format stream "unbound~Tunbound~T~A~%" `(,(mu:symbol-name symbol)))))
+           (mu:symbols (mu:find-ns "prelude"))))
+       (mu:open :file :output file-name))
       :t))

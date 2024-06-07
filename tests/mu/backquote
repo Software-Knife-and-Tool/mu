@@ -1,0 +1,37 @@
+(mu:type-of `,mu:sum)	:func
+(mu:type-of `,mu:*version*)	:vector
+`"abc"	"abc"
+`#(:t 1 2 3)	#(:t 1 2 3)
+`#\a	#\a
+`mu:*standard-output*	mu:*standard-output*
+`1234	1234
+`(,(mu:cons 'satisfies ()))	((satisfies))
+`("abc")	("abc")
+`(#(:t 1 2 3))	(#(:t 1 2 3))
+`(#\a)	(#\a)
+`(())	(:nil)
+`((1234) 1234 symbol)	((1234) 1234 symbol)
+`((a b) c)	((a b) c)
+`()	:nil
+`(,(mu:sum 1 2))	(3)
+`(,1 (2) 3)	(1 (2) 3)
+`(,1234 ,@'(a b c))	(1234 a b c)
+`(,@'(a b c))	(a b c)
+`(,@(mu:sum 1 2))	3
+`(0 ,@'(a b c) 1)	(0 a b c 1)
+`(1 2 ,@3)	(1 2 . 3)
+`(1 2 3)	(1 2 3)
+`(1.0 b (2))	(1.0000 b (2))
+`(1234 symbol)	(1234 symbol)
+`(1234)	(1234)
+`(a b c)	(a b c)
+`,(mu:sum 1 2)	3
+`,(mu:type-of 'symbol)	:symbol
+`,1234	1234
+`,`"abc"	"abc"
+`,`#(:t 1 2 3)	#(:t 1 2 3)
+`,`#\a	#\a
+`,`mu:*standard-output*	mu:*standard-output*
+`,`1234	1234
+`,`(1234)	(1234)
+``1234	`1234

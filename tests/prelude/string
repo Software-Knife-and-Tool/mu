@@ -1,8 +1,8 @@
-(crux:type-of prelude:schar)	:func
-(crux:type-of prelude:string=)	:func
-(crux:type-of prelude:string)	:func
-(crux:type-of prelude:string-append)	:func
-(crux:type-of prelude:substr)	:func
+(mu:type-of prelude:schar)	:func
+(mu:type-of prelude:string=)	:func
+(mu:type-of prelude:string)	:func
+(mu:type-of prelude:string-append)	:func
+(mu:type-of prelude:substr)	:func
 (prelude:string-append '("abc" "123"))	"abc123"
 (prelude:string-append '("" "abc"))	"abc"
 (prelude:string-append '("abc" ""))	"abc"

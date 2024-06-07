@@ -4,18 +4,18 @@
 ;;;
 ;;; symbol table
 ;;;
-(crux:intern (crux:find-ns "prelude") "symbols"
+(mu:intern (mu:find-ns "prelude") "symbols"
    (:lambda (file-name)
       ((:lambda (stream)
           (prelude:mapc
            (:lambda (symbol)
-             (prelude:format stream "~A~%" `(,(crux:symbol-name symbol)))
-             (prelude:format stream "prelude:~A~%" `(,(crux:symbol-name symbol))))
-           (crux:symbols (crux:find-ns "prelude")))
+             (prelude:format stream "~A~%" `(,(mu:symbol-name symbol)))
+             (prelude:format stream "prelude:~A~%" `(,(mu:symbol-name symbol))))
+           (mu:symbols (mu:find-ns "prelude")))
           (prelude:mapc
            (:lambda (symbol)
-             (prelude:format stream "~A~%" `(,(crux:symbol-name symbol)))
-             (prelude:format stream "crux:~A~%" `(,(crux:symbol-name symbol))))
-           (crux:symbols (crux:find-ns "crux"))))
-       (crux:open :file :output file-name))
+             (prelude:format stream "~A~%" `(,(mu:symbol-name symbol)))
+             (prelude:format stream "mu:~A~%" `(,(mu:symbol-name symbol))))
+           (mu:symbols (mu:find-ns "mu"))))
+       (mu:open :file :output file-name))
       :t))

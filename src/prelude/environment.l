@@ -4,13 +4,13 @@
 ;;;
 ;;;  environment
 ;;;
-(crux:intern prelude "environmentp"
+(mu:intern prelude "environmentp"
    (:lambda (env)
       (:if (prelude:%prelude-type-p env)
-           (crux:eq 'env (prelude:type-of env))
+           (mu:eq 'env (prelude:type-of env))
            ())))
 
-(crux:intern prelude "make-environment"
+(mu:intern prelude "make-environment"
    (:lambda (bindings)
      (:if (prelude:listp bindings)
           ((:lambda (env)
@@ -21,8 +21,8 @@
                    (:if (prelude:symbolp symbol)
                         (prelude:%add-env env symbol value)
                         (prelude:raise symbol 'prelude:make-environment "not a symbol")))
-                 (crux:car pair)
-                 (crux:cdr pair)))
+                 (mu:car pair)
+                 (mu:cdr pair)))
               bindings)
              env)
            (prelude:%make-env))
@@ -31,7 +31,7 @@
 ;;;
 ;;; implementation
 ;;;
-(crux:intern prelude "%get-env"
+(mu:intern prelude "%get-env"
    (:lambda (env symbol)
      (:if (prelude:symbolp symbol)
          (:if (prelude:environmentp env)
@@ -40,12 +40,12 @@
                      (:if (prelude:null sym)
                           (prelude:raise symbol 'prelude:%get-env "symbol not in map")
                           sym))
-                  (crux:find ns (crux:symbol-name symbol))))
+                  (mu:find ns (mu:symbol-name symbol))))
                  (prelude:%env-prop :symbols env))
               (prelude:raise env 'prelude:%get-env "not an env"))
          (prelude:raise symbol 'prelude:%get-env "not a symbol"))))
 
-(crux:intern prelude "%add-env"
+(mu:intern prelude "%add-env"
    (:lambda (env symbol value)
      (:if (prelude:symbolp symbol)
          (:if (prelude:environmentp env)
@@ -53,18 +53,18 @@
                  ((:lambda (sym)
                      (:if (prelude:null sym)
                           (prelude:raise symbol 'prelude:%add-env "symbol already in map")
-                          (crux:intern ns (crux:symbol-name symbol) value)))
-                  (crux:find ns (crux:symbol-name symbol))))
+                          (mu:intern ns (mu:symbol-name symbol) value)))
+                  (mu:find ns (mu:symbol-name symbol))))
                (prelude:%env-prop :symbols env))
               (prelude:raise env 'prelude:%add-env "not an env"))
          (prelude:raise symbol 'prelude:%add-env "not a symbol"))))
 
-(crux:intern prelude "%make-env"
+(mu:intern prelude "%make-env"
    (:lambda ()
-     (prelude:%make-type "env" `(,(crux:cons :symbols (crux:make-ns))))))
+     (prelude:%make-type "env" `(,(mu:cons :symbols (mu:make-ns))))))
 
-(crux:intern prelude "%env-prop"
+(mu:intern prelude "%env-prop"
    (:lambda (prop env)
-      (:if (prelude:findl (:lambda (env-prop) (crux:eq prop env-prop)) '(:symbols))
-           (crux:cdr (prelude:%type-ref prop env))
+      (:if (prelude:findl (:lambda (env-prop) (mu:eq prop env-prop)) '(:symbols))
+           (mu:cdr (prelude:%type-ref prop env))
            (prelude:raise prop 'prelude:%env-prop "not an environment property"))))

@@ -1,0 +1,23 @@
+(mu:vector-len "abcde")	5
+(mu:vector-len "abcdeghi")	8
+(mu:vector-len "abcdegh")	7
+(mu:vector-ref "abcde" 2)	#\c
+(mu:vector-type "abcde")	:char
+(mu:vector-len #(:t 1 a -3))	3
+(mu:vector-ref #(:t 1 a -3) 1)	a
+(mu:vector-type #(:byte 1 2 3))	:byte
+(mu:vector-len #(:byte 1 2 3))	3
+(mu:vector-ref #(:byte 1 2 3) 1)	2
+(mu:vector-type #(:char #\1 #\2 #\3))	:char
+(mu:vector-len #(:char #\1 #\2 #\3))	3
+(mu:vector-ref #(:char #\1 #\2 #\3) 1)	#\2
+(mu:vector-len #(:fixnum 1 2 -3))	3
+(mu:vector-ref #(:fixnum 1 2 -3) 1)	2
+(mu:vector-type #(:fixnum 1 2 -3))	:fixnum
+(mu:vector-len #(:float 1.0 2.0 -3.0))	3
+(mu:vector-ref #(:float 1.0 2.0 -3.0) 1)	2.0000
+(mu:vector-type #(:float 1.0 2.0 -3.0))	:float
+(mu:make-vector :byte '(1 2 3))	#(:byte 1 2 3)
+(mu:make-vector :t '(1 2 3))	#(:t 1 2 3)
+(mu:make-vector :fixnum '(1 2 3))	#(:fixnum 1 2 3)
+(mu:make-vector :float '(1.0 2.0 -3.0))	#(:float 1.0000 2.0000 -3.0000)

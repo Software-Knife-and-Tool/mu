@@ -1,1 +1,1 @@
-(crux:type-of prelude:apply)	:func
+(mu:type-of prelude:apply)	:func

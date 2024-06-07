@@ -1,7 +1,0 @@
-(crux:type-of crux:make-struct)	:func
-(crux:type-of crux:struct-type)	:func
-(crux:type-of crux:struct-vec)	:func
-(crux:type-of (crux:make-struct :foo ()))	:struct
-(crux:struct-type (crux:make-struct :foo ()))	:foo
-(crux:struct-vec (crux:make-struct :foo ()))	#(:t)
-(crux:struct-vec (crux:make-struct :foo '(1 2 3 4)))	#(:t 1 2 3 4)

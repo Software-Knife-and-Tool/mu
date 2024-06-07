@@ -1,22 +1,22 @@
-(crux:eq :func (crux:type-of prelude:compile))	:t
-(crux:eq :func (crux:type-of (prelude:compile '(lambda () 1))))	:t
-(crux:eq :func (crux:type-of (prelude:compile '(lambda (a b) b))))	:t
-(crux:eq :func (crux:type-of (prelude:compile '(lambda (a) "hoo"))))	:t
-(crux:eq :func (crux:type-of (prelude:compile '(lambda (a) a))))	:t
-(crux:eval (prelude:compile '(if :t :t ())))	:t
-(crux:eval (prelude:compile '(if () () :t)))	:t
-(crux:eval (prelude:compile '(if :t () :t)))	:nil
-(crux:eval (prelude:compile '(if () :t ())))	:nil
-(crux:eval (prelude:compile '(if :t :t ())))	:t
-(crux:eval (prelude:compile '(if :t :t :t)))	:t
-(crux:eval (prelude:compile '(if () ())))	:nil
-(crux:eval (prelude:compile '(if () :t)))	:nil
-(crux:eval (prelude:compile '(if :t ())))	:nil
-(crux:eval (prelude:compile '(if :t :t)))	:t
-(crux:eval (prelude:compile '(if () (crux:sum 0 1) (crux:sum 0 0))))	0
-(crux:eval (prelude:compile '(if :t (crux:sum 0 1) (crux:sum 0 0))))	1
-(crux:eval (prelude:compile '(if (prelude:null ()) (crux:sum 0 1) (crux:sum 0 0))))	1
-(crux:eval (prelude:compile '(if (prelude:not (prelude:null :t)) (crux:sum 0 1) (crux:sum 0 0))))	1
-(crux:eval (prelude:compile '(if (prelude:null ()) (crux:sum 0 1) (prelude:write "should not eval" () ()))))	1
-(crux:eval (prelude:compile '(if (prelude:null :t) (prelude:write "should not eval" () ()) (crux:sum 0 0))))	0
-(crux:eval (prelude:compile '((:lambda (fn) (prelude:apply (:lambda (fn) (crux:eq :func (crux:type-of fn))) `(,fn))) crux:eq)))	:t
+(mu:eq :func (mu:type-of prelude:compile))	:t
+(mu:eq :func (mu:type-of (prelude:compile '(lambda () 1))))	:t
+(mu:eq :func (mu:type-of (prelude:compile '(lambda (a b) b))))	:t
+(mu:eq :func (mu:type-of (prelude:compile '(lambda (a) "hoo"))))	:t
+(mu:eq :func (mu:type-of (prelude:compile '(lambda (a) a))))	:t
+(mu:eval (prelude:compile '(if :t :t ())))	:t
+(mu:eval (prelude:compile '(if () () :t)))	:t
+(mu:eval (prelude:compile '(if :t () :t)))	:nil
+(mu:eval (prelude:compile '(if () :t ())))	:nil
+(mu:eval (prelude:compile '(if :t :t ())))	:t
+(mu:eval (prelude:compile '(if :t :t :t)))	:t
+(mu:eval (prelude:compile '(if () ())))	:nil
+(mu:eval (prelude:compile '(if () :t)))	:nil
+(mu:eval (prelude:compile '(if :t ())))	:nil
+(mu:eval (prelude:compile '(if :t :t)))	:t
+(mu:eval (prelude:compile '(if () (mu:sum 0 1) (mu:sum 0 0))))	0
+(mu:eval (prelude:compile '(if :t (mu:sum 0 1) (mu:sum 0 0))))	1
+(mu:eval (prelude:compile '(if (prelude:null ()) (mu:sum 0 1) (mu:sum 0 0))))	1
+(mu:eval (prelude:compile '(if (prelude:not (prelude:null :t)) (mu:sum 0 1) (mu:sum 0 0))))	1
+(mu:eval (prelude:compile '(if (prelude:null ()) (mu:sum 0 1) (prelude:write "should not eval" () ()))))	1
+(mu:eval (prelude:compile '(if (prelude:null :t) (prelude:write "should not eval" () ()) (mu:sum 0 0))))	0
+(mu:eval (prelude:compile '((:lambda (fn) (prelude:apply (:lambda (fn) (mu:eq :func (mu:type-of fn))) `(,fn))) mu:eq)))	:t

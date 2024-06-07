@@ -1,0 +1,56 @@
+(mu:eq 1 1)	:t
+(mu:eq 1 2)	:nil
+(mu:eval 'mu:*standard-input*)	#<stream: 0 :standard-input :input :open>
+(mu:eval ())	:nil
+(mu:fix (:lambda (l) (:if l ((:lambda () (mu:write (mu:car l) () mu:*standard-output*) (mu:cdr l))) ())) '(1 2 3 4))	1234:nil
+(mu:fix (:lambda (l) (:if l ((:lambda () (mu:write (mu:car (mu:car l)) () mu:*standard-output*) (mu:cdr l))) ())) '((0 . 1) (2 . 3)))	02:nil
+(mu:apply mu:eq '(1 2))	:nil
+(mu:apply mu:sum '(1 2))	3
+(mu:type-of #\a)	:char
+(mu:type-of '(1 2 3))	:cons
+(mu:type-of '(:lambda ()))	:cons
+(mu:type-of 'mu:apply)	:symbol
+(mu:type-of ())	:null
+(mu:type-of 1)	:fixnum
+(mu:type-of :typeof)	:keyword
+(mu:type-of mu:*standard-input*)	:stream
+(mu:type-of mu:heap-info)	:func
+(mu:type-of "type-of")	:vector
+(mu:type-of (mu:find-ns "mu"))	:ns
+(mu:view ())	#(:t "" nil :nil)
+(mu:view :keyword)	#(:t "keyword" keyword :keyword)
+(mu:view #\a)	#(:t a)
+(mu:view "abcdefg")	#(:t 7 :char)
+(mu:view "abcdefgh")	#(:t 8 :char)
+(mu:view '(1 2))	#(:t 1 (2))
+(mu:view 1234)	#(:t 1234)
+(mu:view 1.0)	#(:t 1.0000)
+(mu:view #(:t 1 2))	#(:t 2 :t)
+(mu:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
+(mu:view 'a)	#(:t "" a :UNBOUND)
+(mu:view 'mu:eq)	#(:t "mu" eq #<:function :mu [req:2, form:eq]>)
+(mu:view mu:eq)	#(:t 2 #(:t mu eq 0))
+(mu:view mu:*standard-input*)	#(:t 0 :input :nil)
+(mu:heap-size ())	8
+(mu:heap-size :keyword)	8
+(mu:heap-size #\a)	8
+(mu:heap-size '(1 2))	8
+(mu:heap-size 1234)	8
+(mu:heap-size 1.0)	8
+(mu:heap-size #s(:foo 1 2))	52
+(mu:heap-size "abcdefg")	8
+(mu:heap-size "abcdefgh")	26
+(mu:heap-size #(:t 1 2))	34
+(mu:heap-size 'a)	27
+(mu:heap-size 'mu:eq)	45
+(mu:heap-size mu:eq)	18
+(mu:heap-size mu:*standard-input*)	8
+(mu:unwind-protect (:lambda (cond obj) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:quotient 1 1)))	1
+(mu:repr :t (mu:repr :vector :t))	:t
+(mu:type-of mu:find)	:func
+(mu:type-of mu:find-ns)	:func
+(mu:type-of mu:intern)	:func
+(mu:type-of mu:make-ns)	:func
+(mu:type-of mu:ns-map)	:func
+(mu:type-of mu:symbols)	:func
+(mu:type-of mu:unintern)	:func
