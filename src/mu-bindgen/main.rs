@@ -1,12 +1,16 @@
-#![allow(dead_code)]
-#[allow(unused_imports)]
+#[rustfmt::skip]
 use {
-    crate::bindgen::{BindGen, Config},
+    crate::{
+        bindgen::BindGen,
+        config::Config,
+        symbol_table::SymbolTable,
+        syntax::Syntax
+    },
     getopts::Options,
-    std::{cell::RefCell, env, error::Error, fs, io::Write},
 };
 
 mod bindgen;
+mod config;
 mod display;
 mod symbol_table;
 mod syntax;
@@ -17,22 +21,27 @@ enum BindOpt {
     Map(String),
     Namespace(String),
     Output(String),
+    Symbols(String),
     Verbose,
 }
 
 fn usage() {
-    println!("mu-bindgen: 0.0.1: [-h?m:n:o:v][--namespace verbose help map] [file...]");
-    println!("?: usage message");
-    println!("h: usage message");
-    println!("m: bindmap [path]");
-    println!("n: namespace [namespace]");
-    println!("o: generated code [path]");
-    println!("v: print version and exit");
+    println!("mu-bindgen: 0.0.1: [options] file");
+    println!("-?                   usage message");
+    println!("-h                   usage message");
+    println!("-m path              bindmap path");
+    println!("-n name              namespace symbol");
+    println!("-o path              generated code path");
+    println!("-s path              symbols path");
+    println!("-v                   print version and exit");
     println!();
-    println!("help:      usage message");
-    println!("map:       bindmap [path]");
-    println!("namespace: namespace [namespace]");
-    println!("verbose:   verbose operation");
+    println!("--help               usage message");
+    println!("--map path           bindmap path");
+    println!("--namespace symbol   namespace [namespace]");
+    println!("--output path        output [path]");
+    println!("--symbols path       symbols [path]");
+    println!("--verbose path       verbose operation");
+    println!("--version            print version and exit");
 
     std::process::exit(0);
 }
@@ -48,6 +57,18 @@ fn options(argv: Vec<String>) -> Option<Vec<BindOpt>> {
     opts.optopt("m", "map", "bindmap path", "");
     opts.optopt("n", "namespace", "namespace", "");
     opts.optopt("o", "output", "output path", "");
+    opts.optopt("s", "symbols", "symbols path", "");
+
+    #[rustfmt::skip]
+    let opt_names = vec![
+        "h", "help", "?",
+        "m", "map",
+        "n", "namespace",
+        "o", "output",
+        "s", "symbols",
+        "v", "version",
+        "verbose",
+    ];
 
     let opt_list = match opts.parse(&argv[1..]) {
         Ok(opts) => opts,
@@ -57,45 +78,45 @@ fn options(argv: Vec<String>) -> Option<Vec<BindOpt>> {
         }
     };
 
-    if opt_list.opt_present("h") || opt_list.opt_present("?") || opt_list.opt_present("help") {
-        usage()
+    for name in opt_names {
+        if opt_list.opt_present(name) {
+            match opt_list.opt_get::<String>(name) {
+                Ok(opt) => match name {
+                    "h" | "help" | "?" => usage(),
+                    "v" | "version" => {
+                        println!("mu-bindgen: 0.0.1");
+                        std::process::exit(0)
+                    }
+                    "m" | "map" => {
+                        if let Some(path) = opt {
+                            optv.push(BindOpt::Map(path))
+                        }
+                    }
+                    "n" | "namespace" => {
+                        if let Some(name) = opt {
+                            optv.push(BindOpt::Namespace(name))
+                        }
+                    }
+                    "o" | "output" => {
+                        if let Some(path) = opt {
+                            optv.push(BindOpt::Output(path))
+                        }
+                    }
+                    "s" | "symbols" => {
+                        if let Some(path) = opt {
+                            optv.push(BindOpt::Symbols(path))
+                        }
+                    }
+                    "verbose" => optv.push(BindOpt::Verbose),
+                    _ => panic!(),
+                },
+                Err(_) => panic!(),
+            }
+        }
     }
 
-    if opt_list.opt_present("m") {
-        optv.push(BindOpt::Map(opt_list.opt_str("m").unwrap()))
-    }
-
-    if opt_list.opt_present("map") {
-        optv.push(BindOpt::Map(opt_list.opt_str("map").unwrap()))
-    }
-
-    if opt_list.opt_present("n") {
-        optv.push(BindOpt::Namespace(opt_list.opt_str("n").unwrap()))
-    }
-
-    if opt_list.opt_present("namespace") {
-        optv.push(BindOpt::Namespace(opt_list.opt_str("namespace").unwrap()))
-    }
-
-    if opt_list.opt_present("v") || opt_list.opt_present("version") {
-        print!("mu-bindgen: 0.0.1");
-        std::process::exit(0)
-    }
-
-    if opt_list.opt_present("o") {
-        optv.push(BindOpt::Output(opt_list.opt_str("o").unwrap()))
-    }
-
-    if opt_list.opt_present("output") {
-        optv.push(BindOpt::Output(opt_list.opt_str("output").unwrap()))
-    }
-
-    if opt_list.opt_present("verbose") {
-        optv.push(BindOpt::Verbose)
-    }
-
-    for file in opt_list.free {
-        optv.push(BindOpt::Parse(file));
+    if opt_list.free.len() == 1 {
+        optv.push(BindOpt::Parse(opt_list.free[0].clone()))
     }
 
     Some(optv)
@@ -113,8 +134,13 @@ pub fn main() {
                             if let Some(ref path) = config.output_path() {
                                 bindgen.write(path).unwrap()
                             }
+                            if let Some(ref path) = config.symbols_path() {
+                                let symbol_table = SymbolTable::new(&config, &bindgen);
+
+                                symbol_table.write(path).unwrap()
+                            }
                             if config.verbose() {
-                                bindgen.print_items(&src_path)
+                                bindgen.print_file(&src_path)
                             }
                         }
                         Err(e) => {
@@ -130,6 +156,9 @@ pub fn main() {
                     }
                     BindOpt::Namespace(name) => {
                         config.namespace.replace(Some(name));
+                    }
+                    BindOpt::Symbols(path) => {
+                        config.symbols_path.replace(Some(path));
                     }
                     BindOpt::Verbose => {
                         config.verbose.replace(true);

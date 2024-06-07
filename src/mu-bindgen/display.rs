@@ -1,12 +1,9 @@
-#[allow(unused_imports)]
 use {
     std::fmt,
     syn::{
-        self,
-        token::Impl,
-        GenericArgument, Ident, ImplItem, ImplItemFn, Item, ItemFn, ItemImpl, Lifetime, Path,
-        PathArguments::{self, AngleBracketed, None, Parenthesized},
-        PathSegment, ReturnType, Signature, Type, Visibility,
+        self, GenericArgument, Ident, ImplItem, Item,
+        PathArguments::{AngleBracketed, None, Parenthesized},
+        PathSegment, ReturnType, Type, Visibility,
     },
 };
 

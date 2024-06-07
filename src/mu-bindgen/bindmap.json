@@ -1,0 +1,8 @@
+{
+    "mu-bindgen": {
+        "config": "",
+        "functions": [
+            { "symbol": "foobar" }
+        ]
+    }
+}
