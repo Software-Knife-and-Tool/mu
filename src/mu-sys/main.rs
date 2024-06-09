@@ -48,8 +48,8 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
                 Some(opt) => match opt {
                     Opt('h', None) | Opt('?', None) => usage(),
                     Opt('v', None) => {
-                        print!("env-sys: {} ", Env::VERSION);
-                        return None;
+                        print!("{} ", Env::VERSION);
+                        std::process::exit(0);
                     }
                     Opt('p', None) => {
                         optv.push(ShellOpt::Pipe);

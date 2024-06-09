@@ -30,6 +30,7 @@ dist:
 	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
 	@install -m 755 ./mu.sh $(BASE)/bin/mu
+	@install -m 755 ./bind-crate.sh $(BASE)/bin/bind-crate
 
 	@install -d $(BASE)/doc/html
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
