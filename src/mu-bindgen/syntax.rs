@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use {
     crate::{bindgen::BindGen, display::Display},
     syn::{self, Item},
@@ -6,6 +7,19 @@ use {
 pub trait Syntax {
     fn pprint(&self, _: &Item, _: u16);
     fn print_file(&self, path: &str);
+}
+
+pub enum SymbolAttr {
+    Pub(bool),
+    Const(bool),
+    Async(bool),
+}
+
+pub struct Symbol {
+    type_: String,
+    name: String,
+    value: String,
+    attrs: Vec<SymbolAttr>,
 }
 
 impl Syntax for BindGen<'_> {

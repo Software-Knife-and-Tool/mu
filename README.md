@@ -43,8 +43,8 @@ Most of our core computational frameworks are built on static systems and are fr
 
 ------
 
-- *mu*, a functional forward system language
-- *mu*, a small, configurable runtime library that implements the *mu* namespace
+- *mu-lisp*, a functional forward system language
+- *mu*, a small, configurable runtime library amd language
 - *mu-sys*, minimal POSIX runtime suitable for containers
 - *mu/codegen*, a native code compiler
 - small and simple installation, no external dependencies
@@ -141,7 +141,7 @@ Tests and regression metrics require some version of `python 3`.
 git clone https://github.com/Software-Knife-and-Tool/mu.git
 ```
 
-After cloning the *mu* repository, the *rust* system can be built and installed with the supplied makefile.
+After cloning the *mu* repository, the *mu* system can be built and installed with the supplied makefile.
 
 ```
 % make release
@@ -292,7 +292,7 @@ The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory 
 mu-sys		shell runtime binary, stdio listener
 mu-ld		image loader
 mu-server	server runtime, socket listener
-mu			shell script for running the prelude listener with mu-sys
+mu			shell script for loading *prelude*, runs *mu-sys* listener
 ```
 
 
