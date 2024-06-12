@@ -1,16 +1,16 @@
 #[rustfmt::skip]
 use {
     crate::{
-        bindgen::BindGen,
+        bindings::Bindings,
         config::Config,
         symbol_table::SymbolTable,
-        syntax::Syntax
     },
     getopts::Options,
 };
 
-mod bindgen;
+mod bindings;
 mod config;
+mod debug;
 mod display;
 mod symbol_table;
 mod syntax;
@@ -20,25 +20,19 @@ enum BindOpt {
     Parse(String),
     Map(String),
     Namespace(String),
-    Output(String),
+    Bindings(String),
     Symbols(String),
     Verbose,
 }
 
 fn usage() {
-    println!("mu-bindgen: 0.0.1: [options] file");
+    println!("mu-bindgen: 0.0.2: [options] file");
     println!("-?                   usage message");
-    println!("-h                   usage message");
-    println!("-m path              bindmap path");
-    println!("-n name              namespace symbol");
-    println!("-o path              generated code path");
-    println!("-s path              symbols path");
-    println!("-v                   print version and exit");
     println!();
     println!("--help               usage message");
     println!("--map path           bindmap path");
     println!("--namespace symbol   namespace [namespace]");
-    println!("--output path        output [path]");
+    println!("--bindings path      generated bindings [path]");
     println!("--symbols path       symbols [path]");
     println!("--verbose path       verbose operation");
     println!("--version            print version and exit");
@@ -50,23 +44,23 @@ fn options(argv: Vec<String>) -> Option<Vec<BindOpt>> {
     let mut opts = Options::new();
     let mut optv = Vec::new();
 
-    opts.optflag("h", "help", "print usage");
+    opts.optflag("", "help", "print usage");
     opts.optflag("?", "", "print usage");
-    opts.optflag("v", "version", "print version");
+    opts.optflag("", "version", "print version");
     opts.optflag("", "verbose", "verbose");
-    opts.optopt("m", "map", "bindmap path", "");
-    opts.optopt("n", "namespace", "namespace", "");
-    opts.optopt("o", "output", "output path", "");
-    opts.optopt("s", "symbols", "symbols path", "");
+    opts.optopt("", "map", "bindmap path", "");
+    opts.optopt("", "namespace", "namespace", "");
+    opts.optopt("", "bindings", "output path", "");
+    opts.optopt("", "symbols", "symbols path", "");
 
-    #[rustfmt::skip]
     let opt_names = vec![
-        "h", "help", "?",
-        "m", "map",
-        "n", "namespace",
-        "o", "output",
-        "s", "symbols",
-        "v", "version",
+        "help",
+        "?",
+        "map",
+        "namespace",
+        "bindings",
+        "symbols",
+        "version",
         "verbose",
     ];
 
@@ -82,27 +76,27 @@ fn options(argv: Vec<String>) -> Option<Vec<BindOpt>> {
         if opt_list.opt_present(name) {
             match opt_list.opt_get::<String>(name) {
                 Ok(opt) => match name {
-                    "h" | "help" | "?" => usage(),
-                    "v" | "version" => {
-                        println!("mu-bindgen: 0.0.1");
+                    "help" | "?" => usage(),
+                    "version" => {
+                        println!("mu-bindgen: 0.0.2");
                         std::process::exit(0)
                     }
-                    "m" | "map" => {
+                    "map" => {
                         if let Some(path) = opt {
                             optv.push(BindOpt::Map(path))
                         }
                     }
-                    "n" | "namespace" => {
+                    "namespace" => {
                         if let Some(name) = opt {
                             optv.push(BindOpt::Namespace(name))
                         }
                     }
-                    "o" | "output" => {
+                    "bindings" => {
                         if let Some(path) = opt {
-                            optv.push(BindOpt::Output(path))
+                            optv.push(BindOpt::Bindings(path))
                         }
                     }
-                    "s" | "symbols" => {
+                    "symbols" => {
                         if let Some(path) = opt {
                             optv.push(BindOpt::Symbols(path))
                         }
@@ -129,19 +123,17 @@ pub fn main() {
         Some(opts) => {
             for opt in opts {
                 match opt {
-                    BindOpt::Parse(src_path) => match BindGen::with_config(&config, &src_path) {
-                        Ok(bindgen) => {
-                            if let Some(ref path) = config.output_path() {
-                                bindgen.write(path).unwrap()
+                    BindOpt::Parse(src_path) => match Bindings::with_config(&config, &src_path) {
+                        Ok(bindings) => {
+                            if let Some(ref path) = config.bindings_path() {
+                                bindings.gencode(path).unwrap()
                             }
                             if let Some(ref path) = config.symbols_path() {
-                                let symbol_table = SymbolTable::new(&config, &bindgen);
+                                let symbol_table = SymbolTable::new(&config, &bindings);
 
                                 symbol_table.write(path).unwrap()
                             }
-                            if config.verbose() {
-                                bindgen.print_file(&src_path)
-                            }
+                            if config.verbose() {}
                         }
                         Err(e) => {
                             eprintln!("mu-bindgen: failed to parse {}", e);
@@ -151,8 +143,8 @@ pub fn main() {
                     BindOpt::Map(path) => {
                         config.bindmap_path.replace(Some(path));
                     }
-                    BindOpt::Output(path) => {
-                        config.output_path.replace(Some(path));
+                    BindOpt::Bindings(path) => {
+                        config.bindings_path.replace(Some(path));
                     }
                     BindOpt::Namespace(name) => {
                         config.namespace.replace(Some(name));
