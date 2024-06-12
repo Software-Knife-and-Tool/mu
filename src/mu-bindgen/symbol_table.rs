@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use {
-    crate::{bindgen::BindGen, config::Config, display::Display},
+    crate::{bindings::Bindings, config::Config, syntax::Syntax},
     std::{
         cell::RefCell,
         fmt,
@@ -8,32 +8,32 @@ use {
         io::{Error, Write},
         result::Result,
     },
-    syn::{self, ImplItem, Item, ReturnType, Visibility},
+    syn::{self, punctuated::Pair, token::Comma, FnArg, ImplItem, Item, Signature, Visibility},
 };
 
 pub struct SymbolTable {
-    symbols: RefCell<Vec<SymbolDescription>>,
+    pub symbols: RefCell<Vec<SymbolDescription>>,
 }
 
-struct SymbolDescription {
-    type_: String,
-    name: String,
-    value: String,
-    attrs: String,
+pub struct SymbolDescription {
+    pub type_: String,
+    pub name: String,
+    pub value: String,
+    pub attrs: String,
 }
 
 impl fmt::Display for SymbolDescription {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:20}{:8}{:40}{:16}",
+            "{:32}{:16}{:40}{:16}",
             self.name, self.type_, self.value, self.attrs,
         )
     }
 }
 
 impl SymbolTable {
-    pub fn new(_config: &Config, bindgen: &BindGen) -> Self {
+    pub fn new(_config: &Config, bindgen: &Bindings) -> Self {
         let symbol_table = SymbolTable {
             symbols: RefCell::new(Vec::<SymbolDescription>::new()),
         };
@@ -54,6 +54,25 @@ impl SymbolTable {
         })
     }
 
+    fn fn_arg_signature(sig: &Signature) -> String {
+        sig.inputs
+            .pairs()
+            .map(|pair: Pair<&FnArg, &Comma>| {
+                let value = pair.value();
+                let _punct = pair.punct();
+                println!("{:#?}", value);
+                "hello, ".to_string()
+            })
+            .collect::<String>()
+    }
+
+    fn fn_return_signature(sig: &Signature) -> String {
+        match Syntax::return_type(&sig.output.clone()) {
+            std::option::Option::None => "".to_string(),
+            Some(str) => format!(" -> {}", str),
+        }
+    }
+
     fn parse_implitem(&self, item: &ImplItem) {
         match item {
             ImplItem::Const(const_) => {
@@ -69,14 +88,14 @@ impl SymbolTable {
                 let is_const = fn_.sig.constness.is_some();
                 let is_async = fn_.sig.asyncness.is_some();
 
-                let return_type = match &fn_.sig.output {
-                    ReturnType::Default => "".to_string(),
-                    ReturnType::Type(_, type_) => {
-                        format!(" -> {}", Display::Type(*type_.clone()))
-                    }
-                };
-
-                let value = format!("(...){}", return_type);
+                let value = format!(
+                    "({}){}",
+                    Self::fn_arg_signature(&fn_.sig),
+                    match Syntax::return_type(&fn_.sig.output.clone()) {
+                        std::option::Option::None => "".to_string(),
+                        Some(str) => format!(" -> {}", str),
+                    },
+                );
 
                 let attrs = format!(
                     "{}{}{}",
@@ -99,12 +118,31 @@ impl SymbolTable {
             Item::Const(_const) => self.push("Item::Const", "", "", ""),
             Item::Enum(_enum) => self.push("Item::Enum", "", "", ""),
             Item::ExternCrate(_crate) => self.push("Item::ExternCrate", "", "", ""),
-            Item::Fn(fn_) => self.push(
-                "Item::Fn",
-                &fn_.sig.ident.to_string(),
-                &Display::Item(item.clone()).to_string(),
-                "",
-            ),
+            Item::Fn(fn_) => {
+                let name = &fn_.sig.ident;
+
+                let is_public = matches!(fn_.vis, Visibility::Public(_));
+                let is_const = fn_.sig.constness.is_some();
+                let is_async = fn_.sig.asyncness.is_some();
+
+                let value = format!(
+                    "({}){}",
+                    Self::fn_arg_signature(&fn_.sig),
+                    match Syntax::return_type(&fn_.sig.output.clone()) {
+                        std::option::Option::None => "".to_string(),
+                        Some(str) => format!(" -> {}", str),
+                    },
+                );
+
+                let attrs = format!(
+                    "{}{}{}",
+                    if is_const { "const " } else { "" },
+                    if is_async { "async " } else { "" },
+                    if is_public { "pub " } else { "" },
+                );
+
+                self.push("Item::Fn", &name.to_string(), &value, &attrs)
+            }
             Item::ForeignMod(_mod) => self.push("Item::ForeignMod", "", "", ""),
             Item::Impl(_impl) => {
                 for impl_ in &_impl.items {

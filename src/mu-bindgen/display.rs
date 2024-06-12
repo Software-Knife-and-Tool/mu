@@ -1,47 +1,71 @@
 use {
+    crate::syntax::Syntax,
     std::fmt,
     syn::{
-        self, GenericArgument, Ident, ImplItem, Item,
+        self,
+        punctuated::Pair,
+        token::Comma,
+        FnArg, GenericArgument, ImplItem, Item,
         PathArguments::{AngleBracketed, None, Parenthesized},
-        PathSegment, ReturnType, Type, Visibility,
+        Signature, Type, Visibility,
     },
 };
 
-pub enum Display {
-    GenericArgument(GenericArgument),
-    Ident(Ident),
-    Item(Item),
-    ImplItem(ImplItem),
-    PathSegment(PathSegment),
-    Type(Type),
-}
-
-impl fmt::Display for Display {
+impl fmt::Display for Syntax {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fn fn_arg_signature(sig: &Signature) -> String {
+            sig.inputs
+                .pairs()
+                .map(|pair: Pair<&FnArg, &Comma>| {
+                    let _value = pair.value();
+                    let _punct = pair.punct();
+                    // println!("{:#?}", value);
+                    "hello, ".to_string()
+                })
+                .collect::<String>()
+        }
+
+        fn fn_return_signature(sig: &Signature) -> String {
+            match Syntax::return_type(&sig.output.clone()) {
+                std::option::Option::None => "".to_string(),
+                Some(str) => format!(" -> {}", str),
+            }
+        }
+
         match self {
-            Display::ImplItem(impl_item) => match impl_item {
+            Syntax::ImplItem(impl_item) => match impl_item {
                 ImplItem::Const(_impl) => write!(f, "ImplItem::Const"),
                 ImplItem::Fn(fn_) => {
-                    let ident = &fn_.sig.ident;
-                    let is_public = matches!(fn_.vis, Visibility::Public(_));
-                    let is_const = fn_.sig.constness.is_some();
-                    let is_async = fn_.sig.asyncness.is_some();
-
-                    let return_type = match &fn_.sig.output {
-                        ReturnType::Default => "".to_string(),
-                        ReturnType::Type(_, type_) => {
-                            format!(" -> {}", Display::Type(*type_.clone()))
-                        }
-                    };
+                    let (const_, async_, pub_) = (
+                        if fn_.sig.constness.is_some() {
+                            "const "
+                        } else {
+                            ""
+                        },
+                        if fn_.sig.asyncness.is_some() {
+                            "async "
+                        } else {
+                            ""
+                        },
+                        if matches!(fn_.vis, Visibility::Public(_)) {
+                            "pub "
+                        } else {
+                            ""
+                        },
+                    );
 
                     write!(
                         f,
-                        "{}{}{}fn {}(...) {}",
-                        if is_const { "const " } else { "" },
-                        if is_async { "async " } else { "" },
-                        if is_public { "pub " } else { "" },
-                        ident,
-                        return_type
+                        "{}{}{}fn {}({}){}",
+                        const_,
+                        async_,
+                        pub_,
+                        &fn_.sig.ident,
+                        fn_arg_signature(&fn_.sig),
+                        match Syntax::return_type(&fn_.sig.output.clone()) {
+                            std::option::Option::None => "".to_string(),
+                            Some(str) => format!(" -> {}", str),
+                        },
                     )
                 }
                 ImplItem::Type(_impl) => write!(f, "ImplItem::Type"),
@@ -49,15 +73,45 @@ impl fmt::Display for Display {
                 ImplItem::Verbatim(_tokens) => write!(f, "ImplItem::Verbatim"),
                 _ => panic!(),
             },
-            Display::Item(item) => match item {
+            Syntax::Ident(ident) => write!(f, "{}", ident),
+            Syntax::Item(item) => match item {
                 Item::Const(_const) => f.pad("<Item::Const>"),
                 Item::Enum(_enum) => f.pad("<Item::Enum>"),
                 Item::ExternCrate(_crate) => f.pad("<Item::ExternCrate>"),
-                Item::Fn(item) => write!(f, "{}", item.sig.ident),
+                Item::Fn(fn_) => {
+                    let (const_, async_, pub_) = (
+                        if fn_.sig.constness.is_some() {
+                            "const "
+                        } else {
+                            ""
+                        },
+                        if fn_.sig.asyncness.is_some() {
+                            "async "
+                        } else {
+                            ""
+                        },
+                        if matches!(fn_.vis, Visibility::Public(_)) {
+                            "pub "
+                        } else {
+                            ""
+                        },
+                    );
+
+                    write!(
+                        f,
+                        "{}{}{}fn {}({}){}",
+                        pub_,
+                        const_,
+                        async_,
+                        &fn_.sig.ident,
+                        fn_arg_signature(&fn_.sig),
+                        fn_return_signature(&fn_.sig),
+                    )
+                }
                 Item::ForeignMod(_mod) => f.pad("<Item::ForeignMod>"),
                 Item::Impl(_impl) => {
                     for impl_ in &_impl.items {
-                        write!(f, "{}", Display::ImplItem(impl_.clone())).unwrap()
+                        write!(f, "{}", Syntax::ImplItem(impl_.clone())).unwrap()
                     }
 
                     Ok(())
@@ -74,19 +128,18 @@ impl fmt::Display for Display {
                 Item::Verbatim(_stream) => f.pad("<Item::Vebatim>"),
                 _ => panic!(),
             },
-            Display::Ident(ident) => write!(f, "{}", ident),
-            Display::GenericArgument(arg) => match arg {
+            Syntax::GenericArgument(arg) => match arg {
                 GenericArgument::Lifetime(lifetime) => {
-                    write!(f, "{}", Display::Ident(lifetime.ident.clone()))
+                    write!(f, "{}", Syntax::Ident(lifetime.ident.clone()))
                 }
-                GenericArgument::Type(type_) => write!(f, "{}", Display::Type(type_.clone())),
+                GenericArgument::Type(type_) => write!(f, "{}", Syntax::Type(type_.clone())),
                 GenericArgument::Const(_expr) => f.pad("<GenericArgument::Const>"),
                 GenericArgument::AssocType(_type) => f.pad("<GenericArgument::AssocType>"),
                 GenericArgument::AssocConst(_const) => f.pad("<GenericArgument::AssocConst>"),
                 GenericArgument::Constraint(_constraint) => f.pad("<GenericArgument::Constraint>"),
                 _ => panic!(),
             },
-            Display::Type(type_) => match type_ {
+            Syntax::Type(type_) => match type_ {
                 Type::Array(_array) => f.pad("[T; n]"),
                 Type::BareFn(_fn) => f.pad("bool"),
                 Type::Group(_group) => f.pad("-Group-"),
@@ -103,7 +156,7 @@ impl fmt::Display for Display {
                     let path_len = _path.path.segments.len();
 
                     for (index, segment) in _path.path.segments.iter().enumerate() {
-                        write!(f, "{}", Display::PathSegment(segment.clone())).unwrap();
+                        write!(f, "{}", Syntax::PathSegment(segment.clone())).unwrap();
                         if index < path_len - 1 {
                             write!(f, "::").unwrap()
                         }
@@ -119,7 +172,7 @@ impl fmt::Display for Display {
                 Type::Verbatim(_tokens) => f.pad("-Verbatim-"),
                 _ => panic!(),
             },
-            Display::PathSegment(segment) => {
+            Syntax::PathSegment(segment) => {
                 write!(f, "{}", segment.ident).unwrap();
 
                 match &segment.arguments {
@@ -129,7 +182,7 @@ impl fmt::Display for Display {
 
                         write!(f, "<").unwrap();
                         for arg in args {
-                            write!(f, "{}", Display::GenericArgument(arg.clone())).unwrap()
+                            write!(f, "{}", Syntax::GenericArgument(arg.clone())).unwrap()
                         }
                         write!(f, ">").unwrap();
                     }

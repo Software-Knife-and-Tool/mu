@@ -49,28 +49,35 @@ done
 args=("$@")
 nargs="$((${#@}-${OPTIND}))"
 if [ "${nargs}" != 0 ]; then
-    echo "single one crate argument" >&2
+    echo "single crate argument" >&2
     exit 1
 fi
 
 arg_index="$((${OPTIND} - 1))"
-crate=${args[${arg_index}]}
 
-cargo clone ${crate}
-
+crate="${args[${arg_index}]}"
 crate_dir=(${crate//@/ })
 crate_srcs=${crate_dir}/src/*
 crate_src_files=(${crate_srcs// /})
 
 if ${verbose}; then
-    echo "bind-crate: loading" ${crate_dir}
-    echo "bind-crate: sources" ${crate_srcs}
-    echo "number of sources" ${#crate_src_files}
-    for source in ${crate_src_files}; do
-        echo "src:" ${source}
-    done
+    echo ";;; bind-crate: generating bindings for" ${crate}
 fi
 
-for source in ${crate_src_files}; do
-    mu-bindgen --symbols ${crate_dir}.symbols.out --output ${crate_dir}.${source}.out --verbose ${source}
+cargo clone ${crate}
+
+for source in ${crate_src_files[@]}; do
+    base_name=${source##*/}
+    base=${base_name%.*}
+    symbols_path=${crate-dir}/${base}.symbols
+    bindings_path=${crate-dir}/${base}.bindings
+    
+    if ${verbose}; then
+        echo ";;;   namespace:  " ${crate}
+        echo ";;;   source:     " ${source}
+        echo ";;;   symbols:    " ${symbols_path}
+        echo ";;;   bindings:   " ${bindings_path}
+    fi
+
+    mu-bindgen --namespace ${crate} --symbols ${symbols_path} --bindings ${bindings_path} --verbose ${source}
 done

@@ -15,7 +15,7 @@ use {
 pub struct Config {
     pub bindmap_path: RefCell<Option<String>>,
     pub namespace: RefCell<Option<String>>,
-    pub output_path: RefCell<Option<String>>,
+    pub bindings_path: RefCell<Option<String>>,
     pub symbols_path: RefCell<Option<String>>,
     pub verbose: RefCell<bool>,
 }
@@ -25,7 +25,7 @@ impl Config {
         Config {
             bindmap_path: RefCell::new(None),
             namespace: RefCell::new(None),
-            output_path: RefCell::new(None),
+            bindings_path: RefCell::new(None),
             symbols_path: RefCell::new(None),
             verbose: RefCell::new(false),
         }
@@ -39,8 +39,8 @@ impl Config {
         self.bindmap_path.borrow().clone()
     }
 
-    pub fn output_path(&self) -> Option<String> {
-        self.output_path.borrow().clone()
+    pub fn bindings_path(&self) -> Option<String> {
+        self.bindings_path.borrow().clone()
     }
 
     pub fn symbols_path(&self) -> Option<String> {
