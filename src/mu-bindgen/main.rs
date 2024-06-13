@@ -12,6 +12,7 @@ mod bindings;
 mod config;
 mod debug;
 mod display;
+mod format;
 mod symbol_table;
 mod syntax;
 

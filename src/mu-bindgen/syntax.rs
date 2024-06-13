@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #[allow(unused_imports)]
 use {
-    crate::bindings::Bindings,
+    crate::{bindings::Bindings, format::Format},
     std::convert::From,
     syn::{
         self, FnArg, GenericArgument, Ident, ImplItem, Item,
@@ -30,15 +30,6 @@ pub enum Syntax {
     ImplItem(ImplItem),
     PathSegment(PathSegment),
     Type(Type),
-}
-
-impl Syntax {
-    pub fn return_type(arg: &ReturnType) -> Option<String> {
-        match arg {
-            ReturnType::Default => std::option::Option::None,
-            ReturnType::Type(_, type_) => Some(format!("{}", Syntax::Type(*type_.clone()))),
-        }
-    }
 }
 
 pub trait PrettyPrint {
@@ -71,7 +62,7 @@ impl PrettyPrint for Bindings<'_> {
                 let is_async = fn_.sig.asyncness.is_some();
                 let is_unsafe = fn_.sig.unsafety.is_some();
 
-                let output_type = match Syntax::return_type(&fn_.sig.output.clone()) {
+                let output_type = match Syntax::fn_return_type(&fn_.sig.output.clone()) {
                     std::option::Option::None => "".to_string(),
                     Some(str) => format!(" -> {}", str),
                 };

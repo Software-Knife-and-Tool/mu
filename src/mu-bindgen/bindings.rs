@@ -81,14 +81,14 @@ impl Bindings<'_> {
         }
 
         /*
-        let ns = match self.config.namespace() {
-            Some(ns) => ns
-                .chars()
-                .filter_map(|ch| Some(if ch == '-' { '_' } else { ch }))
-                .collect(),
-            None => "_".to_string(),
-    };
-         */
+            let ns = match self.config.namespace() {
+                Some(ns) => ns
+                    .chars()
+                    .filter_map(|ch| Some(if ch == '-' { '_' } else { ch }))
+                    .collect(),
+                None => "_".to_string(),
+        };
+             */
 
         let ns = match self.config.namespace() {
             Some(ns) => ns
@@ -97,7 +97,7 @@ impl Bindings<'_> {
                 .collect(),
             None => "_".to_string(),
         };
-        
+
         let stab = SymbolTable::new(self.config, self);
         match engine
             .template("ffi")
