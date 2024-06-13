@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use {
-    crate::{bindings::Bindings, config::Config, syntax::Syntax},
+    crate::{bindings::Bindings, config::Config, format::Format, syntax::Syntax},
     std::{
         cell::RefCell,
         fmt,
@@ -8,7 +8,7 @@ use {
         io::{Error, Write},
         result::Result,
     },
-    syn::{self, punctuated::Pair, token::Comma, FnArg, ImplItem, Item, Signature, Visibility},
+    syn::{self, ImplItem, Item, Visibility},
 };
 
 pub struct SymbolTable {
@@ -26,8 +26,8 @@ impl fmt::Display for SymbolDescription {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:32}{:16}{:40}{:16}",
-            self.name, self.type_, self.value, self.attrs,
+            "{:18}{:20}{:32}{}",
+            self.type_, self.attrs, self.name, self.value,
         )
     }
 }
@@ -54,61 +54,36 @@ impl SymbolTable {
         })
     }
 
-    fn fn_arg_signature(sig: &Signature) -> String {
-        sig.inputs
-            .pairs()
-            .map(|pair: Pair<&FnArg, &Comma>| {
-                let value = pair.value();
-                let _punct = pair.punct();
-                println!("{:#?}", value);
-                "hello, ".to_string()
-            })
-            .collect::<String>()
-    }
-
-    fn fn_return_signature(sig: &Signature) -> String {
-        match Syntax::return_type(&sig.output.clone()) {
-            std::option::Option::None => "".to_string(),
-            Some(str) => format!(" -> {}", str),
-        }
-    }
-
     fn parse_implitem(&self, item: &ImplItem) {
         match item {
             ImplItem::Const(const_) => {
                 let name = &const_.ident;
                 let _is_public = matches!(const_.vis, Visibility::Public(_));
 
-                self.push("const", &name.to_string(), "<fill-me-out>", "")
+                self.push("ImplItem::Const", &name.to_string(), "<fill-me-out>", "")
             }
             ImplItem::Fn(fn_) => {
                 let name = &fn_.sig.ident;
 
-                let is_public = matches!(fn_.vis, Visibility::Public(_));
-                let is_const = fn_.sig.constness.is_some();
-                let is_async = fn_.sig.asyncness.is_some();
-
                 let value = format!(
                     "({}){}",
-                    Self::fn_arg_signature(&fn_.sig),
-                    match Syntax::return_type(&fn_.sig.output.clone()) {
+                    Syntax::fn_arg_signature(&fn_.sig),
+                    match Syntax::fn_return_type(&fn_.sig.output.clone()) {
                         std::option::Option::None => "".to_string(),
                         Some(str) => format!(" -> {}", str),
                     },
                 );
 
-                let attrs = format!(
-                    "{}{}{}",
-                    if is_const { "const " } else { "" },
-                    if is_async { "async " } else { "" },
-                    if is_public { "pub " } else { "" },
-                );
+                let attrs = Syntax::fn_attrs(&fn_.sig, &fn_.vis)
+                    .iter()
+                    .map(|val| val.to_string())
+                    .collect::<String>();
 
-                self.push("fn", &name.to_string(), &value, &attrs)
+                self.push("ImplItem::Fn", &name.to_string(), &value, &attrs)
             }
-            ImplItem::Type(_impl) => self.push("ImplItem::Type", "", "", ""),
-            ImplItem::Macro(_impl) => self.push("ImplItem::Macro", "", "", ""),
-            ImplItem::Verbatim(_tokens) => self.push("ImplItem::Verbatim", "", "", ""),
+            ImplItem::Type(_impl) => (), // self.push("ImplItem::Type", "", "", ""),
+            ImplItem::Macro(_impl) => (), // self.push("ImplItem::Macro", "", "", ""),
+            ImplItem::Verbatim(_tokens) => (), // self.push("ImplItem::Verbatim", "", "", ""),
             _ => panic!(),
         }
     }
@@ -116,30 +91,24 @@ impl SymbolTable {
     fn parse_item(&self, item: &Item) {
         match item {
             Item::Const(_const) => self.push("Item::Const", "", "", ""),
-            Item::Enum(_enum) => self.push("Item::Enum", "", "", ""),
-            Item::ExternCrate(_crate) => self.push("Item::ExternCrate", "", "", ""),
+            Item::Enum(_enum) => (), // self.push("Item::Enum", "", "", ""),
+            Item::ExternCrate(_crate) => (), // self.push("Item::ExternCrate", "", "", ""),
             Item::Fn(fn_) => {
                 let name = &fn_.sig.ident;
 
-                let is_public = matches!(fn_.vis, Visibility::Public(_));
-                let is_const = fn_.sig.constness.is_some();
-                let is_async = fn_.sig.asyncness.is_some();
-
                 let value = format!(
                     "({}){}",
-                    Self::fn_arg_signature(&fn_.sig),
-                    match Syntax::return_type(&fn_.sig.output.clone()) {
+                    Syntax::fn_arg_signature(&fn_.sig),
+                    match Syntax::fn_return_type(&fn_.sig.output.clone()) {
                         std::option::Option::None => "".to_string(),
                         Some(str) => format!(" -> {}", str),
                     },
                 );
 
-                let attrs = format!(
-                    "{}{}{}",
-                    if is_const { "const " } else { "" },
-                    if is_async { "async " } else { "" },
-                    if is_public { "pub " } else { "" },
-                );
+                let attrs = Syntax::fn_attrs(&fn_.sig, &fn_.vis)
+                    .iter()
+                    .map(|val| val.to_string())
+                    .collect::<String>();
 
                 self.push("Item::Fn", &name.to_string(), &value, &attrs)
             }
@@ -149,16 +118,16 @@ impl SymbolTable {
                     self.parse_implitem(impl_)
                 }
             }
-            Item::Macro(_macro) => self.push("Item::Macro", "", "", ""),
-            Item::Mod(_mod) => self.push("Item::Mod", "", "", ""),
-            Item::Static(_static) => self.push("Item::Static", "", "", ""),
-            Item::Struct(_struct) => self.push("Item::Struct", "", "", ""),
-            Item::Trait(_trait) => self.push("Item::Trait", "", "", ""),
-            Item::TraitAlias(_alias) => self.push("Item::TraitAlias", "", "", ""),
-            Item::Type(_type) => self.push("Item::Type", "", "", ""),
-            Item::Union(_union) => self.push("Item::Union", "", "", ""),
-            Item::Use(_use) => self.push("Item::Use", "", "", ""),
-            Item::Verbatim(_stream) => self.push("Item::Vebatim", "", "", ""),
+            Item::Macro(_macro) => (), // self.push("Item::Macro", "", "", ""),
+            Item::Mod(_mod) => (),     // self.push("Item::Mod", "", "", ""),
+            Item::Static(_static) => (), // self.push("Item::Static", "", "", ""),
+            Item::Struct(_struct) => (), // self.push("Item::Struct", "", "", ""),
+            Item::Trait(_trait) => (), // self.push("Item::Trait", "", "", ""),
+            Item::TraitAlias(_alias) => (), // self.push("Item::TraitAlias", "", "", ""),
+            Item::Type(_type) => (),   // self.push("Item::Type", "", "", ""),
+            Item::Union(_union) => (), // self.push("Item::Union", "", "", ""),
+            Item::Use(_use) => (),     // self.push("Item::Use", "", "", ""),
+            Item::Verbatim(_stream) => (), // self.push("Item::Vebatim", "", "", ""),
             _ => panic!(),
         }
     }
