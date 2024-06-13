@@ -70,7 +70,7 @@ impl Bindings<'_> {
         let mut out = File::create(path)?;
 
         let mut source = String::new();
-        File::open("src/mu-bindgen/templates/mu")?
+        File::open("src/mu-bindgen/templates/ffi")?
             .read_to_string(&mut source)
             .unwrap();
 

@@ -26,7 +26,7 @@ impl fmt::Display for SymbolDescription {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:18}{:20}{:32}{}",
+            "{:8}{:20}{:32}{}",
             self.type_, self.attrs, self.name, self.value,
         )
     }
@@ -60,11 +60,10 @@ impl SymbolTable {
                 let name = &const_.ident;
                 let _is_public = matches!(const_.vis, Visibility::Public(_));
 
-                self.push("ImplItem::Const", &name.to_string(), "<fill-me-out>", "")
+                self.push("const", &name.to_string(), "<fill-me-out>", "")
             }
             ImplItem::Fn(fn_) => {
                 let name = &fn_.sig.ident;
-
                 let value = format!(
                     "({}){}",
                     Syntax::fn_arg_signature(&fn_.sig),
@@ -79,7 +78,7 @@ impl SymbolTable {
                     .map(|val| val.to_string())
                     .collect::<String>();
 
-                self.push("ImplItem::Fn", &name.to_string(), &value, &attrs)
+                self.push("fn", &name.to_string(), &value, &attrs)
             }
             ImplItem::Type(_impl) => (), // self.push("ImplItem::Type", "", "", ""),
             ImplItem::Macro(_impl) => (), // self.push("ImplItem::Macro", "", "", ""),
@@ -90,7 +89,7 @@ impl SymbolTable {
 
     fn parse_item(&self, item: &Item) {
         match item {
-            Item::Const(_const) => self.push("Item::Const", "", "", ""),
+            Item::Const(_const) => self.push("const", "", "", ""),
             Item::Enum(_enum) => (), // self.push("Item::Enum", "", "", ""),
             Item::ExternCrate(_crate) => (), // self.push("Item::ExternCrate", "", "", ""),
             Item::Fn(fn_) => {
@@ -110,7 +109,7 @@ impl SymbolTable {
                     .map(|val| val.to_string())
                     .collect::<String>();
 
-                self.push("Item::Fn", &name.to_string(), &value, &attrs)
+                self.push("fn", &name.to_string(), &value, &attrs)
             }
             Item::ForeignMod(_mod) => self.push("Item::ForeignMod", "", "", ""),
             Item::Impl(_impl) => {
