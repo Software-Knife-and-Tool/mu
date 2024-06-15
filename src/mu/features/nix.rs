@@ -23,16 +23,15 @@ use nix::{self};
 
 // env function dispatch table
 lazy_static! {
-    static ref NIX_SYMBOLS: Vec<CoreFnDef> = vec![("uname", 0, Nix::uname)];
+    static ref NIX_SYMBOLS: Vec<CoreFnDef> =
+        vec![("uname", 0, <Feature as CoreFunction>::nix_uname)];
 }
 
-pub struct Nix {}
-
-pub trait Core {
+pub trait Nix {
     fn feature() -> Feature;
 }
 
-impl Core for Nix {
+impl Nix for Feature {
     fn feature() -> Feature {
         Feature {
             symbols: NIX_SYMBOLS.to_vec(),
@@ -42,11 +41,11 @@ impl Core for Nix {
 }
 
 pub trait CoreFunction {
-    fn uname(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn nix_uname(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Nix {
-    fn uname(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+impl CoreFunction for Feature {
+    fn nix_uname(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match nix::sys::utsname::uname() {
             Err(_) => {
                 return Err(Exception::new(

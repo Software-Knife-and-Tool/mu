@@ -27,9 +27,10 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "std", "sysinfo", "nix" ]
+default = [ "std", "sysinfo", "nix", "ffi" ]
 nix = []
 std = []
+ffi = []
 sysinfo = []  # not for macos
 
 [profile.dev]

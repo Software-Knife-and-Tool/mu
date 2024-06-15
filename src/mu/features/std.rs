@@ -27,20 +27,18 @@ use crate::{
 // env function dispatch table
 lazy_static! {
     static ref STD_SYMBOLS: Vec<CoreFnDef> = vec![
-        ("command", 2, Std::std_command),
-        ("env", 0, Std::std_env),
-        ("exit", 1, Std::std_exit),
-        ("sleep", 1, Std::std_sleep),
+        ("command", 2, <Feature as CoreFunction>::std_command),
+        ("env", 0, <Feature as CoreFunction>::std_env),
+        ("exit", 1, <Feature as CoreFunction>::std_exit),
+        ("sleep", 1, <Feature as CoreFunction>::std_sleep),
     ];
 }
 
-pub struct Std {}
-
-pub trait Core {
+pub trait Std {
     fn feature() -> Feature;
 }
 
-impl Core for Std {
+impl Std for Feature {
     fn feature() -> Feature {
         Feature {
             symbols: STD_SYMBOLS.to_vec(),
@@ -56,7 +54,7 @@ pub trait CoreFunction {
     fn std_sleep(_: &Env, fp: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Std {
+impl CoreFunction for Feature {
     fn std_command(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let command = fp.argv[0];
         let args = fp.argv[1];

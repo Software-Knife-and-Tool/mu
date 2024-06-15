@@ -4,12 +4,14 @@
 //! features
 use crate::core::symbols::CoreFn;
 
+#[cfg(feature = "ffi")]
+use crate::features::ffi::Ffi;
 #[cfg(feature = "nix")]
-use crate::features::nix::nix_::{Core as _, Nix};
+use crate::features::nix::Nix;
 #[cfg(feature = "std")]
-use crate::features::std::std_::{Core as _, Std};
+use crate::features::std::Std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
-use crate::features::sysinfo::sysinfo_::{Core as _, Sysinfo};
+use crate::features::sysinfo::Sysinfo;
 
 #[derive(Clone)]
 pub struct Feature {
@@ -26,11 +28,13 @@ impl Core for Feature {
         #[allow(clippy::let_and_return)]
         let features = vec![
             #[cfg(feature = "nix")]
-            Nix::feature(),
+            <Feature as Nix>::feature(),
             #[cfg(feature = "std")]
-            Std::feature(),
+            <Feature as Std>::feature(),
+            #[cfg(feature = "ffi")]
+            <Feature as Ffi>::feature(),
             #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
-            Sysinfo::feature(),
+            <Feature as Sysinfo>::feature(),
         ];
 
         features
