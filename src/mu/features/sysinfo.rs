@@ -15,8 +15,6 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
         indirect_vector::Core as _,
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
         vector::Vector,
     },
 };
@@ -24,16 +22,15 @@ use sysinfo_dot_h::{self};
 
 // env function dispatch table
 lazy_static! {
-    static ref SYSINFO_SYMBOLS: Vec<CoreFnDef> = vec![("sysinfo", 0, Sysinfo::sysinfo),];
+    static ref SYSINFO_SYMBOLS: Vec<CoreFnDef> =
+        vec![("sysinfo", 0, <Feature as CoreFunction>::sysinfo_sysinfo),];
 }
 
-pub struct Sysinfo {}
-
-pub trait Core {
+pub trait Sysinfo {
     fn feature() -> Feature;
 }
 
-impl Core for Sysinfo {
+impl Sysinfo for Feature {
     fn feature() -> Feature {
         Feature {
             symbols: SYSINFO_SYMBOLS.to_vec(),
@@ -43,11 +40,11 @@ impl Core for Sysinfo {
 }
 
 pub trait CoreFunction {
-    fn sysinfo(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn sysinfo_sysinfo(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Sysinfo {
-    fn sysinfo(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+impl CoreFunction for Feature {
+    fn sysinfo_sysinfo(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match sysinfo_dot_h::try_collect() {
             Err(_) => {
                 return Err(Exception::new(
@@ -62,12 +59,12 @@ impl CoreFunction for Sysinfo {
                     env,
                     &[
                         Cons::new(
-                            Symbol::keyword("uptime"),
+                            Vector::from("uptime").evict(env),
                             Fixnum::with_u64(env, sysinfo.uptime as u64)?,
                         )
                         .evict(env),
                         Cons::new(
-                            Symbol::keyword("loads"),
+                            Vector::from("loads").evict(env),
                             Vector::from(vec![
                                 sysinfo.loads[0] as f32,
                                 sysinfo.loads[1] as f32,
@@ -77,51 +74,53 @@ impl CoreFunction for Sysinfo {
                         )
                         .evict(env),
                         Cons::new(
-                            Symbol::keyword("totlram"),
+                            Vector::from("totalram").evict(env),
                             Fixnum::with_u64(env, sysinfo.totalram)?,
                         )
                         .evict(env),
                         Cons::new(
-                            Symbol::keyword("freeram"),
+                            Vector::from("freeram").evict(env),
                             Fixnum::with_u64(env, sysinfo.freeram)?,
                         )
                         .evict(env),
                         Cons::new(
-                            Symbol::keyword("shrdram"),
+                            Vector::from("sharedram").evict(env),
                             Fixnum::with_u64(env, sysinfo.sharedram)?,
                         )
                         .evict(env),
                         Cons::new(
-                            Symbol::keyword("bufram"),
+                            Vector::from("bufferram").evict(env),
                             Fixnum::with_u64(env, sysinfo.bufferram)?,
                         )
                         .evict(env),
                         Cons::new(
-                            Symbol::keyword("totswap"),
+                            Vector::from("totalswap").evict(env),
                             Fixnum::with_u64(env, sysinfo.totalswap)?,
                         )
                         .evict(env),
                         Cons::new(
-                            Symbol::keyword("freswap"),
+                            Vector::from("freeswap").evict(env),
                             Fixnum::with_u64(env, sysinfo.freeswap)?,
                         )
                         .evict(env),
-                        Cons::new(Symbol::keyword("procs"), sysinfo.procs.into()).evict(env),
+                        Cons::new(Vector::from("procs").evict(env), sysinfo.procs.into())
+                            .evict(env),
                         Cons::new(
-                            Symbol::keyword("tothigh"),
+                            Vector::from("totalhigh").evict(env),
                             Fixnum::with_u64(env, sysinfo.totalhigh)?,
                         )
                         .evict(env),
                         Cons::new(
-                            Symbol::keyword("frehigh"),
+                            Vector::from("freehigh").evict(env),
                             Fixnum::with_u64(env, sysinfo.freehigh)?,
                         )
                         .evict(env),
-                        Cons::new(Symbol::keyword("meenvnit"), sysinfo.mem_unit.into()).evict(env),
+                        Cons::new(Vector::from("mem_unit").evict(env), sysinfo.mem_unit.into())
+                            .evict(env),
                     ],
                 )];
 
-                Struct::new(env, "sysinfo", sysinfo).evict(env)
+                Vector::from(sysinfo).evict(env)
             }
         };
 

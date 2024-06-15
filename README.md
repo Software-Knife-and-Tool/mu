@@ -186,6 +186,7 @@ Currently supported features by namespace:
  nix:     uname
  std:     command, exit
  sysinfo: sysinfo
+ ffi:
 ```
 
 The *sysinfo* feature is disabled on *macos* builds.

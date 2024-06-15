@@ -3,6 +3,8 @@
 
 //! features module
 pub mod feature;
+#[cfg(feature = "ffi")]
+pub mod ffi;
 #[cfg(feature = "nix")]
 pub mod nix;
 #[cfg(feature = "std")]
