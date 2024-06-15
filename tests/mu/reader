@@ -15,10 +15,10 @@
 #(:fixnum 1 2 -3)	#(:fixnum 1 2 -3)
 #(:float)	#(:float)
 #(:float 1.0 2.0 -3.0)	#(:float 1.0000 2.0000 -3.0000)
-#s(:foo)	#s(:foo)
-#S(:foo)	#s(:foo)
-#s(:foo 1 2 3)	#s(:foo 1 2 3)
-#S(:foo 1 2 3)	#s(:foo 1 2 3)
+#s(:foo)	#s(:foo #(:t))
+#S(:foo)	#s(:foo #(:t))
+#s(:foo 1 2 3)	#s(:foo #(:t 1 2 3))
+#S(:foo 1 2 3)	#s(:foo #(:t 1 2 3))
 '(1 2 3)	(1 2 3)
 '()	:nil
 #\ 	#\space
