@@ -18,7 +18,7 @@ use crate::{
         core_stream::{Core as _, Stream},
         indirect_vector::Core as _,
         symbol::{Core as _, Symbol},
-        vector::{Vector, VectorIter},
+        vector::Vector,
     },
 };
 
@@ -130,12 +130,8 @@ impl<'a> Core<'a> for Struct {
             Tag::Indirect(_) => {
                 env.write_string("#s(", stream)?;
                 env.write_stream(Self::to_image(env, tag).stype, true, stream)?;
-
-                for tag in VectorIter::new(env, Self::to_image(env, tag).vector) {
-                    env.write_string(" ", stream)?;
-                    env.write_stream(tag, true, stream)?;
-                }
-
+                env.write_string(" ", stream)?;
+                env.write_stream(Self::to_image(env, tag).vector, true, stream)?;
                 env.write_string(")", stream)
             }
             _ => panic!(),
