@@ -44,6 +44,7 @@ pub enum Tag {
 #[derive(PartialEq, Hash, Eq, Copy, Clone, Debug, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Type {
+    Bit,
     Byte,
     Char,
     Cons,
@@ -83,6 +84,7 @@ lazy_static! {
         DirectType::Keyword
     );
     pub static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
+        (Type::Bit, Symbol::keyword("bit")),
         (Type::Byte, Symbol::keyword("byte")),
         (Type::Char, Symbol::keyword("char")),
         (Type::Cons, Symbol::keyword("cons")),

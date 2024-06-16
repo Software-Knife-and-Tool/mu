@@ -33,11 +33,12 @@ use {
 
 lazy_static! {
     pub static ref VTYPEMAP: Vec<(Tag, Type)> = vec![
-        (Symbol::keyword("t"), Type::T),
-        (Symbol::keyword("char"), Type::Char),
+        (Symbol::keyword("bit"), Type::Bit),
         (Symbol::keyword("byte"), Type::Byte),
+        (Symbol::keyword("char"), Type::Char),
         (Symbol::keyword("fixnum"), Type::Fixnum),
         (Symbol::keyword("float"), Type::Float),
+        (Symbol::keyword("t"), Type::T),
     ];
 }
 
@@ -141,7 +142,8 @@ impl Vector {
         let cache = block_on(env.vector_map.read());
 
         let (vtype, length, ivec) = match indirect {
-            IndirectVector::Byte(image, ivec)
+            IndirectVector::Bit(image, ivec)
+            | IndirectVector::Byte(image, ivec)
             | IndirectVector::Char(image, ivec)
             | IndirectVector::Fixnum(image, ivec)
             | IndirectVector::Float(image, ivec) => {
@@ -155,6 +157,12 @@ impl Vector {
                 let tag_vec = block_on(vec_map.read());
 
                 let tag = match ivec {
+                    IndirectType::Bit(u8_vec) => tag_vec.iter().find(|src| {
+                        u8_vec.iter().enumerate().all(|(index, byte)| {
+                            *byte as i64
+                                == Fixnum::as_i64(Vector::ref_heap(env, **src, index).unwrap())
+                        })
+                    }),
                     IndirectType::Byte(u8_vec) => tag_vec.iter().find(|src| {
                         u8_vec.iter().enumerate().all(|(index, byte)| {
                             *byte as i64
@@ -316,6 +324,68 @@ impl<'a> Core<'a> for Vector {
 
                 Ok(Self::from(str).evict(env))
             }
+            '*' => {
+                let mut digits: String = String::new();
+
+                loop {
+                    match Stream::read_char(env, stream)? {
+                        Some(ch) => match map_char_syntax(ch).unwrap() {
+                            SyntaxType::Whitespace | SyntaxType::Tmacro => {
+                                Stream::unread_char(env, stream, ch)?;
+                                break;
+                            }
+                            SyntaxType::Escape => match Stream::read_char(env, stream)? {
+                                Some(ch) => {
+                                    if ch == '0' || ch == '1' {
+                                        digits.push(ch)
+                                    } else {
+                                        return Err(Exception::new(
+                                            env,
+                                            Condition::Eof,
+                                            "mu:read",
+                                            stream,
+                                        ));
+                                    }
+                                }
+                                None => {
+                                    return Err(Exception::new(
+                                        env,
+                                        Condition::Eof,
+                                        "mu:read",
+                                        stream,
+                                    ));
+                                }
+                            },
+                            _ => {
+                                if ch == '0' || ch == '1' {
+                                    digits.push(ch)
+                                } else {
+                                    return Err(Exception::new(
+                                        env,
+                                        Condition::Eof,
+                                        "mu:read",
+                                        stream,
+                                    ));
+                                }
+                            }
+                        },
+                        None => {
+                            return Err(Exception::new(env, Condition::Eof, "mu:read", stream));
+                        }
+                    }
+                }
+
+                let mut vec = vec![0; (digits.len() + 7) / 8];
+                let bvec = &mut vec;
+
+                for (i, ch) in digits.chars().enumerate() {
+                    if ch == '1' {
+                        bvec[i / 8] |= (1_i8) << (7 - i % 8)
+                    }
+                }
+
+                Ok(Self::from((vec, digits.len())).evict(env))
+            }
             '(' => {
                 let vec_list = match Cons::read(env, stream) {
                     Ok(list) => {
@@ -470,6 +540,31 @@ impl CoreFunction for Vector {
                         .collect();
 
                     Vector::from(vec?).evict(env)
+                }
+                Type::Bit => {
+                    let mut vec = vec![0; (Cons::length(env, list).unwrap() + 7) / 8];
+                    let bvec = &mut vec;
+
+                    for (i, cons) in Cons::iter(env, list).enumerate() {
+                        let fx = Cons::car(env, cons);
+                        if fx.type_of() == Type::Fixnum {
+                            let bit = Fixnum::as_i64(fx);
+                            if !(0..1).contains(&bit) {
+                                return Err(Exception::new(
+                                    env,
+                                    Condition::Range,
+                                    "mu:make-vector",
+                                    fx,
+                                ));
+                            } else {
+                                bvec[i / 8] |= (bit as u8) << (7 - i % 8)
+                            }
+                        } else {
+                            return Err(Exception::new(env, Condition::Type, "mu:make-vector", fx));
+                        }
+                    }
+
+                    Vector::from(vec).evict(env)
                 }
                 Type::Byte => {
                     let vec: exception::Result<Vec<u8>> = Cons::iter(env, list)

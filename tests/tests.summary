@@ -8,14 +8,14 @@ mu         future         total: 9        pass: 9        fail: 0        exceptio
 mu         list           total: 24       pass: 24       fail: 0        exceptions: 0       
 mu         namespace      total: 11       pass: 11       fail: 0        exceptions: 0       
 mu         number         total: 41       pass: 41       fail: 0        exceptions: 0       
-mu         reader         total: 52       pass: 52       fail: 0        exceptions: 0       
+mu         reader         total: 56       pass: 56       fail: 0        exceptions: 0       
 mu         special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
 mu         stream         total: 9        pass: 9        fail: 0        exceptions: 0       
 mu         struct         total: 7        pass: 7        fail: 0        exceptions: 0       
 mu         symbol         total: 10       pass: 10       fail: 0        exceptions: 0       
 mu         vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-mu                        total: 302      pass: 301      fail: 1        exceptions: 0         
+mu                        total: 306      pass: 305      fail: 1        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------
