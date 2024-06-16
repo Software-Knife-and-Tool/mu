@@ -273,7 +273,7 @@ impl Core for Lib {
                 }
                 '\\' => Self::read_char_literal(env, stream),
                 'S' | 's' => Ok(Some(Struct::read(env, stream)?)),
-                '(' => Ok(Some(Vector::read(env, '(', stream)?)),
+                '(' | '*' => Ok(Some(Vector::read(env, ch, stream)?)),
                 'x' => match Self::read_token(env, stream) {
                     Ok(token) => match token {
                         Some(hex) => match i64::from_str_radix(&hex, 16) {

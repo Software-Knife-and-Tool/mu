@@ -79,6 +79,19 @@ impl From<Vec<i64>> for Vector {
     }
 }
 
+impl From<(Vec<i8>, usize)> for Vector {
+    fn from(vec_def: (Vec<i8>, usize)) -> Vector {
+        let (vec, len) = vec_def;
+        let image = VectorImage {
+            vtype: Symbol::keyword("bit"),
+            length: Fixnum::with_or_panic(len),
+        };
+        let u8_slice = vec.iter().map(|i8_| *i8_ as u8).collect::<Vec<u8>>();
+
+        Vector::Indirect(image, IndirectType::Bit(u8_slice))
+    }
+}
+
 impl From<Vec<u8>> for Vector {
     fn from(vec: Vec<u8>) -> Vector {
         let image = VectorImage {
@@ -107,6 +120,7 @@ pub struct VectorImage {
 }
 
 pub enum IndirectType {
+    Bit(Vec<u8>),
     Byte(Vec<u8>),
     Char(String),
     Fixnum(Vec<i64>),
@@ -117,6 +131,7 @@ pub enum IndirectType {
 // vector types
 #[allow(dead_code)]
 pub enum IndirectVector<'a> {
+    Bit(&'a VectorImage, &'a IndirectType),
     Byte(&'a VectorImage, &'a IndirectType),
     Char(&'a VectorImage, &'a IndirectType),
     Fixnum(&'a VectorImage, &'a IndirectType),
@@ -147,6 +162,16 @@ impl<'a> IndirectVectorType for IndirectVector<'a> {
             IndirectVector::Byte(image, ivec) => {
                 let data = match ivec {
                     IndirectType::Byte(vec_u8) => &vec_u8[..],
+                    _ => panic!(),
+                };
+
+                heap_ref
+                    .alloc(&Self::image(image), Some(data), Type::Vector as u8)
+                    .unwrap() as u64
+            }
+            IndirectVector::Bit(image, ivec) => {
+                let data = match ivec {
+                    IndirectType::Bit(vec_u8) => &vec_u8[..],
                     _ => panic!(),
                 };
 
@@ -289,6 +314,16 @@ impl<'a> IndirectVectorType for IndirectVector<'a> {
         };
 
         match Vector::to_type(image.vtype).unwrap() {
+            Type::Bit => {
+                let byte_index = index / 8;
+                let slice = heap_ref
+                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, byte_index, 1)
+                    .unwrap();
+
+                let bit_index = 7 - (index % 8);
+
+                Some(((slice[0] >> bit_index) & 1).into())
+            }
             Type::Byte => {
                 let slice = heap_ref
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
@@ -398,6 +433,7 @@ impl<'a> Core<'a> for Vector {
                 let indirect = match ivec {
                     IndirectType::T(_) => IndirectVector::T(image, ivec),
                     IndirectType::Char(_) => IndirectVector::Char(image, ivec),
+                    IndirectType::Bit(_) => IndirectVector::Bit(image, ivec),
                     IndirectType::Byte(_) => IndirectVector::Byte(image, ivec),
                     IndirectType::Fixnum(_) => IndirectVector::Fixnum(image, ivec),
                     IndirectType::Float(_) => IndirectVector::Float(image, ivec),
@@ -451,6 +487,18 @@ impl<'a> Core<'a> for Vector {
 
                     if escape {
                         env.write_string("\"", stream)?;
+                    }
+
+                    Ok(())
+                }
+                Type::Bit => {
+                    env.write_string("#*", stream)?;
+
+                    let _len = Vector::length(env, vector);
+                    for bit in VectorIter::new(env, vector) {
+                        let digit = Fixnum::as_i64(bit);
+
+                        env.write_string(if digit == 1 { "1" } else { "0" }, stream)?
                     }
 
                     Ok(())
