@@ -161,7 +161,7 @@ impl Core for Exception {
 }
 
 pub trait CoreFunction {
-    fn mu_unwind_protect(env: &Env, fp: &mut Frame) -> Result<()>;
+    fn mu_with_exception(env: &Env, fp: &mut Frame) -> Result<()>;
     fn mu_raise(env: &Env, fp: &mut Frame) -> Result<()>;
 }
 
@@ -177,11 +177,11 @@ impl CoreFunction for Exception {
         }
     }
 
-    fn mu_unwind_protect(env: &Env, fp: &mut Frame) -> Result<()> {
+    fn mu_with_exception(env: &Env, fp: &mut Frame) -> Result<()> {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        env.fp_argv_check("mu:unwind-protect", &[Type::Function, Type::Function], fp)?;
+        env.fp_argv_check("mu:with-exception", &[Type::Function, Type::Function], fp)?;
 
         let dynamic_ref = block_on(env.dynamic.read());
 

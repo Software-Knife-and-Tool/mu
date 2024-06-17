@@ -71,11 +71,11 @@
      (:if (prelude:functionp fn)
           (:if (prelude:stringp specifier)
                (:if (prelude:%orf (mu:eq :file type)
-                               (mu:eq :string type))
+                                  (mu:eq :string type))
                     (:if (prelude:%orf (mu:eq :input dir)
-                                    (mu:eq :output dir))
+                                       (mu:eq :output dir))
                          ((:lambda (stream)
-                             (mu:unwind-protect
+                             (mu:with-exception
                               (:lambda (ex) (mu:close stream) ex)
                               (:lambda () (prelude:apply fn `(,stream)))))
                           (mu:open type dir specifier))

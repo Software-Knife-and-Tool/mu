@@ -45,7 +45,7 @@
 (mu:heap-size 'mu:eq)	45
 (mu:heap-size mu:eq)	18
 (mu:heap-size mu:*standard-input*)	8
-(mu:unwind-protect (:lambda (cond obj) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:quotient 1 1)))	1
+(mu:with-exception (:lambda (cond obj) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:quotient 1 1)))	1
 (mu:repr :t (mu:repr :vector :t))	:t
 (mu:type-of mu:find)	:func
 (mu:type-of mu:find-ns)	:func

@@ -60,7 +60,7 @@
 
 (mu:intern prelude "with-exception"
   (:lambda (handler thunk)
-     (mu:unwind-protect
+     (mu:with-exception
       (:lambda (value condition source)
          (:if (mu:eq condition :except)
               (prelude:apply handler `(,value))
