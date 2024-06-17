@@ -9,7 +9,7 @@
 
 use crate::{
     core::{
-        direct::{DirectInfo, DirectTag, DirectType, ExtType},
+        direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,
         exception::{self, Condition, Exception},
         lib::LIB,
@@ -22,9 +22,9 @@ use crate::{
     types::{
         char::Char,
         fixnum::{Core as _, Fixnum},
-        indirect_vector::Core as _,
         symbol::{Core as _, Symbol},
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 
@@ -43,7 +43,7 @@ impl From<Stream> for Tag {
     fn from(stream: Stream) -> Tag {
         DirectTag::to_direct(
             stream.index as u64,
-            DirectInfo::ExtType(ExtType::Stream),
+            DirectExt::ExtType(ExtType::Stream),
             DirectType::Ext,
         )
     }
@@ -67,7 +67,7 @@ impl Core for Stream {
     fn to_stream_index(env: &Env, tag: Tag) -> exception::Result<usize> {
         match tag {
             Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.info().try_into() {
+                DirectType::Ext => match dtag.ext().try_into() {
                     Ok(ExtType::Stream) => Ok(dtag.data() as usize),
                     _ => panic!(),
                 },

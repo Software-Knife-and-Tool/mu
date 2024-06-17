@@ -14,8 +14,8 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
-        indirect_vector::Core as _,
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 use sysinfo_dot_h::{self};

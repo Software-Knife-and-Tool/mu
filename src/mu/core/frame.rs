@@ -46,7 +46,7 @@ impl Frame {
                 let stype = Struct::stype(env, tag);
                 let frame = Struct::vector(env, tag);
 
-                let func = Vector::ref_heap(env, frame, 0).unwrap();
+                let func = Vector::ref_(env, frame, 0).unwrap();
 
                 match func.type_of() {
                     Type::Function => {
@@ -138,9 +138,8 @@ impl Frame {
                         return Err(Exception::new(env, Condition::Arity, "mu:apply", func));
                     }
 
-                    let offset = Fixnum::as_i64(
-                        Vector::ref_heap(env, Function::form(env, func), 2).unwrap(),
-                    );
+                    let offset =
+                        Fixnum::as_i64(Vector::ref_(env, Function::form(env, func), 2).unwrap());
 
                     let functions_ref = block_on(LIB.functions.read());
                     functions_ref[offset as usize](env, &mut self)?;

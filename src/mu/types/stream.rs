@@ -20,9 +20,9 @@ use crate::{
         char::Char,
         core_stream::{Core as _, Stream},
         fixnum::Fixnum,
-        indirect_vector::Core as _,
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
+        vector_image::Core as _,
     },
 };
 

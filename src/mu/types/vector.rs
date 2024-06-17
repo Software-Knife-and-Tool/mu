@@ -20,10 +20,8 @@ use {
             core_stream::{Core as _, Stream},
             fixnum::{Core as _, Fixnum},
             float::Float,
-            indirect_vector::{
-                Core as _, IndirectType, IndirectVector, IndirectVectorType, VectorImage,
-            },
             symbol::{Core as _, Symbol},
+            vector_image::{Core as _, VecImage, VecImageType, VectorImage, VectorImageType},
         },
     },
     futures::executor::block_on,
@@ -46,7 +44,7 @@ pub type VecCacheMap = HashMap<(Type, i32), RwLock<Vec<Tag>>>;
 
 pub enum Vector {
     Direct(Tag),
-    Indirect(VectorImage, IndirectType),
+    Indirect(VectorImage, VectorImageType),
 }
 
 impl Vector {
@@ -62,14 +60,18 @@ impl Vector {
 
     pub fn type_of(env: &Env, vector: Tag) -> Type {
         match vector {
-            Tag::Direct(_) => Type::Char,
+            Tag::Direct(direct) => match direct.dtype() {
+                DirectType::String => Type::Char,
+                DirectType::ByteVec => Type::Byte,
+                _ => panic!(),
+            },
             Tag::Indirect(_) => {
                 let image = Self::to_image(env, vector);
 
                 match VTYPEMAP
                     .iter()
                     .copied()
-                    .find(|desc| image.vtype.eq_(&desc.0))
+                    .find(|desc| image.type_.eq_(&desc.0))
                 {
                     Some(desc) => desc.1,
                     None => panic!(),
@@ -80,7 +82,7 @@ impl Vector {
 
     pub fn length(env: &Env, vector: Tag) -> usize {
         match vector {
-            Tag::Direct(direct) => direct.info() as usize,
+            Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
                 let image = Self::to_image(env, vector);
                 Fixnum::as_i64(image.length) as usize
@@ -90,14 +92,18 @@ impl Vector {
 
     pub fn ref_type_of(gc: &mut Gc, vector: Tag) -> Type {
         match vector {
-            Tag::Direct(_) => Type::Char,
+            Tag::Direct(direct) => match direct.dtype() {
+                DirectType::String => Type::Char,
+                DirectType::ByteVec => Type::Byte,
+                _ => panic!(),
+            },
             Tag::Indirect(_) => {
                 let image = Self::gc_ref_image(&mut gc.lock, vector);
 
                 match VTYPEMAP
                     .iter()
                     .copied()
-                    .find(|desc| image.vtype.eq_(&desc.0))
+                    .find(|desc| image.type_.eq_(&desc.0))
                 {
                     Some(desc) => desc.1,
                     None => panic!(),
@@ -108,7 +114,7 @@ impl Vector {
 
     pub fn ref_length(gc: &mut Gc, vector: Tag) -> usize {
         match vector {
-            Tag::Direct(direct) => direct.info() as usize,
+            Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
                 let image = Self::gc_ref_image(&mut gc.lock, vector);
                 Fixnum::as_i64(image.length) as usize
@@ -138,16 +144,16 @@ impl Vector {
         }
     }
 
-    pub fn cached(env: &Env, indirect: &IndirectVector) -> Option<Tag> {
+    pub fn cached(env: &Env, indirect: &VecImageType) -> Option<Tag> {
         let cache = block_on(env.vector_map.read());
 
         let (vtype, length, ivec) = match indirect {
-            IndirectVector::Bit(image, ivec)
-            | IndirectVector::Byte(image, ivec)
-            | IndirectVector::Char(image, ivec)
-            | IndirectVector::Fixnum(image, ivec)
-            | IndirectVector::Float(image, ivec) => {
-                (image.vtype, Fixnum::as_i64(image.length) as i32, ivec)
+            VecImageType::Bit(image, ivec)
+            | VecImageType::Byte(image, ivec)
+            | VecImageType::Char(image, ivec)
+            | VecImageType::Fixnum(image, ivec)
+            | VecImageType::Float(image, ivec) => {
+                (image.type_, Fixnum::as_i64(image.length) as i32, ivec)
             }
             _ => panic!(),
         };
@@ -157,30 +163,27 @@ impl Vector {
                 let tag_vec = block_on(vec_map.read());
 
                 let tag = match ivec {
-                    IndirectType::Bit(u8_vec) => tag_vec.iter().find(|src| {
+                    VectorImageType::Bit(u8_vec) => tag_vec.iter().find(|src| {
                         u8_vec.iter().enumerate().all(|(index, byte)| {
-                            *byte as i64
-                                == Fixnum::as_i64(Vector::ref_heap(env, **src, index).unwrap())
+                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
                         })
                     }),
-                    IndirectType::Byte(u8_vec) => tag_vec.iter().find(|src| {
+                    VectorImageType::Byte(u8_vec) => tag_vec.iter().find(|src| {
                         u8_vec.iter().enumerate().all(|(index, byte)| {
-                            *byte as i64
-                                == Fixnum::as_i64(Vector::ref_heap(env, **src, index).unwrap())
+                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
                         })
                     }),
-                    IndirectType::Char(string) => tag_vec
+                    VectorImageType::Char(string) => tag_vec
                         .iter()
                         .find(|src| *string == Vector::as_string(env, **src)),
-                    IndirectType::Fixnum(i64_vec) => tag_vec.iter().find(|src| {
+                    VectorImageType::Fixnum(i64_vec) => tag_vec.iter().find(|src| {
                         i64_vec.iter().enumerate().all(|(index, fixnum)| {
-                            *fixnum == Fixnum::as_i64(Vector::ref_heap(env, **src, index).unwrap())
+                            *fixnum == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
                         })
                     }),
-                    IndirectType::Float(float_vec) => tag_vec.iter().find(|src| {
+                    VectorImageType::Float(float_vec) => tag_vec.iter().find(|src| {
                         float_vec.iter().enumerate().all(|(index, float)| {
-                            *float
-                                == Float::as_f32(env, Vector::ref_heap(env, **src, index).unwrap())
+                            *float == Float::as_f32(env, Vector::ref_(env, **src, index).unwrap())
                         })
                     }),
                     _ => panic!(),
@@ -215,7 +218,7 @@ pub trait Core<'a> {
     fn as_string(_: &Env, _: Tag) -> String;
     fn gc_ref(_: &mut Gc, _: &Env, _: Tag, _: usize) -> Option<Tag>;
     fn read(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
-    fn ref_heap(_: &Env, _: Tag, _: usize) -> Option<Tag>;
+    fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
     fn view(_: &Env, _: Tag) -> Tag;
 }
 
@@ -236,8 +239,8 @@ impl<'a> Core<'a> for Vector {
         match tag.type_of() {
             Type::Vector => match tag {
                 Tag::Direct(dir) => match dir.dtype() {
-                    DirectType::ByteVector => str::from_utf8(&dir.data().to_le_bytes()).unwrap()
-                        [..dir.info() as usize]
+                    DirectType::String => str::from_utf8(&dir.data().to_le_bytes()).unwrap()
+                        [..dir.ext() as usize]
                         .to_string(),
                     _ => panic!(),
                 },
@@ -270,23 +273,29 @@ impl<'a> Core<'a> for Vector {
 
                     Some(ch.into())
                 }
-                Tag::Indirect(_) => IndirectVector::gc_ref(gc, vector, index),
+                Tag::Indirect(_) => VecImageType::gc_ref(gc, vector, index),
             },
-            _ => {
-                panic!()
-            }
+            _ => panic!(),
         }
     }
 
-    fn ref_heap(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
+    fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         match vector.type_of() {
             Type::Vector => match vector {
-                Tag::Direct(_direct) => {
-                    let ch: char = vector.data(env).to_le_bytes()[index].into();
+                Tag::Direct(direct) => match direct.dtype() {
+                    DirectType::String => {
+                        let ch: char = vector.data(env).to_le_bytes()[index].into();
 
-                    Some(ch.into())
-                }
-                Tag::Indirect(_) => IndirectVector::ref_heap(env, vector, index),
+                        Some(ch.into())
+                    }
+                    DirectType::ByteVec => {
+                        let byte: u8 = vector.data(env).to_le_bytes()[index];
+
+                        Some(byte.into())
+                    }
+                    _ => panic!(),
+                },
+                Tag::Indirect(_) => VecImageType::ref_(env, vector, index),
             },
             _ => {
                 panic!()
@@ -652,7 +661,7 @@ impl CoreFunction for Vector {
             ));
         }
 
-        fp.value = match Self::ref_heap(env, vector, nth as usize) {
+        fp.value = match Self::ref_(env, vector, nth as usize) {
             Some(nth) => nth,
             None => panic!(),
         };
@@ -702,10 +711,10 @@ impl<'a> Iterator for VectorIter<'a> {
         if self.index >= Vector::length(self.env, self.vec) {
             None
         } else {
-            let el = Vector::ref_heap(self.env, self.vec, self.index);
+            let el = Vector::ref_(self.env, self.vec, self.index).unwrap();
             self.index += 1;
 
-            Some(el.unwrap())
+            Some(el)
         }
     }
 }

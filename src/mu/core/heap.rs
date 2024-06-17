@@ -18,10 +18,10 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
         function::{Core as _, Function},
-        indirect_vector::Core as _,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 

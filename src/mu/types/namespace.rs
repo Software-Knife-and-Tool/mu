@@ -6,7 +6,7 @@ use {
     crate::{
         core::{
             apply::Core as _,
-            direct::{DirectInfo, DirectTag, DirectType, ExtType},
+            direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -15,9 +15,9 @@ use {
         streams::write::Core as _,
         types::{
             cons::{Cons, Core as _},
-            indirect_vector::Core as _,
             symbol::{Core as _, Symbol, UNBOUND},
             vector::{Core as _, Vector},
+            vector_image::Core as _,
         },
     },
     std::{collections::HashMap, str},
@@ -48,7 +48,7 @@ impl Namespace {
 
         let ns = DirectTag::to_direct(
             len as u64,
-            DirectInfo::ExtType(ExtType::Namespace),
+            DirectExt::ExtType(ExtType::Namespace),
             DirectType::Ext,
         );
 
@@ -82,7 +82,7 @@ impl Namespace {
 
         let ns = DirectTag::to_direct(
             len as u64,
-            DirectInfo::ExtType(ExtType::Namespace),
+            DirectExt::ExtType(ExtType::Namespace),
             DirectType::Ext,
         );
 

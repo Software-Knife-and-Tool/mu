@@ -8,7 +8,7 @@ use {
     crate::{
         core::{
             apply::Core as _,
-            direct::{DirectInfo, DirectTag, DirectType, ExtType},
+            direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -21,10 +21,10 @@ use {
             fixnum::{Core as _, Fixnum},
             float::{Core as _, Float},
             function::{Core as _, Function},
-            indirect_vector::Core as _,
             struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
+            vector_image::Core as _,
         },
     },
     num_enum::TryFromPrimitive,
@@ -80,7 +80,7 @@ pub enum TagType {
 lazy_static! {
     static ref NIL: Tag = DirectTag::to_direct(
         (('l' as u64) << 16) | (('i' as u64) << 8) | ('n' as u64),
-        DirectInfo::Length(3),
+        DirectExt::Length(3),
         DirectType::Keyword
     );
     pub static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
@@ -183,10 +183,11 @@ impl Tag {
         } else {
             match self {
                 Tag::Direct(direct) => match direct.dtype() {
-                    DirectType::ByteVector => Type::Vector,
-                    DirectType::String => Type::Char,
+                    DirectType::ByteVec => Type::Vector,
+                    DirectType::String => Type::Vector,
                     DirectType::Keyword => Type::Keyword,
-                    DirectType::Ext => match ExtType::try_from(direct.info()) {
+                    DirectType::Ext => match ExtType::try_from(direct.ext()) {
+                        Ok(ExtType::Char) => Type::Char,
                         Ok(ExtType::Cons) => Type::Cons,
                         Ok(ExtType::Fixnum) => Type::Fixnum,
                         Ok(ExtType::Float) => Type::Float,
@@ -247,7 +248,7 @@ impl CoreFunction for Tag {
 
                 for index in (0..8).rev() {
                     u64_ <<= 8;
-                    u64_ |= match Vector::ref_heap(env, arg, index as usize) {
+                    u64_ |= match Vector::ref_(env, arg, index as usize) {
                         Some(byte) => Fixnum::as_i64(byte) as u64,
                         None => panic!(),
                     }

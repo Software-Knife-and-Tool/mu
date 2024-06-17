@@ -5,7 +5,7 @@
 use crate::{
     core::{
         apply::Core as _,
-        direct::{DirectInfo, DirectTag, DirectType},
+        direct::{DirectExt, DirectTag, DirectType},
         env::Env,
         exception::{self, Condition, Exception},
         lib::Lib,
@@ -16,10 +16,10 @@ use crate::{
     types::{
         core_stream::{Core as _, Stream},
         fixnum::{Core as _, Fixnum},
-        indirect_vector::Core as _,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
+        vector_image::Core as _,
     },
 };
 
@@ -33,7 +33,7 @@ use crate::{
 //
 
 lazy_static! {
-    pub static ref EOL: Tag = DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword);
+    pub static ref EOL: Tag = DirectTag::to_direct(0, DirectExt::Length(0), DirectType::Keyword);
 }
 
 pub trait Core {

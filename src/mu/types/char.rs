@@ -4,7 +4,7 @@
 //! env character class
 use crate::{
     core::{
-        direct::{DirectInfo, DirectTag, DirectType},
+        direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,
         exception,
         types::Tag,
@@ -12,8 +12,8 @@ use crate::{
     streams::write::Core as _,
     types::{
         core_stream::{Core as _, Stream},
-        indirect_vector::Core as _,
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 
@@ -25,7 +25,11 @@ pub enum Char {
 
 impl From<char> for Tag {
     fn from(ch: char) -> Tag {
-        DirectTag::to_direct(ch as u64, DirectInfo::Length(1), DirectType::String)
+        DirectTag::to_direct(
+            ch as u64,
+            DirectExt::ExtType(ExtType::Char),
+            DirectType::Ext,
+        )
     }
 }
 
