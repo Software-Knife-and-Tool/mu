@@ -68,7 +68,7 @@ lazy_static! {
         ( "poll",    1, Future::mu_future_poll ),
         ( "force",   1, Future::mu_future_force ),
         // exceptions
-        ( "unwind-protect",  2, Exception::mu_unwind_protect ),
+        ( "with-exception",  2, Exception::mu_with_exception ),
         ( "raise",           2, Exception::mu_raise ),
         // frames
         ( "frame-pop",  1, Frame::mu_fr_pop ),

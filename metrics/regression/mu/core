@@ -20,4 +20,4 @@
 (mu:view 'a)
 (mu:view 'mu:eq)
 (mu:view mu:*standard-input*)
-(mu:unwind-protect (:lambda (cond obj) cond) (:lambda () (mu:quotient 1 1)))
+(mu:with-exception (:lambda (cond obj) cond) (:lambda () (mu:quotient 1 1)))
