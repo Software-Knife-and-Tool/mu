@@ -17,10 +17,10 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
         function::Function,
-        indirect_vector::Core as _,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
+        vector_image::Core as _,
     },
 };
 
@@ -120,7 +120,7 @@ impl Future {
     fn is_future_complete(env: &Env, future: Tag) -> bool {
         let futures_ref = block_on(LIB.futures.read());
 
-        let index = Vector::ref_heap(env, Struct::vector(env, future), 0).unwrap();
+        let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
 
         let join_id = match &futures_ref.get(&(Fixnum::as_i64(index) as u64)).unwrap() {
             Future::Eager(join_id) => join_id,
@@ -146,7 +146,7 @@ impl CoreFunction for Future {
 
         fp.value = if Struct::stype(env, future).eq_(&Symbol::keyword("future")) {
             let mut futures_ref = block_on(LIB.futures.write());
-            let index = Vector::ref_heap(env, Struct::vector(env, future), 0).unwrap();
+            let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
 
             match futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap() {
                 Future::Eager(join_id) => join_id.join().unwrap(),

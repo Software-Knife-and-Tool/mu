@@ -16,8 +16,8 @@ use crate::{
     },
     types::{
         cons::{Cons, Core as _},
-        indirect_vector::Core as _,
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 

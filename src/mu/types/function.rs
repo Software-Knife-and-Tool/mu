@@ -13,9 +13,9 @@ use crate::{
     streams::write::Core as _,
     types::{
         fixnum::Fixnum,
-        indirect_vector::Core as _,
         namespace::Namespace,
         vector::{Core as _, Vector},
+        vector_image::Core as _,
     },
 };
 
@@ -145,8 +145,8 @@ impl Core for Function {
                         ("lambda".to_string(), format!("{:x}", form.as_u64()))
                     }
                     Type::Vector => {
-                        let ns = Vector::ref_heap(env, form, 0).unwrap();
-                        let name = Vector::ref_heap(env, form, 1).unwrap();
+                        let ns = Vector::ref_(env, form, 0).unwrap();
+                        let name = Vector::ref_(env, form, 1).unwrap();
 
                         (
                             Namespace::name(env, ns).unwrap(),

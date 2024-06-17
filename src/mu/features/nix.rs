@@ -13,10 +13,10 @@ use crate::{
     features::feature::Feature,
     types::{
         cons::{Cons, Core as _},
-        indirect_vector::Core as _,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 use nix::{self};

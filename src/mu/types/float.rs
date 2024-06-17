@@ -6,7 +6,7 @@ use {
     crate::{
         core::{
             apply::Core as _,
-            direct::{DirectInfo, DirectTag, DirectType, ExtType},
+            direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -14,9 +14,9 @@ use {
         },
         streams::write::Core as _,
         types::{
-            indirect_vector::Core as _,
             symbol::{Core as _, Symbol},
             vector::Vector,
+            vector_image::Core as _,
         },
     },
     std::ops::{Add, Div, Mul, Sub},
@@ -33,7 +33,7 @@ impl From<f32> for Tag {
         let bytes = fl.to_le_bytes();
         DirectTag::to_direct(
             u32::from_le_bytes(bytes) as u64,
-            DirectInfo::ExtType(ExtType::Float),
+            DirectExt::ExtType(ExtType::Float),
             DirectType::Ext,
         )
     }

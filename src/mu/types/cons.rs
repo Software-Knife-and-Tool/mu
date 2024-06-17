@@ -5,7 +5,7 @@
 use crate::{
     core::{
         apply::Core as _,
-        direct::{DirectInfo, DirectTag, DirectType, ExtType},
+        direct::{DirectTag, DirectType, ExtType},
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -17,9 +17,9 @@ use crate::{
     streams::{read::Core as _, write::Core as _},
     types::{
         fixnum::{Core as _, Fixnum},
-        indirect_vector::Core as _,
         symbol::Symbol,
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 
@@ -187,7 +187,7 @@ impl Core for Cons {
     fn heap_size(_: &Env, cons: Tag) -> usize {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.info().try_into() {
+                DirectType::Ext => match dtag.ext().try_into() {
                     Ok(ExtType::Cons) => std::mem::size_of::<DirectTag>(),
                     _ => panic!(),
                 },
@@ -215,7 +215,7 @@ impl Core for Cons {
     }
 
     fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
-        let dot = DirectTag::to_direct('.' as u64, DirectInfo::Length(1), DirectType::ByteVector);
+        let dot = Vector::from(".").evict(env);
 
         let car = env.read_stream(stream, false, Tag::nil(), true)?;
 

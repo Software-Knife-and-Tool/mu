@@ -16,9 +16,9 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         core_stream::{Core as _, Stream},
-        indirect_vector::Core as _,
         symbol::{Core as _, Symbol},
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 

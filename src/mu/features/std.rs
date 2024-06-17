@@ -19,8 +19,8 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
         float::Float,
-        indirect_vector::Core as _,
         vector::{Core as _, Vector},
+        vector_image::Core as _,
     },
 };
 

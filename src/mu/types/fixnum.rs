@@ -5,7 +5,7 @@
 use crate::{
     core::{
         apply::Core as _,
-        direct::{DirectInfo, DirectTag, DirectType, ExtType},
+        direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,
         exception::{self, Condition, Exception, Result},
         frame::Frame,
@@ -14,9 +14,9 @@ use crate::{
     streams::write::Core as _,
     types::{
         cons::{Cons, Core as _},
-        indirect_vector::Core as _,
         symbol::{Core as _, Symbol},
         vector::Vector,
+        vector_image::Core as _,
     },
 };
 
@@ -31,7 +31,7 @@ impl From<u32> for Tag {
     fn from(fx: u32) -> Tag {
         DirectTag::to_direct(
             ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
-            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
     }
@@ -42,7 +42,7 @@ impl From<u16> for Tag {
     fn from(fx: u16) -> Tag {
         DirectTag::to_direct(
             ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
-            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
     }
@@ -53,7 +53,7 @@ impl From<u8> for Tag {
     fn from(fx: u8) -> Tag {
         DirectTag::to_direct(
             ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
-            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
     }
@@ -107,7 +107,7 @@ impl Core for Fixnum {
 
                 DirectTag::to_direct(
                     (i64_ & (2_i64.pow(56) - 1)) as u64,
-                    DirectInfo::ExtType(ExtType::Fixnum),
+                    DirectExt::ExtType(ExtType::Fixnum),
                     DirectType::Ext,
                 )
             }
@@ -121,7 +121,7 @@ impl Core for Fixnum {
 
         DirectTag::to_direct(
             (fx & (2_i64.pow(56) - 1)) as u64,
-            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
     }
@@ -137,7 +137,7 @@ impl Core for Fixnum {
 
         Ok(DirectTag::to_direct(
             (fx & (2_i64.pow(56) - 1)) as u64,
-            DirectInfo::ExtType(ExtType::Fixnum),
+            DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         ))
     }
@@ -152,7 +152,7 @@ impl Core for Fixnum {
 
                 Ok(DirectTag::to_direct(
                     ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
-                    DirectInfo::ExtType(ExtType::Fixnum),
+                    DirectExt::ExtType(ExtType::Fixnum),
                     DirectType::Ext,
                 ))
             }

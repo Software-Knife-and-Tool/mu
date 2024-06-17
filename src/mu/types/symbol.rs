@@ -6,7 +6,7 @@ use {
     crate::{
         core::{
             apply::Core as _,
-            direct::{DirectInfo, DirectTag, DirectType},
+            direct::{DirectExt, DirectTag, DirectType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -19,9 +19,9 @@ use {
         streams::write::Core as _,
         types::{
             core_stream::{Core as _, Stream},
-            indirect_vector::Core as _,
             namespace::Namespace,
             vector::{Core as _, Vector},
+            vector_image::Core as _,
         },
     },
     std::str,
@@ -42,7 +42,7 @@ pub struct SymbolImage {
 
 lazy_static! {
     pub static ref UNBOUND: Tag =
-        DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword);
+        DirectTag::to_direct(0, DirectExt::Length(0), DirectType::Keyword);
 }
 
 impl Symbol {
@@ -123,8 +123,8 @@ impl Symbol {
             Type::Null | Type::Keyword => match symbol {
                 Tag::Direct(dir) => DirectTag::to_direct(
                     dir.data(),
-                    DirectInfo::Length(dir.info() as usize),
-                    DirectType::ByteVector,
+                    DirectExt::Length(dir.ext() as usize),
+                    DirectType::String,
                 ),
                 _ => panic!(),
             },
@@ -146,8 +146,8 @@ impl Symbol {
             Type::Null | Type::Keyword => match symbol {
                 Tag::Direct(dir) => DirectTag::to_direct(
                     dir.data(),
-                    DirectInfo::Length(dir.info() as usize),
-                    DirectType::ByteVector,
+                    DirectExt::Length(dir.ext() as usize),
+                    DirectType::String,
                 ),
                 _ => panic!(),
             },
@@ -258,7 +258,7 @@ impl Core for Symbol {
         }
         DirectTag::to_direct(
             u64::from_le_bytes(data),
-            DirectInfo::Length(len),
+            DirectExt::Length(len),
             DirectType::Keyword,
         )
     }

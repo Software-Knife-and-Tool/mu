@@ -19,7 +19,7 @@ pub struct DirectTag {
     pub tag: TagType,
     #[bits = 2]
     pub dtype: DirectType,
-    pub info: B3,
+    pub ext: B3,
     pub data: B56,
 }
 
@@ -32,7 +32,7 @@ impl Default for DirectTag {
 #[derive(BitfieldSpecifier, Copy, Clone, Eq, PartialEq)]
 pub enum DirectType {
     Ext = 0,
-    ByteVector = 1,
+    ByteVec = 1,
     Keyword = 2,
     String = 3,
 }
@@ -41,14 +41,15 @@ pub enum DirectType {
 #[repr(u8)]
 pub enum ExtType {
     Fixnum = 0,
-    Float = 1,
-    Cons = 2,
-    Stream = 3,
-    Namespace = 4,
+    Char = 1,
+    Float = 2,
+    Cons = 3,
+    Stream = 4,
+    Namespace = 5,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub enum DirectInfo {
+pub enum DirectExt {
     Length(usize),
     ExtType(ExtType),
 }
@@ -63,8 +64,8 @@ impl DirectTag {
     pub fn length(tag: Tag) -> usize {
         match tag {
             Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::String | DirectType::ByteVector | DirectType::Keyword => {
-                    dtag.info() as usize
+                DirectType::String | DirectType::ByteVec | DirectType::Keyword => {
+                    dtag.ext() as usize
                 }
                 _ => panic!(),
             },
@@ -72,15 +73,15 @@ impl DirectTag {
         }
     }
 
-    pub fn to_direct(data: u64, info: DirectInfo, tag: DirectType) -> Tag {
-        let info: u8 = match info {
-            DirectInfo::Length(size) => size as u8,
-            DirectInfo::ExtType(ext_type) => ext_type as u8,
+    pub fn to_direct(data: u64, ext: DirectExt, tag: DirectType) -> Tag {
+        let ext: u8 = match ext {
+            DirectExt::Length(size) => size as u8,
+            DirectExt::ExtType(ext_type) => ext_type as u8,
         };
 
         let dir = DirectTag::new()
             .with_data(data)
-            .with_info(info)
+            .with_ext(ext)
             .with_dtype(tag)
             .with_tag(TagType::Direct);
 
@@ -114,7 +115,7 @@ impl DirectTag {
         Self::sext_from_tag(cdr).map(|cdr_| {
             Self::to_direct(
                 (car_ as u64) << 28 | cdr_ as u64,
-                DirectInfo::ExtType(ExtType::Cons),
+                DirectExt::ExtType(ExtType::Cons),
                 DirectType::Ext,
             )
         })
@@ -123,7 +124,7 @@ impl DirectTag {
     pub fn car(cons: Tag) -> Tag {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.info().try_into() {
+                DirectType::Ext => match dtag.ext().try_into() {
                     Ok(ExtType::Cons) => {
                         let mask_32: u64 = 0xffffffff;
                         let mut u64_: u64 = dtag.data() >> 28;
@@ -146,7 +147,7 @@ impl DirectTag {
     pub fn cdr(cons: Tag) -> Tag {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.info().try_into() {
+                DirectType::Ext => match dtag.ext().try_into() {
                     Ok(ExtType::Cons) => {
                         let mask_28: u64 = 0x0fffffff;
                         let mask_32: u64 = 0xffffffff;

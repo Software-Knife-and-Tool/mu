@@ -6,7 +6,7 @@
 use {
     crate::{
         core::{
-            direct::{DirectInfo, DirectTag, DirectType, ExtType},
+            direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             lib::{Lib, LIB},
@@ -130,7 +130,7 @@ impl Core for SystemStream {
 
                 Ok(DirectTag::to_direct(
                     index as u64,
-                    DirectInfo::ExtType(ExtType::Stream),
+                    DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,
                 ))
             }
@@ -181,7 +181,7 @@ impl Core for SystemStream {
 
                 Ok(DirectTag::to_direct(
                     index as u64,
-                    DirectInfo::ExtType(ExtType::Stream),
+                    DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,
                 ))
             }
@@ -222,7 +222,7 @@ impl Core for SystemStream {
 
                 Ok(DirectTag::to_direct(
                     index as u64,
-                    DirectInfo::ExtType(ExtType::Stream),
+                    DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,
                 ))
             }
