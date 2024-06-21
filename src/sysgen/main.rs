@@ -41,6 +41,12 @@ pub fn main() {
 
     let command = argv[1].as_str();
 
+    match command {
+        "--help" => Options::usage(),
+        "--version" => Options::version(),
+        _ => (),
+    }
+
     let sysgen = match Options::with_options(&argv) {
         Some(opts) => {
             let workspace = match opts.opt_value("workspace") {
@@ -163,8 +169,6 @@ pub fn main() {
                 }
             }
         }
-        "--help" => Options::usage(),
-        "--version" => Options::version(),
         _ => {
             eprintln!("sysgen: unimplemented command {command}");
             std::process::exit(-1)
