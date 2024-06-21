@@ -3,7 +3,7 @@
 
 #![allow(dead_code)]
 use {
-    crate::crate_::Crate,
+    crate::crates::Crate,
     public_api::{tokens::Token, PublicItem},
     std::{
         cell::RefCell,
@@ -13,22 +13,22 @@ use {
     },
 };
 
-pub struct SymbolTable {
-    pub symbols: RefCell<Vec<SymbolDescription>>,
+pub struct Symbols {
+    pub symbols: RefCell<Vec<Symbol>>,
 }
 
 #[derive(Debug)]
-pub struct SymbolDescription {
+pub struct Symbol {
     pub type_: String,
     pub name: String,
     pub value: String,
     pub qualifiers: String,
 }
 
-impl SymbolTable {
+impl Symbols {
     pub fn new(crate_: &Crate) -> Self {
-        let symbol_table = SymbolTable {
-            symbols: RefCell::new(Vec::<SymbolDescription>::new()),
+        let symbol_table = Symbols {
+            symbols: RefCell::new(Vec::<Symbol>::new()),
         };
 
         for item in crate_.symbols.items() {
@@ -41,8 +41,8 @@ impl SymbolTable {
         symbol_table
     }
 
-    fn parse_item(item: &PublicItem) -> SymbolDescription {
-        let mut symbol = SymbolDescription {
+    fn parse_item(item: &PublicItem) -> Symbol {
+        let mut symbol = Symbol {
             type_: "".to_string(),
             name: "".to_string(),
             value: "".to_string(),

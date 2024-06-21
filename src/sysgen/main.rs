@@ -4,7 +4,7 @@
 #[rustfmt::skip]
 use {
     crate::{
-        crate_::Crate,
+        crates::Crate,
         options::{Options, Opt},
         sysgen::Sysgen,
     },
@@ -16,9 +16,9 @@ use {
     },
 };
 
-mod crate_;
+mod crates;
 mod options;
-mod symbol_table;
+mod symbols;
 mod sysgen;
 
 pub fn main() {

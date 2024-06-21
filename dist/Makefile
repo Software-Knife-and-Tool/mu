@@ -5,9 +5,10 @@
 
 VERSION != grep VERSION: ../src/mu/core/lib.rs | sed 's/.* "//' | sed 's/".*//'
 
-BASE = mu
+BASE = ./mu
 DIST = ../dist
 DOCS = ../doc
+LIB = ../lib
 SRC = ../src
 
 dist:
@@ -24,8 +25,8 @@ dist:
 
 	@make -f mu.mk mu
 
-	@install -m 644 $(DIST)/prelude.l $(BASE)/lib
-	@install -m 644 $(SRC)/lib/mu.l $(BASE)/lib
+#	@install -m 644 $(DIST)/prelude.l $(BASE)/lib
+	@install -m 644 $(LIB)/mu.l $(BASE)/lib
 
 	@install -m 755 ./sysgen $(BASE)/bin
 	@install -m 644 -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
@@ -34,7 +35,7 @@ dist:
 	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
 
-	@install -m 755 $(SRC)/bin/mu.sh $(BASE)/bin/mu
+	@install -m 755 $(LIB)/mu.sh $(BASE)/bin/mu
 
 	@install -d $(BASE)/doc/html
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc

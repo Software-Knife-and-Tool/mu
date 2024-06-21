@@ -3,6 +3,7 @@
 #
 .PHONY: mu prelude
 SRC = ../src
+LIB = ../lib
 
 # prelude.l needs to be first
 PRELUDE = \
@@ -38,11 +39,10 @@ PRELUDE = \
 	vector.l
 
 mu:
-	@cp -r $(SRC)/codegen mu/lib
-	@cp -r $(SRC)/mu mu/lib
-	@cp -r $(SRC)/prelude mu/lib
+	@cp -r $(LIB)/codegen mu/lib
+	@cp -r $(LIB)/prelude mu/lib
 	@rm -f prelude.l
 	@for prelude in $(PRELUDE); do		\
-	    cat $(SRC)/prelude/$$prelude >> prelude.l;	\
+	    cat $(LIB)/prelude/$$prelude >> prelude.l;	\
 	done
 	@cp prelude.l mu/lib

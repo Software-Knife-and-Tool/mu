@@ -4,9 +4,9 @@
 #[rustfmt::skip]
 use {
     crate::{
-        crate_::Crate,
+        crates::Crate,
         options::{Options},
-        symbol_table::SymbolTable,
+        symbols::Symbols,
     },
 };
 
@@ -25,7 +25,7 @@ impl Sysgen {
     pub fn generate(&self, crate_: &Crate) {
         crate_.gencode(&self.options).unwrap();
 
-        SymbolTable::new(crate_)
+        Symbols::new(crate_)
             .write(&format!("{}.sysgen/{}.SYMS", crate_.sysgen, crate_.name,))
             .unwrap()
     }
