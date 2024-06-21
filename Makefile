@@ -45,8 +45,8 @@ emacs: tags
 	@echo '((nil . ((compile-command . "make -C ~/projects/mu release"))))' > .dir-locals.el
 
 release:
-	@cargo build --release --bin mu-bindgen
-	@cp target/release/mu-bindgen dist
+	@cargo build --release --bin sysgen
+	@cp target/release/sysgen dist
 	@cargo build --release --bin mu-exec
 	@cp target/release/mu-exec dist
 	@cargo build --release --bin mu-sys
