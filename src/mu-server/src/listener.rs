@@ -2,18 +2,14 @@
 //  SPDX-License-Identifier: MIT
 
 //! runtime loader/listener
-extern crate env;
+use mu::{Env, Condition};
 
-use env::{Condition};
-
-pub fn _listener(system: &System, _config: &str) {
-    let env = system.env();
-
-    let eval_string = system
-        .eval(&"(env:open :string :output \"\")".to_string())
+pub fn _listener(env: &Env, _config: &str) {    
+    let eval_string = env
+        .eval(&"(mu:open :string :output \"\")".to_string())
         .unwrap();
 
-    let eof_value = system.eval(&"(env:symbol \"eof\")".to_string()).unwrap();
+    let eof_value = env.eval(&"(env:symbol \"eof\")".to_string()).unwrap();
 
     loop {
         match env.read(env.std_in(), true, eof_value) {
@@ -32,7 +28,7 @@ pub fn _listener(system: &System, _config: &str) {
                         Err(e) => {
                             eprint!(
                                 "eval exception raised by {}, {:?} condition on ",
-                                system.write(e.source, true),
+                                env.write(e.source, true),
                                 e.condition
                             );
                             env.write(e.object, true, env.err_out()).unwrap();
@@ -42,7 +38,7 @@ pub fn _listener(system: &System, _config: &str) {
                     Err(e) => {
                         eprint!(
                             "compile exception raised by {}, {:?} condition on ",
-                            system.write(e.source, true),
+                            env.write(e.source, true),
                             e.condition
                         );
                         env.write(e.object, true, env.err_out()).unwrap();
@@ -56,7 +52,7 @@ pub fn _listener(system: &System, _config: &str) {
                 } else {
                     eprint!(
                         "reader exception raised by {}, {:?} condition on ",
-                        system.write(e.source, true),
+                        env.write(e.source, true),
                         e.condition
                     );
                     env.write(e.object, true, env.err_out()).unwrap();

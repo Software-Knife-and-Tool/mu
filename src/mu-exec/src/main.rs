@@ -9,8 +9,6 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-extern crate core;
-
 #[allow(unused_imports)]
 use {
     elf::{

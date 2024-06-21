@@ -2,12 +2,11 @@
 //  SPDX-License-Identifier: MIT
 
 //! runtime loader/listener
-extern crate env;
-
 use {
     futures::executor::block_on,
     getopt::Opt,
-    env::{Env},
+    mu::{Env},
+    oports::self,
     std::net::{SocketAddr, ToSocketAddrs},
 };
 
@@ -120,33 +119,33 @@ impl ServerConfig {
                     }
                 }
 
-                let system = match System::config(&config) {
-                    Some(config) => System::new(&config),
+                let env = match Env::config(config) {
+                    Some(config) => Env::new(config, None),
                     None => {
-                        eprintln!("server: config error {}", config);
+                        eprintln!("option: configuration error");
                         std::process::exit(-1)
                     }
                 };
-
+ 
                 for opt in opts {
                     match opt.0 {
                         OptType::Config => (),
                         OptType::Ping => ping = true,
                         OptType::Socket => socket = opt.1.to_string(),
-                        OptType::Eval => match system.eval(&opt.1) {
+                        OptType::Eval => match env.eval(&opt.1) {
                             Ok(_) => (),
                             Err(e) => {
-                                eprintln!("runtime: error {}, {}", opt.1, system.error(e));
+                                eprintln!("runtime: error {}, {}", opt.1, env.error(e));
                                 std::process::exit(-1);
                             }
                         },
-                        OptType::Load => match system.load(&opt.1) {
+                        OptType::Load => match env.load(&opt.1) {
                             Ok(_) => (),
                             Err(e) => {
                                 eprintln!(
                                     "runtime: failed to load {}, {}",
                                     &opt.1,
-                                    system.error(e)
+                                    env.error(e)
                                 );
                                 std::process::exit(-1);
                             }

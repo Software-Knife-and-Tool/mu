@@ -45,23 +45,21 @@ emacs: tags
 	@echo '((nil . ((compile-command . "make -C ~/projects/mu release"))))' > .dir-locals.el
 
 release:
-	@cargo build --release --bin sysgen
+	@cargo build --release --workspace
 	@cp target/release/sysgen dist
-	@cargo build --release --bin mu-exec
 	@cp target/release/mu-exec dist
-	@cargo build --release --bin mu-sys
 	@cp target/release/mu-sys dist
-	@cargo build --release --bin mu-ld
-	@cp target/release/mu-ld dist
+#	@cp target/release/mu-ld dist
+#	@cp target/release/mu-server dist
 	@make dist --no-print-directory
 
 debug:
-	@cargo build --bin mu-exec
+	@cargo build --workspace
+	@cp target/release/sysgen dist
 	@cp target/release/mu-exec dist
-	@cargo build --bin mu-sys
 	@cp target/release/mu-sys dist
-	@cargo build --bin mu-ld
-	@cp target/release/mu-ld dist
+#	@cp target/release/mu-ld dist
+#	@cp target/release/mu-server dist
 	@make dist --no-print-directory
 
 dist:
