@@ -17,21 +17,24 @@ dist:
 	@install -d $(BASE)/bin
 	@install -d $(BASE)/doc
 	@install -d $(BASE)/lib
-	@install -d $(BASE)/lib/prelude
 	@install -d $(BASE)/lib/codegen
 	@install -d $(BASE)/lib/mu
+	@install -d $(BASE)/lib/prelude
+	@install -d $(BASE)/lib/sysgen
 
 	@make -f mu.mk mu
 
 	@install -m 644 $(DIST)/prelude.l $(BASE)/lib
 	@install -m 644 $(SRC)/lib/mu.l $(BASE)/lib
 
-	@install -m 755 ./mu-bindgen $(BASE)/bin
+	@install -m 755 ./sysgen $(BASE)/bin
+	@install -m 644 -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
+
 	@install -m 755 ./mu-exec $(BASE)/bin
 	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
+
 	@install -m 755 $(SRC)/bin/mu.sh $(BASE)/bin/mu
-	@install -m 755 $(SRC)/bin/bind-crate.sh $(BASE)/bin/bind-crate
 
 	@install -d $(BASE)/doc/html
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
@@ -41,4 +44,4 @@ dist:
 	@rm -rf $(BASE)
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) $(MU_EXEC) $(MU_LD) $(MU_SYS) $(MU_SERVER) prelude.l
+	@rm -rf $(BASE)-*.tgz $(BASE) mu-exec mu-ld mu-exec sysgen prelude.l

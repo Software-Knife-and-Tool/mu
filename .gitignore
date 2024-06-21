@@ -3,7 +3,7 @@
 TAGS
 Cargo.lock
 dist/mu*.tgz
-dist/mu-bindgen
+dist/sysgen
 dist/mu-exec
 dist/mu-ld
 dist/mu-server
