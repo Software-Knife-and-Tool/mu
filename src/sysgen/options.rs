@@ -23,18 +23,19 @@ lazy_static! {
 
 impl Options {
     pub fn version() {
-        println!("sysgen: 0.0.2");
+        println!("sysgen: 0.0.3");
         std::process::exit(0)
     }
 
     pub fn usage() {
-        println!("sysgen: 0.0.2: command [options] crate...");
-        println!("command:             [clone generate image toc]");
-        println!("-?                   usage message");
+        println!("Usage: sysgen command [option]... crate...");
         println!();
-        println!("--help               usage message");
-        println!("--verbose            verbose operation");
-        println!("--version            print version and exit");
+        println!("  command:             [clone generate image toc]");
+        println!("  -?                   usage message");
+        println!();
+        println!("  --help               usage message");
+        println!("  --verbose            verbose operation");
+        println!("  --version            print version and exit");
 
         std::process::exit(0);
     }
