@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 use {
-    crate::{options::Options, symbol_table::SymbolTable},
+    crate::{options::Options, symbols::Symbols},
     capitalize::Capitalize,
     json::{self, JsonValue},
     public_api::PublicApi,
@@ -65,11 +65,11 @@ impl Crate {
         })
     }
 
-    fn prototypes(&self, _stab: &SymbolTable) -> String {
+    fn prototypes(&self, _stab: &Symbols) -> String {
         String::new()
     }
 
-    fn functions(&self, _stab: &SymbolTable) -> String {
+    fn functions(&self, _stab: &Symbols) -> String {
         String::new()
     }
 
@@ -85,7 +85,7 @@ impl Crate {
             Err(_) => panic!(),
         }
 
-        let stab = SymbolTable::new(self);
+        let stab = Symbols::new(self);
 
         match engine
             .template("ffi")
