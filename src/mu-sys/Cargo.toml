@@ -1,0 +1,11 @@
+[package]
+name = "mu-sys"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+getopt = "1.1.3"
+mu = { path = "../.." }
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+tikv-jemallocator = "0.5.4"
