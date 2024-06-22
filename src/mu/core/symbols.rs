@@ -85,11 +85,11 @@ lazy_static! {
         ( "logor",   2, Fixnum::mu_logor ),
         ( "lognot",  1, Fixnum::mu_lognot ),
         // floats
-        ( "fl-add",  2, Float::mu_fladd ),
-        ( "fl-sub",  2, Float::mu_flsub ),
-        ( "fl-lt",   2, Float::mu_fllt ),
-        ( "fl-mul",  2, Float::mu_flmul ),
-        ( "fl-div",  2, Float::mu_fldiv ),
+        ( "fsum",         2, Float::mu_fladd ),
+        ( "fdifference",  2, Float::mu_flsub ),
+        ( "fless-than",   2, Float::mu_fllt ),
+        ( "fproduct",     2, Float::mu_flmul ),
+        ( "fquotient",    2, Float::mu_fldiv ),
         // namespaces
         ( "find",      2, Namespace::mu_find ),
         ( "find-ns",   1, Namespace::mu_find_ns ),
