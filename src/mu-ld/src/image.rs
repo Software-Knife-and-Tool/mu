@@ -2,14 +2,11 @@
 //  SPDX-License-Identifier: MIT
 
 //! image mechanics
-#[allow(unused_imports)]
-use crate::{
-    mu::{Condition, Env, Result, Tag},
-    reader::Reader,
-    writer::Writer,
+use {
+    crate::{reader::Reader, writer::Writer},
+    json::{self, object},
+    mu::Env,
 };
-
-use json::{self, object};
 
 pub struct Image {
     pub magic: String,

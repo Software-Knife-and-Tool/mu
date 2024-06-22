@@ -5,8 +5,7 @@
 use {
     futures::executor::block_on,
     getopt::Opt,
-    mu::{Env},
-    oports::self,
+    mu::Env,
     std::net::{SocketAddr, ToSocketAddrs},
 };
 
@@ -119,23 +118,23 @@ impl ServerConfig {
                     }
                 }
 
-                let env = match Env::config(config) {
+                let env = match Env::config(Some(config)) {
                     Some(config) => Env::new(config, None),
                     None => {
                         eprintln!("option: configuration error");
                         std::process::exit(-1)
                     }
                 };
- 
+
                 for opt in opts {
                     match opt.0 {
                         OptType::Config => (),
                         OptType::Ping => ping = true,
                         OptType::Socket => socket = opt.1.to_string(),
-                        OptType::Eval => match env.eval(&opt.1) {
+                        OptType::Eval => match env.eval_str(&opt.1) {
                             Ok(_) => (),
                             Err(e) => {
-                                eprintln!("runtime: error {}, {}", opt.1, env.error(e));
+                                eprintln!("runtime: error {}, {}", opt.1, env.exception_string(e));
                                 std::process::exit(-1);
                             }
                         },
@@ -145,7 +144,7 @@ impl ServerConfig {
                                 eprintln!(
                                     "runtime: failed to load {}, {}",
                                     &opt.1,
-                                    env.error(e)
+                                    env.exception_string(e)
                                 );
                                 std::process::exit(-1);
                             }
