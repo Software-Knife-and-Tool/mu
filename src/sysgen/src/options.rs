@@ -1,9 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-
 use lazy_static::lazy_static;
 
-#[rustfmt::skip]
 pub struct Options {
     pub options: Vec<Opt>,
 }
@@ -23,19 +21,19 @@ lazy_static! {
 
 impl Options {
     pub fn version() {
-        println!("sysgen: 0.0.3");
+        println!("sysgen: 0.0.4");
         std::process::exit(0)
     }
 
     pub fn usage() {
-        println!("Usage: sysgen command [option]... crate...");
-        println!();
-        println!("  command:             [clone generate image toc]");
-        println!("  -?                   usage message");
-        println!();
-        println!("  --help               usage message");
-        println!("  --verbose            verbose operation");
-        println!("  --version            print version and exit");
+        println!("Usage: sysgen command [option]... [crate]...");
+        println!("  command:      [init generate image symbols toc]");
+        println!("    init        [option]... [crate]...   ; populate workspace");
+        println!("    bind        [option]...              ; generate bindings");
+        println!("    build       [option]...              ; build image");
+        println!("  --verbose     verbose operation");
+        println!("  -?, --help    print usage message and exit");
+        println!("  --version     print version and exit");
 
         std::process::exit(0);
     }
@@ -52,6 +50,7 @@ impl Options {
         }
     }
 
+    #[allow(dead_code)]
     pub fn opt_value(&self, name: &str) -> Option<String> {
         let bindopt = OPTIONMAP.iter().find(|(tag, _)| *tag == name);
 
@@ -71,7 +70,7 @@ impl Options {
         }
     }
 
-    pub fn with_options(argv: &[String]) -> Option<Options> {
+    pub fn parse(argv: &[String]) -> Option<Options> {
         let mut opts = getopts::Options::new();
         let mut options = Vec::new();
 

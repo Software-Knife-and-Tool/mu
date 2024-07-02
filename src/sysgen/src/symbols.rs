@@ -1,14 +1,16 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-
-#![allow(dead_code)]
+#![allow(unused_imports)]
 use {
-    crate::crates::Crate,
+    crate::{
+        crates::Crate,
+        parser::{Item, Parser},
+    },
     public_api::{tokens::Token, PublicItem},
     std::{
         cell::RefCell,
         fs::File,
-        io::{Error, Write},
+        io::{Error, ErrorKind, Write},
         result::Result,
     },
 };
@@ -19,10 +21,9 @@ pub struct Symbols {
 
 #[derive(Debug)]
 pub struct Symbol {
-    pub type_: String,
-    pub name: String,
-    pub value: String,
-    pub qualifiers: String,
+    pub qualifiers: Option<Vec<Token>>,
+    pub name: Option<Token>,
+    pub item: Option<Item>,
 }
 
 impl Symbols {
@@ -32,48 +33,21 @@ impl Symbols {
         };
 
         for item in crate_.symbols.items() {
-            symbol_table
-                .symbols
-                .borrow_mut()
-                .push(Self::parse_item(item))
+            let item = Self::parse_item(item);
+
+            match item {
+                Err(e) => {
+                    eprintln!("parse error: {e:?}")
+                }
+                Ok(item) => symbol_table.symbols.borrow_mut().push(item),
+            }
         }
 
         symbol_table
     }
 
-    fn parse_item(item: &PublicItem) -> Symbol {
-        let mut symbol = Symbol {
-            type_: "".to_string(),
-            name: "".to_string(),
-            value: "".to_string(),
-            qualifiers: "".to_string(),
-        };
-
-        for qualifier in item.tokens() {
-            if let Token::Qualifier(qualifier) = qualifier {
-                symbol.qualifiers = format!("{} {}", symbol.qualifiers, qualifier)
-            }
-        }
-
-        for token in item.tokens() {
-            match token {
-                Token::Symbol(_symbol) => (),
-                Token::Qualifier(_qualifier) => (),
-                Token::Kind(_kind) => (),
-                Token::Whitespace => (),
-                Token::Identifier(identifier) => symbol.name = identifier.to_string(),
-                Token::Annotation(_annotation) => (),
-                Token::Self_(_self) => (),
-                Token::Function(function) => symbol.value = function.to_string(),
-                Token::Lifetime(_lifetime) => (),
-                Token::Keyword(_keyword) => (),
-                Token::Generic(_generic) => (),
-                Token::Primitive(_primitive) => (),
-                Token::Type(_type_) => (),
-            }
-        }
-
-        symbol
+    fn parse_item(item: &PublicItem) -> Result<Symbol, Error> {
+        <Symbol as Parser>::parse(item)
     }
 
     pub fn write(&self, path: &str) -> Result<(), Error> {

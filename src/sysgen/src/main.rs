@@ -6,29 +6,29 @@ use {
     crate::{
         crates::Crate,
         options::{Options, Opt},
-        sysgen::Sysgen,
+        symbols::Symbols,
     },
     std::process::Command,
     git2::Repository,
     std::{
         fs,
-        path::Path,
+        path::{Path},
     },
 };
 
 mod crates;
+mod item;
 mod options;
+mod parser;
 mod symbols;
-mod sysgen;
 
 pub fn main() {
-    fn fetch(name: &str, path: &str) -> Option<()> {
+    fn fetch(name: &str) -> Option<()> {
         let _output = Command::new("cargo")
-            .current_dir(path)
             .arg("clone")
             .arg(name)
             .output()
-            .expect("failed to execute process");
+            .expect("failed to execute cargo clone for {path}");
 
         Some(())
     }
@@ -47,31 +47,22 @@ pub fn main() {
         _ => (),
     }
 
-    let sysgen = match Options::with_options(&argv) {
-        Some(opts) => {
-            let workspace = match opts.opt_value("workspace") {
-                Some(path) => path,
-                None => "mu".to_string(),
-            };
+    let options = Options::parse(&argv).unwrap();
 
-            Sysgen::new(opts, workspace)
-        }
-        None => std::process::exit(0),
-    };
-
-    let workspace = &sysgen.workspace;
+    let workspace = Path::new("mu");
+    let workspace_path = workspace.display().to_string();
 
     match command {
-        "clone" => {
+        "init" => {
             let url = "https://github.com/Software-Knife-and-Tool/mu";
 
-            if Path::new(workspace).exists() {
-                eprintln!("sysgen: workspace {workspace} already present");
+            if workspace.exists() {
+                eprintln!("sysgen: workspace {workspace:?} already present");
                 std::process::exit(-1)
             }
 
-            if sysgen.options.is_opt("verbose") {
-                println!("sysgen: cloning {url} to {workspace}")
+            if options.is_opt("verbose") {
+                println!("sysgen: cloning {url} to {workspace_path}")
             }
 
             let _repo = match Repository::clone(url, workspace) {
@@ -79,55 +70,47 @@ pub fn main() {
                 Err(e) => panic!("failed to clone: {}", e),
             };
 
-            let sysgen_path = &format!("{workspace}/{}", Sysgen::BINDINGS);
+            for opt in &options.options {
+                if let Opt::Crate(name) = opt {
+                    let crate_sysgen = &format!("{name}.sysgen");
 
-            match std::fs::create_dir(Path::new(sysgen_path)) {
-                Ok(_) => (),
-                Err(e) => {
-                    eprintln!("sysgen: couldn't create bindings directory {e:?}");
+                    if options.is_opt("verbose") {
+                        println!("sysgen: cloning crate {name}")
+                    }
 
-                    std::process::exit(-1)
+                    fetch(name);
+
+                    match std::fs::create_dir(Path::new(crate_sysgen)) {
+                        Ok(_) => (),
+                        Err(e) => {
+                            eprintln!("sysgen: couldn't create {crate_sysgen} directory {e:?}");
+
+                            std::process::exit(-1)
+                        }
+                    }
                 }
             }
         }
-        "generate" => {
-            let options = &sysgen.options;
-
+        "bind" => {
             if !Path::new(workspace).exists() {
                 eprintln!("sysgen: no workspace present");
                 std::process::exit(-1)
             }
 
-            let sysgen_path = &format!("{workspace}/{}", Sysgen::BINDINGS);
-
-            if !Path::new(sysgen_path).exists() {
-                eprintln!("sysgen: no workspace bindings directory present");
-                std::process::exit(-1)
-            }
-
-            for opt in &options.options {
-                if let Opt::Crate(name) = opt {
-                    fetch(name, sysgen_path);
-
-                    let crate_src = &format!("{sysgen_path}/{name}");
-                    let crate_sysgen = &format!("{sysgen_path}/{name}.sysgen");
-
-                    match std::fs::create_dir(Path::new(crate_sysgen)) {
-                        Ok(_) => (),
-                        Err(e) => {
-                            eprintln!("sysgen: couldn't create {name}.sysgen directory {e:?}");
-
-                            std::process::exit(-1)
-                        }
-                    }
-
-                    match Crate::with_options(options, name, crate_src, crate_sysgen) {
+            for path in fs::read_dir(".").unwrap() {
+                let name = path.unwrap().path().display().to_string();
+                if name != "./mu" && !name.contains(".sysgen") {
+                    match Crate::with_options(&options, &name, &format!("{name}.sysgen")) {
                         Ok(crate_) => {
                             if options.is_opt("verbose") {
-                                println!("sysgen: generating from {name}")
+                                println!("sysgen: generating bindings from {name}")
                             }
 
-                            sysgen.generate(&crate_)
+                            crate_.genbind(&options).unwrap();
+
+                            Symbols::new(&crate_)
+                                .write(&format!("{name}.sysgen/{name}.SYMS"))
+                                .unwrap()
                         }
                         Err(e) => {
                             eprintln!("sysgen: failed to parse {}", e);
@@ -137,38 +120,8 @@ pub fn main() {
                 }
             }
         }
-        "image" => (),
-        "toc" => {
-            let options = &sysgen.options;
-
-            if !Path::new(workspace).exists() {
-                eprintln!("sysgen: no workspace present");
-                std::process::exit(-1)
-            }
-
-            let sysgen_path = &format!("{workspace}/{}", Sysgen::BINDINGS);
-
-            if !Path::new(sysgen_path).exists() {
-                eprintln!("sysgen: no workspace bindings directory present");
-                std::process::exit(-1)
-            }
-
-            for opt in &options.options {
-                if let Opt::Crate(name) = opt {
-                    let dir = format!("{sysgen_path}/{name}.sysgen");
-                    println!("{name} contents: {dir}");
-                    for entry in fs::read_dir(dir).unwrap() {
-                        match entry {
-                            Ok(dir) => println!("  {:?}", dir.path()),
-                            Err(_) => {
-                                println!("can't read bindings directory");
-                                std::process::exit(-1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        "symbols" => (),
+        "build" => (),
         _ => {
             eprintln!("sysgen: unimplemented command {command}");
             std::process::exit(-1)
