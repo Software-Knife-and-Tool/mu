@@ -4,10 +4,9 @@
 use {
     crate::{options::Options, symbols::Symbols},
     capitalize::Capitalize,
-    json::{self, JsonValue},
     public_api::PublicApi,
     std::{
-        fs::{self, File},
+        fs::File,
         io::{Error, ErrorKind, Read},
         result::Result,
     },
@@ -15,35 +14,16 @@ use {
 
 pub struct Crate {
     pub name: String,
-    pub src: String,
     pub sysgen: String,
-    pub bindmap: Option<JsonValue>,
     pub rustdoc: String,
     pub symbols: PublicApi,
 }
 
 impl Crate {
-    pub fn with_options(
-        options: &Options,
-        name: &str,
-        src: &str,
-        sysgen: &str,
-    ) -> Result<Crate, Error> {
-        let bindmap = match options.opt_value("map") {
-            Some(src) => {
-                let bindmap = fs::read(src)?;
-
-                match json::parse(&String::from_utf8(bindmap).unwrap()) {
-                    Ok(bindmap) => Some(bindmap),
-                    Err(e) => return Err(Error::new(ErrorKind::Other, e)),
-                }
-            }
-            None => None,
-        };
-
+    pub fn with_options(options: &Options, name: &str, sysgen: &str) -> Result<Crate, Error> {
         let rustdoc = rustdoc_json::Builder::default()
             .toolchain("nightly")
-            .manifest_path(format!("{src}/Cargo.toml"))
+            .manifest_path(format!("{name}/Cargo.toml"))
             .build()
             .unwrap();
 
@@ -51,15 +31,15 @@ impl Crate {
             .build()
             .unwrap();
 
-        for symbol in symbols.items() {
-            println!("{symbol}");
+        if options.is_opt("verbose") {
+            for symbol in symbols.items() {
+                println!("{symbol}");
+            }
         }
 
         Ok(Crate {
             name: name.to_string(),
-            src: src.to_string(),
             sysgen: sysgen.to_string(),
-            bindmap,
             rustdoc: rustdoc.clone().display().to_string(),
             symbols,
         })
@@ -73,7 +53,7 @@ impl Crate {
         String::new()
     }
 
-    pub fn gencode(&self, _options: &Options) -> Result<(), Error> {
+    pub fn genbind(&self, _options: &Options) -> Result<(), Error> {
         let mut out = File::create(format!("{}/{}.rs", self.sysgen, self.name))?;
 
         let mut source = String::new();
