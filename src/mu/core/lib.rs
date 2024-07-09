@@ -47,7 +47,7 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.69";
+    pub const VERSION: &'static str = "0.1.70";
 
     pub fn new() -> Self {
         Lib {

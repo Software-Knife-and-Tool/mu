@@ -9,7 +9,7 @@
       (:if (mu:eq (mu:type-of string) :vector)
            (mu:eq :char (mu:vector-type string))
            (:if (prelude:%prelude-type-p string)
-                (:if (mu:eq "vector" (mu:vector-ref (mu:struct-vec string) 0))
+                (:if (mu:eq "vector" (mu:svref (mu:struct-vec string) 0))
                      (mu:eq :char (mu:vector-type (prelude:%vector-prop :base string)))
                      ())
                 ()))))
@@ -22,7 +22,7 @@
   (:lambda (str index)
      (:if (prelude:stringp str)
           (:if (prelude:fixnump index)
-               (mu:vector-ref str index)
+               (mu:svref str index)
                (prelude:raise index 'prelude:schar "not a string"))
           (prelude:raise str 'prelude:schar "not a string"))))
 
@@ -38,7 +38,7 @@
                               (:if (prelude:numberp nth)
                                    (:if (mu:eq nth (mu:vector-len str-1))
                                         :t
-                                        (:if (mu:eq (mu:vector-ref str-1 nth) (mu:vector-ref str-2 nth))
+                                        (:if (mu:eq (mu:svref str-1 nth) (mu:svref str-2 nth))
                                              (mu:sum 1 nth)
                                              ()))
                                    nth))
@@ -84,7 +84,7 @@
                            (:if (prelude:numberp loop)
                                 (:if (mu:less-than (mu:difference len 1) loop)
                                      ()
-                                     (:if (mu:eq ch (mu:vector-ref str loop))
+                                     (:if (mu:eq ch (mu:svref str loop))
                                           loop
                                           (mu:sum 1 loop)))
                                 loop))
@@ -108,7 +108,7 @@
                            (:if (prelude:numberp loop)
                                 (:if (mu:less-than (mu:difference len 1) loop)
                                      ()
-                                     (:if (mu:eq ch (mu:vector-ref str loop))
+                                     (:if (mu:eq ch (mu:svref str loop))
                                           ch
                                           (mu:sum 1 loop)))
                                 loop))
@@ -163,7 +163,7 @@
                                       ()
                                       (:if (mu:less-than nth (mu:sum 1 end))
                                            ((:lambda ()
-                                               (mu:write (mu:vector-ref str nth) () substr)
+                                               (mu:write (mu:svref str nth) () substr)
                                                (mu:sum 1 nth)))
                                            ()))
                                  nth))

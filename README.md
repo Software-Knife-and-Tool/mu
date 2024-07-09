@@ -70,7 +70,7 @@ Most of our core computational frameworks are built on static systems and are fr
 - x86-64 WSL
 - Docker Ubuntu and Alpine containers
 
-Current releases on github will are for Linux x86-64, other architectures will follow.
+Current releases on github are Linux x86-64, other architectures will follow.
 
 Portability, libraries, deployment, documentation, and garbage collection are currently the top priorities.
 
@@ -131,7 +131,7 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 
 ------
 
-versions past 0.1.54 are built with rust 1.78.0.
+versions past 0.1.69 are built with rust 1.79.0.
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 

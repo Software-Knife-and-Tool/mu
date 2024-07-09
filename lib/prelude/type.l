@@ -67,7 +67,7 @@
                          (mu:cdr property-def)
                          (mu:cdr property-value))
                         ()))
-                (mu:vector-ref (mu:struct-vec (mu:symbol-value type-symbol)) 1)))
+                (mu:svref (mu:struct-vec (mu:symbol-value type-symbol)) 1)))
             property-values))
         (mu:find prelude:%types-ns name))
        (mu:make-struct :<type> `(,name ,property-values))))
@@ -79,7 +79,7 @@
    (:lambda (prop-name struct)
       (:if (prelude:%prelude-type-p struct)
            (:if (prelude:keywordp prop-name)
-                (prelude:%assq prop-name (mu:vector-ref (mu:struct-vec struct) 1))
+                (prelude:%assq prop-name (mu:svref (mu:struct-vec struct) 1))
                 (prelude:raise struct 'prelude:%type-ref "not a prelude type"))
            (prelude:raise prop-name 'prelude:%type-ref "not a property name"))))
 
@@ -91,7 +91,7 @@
       ((:lambda (type)
           (:if (mu:eq type :struct)
                (:if (mu:eq :<type> (mu:struct-type value))
-                    (mu:makunbound (mu:intern (mu:find-ns "") (mu:vector-ref (mu:struct-vec value) 0) ()))
+                    (mu:makunbound (mu:intern (mu:find-ns "") (mu:svref (mu:struct-vec value) 0) ()))
                     (mu:struct-type value))
                (:if (prelude:stringp value)
                     'string
