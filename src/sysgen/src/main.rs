@@ -1,12 +1,11 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-
 #[rustfmt::skip]
 use {
     crate::{
-        crates::Crate,
+        crate_::Crate,
+        binding::Binding,
         options::{Options, Opt},
-        symbols::Symbols,
     },
     std::process::Command,
     git2::Repository,
@@ -16,11 +15,12 @@ use {
     },
 };
 
-mod crates;
+mod binding;
+mod crate_;
 mod item;
 mod options;
 mod parser;
-mod symbols;
+mod parsers;
 
 pub fn main() {
     fn fetch(name: &str) -> Option<()> {
@@ -106,14 +106,16 @@ pub fn main() {
                                 println!("sysgen: generating bindings from {name}")
                             }
 
-                            crate_.genbind(&options).unwrap();
-
-                            Symbols::new(&crate_)
-                                .write(&format!("{name}.sysgen/{name}.SYMS"))
-                                .unwrap()
+                            match Binding::emit(&crate_, &options) {
+                                Ok(_) => (),
+                                Err(e) => {
+                                    eprintln!("sysgen emit: failed to parse {}", e);
+                                    std::process::exit(-1);
+                                }
+                            }
                         }
                         Err(e) => {
-                            eprintln!("sysgen: failed to parse {}", e);
+                            eprintln!("sysgen crate: failed to parse {}", e);
                             std::process::exit(-1);
                         }
                     }

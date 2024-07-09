@@ -8,6 +8,7 @@ use {
     mu::Env,
 };
 
+#[allow(dead_code)]
 pub struct Image {
     pub magic: String,
     pub version: String,
