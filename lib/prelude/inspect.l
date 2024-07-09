@@ -9,8 +9,8 @@
       ((:lambda (view)
           ((:lambda (tags)
              (mu:make-struct :inspect `(function ,(mu:heap-size obj) ,tags)))
-           `(,(mu:cons :arity (mu:vector-ref view 0))
-             ,(mu:cons :body (mu:vector-ref view 1)))))
+           `(,(mu:cons :arity (mu:svref view 0))
+             ,(mu:cons :body (mu:svref view 1)))))
        (mu:view obj))))
 
 (mu:intern prelude "%inspect-type"
@@ -18,8 +18,8 @@
      ((:lambda (view)
          ((:lambda (tags)
             (mu:make-struct :inspect `(:<type> ,(mu:heap-size obj) ,tags)))
-          `(,(mu:cons :type (mu:vector-ref (mu:struct-vec obj) 0))
-            ,(mu:cons :values (mu:vector-ref (mu:struct-vec obj) 1)))))
+          `(,(mu:cons :type (mu:svref (mu:struct-vec obj) 0))
+            ,(mu:cons :values (mu:svref (mu:struct-vec obj) 1)))))
       (mu:view obj))))
 
 (mu:intern prelude "%inspect-struct"
@@ -36,9 +36,9 @@
      ((:lambda (view)
          ((:lambda (tags)  
             (mu:make-struct :inspect `(symbol ,(mu:heap-size obj) ,tags)))
-          `(,(mu:cons :ns (mu:vector-ref view 0))
-            ,(mu:cons :name (mu:vector-ref view 1))
-            ,(mu:cons :value (mu:vector-ref view 2)))))
+          `(,(mu:cons :ns (mu:svref view 0))
+            ,(mu:cons :name (mu:svref view 1))
+            ,(mu:cons :value (mu:svref view 2)))))
       (mu:view obj))))
 
 (mu:intern prelude "%inspect-const"

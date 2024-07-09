@@ -648,17 +648,12 @@ impl CoreFunction for Vector {
         let vector = fp.argv[0];
         let index = fp.argv[1];
 
-        env.fp_argv_check("mu:vector-ref", &[Type::Vector, Type::Fixnum], fp)?;
+        env.fp_argv_check("mu:svref", &[Type::Vector, Type::Fixnum], fp)?;
 
         let nth = Fixnum::as_i64(index);
 
         if nth < 0 || nth as usize >= Self::length(env, vector) {
-            return Err(Exception::new(
-                env,
-                Condition::Range,
-                "mu:vector-ref",
-                index,
-            ));
+            return Err(Exception::new(env, Condition::Range, "mu:svref", index));
         }
 
         fp.value = match Self::ref_(env, vector, nth as usize) {

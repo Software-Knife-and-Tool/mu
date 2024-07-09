@@ -11,9 +11,9 @@
             "function: (~A bytes) :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
             `(,(mu:heap-size fn)
               ,(prelude:type-of fn)
-              ,(mu:vector-ref view 2)
-              ,(mu:vector-ref view 0)
-              ,(mu:vector-ref view 1))))
+              ,(mu:svref view 2)
+              ,(mu:svref view 0)
+              ,(mu:svref view 1))))
        (mu:view fn))))
 
 (mu:intern prelude "%describe-prelude-type"
