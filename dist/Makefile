@@ -19,22 +19,23 @@ dist:
 	@install -d $(BASE)/doc
 	@install -d $(BASE)/lib
 	@install -d $(BASE)/lib/codegen
+	@install -d $(BASE)/lib/common
 	@install -d $(BASE)/lib/mu
 	@install -d $(BASE)/lib/prelude
 	@install -d $(BASE)/lib/sysgen
 
-	@make -f mu.mk mu
+	@make -f dist.mk dist
 
-	@install -m 644 $(LIB)/mu.l $(BASE)/lib
-
-	@install -m 755 ./sysgen $(BASE)/bin
+	@install -m 644 $(SRC)/dist/mu.l $(BASE)/lib
 	@install -m 644 -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
 
+	@install -m 755 ./sysgen $(BASE)/bin
 	@install -m 755 ./mu-exec $(BASE)/bin
-# 	@install -m 755 ./mu-ld $(BASE)/bin
+	@install -m 755 ./mu-ld $(BASE)/bin
+	@install -m 755 ./mu-server $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
 
-	@install -m 755 $(LIB)/mu.sh $(BASE)/bin/mu
+	@install -m 755 $(SRC)/dist/mu.sh $(BASE)/bin/mu
 
 	@install -d $(BASE)/doc/html
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc

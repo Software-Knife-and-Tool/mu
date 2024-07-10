@@ -1,9 +1,9 @@
 #
-# mu makefile
+# dist makefile
 #
 .PHONY: mu prelude
 SRC = ../src
-LIB = ../lib
+LIB = $(SRC)/lib
 
 # prelude.l needs to be first
 PRELUDE = \
@@ -38,11 +38,13 @@ PRELUDE = \
 	type.l		\
 	vector.l
 
-mu:
+dist:
 	@cp -r $(LIB)/codegen mu/lib
+	@cp -r $(LIB)/common mu/lib
+	@cp -r $(LIB)/mu mu/lib
 	@cp -r $(LIB)/prelude mu/lib
 	@rm -f prelude.l
-	@for prelude in $(PRELUDE); do		\
+	@for prelude in $(PRELUDE); do			\
 	    cat $(LIB)/prelude/$$prelude >> prelude.l;	\
 	done
 	@cp prelude.l mu/lib
