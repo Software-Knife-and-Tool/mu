@@ -49,8 +49,8 @@ release:
 	@cp target/release/sysgen dist
 	@cp target/release/mu-exec dist
 	@cp target/release/mu-sys dist
-#	@cp target/release/mu-ld dist
-#	@cp target/release/mu-server dist
+	@cp target/release/mu-ld dist
+	@cp target/release/mu-server dist
 	@make dist --no-print-directory
 
 debug:
