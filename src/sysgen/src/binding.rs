@@ -1,20 +1,18 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-#![allow(unused_imports)]
 use {
     crate::{
         crate_::Crate,
         item::Item,
         options::Options,
-        parser::Parser,
         parsers::{enum_::Enum, fn_::Function, impl_::Impl, mod_::Mod, type_::TypeAlias},
     },
     capitalize::Capitalize,
-    public_api::{tokens::Token, PublicItem},
+    public_api::tokens::Token,
     std::{
-        cell::RefCell,
+        //        cell::RefCell,
         fs::File,
-        io::{Error, ErrorKind, Read, Write},
+        io::{Error, ErrorKind, Read},
         result::Result,
     },
 };
@@ -37,12 +35,37 @@ pub struct Binding<'a> {
 }
 
 impl Binding<'_> {
-    pub fn prototypes(_: &Vec<Binding>) -> String {
+    pub fn prototypes(bindings: &Vec<Binding>) -> String {
+        for _prototype in bindings {}
         String::new()
     }
 
-    pub fn functions(_: &Vec<Binding>) -> String {
-        String::new()
+    pub fn functions(bindings: &Vec<Binding>) -> String {
+        let functions = String::new();
+        for binding in bindings {
+            match binding.item.as_ref().unwrap() {
+                BindingItem::Function(binding_item) => println!(
+                    "function {}: {binding_item:?}",
+                    binding.name.as_ref().unwrap()
+                ),
+                _ => (),
+            }
+        }
+
+        functions
+    }
+
+    fn make_binding(item: Item) -> Result<Binding, Error> {
+        let binding = match item {
+            Item::Module(_) => Mod::parse(item)?,
+            Item::Enumeration(_) => Enum::parse(item)?,
+            Item::Implementation(_) => Impl::parse(item)?,
+            Item::Function(_) => Function::parse(item)?,
+            Item::TypeAlias(_) => TypeAlias::parse(item)?,
+            _ => return Err(Error::new(ErrorKind::Other, "unparsed item")),
+        };
+
+        Ok(binding)
     }
 
     pub fn emit(crate_: &Crate, options: &Options) -> Result<(), Error> {
@@ -64,7 +87,8 @@ impl Binding<'_> {
                     if options.is_opt("verbose") {
                         println!("sysgen parse: {public_item:?}")
                     }
-                    bindings.push(<Item as Parser>::parse(item)?)
+
+                    bindings.push(Self::make_binding(item)?)
                 }
                 None => break,
             }
@@ -84,12 +108,7 @@ impl Binding<'_> {
             .to_writer(&mut out)
         {
             Ok(_) => Ok(()),
-            Err(e) => {
-                println!("{e:?}");
-                // Err<(), Error>(Error::new(ErrorKind::Other, e)));
-
-                Ok(())
-            }
+            Err(e) => Err(Error::new(ErrorKind::Other, e)),
         }
     }
 }

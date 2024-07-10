@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 use {
-    crate::{crate_::Crate, parser::Parser},
+    crate::crate_::Crate,
     public_api::{tokens::Token, PublicItem},
     std::{
         cell::RefCell,

@@ -5,7 +5,6 @@ use {
     crate::{
         binding::{Binding, BindingItem},
         item::{Item, ItemState},
-        parser::Parser,
     },
     public_api::tokens::Token,
     rust_fsm::state_machine,
@@ -33,8 +32,8 @@ state_machine! {
     },
 }
 
-impl Parser for Enum<'_> {
-    fn parse(item: Item) -> Result<Binding, Error> {
+impl Enum<'_> {
+    pub fn parse(item: Item) -> Result<Binding, Error> {
         match item {
             Item::Enumeration(ItemState {
                 ref crate_,

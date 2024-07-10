@@ -5,7 +5,6 @@ use {
     crate::{
         binding::{Binding, BindingItem},
         item::{Item, ItemState},
-        parser::Parser,
     },
     public_api::{tokens::Token, PublicItem},
     rust_fsm::*,
@@ -22,15 +21,19 @@ state_machine! {
     #[repr(C)]
     function(Function)
 
-    Function(Identifier) => Members [Identifier],
+    Identifier(Symbol) => Symbol,
+    Symbol => {
+        Symbol => Symbol,
+        Else => Members,
+    },
     Members => {
         Members => Members [Parse],
         Else => End [Push],
     },
 }
 
-impl Parser for Function {
-    fn parse(item: Item) -> Result<Binding, Error> {
+impl Function {
+    pub fn parse(item: Item) -> Result<Binding, Error> {
         match item {
             Item::Function(ItemState {
                 // ref crate_,
@@ -41,13 +44,17 @@ impl Parser for Function {
                 let mut machine = function::StateMachine::new();
                 let _ = machine.consume(&function::Input::Members);
 
-                let mut name: Option<String> = None;
+                let mut name: String = String::new();
 
                 for token in tokens.clone() {
                     match token {
-                        Token::Identifier(ident) => {
-                            name = Some(ident);
-                            let _ = machine.consume(&function::Input::Identifier);
+                        Token::Identifier(str)
+                        | Token::Function(str)
+                        | Token::Symbol(str)
+                        | Token::Keyword(str)
+                        | Token::Type(str) => {
+                            name.push_str(&str);
+                            let _ = machine.consume(&function::Input::Symbol);
                         }
                         _ => continue,
                     }
@@ -58,7 +65,7 @@ impl Parser for Function {
                 Ok(Binding {
                     qualifiers: Some(qualifiers.to_vec()),
                     item: Some(item),
-                    name,
+                    name: Some(name),
                 })
             }
             _ => panic!(),
