@@ -19,7 +19,6 @@ mod binding;
 mod crate_;
 mod item;
 mod options;
-mod parser;
 mod parsers;
 
 pub fn main() {

@@ -5,7 +5,6 @@ use {
     crate::{
         binding::{Binding, BindingItem},
         item::{Item, ItemState},
-        parser::Parser,
     },
     public_api::{tokens::Token, PublicItem},
     rust_fsm::*,
@@ -29,8 +28,8 @@ state_machine! {
     },
 }
 
-impl Parser for Mod {
-    fn parse(item: Item) -> Result<Binding, Error> {
+impl Mod {
+    pub fn parse(item: Item) -> Result<Binding, Error> {
         match item {
             Item::Module(ItemState {
                 // ref crate_,
