@@ -6,6 +6,8 @@
 ;;;
 (mu:intern (mu:find-ns "") "prelude" (mu:make-ns "prelude"))
 
+(mu:intern prelude "*version*" "0.0.1")
+
 ;;;
 ;;; types
 ;;;

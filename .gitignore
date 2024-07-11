@@ -12,6 +12,7 @@ dist/prelude.l
 doc/rustdoc
 metrics/footprint/*.report
 metrics/footprint/json
+metrics/regression/current.summary
 metrics/regression/*.report
 metrics/regression/json
 metrics/valgrind/cachegrind.report

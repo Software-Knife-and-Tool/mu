@@ -5,3 +5,13 @@
 ;;; namespace
 ;;;
 (core:make-ns :common)
+;;;
+;;; external environment
+#|
+*features*                   machine-instance  short-site-name   
+lisp-implementation-type     machine-type      software-type     
+lisp-implementation-version  machine-version   software-version  
+long-site-name               room
+|#
+;;;
+(mu:intern common "lisp-implementation-version" "0.0.1")
