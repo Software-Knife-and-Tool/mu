@@ -130,6 +130,6 @@ lazy_static! {
         ( "write-byte",  2, Stream::mu_write_byte ),
         ( "write-char",  2, Stream::mu_write_char ),
         // system
-        ( "utime",   0, Env::mu_utime ),
+        ( "internal-run-time",   0, Env::mu_utime ),
     ];
 }
