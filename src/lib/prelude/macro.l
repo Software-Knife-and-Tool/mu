@@ -17,37 +17,22 @@
 ;;;
 ;;; macro environment
 ;;;
-(mu:intern prelude "%map-macro-symbol-ns"
-   (:lambda (symbol)
-      ((:lambda (ns)
-          (mu:find prelude:%macro-ns% (mu:ns-name ns)))
-       (mu:symbol-ns symbol))))
-
-(mu:intern prelude "%make-macro-ns"
-   (:lambda (ns)
-       ((:lambda (macro-ns)
-          (mu:intern prelude:%macro-ns% (mu:ns-name ns) macro-ns)
-          macro-ns)
-       (prelude:%gen-anon-ns))))
-
 (mu:intern prelude "%defmacro"
    (:lambda (symbol macro-function)
-      ((:lambda (macro-ns symbol-ns)
-         (:if macro-ns
-              (mu:intern macro-ns symbol-ns macro-function)
-              (mu:intern (prelude:%make-macro-ns symbol-ns) (mu:symbol-name symbol) macro-function))
-         symbol)
-       (prelude:%map-macro-symbol-ns symbol)
-       (mu:symbol-ns symbol))))
-
-(mu:intern prelude "%find-macro"
-    (:lambda (symbol env)
-      ((:lambda (macro-ns symbol-name)
-          (:if macro-ns
-               (mu:find (mu:symbol-value macro-ns) symbol-name)
-               ()))
-       (mu:find prelude:%macro-ns% (mu:ns-name (mu:symbol-ns symbol)))
-       (mu:symbol-name symbol))))
+      ((:lambda (symbol-ns-name)
+         ((:lambda (macro-ns)
+            (:if macro-ns
+                 (mu:intern (mu:find-ns (mu:symbol-name macro-ns)) symbol-ns-name macro-function)
+                 (mu:intern
+                     ((:lambda (ns)
+                        (mu:intern prelude:%macro-ns% symbol-ns-name ns)
+                        ns)
+                      (prelude:%gen-anon-ns))
+                     (mu:symbol-name symbol)
+                     macro-function))
+            symbol)
+          (mu:find prelude:%macro-ns% symbol-ns-name)))
+       (mu:ns-name (mu:symbol-ns symbol)))))
 
 (mu:intern prelude "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
@@ -104,5 +89,10 @@
                (:if macro
                     (mu:symbol-value macro)
                     ()))
-            (prelude:%find-macro symbol env))
-          ())))
+            ((:lambda (macro-ns symbol-name)
+               (:if macro-ns
+                    (mu:find (mu:symbol-value macro-ns) symbol-name)
+                    ()))
+             (mu:find prelude:%macro-ns% (mu:ns-name (mu:symbol-ns symbol)))
+             (mu:symbol-name symbol)))
+            ())))

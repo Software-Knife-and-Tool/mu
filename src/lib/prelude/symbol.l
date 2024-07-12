@@ -36,7 +36,6 @@
 
 (mu:intern prelude "symbol-value" mu:symbol-value)
 
-
 ;;;
 ;;; utilities
 ;;;

@@ -107,5 +107,5 @@
 
 (mu:intern prelude "warn"
    (:lambda (value message)
-     (prelude:format mu:*error-output* ";;; warning: ~S ~A~%" `(,value ,message))
+     (prelude:format mu:*error-output* ";;; warning: ~S (~A) ~A~%" `(,value ,(mu:type-of value) ,message))
     value))
