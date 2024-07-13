@@ -1,8 +1,8 @@
 (mu:type-of prelude:read)	:func
 (mu:symbol-name (prelude:read (prelude:make-string-stream :input "a") () ()))	"a"
 (mu:symbol-name (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))	"a"
-(mu:symbol-ns (prelude:read (prelude:make-string-stream :input "a") () ()))	#<:ns "">
-(mu:symbol-ns (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))	#<:ns "prelude">
+(mu:symbol-namespace (prelude:read (prelude:make-string-stream :input "a") () ()))	#<:ns "">
+(mu:symbol-namespace (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))	#<:ns "prelude">
 (prelude:read (prelude:make-string-stream :input "a ;") () ())	a
 (prelude:read (prelude:make-string-stream :input "a ; a") () ())	a
 (prelude:read (prelude:make-string-stream :input "a") () ())	a

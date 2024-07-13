@@ -61,7 +61,7 @@
 
 (mu:intern prelude "%make-env"
    (:lambda ()
-     (prelude:%make-type "env" `(,(mu:cons :symbols (mu:make-ns))))))
+     (prelude:%make-type "env" `(,(mu:cons :symbols (mu:make-namespace))))))
 
 (mu:intern prelude "%env-prop"
    (:lambda (prop env)

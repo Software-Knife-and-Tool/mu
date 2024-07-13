@@ -27,7 +27,7 @@
     ((:lambda (colon)
        (:if (prelude:null colon)
             ()
-            (mu:find-ns (prelude:substr name 0 (mu:difference colon 1)))))
+            (mu:find-namespace (prelude:substr name 0 (mu:difference colon 1)))))
      (prelude:string-position #\: name))))
 
 (mu:intern prelude "%read-symbol-name"
@@ -52,9 +52,9 @@
              (:if (prelude:null ns)
                   ((:lambda (symbol)
                      (:if (prelude:null symbol)
-                          (mu:makunbound (mu:intern (mu:find-ns "") name ()))
+                          (mu:makunbound (mu:intern (mu:find-namespace "") name ()))
                           symbol))
-                   (mu:find (mu:find-ns "") name))
+                   (mu:find (mu:find-namespace "") name))
                   ((:lambda (symbol)
                      (:if (prelude:null symbol)
                           (mu:makunbound (mu:intern ns name ()))

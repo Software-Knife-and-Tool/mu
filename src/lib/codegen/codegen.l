@@ -8,7 +8,7 @@
 ;;;
 ;;; namespace
 ;;;
-(core:make-ns :arm)
+(mu:make-namespace :arm)
 
 (prelude:load "/opt/mu/mu/arm-codegen/as.l" ())
 (prelude:load "/opt/mu/mu/arm-codegen/armv8-aarch64.l" ())

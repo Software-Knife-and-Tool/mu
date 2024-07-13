@@ -14,7 +14,7 @@
 
 (mu:intern prelude "uninternedp"
    (:lambda (sym)
-      (prelude:null (prelude:symbol-ns sym))))
+      (prelude:null (prelude:symbol-namespace sym))))
 
 (mu:intern prelude "keywordp"
    (:lambda (t)
@@ -30,9 +30,9 @@
 ;;;
 (mu:intern prelude "symbol-name" mu:symbol-name)
 
-(mu:intern prelude "symbol-ns"
+(mu:intern prelude "symbol-namespace"
    (:lambda (sym)
-      (mu:symbol-ns sym)))
+      (mu:symbol-namespace sym)))
 
 (mu:intern prelude "symbol-value" mu:symbol-value)
 
@@ -43,7 +43,7 @@
    (:lambda (name)
       (:if (prelude:stringp name)
            (:if (mu:less-than (mu:vector-len name) 8)
-                (mu:intern (mu:find-ns "keyword") name ())
+                (mu:intern (mu:find-namespace "keyword") name ())
                 (prelude:raise name 'prelude:make-keyword "not a legal name"))
            (prelude:raise name 'prelude:make-keyword "not a legal name"))))
             

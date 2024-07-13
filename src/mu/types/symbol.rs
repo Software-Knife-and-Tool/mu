@@ -386,7 +386,14 @@ impl CoreFunction for Symbol {
 
         fp.value = match symbol.type_of() {
             Type::Symbol | Type::Keyword | Type::Null => Symbol::namespace(env, symbol),
-            _ => return Err(Exception::new(env, Condition::Type, "mu:symbol-ns", symbol)),
+            _ => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "mu:symbol-namespace",
+                    symbol,
+                ))
+            }
         };
 
         Ok(())

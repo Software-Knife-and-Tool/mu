@@ -4,7 +4,7 @@
 ;;;
 ;;; cross reference
 ;;;
-(mu:intern (mu:find-ns "prelude") "crossref"
+(mu:intern (mu:find-namespace "prelude") "crossref"
    (:lambda (file-name)
       ((:lambda (stream)
           (prelude:mapc
@@ -15,6 +15,6 @@
                                   ,(prelude:type-of (mu:symbol-value symbol))
                                   ,(mu:symbol-value symbol)))
                    (prelude:format stream "unbound~Tunbound~T~A~%" `(,(mu:symbol-name symbol)))))
-           (mu:symbols (mu:find-ns "prelude"))))
+           (mu:namespace-symbols (mu:find-namespace "prelude"))))
        (mu:open :file :output file-name))
       :t))

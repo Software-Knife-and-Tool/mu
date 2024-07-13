@@ -4,7 +4,7 @@
 ;;;
 ;;; prelude types
 ;;;
-(mu:intern prelude "%types-ns" (mu:make-ns "%types"))
+(mu:intern prelude "%types-ns" (mu:make-namespace "%types"))
 
 (mu:intern prelude "%prelude-type-p"
    (:lambda (value)
@@ -23,9 +23,9 @@
           (:if (prelude:listp properties)
                ((:lambda (symbol)
                    (:if (prelude:null symbol)
-                        (mu:intern (mu:find-ns "%types") str (mu:make-struct :<type> `(,str ,properties)))
+                        (mu:intern (mu:find-namespace "%types") str (mu:make-struct :<type> `(,str ,properties)))
                         (prelude:raise symbol 'prelude:define-type "type symbol bound")))
-                (mu:find (mu:find-ns "%types") str))
+                (mu:find (mu:find-namespace "%types") str))
                (prelude:raise properties 'prelude:define-type "not a property list")))
        (prelude:string name))))
 
@@ -91,11 +91,11 @@
       ((:lambda (type)
           (:if (mu:eq type :struct)
                (:if (mu:eq :<type> (mu:struct-type value))
-                    (mu:makunbound (mu:intern (mu:find-ns "") (mu:svref (mu:struct-vec value) 0) ()))
+                    (mu:makunbound (mu:intern (mu:find-namespace "") (mu:svref (mu:struct-vec value) 0) ()))
                     (mu:struct-type value))
                (:if (prelude:stringp value)
                     'string
-                    (mu:makunbound (mu:intern (mu:find-ns "") (mu:symbol-name type) ())))))
+                    (mu:makunbound (mu:intern (mu:find-namespace "") (mu:symbol-name type) ())))))
        (mu:type-of value))))
 
 ;;;
