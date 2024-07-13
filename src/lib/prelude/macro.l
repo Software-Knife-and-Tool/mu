@@ -22,7 +22,7 @@
       ((:lambda (symbol-ns-name)
          ((:lambda (macro-ns)
             (:if macro-ns
-                 (mu:intern (mu:find-ns (mu:symbol-name macro-ns)) symbol-ns-name macro-function)
+                 (mu:intern (mu:find-namespace (mu:symbol-name macro-ns)) symbol-ns-name macro-function)
                  (mu:intern
                      ((:lambda (ns)
                         (mu:intern prelude:%macro-ns% symbol-ns-name ns)
@@ -32,7 +32,7 @@
                      macro-function))
             symbol)
           (mu:find prelude:%macro-ns% symbol-ns-name)))
-       (mu:ns-name (mu:symbol-ns symbol)))))
+       (mu:namespace-name (mu:symbol-namespace symbol)))))
 
 (mu:intern prelude "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
@@ -93,6 +93,6 @@
                (:if macro-ns
                     (mu:find (mu:symbol-value macro-ns) symbol-name)
                     ()))
-             (mu:find prelude:%macro-ns% (mu:ns-name (mu:symbol-ns symbol)))
+             (mu:find prelude:%macro-ns% (mu:namespace-name (mu:symbol-namespace symbol)))
              (mu:symbol-name symbol)))
             ())))

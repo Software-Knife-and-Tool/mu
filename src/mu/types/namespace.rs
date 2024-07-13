@@ -41,7 +41,7 @@ impl Namespace {
             return Err(Exception::new(
                 env,
                 Condition::Type,
-                "mu:make-ns",
+                "mu:make-namespace",
                 Vector::from(name).evict(env),
             ));
         }
@@ -75,7 +75,7 @@ impl Namespace {
             return Err(Exception::new(
                 env,
                 Condition::Type,
-                "mu:make-ns",
+                "mu:make-namespace",
                 Vector::from(name).evict(env),
             ));
         }
@@ -403,7 +403,7 @@ impl CoreFunction for Namespace {
     fn mu_make_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        env.fp_argv_check("mu:make-ns", &[Type::String], fp)?;
+        env.fp_argv_check("mu:make-namespace", &[Type::String], fp)?;
         fp.value = Self::with(env, &Vector::as_string(env, name))?;
 
         Ok(())
@@ -421,10 +421,17 @@ impl CoreFunction for Namespace {
     fn mu_find_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        env.fp_argv_check("mu:find-ns", &[Type::String], fp)?;
+        env.fp_argv_check("mu:find-namespace", &[Type::String], fp)?;
         fp.value = match Self::find(env, &Vector::as_string(env, name)) {
             Some(ns) => ns,
-            None => return Err(Exception::new(env, Condition::Type, "mu:find-ns", name)),
+            None => {
+                return Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "mu:find-namespace",
+                    name,
+                ))
+            }
         };
 
         Ok(())

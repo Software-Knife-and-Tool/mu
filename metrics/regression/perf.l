@@ -5,7 +5,7 @@
 ;;; return the elapsed process time in usec
 ;;; from applying fn to args
 ;;;
-(mu:intern (mu:find-ns "") "perf" (mu:make-ns "perf"))
+(mu:intern (mu:find-namespace "") "perf" (mu:make-namespace "perf"))
 
 (mu:intern perf "time-delta"
   (:lambda (fn args)

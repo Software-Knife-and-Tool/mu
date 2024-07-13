@@ -11,7 +11,7 @@
 (mu:intern prelude "%in-namespace"
    (:lambda (ns)
       ((:lambda ()
-          (mu:make-ns ns)
+          (mu:make-namespace ns)
           (prelude:%reader-set-ns ns)
           ns))))
 
@@ -19,7 +19,7 @@
    (:lambda ()
      ((:lambda (ns)
         (mu:write ns () prelude:%reader-current-ns%)
-        (mu:find-ns ns))
+        (mu:find-namespace ns))
       (prelude:get-output-stream-string prelude:%reader-current-ns%))))
 
 (mu:intern prelude "%reader-set-ns"

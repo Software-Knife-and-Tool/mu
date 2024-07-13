@@ -16,10 +16,10 @@
    (:lambda (name uses)
      (prelude:%make-type "%ns"
        `(,(mu:cons :name name)
-          ,(mu:cons :intern (mu:make-ns))
-          ,(mu:cons :extern (mu:make-ns))
-          ,(mu:cons :ch-mac (mu:make-ns))
-          ,(mu:cons :sy-mac (mu:make-ns))
+          ,(mu:cons :intern (mu:make-namespace))
+          ,(mu:cons :extern (mu:make-namespace))
+          ,(mu:cons :ch-mac (mu:make-namespace))
+          ,(mu:cons :sy-mac (mu:make-namespace))
           ,(mu:cons :uses uses)))))
 
 (mu:intern prelude "%namespace-prop"

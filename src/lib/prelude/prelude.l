@@ -4,7 +4,7 @@
 ;;;
 ;;; namespace
 ;;;
-(mu:intern (mu:find-ns "") "prelude" (mu:make-ns "prelude"))
+(mu:intern (mu:find-namespace "") "prelude" (mu:make-namespace "prelude"))
 
 (mu:intern prelude "*version*" "0.0.1")
 
@@ -132,4 +132,4 @@
 ;;;
 (mu:intern prelude "%gen-anon-ns"
    (:lambda ()
-      (mu:make-ns (mu:symbol-name (prelude:genkeyword #\%)))))
+      (mu:make-namespace (mu:symbol-name (prelude:genkeyword #\%)))))

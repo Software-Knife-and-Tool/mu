@@ -16,7 +16,7 @@
 (mu:type-of mu:*standard-input*)	:stream
 (mu:type-of mu:heap-info)	:func
 (mu:type-of "type-of")	:vector
-(mu:type-of (mu:find-ns "mu"))	:ns
+(mu:type-of (mu:find-namespace "mu"))	:ns
 (mu:view ())	#(:t "" nil :nil)
 (mu:view :keyword)	#(:t "keyword" keyword :keyword)
 (mu:view #\a)	#(:t a)
@@ -48,9 +48,9 @@
 (mu:with-exception (:lambda (cond obj) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:quotient 1 1)))	1
 (mu:repr :t (mu:repr :vector :t))	:t
 (mu:type-of mu:find)	:func
-(mu:type-of mu:find-ns)	:func
+(mu:type-of mu:find-namespace)	:func
 (mu:type-of mu:intern)	:func
-(mu:type-of mu:make-ns)	:func
-(mu:type-of mu:ns-map)	:func
-(mu:type-of mu:symbols)	:func
+(mu:type-of mu:make-namespace)	:func
+(mu:type-of mu:namespace-map)	:func
+(mu:type-of mu:namespace-symbols)	:func
 (mu:type-of mu:unintern)	:func

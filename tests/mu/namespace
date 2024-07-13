@@ -1,11 +1,11 @@
-(mu:boundp (mu:intern (mu:find-ns "") "foo" ()))	foo
-(mu:eq :func (mu:type-of mu:make-ns))	:t
-(mu:find (mu:find-ns "mu") "eq")	mu:eq
-(mu:find (mu:find-ns "mu") "foo")	:nil
-(mu:intern (mu:find-ns "") "foo" "foo")	foo
-(mu:intern (mu:find-ns "mu") "foo" ())	mu:foo
-(mu:make-ns "crux")	#<:ns "crux">
-(mu:type-of (mu:symbols (mu:find-ns "")))	:null
-(mu:type-of (mu:symbols (mu:find-ns "keyword")))	:null
-(mu:type-of (mu:symbols (mu:find-ns "mu")))	:cons
-(mu:type-of (mu:unintern (mu:intern (mu:find-ns "") "foo" ())))	:symbol
+(mu:boundp (mu:intern (mu:find-namespace "") "foo" ()))	foo
+(mu:eq :func (mu:type-of mu:make-namespace))	:t
+(mu:find (mu:find-namespace "mu") "eq")	mu:eq
+(mu:find (mu:find-namespace "mu") "foo")	:nil
+(mu:intern (mu:find-namespace "") "foo" "foo")	foo
+(mu:intern (mu:find-namespace "mu") "foo" ())	mu:foo
+(mu:make-namespace "crux")	#<:ns "crux">
+(mu:type-of (mu:namespace-symbols (mu:find-namespace "")))	:null
+(mu:type-of (mu:namespace-symbols (mu:find-namespace "keyword")))	:null
+(mu:type-of (mu:namespace-symbols (mu:find-namespace "mu")))	:cons
+(mu:type-of (mu:unintern (mu:intern (mu:find-namespace "") "foo" ())))	:symbol
