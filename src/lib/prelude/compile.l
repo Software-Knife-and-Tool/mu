@@ -59,9 +59,9 @@
 ;;;
 (mu:intern prelude "%if"
    (:lambda (testf t-thunk f-thunk)
-     (:if (prelude:apply testf ())
-          (prelude:apply t-thunk ())
-          (prelude:apply f-thunk ()))))
+     (:if (prelude:null testf)
+          (prelude:apply f-thunk ())
+          (prelude:apply t-thunk ()))))
 
 (mu:intern prelude "%compile-if"
    (:lambda (form env)
@@ -69,7 +69,7 @@
           (:if (prelude:%orf (mu:eq length 3) (mu:eq length 4))
                ((:lambda (test t-arm f-arm)
                   (mu:compile `(prelude:%if ,test ,t-arm ,f-arm)))
-                (prelude:%compile `(lambda () ,(mu:nth 1 form)) env)
+                (prelude:%compile (mu:nth 1 form) env)
                 (prelude:%compile `(lambda () ,(mu:nth 2 form)) env)
                 (prelude:%compile `(lambda () ,(mu:nth 3 form)) env))
                (prelude:raise form 'prelude:%compile-if "takes two or three arguments")))
