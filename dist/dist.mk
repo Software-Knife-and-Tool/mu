@@ -49,7 +49,8 @@ dist:
 	@cp -r $(LIB)/common mu/lib
 	@cp -r $(LIB)/mu mu/lib
 	@cp -r $(LIB)/prelude mu/lib
-	@rm -f prelude/*.l
+	@rm -rf prelude
+	@mkdir prelude
 	@for core in $(CORE); do				\
 	    cat $(LIB)/prelude/core/$$core >> prelude.l;	\
 	done
