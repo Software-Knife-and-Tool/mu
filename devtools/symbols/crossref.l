@@ -15,6 +15,7 @@
                                   ,(prelude:type-of (mu:symbol-value symbol))
                                   ,(mu:symbol-value symbol)))
                    (prelude:format stream "unbound~Tunbound~T~A~%" `(,(mu:symbol-name symbol)))))
-           (mu:namespace-symbols (mu:find-namespace "prelude"))))
+           (mu:namespace-symbols (mu:find-namespace "prelude")))
+         (mu:close stream))
        (mu:open :file :output file-name))
       :t))

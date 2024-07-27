@@ -3,7 +3,6 @@
 #
 .PHONY: mu prelude
 SRC = ../src
-LIB = $(SRC)/lib
 
 # prelude.l needs to be first
 CORE= \
@@ -45,29 +44,29 @@ SYSTEM = \
 	time.l
 
 dist:
-	@cp -r $(LIB)/codegen mu/lib
-	@cp -r $(LIB)/common mu/lib
-	@cp -r $(LIB)/mu mu/lib
-	@cp -r $(LIB)/prelude mu/lib
+	@cp -r $(SRC)/lib/codegen mu/lib
+	@cp -r $(SRC)/lib/common mu/lib
+	@cp -r $(SRC)/lib/mu mu/lib
+	@cp -r $(SRC)/prelude mu/lib
 	@rm -rf prelude
 	@mkdir prelude
 	@for core in $(CORE); do				\
-	    cat $(LIB)/prelude/core/$$core >> prelude.l;	\
+	    cat $(SRC)/prelude/core/$$core >> core.l;		\
 	done
-	@cp prelude.l mu/lib/prelude
-	@mv prelude.l prelude
+	@cp core.l mu/lib/prelude
+	@mv core.l prelude
 	@for repl in $(REPL); do				\
-	    cat $(LIB)/prelude/repl/$$repl >> repl.l;		\
+	    cat $(SRC)/prelude/repl/$$repl >> repl.l;		\
 	done
 	@cp repl.l mu/lib/prelude
 	@mv repl.l prelude
 	@for inspect in $(INSPECT); do				\
-	    cat $(LIB)/prelude/inspect/$$inspect >> inspect.l;	\
+	    cat $(SRC)/prelude/inspect/$$inspect >> inspect.l;	\
 	done
 	@cp inspect.l mu/lib/prelude
 	@mv inspect.l prelude
 	@for system in $(SYSTEM); do				\
-	    cat $(LIB)/prelude/system/$$system >> system.l;	\
+	    cat $(SRC)/prelude/system/$$system >> system.l;	\
 	done
 	@cp system.l mu/lib/prelude
 	@mv system.l prelude
