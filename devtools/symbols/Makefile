@@ -13,7 +13,7 @@ crossref:
 
 symbols:
 	@mu --pipe --load=./symbols.l --quiet-eval='(prelude:symbols \"symbols.out\")'
-	@python3 symbols.py ../../dist/prelude.l symbols.out
+	@python3 symbols.py ../../dist/prelude/prelude.l symbols.out
 
 clean:
 	@rm -f crossref.out symbols.out

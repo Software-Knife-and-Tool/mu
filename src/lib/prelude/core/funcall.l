@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; compile applications
+;;; compile function applications
 ;;;
 
 ;;;
@@ -46,7 +46,7 @@
          args)))
 
 ;;;
-;;; compiled argument lists
+;;; compile argument lists
 ;;;
 (mu:intern prelude "%compile-arg-list"
    (:lambda (arg-list env)
@@ -68,34 +68,36 @@
      (prelude:%compile-lambda-arg-list function (prelude:%mapcar (:lambda (elt) (prelude:%compile elt env)) arg-list))))
 
 ;;;
-;;; compile-funcall
-;;;
-;;; compile function applications to lib-appliable forms
+;;; compile function applications to mu forms
 ;;;
 (mu:intern prelude "%compile-lambda-call"
    (:lambda (lambda-form arg-list env)
-      ((:lambda (compiled-function)
+;;;     (prelude:warn lambda-form "compile-lambda-call")
+     ((:lambda (compiled-function)
+        ;;; (prelude:warn compiled-function "compiled-function")
         (:if (prelude:functionp compiled-function)
              (:if (prelude:%prelude-function-p compiled-function)
-                  `(prelude:%fn-apply-quoted ,compiled-function ,(prelude:%compile-lambda-arg-list compiled-function arg-list env))
+                  `(,prelude:%fn-apply-quoted ,compiled-function ,(prelude:%compile-lambda-arg-list compiled-function arg-list env))
                   `(mu:apply ,compiled-function ,(prelude:%compile-arg-list arg-list env)))
              (prelude:raise compiled-function 'prelude:%compile-lambda-call "illegal function call")))
      (prelude:%compile lambda-form env))))
 
 (mu:intern prelude "%compile-symbol-call"
    (:lambda (function-symbol arg-list env)
+;;;     (prelude:warn function-symbol "compile-symbol-call")
       (:if (prelude:boundp function-symbol)
            ((:lambda (function)
                (:if (prelude:functionp function)
                     (:if (prelude:%prelude-function-p function)
-                         `(prelude:%fn-apply-quoted ,function ,(prelude:%compile-lambda-arg-list function arg-list env))
+                         `(,prelude:%fn-apply-quoted ,function ,(prelude:%compile-lambda-arg-list function arg-list env))
                          `(mu:apply ,function ,(prelude:%compile-arg-list arg-list env)))
                     (prelude:raise function 'prelude:%compile-symbol-call "illegal function call")))
             (prelude:symbol-value function-symbol))
-           `(prelude:apply ,function-symbol ,(prelude:%compile-arg-list arg-list env)))))
+           `(,prelude:apply ,function-symbol ,(prelude:%compile-arg-list arg-list env)))))
 
 (mu:intern prelude "%compile-funcall"
    (:lambda (function-form arg-list env)
+      ;;; (prelude:warn function-form "compile-funcall")
       (:if (prelude:consp function-form)
            (prelude:%compile-lambda-call function-form arg-list env)
            (:if (mu:eq :symbol (mu:type-of function-form))
@@ -107,7 +109,7 @@
 ;;;
 (mu:intern prelude "%fn-apply"
    (:lambda (fn arg-list)
-      ;; (prelude:warn `(,fn ,arg-list) "%fn-apply")
+      ;;; (prelude:warn `(,fn ,arg-list) "%fn-apply")
       ((:lambda (env)
         (prelude:%mapc mu:frame-push env)
          ((:lambda (value)
@@ -120,7 +122,7 @@
 
 (mu:intern prelude "%fn-apply-quoted"
    (:lambda (fn arg-list)
-      ;; (prelude:warn `(,fn ,arg-list) "%fn-apply-quoted")
+      ;;; (prelude:warn `(,fn ,arg-list) "%fn-apply-quoted")
       ((:lambda (env)
         (prelude:%mapc mu:frame-push env)
         ((:lambda (value)

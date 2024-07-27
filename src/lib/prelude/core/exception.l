@@ -14,29 +14,20 @@
 ;;; reason: extended condition, usually a string
 ;;; env:    dynamic environment, list of frames
 ;;;
-(mu:intern prelude "exceptp"
+(mu:intern prelude "exceptionp"
     (:lambda (ex)
       (prelude:%andf
        (prelude:%prelude-type-p ex)
        (mu:eq '%except (prelude:type-of ex)))))
 
-(mu:intern prelude "%make-except"
-   (:lambda (cond value source reason env)
-      (prelude:%make-type "%except"
-        `(,(mu:cons :cond   cond)
-          ,(mu:cons :value  value)
-          ,(mu:cons :source source)
-          ,(mu:cons :reason reason)
-          ,(mu:cons :env    env)))))
-
-(mu:intern prelude "%except-prop"
-   (:lambda (prop except)
+(mu:intern prelude "%exception-prop"
+   (:lambda (prop exception)
       (:if (prelude:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
-           (prelude:%type-ref prop except)
-           (prelude:raise prop 'prelude:%except-prop "not an except property"))))
+           (prelude:%type-ref prop exception)
+           (prelude:raise prop 'prelude:%exception-prop "not an exception property"))))
 
-(mu:intern prelude "%exceptf"
-   (:lambda (stream format-string printenv except)
+(mu:intern prelude "%exceptionf"
+   (:lambda (stream format-string printenv exception)
      ((:lambda (cond value source reason env)
          (:if (prelude:null format-string)
               (prelude:format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
@@ -52,11 +43,11 @@
                                      ,(mu:cdr frame))))
                    (mu:cdr env))))
               ()))
-      (prelude:%except-prop :cond except)
-      (prelude:%except-prop :value except)
-      (prelude:%except-prop :source except)
-      (prelude:%except-prop :reason except)
-      (prelude:%except-prop :env except))))
+      (prelude:%exception-prop :cond exception)
+      (prelude:%exception-prop :value exception)
+      (prelude:%exception-prop :source exception)
+      (prelude:%exception-prop :reason exception)
+      (prelude:%exception-prop :env exception))))
 
 (mu:intern prelude "with-exception"
   (:lambda (handler thunk)
@@ -64,36 +55,43 @@
       (:lambda (value condition source)
          (:if (mu:eq condition :except)
               (prelude:apply handler `(,value))
-              (prelude:apply handler `(,(prelude:%make-except
-                                      condition
-                                      value
-                                      source
-                                      "mu:raise"
-                                      (mu:frames))))))
+              (prelude:apply handler `(,(prelude:make-exception
+                                           condition
+                                           value
+                                           source
+                                           "mu:raise"
+                                           (mu:frames))))))
       (:lambda () (prelude:apply thunk ())))))
+
+(mu:intern prelude "make-exception"
+   (:lambda (cond value source reason env)
+      (prelude:%make-type "%except"
+        `(,(mu:cons :cond   cond)
+          ,(mu:cons :value  value)
+          ,(mu:cons :source source)
+          ,(mu:cons :reason reason)
+          ,(mu:cons :env    env)))))
 
 ;;;
 ;;; exception flavors
 ;;;
-(mu:intern prelude "make-exception" prelude:%make-except)
-
 (mu:intern prelude "error"
    (:lambda (value format-string arg-list)
       (prelude:format mu:*error-output* format-string arg-list)
       (mu:raise
-       (prelude:%make-except :error value :error "" ())
+       (prelude:make-exception :error value :error "" ())
        :except)))
 
 (mu:intern prelude "raise-env"
    (:lambda (value source reason)
      (mu:raise
-      (prelude:%make-except :error value source reason (mu:frames))
+      (prelude:make-exception :error value source reason (mu:frames))
       :except)))
 
 (mu:intern prelude "raise"
    (:lambda (value source reason)
      (mu:raise
-      (prelude:%make-except :error value source reason ())
+      (prelude:make-exception :error value source reason ())
       :except)))
 
 (mu:intern prelude "debug"

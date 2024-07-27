@@ -64,18 +64,18 @@
 
 (mu:intern prelude "%describe-fixnum"
    (:lambda (fx stream)
-      (prelude:format stream "fixnum: (~A bytes) :fixnum ~A~%    format: 61b signed integer~%    value:  ~A~%"
+      (prelude:format stream "fixnum: (~A bytes) :fixnum ~A~%    format: 56b signed integer immediate~%    value:  ~A~%"
         `(,(mu:heap-size fx) ,(prelude:type-of fx) ,fx))))
 
 (mu:intern prelude "%describe-char"
    (:lambda (ch stream)
-      (prelude:format stream "char: (~A bytes) :char ~A~%    format: 8b ASCII character~%    value:  ~A~%"
+      (prelude:format stream "char: (~A bytes) :char ~A~%    format: 8b ASCII character immediate~%    value:  ~A~%"
         `(,(mu:heap-size ch) ,(prelude:type-of ch) ,ch))))
 
 (mu:intern prelude "%describe-float"
    (:lambda (fl stream)
       (prelude:format stream
-       "float: :float ~A~%    format: 32b IEEE single float~%    value:  ~A~%"
+       "float: :float ~A~%    format: 32b IEEE single float immediate~%    value:  ~A~%"
        `(,(prelude:type-of fl) ,fl))))
 
 (mu:intern prelude "%describe-string"

@@ -10,9 +10,7 @@
 ;;;
 
 ;;;
-;;; compile a lambda form to a function prelude type
-;;;
-;;; returns the compiled function
+;;; compile a prelude lambda form to a mu function
 ;;;
 (mu:intern prelude "%compile-lambda"
    (:lambda (form env)
@@ -20,12 +18,12 @@
            (prelude:raise form 'prelude:%compile-lambda "malformed lambda expression")
            ((:lambda (lambda body)
                ((:lambda (lambda-desc)
-                   ((:lambda (compiled-function)
-                       (:if (prelude:%orf
-                             (prelude:%lambda-prop :lexenv lambda-desc)
-                             (prelude:%lambda-prop :rest lambda-desc))
-                            (prelude:%make-fn lambda-desc compiled-function ())
-                            compiled-function))
+                  ((:lambda (compiled-function)
+                     (:if (prelude:%orf
+                           (prelude:%lambda-prop :lexenv lambda-desc)
+                           (prelude:%lambda-prop :rest lambda-desc))
+                          (prelude:%make-fn lambda-desc compiled-function ())
+                          compiled-function))
                     (mu:compile
                      `(:lambda
                        ,(prelude:%lambda-prop :bound lambda-desc)
@@ -40,8 +38,6 @@
 ;;;
 ;;; compile a defmacro form to a bound macro symbol
 ;;;
-;;; returns the macro symbol
-;;;
 (mu:intern prelude "%compile-defmacro"
    (:lambda (form env)
       ((:lambda (macro-symbol lambda-form)
@@ -55,7 +51,7 @@
 ;;;
 ;;; this if form can take two or three arguments
 ;;;
-;;; returns an application of the if form
+;;; returns an application of the %if form
 ;;;
 (mu:intern prelude "%if"
    (:lambda (testf t-thunk f-thunk)
@@ -65,10 +61,11 @@
 
 (mu:intern prelude "%compile-if"
    (:lambda (form env)
-      ((:lambda (length)
+     ;;; (prelude:warn form "compile-if")
+     ((:lambda (length)
           (:if (prelude:%orf (mu:eq length 3) (mu:eq length 4))
                ((:lambda (test t-arm f-arm)
-                  (mu:compile `(prelude:%if ,test ,t-arm ,f-arm)))
+                  (mu:compile `(,prelude:%if ,test ,t-arm ,f-arm)))
                 (prelude:%compile (mu:nth 1 form) env)
                 (prelude:%compile `(lambda () ,(mu:nth 2 form)) env)
                 (prelude:%compile `(lambda () ,(mu:nth 3 form)) env))
@@ -88,14 +85,14 @@
 ;;; rewrites a function call/special call/macro call against an environment
 ;;; into something the runtime can execute.
 ;;;
-;;; returns a lib form or %fn type (in the case of a define-prelude-lambda)
+;;; returns a mu form or %fn type (in the case of a define-prelude-lambda)
 ;;;
 (mu:intern prelude "%compile"
    (:lambda (form env)
       (:if (prelude:consp form)
            ((:lambda (function-form arg-list)
                (:if (prelude:keywordp function-form)
-                    (mu:compile form)                    ; lib special form (:key ...)
+                    (mu:compile form)                    ; mu special form (:key ...)
                     (:if (mu:eq :symbol (mu:type-of function-form)) ; special form or macro
                          ((:lambda (special)
                              (:if special
@@ -117,7 +114,7 @@
            form)))
 
 ;;;
-;;; repl's compile interface, compiles in the null environment
+;;; prelude's compile interface, compiles in the null environment
 ;;;
 (mu:intern prelude "compile"
    (:lambda (form)

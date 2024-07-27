@@ -26,8 +26,8 @@
                            (:if (mu:eq prelude:%eof% loop)
                                 prelude:%eof%
                                 (prelude:with-exception
-                                    (:lambda (except)
-                                      (prelude:%exceptf mu:error-output "loader exception: ~A on ~A by ~S, ~A~%" () except))
+                                    (:lambda (exception)
+                                      (prelude:%exceptionf mu:error-output "loader exception: ~A on ~A by ~S, ~A~%" () except))
                                     (:lambda ()
                                       ((:lambda (form)
                                           (:if (mu:eq prelude:%eof% form)

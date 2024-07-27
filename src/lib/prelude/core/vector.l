@@ -32,19 +32,19 @@
           (mu:make-vector (prelude:%specialized-vector-type list) list)
           (prelude:raise list 'prelude:make-vector "not a list"))))
 
-(mu:intern prelude "slice"
+(mu:intern prelude "vector-slice"
    (:lambda (vector start length)
      (:if (prelude:typep vector :vector)
           (:if (prelude:fixnump start)
                (:if (prelude:%orf (prelude:minusp start) (mu:less-than (prelude:vector-length vector) start))
-                    (prelude:raise start 'prelude:slice "illegal start")
+                    (prelude:raise start 'prelude:vector-slice "illegal start")
                     (:if (prelude:fixnump length)
                          (:if (prelude:%orf (prelude:minusp length) (mu:less-than (prelude:vector-length vector) length))
-                              (prelude:raise length 'prelude:slice "illegal length")
+                              (prelude:raise length 'prelude:vector-slice "illegal length")
                               (prelude:%make-vector vector `(,start ,@length) ()))
-                         (prelude:raise start 'prelude:slice "not a fixnum")))
-               (prelude:raise length 'prelude:slice "not a fixnum"))
-          (prelude:raise vector 'prelude:slice "not a base vector"))))
+                         (prelude:raise start 'prelude:vector-slice "not a fixnum")))
+               (prelude:raise length 'prelude:vector-slice "not a fixnum"))
+          (prelude:raise vector 'prelude:vector-slice "not a base vector"))))
 
 (mu:intern prelude "vector-length"
    (:lambda (vector)

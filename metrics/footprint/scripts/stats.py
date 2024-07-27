@@ -19,7 +19,7 @@ def stats():
         format,
         mu_cmd,
         '-p',
-        '-l', '../../dist/prelude.l',
+        '-l', '../../dist/prelude/prelude.l',
         '-q', '(prelude:%init-ns)'
     ],\
     stdout=subprocess.PIPE,\
