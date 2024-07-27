@@ -49,4 +49,4 @@ dist:
 	@rm -rf $(BASE)
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) mu-exec mu-ld mu-exec sysgen prelude.l
+	@rm -rf $(BASE)-*.tgz $(BASE) mu-exec mu-ld mu-exec mu-server mu-sys sysgen prelude

@@ -16,6 +16,7 @@
            (:lambda (symbol)
              (prelude:format stream "~A~%" `(,(mu:symbol-name symbol)))
              (prelude:format stream "mu:~A~%" `(,(mu:symbol-name symbol))))
-           (mu:namespace-symbols (mu:find-namespace "mu"))))
+           (mu:namespace-symbols (mu:find-namespace "mu")))
+          (mu:close stream))
        (mu:open :file :output file-name))
       :t))

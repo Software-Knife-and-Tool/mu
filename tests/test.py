@@ -16,7 +16,7 @@ def runtest(line, test, expected):
 
     if ns == 'prelude':
         proc = subprocess.Popen(['../dist/mu-sys',
-                                 '-l../dist/prelude/prelude.l',
+                                 '-l../dist/prelude/core.l',
                                  '-q (prelude:%init-ns)',
                                  '-p',
                                  '-e' + test],\

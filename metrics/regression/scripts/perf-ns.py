@@ -33,7 +33,7 @@ def storage(ns, group, line, test):
 
     if ns == 'prelude':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/prelude/prelude.l',
+                                 '-l../../dist/prelude/core.l',
                                  '-q (prelude:%init-ns)',
                                  '-p',
                                  '-l./perf.l',
@@ -70,7 +70,7 @@ def timing(ns, test):
 
     if ns == 'prelude':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/prelude/prelude.l',
+                                 '-l../../dist/prelude/core.l',
                                  '-q (prelude:%init-ns)',
                                  '-p',
                                  '-l./perf.l',
