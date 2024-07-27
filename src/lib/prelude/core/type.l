@@ -15,7 +15,7 @@
 ;;;
 ;;; type struct: #s(:<type> #(:t name property-alist))
 ;;;
-;;; where the property-alist is ((:predicate . :predicate) ...)
+;;; where the property-alist is ((:property . accessor) ...)
 ;;;
 (mu:intern prelude "define-type"
    (:lambda (name properties)

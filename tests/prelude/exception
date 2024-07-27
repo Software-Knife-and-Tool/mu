@@ -3,5 +3,5 @@
 (mu:type-of prelude:raise)	:func
 (mu:type-of prelude:warn)	:func
 (prelude:structp (prelude:make-exception () :error 'test "exception test" ()))	:t
-(prelude:exceptp (prelude:make-exception () :error 'test "exception test" ()))	:t
+(prelude:exceptionp (prelude:make-exception () :error 'test "exception test" ()))	:t
 (prelude:with-exception (:lambda (exception) ()) (:lambda () :t))	:t

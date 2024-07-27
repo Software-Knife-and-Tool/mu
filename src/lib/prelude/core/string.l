@@ -180,7 +180,7 @@
      (:if (prelude:stringp str)
           (:if (prelude:fixnump start)
                (:if (prelude:fixnump end)
-                    (prelude:slice str start end)
+                    (prelude:vector-slice str start end)
                     (prelude:raise end 'prelude:substr "is not a fixnum"))
                (prelude:raise str 'prelude:substr "is not a string"))
           (prelude:raise start 'prelude:substr "is not a fixnum"))))

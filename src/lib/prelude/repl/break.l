@@ -34,9 +34,9 @@
 ;;; break loop
 ;;;
 (mu:intern prelude "break"
-   (:lambda (except)
+   (:lambda (exception)
      (prelude:format :t ";;; entering break loop with exception~%" ())
-     (prelude:%exceptf :t ";;; ~A on ~A by ~S, ~A~%" () except)
+     (prelude:%exceptionf :t ";;; ~A on ~A by ~S, ~A~%" () exception)
      (prelude:format :t ";;; :h for commands~%" ())
      (mu:fix
       (:lambda (loop)
@@ -55,12 +55,12 @@
                           ((:lambda (value)
                              (prelude:describe (mu:cdr value) :t)
                              (prelude:null loop))
-                           (prelude:%except-prop :value except))
+                           (prelude:%exception-prop :value except))
                           (:if (mu:eq form :x)
                                (mu:exit 0)
                                (:if (mu:eq form :e)
                                     ((:lambda ()
-                                       (prelude:%exceptf mu:*standard-output* "exception: ~A on ~A by ~S, ~A~%" :t except)
+                                       (prelude:%exceptionf mu:*standard-output* "exception: ~A on ~A by ~S, ~A~%" :t except)
                                        (prelude:null loop)))
                                     (:if (mu:eq form :r)
                                          loop

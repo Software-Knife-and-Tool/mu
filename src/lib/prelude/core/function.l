@@ -4,6 +4,19 @@
 ;;;
 ;;; closures
 ;;;
+
+;;;
+;;; function properties
+;;;
+(mu:intern prelude "%fn-prop"
+   (:lambda (prop fn)
+      (:if (prelude:findl (:lambda (fn-prop) (mu:eq prop fn-prop)) '(:lambda :arity :fn :env))
+           ((:lambda (ref)
+               ;;; (prelude:raise-when prelude:null prop 'prelude:%function-prop "property not bound")
+               (mu:cdr ref))
+            (prelude:%type-ref prop fn))
+           (prelude:%lambda-prop prop (prelude:%fn-prop :lambda fn)))))
+
 ;;;
 ;;; predicates
 ;;;
@@ -20,14 +33,12 @@
            (prelude:%prelude-function-p fn))))
 
 ;;;
-;;; [*function descriptor*] #s(:<type> :%fn (lambda narg-list fn env))
+;;; [*function descriptor*] #s(:<type> :%fn (lambda nargs fn env))
 ;;;
 ;;; lambda: lambda type
 ;;; nargs:  number of reqs plus rest
-;;; fn:     implementation
+;;; fn:     mu function implementation
 ;;; env:    dynamic environment, list of frames
-;;;
-;;; function
 ;;;
 (mu:intern prelude "%make-fn"
    (:lambda (lambda fn env)
@@ -41,19 +52,8 @@
         (mu:length (prelude:%lambda-prop :bound lambda))
         (:if (prelude:%lambda-prop :rest lambda) 1 0)))))
 
-(mu:intern prelude "%fn-prop"
-   (:lambda (prop fn)
-      (:if (prelude:findl (:lambda (fn-prop) (mu:eq prop fn-prop)) '(:lambda :arity :fn :env))
-           ((:lambda (ref)
-               ;;; (prelude:raise-when prelude:null prop 'prelude:%function-prop "property not bound")
-               (mu:cdr ref))
-            (prelude:%type-ref prop fn))
-           (prelude:%lambda-prop prop (prelude:%fn-prop :lambda fn)))))
-
 ;;;
 ;;; create closed environment
-;;;
-;;; retruns env
 ;;;
 (mu:intern prelude "%closure-env"
    (:lambda (lambda body env)
@@ -89,23 +89,7 @@
        (prelude:%type-ref :bound lambda))))
 
 ;;;
-;;; %close-env = > closure
-;;;
-;;; mu:frames => list of [*frame descriptor*] (function . vector)
-;;; env => list of (symbol . lambda)
-;;;
-(mu:intern prelude "%close-env"
-  (:lambda (closure env)
-     ((:lambda (lambda fn env)
-         (prelude:%make-fn lambda fn env))
-      (prelude:%make-lambda
-       (prelude:%lambda-prop :bound fn)
-       (prelude:%lambda-prop :rest fn)
-       (mu:frames))
-      (prelude:%fn-prop :fn fn))))
-
-;;;
-;;; compile closed lambda => function
+;;; compile closed lambda => mu function
 ;;;
 (mu:intern prelude "%compile-function"
    (:lambda (form env)

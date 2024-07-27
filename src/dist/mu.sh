@@ -20,43 +20,7 @@ PRELUDE_FILES=""
 OPTIONS=""
 SOURCES=""
 
-# prelude.l needs to be first
-PRELUDE=(	       	\
-      prelude.l		\
-      break.l		\
-      compile.l		\
-      describe.l       	\
-      environment.l	\
-      exception.l	\
-      fixnum.l		\
-      format.l		\
-      funcall.l		\
-      function.l	\
-      inspect.l		\
-      lambda.l		\
-      list.l		\
-      loader.l          \
-      log.l		\
-      macro.l		\
-      map.l		\
-      namespace.l	\
-      parse.l		\
-      quasiquote.l	\
-      read-macro.l	\
-      read.l		\
-      repl.l		\
-      stream.l		\
-      string.l		\
-      symbol-macro.l	\
-      symbol.l		\
-      time.l		\
-      type.l		\
-      vector.l		\
-    )
-
-for src in ${PRELUDE[@]}; do
-    PRELUDE_FILES+=" -l $BASE_PRELUDE/$src"
-done
+PRELUDE_FILES=" -l $BASE_PRELUDE/prelude.l -l $BASE_PRELUDE/repl.l"
 
 optspec=":h-:"
 while getopts "$optspec" optchar; do

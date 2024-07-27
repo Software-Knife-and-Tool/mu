@@ -1,5 +1,5 @@
 (mu:type-of prelude:make-vector)	:func
-(mu:type-of prelude:slice)	:func
+(mu:type-of prelude:vector-slice)	:func
 (mu:type-of prelude:vector-length)	:func
 (mu:type-of prelude:vector-ref)	:func
 (mu:type-of prelude:vectorp)	:func
@@ -13,12 +13,12 @@
 (prelude:%prelude-type-p (prelude:make-vector '(1 2 3)))	:nil
 (prelude:vector-type #(:t 1 2 3))	:t
 (prelude:vector-type (prelude:read (prelude:make-string-stream :input "#*11101") () ()))	bit
-(prelude:vector-type (prelude:slice #(:fixnum 1 2 3) 1 2))	:fixnum
-(prelude:slice #(:fixnum 1 2 3) 1 2)	#s(:<type> #(:t %vector ((:base . #(:fixnum 1 2 3)) (:disp 1 . 2) (:bitvec))))
+(prelude:vector-type (prelude:vector-slice #(:fixnum 1 2 3) 1 2))	:fixnum
+(prelude:vector-slice #(:fixnum 1 2 3) 1 2)	#s(:<type> #(:t %vector ((:base . #(:fixnum 1 2 3)) (:disp 1 . 2) (:bitvec))))
 (prelude:vector-ref (prelude:make-vector '(1 2 3)) 1)	2
 (prelude:vectorp (prelude:make-vector '(1 2 3)))	:t
 (prelude:vectorp (mu:make-vector :t '(1 2 3)))	:t
-(prelude:vector-ref (prelude:slice #(:fixnum 1 2 3) 1 2) 0)	2
+(prelude:vector-ref (prelude:vector-slice #(:fixnum 1 2 3) 1 2) 0)	2
 (prelude:vectorp (prelude:read (prelude:make-string-stream :input "#*1111") () ()))	:t
 (prelude:vector-length (prelude:read (prelude:make-string-stream :input "#*1111") () ()))	4
 (prelude:vector-ref (prelude:read (prelude:make-string-stream :input "#*1111") () ()) 0)	1

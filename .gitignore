@@ -3,12 +3,9 @@
 TAGS
 Cargo.lock
 dist/mu*.tgz
+dist/mu-*
+dist/prelude
 dist/sysgen
-dist/mu-exec
-dist/mu-ld
-dist/mu-server
-dist/mu-sys
-dist/prelude.l
 doc/rustdoc
 metrics/footprint/*.report
 metrics/footprint/json

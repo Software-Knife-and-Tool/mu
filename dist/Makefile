@@ -22,6 +22,10 @@ dist:
 	@install -d $(BASE)/lib/common
 	@install -d $(BASE)/lib/mu
 	@install -d $(BASE)/lib/prelude
+	@install -d $(BASE)/lib/prelude/core
+	@install -d $(BASE)/lib/prelude/system
+	@install -d $(BASE)/lib/prelude/repl
+	@install -d $(BASE)/lib/prelude/inspect
 	@install -d $(BASE)/lib/sysgen
 
 	@make -f dist.mk dist

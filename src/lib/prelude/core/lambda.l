@@ -2,14 +2,11 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; lambda form
-;;;
-;;; [*lambda form*]
 ;;; (lambda ([symbol ...] [&rest rest-symbol]) . body)
 ;;;
 
 ;;;
-;;; [*lambda descriptor*] #s(:<type> :lambda (bound rest lexenv))
+;;; lambda descriptor: #s(:<type> :lambda (bound rest lexenv))
 ;;;
 ;;; bound:  bound symbols
 ;;; rest:   rest symbol or nil
