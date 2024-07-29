@@ -124,30 +124,30 @@
 ;;;
 (mu:intern prelude "%read-consume-ws"
    (:lambda (stream)
-    (mu:fix
-     (:lambda (loop)
-       (:if (prelude:%orf (prelude:streamp loop) (prelude:charp loop))
-            loop
-            ((:lambda (ch)
-               (:if (prelude:null ch)
-                    stream
-                    (:if (mu:eq :wspace (prelude:%read-char-syntax ch))
-                         (prelude:null loop)
-                         (:if (mu:eq ch #\#)
-                              ((:lambda (ch)
-                                 (:if (mu:eq ch #\|)
-                                      ((:lambda ()
+     (mu:fix
+      (:lambda (loop)
+        (:if (prelude:%orf (prelude:streamp loop) (prelude:charp loop))
+             loop
+             ((:lambda (ch)
+                (:if (prelude:null ch)
+                     stream
+                     (:if (mu:eq :wspace (prelude:%read-char-syntax ch))
+                          (prelude:null loop)
+                          (:if (mu:eq ch #\#)
+                               ((:lambda (ch)
+                                  (:if (mu:eq ch #\|)
+                                       ((:lambda ()
                                           (prelude:%read-sharp-comment ch stream)
                                           (prelude:null loop)))
-                                      #\#))
+                                       #\#))
                                 (prelude:peek-char stream () ()))
-                              (:if (mu:eq ch #\;)
-                                   ((:lambda ()
+                               (:if (mu:eq ch #\;)
+                                    ((:lambda ()
                                        (prelude:%read-line-comment ch stream)
                                        (prelude:null loop)))
-                                   ch)))))
-             (prelude:read-char stream () ()))))
-     ())))
+                                    ch)))))
+              (prelude:read-char stream () ()))))
+      ())))
 
 ;;;
 ;;; recursive reader
@@ -155,7 +155,7 @@
 (mu:intern prelude "%read"
   (:lambda (stream)
     ((:lambda (ch)
-       (:if (prelude:null ch)
+       (:if (prelude:streamp ch)
             prelude:%eof%
             ((:lambda (macro)
                (:if macro
