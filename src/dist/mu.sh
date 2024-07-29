@@ -20,7 +20,7 @@ PRELUDE_FILES=""
 OPTIONS=""
 SOURCES=""
 
-PRELUDE_FILES=" -l $BASE_PRELUDE/prelude.l -l $BASE_PRELUDE/repl.l"
+PRELUDE_FILES=" -l $BASE_PRELUDE/core.l -l $BASE_PRELUDE/repl.l"
 
 optspec=":h-:"
 while getopts "$optspec" optchar; do

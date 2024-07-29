@@ -1,26 +1,28 @@
-(lib:intern (lib:find-ns "") "list" (lambda (&rest list) list))
+;;; delete me
 
-(lib:intern (lib:find-ns "") "list*"
+(mu:intern (mu:find-namespace "") "list" (lambda (&rest list) list))
+
+(mu:intern (mu:find-namespace "") "list*"
    (lambda (&rest args)
-     (lib:car
-      (lib:fix
+     (mu:car
+      (mu:fix
        (:lambda (loop)
          ((:lambda (list args)
             (:if args
-                 (:if (lib:cdr args)
-                      (lib:cons (lib:append list (lib:cons (lib:car args) ())) (lib:cdr args))
-                      (lib:cons (lib:append list (lib:car args)) ()))
+                 (:if (mu:cdr args)
+                      (mu:cons (mu:append list (mu:cons (mu:car args) ())) (mu:cdr args))
+                      (mu:cons (mu:append list (mu:car args)) ()))
                  loop))
-          (lib:car loop)
-          (lib:cdr loop)))
-       (lib:cons () args)))))
+          (mu:car loop)
+          (mu:cdr loop)))
+       (mu:cons () args)))))
 
-(lib:intern (lib:find-ns "") "list+"
+(mu:intern (mu:find-namespace "") "list+" ;;; delete me
    (lambda (&rest args)
      (if args
-         (if (lib:cdr args)
-             (lib:cons (lib:car args) (list+ (lib:cdr args)))
-             (lib:car args)))))
+         (if (mu:cdr args)
+             (mu:cons (mu:car args) (list+ (mu:cdr args)))
+             (mu:car args)))))
 
 (define-macro progn (&rest body) (list (list* 'lambda () body)))
 
