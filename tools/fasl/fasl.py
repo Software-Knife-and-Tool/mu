@@ -1,23 +1,31 @@
-import sys
+###  SPDX-FileCopyrightText: Copyright 2023 James M. Putnam (putnamjm.design@gmail.com)
+###  SPDX-License-Identifier: MIT
+###
 import os
-import re
-from datetime import datetime
+import sys
+import subprocess
 
-with open(sys.argv[1]) as f: src = f.read(-1)
+mu_cmd = '/opt/mu/bin/mu-sys'
 
-def strip_comment(src):
-    return re.sub(r';.*\n', '', re.sub(r'\#\|.*\|\#', ' ', src))
+src = sys.argv[1]
 
-def strip_space(src):
-    return re.sub(r'\n', '', re.sub(r'\s[\s]+', ' ', src))
+def fasl():
+    proc = subprocess.Popen([
+        mu_cmd,
+        '-p',
+        '-l', '/opt/mu/lib/prelude/core.l',
+        '-q', '(prelude:%init-ns)',
+        '-l', './fasl.l',
+        '-q', f'(fasl:fasl "{src}" :t)'
+    ],\
+    stdout=subprocess.PIPE,\
+    stderr=subprocess.PIPE)
     
-def fasl(src):
-    date = datetime.now().strftime('%m/%d/%Y %H:%M:%S')
-    
-    print(f';;; fasl: {sys.argv[1]} {date}')
-    src = strip_comment(src)
-    src = strip_space(src)
+    vector = proc.stdout.read()[:-1].decode('utf8')
+    err = proc.stderr.read()[:-1].decode('utf8')
 
-    print(src)
+    proc.communicate()
 
-fasl(src)
+    return vector if proc.poll == 0 else err
+
+print(fasl())

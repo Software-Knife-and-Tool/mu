@@ -6,6 +6,7 @@ dist/mu*.tgz
 dist/mu-*
 dist/prelude
 dist/sysgen
+dist/devop
 doc/rustdoc
 metrics/footprint/*.report
 metrics/footprint/json
