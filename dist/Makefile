@@ -33,12 +33,12 @@ dist:
 	@install -m 644 $(SRC)/dist/mu.l $(BASE)/lib
 	@install -m 644 -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
 
-	@install -m 755 ./sysgen $(BASE)/bin
+	@install -m 755 ./devop $(BASE)/bin
 	@install -m 755 ./mu-exec $(BASE)/bin
 	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-server $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
-
+	@install -m 755 ./sysgen $(BASE)/bin
 	@install -m 755 $(SRC)/dist/mu.sh $(BASE)/bin/mu
 
 	@install -d $(BASE)/doc/html
