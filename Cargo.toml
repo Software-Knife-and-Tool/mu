@@ -19,6 +19,7 @@ default = [ "std", "sysinfo", "nix", "ffi" ]
 nix = []
 std = []
 ffi = []
+perf = []
 sysinfo = []  # not for macos
 
 [profile.dev]
@@ -28,6 +29,9 @@ opt-level = 0
 opt-level = 3
 lto = "fat"
 codegen-units = 1
+
+[profile.perf]
+inherits = "release"
 
 [dependencies]
 async-std = "1.12.0"
