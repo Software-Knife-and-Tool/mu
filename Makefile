@@ -13,6 +13,7 @@ help:
 	@echo "--- build options"
 	@echo "    debug - build runtime for debug and package for distribution"
 	@echo "    release - build runtime for release and package for distribution"
+	@echo "    perf - build runtime for performance monitoring and package for distribution"
 	@echo "--- distribution options"
 	@echo "    doc - generate documentation"
 	@echo "    dist - build distribution image"
@@ -62,6 +63,16 @@ debug:
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sys dist
 	@cp target/release/sysgen dist
+	@make dist --no-print-directory
+
+perf:
+	@cargo build --profile perf --features perf --workspace
+	@cp target/perf/devop dist
+	@cp target/perf/mu-exec dist
+	@cp target/perf/mu-ld dist
+	@cp target/perf/mu-server dist
+	@cp target/perf/mu-sys dist
+	@cp target/perf/sysgen dist
 	@make dist --no-print-directory
 
 dist:
