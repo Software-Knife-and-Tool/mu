@@ -9,7 +9,7 @@
 ;;; argument lists
 ;;;
 (mu:intern prelude "%arg-list"
-    (:lambda (arg-list)
+   (:lambda (arg-list)
       (prelude:foldr
        (:lambda (elt acc)
          `(mu:cons ,elt ,acc))
@@ -17,18 +17,20 @@
        arg-list)))
 
 (mu:intern prelude "%lambda-arg-list"
-    (:lambda (function arg-list)
+   (:lambda (function arg-list)
       (:if (prelude:%prelude-function-p function)
-                ((:lambda (rest nreqs)
-                   (:if (prelude:%andf rest (prelude:zerop nreqs))
-                        `(mu:cons ,(prelude:%arg-list arg-list) ())
-                        ((:lambda (reqs rest)
-                           (prelude:%arg-list `(,@reqs ,(prelude:%arg-list rest))))
-                         (prelude:dropr arg-list (mu:difference (mu:length arg-list) nreqs))
-                         (prelude:dropl arg-list nreqs))))
-                 (prelude:%fn-prop :rest function)
-                 (prelude:%fn-prop :arity function))
-                (prelude:%arg-list arg-list))))
+           ((:lambda (rest nreqs)
+              (:if (prelude:%andf rest (prelude:zerop nreqs))
+                   `(mu:cons ,(prelude:%arg-list arg-list) ())
+                   ((:lambda (reqs rest)
+                      (:if (prelude:%andf (prelude:null rest) (prelude:null reqs))
+                           ()
+                           (prelude:%arg-list `(,@reqs ,(prelude:%arg-list rest)))))
+                    (prelude:dropr arg-list (mu:difference (mu:length arg-list) nreqs))
+                    (prelude:dropl arg-list nreqs))))
+            (prelude:%fn-prop :rest function)
+            (prelude:%fn-prop :arity function))
+           (prelude:%arg-list arg-list))))
 
 (mu:intern prelude "%quoted-lambda-arg-list"
   (:lambda (fn args)
@@ -72,9 +74,7 @@
 ;;;
 (mu:intern prelude "%compile-lambda-call"
    (:lambda (lambda-form arg-list env)
-;;;     (prelude:warn lambda-form "compile-lambda-call")
      ((:lambda (compiled-function)
-        ;;; (prelude:warn compiled-function "compiled-function")
         (:if (prelude:functionp compiled-function)
              (:if (prelude:%prelude-function-p compiled-function)
                   `(,prelude:%fn-apply-quoted ,compiled-function ,(prelude:%compile-lambda-arg-list compiled-function arg-list env))
@@ -84,7 +84,6 @@
 
 (mu:intern prelude "%compile-symbol-call"
    (:lambda (function-symbol arg-list env)
-;;;     (prelude:warn function-symbol "compile-symbol-call")
       (:if (prelude:boundp function-symbol)
            ((:lambda (function)
                (:if (prelude:functionp function)
@@ -97,7 +96,6 @@
 
 (mu:intern prelude "%compile-funcall"
    (:lambda (function-form arg-list env)
-      ;;; (prelude:warn function-form "compile-funcall")
       (:if (prelude:consp function-form)
            (prelude:%compile-lambda-call function-form arg-list env)
            (:if (mu:eq :symbol (mu:type-of function-form))
@@ -106,11 +104,27 @@
 
 ;;;
 ;;; apply closure to argument list
-;;;
+;;; sic transit
+(mu:intern prelude "%describe-fn"
+   (:lambda (fn)
+     (:if (prelude:%prelude-function-p fn)
+          ((:lambda (lambda arity fn env)
+             (prelude:eprint "" "%describe-fn:prelude")
+             (prelude:eprint lambda "    lambda")
+             (prelude:eprint arity "    arity")
+             (prelude:eprint fn "    fn")
+             (prelude:eprint env "    env"))
+           (prelude:%fn-prop :lambda fn)
+           (prelude:%fn-prop :arity fn)
+           (prelude:%fn-prop :fn fn)
+           (prelude:%fn-prop :env fn))
+          (prelude:eprint (mu:view fn) "%describe-fn:mu-fn"))))
+
 (mu:intern prelude "%fn-apply"
    (:lambda (fn arg-list)
-      ;;; (prelude:warn `(,fn ,arg-list) "%fn-apply")
-      ((:lambda (env)
+     ;;; (prelude:%describe-fn fn)
+     ;;; (prelude:eprint arg-list "%fn-apply-quoted:arg list")
+     ((:lambda (env)
         (prelude:%mapc mu:frame-push env)
          ((:lambda (value)
             (prelude:%mapc (:lambda (frame) (mu:frame-pop (mu:car frame))) env)
@@ -122,7 +136,8 @@
 
 (mu:intern prelude "%fn-apply-quoted"
    (:lambda (fn arg-list)
-      ;;; (prelude:warn `(,fn ,arg-list) "%fn-apply-quoted")
+     ;;; (prelude:%describe-fn fn)
+     ;;; (prelude:eprint arg-list "%fn-apply-quoted:arg list")
       ((:lambda (env)
         (prelude:%mapc mu:frame-push env)
         ((:lambda (value)

@@ -61,7 +61,6 @@
 
 (mu:intern prelude "%compile-if"
    (:lambda (form env)
-     ;;; (prelude:warn form "compile-if")
      ((:lambda (length)
           (:if (prelude:%orf (mu:eq length 3) (mu:eq length 4))
                ((:lambda (test t-arm f-arm)
@@ -89,29 +88,40 @@
 ;;;
 (mu:intern prelude "%compile"
    (:lambda (form env)
-      (:if (prelude:consp form)
-           ((:lambda (function-form arg-list)
-               (:if (prelude:keywordp function-form)
-                    (mu:compile form)                    ; mu special form (:key ...)
-                    (:if (mu:eq :symbol (mu:type-of function-form)) ; special form or macro
-                         ((:lambda (special)
-                             (:if special
-                                  (mu:apply (mu:symbol-value special) `(,form ,env))
-                                  ((:lambda (macro-function)
-                                      (:if macro-function
-                                           (prelude:%compile-macro-call function-form arg-list env)
-                                           (prelude:%compile-funcall function-form arg-list env)))
-                                   (prelude:macro-function function-form env))))
-                          (mu:cdr (prelude:%assq
-                                   function-form
-                                   '((define-macro . prelude:%compile-defmacro)
-                                     (if           . prelude:%compile-if)
-                                     (%quasi%      . prelude:%compile-quasi)
-                                     (lambda       . prelude:%compile-lambda)))))
-                    (prelude:%compile-funcall function-form arg-list env))))
-            (mu:car form)
-            (mu:cdr form))
-           form)))
+     (:if (prelude:symbolp form)
+          ((:lambda (ns name)
+             (:if (mu:eq ns (mu:find-namespace ""))
+                  ((:lambda (frame-ref)
+                     ;;; (prelude:warn name "%compiling an unqualified symbol")
+                     ;;; (prelude:warn env "in this environment")
+                     form)
+                   (prelude:%frame-ref form env))
+                  form))
+             (prelude:symbol-namespace form)
+             (prelude:symbol-name form))
+          (:if (prelude:consp form)
+               ((:lambda (function-form arg-list)
+                  (:if (prelude:keywordp function-form)
+                       (mu:compile form)              ; mu special form (:key ...)
+                       (:if (mu:eq :symbol (mu:type-of function-form)) ; special form or macro
+                            ((:lambda (special)
+                               (:if special
+                                    (mu:apply (mu:symbol-value special) `(,form ,env))
+                                    ((:lambda (macro-function)
+                                       (:if macro-function
+                                            (prelude:%compile-macro-call function-form arg-list env)
+                                            (prelude:%compile-funcall function-form arg-list env)))
+                                     (prelude:macro-function function-form env))))
+                             (mu:cdr (prelude:%assq
+                                      function-form
+                                      '((define-macro . prelude:%compile-defmacro)
+                                        (if           . prelude:%compile-if)
+                                        (%quasi%      . prelude:%compile-quasi)
+                                        (lambda       . prelude:%compile-lambda)))))
+                            (prelude:%compile-funcall function-form arg-list env))))
+                (mu:car form)
+                (mu:cdr form))
+           form))))
 
 ;;;
 ;;; prelude's compile interface, compiles in the null environment

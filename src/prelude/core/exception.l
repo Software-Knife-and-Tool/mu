@@ -60,7 +60,7 @@
                                            value
                                            source
                                            "mu:raise"
-                                           (mu:frames))))))
+                                           (mu:dynamic-env))))))
       (:lambda () (prelude:apply thunk ())))))
 
 (mu:intern prelude "make-exception"
@@ -85,7 +85,7 @@
 (mu:intern prelude "raise-env"
    (:lambda (value source reason)
      (mu:raise
-      (prelude:make-exception :error value source reason (mu:frames))
+      (prelude:make-exception :error value source reason (mu:dynamic-env))
       :except)))
 
 (mu:intern prelude "raise"
@@ -102,6 +102,11 @@
      (mu:write message () mu:*error-output*)
      (mu:write-char #\linefeed mu:*error-output*)
      value))
+
+(mu:intern prelude "eprint"
+   (:lambda (value message)          
+     (prelude:format mu:*error-output* ";;; ~A:~T ~A~%" `(,message ,value))
+    value))
 
 (mu:intern prelude "warn"
    (:lambda (value message)

@@ -29,7 +29,7 @@
       ;;; exception
       (prelude:define-type "%except"
           '((:cond   . :symbolp)
-            (:value . :t)
+            (:value  . :t)
             (:source . :symbolp)
             (:reason . :string)
             (:env    . :listp)))
