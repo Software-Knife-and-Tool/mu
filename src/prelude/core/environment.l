@@ -14,7 +14,7 @@
    (:lambda (bindings)
      (:if (prelude:listp bindings)
           ((:lambda (env)
-             (prelude:warn env "make-environment: env")
+             ;;; (prelude:warn env "make-environment: env")
              (prelude:mapc
               (:lambda (pair)
                 ((:lambda (symbol value)

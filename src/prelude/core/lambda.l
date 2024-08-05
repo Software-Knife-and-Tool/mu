@@ -98,7 +98,6 @@
                 body))
           `(,lambda-desc ,@env)))))
 
-#|
 ;;;
 ;;; resolving body symbols
 ;;;
@@ -109,7 +108,7 @@
 ;;; `symbol:` symbol to be compiled
 ;;; `env:` lexical compiled environment
 ;;;
-;;; `returns:` *frame-ref* or *nil*
+;;; `returns:` compiled *frame-ref* or *nil*
 ;;;
 (mu:intern prelude "%frame-ref"
   (:lambda (symbol env)
@@ -128,5 +127,4 @@
              (:lambda (el) (mu:eq el symbol))
              (mu:cdr (prelude:%type-ref :bound frame))))))
      ()
-     env)))
-|#
+env)))
