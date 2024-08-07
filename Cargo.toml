@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["me <putnamjm.design@gmail.com>"]
 
 [workspace]
-members = [ "src/sysgen", "src/devop", "src/mu-*" ]
+members = [ "src/sysgen", "src/mu-*" ]
 resolver = "2"
 
 [lib]

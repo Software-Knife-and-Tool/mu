@@ -111,7 +111,8 @@
 ;;; `returns:` compiled *frame-ref* or *nil*
 ;;;
 (mu:intern prelude "%frame-ref"
-  (:lambda (symbol env)
+   (:lambda (symbol env)
+    ;;; (prelude:mapc (:lambda (frame) (prelude:warn env "frame")) env)          
     (prelude:%foldl
      (:lambda (frame acc)
        (:if acc
@@ -127,4 +128,4 @@
              (:lambda (el) (mu:eq el symbol))
              (mu:cdr (prelude:%type-ref :bound frame))))))
      ()
-env)))
+     env)))

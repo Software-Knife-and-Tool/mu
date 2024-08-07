@@ -60,7 +60,7 @@
                                            value
                                            source
                                            "mu:raise"
-                                           (mu:dynamic-env))))))
+                                           (mu:frames))))))
       (:lambda () (prelude:apply thunk ())))))
 
 (mu:intern prelude "make-exception"
@@ -85,7 +85,7 @@
 (mu:intern prelude "raise-env"
    (:lambda (value source reason)
      (mu:raise
-      (prelude:make-exception :error value source reason (mu:dynamic-env))
+      (prelude:make-exception :error value source reason (mu:frames))
       :except)))
 
 (mu:intern prelude "raise"

@@ -1,5 +1,5 @@
 [package]
-name = "devop"
+name = "mu-ui"
 version = "0.0.1"
 edition = "2021"
 
@@ -11,4 +11,5 @@ lazy_static = "1.4.0"
 public-api = "0.35.1"
 rust-fsm = "0.7.0"
 rustdoc-json = "0.9.1"
+temp-file = "0.1.8"
 upon = "0.8.1"
