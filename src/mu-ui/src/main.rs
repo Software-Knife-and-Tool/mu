@@ -40,7 +40,7 @@ pub fn main() {
         "symbols" => Symbols::symbols(&options),
         "test" => Test::test(&options),
         _ => {
-            eprintln!("devop: unimplemented command {command}");
+            eprintln!("mu-ui: unimplemented command {command}");
             std::process::exit(-1)
         }
     }

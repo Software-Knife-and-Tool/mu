@@ -47,21 +47,21 @@ emacs: tags
 
 release:
 	@cargo build --release --workspace
-	@cp target/release/devop dist
 	@cp target/release/mu-exec dist
 	@cp target/release/mu-ld dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sys dist
+	@cp target/release/mu-ui dist
 	@cp target/release/sysgen dist
 	@make dist --no-print-directory
 
 debug:
 	@cargo build --workspace
-	@cp target/release/devop dist
 	@cp target/release/mu-exec dist
 	@cp target/release/mu-ld dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sys dist
+	@cp target/release/mu-ui dist
 	@cp target/release/sysgen dist
 	@make dist --no-print-directory
 
