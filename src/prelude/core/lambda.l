@@ -2,10 +2,6 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; (lambda ([symbol ...] [&rest rest-symbol]) . body)
-;;;
-
-;;;
 ;;; lambda descriptor: #s(:<type> :lambda (bound rest lexenv))
 ;;;
 ;;; bound:  bound symbols
@@ -18,35 +14,45 @@
        (prelude:%prelude-type-p fn)
        (mu:eq '%lambda (prelude:type-of fn)))))
 
+(mu:intern prelude "%apply-lambda" (:lambda (fn) (fn)))
 (mu:intern prelude "%make-lambda"
    (:lambda (lambda-list rest-sym env)
-      (prelude:%make-type "%lambda"
-         `(,(mu:cons :bound  lambda-list)
-           ,(mu:cons :rest   rest-sym)
-           ,(mu:cons :lexenv env)))))
+     ((:lambda (frame)
+        (prelude:%make-type "%lambda"
+           `(,(mu:cons :bound  lambda-list)
+             ,(mu:cons :frame  frame)
+             ,(mu:cons :rest   rest-sym)
+             ,(mu:cons :lexenv env))))
+      (:if (prelude:null lambda-list)
+           prelude:%apply-lambda
+           ((:lambda (fn-symbol arg-list)
+              (mu:compile `(:lambda ,(mu:cons fn-symbol lambda-list) (mu:apply fn-symbol arg-list))))
+            (mu:make-symbol "fn")
+            (prelude:%arg-list lambda-list))))))
 
 (mu:intern prelude "%lambda-prop"
    (:lambda (prop lambda)
-      (:if (prelude:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :rest :lexenv))
+      (:if (prelude:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :frame :rest :lexenv))
            ((:lambda (ref)
-               ;;; (prelude:raise-when prelude:null prop 'lambda-prop "property not bound")
                (mu:cdr ref))
             (prelude:%type-ref prop lambda))
            (prelude:raise prop 'prelude:%lambda-prop "not a lambda property"))))
 
 ;;;
-;;; `%compile-lambda-list` compiles a lambda form to a lambda descriptor
+;;; `%compile-lambda-desc` compiles a lambda form to a lambda descriptor
 ;;;
 ;;; `lambda:` whole lambda form, with leading symbol
 ;;; `env:`    lexical environment
 ;;;
 ;;; `returns:` lambda descriptor
 ;;;
-(mu:intern prelude "%compile-lambda-list"
+(mu:intern prelude "%compile-lambda-desc"
    (:lambda (lambda env)
+     ;;; (prelude:warn lambda "from lambda")
       (:if (prelude:findl (:lambda (el) (prelude:null (mu:eq :symbol (mu:type-of el)))) lambda)
-           (prelude:raise lambda 'prelude:%compile-lambda-list "list syntax")
+           (prelude:raise lambda 'prelude:%compile-lambda-desc "list syntax")
            ((:lambda (desc)
+              ;;; (prelude:warn desc "to desc")
                (:if (prelude:fixnump desc)
                     (prelude:%make-lambda lambda () env)
                     desc))
@@ -60,7 +66,7 @@
                                 `(,@(prelude:dropr lambda 2) ,@(prelude:dropl lambda (mu:difference (mu:length lambda) 1)))
                                 (mu:nth (mu:difference (mu:length lambda) 1) lambda)
                                 env)
-                               (prelude:raise lambda 'prelude:%compile-lambda-list "rest botch"))
+                               (prelude:raise lambda 'prelude:%compile-lambda-desc "rest botch"))
                           (mu:sum 1 acc))))
              0
              lambda)))))
@@ -99,11 +105,9 @@
           `(,lambda-desc ,@env)))))
 
 ;;;
-;;; resolving body symbols
-;;;
 ;;; *%frame-ref* looks up *symbol* in the lexical environment.
 ;;;
-;;; if found return a compiled frame reference, otherwise *nil*.
+;;; if found returns a compiled frame reference, otherwise *nil*.
 ;;;
 ;;; `symbol:` symbol to be compiled
 ;;; `env:` lexical compiled environment
@@ -112,20 +116,21 @@
 ;;;
 (mu:intern prelude "%frame-ref"
    (:lambda (symbol env)
-    ;;; (prelude:mapc (:lambda (frame) (prelude:warn env "frame")) env)          
     (prelude:%foldl
      (:lambda (frame acc)
+;;;       (prelude:warn (prelude:%lambda-prop :bound frame) "frame-ref: bound")
+;;;       (prelude:warn `(,symbol ,(prelude:%lambda-prop :frame frame)) "frame-ref: symbol")
        (:if acc
             acc
             ((:lambda (offset)
                (:if offset
                     (mu:compile
-                     `(mu:frame-ref
-                       ,(mu:cdr (prelude:%type-ref :func frame))
+                     `(mu:%frame-ref
+                       ,(prelude:%lambda-prop :frame frame)
                        ,offset))
                     ()))
             (prelude:positionl
              (:lambda (el) (mu:eq el symbol))
-             (mu:cdr (prelude:%type-ref :bound frame))))))
+             (prelude:%lambda-prop :bound frame)))))
      ()
      env)))

@@ -51,7 +51,7 @@ release:
 	@cp target/release/mu-ld dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sys dist
-	@cp target/release/mu-ui dist
+	@cp target/release/mux dist
 	@cp target/release/sysgen dist
 	@make dist --no-print-directory
 
@@ -61,7 +61,7 @@ debug:
 	@cp target/release/mu-ld dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sys dist
-	@cp target/release/mu-ui dist
+	@cp target/release/mux dist
 	@cp target/release/sysgen dist
 	@make dist --no-print-directory
 
@@ -71,7 +71,7 @@ perf:
 	@cp target/perf/mu-exec dist
 	@cp target/perf/mu-ld dist
 	@cp target/perf/mu-server dist
-	@cp target/perf/mu-sys dist
+	@cp target/perf/mux dist
 	@cp target/perf/sysgen dist
 	@make dist --no-print-directory
 

@@ -4,6 +4,7 @@ TAGS
 Cargo.lock
 dist/mu*.tgz
 dist/mu-*
+dist/mux
 dist/prelude
 dist/sysgen
 dist/devop

@@ -60,7 +60,7 @@ lazy_static! {
         // env
         ( "apply",   2, Env::mu_apply ),
         ( "eval",    1, Env::mu_eval ),
-        ( "frames",  0, Env::mu_frames ),
+        ( "%frame-stack",  0, Env::mu_frames ),
         ( "fix",     2, Env::mu_fix ),
         // futures
         ( "defer",   2, Future::mu_future_defer ),
@@ -71,9 +71,9 @@ lazy_static! {
         ( "with-exception",  2, Exception::mu_with_exception ),
         ( "raise",           2, Exception::mu_raise ),
         // frames
-        ( "frame-pop",  1, Frame::mu_fr_pop ),
-        ( "frame-push", 1, Frame::mu_fr_push ),
-        ( "frame-ref",  2, Frame::mu_fr_ref ),
+        ( "%frame-pop",  1, Frame::mu_fr_pop ),
+        ( "%frame-push", 1, Frame::mu_fr_push ),
+        ( "%frame-ref",  2, Frame::mu_fr_ref ),
         // fixnums
         ( "ash",         2, Fixnum::mu_ash ),
         ( "sum",         2, Fixnum::mu_fxadd ),

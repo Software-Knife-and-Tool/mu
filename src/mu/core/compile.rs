@@ -159,9 +159,9 @@ impl Compile for Env {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
                 let lex_ref = vec![
-                    Namespace::intern(self, self.mu_ns, "frame-ref".to_string(), Tag::nil())
+                    Namespace::intern(self, self.mu_ns, "%frame-ref".to_string(), Tag::nil())
                         .unwrap(),
-                    Fixnum::with_u64_or_panic(tag.as_u64()),
+                    *tag,
                     Fixnum::with_or_panic(nth),
                 ];
 

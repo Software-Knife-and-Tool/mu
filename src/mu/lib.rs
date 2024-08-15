@@ -84,7 +84,7 @@ use {
 /// - Result, specialized result for API functions that can fail
 /// - Tag, tagged data representation
 
-/// tagged data representation
+///   tagged data representation
 pub type Tag = core::types::Tag;
 /// API function Result
 pub type Result = core::exception::Result<Tag>;

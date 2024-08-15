@@ -207,15 +207,11 @@ impl CoreFunction for Frame {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 
-        env.fp_argv_check("mu:frame-ref", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.fp_argv_check("mu:%frame-ref", &[Type::Function, Type::Fixnum], fp)?;
 
-        fp.value = match Frame::frame_ref(
-            env,
-            Fixnum::as_i64(frame) as u64,
-            Fixnum::as_i64(offset) as usize,
-        ) {
+        fp.value = match Frame::frame_ref(env, frame.as_u64(), Fixnum::as_i64(offset) as usize) {
             Some(tag) => tag,
-            None => return Err(Exception::new(env, Condition::Type, "mu:frame-ref", frame)),
+            None => return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", frame)),
         };
 
         Ok(())
