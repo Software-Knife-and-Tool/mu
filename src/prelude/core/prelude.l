@@ -19,10 +19,11 @@
             (:arity   . :fixnum)
             (:fn      . :func)
             (:env     . :listp)))
-      
+
       ;;; lambda
       (prelude:define-type "%lambda"
           '((:bound  . :listp)
+            (:frame  . :func)
             (:rest   . :symbolp)
             (:lexenv . :listp)))
 

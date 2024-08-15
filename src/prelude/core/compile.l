@@ -31,7 +31,7 @@
                           lambda-desc
                           body
                           env)))))
-                (prelude:%compile-lambda-list lambda env)))
+                (prelude:%compile-lambda-desc lambda env)))
             (mu:nth 1 form)
             (mu:nthcdr 2 form)))))
 

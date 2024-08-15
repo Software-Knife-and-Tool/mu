@@ -22,22 +22,22 @@ lazy_static! {
 
 impl Options {
     pub fn version() {
-        println!("mu-ui: 0.0.1");
+        println!("mux: 0.0.1");
         std::process::exit(0)
     }
 
     pub fn usage() {
-        println!("Usage: mu-ui command [option...]");
+        println!("Usage: mux command [option...]");
         println!("  command:    [help repl symbols crossref test version]");
         println!("    crossref                      ; symbol cross reference");
         println!("    help                          ; this message");
         println!("    repl      [--namespace ns]    ; repl");
         println!("    test      [--namespace ns]    ; run tests");
         println!("    symbols                       ; symbol table");
-        println!("    version                       ; mu-ui version");
+        println!("    version                       ; mux version");
         println!();
         println!("  general options:");
-        println!("    --verbose                       ; verbose operation");
+        println!("    --verbose                     ; verbose operation");
 
         std::process::exit(0);
     }
@@ -54,7 +54,7 @@ impl Options {
         let opts = match opts.parse(&argv[2..]) {
             Ok(opts) => opts,
             Err(error) => {
-                eprintln!("mu-ui options: {error:?}");
+                eprintln!("mux options: {error:?}");
                 std::process::exit(-1);
             }
         };

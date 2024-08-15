@@ -37,7 +37,7 @@ dist:
 	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-server $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
-	@install -m 755 ./mu-ui $(BASE)/bin
+	@install -m 755 ./mux $(BASE)/bin
 	@install -m 755 ./sysgen $(BASE)/bin
 	@install -m 755 $(SRC)/dist/mu.sh $(BASE)/bin/mu
 

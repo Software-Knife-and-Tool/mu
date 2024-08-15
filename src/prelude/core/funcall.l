@@ -102,36 +102,19 @@
                 (prelude:%compile-symbol-call function-form arg-list env)
                 (prelude:raise function-form 'prelude:%compile-funcall "illegal function call")))))
 
-;;;
-;;; apply closure to argument list
-;;; sic transit
-(mu:intern prelude "%describe-fn"
-   (:lambda (fn)
-     (:if (prelude:%prelude-function-p fn)
-          ((:lambda (lambda arity fn env)
-             (prelude:eprint "" "%describe-fn:prelude")
-             (prelude:eprint lambda "    lambda")
-             (prelude:eprint arity "    arity")
-             (prelude:eprint fn "    fn")
-             (prelude:eprint env "    env"))
-           (prelude:%fn-prop :lambda fn)
-           (prelude:%fn-prop :arity fn)
-           (prelude:%fn-prop :fn fn)
-           (prelude:%fn-prop :env fn))
-          (prelude:eprint (mu:view fn) "%describe-fn:mu-fn"))))
-
 (mu:intern prelude "%fn-apply"
    (:lambda (fn arg-list)
-     ;;; (prelude:%describe-fn fn)
-     ;;; (prelude:eprint arg-list "%fn-apply-quoted:arg list")
+;;;     (prelude:eprint arg-list "%fn-apply:arg list")
      ((:lambda (env)
-        (prelude:%mapc mu:frame-push env)
+        (prelude:%mapc mu:%frame-push env)
          ((:lambda (value)
-            (prelude:%mapc (:lambda (frame) (mu:frame-pop (mu:car frame))) env)
+            (prelude:%mapc (:lambda (frame) (mu:%frame-pop (mu:car frame))) env)
             value)
-          ((:lambda (lib-fn)
+          ((:lambda (lib-fn frame-fn)
+             ;;; (prelude:warn (mu:apply frame-fn `(,lib-fn ,arg-list)) "apply")
              (mu:apply lib-fn (mu:eval (prelude:%lambda-arg-list fn arg-list))))
-           (prelude:%fn-prop :fn fn))))
+           (prelude:%fn-prop :fn fn)
+           (prelude:%lambda-prop :frame (prelude:%fn-prop :lambda fn)))))
        (prelude:%fn-prop :env fn))))
 
 (mu:intern prelude "%fn-apply-quoted"
@@ -139,9 +122,9 @@
      ;;; (prelude:%describe-fn fn)
      ;;; (prelude:eprint arg-list "%fn-apply-quoted:arg list")
       ((:lambda (env)
-        (prelude:%mapc mu:frame-push env)
+        (prelude:%mapc mu:%frame-push env)
         ((:lambda (value)
-           (prelude:%mapc (:lambda (frame) (mu:frame-pop (mu:car frame))) env)
+           (prelude:%mapc (:lambda (frame) (mu:%frame-pop (mu:car frame))) env)
            value)
          ((:lambda (lib-fn)
              (mu:apply lib-fn arg-list))

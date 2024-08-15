@@ -33,6 +33,24 @@
            (prelude:%prelude-function-p fn))))
 
 ;;;
+;;; print prelude function
+;;;
+(mu:intern prelude "%describe-fn"
+   (:lambda (fn)
+     (:if (prelude:%prelude-function-p fn)
+          ((:lambda (lambda arity fn env)
+             (prelude:eprint "" "%describe-fn:prelude")
+             (prelude:eprint lambda "    lambda")
+             (prelude:eprint arity "    arity")
+             (prelude:eprint fn "    fn")
+             (prelude:eprint env "    env"))
+           (prelude:%fn-prop :lambda fn)
+           (prelude:%fn-prop :arity fn)
+           (prelude:%fn-prop :fn fn)
+           (prelude:%fn-prop :env fn))
+          (prelude:eprint (mu:view fn) "%describe-fn:mu-fn"))))
+
+;;;
 ;;; [*function descriptor*] #s(:<type> :%fn (lambda nargs fn env))
 ;;;
 ;;; lambda: lambda type
@@ -100,4 +118,4 @@
             `(:lambda
               ,(prelude:%lambda-prop :bound lambda)
               ,(prelude:%compile-lambda-body lambda (mu:nthcdr 2 form) env)))))
-       (prelude:%compile-lambda-list (mu:nth 1 form) env))))
+       (prelude:%compile-lambda-desc (mu:nth 1 form) env))))
