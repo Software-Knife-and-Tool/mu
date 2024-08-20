@@ -43,8 +43,8 @@ Most of our core computational frameworks are built on static systems and are fr
 
 ------
 
-- *mu-lisp*, a functional forward system language
-- *mu*, a small, configurable runtime library amd language
+- *mu*, a functional forward system language
+- *mu/lib*, a small, configurable runtime library amd language
 - *mu-sys*, minimal POSIX runtime suitable for containers
 - *mu/codegen*, a native code compiler
 - small and simple installation, no external dependencies
@@ -84,13 +84,13 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 *mu* leans heavily on functional programming principles.
 
-The *mu* runtime kernel, *mu*, is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file and random user selected features may have unsafe implementations.)
+The *mu* runtime kernel, *mu/lb*, is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file and random user selected features may have unsafe implementations.)
 
 The runtime implements 64 bit tagged pointers, is available as a crate, and extends a Rust API for embedded applications. The runtime is primarily a resource allocator and evaluator for the *mu* kernel language. *mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
 
 The *mu* 2-LISP system is organized as a stack of compilers, culminating in the *mu/codegen* native code compiler/system builder.
 
-The *prelude* library provides *rest* lambdas, closures, expanded struct types, macros, and a reader/compiler for those forms.
+The *core* library provides *rest* lambdas, closures, expanded struct types, macros, and a reader/compiler for those forms.
 
 Optional libraries provide a variety of enhancements and services, including Common LISP macros and binding special forms.
 
@@ -131,7 +131,7 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 
 ------
 
-versions past 0.1.69 are built with rust 1.79.0.
+versions past 0.1.69 are built with rust 1.79.0. the current version, 0.1.73, is built with rust 1.82.0.
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
@@ -202,13 +202,12 @@ The distribution includes a test suite, which should be run after every interest
 Failures in the *mu* tests are almost guaranteed to cause complete failure of subsequent tests.
 
 ```
-% make tests/summary
-% make tests/commit
+% make tests/base
+% make tests/current
+% make tests/report
 ```
 
-The `summary` target produces a human readable test report. This summary will be checked into the repo at the next commit.
-
- The `commit` target will produce a diff between the current summary and the repo summary.
+The `report` target produces a human readable test report. 
 
 The `tests` makefile has additional facilities for development. The `help` target will list them.
 
@@ -220,14 +219,14 @@ The `tests` makefile has additional facilities for development. The `help` targe
     namespaces - list namespaces
     commit - create test summary
     tests - tests in $NS
-    mu | prelude - run all tests in namespace, raw output
+    mu | cargo - run all tests in namespace, raw output
     test - run single test in $NS/$TEST
-    summary - run all tests in all namespaces and print summary
+    base - run all tests in all namespaces and print summary
 ```
 
 
 
-#### Performance regression metrics
+#### Performance metrics
 
 ------
 
@@ -238,20 +237,20 @@ The **NTESTS** environment variable (defaults to 10) controls how many passes ar
 On a modern Core I7 CPU at 3+ GHz, the default regression tests take approximately five minutes of elapsed time for both the *mu* and *prelude* namespaces.
 
 ```
-% make -C metrics/regression base
-% make -C metrics/regression current
-% make -C metrics/regression report
-% make -C metrics/regression commit
+% make -C tests/performance base
+% make -C tests/performance current
+% make -C tests/performance report
+% make -C tests/performance commit
 ```
 
 The `base` target produces a performance run and establishes a base line. The `current`  target produces a secondary performance run. The `report` target produces a human-readable diff between `base` and `current`.  Normally, you'd run a baseline, make some changes, and then do a current run to see if there were any regressions.
 
-The `regression` makefile has additional facilities for development, including reporting on individual tests. The `help` target will list them. 
+The `performance` makefile has additional facilities for development, including reporting on individual tests. The `help` target will list them. 
 
 In specific, a summary of significant performance changes (differences in measured resource consumption and/or a large difference in average test time between the current summary and the baseline summary.) Timing metrics are heavily CPU/clock speed dependent.
 
 ```
-% make -C metrics/regression commit
+% make -C tests/performance commit
 ```
 
 produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary.
@@ -259,13 +258,13 @@ produces a report of the differences between the current summary and the establi
 For convenience, the *mu* Makefile provides:
 
 ```
-% make regression/base		# establish a baseline report
-% make regression/current	# produce a secondary report
-% make regression/report	# diff baseline and current
-% make regression/commit	# diff baseline and current, prepare for commit
+% make performance/base		# establish a baseline report
+% make performance/current	# produce a secondary report
+% make performance/report	# diff baseline and current
+% make performance/commit	# diff baseline and current, prepare for commit
 ```
 
-The  `regression`  makefile offers some development options.
+The  `performance`  makefile offers some development options.
 
 ```
 % make -C metrics/regression help
@@ -293,7 +292,7 @@ The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory 
 mu-sys		shell runtime binary, stdio listener
 mu-ld		image loader
 mu-server	server runtime, socket listener
-mu			shell script for loading *prelude*, runs *mu-sys* listener
+mu			shell script for loading *core*, runs *mu-sys* listener
 ```
 
 
@@ -320,6 +319,8 @@ An interactive session for the extended *mu* system is invoked by the `mu` shell
 ```
 % /opt/mu/bin/mu 
 ```
+
+(the *prelude* namespace is currently under development.)
 
 If you want to exercise the *prelude* repl,
 
