@@ -1,0 +1,8 @@
+(mu:type-of ((:lambda () (core:compile '(define-macro core:a-macro () core:a-macro)) (core:macro-function 'core:a-macro ()))))
+((:lambda () (core:compile '(define-macro no-arg-macro () ''no-arg-macro)) (core:macroexpand '(no-arg-macro) ())))
+((:lambda () (core:compile '(define-macro no-arg-macro () ''no-arg-macro)) (mu:eval (core:compile '(no-arg-macro)))))
+((:lambda () (core:compile '(define-macro arg-macro (arg) arg)) (core:macroexpand '(arg-macro (mu:sum 1 2)) ())))
+((:lambda () (core:compile '(define-macro arg-macro (arg) arg)) (mu:eval (core:compile '(arg-macro (mu:sum 1 2))))))
+((:lambda () (core:compile '(define-macro rest-macro (&rest args) (mu:cons '(lambda (&rest rest) rest) args))) (mu:eval (core:compile '(rest-macro (mu:sum 1 2))))))
+((:lambda () (core:compile '(define-macro rest-macro (&rest args) (mu:cons '(lambda (&rest rest) rest) args))) (mu:eval (core:compile '(rest-macro (mu:sum 1 2) (mu:sum 3 4))))))
+((:lambda () (core:compile '(define-macro rest-macro (&rest args) (mu:cons '(lambda (&rest rest) rest) args))) (mu:eval (core:compile '(rest-macro 1 2 3)))))

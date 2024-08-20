@@ -1,4 +1,0 @@
-(prelude:structp (prelude:make-exception () :error (:quote test) "exception test" ()))
-(prelude:exceptionp (prelude:make-exception () :error (:quote test) "exception test" ()))
-(prelude:with-exception (:lambda (ex) :t) (:lambda () (prelude:raise () (:quote test) "")))
-(prelude:with-exception (:lambda (exception) ()) (:lambda () :t))

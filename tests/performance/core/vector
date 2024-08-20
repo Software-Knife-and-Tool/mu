@@ -1,0 +1,8 @@
+(core:make-vector '(1 2 3))
+(core:%core-type-p (core:make-vector '(1 2 3)))
+(core:vector-slice (core:make-vector '(1 2 3)) 1 2)
+(core:vector-length (core:make-vector '(1 2 3)))
+(core:vector-ref (core:make-vector '(1 2 3)) 1)
+(core:vectorp (core:make-vector '(1 2 3)))
+(core:vectorp (mu:make-vector :t '(1 2 3)))
+(core:vector-ref (core:vector-slice (core:make-vector '(1 2 3)) 1 2) 0)

@@ -1,0 +1,20 @@
+(mu:type-of core:schar)	:func
+(mu:type-of core:string=)	:func
+(mu:type-of core:string)	:func
+(mu:type-of core:string-append)	:func
+(mu:type-of core:substr)	:func
+(core:string-append '("abc" "123"))	"abc123"
+(core:string-append '("" "abc"))	"abc"
+(core:string-append '("abc" ""))	"abc"
+(core:string-append '("" ""))	""
+(core:string= "abc" "abc")	:t
+(core:string= "abd" "abc")	:nil
+(core:stringp "abc")	:t
+(core:stringp 1)	:nil
+(core:string-find #\a "abc")	#\a
+(core:string-find #\d "abc")	:nil
+(core:string-position #\a "abc")	0
+(core:string-position #\d "abc")	:nil
+(core:substr "abc" 0 0)	"a"
+(core:substr "abc" 0 1)	"ab"
+(core:substr "abc" 1 3)	"bc"

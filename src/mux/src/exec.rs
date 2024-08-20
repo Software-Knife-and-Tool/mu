@@ -22,22 +22,22 @@ impl Exec {
             },
         };
 
-        match ns_str {
-            "mu" => {
-                let mut child = Command::new("mu-sys").spawn().unwrap();
-                let _ = child.wait();
-            }
-            "prelude" => {
-                let mut child = Command::new("mu-sys")
-                    .args(["-l", "/opt/mu/lib/prelude/core.l"])
-                    .args(["-l", "/opt/mu/lib/prelude/repl.l"])
-                    .args(["-q", "(prelude:%init-ns)"])
-                    .args(["-e", "(prelude:repl)"])
-                    .spawn()
-                    .unwrap();
-                let _ = child.wait();
-            }
+        let mut child = match ns_str {
+            "mu" => Command::new("mu-sys").spawn().unwrap(),
+            "core" => Command::new("mu-sys")
+                .args(["-l", "/opt/mu/lib/core/core.l"])
+                .spawn()
+                .unwrap(),
+            "prelude" => Command::new("mu-sys")
+                .args(["-l", "/opt/mu/lib/core/core.l"])
+                .args(["-l", "/opt/mu/lib/prelude/repl.l"])
+                .args(["-q", "(prelude:%init-ns)"])
+                .args(["-e", "(prelude:repl)"])
+                .spawn()
+                .unwrap(),
             _ => panic!(),
-        }
+        };
+
+        let _ = child.wait();
     }
 }

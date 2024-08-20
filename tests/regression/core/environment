@@ -1,0 +1,9 @@
+(mu:type-of core:add-env)	:func
+(mu:type-of core:envp)	:func
+(mu:type-of core:get-env)	:func
+(mu:type-of core:make-env)	:func
+(core:type-of (core:make-env ()))	env
+(core:envp (core:make-env ()))	:t
+(core:add-env (core:make-env ()) 'a 'b)	(a . b)
+(core:get-env (core:make-env '((a . b))) 'a)	b
+(core:make-env '((a . b)))	#s(:<ctype> env ((:symbols . #<:map [size:1, tag:0]>)))
