@@ -1,9 +1,0 @@
-(mu:type-of prelude:add-env)	:func
-(mu:type-of prelude:envp)	:func
-(mu:type-of prelude:get-env)	:func
-(mu:type-of prelude:make-env)	:func
-(prelude:type-of (prelude:make-env ()))	env
-(prelude:envp (prelude:make-env ()))	:t
-(prelude:add-env (prelude:make-env ()) 'a 'b)	(a . b)
-(prelude:get-env (prelude:make-env '((a . b))) 'a)	b
-(prelude:make-env '((a . b)))	#s(:<ctype> env ((:symbols . #<:map [size:1, tag:0]>)))

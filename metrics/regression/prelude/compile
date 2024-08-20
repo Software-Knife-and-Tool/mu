@@ -1,6 +1,0 @@
-(prelude:compile '(defconst foo ()))
-(prelude:compile '(if :t :t :t))
-(prelude:compile '(if :t :t))
-(prelude:compile '(if :t (mu:sum 0 1) (mu:sum 0 0)))
-(prelude:compile '(if (prelude:null ()) (mu:sum 0 1) (mu:sum 0 0)))
-(prelude:compile '(if (prelude:not (prelude:null :t)) (mu:sum 0 1) (mu:sum 0 0)))

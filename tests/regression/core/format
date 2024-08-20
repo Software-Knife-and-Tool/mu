@@ -1,0 +1,15 @@
+(mu:type-of core:format)	:func
+(core:format :t "core:format" ())	core:format:nil
+(core:format () "core:format" ())	"core:format"
+(core:stringp (core:format () "core:format" ()))	:t
+(core:format :t "core:format unqualified ~A symbol arg" '(f-symbol))	core:format unqualified f-symbol symbol arg:nil
+(core:format :t "core:format unqualified ~S symbol arg" '(f-symbol))	core:format unqualified f-symbol symbol arg:nil
+(core:format :t "core:format qualified ~A symbol arg" '(mu:sum))	core:format qualified sum symbol arg:nil
+(core:format :t "core:format qualified ~S symbol arg" '(mu:sum))	core:format qualified mu:sum symbol arg:nil
+(core:format :t "core:format ~A string arg" '("f-string"))	core:format f-string string arg:nil
+(core:format :t "core:format ~S string arg" '("f-string"))	core:format "f-string" string arg:nil
+(core:format :t "core:format ~A fixnum arg" '(1))	core:format 1 fixnum arg:nil
+(core:format :t "core:format ~S fixnum arg" '(1))	core:format 1 fixnum arg:nil
+(core:format :t "core:format ~X fixnum arg" '(#xabcd))	core:format abcd fixnum arg:nil
+(core:format :t "core:format ~X fixnum arg" '(-14))	core:format -e fixnum arg:nil
+(core:format :t "core:format ~D fixnum arg" '(#xabc))	core:format 2748 fixnum arg:nil

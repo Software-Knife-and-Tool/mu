@@ -1,5 +1,0 @@
-(prelude:stringp (prelude:format () "prelude:format" ()))
-(prelude:format () "prelude:format unqualified ~A symbol arg" (:quote (f-symbol)))
-(prelude:format () "prelude:format qualified ~A symbol arg" (:quote (mu:sum)))
-(prelude:format () "prelude:format ~A string arg" (:quote ("f-string")))
-(prelude:format () "prelude:format ~X fixnum arg" (:quote (#xabcddcba)))

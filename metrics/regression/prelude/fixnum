@@ -1,8 +1,0 @@
-(prelude:1+ 10)
-(prelude:1- 10)
-(prelude:ceiling 5 2)
-(prelude:floor 5 2)
-(prelude:mod 5 2)
-(prelude:rem 5 2)
-(prelude:round 5 2)
-(prelude:truncate 5 2)

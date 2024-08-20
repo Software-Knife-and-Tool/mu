@@ -1,0 +1,4 @@
+(mu:write 1000 () (mu:open :string :output ""))
+(mu:write (mu:product 100 200) () (mu:open :string :output ""))
+(mu:write (core:string= "" "") () (mu:open :string :output ""))
+(mu:write (core:string= "ci" "") () (mu:open :string :output ""))

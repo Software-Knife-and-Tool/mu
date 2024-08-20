@@ -1,0 +1,5 @@
+(core:compile (:quote (lambda ())))
+(core:compile (:quote (lambda (a) a)))
+(core:compile (:quote (lambda (&rest c))))
+(core:compile (:quote ((lambda (a b) (mu:sum a b)) 1 2)))
+(core:compile (:quote ((lambda (a b &rest c) (mu:sum a b) c) 1 2)))

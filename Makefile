@@ -4,7 +4,7 @@
 .PHONY: release debug
 .PHONY: doc dist install uninstall
 .PHONY: clobber commit tags emacs
-.PHONY: tests/rust tests/summary tests/report
+.PHONY: tests/rust tests/base tests/current tests/report
 .PHONY: regression/base regression/current regression/report regression/commit
 
 help:
@@ -26,18 +26,21 @@ help:
 	@echo "    tags - make etags"
 	@echo "--- test options"
 	@echo "    tests/rust - rust tests"
-	@echo "    tests/summary - test summary"
-	@echo "    tests/report - full test report"
+	@echo "    tests/base - everything (may take a while)"
+	@echo "    tests/current - full test report"
+	@echo "    tests/report - condensed performance report"
+	@echo "    tests/commit - establish what needs to go into repo"
 	@echo "--- regression options"
-	@echo "    regression/base - baseline report"
-	@echo "    regression/current - current report"
-	@echo "    regression/report - compare base and current"
-	@echo "    regression/commit - condensed regression report"
+	@echo "    regression/summary - test summary"
+	@echo "    regression/report - full test report"
+	@echo "--- performance options"
+	@echo "    performance/base - baseline report"
+	@echo "    performance/current - current report"
+	@echo "    performance/report - compare base and current"
 	@echo "--- footprint options"
 	@echo "    footprint/base - baseline report"
 	@echo "    footprint/current - current report"
 	@echo "    footprint/report - compare base and current"
-	@echo "    footprint/commit - condensed footprint report"
 
 tags:
 	@etags `find src/mu -name '*.rs' -print`
@@ -90,35 +93,41 @@ install:
 uninstall:
 	@make -C ./dist -f install.mk uninstall --no-print-directory
 
-tests/commit:
-	@make -C tests commit --no-print-directory
+tests/base: performance/base footprint/base
 
-tests/summary:
-	@make -C tests summary --no-print-directory
+tests/current: performance/current footprint/current
 
-regression/base:
-	@make -C metrics/regression base --no-print-directory
-
-regression/current:
-	@make -C metrics/regression current --no-print-directory
-
-regression/report:
-	@make -C metrics/regression report --no-print-directory
+tests/report: regression/report performance/report footprint/report
 
 regression/commit:
-	@make -C metrics/regression commit --no-print-directory
+	@make -C tests/regression commit --no-print-directory
+
+regression/report:
+	@make -C tests/regression summary --no-print-directory
+
+performance/base:
+	@make -C tests/performance base --no-print-directory
+
+performance/current:
+	@make -C tests/performance current --no-print-directory
+
+performance/report:
+	@make -C tests/performance report --no-print-directory
+
+performance/commit:
+	@make -C tests/regression commit --no-print-directory
 
 footprint/base:
-	@make -C metrics/footprint base --no-print-directory
+	@make -C tests/footprint base --no-print-directory
 
 footprint/current:
-	@make -C metrics/footprint current --no-print-directory
+	@make -C tests/footprint current --no-print-directory
 
 footprint/report:
-	@make -C metrics/footprint report --no-print-directory
+	@make -C tests/footprint report --no-print-directory
 
 footprint/commit:
-	@make -C metrics/footprint commit --no-print-directory
+	@make -C tests/footprint commit --no-print-directory
 
 commit:
 	@cargo fmt
@@ -127,15 +136,14 @@ commit:
 	@echo ";;; clippy tests"
 	@cargo clippy
 	@echo ";;; external tests report"
-	@make -C tests commit --no-print-directory
-	@echo ";;; metrics reports"
-	@make -C metrics/regression commit --no-print-directory
-#	@make -C metrics/footprint commit --no-print-directory
+	@make -C tests/regression commit --no-print-directory
+	@echo ";;;  reports"
+	@make -C tests/performance commit --no-print-directory
+#	@make -C tests/footprint commit --no-print-directory
 
 clobber:
 	@rm -rf target Cargo.lock TAGS
 	@make -C docker clean --no-print-directory
 	@make -C dist clean --no-print-directory
-	@make -C tests clean --no-print-directory
-	@make -C metrics/regression clean --no-print-directory
-	@make -C metrics/footprint clean --no-print-directory
+	@make -C tests/regression clean --no-print-directory
+	@make -C tests/footprint clean --no-print-directory
