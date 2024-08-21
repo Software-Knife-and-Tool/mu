@@ -19,7 +19,7 @@ def stats():
         format,
         mu_cmd,
         '-p',
-        '-l', '../../dist/core/core.l'
+        '-l', '../../dist/core.l'
     ],\
     stdout=subprocess.PIPE,\
     stderr=subprocess.PIPE)

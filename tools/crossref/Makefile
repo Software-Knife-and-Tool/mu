@@ -1,13 +1,13 @@
 #
-#  tools makefile
+#  crossref makefile
 #
 .PHONY: crossref help
 
 help:
-	@echo "crossref: mu/prelude symbol cross reference"
+	@echo "crossref: mu/core symbol cross reference"
 
 crossref:
-	@mu --pipe --load=./crossref.l --quiet-eval='(prelude:crossref \"crossref.out\")'
+	@mu --pipe --load=./crossref.l --quiet-eval='(crossref \"crossref.out\")'
 	@python3 crossref.py crossref.out
 
 clean:

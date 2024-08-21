@@ -17,7 +17,7 @@
          (:if (core:%andf printenv env)
               ((:lambda ()
                   (core:format stream "env:~%" ())
-                  (core:%%mapc
+                  (core:%mapc
                    (:lambda (frame)
                       (core:format stream "  ~A~T(~A ~A)~%"
                                    `(,(core:%format-mapped-symbol (mu:car frame))
