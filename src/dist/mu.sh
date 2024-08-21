@@ -1,26 +1,19 @@
 #!/usr/bin/env bash
 BASE=${MU_HOME:=/opt/mu}
-BASE_PRELUDE=$BASE/lib/prelude
 
 usage () {
-    echo "usage: $0 [session options] [runtime options] src-file..." >&2
-    echo "[session options]" >&2
-    echo "  -h, --help                 print this message and exit." >&2
-    echo "  --config=config-list       runtime configuration." >&2
-    echo "[runtime options]" >&2
+    echo "usage: $0 [session options] [runtime options] src-file..."    >&2
+    echo "[session options]"                                            >&2
+    echo "  -h, --help                 print this message and exit."    >&2
+    echo "  --config=config-list       runtime configuration."          >&2
+    echo "[runtime options]"                                            >&2
     echo "  --eval=form                evaluate form and print result." >&2
-    echo "  --quiet-eval=form          evaluate form quietly." >&2
-    echo "  --load=src-file            load src-file in sequence." >&2
-    echo "  --pipe                     run in pipe mode." >&2
-    echo "  --version                  print version and exit." >&2
+    echo "  --quiet-eval=form          evaluate form quietly."          >&2
+    echo "  --load=src-file            load src-file in sequence."      >&2
+    echo "  --pipe                     run in pipe mode."               >&2
+    echo "  --version                  print version and exit."         >&2
     exit 2
 }
-
-PRELUDE_FILES=""
-OPTIONS=""
-SOURCES=""
-
-PRELUDE_FILES=" -l $BASE_PRELUDE/core.l -l $BASE_PRELUDE/repl.l"
 
 optspec=":h-:"
 while getopts "$optspec" optchar; do
@@ -75,9 +68,6 @@ while getopts "$optspec" optchar; do
     esac
 done
 
-len="${#@}"
-
 for (( i=${OPTIND}; i<="${#@}"; i++ )); do SOURCES+=" \"${!i}\"" ; done
 
-export MU_LOAD_LIST=SOURCES
-eval $BASE/bin/mu-sys $PRELUDE_FILES -q "\(prelude:%init-ns\)" $OPTIONS # $BASE/lib/mu.l ${SOURCES[@]}
+eval $BASE/bin/mu-sys -l $BASE/dist/core.l $OPTIONS # $BASE/dist/mu.l ${SOURCES[@]}

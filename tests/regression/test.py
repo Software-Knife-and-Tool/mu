@@ -16,7 +16,7 @@ def runtest(line, test, expected):
 
     if ns == 'core':
         proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core/core.l',
+                                 '-l../../dist/core.l',
                                  '-p',
                                  '-e' + test],\
                                 stdout=subprocess.PIPE,\

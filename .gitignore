@@ -5,7 +5,7 @@ Cargo.lock
 dist/mu*.tgz
 dist/mu-*
 dist/mux
-dist/core
+dist/*.l
 dist/prelude
 dist/sysgen
 dist/devop

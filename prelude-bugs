@@ -1,4 +1,0 @@
-(lib:eval (prelude:compile '((lambda (a) (if a () a)) ())))	:t
-((lambda (a) (if a () a)) ())
-(lib:intern prelude "foo" (lambda (a) (if a () a)))
-(lib:intern prelude "fool" (lambda (a) ((lambda () a))))

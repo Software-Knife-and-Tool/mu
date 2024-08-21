@@ -13,7 +13,7 @@ def fasl():
     proc = subprocess.Popen([
         mu_cmd,
         '-p',
-        '-l', '/opt/mu/lib/prelude/core.l',
+        '-l', '/opt/mu/dist/core.l',
         '-q', '(prelude:%init-ns)',
         '-l', './fasl.l',
         '-q', f'(fasl:fasl "{src}" :t)'
