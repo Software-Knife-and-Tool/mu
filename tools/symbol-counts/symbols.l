@@ -5,18 +5,13 @@
 ;;; symbol table
 ;;;
 (mu:intern (mu:find-namespace "") "symbols"
-   (:lambda (file-name)
+   (:lambda (ns file-name)
       ((:lambda (stream)
           (core:mapc
            (:lambda (symbol)
              (core:format stream "~A~%" `(,(mu:symbol-name symbol)))
-             (core:format stream "core:~A~%" `(,(mu:symbol-name symbol))))
-           (mu:namespace-symbols (mu:find-namespace "core")))
-          (core:mapc
-           (:lambda (symbol)
-             (core:format stream "~A~%" `(,(mu:symbol-name symbol)))
-             (core:format stream "mu:~A~%" `(,(mu:symbol-name symbol))))
-           (mu:namespace-symbols (mu:find-namespace "mu")))
+             (core:format stream "~A:~A~%" `(,ns ,(mu:symbol-name symbol))))
+           (mu:namespace-symbols (mu:find-namespace ns)))
           (mu:close stream))
        (mu:open :file :output file-name))
       :t))

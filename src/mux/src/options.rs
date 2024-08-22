@@ -22,18 +22,19 @@ lazy_static! {
 
 impl Options {
     pub fn version() {
-        println!("mux: 0.0.1");
+        println!("mux: 0.0.2");
         std::process::exit(0)
     }
 
     pub fn usage() {
         println!("Usage: mux command [option...]");
-        println!("  command:    [help repl symbols crossref test version]");
-        println!("    crossref                      ; symbol cross reference");
+        println!("  command:    [help repl symbol-counts reference crossref test version]");
+        println!("    crossref                      ; core symbols cross reference");
+        println!("    reference [--namespace ns]    ; namespace symbol reference");
         println!("    help                          ; this message");
         println!("    repl      [--namespace ns]    ; repl");
         println!("    test      [--namespace ns]    ; run tests");
-        println!("    symbols                       ; symbol table");
+        println!("    symbol-counts                 ; core symbol counts");
         println!("    version                       ; mux version");
         println!();
         println!("  general options:");

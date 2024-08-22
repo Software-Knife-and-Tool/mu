@@ -81,10 +81,10 @@
                               (:lambda (ex) (mu:close stream) ex)
                               (:lambda () (core:apply fn `(,stream)))))
                           (mu:open type dir specifier))
-                         (core:raise dir 'core:with-open-stream "not a direction keyword"))
-                    (core:raise type 'core:with-open-stream "not a type keyword"))
-               (core:raise path 'core:with-open-stream "not a stream specifier"))
-          (core:raise dir 'core:with-open-stream "not a function"))))
+                         (core:raise dir 'core:with-open-file "not a direction keyword"))
+                    (core:raise type 'core:with-open-file "not a type keyword"))
+               (core:raise path 'core:with-open-file "not a stream specifier"))
+          (core:raise dir 'core:with-open-file "not a function"))))
 
 (mu:intern core "load-file"
    (:lambda (path)
