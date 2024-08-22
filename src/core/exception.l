@@ -20,7 +20,7 @@
                   (core:%mapc
                    (:lambda (frame)
                       (core:format stream "  ~A~T(~A ~A)~%"
-                                   `(,(core:%format-mapped-symbol (mu:car frame))
+                                   `(,(mu:car frame)
                                      ,(mu:car frame)
                                      ,(mu:cdr frame))))
                    (mu:cdr env))))

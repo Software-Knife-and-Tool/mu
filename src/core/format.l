@@ -80,7 +80,7 @@
   (:lambda (dir dest arg-list)
     ((:lambda (fn)
        (:if fn
-            (core:apply (mu:symbol-value fn) `(,dest ,arg-list))
+            (core:%apply (mu:symbol-value fn) `(,dest ,arg-list))
             (core:raise dir 'core:format "unrecognized format directive")))
      (mu:cdr
       (core:%assq
@@ -103,14 +103,14 @@
                loop
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
-                       `(,(mu:sum 2 nth) ,@(core:%fmt-op (core:schar fmt (mu:sum 1 nth)) dest argl))
+                       (mu:cons (mu:sum 2 nth) (core:%fmt-op (core:schar fmt (mu:sum 1 nth)) dest argl))
                        ((:lambda ()
                            (core:write-char ch dest)
-                           `(,(mu:sum 1 nth) ,@argl)))))
+                           (mu:cons (mu:sum 1 nth) argl)))))
                 (core:schar fmt nth))))
         (mu:car loop)
         (mu:cdr loop)))
-     `(0 ,@arg-list))
+     (mu:cons 0 arg-list))
     (:if (core:null stream)
          (core:get-output-stream-string dest)
          ())))

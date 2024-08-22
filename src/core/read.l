@@ -8,13 +8,6 @@
 (mu:intern core "%reader-stream%" (mu:open :string :output ""))
 (mu:intern core "%reader-current-ns%" (mu:open :string :bidir "core"))
 
-(mu:intern core "%in-namespace"
-   (:lambda (ns)
-      ((:lambda ()
-          (mu:make-namespace ns)
-          (core:%reader-set-ns ns)
-          ns))))
-
 (mu:intern core "%reader-get-ns"
    (:lambda ()
      ((:lambda (ns)
@@ -159,7 +152,7 @@
             core:%eof%
             ((:lambda (macro)
                (:if macro
-                    (core:apply (mu:car macro) `(,stream ,ch))
+                    (core:%apply (mu:car macro) `(,stream ,ch))
                     (core:%read-dispatch ch stream)))
              (core:get-macro-character ch))))
      (core:%read-consume-ws stream))))

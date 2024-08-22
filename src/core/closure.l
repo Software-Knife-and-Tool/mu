@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; functions/closures
+;;; closures
 ;;;
 
 ;;;
@@ -37,24 +37,6 @@
       (:if (mu:eq :func (mu:type-of fn))
            :t
            (core:%core-function-p fn))))
-
-;;;
-;;; describe
-;;;
-(mu:intern core "%describe-fn"
-   (:lambda (fn)
-     (:if (core:%core-function-p fn)
-          ((:lambda (lambda arity fn env)
-             (core:eprint "" "%describe-fn:core")
-             (core:eprint lambda "    lambda")
-             (core:eprint arity "    arity")
-             (core:eprint fn "    fn")
-             (core:eprint env "    env"))
-           (core:%fn-prop :lambda fn)
-           (core:%fn-prop :arity fn)
-           (core:%fn-prop :fn fn)
-           (core:%fn-prop :env fn))
-          (core:eprint (mu:view fn) "%describe-fn:mu-fn"))))
 
 ;;;
 ;;; [*function descriptor*] #s(:<type> :%fn (lambda nargs fn env))

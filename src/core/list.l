@@ -24,12 +24,12 @@
                           loop
                           (:if (mu:cdr loop)
                                ((:lambda (el)
-                                   (:if (core:apply function `(,el))
-                                        `(:t ,@el)
-                                        `(() ,@(mu:nthcdr 2 loop))))
+                                   (:if (core:%apply function (mu:cons el ()))
+                                        (mu:cons :t el)
+                                        (mu:cons () (mu:nthcdr 2 loop))))
                                 (mu:nth 1 loop))
                                loop)))
-                  `(() ,@list)))
+                  (mu:cons () list)))
                 (core:raise list 'core:findl "not a list"))
            (core:raise function 'core:findl "not a function"))))
 
@@ -52,8 +52,8 @@
                                    loop
                                    (:if (mu:less-than length loop)
                                         ()
-                                        (:if (core:apply function `(,(mu:nth loop list)))
-                                             `(,loop)
+                                        (:if (core:%apply function (mu:cons (mu:nth loop list) ()))
+                                             (mu:cons loop  ())
                                              (core:1+ loop)))))
                            0)))
                      (mu:length list))
@@ -74,8 +74,8 @@
                                loop
                                (:if (mu:less-than loop 0)
                                     ()
-                                    (:if (core:apply function `(,(mu:nth loop list)))
-                                         `(,loop)
+                                    (:if (core:%apply function (mu:cons (mu:nth loop list) ()))
+                                         (mu:cons loop ())
                                          (core:1- loop)))))
                        (mu:difference (mu:length list) 1))))
                 (core:raise list 'core:positionr "not a list"))
@@ -99,7 +99,7 @@
 (mu:intern core "reverse"
    (:lambda (list)
       (:if (core:listp list)
-           (core:foldl mu:cons () list)
+           (core:%foldl mu:cons () list)
            (core:raise list 'core:reverse "not a list"))))
 
 (mu:intern core "dropl"
@@ -114,14 +114,14 @@
    (:lambda (list n)
       (:if (core:listp list)
            (:if (core:fixnump n)
-                (core:foldl
+                (core:%foldl
                  mu:cons
                  ()
                  ((:lambda (length)
-                     (core:foldl
+                     (core:%foldl
                       (:lambda (el last)
                          (:if (mu:less-than (mu:length last) (mu:difference length n))
-                              `(,el ,@last)
+                              (mu:cons el last)
                               last))
                       ()
                       list))

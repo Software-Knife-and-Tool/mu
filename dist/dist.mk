@@ -8,7 +8,6 @@ SRC = ../src
 CORE= \
 	core.l         \
 	compile.l      \
-	environment.l  \
 	string.l       \
 	typedef.l      \
 	typespec.l     \
@@ -16,12 +15,12 @@ CORE= \
 	fixnum.l       \
 	format.l       \
 	funcall.l      \
-	function.l     \
+	closure.l      \
 	lambda.l       \
 	list.l         \
 	macro.l        \
 	map.l          \
-	namespace.l    \
+	package.l      \
 	parse.l        \
 	quasiquote.l   \
 	read.l         \

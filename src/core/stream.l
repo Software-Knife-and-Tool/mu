@@ -8,17 +8,17 @@
 ;;;
 ;;; implementation
 ;;;
-(mu:intern core "%write-stream-designator"
+(mu:intern core "write-stream-designator"
   (:lambda (designator)
     (:if (core:null designator)
          mu:*standard-output*
          (:if (core:streamp designator)
               designator
               (core:raise designator
-                          'core:%write-stream-designator
+                          'core:write-stream-designator
                           "not a stream designator")))))
 
-(mu:intern core "%read-stream-designator"
+(mu:intern core "read-stream-designator"
   (:lambda (designator)
     (:if (core:null designator)
          mu:*standard-input*
@@ -27,7 +27,7 @@
               (:if (core:streamp designator)
                    designator
                    (core:raise designator
-                               'core:%read-stream-designator
+                               'core:read-stream-designator
                                "not a stream designator"))))))
 
 ;;;
@@ -79,7 +79,7 @@
                          ((:lambda (stream)
                              (mu:with-exception
                               (:lambda (ex) (mu:close stream) ex)
-                              (:lambda () (core:apply fn `(,stream)))))
+                              (:lambda () (core:%apply fn `(,stream)))))
                           (mu:open type dir specifier))
                          (core:raise dir 'core:with-open-file "not a direction keyword"))
                     (core:raise type 'core:with-open-file "not a type keyword"))
@@ -103,23 +103,23 @@
 ;;;
 (mu:intern core "write-char"
    (:lambda (ch designator)
-     (mu:write-char ch (core:%write-stream-designator designator))))
+     (mu:write-char ch (core:write-stream-designator designator))))
 
 (mu:intern core "write-byte"
    (:lambda (byte designator)
-     (mu:write-byte byte (core:%write-stream-designator designator))))
+     (mu:write-byte byte (core:write-stream-designator designator))))
 
 (mu:intern core "read-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
        (mu:read-char stream error-eofp eof-value))
-     (core:%read-stream-designator designator))))
+     (core:read-stream-designator designator))))
 
 (mu:intern core "read-byte"
    (:lambda (designator error-eofp eof-value)
      ((:lambda (stream)
         (mu:read-byte stream error-eofp eof-value))
-      (core:%read-stream-designator designator))))
+      (core:read-stream-designator designator))))
 
 (mu:intern core "peek-char"
   (:lambda (designator error-eofp eof-value)
@@ -127,12 +127,12 @@
        (mu:unread-char
         (core:read-char stream error-eofp eof-value)
         stream))
-     (core:%read-stream-designator designator))))
+     (core:read-stream-designator designator))))
 
 (mu:intern core "unread-char"
    (:lambda (ch designator)
      (:if (core:charp ch)
-          (mu:unread-char ch (core:%write-stream-designator designator))
+          (mu:unread-char ch (core:write-stream-designator designator))
           (core:raise ch 'core:unread-char "not a char"))))
 
 ;;;
@@ -150,7 +150,7 @@
                      (core:raise stream 'core:read "unmatched close parenthesis")
                      form)))
          (core:%read stream)))
-      (core:%read-stream-designator designator))))
+      (core:read-stream-designator designator))))
 
 (mu:intern core "read-line"
    (:lambda (stream eof-error-p eof-value)
@@ -179,4 +179,4 @@
           (:if (core:%andf (core:vectorp object) (core:%core-type-p object))
                (core:%vector-write object escape stream)
                (mu:write object escape stream)))
-      (core:%read-stream-designator designator))))
+      (core:read-stream-designator designator))))

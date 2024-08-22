@@ -4,6 +4,25 @@
 ;;;
 ;;; describe
 ;;;
+
+;;;
+;;; describe
+;;;
+(mu:intern core "%describe-fn"
+   (:lambda (fn)
+     (:if (core:%core-function-p fn)
+          ((:lambda (lambda arity fn env)
+             (core:eprint "" "%describe-fn:core")
+             (core:eprint lambda "    lambda")
+             (core:eprint arity "    arity")
+             (core:eprint fn "    fn")
+             (core:eprint env "    env"))
+           (core:%fn-prop :lambda fn)
+           (core:%fn-prop :arity fn)
+           (core:%fn-prop :fn fn)
+           (core:%fn-prop :env fn))
+          (core:eprint (mu:view fn) "%describe-fn:mu-fn"))))
+
 (mu:intern prelude "%describe-function"
    (:lambda (fn stream)
       ((:lambda (view)

@@ -4,6 +4,10 @@
 ;;;
 ;;; macro definition, compilation, and expansion
 ;;;
+(mu:intern core "%gen-macro-ns"
+   (:lambda ()
+      (mu:make-namespace (mu:symbol-name (core:genkeyword #\%)))))
+
 (mu:intern core "%defmacro"
    (:lambda (symbol macro-function)
       ((:lambda (symbol-ns-name)
@@ -14,7 +18,7 @@
                      ((:lambda (ns)
                         (mu:intern core:%macro-ns% symbol-ns-name ns)
                         ns)
-                      (core:%gen-anon-ns))
+                      (core:%gen-macro-ns))
                      (mu:symbol-name symbol)
                      macro-function))
             symbol)

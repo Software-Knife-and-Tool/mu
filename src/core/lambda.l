@@ -88,7 +88,7 @@
                                  (core:%compile form env)))
                          (mu:car body-cdr))))
                 body))
-          `(,lambda-desc ,@env)))))
+          (mu:cons lambda-desc env)))))
 
 (mu:intern core "%frame-ref"
    (:lambda (symbol env)
