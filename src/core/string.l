@@ -218,4 +218,4 @@
       ((:lambda (stream)          
          (core:write-string str stream)
          (core:write-char #\linefeed stream))
-       (core:%write-stream-designator designator))))
+       (core:write-stream-designator designator))))

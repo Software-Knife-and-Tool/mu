@@ -56,8 +56,8 @@
 (mu:intern core "%if"
    (:lambda (testf t-thunk f-thunk)
      (:if (core:null testf)
-          (core:apply f-thunk ())
-          (core:apply t-thunk ()))))
+          (core:%apply f-thunk ())
+          (core:%apply t-thunk ()))))
 
 (mu:intern core "%compile-if"
    (:lambda (form env)
@@ -110,7 +110,7 @@
                                     ((:lambda (macro-function)
                                        (:if macro-function
                                             (core:%compile-macro-call function-form arg-list env)
-                                            (core:%compile-funcall function-form arg-list env)))
+                                            (core:compile-funcall function-form arg-list env)))
                                      (core:macro-function function-form env))))
                              (mu:cdr (core:%assq
                                       function-form
@@ -118,7 +118,7 @@
                                         (if           . core:%compile-if)
                                         (%quasi%      . core:%compile-quasi)
                                         (lambda       . core:%compile-lambda)))))
-                            (core:%compile-funcall function-form arg-list env))))
+                            (core:compile-funcall function-form arg-list env))))
                 (mu:car form)
                 (mu:cdr form))
            form))))

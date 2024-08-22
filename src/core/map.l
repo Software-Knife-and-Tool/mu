@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; folds and maps
+;;; folds
 ;;;
 (mu:intern core "%foldl"
   (:lambda (function init list)
@@ -11,29 +11,19 @@
        (:lambda (arg)
           ((:lambda (list acc)
              (:if list
-                  `(,(mu:cdr list)
-                     ,@(mu:apply function `(,(mu:car list) ,acc)))
-                   arg))
+                  (mu:cons
+                   (mu:cdr list)
+                   (core:%apply function (mu:cons (mu:car list) (mu:cons acc ()))))
+                  arg))
            (mu:car arg)
            (mu:cdr arg)))
-       `(,list ,@init)))))
+       (mu:cons list init)))))
 
 (mu:intern core "foldl"
   (:lambda (function init list)
      (:if (core:functionp function)
           (:if (core:listp list)
-               (mu:cdr
-                (mu:fix
-                 (:lambda (arg)
-                    ((:lambda (list acc)
-                        (:if list
-                             (mu:cons
-                              (mu:cdr list)
-                              (core:apply function `(,(mu:car list) ,acc)))
-                             arg))
-                     (mu:car arg)
-                     (mu:cdr arg)))
-                 `(,list ,@init)))
+               (core:%foldl function init list)
                (core:raise list 'core:foldl "not a list"))
           (core:raise function 'core:foldl "not a function"))))
 
@@ -54,7 +44,7 @@
       (:lambda (list-cdr)
         (:if list-cdr
              ((:lambda ()
-                 (mu:apply function `(,(mu:car list-cdr)))
+                 (mu:apply function (mu:cons (mu:car list-cdr) ()))
                  (mu:cdr list-cdr)))
              ()))
       list)
@@ -93,7 +83,7 @@
                  (:lambda (list)
                     (:if list
                          ((:lambda ()
-                            (core:apply function `(,list))
+                            (core:%apply function `(,list))
                             (mu:cdr list)))
                          ()))
                  list)
@@ -111,7 +101,7 @@
                      ((:lambda (acc list)
                          (:if list
                               (mu:cons
-                               `(,@acc ,(core:apply function `(,list)))
+                               `(,@acc ,(core:%apply function `(,list)))
                                 (mu:cdr list))
                               loop))
                       (mu:car loop)
@@ -120,6 +110,9 @@
                 (core:raise list 'core:maplist "not a list"))
            (core:raise function 'core:maplist "not a function"))))
 
+;;;
+;;; association lists
+;;;
 (mu:intern core "%assq"
    (:lambda (item alist)
       (mu:car
@@ -136,12 +129,6 @@
                  (mu:cdr lst))
                 ()))
         alist))))
-
-(mu:intern core "assq"
-   (:lambda (item alist)
-     (:if (core:listp alist)
-          (core:%assq item alist)
-          (core:raise alist 'core:assq "not an alist"))))
 
 (mu:intern core "%rassq"
    (:lambda (item alist)
@@ -160,8 +147,14 @@
                 ()))
         alist))))
 
+(mu:intern core "assq"
+   (:lambda (item alist)
+     (:if (core:listp alist)
+          (core:%assq item alist)
+          (core:raise alist 'core:assq "not an alist"))))
+
 (mu:intern core "rassq"
    (:lambda (item alist)
      (:if (core:listp alist)
           (core:%rassq item alist)
-          (core:raise alist 'core:assq "not an alist"))))
+          (core:raise alist 'core:rassq "not an alist"))))

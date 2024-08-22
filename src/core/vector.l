@@ -154,7 +154,7 @@
                      (:if is-byte
                           :byte
                           :fixnum))
-                   (core:foldl
+                   (core:%foldl
                     (:lambda (elt acc)
                       (:if (core:%andf (core:not (core:minusp elt)) (mu:less-than elt 256))
                            acc
@@ -163,7 +163,7 @@
                       list))
                   type)
              :t))
-      (core:foldl
+      (core:%foldl
        (:lambda (elt acc)
           (:if (mu:eq :t acc)
                :t
@@ -181,7 +181,7 @@
             (:if (mu:eq nth (mu:vector-len vector))
                  ()
                  ((:lambda ()
-                     (core:apply fn `(,(mu:svref vector nth)))
+                     (core:%apply fn `(,(mu:svref vector nth)))
                      (mu:sum 1 nth))))
             ()))
      0)))

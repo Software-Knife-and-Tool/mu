@@ -25,7 +25,7 @@
                  ((:lambda (predicate-symbol)
                     (:if (core:symbolp predicate-symbol)
                          (:if (mu:boundp predicate-symbol)
-                              (core:apply (mu:symbol-value predicate-symbol) `(,value))
+                              (core:%apply (mu:symbol-value predicate-symbol) `(,value))
                               (core:raise predicate 'core:typep "satisfies typespec format"))
                          (core:raise predicate 'core:typep "satisfies typespec format")))
                   (mu:car spec-list))
@@ -37,7 +37,7 @@
      ,(mu:cons 'and (:lambda (value spec-list)
                        (:if (core:null spec-list)
                             :t
-                            (core:foldl
+                            (core:%foldl
                              (:lambda (elt acc)
                                 (core:%andf acc (core:typep value elt)))
                              :t
@@ -45,7 +45,7 @@
      ,(mu:cons 'or (:lambda (value spec-list)
                      (:if (core:null spec-list)
                           ()
-                          (core:foldl
+                          (core:%foldl
                            (:lambda (elt acc)
                              (core:%orf acc (core:typep value elt)))
                            :t
