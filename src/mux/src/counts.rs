@@ -2,13 +2,13 @@
 //  SPDX-License-Identifier: MIT
 use {crate::options::Options, std::process::Command};
 
-pub struct Symbols {}
+pub struct Counts {}
 
-impl Symbols {
-    pub fn symbols(_options: &Options) {
-        let path = std::path::Path::new("./tools/symbols");
+impl Counts {
+    pub fn counts(_options: &Options) {
+        let path = std::path::Path::new("./tools/symbol-counts");
         std::env::set_current_dir(&path).unwrap();
-        let mut child = Command::new("make").arg("symbols").spawn().unwrap();
+        let mut child = Command::new("make").arg("core").spawn().unwrap();
 
         let _ = child.wait();
     }

@@ -1,21 +1,23 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-#[rustfmt::skip]
-use {
-    crate::{
-        crossref::Crossref,
-        options::Options,
-        exec::Exec,
-        test::Test,
-        symbols::Symbols,
-    },
-};
-
+mod counts;
 mod crossref;
 mod exec;
 mod options;
-mod symbols;
+mod reference;
 mod test;
+
+#[rustfmt::skip]
+use {
+    crate::{
+        counts::Counts,
+        crossref::Crossref,
+        exec::Exec,
+        options::Options,
+        reference::Reference,
+        test::Test,
+    },
+};
 
 pub fn main() {
     let argv = std::env::args().collect::<Vec<String>>();
@@ -37,7 +39,8 @@ pub fn main() {
         "version" => Options::version(),
         "crossref" => Crossref::crossref(&options),
         "repl" => Exec::repl(&options),
-        "symbols" => Symbols::symbols(&options),
+        "reference" => Reference::reference(&options),
+        "symbol-counts" => Counts::counts(&options),
         "test" => Test::test(&options),
         _ => {
             eprintln!("mux: unimplemented command {command}");

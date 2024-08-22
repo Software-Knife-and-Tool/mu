@@ -45,7 +45,7 @@
    (:lambda (n)
       (:if (core:numberp n)
            (:if (core:floatp n)
-                (mu:fl-lt n 0.0)
+                (mu:fless-than n 0.0)
                 (mu:less-than n 0))
            (core:raise n 'core:minusp "not a number"))))
 
@@ -53,7 +53,7 @@
    (:lambda (n)
       (:if (core:numberp n)
            (:if (core:floatp n)
-                (mu:fl-lt 0.0 n)
+                (mu:fless-than 0.0 n)
                 (mu:less-than 0 n))
            (core:raise n 'core:plusp "not a number"))))
 
