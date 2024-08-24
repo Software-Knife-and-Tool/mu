@@ -18,7 +18,7 @@
 
 (mu:intern core "%lambda-arg-list"
    (:lambda (function arg-list)
-      (:if (core:%core-function-p function)
+      (:if (core:%closurep function)
            ((:lambda (rest nreqs)
               (:if (core:%andf rest (core:zerop nreqs))
                    `(mu:cons ,(core:%arg-list arg-list) ())
@@ -28,22 +28,22 @@
                            (core:%arg-list `(,@reqs ,(core:%arg-list rest)))))
                     (core:dropr arg-list (mu:difference (mu:length arg-list) nreqs))
                     (core:dropl arg-list nreqs))))
-            (core:%fn-prop :rest function)
-            (core:%fn-prop :arity function))
+            (core:%closure-prop :rest function)
+            (core:%closure-prop :arity function))
            (core:%arg-list arg-list))))
 
 (mu:intern core "%quoted-lambda-arg-list"
   (:lambda (fn args)
-    (:if (core:%core-function-p fn)
-         (:if (core:%fn-prop :rest fn)
-              (:if (core:%andf (core:%fn-prop :rest fn) (core:zerop (core:%fn-prop :arity fn)))
+    (:if (core:%closurep fn)
+         (:if (core:%closure-prop :rest fn)
+              (:if (core:%andf (core:%closure-prop :rest fn) (core:zerop (core:%closure-prop :arity fn)))
                    (mu:cons args ())
                    ((:lambda (reqs rest)
                       (core:append
                        reqs
                        (mu:cons rest ())))
-                    (core:dropr args (mu:difference (mu:length args) (core:%fn-prop :arity fn)))
-                    (core:dropl args (core:%fn-prop :arity fn))))
+                    (core:dropr args (mu:difference (mu:length args) (core:%closure-prop :arity fn)))
+                    (core:dropl args (core:%closure-prop :arity fn))))
               args)
          args)))
 
@@ -77,7 +77,7 @@
       (:if (core:consp function-form)
            ((:lambda (compiled-function)
               (:if (core:functionp compiled-function)
-                   (:if (core:%core-function-p compiled-function)
+                   (:if (core:%closurep compiled-function)
                         `(,core:%fn-apply-quoted ,compiled-function ,(core:%compile-lambda-arg-list compiled-function arg-list env))
                         `(mu:apply ,compiled-function ,(core:%compile-arg-list arg-list env)))
                    (core:raise compiled-function 'core:compile-funcall "illegal function call")))
@@ -85,7 +85,7 @@
            (:if (core:boundp function-form)
                 ((:lambda (function)
                    (:if (core:functionp function)
-                        (:if (core:%core-function-p function)
+                        (:if (core:%closurep function)
                              `(,core:%fn-apply-quoted ,function ,(core:%compile-lambda-arg-list function arg-list env))
                              `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                         (core:raise function 'core:compile-funcall "illegal function call")))
@@ -105,9 +105,9 @@
           ((:lambda (lib-fn frame-fn)
              ;;; (core:warn (mu:apply frame-fn `(,lib-fn ,arg-list)) "apply")
              (mu:apply lib-fn (mu:eval (core:%lambda-arg-list fn arg-list))))
-           (core:%fn-prop :fn fn)
-           (core:%lambda-prop :frame (core:%fn-prop :lambda fn)))))
-       (core:%fn-prop :env fn))))
+           (core:%closure-prop :fn fn)
+           (core:%lambda-prop :frame (core:%closure-prop :lambda fn)))))
+       (core:%closure-prop :env fn))))
 
 (mu:intern core "%fn-apply-quoted"
    (:lambda (fn arg-list)
@@ -118,12 +118,12 @@
            value)
          ((:lambda (lib-fn)
              (mu:apply lib-fn arg-list))
-          (core:%fn-prop :fn fn))))
-        (core:%fn-prop :env fn))))
+          (core:%closure-prop :fn fn))))
+        (core:%closure-prop :env fn))))
 
 (mu:intern core "%apply"
    (:lambda (function arg-list)
-     (:if (core:%core-function-p function)
+     (:if (core:%closurep function)
           (core:%fn-apply function arg-list)
           (mu:apply function arg-list))))
 

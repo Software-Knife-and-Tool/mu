@@ -47,7 +47,7 @@
 
 (mu:intern core "make-exception"
    (:lambda (cond value source reason env)
-      (core:%make-type "%except"
+      (core:%make-type "%exception"
         `(,(mu:cons :cond   cond)
           ,(mu:cons :value  value)
           ,(mu:cons :source source)
@@ -92,11 +92,11 @@
 
 (mu:intern core "warn"
    (:lambda (value message)
-     (core:format mu:*error-output* ";;; warning: ~S ; ~A, type ~A~%" `(,value ,message ,(mu:type-of value)))
+     (core:format mu:*error-output* ";;; ~S ; ~A, type ~A~%" `(,value ,message ,(mu:type-of value)))
     value))
 
 ;;;
-;;; [*exception descriptor*] #s(:%except cond value source reason env)
+;;; [*exception descriptor*] #s(%exception cond value source reason env)
 ;;;
 ;;; cond:   condition type symbol
 ;;; value:  exception raised on value
@@ -108,9 +108,9 @@
     (:lambda (ex)
       (core:%andf
        (core:%core-type-p ex)
-       (mu:eq '%except (core:type-of ex)))))
+       (mu:eq '%exception (core:type-of ex)))))
 
-(core:define-type "%except"
+(core:def-type "%exception"
     '((:cond   . :symbolp)
       (:value  . :t)
       (:source . :symbolp)

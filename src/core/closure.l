@@ -8,48 +8,48 @@
 ;;;
 ;;; implementation
 ;;;
-(core:define-type "%fn"
+(core:def-type "%closure"
     '((:lambda  . :struct)
       (:arity   . :fixnum)
       (:fn      . :func)
       (:env     . :listp)))
 
-(mu:intern core "%fn-prop"
-   (:lambda (prop fn)
-      (:if (core:findl (:lambda (fn-prop) (mu:eq prop fn-prop)) '(:lambda :arity :fn :env))
+(mu:intern core "%closure-prop"
+   (:lambda (prop closure)
+      (:if (core:findl (:lambda (closure-prop) (mu:eq prop closure-prop)) '(:lambda :arity :fn :env))
            ((:lambda (ref)
                ;;; (core:raise-when core:null prop 'core:%function-prop "property not bound")
                (mu:cdr ref))
-            (core:%type-ref prop fn))
-           (core:%lambda-prop prop (core:%fn-prop :lambda fn)))))
+            (core:%type-ref prop closure))
+           (core:%lambda-prop prop (core:%closure-prop :lambda closure)))))
 
 ;;;
 ;;; predicates
 ;;;
-(mu:intern core "%core-function-p"
+(mu:intern core "%closurep"
    (:lambda (fn)
      (core:%andf
       (core:%core-type-p fn)
-      (mu:eq '%fn (core:type-of fn)))))
+      (mu:eq '%closure (core:type-of fn)))))
 
 (mu:intern core "functionp"
    (:lambda (fn)
       (:if (mu:eq :func (mu:type-of fn))
            :t
-           (core:%core-function-p fn))))
+           (core:%closurep fn))))
 
 ;;;
-;;; [*function descriptor*] #s(:<type> :%fn (lambda nargs fn env))
+;;; [*closure descriptor*] #s(:<core> :%fn (lambda nargs fn env))
 ;;;
 ;;; lambda: lambda type
 ;;; nargs:  number of reqs plus rest
 ;;; fn:     mu function implementation
 ;;; env:    dynamic environment, list of frames
 ;;;
-(mu:intern core "%make-fn"
+(mu:intern core "%make-closure"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
-          (core:%make-type "%fn"
+          (core:%make-type "%closure"
              `(,(mu:cons :lambda lambda)
                ,(mu:cons :arity  nargs)
                ,(mu:cons :fn     fn)
@@ -95,13 +95,13 @@
        (core:%type-ref :bound lambda))))
 
 ;;;
-;;; compile closed lambda => mu function
+;;; compile closed lambda to mu function
 ;;;
 (mu:intern core "%compile-function"
    (:lambda (form env)
       ((:lambda (lambda)
-          ((:lambda (fn)
-              (core:%make-fn lambda fn ()))
+          ((:lambda (closure)
+             (core:%make-closure lambda closure ()))
            (mu:compile
             `(:lambda
               ,(core:%lambda-prop :bound lambda)
