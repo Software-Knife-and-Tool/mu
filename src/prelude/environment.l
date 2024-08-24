@@ -113,7 +113,7 @@
        (core:%core-type-p ex)
        (mu:eq '%except (core:type-of ex)))))
 
-(core:define-type "%except"
+(core:def-type "%exception"
     '((:cond   . :symbolp)
       (:value  . :t)
       (:source . :symbolp)

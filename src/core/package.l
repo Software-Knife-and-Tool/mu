@@ -8,7 +8,7 @@
 ;;;
 ;;; package type
 ;;;
-(core:define-type "%packge"
+(core:def-type "%package"
     '((:name    . :string)
       (:intern  . :keyword)
       (:extern  . :keyword)
@@ -21,18 +21,18 @@
       (:if (core:findl
             (:lambda (lambda-prop)
                (mu:eq prop lambda-prop))
-            '(:name :intern :extern :ch-mac :rd-mac :sy-mac :uses))
+            '(:name :intern :extern :ch-mac :sy-mac :uses))
            (core:%type-ref prop package)
            (core:raise prop 'core:%package-prop "not a package property"))))
 
 (mu:intern core "%make-package"
    (:lambda (name uses)
-     (core:%make-type "%packge"
+     (core:%make-type "%package"
        `(,(mu:cons :name name)
-          ,(mu:cons :intern (mu:make-package))
-          ,(mu:cons :extern (mu:make-package))
-          ,(mu:cons :ch-mac (mu:make-package))
-          ,(mu:cons :sy-mac (mu:make-package))
+          ,(mu:cons :intern (mu:make-namespace))
+          ,(mu:cons :extern (mu:make-namespace))
+          ,(mu:cons :ch-mac (mu:make-namespace))
+          ,(mu:cons :sy-mac (mu:make-namespace))
           ,(mu:cons :uses uses)))))
 
 ;;;

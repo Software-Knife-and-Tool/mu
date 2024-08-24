@@ -210,7 +210,7 @@
       (:if (core:stringp str)
            ((:lambda (stream)
               (mu:write str () stream))
-            (core:%read-stream-designator designator))
+            (core:read-stream-designator designator))
            (core:raise str 'core:write-string "is not a string"))))
 
 (mu:intern core "write-line"

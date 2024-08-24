@@ -7,25 +7,25 @@
 (mu:intern core "%core-type-p"
    (:lambda (value)
       (:if (core:structp value)
-           (mu:eq :<type> (mu:struct-type value))
+           (mu:eq :<core> (mu:struct-type value))
            ())))
 
 ;;;
-;;; type struct: #s(:<type> #(:t name property-alist))
+;;; type struct: #s(:<core> #(:t name property-alist))
 ;;;
 ;;; where the property-alist is ((:property . accessor) ...)
 ;;;
-(mu:intern core "define-type"
+(mu:intern core "def-type"
    (:lambda (name properties)
       ((:lambda (str)
           (:if (core:listp properties)
                ((:lambda (symbol)
                    (:if (core:null symbol)
-                        (mu:intern core:%types-ns% str (mu:make-struct :<type> `(,str ,properties)))
-                        (core:raise symbol 'core:define-type "type symbol bound")))
+                        (mu:intern core:%types-ns% str (mu:make-struct :<core> `(,str ,properties)))
+                        (core:raise symbol 'core:def-type "type symbol bound")))
                 (mu:find core:%types-ns% str))
-               (core:raise properties 'core:define-type "not a property list")))
-       (core:string name))))
+               (core:raise properties 'core:def-type "not a property list")))
+       name)))
 
 (mu:intern core "%type-predicate-map%"
    `(,(mu:cons :char (:lambda (t) (core:charp t)))
@@ -61,14 +61,14 @@
                         ((:lambda (type value)
                             (:if (core:%type-predicate type value)
                                  property-def
-                                 (core:raise property-value '%make-type "type mismatch")))
+                                 (core:raise property-value 'core:%make-type "type mismatch")))
                          (mu:cdr property-def)
                          (mu:cdr property-value))
                         ()))
                 (mu:svref (mu:struct-vec (mu:symbol-value type-symbol)) 1)))
             property-values))
         (mu:find core:%types-ns% name))
-       (mu:make-struct :<type> `(,name ,property-values))))
+       (mu:make-struct :<core> `(,name ,property-values))))
 
 (mu:intern core "%type-ref"
    (:lambda (prop-name struct)
@@ -85,7 +85,7 @@
    (:lambda (value)
       ((:lambda (type)
           (:if (mu:eq type :struct)
-               (:if (mu:eq :<type> (mu:struct-type value))
+               (:if (mu:eq :<core> (mu:struct-type value))
                     (mu:makunbound (mu:intern (mu:find-namespace "") (mu:svref (mu:struct-vec value) 0) ()))
                     (mu:struct-type value))
                (:if (core:stringp value)

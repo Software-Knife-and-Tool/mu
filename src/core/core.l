@@ -57,6 +57,8 @@
                 (mu:less-than 0 n))
            (core:raise n 'core:plusp "not a number"))))
 
+(mu:intern core "packagep" (:lambda (t) (mu:eq (core:type-of t) 'package)))
+
 ;;;
 ;;; mu system classes
 ;;;
@@ -65,7 +67,7 @@
 (mu:intern core "fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
 (mu:intern core "floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
 (mu:intern core "listp" (:lambda (t) (:if (core:consp t) :t (core:null t))))
-(mu:intern core "namespacep" (:lambda (t) (mu:eq (core:type-of t) 'namespace)))
+(mu:intern core "namespacep" (:lambda (t) (mu:eq :ns (mu:type-of t))))
 (mu:intern core "null" (:lambda (t) (mu:eq () t)))
 (mu:intern core "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
 (mu:intern core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))

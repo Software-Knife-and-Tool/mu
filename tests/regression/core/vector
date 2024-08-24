@@ -14,7 +14,7 @@
 (core:vector-type #(:t 1 2 3))	:t
 (core:vector-type (core:read (core:make-string-stream :input "#*11101") () ()))	bit
 (core:vector-type (core:vector-slice #(:fixnum 1 2 3) 1 2))	:fixnum
-(core:vector-slice #(:fixnum 1 2 3) 1 2)	#s(:<type> #(:t %vector ((:base . #(:fixnum 1 2 3)) (:disp 1 . 2) (:bitvec))))
+(core:vector-slice #(:fixnum 1 2 3) 1 2)	#s(:<core> #(:t %vector ((:base . #(:fixnum 1 2 3)) (:disp 1 . 2) (:bitvec))))
 (core:vector-ref (core:make-vector '(1 2 3)) 1)	2
 (core:vectorp (core:make-vector '(1 2 3)))	:t
 (core:vectorp (mu:make-vector :t '(1 2 3)))	:t

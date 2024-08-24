@@ -22,7 +22,7 @@
                      (:if (core:%orf
                            (core:%lambda-prop :lexenv lambda-desc)
                            (core:%lambda-prop :rest lambda-desc))
-                          (core:%make-fn lambda-desc compiled-function ())
+                          (core:%make-closure lambda-desc compiled-function ())
                           compiled-function))
                     (mu:compile
                      `(:lambda

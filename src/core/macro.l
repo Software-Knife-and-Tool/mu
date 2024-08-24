@@ -30,7 +30,7 @@
        ((:lambda (macro-function)
           ((:lambda (expanded-form)
              (core:%compile expanded-form env))
-           (:if (core:%core-function-p macro-function)
+           (:if (core:%closurep macro-function)
                 (core:%fn-apply-quoted
                  macro-function
                  (mu:eval (core:%compile-lambda-arg-list macro-function arg-list env)))
@@ -47,7 +47,7 @@
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-function)
                      (:if macro-function
-                          (:if (core:%core-function-p macro-function)
+                          (:if (core:%closurep macro-function)
                                (core:%fn-apply-quoted macro-function
                                                       (core:%quoted-lambda-arg-list macro-function arg-list))
                                (mu:apply macro-function arg-list))

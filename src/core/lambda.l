@@ -13,7 +13,7 @@
 ;;;
 ;;; implementation
 ;;;
-(core:define-type "%lambda"
+(core:def-type "%lambda"
     '((:bound  . :listp)
       (:frame  . :func)
       (:rest   . :symbolp)

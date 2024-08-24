@@ -8,7 +8,7 @@
 ;;;
 ;;; core type
 ;;;
-(core:define-type "%vector"
+(core:def-type "%vector"
     '((:base    . :vector)
       (:disp    . :listp)
       (:bitvec  . :listp)))
