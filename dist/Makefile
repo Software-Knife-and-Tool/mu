@@ -35,6 +35,7 @@ dist:
 
 	@install -m 644 $(SRC)/dist/mu.l $(BASE)/dist
 	@install -m 644 -D -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
+	@install -D -t $(BASE)/lib/common $(SRC)/common/*.l
 	@install -D -t $(BASE)/lib/core $(SRC)/core/*.l
 	@install -D -t $(BASE)/lib/prelude $(SRC)/prelude/*.l
 

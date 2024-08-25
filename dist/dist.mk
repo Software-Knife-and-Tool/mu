@@ -31,6 +31,15 @@ CORE= \
 	package.l      \
 	vector.l 
 
+COMMON= \
+	common.l       \
+	predicates.l   \
+	string.l       \
+	fixnum.l       \
+	list.l	       \
+	stream.l       \
+	symbol.l
+
 PRELUDE = \
 	prelude.l
 
@@ -40,6 +49,12 @@ dist:
 	    cat $(SRC)/core/$$core >> core.l;		\
 	done
 	@cp core.l mu/dist
+
+	@rm -f common.l
+	@for common in $(COMMON); do			\
+	    cat $(SRC)/common/$$common >> common.l;	\
+	done
+	@cp common.l mu/dist
 
 	@rm -f prelude.l
 	@for prelude in $(PRELUDE); do			\
