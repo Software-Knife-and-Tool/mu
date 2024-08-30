@@ -20,7 +20,7 @@
    (:lambda (function arg-list)
       (:if (core:%closurep function)
            ((:lambda (rest nreqs)
-              (:if (core:%andf rest (core:zerop nreqs))
+              (:if (core:%andf rest (mu:eq 0 nreqs))
                    `(mu:cons ,(core:%arg-list arg-list) ())
                    ((:lambda (reqs rest)
                       (:if (core:%andf (core:null rest) (core:null reqs))
@@ -36,7 +36,7 @@
   (:lambda (fn args)
     (:if (core:%closurep fn)
          (:if (core:%closure-prop :rest fn)
-              (:if (core:%andf (core:%closure-prop :rest fn) (core:zerop (core:%closure-prop :arity fn)))
+              (:if (core:%andf (core:%closure-prop :rest fn) (mu:eq 0 (core:%closure-prop :arity fn)))
                    (mu:cons args ())
                    ((:lambda (reqs rest)
                       (core:%append

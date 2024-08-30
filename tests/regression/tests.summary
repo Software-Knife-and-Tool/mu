@@ -22,11 +22,11 @@ Namespace Test Summary:
 core       backquote      total: 37       pass: 25       fail: 10       exceptions: 2       
 core       closure        total: 1        pass: 1        fail: 0        exceptions: 0       
 core       compile        total: 22       pass: 22       fail: 0        exceptions: 0       
-core       prelude        total: 15       pass: 15       fail: 0        exceptions: 0       
+core       prelude        total: 13       pass: 13       fail: 0        exceptions: 0       
 core       exception      total: 7        pass: 7        fail: 0        exceptions: 0       
 core       format         total: 15       pass: 15       fail: 0        exceptions: 0       
 core       lambda         total: 25       pass: 25       fail: 0        exceptions: 0       
-core       list           total: 64       pass: 64       fail: 0        exceptions: 0       
+core       list           total: 61       pass: 61       fail: 0        exceptions: 0       
 core       macro          total: 13       pass: 13       fail: 0        exceptions: 0       
 core       reader         total: 66       pass: 66       fail: 0        exceptions: 0       
 core       stream         total: 4        pass: 4        fail: 0        exceptions: 0       
@@ -35,5 +35,5 @@ core       symbol         total: 3        pass: 3        fail: 0        exceptio
 core       types          total: 42       pass: 42       fail: 0        exceptions: 0       
 core       vector         total: 25       pass: 25       fail: 0        exceptions: 0       
 -----------------------
-core                      total: 341      pass: 329      fail: 10       exceptions: 2         
+core                      total: 336      pass: 324      fail: 10       exceptions: 2         
 

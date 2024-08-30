@@ -35,7 +35,7 @@
   (:lambda (dest arg-list)
      ((:lambda (fx)
        (:if (core:%fixnump fx)
-            (:if (core:zerop fx)
+            (:if (mu:eq 0 fx)
                  (core:write "0" () dest)
                  ((:lambda (str-stream)
                      (mu:fix
@@ -52,14 +52,14 @@
                      ((:lambda (hexstr)
                          (mu:fix
                           (:lambda (len)
-                             (:if (core:zerop len)
-                          0
-                          ((:lambda ()
-                              (mu:write (mu:svref hexstr (mu:sub len 1)) () dest)
-                              (mu:sub len 1)))))
-                   (mu:vector-len hexstr)))
-                  (mu:get-string str-stream)))
-             (mu:open :string :output "")))
+                             (:if (mu:eq 0 len)
+                                  0
+                                  ((:lambda ()
+                                     (mu:write (mu:svref hexstr (mu:sub len 1)) () dest)
+                                     (mu:sub len 1)))))
+                          (mu:vector-len hexstr)))
+                      (mu:get-string str-stream)))
+                  (mu:open :string :output "")))
             (core:raise fx 'core:format "argument to ~X not a fixnum")))
       (mu:car arg-list))))
 
@@ -119,7 +119,7 @@
    (:lambda (stream format-string arg-list)
       (:if (core:stringp format-string)
            (:if (core:listp arg-list)
-                (:if (core:zerop (mu:vector-len format-string))
+                (:if (mu:eq 0 (mu:vector-len format-string))
                      (:if stream
                           ""
                           ())

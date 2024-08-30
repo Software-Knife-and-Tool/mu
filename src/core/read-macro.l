@@ -51,7 +51,7 @@
       (mu:fix
        (:lambda (loop)
          ((:lambda (nbits byte)
-            (:if (core:zerop nbits)
+            (:if (mu:eq 0 nbits)
                  loop
                  ((:lambda (ch)                   
                     (:if (core:null ch)
@@ -114,7 +114,7 @@
   (:lambda (base stream)
     (mu:fix
       (:lambda (loop)
-        (:if (core:numberp loop)
+        (:if (core:%numberp loop)
              loop
              ((:lambda (ch)
                 (:if (core:null ch)

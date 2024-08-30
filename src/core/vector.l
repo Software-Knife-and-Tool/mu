@@ -64,10 +64,10 @@
    (:lambda (vector start length)
      (:if (core:typep vector :vector)
           (:if (core:%fixnump start)
-               (:if (core:%orf (core:minusp start) (mu:less-than (core:vector-length vector) start))
+               (:if (core:%orf (core:%minusp start) (mu:less-than (core:vector-length vector) start))
                     (core:raise start 'core:vector-slice "illegal start")
                     (:if (core:%fixnump length)
-                         (:if (core:%orf (core:minusp length) (mu:less-than (core:vector-length vector) length))
+                         (:if (core:%orf (core:%minusp length) (mu:less-than (core:vector-length vector) length))
                               (core:raise length 'core:vector-slice "illegal length")
                               (core:%make-vector vector `(,start ,@length) ()))
                          (core:raise start 'core:vector-slice "not a fixnum")))
@@ -98,12 +98,12 @@
    (:lambda (vector nth)
      (:if (core:vectorp vector)
           (:if (core:%fixnump nth)
-               (:if (core:%orf (core:minusp nth) (mu:less-than (core:vector-length vector) nth))
+               (:if (core:%orf (core:%minusp nth) (mu:less-than (core:vector-length vector) nth))
                     (core:raise length 'core:vector-ref "illegal index")
                     (:if (core:bit-vector-p vector)
                          ((:lambda (nth-byte offset)
                             ((:lambda (byte)
-                               (:if (core:zerop (mu:logand byte (mu:ash 1 (mu:sub 7 offset))))
+                               (:if (mu:eq 0 (mu:logand byte (mu:ash 1 (mu:sub 7 offset))))
                                     0
                                     1))
                                (core:vector-ref (core:%vector-prop :base vector) nth-byte)))
@@ -156,7 +156,7 @@
                           :fixnum))
                    (core:%foldl
                     (:lambda (elt acc)
-                      (:if (core:%andf (core:not (core:minusp elt)) (mu:less-than elt 256))
+                      (:if (core:%andf (core:not (core:%minusp elt)) (mu:less-than elt 256))
                            acc
                            ()))
                       :t

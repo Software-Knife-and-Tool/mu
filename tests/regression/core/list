@@ -52,9 +52,6 @@
 (core:%positionl (:lambda (el) (mu:eq el 'foo)) '(1))	:nil
 (core:%positionl (:lambda (el) (mu:eq el 'foo)) '(foo))	0
 (core:%positionl (:lambda (el) (mu:eq el 'foo)) '(1 foo))	1
-(core:%positionl core:zerop '(1 2 0 4 5))	2
-(core:%positionl core:zerop '(0 2 0 4 5))	0
-(core:%positionl core:zerop '(1 2 3 4 0))	4
 (core:%reverse '(1 2 3 4))	(4 3 2 1)
 (mu:cdr (core:%assq #\a '((#\a . foo))))	foo
 (mu:cdr (core:%assq #\a '(() (#\a . foo))))	foo
