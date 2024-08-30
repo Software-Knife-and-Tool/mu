@@ -211,17 +211,17 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:sum", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.fp_argv_check("mu:add", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
             Some(sum) => {
                 if Self::is_i56(sum) {
                     Self::with_i64_or_panic(sum)
                 } else {
-                    return Err(Exception::new(env, Condition::Over, "mu:sum", fx0));
+                    return Err(Exception::new(env, Condition::Over, "mu:add", fx0));
                 }
             }
-            None => return Err(Exception::new(env, Condition::Over, "mu:sum", fx1)),
+            None => return Err(Exception::new(env, Condition::Over, "mu:add", fx1)),
         };
 
         Ok(())
@@ -231,17 +231,17 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:difference", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.fp_argv_check("mu:sub", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
             Some(diff) => {
                 if Self::is_i56(diff) {
                     Self::with_i64_or_panic(diff)
                 } else {
-                    return Err(Exception::new(env, Condition::Over, "mu:difference", fx1));
+                    return Err(Exception::new(env, Condition::Over, "mu:sub", fx1));
                 }
             }
-            None => return Err(Exception::new(env, Condition::Over, "mu:difference", fx1)),
+            None => return Err(Exception::new(env, Condition::Over, "mu:sub", fx1)),
         };
 
         Ok(())
@@ -251,17 +251,17 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:product", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.fp_argv_check("mu:mul", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
             Some(prod) => {
                 if Self::is_i56(prod) {
                     Self::with_i64_or_panic(prod)
                 } else {
-                    return Err(Exception::new(env, Condition::Over, "mu:product", fx1));
+                    return Err(Exception::new(env, Condition::Over, "mu:mul", fx1));
                 }
             }
-            None => return Err(Exception::new(env, Condition::Over, "mu:product", fx1)),
+            None => return Err(Exception::new(env, Condition::Over, "mu:mul", fx1)),
         };
 
         Ok(())
@@ -271,7 +271,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:quotient", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.fp_argv_check("mu:div", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         if Self::as_i64(fx1) == 0 {
             return Err(Exception::new(env, Condition::ZeroDivide, "mu:fx-div", fx0));
@@ -282,10 +282,10 @@ impl CoreFunction for Fixnum {
                 if Self::is_i56(div) {
                     Self::with_i64_or_panic(div)
                 } else {
-                    return Err(Exception::new(env, Condition::Over, "mu:quotient", fx1));
+                    return Err(Exception::new(env, Condition::Over, "mu:div", fx1));
                 }
             }
-            None => return Err(Exception::new(env, Condition::Over, "mu:quotient", fx1)),
+            None => return Err(Exception::new(env, Condition::Over, "mu:div", fx1)),
         };
 
         Ok(())

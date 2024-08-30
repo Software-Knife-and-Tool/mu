@@ -21,7 +21,7 @@
 
 (mu:intern core "%lambda-prop"
    (:lambda (prop lambda)
-      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :frame :rest :lexenv))
+      (:if (core:%findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :frame :rest :lexenv))
            ((:lambda (ref)
               (mu:cdr ref))
             (core:%type-ref prop lambda))
@@ -48,10 +48,10 @@
 ;;;
 (mu:intern core "%compile-lambda-desc"
    (:lambda (lambda env)
-     (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
+     (:if (core:%findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
           (core:raise lambda 'core:%compile-lambda-desc "list syntax")
           ((:lambda (desc)
-             (:if (core:fixnump desc)
+             (:if (core:%fixnump desc)
                   (core:%make-lambda lambda () env)
                   desc))
            (core:%foldl
@@ -59,13 +59,13 @@
               (:if (core:%lambdap acc)
                    acc
                    (:if (mu:eq '&rest el)
-                        (:if (mu:eq (mu:length lambda) (mu:sum 2 acc))
+                        (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
                              (core:%make-lambda
-                              `(,@(core:dropr lambda 2) ,@(core:dropl lambda (mu:difference (mu:length lambda) 1)))
-                              (mu:nth (mu:difference (mu:length lambda) 1) lambda)
+                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
+                              (mu:nth (mu:sub (mu:length lambda) 1) lambda)
                               env)
                              (core:raise lambda 'core:%compile-lambda-desc "rest botch"))
-                        (mu:sum 1 acc))))
+                        (mu:add 1 acc))))
             0
             lambda)))))
 
@@ -74,14 +74,14 @@
       (:if (core:null body)
            ()
            ((:lambda (env)
-               (core:maplist
+               (core:%maplist
                 (:lambda (body-cdr)
                    (:if (mu:cdr body-cdr)
                         ((:lambda (value)
                             (core:%compile value env))
                             (mu:car body-cdr))
                         ((:lambda (form)
-                            (:if (core:consp form)
+                            (:if (core:%consp form)
                                  (:if (mu:eq 'lambda (mu:car form))
                                       (core:%compile-function form env)
                                       (core:%compile form env))
@@ -103,7 +103,7 @@
                        ,(core:%lambda-prop :frame frame)
                        ,offset))
                     ()))
-            (core:positionl
+            (core:%positionl
              (:lambda (el) (mu:eq el symbol))
              (core:%lambda-prop :bound frame)))))
      ()

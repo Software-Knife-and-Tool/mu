@@ -1,20 +1,4 @@
-(mu:type-of core:close)	:func
-(mu:type-of core:get-output-stream-string)	:func
-(mu:type-of core:make-string-stream)	:func
-(mu:type-of core:open)	:func
-(mu:type-of core:with-open-file)	:func
 (mu:type-of core:read)	:func
-(mu:type-of core:read-byte)	:func
-(mu:type-of core:read-char)	:func
-(mu:type-of core:unread-char)	:func
 (mu:type-of core:write)	:func
-(mu:type-of core:write-byte)	:func
 (mu:write 1 () mu:*standard-output*)	11
-(mu:write (mu:sum 1 2) () mu:*standard-output*)	33
-(mu:write (core:string= "" "") () mu:*standard-output*)	:t:t
-(mu:write (core:string= "" "1") () mu:*standard-output*)	:nil:nil
-(mu:write (core:string= "1" "1") () mu:*standard-output*)	:t:t
-(mu:write (core:string= "123" "1") () mu:*standard-output*)	:nil:nil
-(mu:write (core:string= "" "ci") () mu:*standard-output*)	:nil:nil
-(mu:write (core:string= "ci" "") () mu:*standard-output*)	:nil:nil
-(mu:write (core:with-open-file :string :input "foo" (:lambda (stream) (core:read-char stream () ()))) () mu:*standard-output*)	f#\f
+(mu:write (mu:add 1 2) () mu:*standard-output*)	33

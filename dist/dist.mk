@@ -9,7 +9,6 @@ CORE= \
 	core.l         \
 	compile.l      \
 	string.l       \
-	fixnum.l       \
 	format.l       \
 	funcall.l      \
 	list.l         \

@@ -1,17 +1,17 @@
 (mu:apply (core:compile '(lambda () 1)) ())	1
 (mu:apply (core:compile '(lambda (a b) (core:null b))) '(1 2))	:nil
-(mu:apply (core:compile '(lambda (a b) (mu:sum 1 2))) '(1 2))	3
-(mu:apply (core:compile '(lambda (a b) (mu:sum a b))) '(1 2))	3
+(mu:apply (core:compile '(lambda (a b) (mu:add 1 2))) '(1 2))	3
+(mu:apply (core:compile '(lambda (a b) (mu:add a b))) '(1 2))	3
 (mu:apply (core:compile '(lambda (a b) (mu:type-of b))) '(1 2))	:fixnum
 (core:apply (core:compile '(lambda ())) ())	:nil
 (core:apply (core:compile '(lambda () 1)) ())	1
 (core:apply (core:compile '(lambda (a) a)) '(1))	1
 (core:apply (core:compile '(lambda (a) 1)) '(2))	1
 (core:apply (core:compile '(lambda (a b) 1)) '(2 3))	1
-(core:apply (core:compile '(lambda (a b) (core:fixnump b))) '(1 2))	:t
+(core:apply (core:compile '(lambda (a b) (core:%fixnump b))) '(1 2))	:t
 (core:apply (core:compile '(lambda (a b) (core:null b))) '(1 2))	:nil
-(core:apply (core:compile '(lambda (a b) (mu:sum 1 2))) '(1 2))	3
-(core:apply (core:compile '(lambda (a b) (mu:sum a b))) '(1 2))	3
+(core:apply (core:compile '(lambda (a b) (mu:add 1 2))) '(1 2))	3
+(core:apply (core:compile '(lambda (a b) (mu:add a b))) '(1 2))	3
 (core:apply (core:compile '(lambda (a b) (mu:type-of b))) '(1 2))	:fixnum
 (core:apply (core:compile '(lambda (&rest e) e)) '(1 2 3 4 5))	(1 2 3 4 5)
 (core:apply (core:compile '(lambda (a &rest e) e)) '(1 2 3 4 5))	(2 3 4 5)

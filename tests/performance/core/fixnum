@@ -1,8 +1,0 @@
-(core:1+ 10)
-(core:1- 10)
-(core:ceiling 5 2)
-(core:floor 5 2)
-(core:mod 5 2)
-(core:rem 5 2)
-(core:round 5 2)
-(core:truncate 5 2)

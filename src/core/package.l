@@ -18,7 +18,7 @@
 
 (mu:intern core "%package-prop"
    (:lambda (prop package)
-      (:if (core:findl
+      (:if (core:%findl
             (:lambda (lambda-prop)
                (mu:eq prop lambda-prop))
             '(:name :intern :extern :ch-mac :sy-mac :uses))
@@ -48,10 +48,10 @@
 
 (mu:intern core "intern"
    (:lambda (symbol value)          
-      (:if (core:uninternedp symbol)
+      (:if (core:%uninternedp symbol)
            ((:lambda (sym)
                (:if sym
-                    (:if (core:boundp sym)
+                    (:if (mu:boundp sym)
                          symbol
                          (mu:intern (core:%reader-get-ns) (mu:symbol-name symbol) value))
                     (mu:intern (core:%reader-get-ns) (mu:symbol-name symbol) value)))

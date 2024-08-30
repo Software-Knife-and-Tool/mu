@@ -19,21 +19,9 @@
            (mu:cdr arg)))
        (mu:cons list init)))))
 
-(mu:intern core "foldl"
-  (:lambda (function init list)
-     (:if (core:functionp function)
-          (:if (core:listp list)
-               (core:%foldl function init list)
-               (core:raise list 'core:foldl "not a list"))
-          (core:raise function 'core:foldl "not a function"))))
-
-(mu:intern core "foldr"
+(mu:intern core "%foldr"
    (:lambda (function init list)
-    (:if (core:functionp function)
-         (:if (core:listp list)
-              (core:foldl function init (core:reverse list))
-              (core:raise list 'core:foldr "not a list"))
-         (core:raise function 'core:foldr "not a function"))))
+     (core:%foldl function init (core:%reverse list))))
 
 ;;;
 ;;; maps
@@ -50,15 +38,6 @@
       list)
      list))
 
-(mu:intern core "mapc"
-   (:lambda (function list)
-     (:if (core:functionp function)
-          (:if (core:listp list)
-               (core:%mapc function list)
-               (core:raise list 'core:mapc "not a list"))
-          (core:raise function 'core:mapc "not a function"))
-     list))
-
 (mu:intern core "%mapcar"
    (:lambda (function list)
       (core:%foldl
@@ -67,48 +46,32 @@
        ()
        list)))
 
-(mu:intern core "mapcar"
+(mu:intern core "%mapl"
    (:lambda (function list)
-     (:if (core:functionp function)
-          (:if (core:listp list)
-               (core:%mapcar function list)
-               (core:raise list 'core:mapcar "not a list"))
-          (core:raise function 'core:mapcar "not a function"))))
+     (mu:fix
+      (:lambda (list)
+        (:if list
+             ((:lambda ()
+                (core:%apply function `(,list))
+                (mu:cdr list)))
+             ()))
+      list)
+     list))
 
-(mu:intern core "mapl"
+(mu:intern core "%maplist"
    (:lambda (function list)
-      (:if (core:functionp function)
-           (:if (core:listp list)
-                (mu:fix
-                 (:lambda (list)
-                    (:if list
-                         ((:lambda ()
-                            (core:%apply function `(,list))
-                            (mu:cdr list)))
-                         ()))
-                 list)
-                (core:raise list 'core:mapl "not a list"))
-           (core:raise function 'core:mapl "not a function"))
-      list))
-
-(mu:intern core "maplist"
-   (:lambda (function list)
-      (:if (core:functionp function)
-           (:if (core:listp list)
-                (mu:car
-                 (mu:fix
-                  (:lambda (loop)
-                     ((:lambda (acc list)
-                         (:if list
-                              (mu:cons
-                               `(,@acc ,(core:%apply function `(,list)))
-                                (mu:cdr list))
-                              loop))
-                      (mu:car loop)
-                      (mu:cdr loop)))
-                  `(() ,@list)))
-                (core:raise list 'core:maplist "not a list"))
-           (core:raise function 'core:maplist "not a function"))))
+     (mu:car
+      (mu:fix
+       (:lambda (loop)
+         ((:lambda (acc list)
+            (:if list
+                 (mu:cons
+                  `(,@acc ,(core:%apply function `(,list)))
+                  (mu:cdr list))
+                 loop))
+          (mu:car loop)
+          (mu:cdr loop)))
+       `(() ,@list)))))
 
 ;;;
 ;;; association lists
@@ -146,15 +109,3 @@
                  (mu:cdr lst))
                 ()))
         alist))))
-
-(mu:intern core "assq"
-   (:lambda (item alist)
-     (:if (core:listp alist)
-          (core:%assq item alist)
-          (core:raise alist 'core:assq "not an alist"))))
-
-(mu:intern core "rassq"
-   (:lambda (item alist)
-     (:if (core:listp alist)
-          (core:%rassq item alist)
-          (core:raise alist 'core:rassq "not an alist"))))

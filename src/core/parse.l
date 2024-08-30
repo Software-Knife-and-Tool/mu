@@ -11,15 +11,15 @@
 (mu:intern core "parse-integer"
   (:lambda (digits base)
     (:if (core:stringp digits)
-         (:if (core:fixnump base)
+         (:if (core:%fixnump base)
               (:if (core:zerop (mu:vector-len digits))
                    ()
                    ((:lambda (sign)
                        ((:lambda (integer)
-                           (:if (core:fixnump integer)
+                           (:if (core:%fixnump integer)
                                 (:if (core:null sign)
                                      integer
-                                     (mu:product sign integer))
+                                     (mu:mul sign integer))
                                 ()))
                         (mu:cdr
                          (mu:fix
@@ -27,18 +27,18 @@
                              (:if (core:null loop)
                                   ()
                                   ((:lambda (index acc)
-                                      (:if (mu:less-than (mu:difference (mu:vector-len digits) 1) index)
+                                      (:if (mu:less-than (mu:sub (mu:vector-len digits) 1) index)
                                            loop
                                            ((:lambda (n)
                                                (:if (core:null n)
                                                     ()
-                                                    (:if (mu:less-than (mu:difference base 1) n)
+                                                    (:if (mu:less-than (mu:sub base 1) n)
                                                          ()
-                                                         `(,(mu:sum 1 index) ,@(mu:sum n (mu:product acc base))))))
-                                            (core:string-position (core:schar digits index) "0123456789abcdef"))))
+                                                         `(,(mu:add 1 index) ,@(mu:add n (mu:mul acc base))))))
+                                            (core:%string-position (mu:svref digits index) "0123456789abcdef"))))
                                    (mu:car loop)
                                    (mu:cdr loop))))
-                          (:if (core:fixnump sign)
+                          (:if (core:%fixnump sign)
                                '(1 . 0)
                                '(0 . 0))))))
                     ((:lambda (digit)
@@ -47,7 +47,7 @@
                              (:if (mu:eq #\+ digit)
                                   1
                                   ())))
-                     (core:schar digits 0))))
+                     (mu:svref digits 0))))
               (core:raise base 'core:parse-integer "not a fixnum"))
          (core:raise digits 'core:parse-integer "not a string"))))
 
@@ -55,7 +55,7 @@
   (:lambda (str)
     ((:lambda (stream)
        ((:lambda (float)
-          (:if (core:floatp float)
+          (:if (core:%floatp float)
                float
                ()))
           (mu:read stream () ())))

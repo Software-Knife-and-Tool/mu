@@ -7,7 +7,7 @@
 (mu:intern (mu:find-namespace "") "crossref"
    (:lambda (file-name)
       ((:lambda (stream)
-          (core:mapc
+          (core:%mapc
            (:lambda (symbol)
               (:if (mu:boundp symbol)
                    (core:format stream "~A~T~A~T~S~%"

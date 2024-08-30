@@ -6,7 +6,7 @@
 ;;;
 (mu:intern core "%gen-macro-ns"
    (:lambda ()
-      (mu:make-namespace (mu:symbol-name (core:genkeyword #\%)))))
+      (mu:make-namespace (mu:symbol-name (core:%genkey #\%)))))
 
 (mu:intern core "%defmacro"
    (:lambda (symbol macro-function)
@@ -42,7 +42,7 @@
 ;;;
 (mu:intern core "macroexpand-1"
    (:lambda (form env)
-     (:if (core:consp form)
+     (:if (core:%consp form)
           ((:lambda (fn-symbol arg-list)
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-function)
