@@ -152,7 +152,7 @@
                                     (:if (common:%apply function (mu:cons (mu:nth loop list) ()))
                                          (mu:cons loop ())
                                          (common:1- loop)))))
-                       (mu:difference (mu:length list) 1))))
+                       (mu:sub (mu:length list) 1))))
                 (common:raise list 'common:positionr "not a list"))
            (common:raise function 'common:positionr "not a function"))))
 

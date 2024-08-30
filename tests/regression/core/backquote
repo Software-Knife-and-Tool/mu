@@ -1,4 +1,4 @@
-(mu:eq 'mu:sum (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:sum") () ()))))	:t
+(mu:eq 'mu:add (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:add") () ()))))	:t
 (mu:eq 'mu:*version* (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:*version*") () ()))))	:t
 (mu:eval (core:compile (core:read (mu:open :string :input "`\"abc\"") () ())))	"abc"
 (mu:eval (core:compile (core:read (mu:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
@@ -13,11 +13,11 @@
 (mu:eval (core:compile (core:read (mu:open :string :input "`((1234) 1234 symbol)") () ())))	((1234) 1234 symbol)
 (mu:eval (core:compile (core:read (mu:open :string :input "`((a b) c)") () ())))	((a b) c)
 (mu:eval (core:compile (core:read (mu:open :string :input "`()") () ())))	:nil
-(mu:eval (core:compile (core:read (mu:open :string :input "`(,(mu:sum 1 2))") () ())))	(3)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(,(mu:add 1 2))") () ())))	(3)
 (mu:eval (core:compile (core:read (mu:open :string :input "`(,1 (2) 3)") () ())))	(1 (2) 3)
 (mu:eval (core:compile (core:read (mu:open :string :input "`(,1234 ,@'(a b c))") () ())))	(1234 a b c)
 (mu:eval (core:compile (core:read (mu:open :string :input "`(,@'(a b c))") () ())))	(a b c)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(,@(mu:sum 1 2))")) () ()))	3
+(mu:eval (core:compile (core:read (mu:open :string :input "`(,@(mu:add 1 2))")) () ()))	3
 (mu:eval (core:compile (core:read (mu:open :string :input "`(0 ,@'(a b c) 1)") () ())))	(0 a b c 1)
 (mu:eval (core:compile (core:read (mu:open :string :input "`(1 2 ,@3)") () ())))	(1 2 . 3)
 (mu:eval (core:compile (core:read (mu:open :string :input "`(1 2 3)") () ())))	(1 2 3)
@@ -25,7 +25,7 @@
 (mu:eval (core:compile (core:read (mu:open :string :input "`(1234 symbol)") () ())))	(1234 symbol)
 (mu:eval (core:compile (core:read (mu:open :string :input "`(1234)") () ())))	(1234)
 (mu:eval (core:compile (core:read (mu:open :string :input "`(a b c)") () ())))	(a b c)
-(mu:eval (core:compile (core:read (mu:open :string :input "`,(mu:sum 1 2)") () ())))	3
+(mu:eval (core:compile (core:read (mu:open :string :input "`,(mu:add 1 2)") () ())))	3
 (mu:eval (core:compile (core:read (mu:open :string :input "`,(mu:type-of 'symbol)") () ())))	:symbol
 (mu:eval (core:compile (core:read (mu:open :string :input "`,1234") () ())))	1234
 (mu:eval (core:compile (core:read (mu:open :string :input "`,`\"abc\"") () ())))	"abc"

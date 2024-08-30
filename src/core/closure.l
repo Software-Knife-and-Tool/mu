@@ -16,7 +16,7 @@
 
 (mu:intern core "%closure-prop"
    (:lambda (prop closure)
-      (:if (core:findl (:lambda (closure-prop) (mu:eq prop closure-prop)) '(:lambda :arity :fn :env))
+      (:if (core:%findl (:lambda (closure-prop) (mu:eq prop closure-prop)) '(:lambda :arity :fn :env))
            ((:lambda (ref)
                ;;; (core:raise-when core:null prop 'core:%function-prop "property not bound")
                (mu:cdr ref))
@@ -54,7 +54,7 @@
                ,(mu:cons :arity  nargs)
                ,(mu:cons :fn     fn)
                ,(mu:cons :env    env))))
-       (mu:difference
+       (mu:sub
         (mu:length (core:%lambda-prop :bound lambda))
         (:if (core:%lambda-prop :rest lambda) 1 0)))))
 
@@ -66,14 +66,14 @@
       ((:lambda (bound-symbols)
           (core:%foldl
            (:lambda (elt acc)
-              (:if (core:consp elt)
+              (:if (core:%consp elt)
                    ((:lambda (function-form)
-                       (:if (core:consp function-form)
+                       (:if (core:%consp function-form)
                             `(,@(core:%closure-env lambda function-form env) ,@acc)
                             `(,@(core:%closure-env lambda (mu:cdr elt) env) ,@acc)))
                     (mu:car elt))
                    (:if (mu:eq :symbol (mu:type-of elt))
-                        (:if (core:uninternedp elt)
+                        (:if (core:%uninternedp elt)
                              ((:lambda (symbol)
                                  (:if symbol
                                       acc
@@ -81,13 +81,13 @@
                                           (:if binding-lambda
                                                 `(,(mu:cons form binding-lambda) ,@acc)
                                                 acc))
-                                       (core:findl
+                                       (core:%findl
                                         (:lambda (lambda)
-                                           (core:findl
+                                           (core:%findl
                                             (:lambda (symbol) (mu:eq symbol form))
                                             (core:%type-ref :bound lambda)))
                                         env))))
-                                 (core:findl (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
+                                 (core:%findl (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
                              acc)
                         acc)))
            ()

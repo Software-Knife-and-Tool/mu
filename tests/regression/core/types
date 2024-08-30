@@ -17,11 +17,11 @@
 (core:typep () :null)	:t
 (core:typep () 'symbol)	:t
 (core:typep () '(satisfies core:null))	:t
-(core:typep 1 '(satisfies core:fixnump))	:t
-(core:typep 1024e23 '(satisfies core:floatp))	:t
-(core:typep '(1 2 3) '(satisfies core:consp))	:t
+(core:typep 1 '(satisfies core:%fixnump))	:t
+(core:typep 1024e23 '(satisfies core:%floatp))	:t
+(core:typep '(1 2 3) '(satisfies core:%consp))	:t
 (core:typep #(:t 1 2 3) '(satisfies core:vectorp))	:t
-(core:typep #\a '(satisfies core:charp))	:t
+(core:typep #\a '(satisfies core:%charp))	:t
 (core:typep () '(not symbol))	:nil
 (core:typep () '(and))	:t
 (core:typep () '(and (satisfies core:null)))	:t
@@ -29,7 +29,6 @@
 (core:typep () '(or))	:nil
 (core:typep () '(or (satisfies core:null)))	:t
 (core:typep () '(or :null (satisfies core:null)))	:t
-(core:typep core:1+ 'function)	:t
 (core:typep 1234 'number)	:t
 (core:typep 1.024 'number)	:t
 (core:typep 1234 'integer)	:t
@@ -40,4 +39,4 @@
 (core:typep mu:*standard-input* 'stream)	:t
 (core:typep :sym 'symbol)	:t
 (core:typep 'sym 'symbol)	:t
-(core:typep (core:read (core:make-string-stream :input "#*1111") () ()) 'bit-vector)	:t
+(core:typep (core:read (mu:open :string :input "#*1111") () ()) 'bit-vector)	:t

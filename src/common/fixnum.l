@@ -7,20 +7,20 @@
 (mu:intern common "1+"
    (:lambda (n)
      (:if (common:fixnump n)
-          (mu:sum n 1)
+          (mu:add n 1)
           (common:raise n 'common:1+ "not a fixnum"))))
 
 (mu:intern common "1-"
    (:lambda (n)
      (:if (common:fixnump n)
-          (mu:difference n 1)
+          (mu:sub n 1)
           (common:raise n 'common:1- "not a fixnum"))))
 
 (mu:intern common "truncate"
    (:lambda (n m)
      (:if (common:fixnump n)
           (:if (common:fixnump m)
-               `(,(mu:quotient n m) ,@(mu:difference n (mu:product m (mu:quotient n m))))
+               `(,(mu:div n m) ,@(mu:sub n (mu:mul m (mu:div n m))))
                (common:raise m 'common:truncate "not a fixnum"))
           (common:raise n 'common:truncate "not a fixnum"))))
 
@@ -29,7 +29,7 @@
    (:lambda (n m)
      (:if (common:fixnump n)
           (:if (common:fixnump m)
-               `(,(mu:quotient n m) ,@(mu:difference n (mu:product m (mu:quotient n m))))
+               `(,(mu:div n m) ,@(mu:sub n (mu:mul m (mu:div n m))))
                (common:raise m 'common:rem "not a fixnum"))
           (common:raise n 'common:floor "not a fixnum"))))
 
@@ -38,7 +38,7 @@
    (:lambda (n m)
      (:if (common:fixnump n)
           (:if (common:fixnump m)
-               `(,(mu:quotient n m) ,@(mu:difference n (mu:product m (mu:quotient n m))))
+               `(,(mu:div n m) ,@(mu:sub n (mu:mul m (mu:div n m))))
                (common:raise m 'common:ceiling "not a fixnum"))
           (common:raise n 'common:ceiling "not a fixnum"))))
 
@@ -63,6 +63,6 @@
    (:lambda (n m)
      (:if (common:fixnump n)
           (:if (common:fixnump m)
-               (mu:difference (mu:quotient n m) (mu:difference n (mu:product m (mu:quotient n m))))
+               (mu:sub (mu:div n m) (mu:sub n (mu:mul m (mu:div n m))))
                (common:raise m 'common:round "not a fixnum"))
           (common:raise n 'common:round "not a fixnum"))))

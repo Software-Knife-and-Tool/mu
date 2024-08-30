@@ -13,11 +13,11 @@
      ((:lambda (ns)
         (mu:write ns () core:%reader-current-ns%)
         (mu:find-namespace ns))
-      (core:get-output-stream-string core:%reader-current-ns%))))
+      (mu:get-string core:%reader-current-ns%))))
 
 (mu:intern core "%reader-set-ns"
    (:lambda (ns)
-      (core:get-output-stream-string core:%reader-current-ns%)
+      (mu:get-string core:%reader-current-ns%)
       (mu:write ns () core:%reader-current-ns%)))
 
 ;;;
@@ -70,10 +70,10 @@
 ;;;
 (mu:intern core "%read-atom"
   (:lambda (ch stream)
-    (core:write-char ch core:%reader-stream%)
+    (mu:write-char ch core:%reader-stream%)
     (mu:fix
      (:lambda (loop)
-       (:if (core:consp loop)
+       (:if (core:%consp loop)
             loop
             ((:lambda (ch)
                (:if (mu:eq core:%eof% ch)
@@ -81,13 +81,13 @@
                     ((:lambda (syntax-type)
                        (:if (mu:eq :const syntax-type)
                             ((:lambda ()
-                               (core:write-char ch core:%reader-stream%)
+                               (mu:write-char ch core:%reader-stream%)
                                (core:null loop)))
                             ((:lambda ()
-                               (core:unread-char ch stream)
+                               (mu:unread-char ch stream)
                                loop))))
                      (core:%read-char-syntax ch))))
-             (core:read-char stream () core:%eof%))))
+             (mu:read-char stream () core:%eof%))))
      ())
     ((:lambda (token)
        ((:lambda (number)
@@ -95,7 +95,7 @@
                number
                (core:%symbol-macro-expand (core:%read-symbol token))))
         (core:%read-number token)))
-     (core:get-output-stream-string core:%reader-stream%))))
+     (mu:get-string core:%reader-stream%))))
 
 ;;;
 ;;; parser
@@ -119,7 +119,7 @@
    (:lambda (stream)
      (mu:fix
       (:lambda (loop)
-        (:if (core:%orf (core:streamp loop) (core:charp loop))
+        (:if (core:%orf (core:%streamp loop) (core:%charp loop))
              loop
              ((:lambda (ch)
                 (:if (core:null ch)
@@ -133,13 +133,13 @@
                                           (core:%read-sharp-comment ch stream)
                                           (core:null loop)))
                                        #\#))
-                                (core:peek-char stream () ()))
+                                (core:%peek-char stream () ()))
                                (:if (mu:eq ch #\;)
                                     ((:lambda ()
                                        (core:%read-line-comment ch stream)
                                        (core:null loop)))
                                     ch)))))
-              (core:read-char stream () ()))))
+              (mu:read-char stream () ()))))
       ())))
 
 ;;;
@@ -148,7 +148,7 @@
 (mu:intern core "%read"
   (:lambda (stream)
     ((:lambda (ch)
-       (:if (core:streamp ch)
+       (:if (core:%streamp ch)
             core:%eof%
             ((:lambda (macro)
                (:if macro

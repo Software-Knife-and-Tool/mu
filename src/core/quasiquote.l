@@ -12,7 +12,7 @@
 
 (mu:intern core "%quasi-func-map"
    (:lambda (key map)
-     (mu:cdr (core:assq key map))))
+     (mu:cdr (core:%assq key map))))
 
 (mu:intern core "%quasi-read"
    (:lambda (stream)
@@ -23,7 +23,7 @@
                 (:if (core:null type-map)
                      `(:form ,(core:%read-dispatch ch stream))
                      (mu:apply (mu:cdr type-map) ())))
-                (core:assq ch syntax-map))))
+                (core:%assq ch syntax-map))))
         (core:%read-consume-ws stream)
         `(,(mu:cons #\( (:lambda () `(:list ,(core:%quasi-read-list stream))))
            ,(mu:cons #\) (:lambda () `(:list-)))
@@ -34,9 +34,9 @@
                                   (:if (mu:eq #\@ ch)
                                        `(:comma@ ,(core:read stream () ()))
                                        ((:lambda ()
-                                          (core:unread-char ch stream)
+                                          (mu:unread-char ch stream)
                                           `(:form ,(core:read stream () ())))))))
-                            (core:read-char stream () ()))))
+                            (mu:read-char stream () ()))))
            ,(mu:cons #\' (:lambda () `(:qquote ,(core:%quasi-read stream))))
            ,(mu:cons #\` (:lambda () `(:quasi ,(core:read stream () ()))))))))
 
@@ -71,10 +71,10 @@
          ,(mu:cons :list   (:lambda (expr list)
                              (:if (core:null (mu:car expr))
                                   (mu:cons () (mu:append list (core:%list `(:l-form ()))))
-                                  (:if (core:consp (mu:car expr))
+                                  (:if (core:%consp (mu:car expr))
                                        ((:lambda (form)
                                           (mu:cons () (mu:append list (core:%list `(:l-form ,form)))))
-                                        (core:mapcar (:lambda (expr) (mu:nth 1 expr)) (mu:car expr)))
+                                        (core:%mapcar (:lambda (expr) (mu:nth 1 expr)) (mu:car expr)))
                                        (mu:cons () (mu:append list (core:%list `(:l-list ,(mu:car expr)))))))))
          ,(mu:cons :list-  (:lambda (expr list)
                              (mu:cons :t list)))

@@ -41,7 +41,7 @@
 (mu:intern core "%compile-defmacro"
    (:lambda (form env)
       ((:lambda (macro-symbol lambda-form)
-          (:if (core:symbolp macro-symbol)
+          (:if (core:%symbolp macro-symbol)
                (core:%defmacro macro-symbol (core:%compile-lambda lambda-form env))
                (core:raise macro-symbol 'core:%compile-defmacro "not a symbol"))
           `(:quote ,macro-symbol))
@@ -88,7 +88,7 @@
 ;;;
 (mu:intern core "%compile"
    (:lambda (form env)
-     (:if (core:symbolp form)
+     (:if (core:%symbolp form)
           ((:lambda (ns name)
              (:if (mu:eq ns (mu:find-namespace ""))
                   ((:lambda (frame-ref)
@@ -97,11 +97,11 @@
                      form)
                    (core:%frame-ref form env))
                   form))
-             (core:symbol-namespace form)
-             (core:symbol-name form))
-          (:if (core:consp form)
+             (mu:symbol-namespace form)
+             (mu:symbol-name form))
+          (:if (core:%consp form)
                ((:lambda (function-form arg-list)
-                  (:if (core:keywordp function-form)
+                  (:if (core:%keywordp function-form)
                        (mu:compile form)              ; mu special form (:key ...)
                        (:if (mu:eq :symbol (mu:type-of function-form)) ; special form or macro
                             ((:lambda (special)

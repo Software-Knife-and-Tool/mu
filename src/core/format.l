@@ -6,17 +6,17 @@
 ;;;
 (mu:intern core "%fmt-tilde"
   (:lambda (dest arg-list)
-    (core:write-char #\~ dest)
+    (mu:write-char #\~ dest)
     arg-list))
 
 (mu:intern core "%fmt-tab"
   (:lambda (dest arg-list)
-    (core:write-char #\tab dest)
+    (mu:write-char #\tab dest)
     arg-list))
 
 (mu:intern core "%fmt-percent"
   (:lambda (dest arg-list)
-    (core:write-char #\linefeed dest)
+    (mu:write-char #\linefeed dest)
     arg-list))
 
 (mu:intern core "%fmt-bang"
@@ -25,7 +25,7 @@
 
 (mu:intern core "%fmt-decimal"
   (:lambda (dest arg-list)
-     (:if (core:fixnump (mu:car arg-list))
+     (:if (core:%fixnump (mu:car arg-list))
           ((:lambda ()
               (core:write (mu:car arg-list) () dest)
               (mu:cdr arg-list)))
@@ -34,7 +34,7 @@
 (mu:intern core "%fmt-hex"
   (:lambda (dest arg-list)
      ((:lambda (fx)
-       (:if (core:fixnump fx)
+       (:if (core:%fixnump fx)
             (:if (core:zerop fx)
                  (core:write "0" () dest)
                  ((:lambda (str-stream)
@@ -43,9 +43,9 @@
                          (:if (core:%orf (core:null n) (mu:eq 0 n))
                               ()
                               ((:lambda ()
-                                  (mu:write (core:schar "0123456789abcdef" (mu:logand n #xf)) () str-stream)
-                                  (mu:quotient n 16)))))
-                      (:if (mu:less-than fx 0) (mu:product -1 fx) fx))
+                                  (mu:write (mu:svref "0123456789abcdef" (mu:logand n #xf)) () str-stream)
+                                  (mu:div n 16)))))
+                      (:if (mu:less-than fx 0) (mu:mul -1 fx) fx))
                      (:if (mu:less-than fx 0)
                           (mu:write #\- () str-stream)
                           ())
@@ -55,8 +55,8 @@
                              (:if (core:zerop len)
                           0
                           ((:lambda ()
-                              (mu:write (core:schar hexstr (mu:difference len 1)) () dest)
-                              (mu:difference len 1)))))
+                              (mu:write (mu:svref hexstr (mu:sub len 1)) () dest)
+                              (mu:sub len 1)))))
                    (mu:vector-len hexstr)))
                   (mu:get-string str-stream)))
              (mu:open :string :output "")))
@@ -103,16 +103,16 @@
                loop
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
-                       (mu:cons (mu:sum 2 nth) (core:%fmt-op (core:schar fmt (mu:sum 1 nth)) dest argl))
+                       (mu:cons (mu:add 2 nth) (core:%fmt-op (mu:svref fmt (mu:add 1 nth)) dest argl))
                        ((:lambda ()
-                           (core:write-char ch dest)
-                           (mu:cons (mu:sum 1 nth) argl)))))
-                (core:schar fmt nth))))
+                           (mu:write-char ch dest)
+                           (mu:cons (mu:add 1 nth) argl)))))
+                (mu:svref fmt nth))))
         (mu:car loop)
         (mu:cdr loop)))
      (mu:cons 0 arg-list))
     (:if (core:null stream)
-         (core:get-output-stream-string dest)
+         (mu:get-string dest)
          ())))
 
 (mu:intern core "format"
@@ -128,7 +128,7 @@
                            (mu:open :string :output "")
                            (:if (mu:eq stream :t)
                                 mu:*standard-output*
-                                (:if (core:streamp stream)
+                                (:if (core:%streamp stream)
                                      stream
                                      (core:raise stream 'core:format "not a stream designator"))))))
                 (core:raise arg-list 'core:format "not a list"))

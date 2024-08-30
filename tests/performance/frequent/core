@@ -33,7 +33,7 @@
 (mu:eval 'mu:*version*)
 (mu:intern (mu:find-namespace "") "a" ())
 (mu:fix (:lambda (a) ()) ())
-(mu:fix (:lambda (a) (:if (mu:eq 0 a) 0 (mu:difference a 1))) 100)
+(mu:fix (:lambda (a) (:if (mu:eq 0 a) 0 (mu:sub a 1))) 100)
 (mu:type-of ())
 (mu:type-of 1)
 (mu:eq () ())

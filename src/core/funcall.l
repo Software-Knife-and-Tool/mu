@@ -10,7 +10,7 @@
 ;;;
 (mu:intern core "%arg-list"
    (:lambda (arg-list)
-      (core:foldr
+      (core:%foldr
        (:lambda (elt acc)
          `(mu:cons ,elt ,acc))
        ()
@@ -26,8 +26,8 @@
                       (:if (core:%andf (core:null rest) (core:null reqs))
                            ()
                            (core:%arg-list `(,@reqs ,(core:%arg-list rest)))))
-                    (core:dropr arg-list (mu:difference (mu:length arg-list) nreqs))
-                    (core:dropl arg-list nreqs))))
+                    (core:%dropr arg-list (mu:sub (mu:length arg-list) nreqs))
+                    (core:%dropl arg-list nreqs))))
             (core:%closure-prop :rest function)
             (core:%closure-prop :arity function))
            (core:%arg-list arg-list))))
@@ -39,11 +39,11 @@
               (:if (core:%andf (core:%closure-prop :rest fn) (core:zerop (core:%closure-prop :arity fn)))
                    (mu:cons args ())
                    ((:lambda (reqs rest)
-                      (core:append
+                      (core:%append
                        reqs
                        (mu:cons rest ())))
-                    (core:dropr args (mu:difference (mu:length args) (core:%closure-prop :arity fn)))
-                    (core:dropl args (core:%closure-prop :arity fn))))
+                    (core:%dropr args (mu:sub (mu:length args) (core:%closure-prop :arity fn)))
+                    (core:%dropl args (core:%closure-prop :arity fn))))
               args)
          args)))
 
@@ -52,11 +52,11 @@
 ;;;
 (mu:intern core "%compile-arg-list"
    (:lambda (arg-list env)
-      (core:foldr
+      (core:%foldr
        (:lambda (elt acc)
           `(mu:cons ,@(mu:cons elt `(,acc))))
        ()
-       (core:mapcar
+       (core:%mapcar
         (:lambda (form)
            (core:%compile form env))
         arg-list))))
@@ -74,7 +74,7 @@
 ;;;
 (mu:intern core "compile-funcall"
    (:lambda (function-form arg-list env)
-      (:if (core:consp function-form)
+      (:if (core:%consp function-form)
            ((:lambda (compiled-function)
               (:if (core:functionp compiled-function)
                    (:if (core:%closurep compiled-function)
@@ -82,14 +82,14 @@
                         `(mu:apply ,compiled-function ,(core:%compile-arg-list arg-list env)))
                    (core:raise compiled-function 'core:compile-funcall "illegal function call")))
             (core:%compile function-form env))
-           (:if (core:boundp function-form)
+           (:if (mu:boundp function-form)
                 ((:lambda (function)
                    (:if (core:functionp function)
                         (:if (core:%closurep function)
                              `(,core:%fn-apply-quoted ,function ,(core:%compile-lambda-arg-list function arg-list env))
                              `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                         (core:raise function 'core:compile-funcall "illegal function call")))
-                 (core:symbol-value function-form))
+                 (mu:symbol-value function-form))
                 `(,core:%apply ,function-form ,(core:%compile-arg-list arg-list env))))))
 
 ;;;

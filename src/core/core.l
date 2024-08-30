@@ -17,21 +17,15 @@
 ;;; predicates
 ;;;
 (mu:intern core "not" (:lambda (value) (core:null value)))
-(mu:intern core "atom" (:lambda (value) (core:not (core:consp value))))
 
-(mu:intern core "constantp"
-   (:lambda (value)
-      (:if (core:%orf (core:null value) (core:keywordp value))
-           :t
-           (:if (core:consp value)
-                (mu:eq :quote (mu:car value))
-                (core:not (core:symbolp value))))))
+;;; candidate for culling
+(mu:intern core "%atom" (:lambda (value) (core:not (core:%consp value))))
 
 (mu:intern core "numberp"
   (:lambda (n)
-     (:if (core:fixnump n)
+     (:if (core:%fixnump n)
           :t
-          (core:floatp n))))
+          (core:%floatp n))))
 
 (mu:intern core "zerop"
    (:lambda (n)
@@ -44,33 +38,34 @@
 (mu:intern core "minusp"
    (:lambda (n)
       (:if (core:numberp n)
-           (:if (core:floatp n)
+           (:if (core:%floatp n)
                 (mu:fless-than n 0.0)
                 (mu:less-than n 0))
            (core:raise n 'core:minusp "not a number"))))
 
-(mu:intern core "plusp"
+;;; candidate for culling
+(mu:intern core "%plusp"
    (:lambda (n)
       (:if (core:numberp n)
-           (:if (core:floatp n)
+           (:if (core:%floatp n)
                 (mu:fless-than 0.0 n)
                 (mu:less-than 0 n))
            (core:raise n 'core:plusp "not a number"))))
 
-(mu:intern core "packagep" (:lambda (t) (mu:eq (core:type-of t) 'package)))
+(mu:intern core "null" (:lambda (t) (mu:eq () t)))
+(mu:intern core "listp" (:lambda (t) (:if (core:%consp t) :t (core:null t))))
 
 ;;;
 ;;; mu system classes
 ;;;
-(mu:intern core "charp" (:lambda (t) (mu:eq :char (mu:type-of t))))
-(mu:intern core "consp" (:lambda (t) (mu:eq :cons (mu:type-of t))))
-(mu:intern core "fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
-(mu:intern core "floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
-(mu:intern core "listp" (:lambda (t) (:if (core:consp t) :t (core:null t))))
-(mu:intern core "namespacep" (:lambda (t) (mu:eq :ns (mu:type-of t))))
-(mu:intern core "null" (:lambda (t) (mu:eq () t)))
-(mu:intern core "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
-(mu:intern core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
+(mu:intern core "%charp" (:lambda (t) (mu:eq :char (mu:type-of t))))
+(mu:intern core "%consp" (:lambda (t) (mu:eq :cons (mu:type-of t))))
+(mu:intern core "%fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
+(mu:intern core "%floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
+(mu:intern core "%namespacep" (:lambda (t) (mu:eq :ns (mu:type-of t))))
+(mu:intern core "%streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
+(mu:intern core "%structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
+(mu:intern core "%keywordp" (:lambda (t) (mu:eq (core:type-of t) 'keyword)))
 
 ;;;
 ;;; syntactic sugar

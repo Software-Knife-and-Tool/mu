@@ -3,7 +3,6 @@ closure
 compile
 prelude
 exception
-fixnum
 format
 lambda
 list

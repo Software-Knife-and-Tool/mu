@@ -1,4 +1,4 @@
-(mu:type-of `,mu:sum)	:func
+(mu:type-of `,mu:add)	:func
 (mu:type-of `,mu:*version*)	:vector
 `"abc"	"abc"
 `#(:t 1 2 3)	#(:t 1 2 3)
@@ -13,11 +13,11 @@
 `((1234) 1234 symbol)	((1234) 1234 symbol)
 `((a b) c)	((a b) c)
 `()	:nil
-`(,(mu:sum 1 2))	(3)
+`(,(mu:add 1 2))	(3)
 `(,1 (2) 3)	(1 (2) 3)
 `(,1234 ,@'(a b c))	(1234 a b c)
 `(,@'(a b c))	(a b c)
-`(,@(mu:sum 1 2))	3
+`(,@(mu:add 1 2))	3
 `(0 ,@'(a b c) 1)	(0 a b c 1)
 `(1 2 ,@3)	(1 2 . 3)
 `(1 2 3)	(1 2 3)
@@ -25,7 +25,7 @@
 `(1234 symbol)	(1234 symbol)
 `(1234)	(1234)
 `(a b c)	(a b c)
-`,(mu:sum 1 2)	3
+`,(mu:add 1 2)	3
 `,(mu:type-of 'symbol)	:symbol
 `,1234	1234
 `,`"abc"	"abc"

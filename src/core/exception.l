@@ -119,6 +119,6 @@
 
 (mu:intern core "%exception-prop"
    (:lambda (prop exception)
-      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
+      (:if (core:%findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
            (core:%type-ref prop exception)
            (core:raise prop 'core:%exception-prop "not an exception property"))))

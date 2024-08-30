@@ -6,7 +6,7 @@
 ;;;
 (mu:intern core "%core-type-p"
    (:lambda (value)
-      (:if (core:structp value)
+      (:if (core:%structp value)
            (mu:eq :<core> (mu:struct-type value))
            ())))
 
@@ -28,19 +28,19 @@
        name)))
 
 (mu:intern core "%type-predicate-map%"
-   `(,(mu:cons :char (:lambda (t) (core:charp t)))
-      ,(mu:cons :cons (:lambda (t) (core:consp t)))
-      ,(mu:cons :fixnum (:lambda (t) (core:fixnump t)))
-      ,(mu:cons :float (:lambda (t) (core:floatp t)))
+   `(,(mu:cons :char (:lambda (t) (core:%charp t)))
+      ,(mu:cons :cons (:lambda (t) (core:%consp t)))
+      ,(mu:cons :fixnum (:lambda (t) (core:%fixnump t)))
+      ,(mu:cons :float (:lambda (t) (core:%floatp t)))
       ,(mu:cons :func (:lambda (t) (core:functionp t)))
       ,(mu:cons :listp (:lambda (t) (core:listp t)))
       ,(mu:cons :map (:lambda (t) (mu:eq :map (mu:type-of t))))
-      ,(mu:cons :keyword (:lambda (t) (core:keywordp t)))
-      ,(mu:cons :ns (:lambda (t) (core:namespacep t)))
+      ,(mu:cons :keyword (:lambda (t) (core:%keywordp t)))
+      ,(mu:cons :ns (:lambda (t) (core:%namespacep t)))
       ,(mu:cons :string (:lambda (t) (core:stringp t)))
-      ,(mu:cons :struct (:lambda (t) (core:structp t)))
+      ,(mu:cons :struct (:lambda (t) (core:%structp t)))
       ,(mu:cons :symbol (:lambda (t) (mu:eq :symbol (mu:type-of t))))
-      ,(mu:cons :symbolp (:lambda (t) (core:symbolp t)))
+      ,(mu:cons :symbolp (:lambda (t) (core:%symbolp t)))
       ,(mu:cons :t (:lambda (t) :t))
       ,(mu:cons :vector (:lambda (t) (core:vectorp t)))))
 
@@ -55,7 +55,7 @@
        ((:lambda (type-symbol)
            (core:%mapc
             (:lambda (property-value)
-               (core:findl
+               (core:%findl
                 (:lambda (property-def)
                    (:if (mu:eq (mu:car property-value) (mu:car property-def))
                         ((:lambda (type value)
@@ -73,7 +73,7 @@
 (mu:intern core "%type-ref"
    (:lambda (prop-name struct)
       (:if (core:%core-type-p struct)
-           (:if (core:keywordp prop-name)
+           (:if (core:%keywordp prop-name)
                 (core:%assq prop-name (mu:svref (mu:struct-vec struct) 1))
                 (core:raise struct 'core:%type-ref "not a core type"))
            (core:raise prop-name 'core:%type-ref "not a property name"))))

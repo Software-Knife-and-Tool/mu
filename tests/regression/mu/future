@@ -1,9 +1,9 @@
 (mu:type-of mu:defer)	:func
 (mu:type-of mu:force)	:func
 (mu:type-of mu:poll)	:func
-(mu:type-of (mu:defer mu:sum '(1 2)))	:struct
-(mu:force (mu:defer mu:sum '(1 2)))	3
-(mu:type-of (mu:detach mu:sum '(1 2)))	:struct
-(mu:force (mu:detach mu:sum '(1 2)))	3
-(mu:type-of (mu:poll (mu:detach mu:sum '(1 2))))	:null
-(mu:type-of (mu:poll (mu:defer mu:sum '(1 2))))	:null
+(mu:type-of (mu:defer mu:add '(1 2)))	:struct
+(mu:force (mu:defer mu:add '(1 2)))	3
+(mu:type-of (mu:detach mu:add '(1 2)))	:struct
+(mu:force (mu:detach mu:add '(1 2)))	3
+(mu:type-of (mu:poll (mu:detach mu:add '(1 2))))	:null
+(mu:type-of (mu:poll (mu:defer mu:add '(1 2))))	:null

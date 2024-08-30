@@ -2,7 +2,6 @@ closure
 compile
 core
 exception
-fixnum
 format
 lambda
 list
