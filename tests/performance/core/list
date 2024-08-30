@@ -29,8 +29,6 @@
 (core:%maplist (:lambda (el) el) ())
 (core:%positionl (:lambda (el) (mu:eq el 'foo)) '(foo))
 (core:%positionl (:lambda (el) (mu:eq el 'foo)) '(1 foo))
-(core:%positionl core:zerop '(0 2 0 4 5))
-(core:%positionl core:zerop '(1 2 3 4 0))
 (core:%reverse '(1 2 3 4))
 (mu:cdr (core:%assq #\a '((#\a . foo))))
 (mu:cdr (core:%assq #\a '(() (#\a . foo))))

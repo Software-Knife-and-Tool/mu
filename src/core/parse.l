@@ -12,7 +12,7 @@
   (:lambda (digits base)
     (:if (core:stringp digits)
          (:if (core:%fixnump base)
-              (:if (core:zerop (mu:vector-len digits))
+              (:if (mu:eq 0 (mu:vector-len digits))
                    ()
                    ((:lambda (sign)
                        ((:lambda (integer)

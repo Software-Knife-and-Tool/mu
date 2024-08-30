@@ -16,12 +16,12 @@
 
 (mu:intern core "%string-position"
   (:lambda (ch str)
-    (:if (core:zerop (mu:vector-len str))
+    (:if (mu:eq 0 (mu:vector-len str))
          ()
          ((:lambda (len)
             (mu:fix
              (:lambda (loop)
-               (:if (core:numberp loop)
+               (:if (core:%numberp loop)
                     (:if (mu:less-than (mu:sub len 1) loop)
                          ()
                          (:if (mu:eq ch (mu:svref str loop))
@@ -36,7 +36,7 @@
     ((:lambda (substr)
        (mu:fix
         (:lambda (nth)
-          (:if (core:numberp nth)
+          (:if (core:%numberp nth)
                (:if (mu:eq nth (mu:vector-len str))
                     ()
                     (:if (mu:less-than nth (mu:add 1 end))

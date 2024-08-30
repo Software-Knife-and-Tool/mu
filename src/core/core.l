@@ -17,43 +17,22 @@
 ;;; predicates
 ;;;
 (mu:intern core "not" (:lambda (value) (core:null value)))
+(mu:intern core "null" (:lambda (t) (mu:eq () t)))
+(mu:intern core "listp" (:lambda (t) (:if (core:%consp t) :t (core:null t))))
 
-;;; candidate for culling
-(mu:intern core "%atom" (:lambda (value) (core:not (core:%consp value))))
-
-(mu:intern core "numberp"
+(mu:intern core "%numberp"
   (:lambda (n)
      (:if (core:%fixnump n)
           :t
           (core:%floatp n))))
 
-(mu:intern core "zerop"
+(mu:intern core "%minusp"
    (:lambda (n)
-     (:if (core:numberp n)
-          (:if (mu:eq 0 n)
-               :t
-               (mu:eq 0.0 n))
-          (core:raise n 'core:zerop "not a number"))))
-
-(mu:intern core "minusp"
-   (:lambda (n)
-      (:if (core:numberp n)
+      (:if (core:%numberp n)
            (:if (core:%floatp n)
                 (mu:fless-than n 0.0)
                 (mu:less-than n 0))
-           (core:raise n 'core:minusp "not a number"))))
-
-;;; candidate for culling
-(mu:intern core "%plusp"
-   (:lambda (n)
-      (:if (core:numberp n)
-           (:if (core:%floatp n)
-                (mu:fless-than 0.0 n)
-                (mu:less-than 0 n))
-           (core:raise n 'core:plusp "not a number"))))
-
-(mu:intern core "null" (:lambda (t) (mu:eq () t)))
-(mu:intern core "listp" (:lambda (t) (:if (core:%consp t) :t (core:null t))))
+           (core:raise n 'core:%minusp "not a number"))))
 
 ;;;
 ;;; mu system classes
