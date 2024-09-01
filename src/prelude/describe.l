@@ -8,7 +8,7 @@
 ;;;
 ;;; describe
 ;;;
-(mu:intern core "%describe-fn"
+(mu:intern prelude "%describe-fn"
    (:lambda (fn)
      (:if (core:%core-function-p fn)
           ((:lambda (lambda arity fn env)

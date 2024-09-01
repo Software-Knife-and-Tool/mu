@@ -40,7 +40,9 @@ COMMON= \
 	symbol.l
 
 PRELUDE = \
-	prelude.l
+	prelude.l      \
+	break.l	       \
+	sequence.l
 
 dist:
 	@rm -f core.l

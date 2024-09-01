@@ -8,23 +8,24 @@
    (:lambda ()
      (mu:fix
        (:lambda (loop)
-         (prelude:with-exception
+         (core:with-exception
              (:lambda (ex)
                (prelude:break ex)
-               (prelude:null loop))
+               (core:null loop))
            (:lambda ()
-             (prelude:format :t "prelude> " ())
+             (core:format :t "prelude> " ())
              (mu:flush mu:*standard-output*)
              ((:lambda (form)
-                (:if (mu:eq form prelude:%eof%)
+                (:if (mu:eq form core:%eof%)
                      loop
                      ((:lambda (value)
-                        (prelude:format :t "[~A] ~S~%" `(,(prelude:type-of value) ,value))
-                        (prelude:null loop))
-                      (mu:eval (prelude:compile form)))))
-              (prelude:read :t () prelude:%eof%)))))
+                        (core:format :t "[~A] ~S~%" `(,(core:type-of value) ,value))
+                        (core:null loop))
+                      (mu:eval (core:compile form)))))
+              (core:read mu:*standard-input* () core:%eof%)))))
        ())))
 
+#|
 (defun repl (ns)
   (errorp-unless namespacep ns "repl: not a namespace")
   (flet ((repl (repl)
@@ -58,3 +59,4 @@
                   (loop loop (read t t ())))))))
     (format t ";;; Eko Lisp ~A (core:repl) :h for help~%" core::eko-version)
     (repl repl)))
+|#

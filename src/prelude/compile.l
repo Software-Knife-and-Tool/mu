@@ -1,5 +1,6 @@
 ;;;  SPDX-FileCopyrightText: Copyright 2017-2022 James M. Putnam (putnamjm.design@gmail.com)
 ;;;  SPDX-License-Identifier: MIT
+#|
 (defun compile-form (form)
   (format t "compile-file: ~A~%" form)
   (flet ((parse (form)
@@ -35,3 +36,4 @@
            ((eofp src) t)
         (format t ":read ~A~%" form)
         (format out ";;; ~A~%" form)))))
+|#

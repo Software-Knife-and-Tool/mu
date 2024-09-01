@@ -6,4 +6,4 @@
 ;;;
 (mu:intern (mu:find-namespace "") "prelude" (mu:make-namespace "prelude"))
 
-(mu:intern core "*version*" "0.0.1")
+(mu:intern prelude "*version*" "0.0.1")
