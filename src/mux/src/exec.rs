@@ -25,13 +25,19 @@ impl Exec {
         let mut child = match ns_str {
             "mu" => Command::new("mu-sys").spawn().unwrap(),
             "core" => Command::new("mu-sys")
-                .args(["-l", "/opt/mu/lib/core/core.l"])
+                .args(["-l", "/opt/mu/dist/core.l"])
+                .spawn()
+                .unwrap(),
+            "common" => Command::new("mu-sys")
+                .args(["-l", "/opt/mu/dist/core.l"])
+                .args(["-l", "/opt/mu/dist/common.l"])
                 .spawn()
                 .unwrap(),
             "prelude" => Command::new("mu-sys")
-                .args(["-l", "/opt/mu/lib/core/core.l"])
+                .args(["-l", "/opt/mu/dist/core.l"])
+                .args(["-l", "/opt/mu/dist/common.l"])
+                .args(["-l", "/opt/mu/dist/prelude.l"])
                 .args(["-l", "/opt/mu/lib/prelude/repl.l"])
-                .args(["-q", "(prelude:%init-ns)"])
                 .args(["-e", "(prelude:repl)"])
                 .spawn()
                 .unwrap(),

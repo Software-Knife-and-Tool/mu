@@ -6,5 +6,4 @@
 ;;;
 (mu:intern (mu:find-namespace "") "common" (mu:make-namespace "common"))
 
-(mu:intern core "*version*" "0.0.1")
-
+(mu:intern common "*version*" "0.0.1")

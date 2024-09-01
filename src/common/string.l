@@ -4,32 +4,22 @@
 ;;;
 ;;; strings
 ;;;
-(mu:intern common "stringp"
-   (:lambda (string)
-      (:if (mu:eq (mu:type-of string) :vector)
-           (mu:eq :char (mu:vector-type string))
-           (:if (common:%common-type-p string)
-                (:if (mu:eq "vector" (mu:svref (mu:struct-vec string) 0))
-                     (mu:eq :char (mu:vector-type (common:%vector-prop :base string)))
-                     ())
-                ()))))
-
 (mu:intern common "get-output-stream-string"
    (:lambda (stream)
       (mu:get-string stream)))
 
 (mu:intern common "schar"
   (:lambda (str index)
-     (:if (common:stringp str)
-          (:if (common:fixnump index)
+     (:if (core:stringp str)
+          (:if (core:%fixnump index)
                (mu:svref str index)
-               (common:raise index 'common:schar "not a string"))
-          (common:raise str 'common:schar "not a string"))))
+               (core:raise index 'common:schar "not a string"))
+          (core:raise str 'common:schar "not a string"))))
 
 (mu:intern common "string="
    (:lambda (str-1 str-2)
-      (:if (common:stringp str-1)
-           (:if (common:stringp str-2)
+      (:if (core:stringp str-1)
+           (:if (core:stringp str-2)
                 (:if (mu:eq str-1 str-2)
                      :t
                      (:if (mu:eq (mu:vector-len str-1) (mu:vector-len str-2))
@@ -44,9 +34,10 @@
                                    nth))
                            0)
                           ()))
-                (common:raise str-2 'common:string= "not a string"))
-           (common:raise str-1 'common:string= "not a string"))))
+                (core:raise str-2 'common:string= "not a string"))
+           (core:raise str-1 'common:string= "not a string"))))
 
+#|
 (mu:intern common "%string-write"
    (:lambda (string escape stream)
       (:if (mu:eq :vector (mu:type-of string))
@@ -68,6 +59,7 @@
                     ()))
             (common:%vector-prop :length string)))
       ()))
+|#
 
 (mu:intern common "string-position"
   (:lambda (ch str)
@@ -87,8 +79,8 @@
                                 loop))
                         0))
                     (mu:vector-len str)))
-              (common:raise str 'common:string-position "not a string"))
-         (common:raise ch 'common:string-position "not a char"))))
+              (core:raise str 'common:string-position "not a string"))
+         (core:raise ch 'common:string-position "not a char"))))
 
 (mu:intern common "string-find"
   (:lambda (ch str)
@@ -108,8 +100,8 @@
                                 loop))
                         0))
                     (mu:vector-len str)))
-              (common:raise str 'common:string-find "not a string"))
-         (common:raise ch 'common:string-find "not a char"))))
+              (core:raise str 'common:string-find "not a string"))
+         (core:raise ch 'common:string-find "not a char"))))
 
 (mu:intern common "string"
    (:lambda (designator)
@@ -119,7 +111,7 @@
               (mu:symbol-name designator)
               (:if (common:charp designator)
                    (mu:make-vector :char `(,designator))
-                   (common:raise designator 'common:string "not a string designator"))))))
+                   (core:raise designator 'common:string "not a string designator"))))))
 
 (mu:intern common "string-append"
    (:lambda (list)
@@ -132,14 +124,14 @@
                             ((:lambda (str)
                                 (:if (common:stringp str)
                                      (mu:write str () stream)
-                                     (common:raise str 'common:string-append "is not a string")))
+                                     (core:raise str 'common:string-append "is not a string")))
                              (mu:car list))
                             (mu:cdr list)))
                         ()))
                 list)
                (mu:get-string stream))
             (mu:open :string :output ""))
-           (common:raise list 'common:string "is not a list"))))
+           (core:raise list 'common:string "is not a list"))))
 
 (mu:intern common "substr"
   (:lambda (str start end)
@@ -161,9 +153,9 @@
                          start)
                         (mu:get-string substr))
                      (mu:open :string :output ""))
-                    (common:raise end 'common:substr "end is not a fixnum"))
-               (common:raise str 'common:substr "is not a string"))
-          (common:raise start 'common:substr "start is not a fixnum"))))
+                    (core:raise end 'common:substr "end is not a fixnum"))
+               (core:raise str 'common:substr "is not a string"))
+          (core:raise start 'common:substr "start is not a fixnum"))))
 
 #|
 (mu:intern common "substr-"
@@ -172,28 +164,9 @@
           (:if (common:fixnump start)
                (:if (common:fixnump end)
                     (common:vector-slice str start end)
-                    (common:raise end 'common:substr "is not a fixnum"))
-               (common:raise str 'common:substr "is not a string"))
-          (common:raise start 'common:substr "is not a fixnum"))))
-
-(mu:intern common "read-line"
-   (:lambda (stream eof-error eof-value)
-      (:if (common:streamp stream)
-           ((:lambda (sstream)
-               (mu:fix
-                (:lambda (loop)
-                   (:if (common:stringp loop)
-                        loop
-                        ((:lambda (ch)
-                            (:if (mu:eq ch #\linefeed)
-                                 (mu:get-string sstream)
-                                 ((:lambda ()
-                                     (mu:write-char ch sstream)
-                                     (common:null loop)))))
-                         (common:read-char stream eof-error eof-value))))
-                ()))
-            (mu:open :string :output ""))
-           (common:raise str 'common:read-line "is not a stream"))))
+                    (core:raise end 'common:substr "is not a fixnum"))
+               (core:raise str 'common:substr "is not a string"))
+          (core:raise start 'common:substr "is not a fixnum"))))
 |#
 
 (mu:intern common "%read-string%" (mu:open :string :bidir ""))
@@ -203,7 +176,7 @@
            ((:lambda ()
               (mu:write str () common:%read-string%) 
               (mu:read common:%read-string% eof-error eof-value)))
-           (common:raise str 'common:read-string "is not a string"))))
+           (core:raise str 'common:read-string "is not a string"))))
 
 (mu:intern common "write-string"
    (:lambda (str designator)
@@ -211,7 +184,7 @@
            ((:lambda (stream)
               (mu:write str () stream))
             (common:read-stream-designator designator))
-           (common:raise str 'common:write-string "is not a string"))))
+           (core:raise str 'common:write-string "is not a string"))))
 
 (mu:intern common "write-line"
    (:lambda (str designator)

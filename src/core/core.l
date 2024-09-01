@@ -16,8 +16,8 @@
 ;;;
 ;;; predicates
 ;;;
-(mu:intern core "not" (:lambda (value) (core:null value)))
 (mu:intern core "null" (:lambda (t) (mu:eq () t)))
+(mu:intern core "not" core:null)
 (mu:intern core "listp" (:lambda (t) (:if (core:%consp t) :t (core:null t))))
 
 (mu:intern core "%numberp"
