@@ -90,7 +90,7 @@
    (:lambda (form env)
      (:if (core:%symbolp form)
           ((:lambda (ns name)
-             (:if (mu:eq ns (mu:find-namespace ""))
+             (:if (mu:eq ns core:%null-ns%)
                   ((:lambda (frame-ref)
                      ;;; (core:warn name "%compiling an unqualified symbol")
                      ;;; (core:warn env "in this environment")
@@ -111,7 +111,7 @@
                                        (:if macro-function
                                             (core:%compile-macro-call function-form arg-list env)
                                             (core:compile-funcall function-form arg-list env)))
-                                     (core:macro-function function-form env))))
+                                     (core:%macro-function function-form env))))
                              (mu:cdr (core:%assq
                                       function-form
                                       '((define-macro . core:%compile-defmacro)

@@ -27,7 +27,7 @@
             (core:%type-ref prop lambda))
            (core:raise prop 'core:%lambda-prop "not a lambda property"))))
 
-(mu:intern core "%apply-lambda" (:lambda (fn) (fn)))
+(mu:intern core "%apply-lambda%" (:lambda (fn) (fn)))
 (mu:intern core "%make-lambda"
    (:lambda (lambda-list rest-sym env)
      ((:lambda (frame)
@@ -37,7 +37,7 @@
              ,(mu:cons :rest   rest-sym)
              ,(mu:cons :lexenv env))))
       (:if (core:null lambda-list)
-           core:%apply-lambda
+           core:%apply-lambda%
            ((:lambda (fn-symbol arg-list)
               (mu:compile `(:lambda ,(mu:cons fn-symbol lambda-list) (mu:apply fn-symbol arg-list))))
             (mu:make-symbol "fn")

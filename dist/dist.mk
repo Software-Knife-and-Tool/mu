@@ -32,6 +32,8 @@ CORE= \
 
 COMMON= \
 	common.l       \
+	boole.l	       \
+	defun.l        \
 	predicates.l   \
 	string.l       \
 	fixnum.l       \

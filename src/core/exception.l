@@ -90,6 +90,11 @@
      (core:format mu:*error-output* ";;; ~A:~T ~A~%" `(,message ,value))
      value))
 
+(mu:intern core "print"
+   (:lambda (value message)          
+     (core:format mu:*standard-output* ";;; ~A:~T ~A~%" `(,message ,value))
+     value))
+
 (mu:intern core "warn"
    (:lambda (value message)
      (core:format mu:*error-output* ";;; ~S ; ~A, type ~A~%" `(,value ,message ,(mu:type-of value)))
