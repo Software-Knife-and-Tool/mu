@@ -86,10 +86,10 @@
       ((:lambda (type)
           (:if (mu:eq type :struct)
                (:if (mu:eq :<core> (mu:struct-type value))
-                    (mu:makunbound (mu:intern (mu:find-namespace "") (mu:svref (mu:struct-vec value) 0) ()))
+                    (mu:makunbound (mu:intern core:%null-ns% (mu:svref (mu:struct-vec value) 0) ()))
                     (mu:struct-type value))
                (:if (core:stringp value)
                     'string
-                    (mu:makunbound (mu:intern (mu:find-namespace "") (mu:symbol-name type) ())))))
+                    (mu:makunbound (mu:intern core:%null-ns% (mu:symbol-name type) ())))))
        (mu:type-of value))))
 
