@@ -15,9 +15,13 @@
 
 (mu:intern core "%vector-prop"
    (:lambda (prop vector)
+     (mu:cdr (core:%type-ref prop vector))))
+
+(mu:intern core "vector-prop"
+   (:lambda (prop vector)
       (:if (core:%findl (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :disp :bitvec))
-           (mu:cdr (core:%type-ref prop vector))
-           (core:raise prop 'core:%vector-prop "not a vector property"))))
+           (core:%vector-prop prop vector)
+           (core:raise prop 'core:vector-prop "not a vector property"))))
 
 (mu:intern core "%make-vector"
    (:lambda (vector displace bitvec)

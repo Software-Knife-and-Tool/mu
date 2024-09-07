@@ -21,10 +21,12 @@
 
 (mu:intern core "%lambda-prop"
    (:lambda (prop lambda)
+     (mu:cdr (core:%type-ref prop lambda))))
+
+(mu:intern core "lambda-prop"
+   (:lambda (prop lambda)
       (:if (core:%findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :frame :rest :lexenv))
-           ((:lambda (ref)
-              (mu:cdr ref))
-            (core:%type-ref prop lambda))
+           (core:%lambda-prop prop lambda)
            (core:raise prop 'core:%lambda-prop "not a lambda property"))))
 
 (mu:intern core "%apply-lambda%" (:lambda (fn) (fn)))
