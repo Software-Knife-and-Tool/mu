@@ -26,9 +26,9 @@
 (mu:intern core "%fmt-decimal"
   (:lambda (dest arg-list)
      (:if (core:%fixnump (mu:car arg-list))
-          ((:lambda ()
+          (core:%arg2
               (core:write (mu:car arg-list) () dest)
-              (mu:cdr arg-list)))
+              (mu:cdr arg-list))
           (core:raise (mu:car arg-list) 'core:format "argument to ~D not a fixnum"))))
 
 (mu:intern core "%fmt-hex"
@@ -42,9 +42,9 @@
                       (:lambda (n)
                          (:if (core:%orf (core:null n) (mu:eq 0 n))
                               ()
-                              ((:lambda ()
+                              (core:%arg2
                                   (mu:write (mu:svref "0123456789abcdef" (mu:logand n #xf)) () str-stream)
-                                  (mu:div n 16)))))
+                                  (mu:div n 16))))
                       (:if (mu:less-than fx 0) (mu:mul -1 fx) fx))
                      (:if (mu:less-than fx 0)
                           (mu:write #\- () str-stream)
@@ -54,9 +54,9 @@
                           (:lambda (len)
                              (:if (mu:eq 0 len)
                                   0
-                                  ((:lambda ()
+                                  (core:%arg2
                                      (mu:write (mu:svref hexstr (mu:sub len 1)) () dest)
-                                     (mu:sub len 1)))))
+                                     (mu:sub len 1))))
                           (mu:vector-len hexstr)))
                       (mu:get-string str-stream)))
                   (mu:open :string :output "")))
@@ -104,9 +104,9 @@
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
                        (mu:cons (mu:add 2 nth) (core:%fmt-op (mu:svref fmt (mu:add 1 nth)) dest argl))
-                       ((:lambda ()
+                       (core:%arg2
                            (mu:write-char ch dest)
-                           (mu:cons (mu:add 1 nth) argl)))))
+                           (mu:cons (mu:add 1 nth) argl))))
                 (mu:svref fmt nth))))
         (mu:car loop)
         (mu:cdr loop)))

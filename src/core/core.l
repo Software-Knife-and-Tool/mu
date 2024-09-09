@@ -57,3 +57,7 @@
 (mu:intern core "%andf"
    (:lambda (arg arg1)
      (:if arg arg1 ())))
+
+(mu:intern core "%arg2"
+   (:lambda (arg1 arg2)
+     arg2))

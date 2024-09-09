@@ -46,9 +46,9 @@ def storage():
     
     proc.communicate()
 
-    heap_vec = heap.split()
+    heap_vec = heap.replace(')', '').split()
     heaps = []
-    
+
     heaps.append(heap_vec[5:9])
     heaps.append(heap_vec[9:13])
     heaps.append(heap_vec[13:17])

@@ -33,9 +33,9 @@
                                   (core:error stream "backquote: early end of file~%" ())
                                   (:if (mu:eq #\@ ch)
                                        `(:comma@ ,(core:read stream () ()))
-                                       ((:lambda ()
+                                       (core:%arg2
                                           (mu:unread-char ch stream)
-                                          `(:form ,(core:read stream () ())))))))
+                                          `(:form ,(core:read stream () ()))))))
                             (mu:read-char stream () ()))))
            ,(mu:cons #\' (:lambda () `(:qquote ,(core:%quasi-read stream))))
            ,(mu:cons #\` (:lambda () `(:quasi ,(core:read stream () ()))))))))

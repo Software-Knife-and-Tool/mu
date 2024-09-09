@@ -58,11 +58,11 @@
                          (mu:cons 0 `(,(mu:sub 8 nbits) ,@(mu:ash byte nbits)))
                          ((:lambda (syntax)
                             (:if (core:%orf (mu:eq :tmacro syntax) (mu:eq :wspace syntax))
-                                 ((:lambda ()
+                                 (core:%arg2
                                     (:if (mu:eq :tmacro syntax)
                                          (mu:unread-char ch stream)
                                          ())
-                                    (mu:cons 0 `(,(mu:sub 8 nbits) ,@(mu:ash byte nbits)))))
+                                    (mu:cons 0 `(,(mu:sub 8 nbits) ,@(mu:ash byte nbits))))
                                  (:if (core:%orf (mu:eq #\0 ch) (mu:eq #\1 ch))
                                       `(,(mu:sub nbits 1)
                                         ,@(mu:logor
@@ -125,16 +125,16 @@
                                (core:parse-integer (mu:get-string core:%reader-stream%) 10)))
                      ((:lambda (syntax-type)
                         (:if (mu:eq syntax-type :const)
-                             ((:lambda ()
+                             (core:%arg2
                                 (mu:write-char ch core:%reader-stream%)
-                                (core:null loop)))
-                             ((:lambda ()
+                                (core:null loop))
+                             (core:arg2
                                 (mu:unread-char ch stream)
                                 (:if (mu:eq base #\x)
                                      (core:parse-integer (mu:get-string core:%reader-stream%) 16)
                                      (:if (mu:eq base #\b)
                                           (core:parse-integer (mu:get-string core:%reader-stream%) 2)
-                                          (core:parse-integer (mu:get-string core:%reader-stream%) 10)))))))
+                                          (core:parse-integer (mu:get-string core:%reader-stream%) 10))))))
                      (core:%read-char-syntax ch))))
               (mu:read-char stream () ()))))
       ())))
@@ -176,9 +176,9 @@
                       (:if (mu:eq (mu:symbol-name el) ".")
                            ((:lambda (dotted)
                               (:if (mu:eq (core:%read stream) core:%read-list-eol%)
-                                   ((:lambda ()
+                                   (core:%arg2
                                       (mu:unread-char #\) stream)
-                                      dotted))
+                                      dotted)
                                    (core:raise () 'core:%read-list "malformed dotted list")))
                             (core:%foldr mu:cons (core:%read stream) loop))
                            `(,@loop ,el))
@@ -198,9 +198,9 @@
              ((:lambda (ch)
                 (:if (mu:eq ch #\")
                      (mu:get-string core:%reader-stream%)
-                     ((:lambda ()
+                     (core:%arg2
                         (mu:write-char ch core:%reader-stream%)
-                        (core:null loop)))))
+                        (core:null loop))))
               (mu:read-char stream () ()))))
         ())))
 

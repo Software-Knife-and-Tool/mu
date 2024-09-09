@@ -31,16 +31,17 @@
    (:lambda (function list)
      (:if list
           ((:lambda (length)
-             (mu:car (mu:fix
-                      (:lambda (loop)
-                        (:if (core:listp loop)
-                             loop
-                             (:if (mu:less-than length loop)
-                                  ()
-                                  (:if (core:%apply function (mu:cons (mu:nth loop list) ()))
-                                       (mu:cons loop  ())
-                                       (mu:add loop 1)))))
-                      0)))
+             (mu:car
+              (mu:fix
+               (:lambda (loop)
+                 (:if (core:listp loop)
+                      loop
+                      (:if (mu:less-than length loop)
+                           ()
+                           (:if (core:%apply function (mu:cons (mu:nth loop list) ()))
+                                (mu:cons loop  ())
+                                (mu:add loop 1)))))
+               0)))
            (mu:length list))
           ())))
    

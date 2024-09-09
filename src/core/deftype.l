@@ -17,15 +17,13 @@
 ;;;
 (mu:intern core "def-type"
    (:lambda (name properties)
-      ((:lambda (str)
-          (:if (core:listp properties)
-               ((:lambda (symbol)
-                   (:if (core:null symbol)
-                        (mu:intern core:%types-ns% str (mu:make-struct :<core> `(,str ,properties)))
-                        (core:raise symbol 'core:def-type "type symbol bound")))
-                (mu:find core:%types-ns% str))
-               (core:raise properties 'core:def-type "not a property list")))
-       name)))
+     (:if (core:listp properties)
+          ((:lambda (symbol)
+             (:if (core:null symbol)
+                  (mu:intern core:%types-ns% name (mu:make-struct :<core> `(,name ,properties)))
+                  (core:raise symbol 'core:def-type "type symbol bound")))
+           (mu:find core:%types-ns% name))
+          (core:raise properties 'core:def-type "not a property list"))))
 
 (mu:intern core "%type-predicate-map%"
    `(,(mu:cons :char (:lambda (t) (core:%charp t)))

@@ -64,6 +64,7 @@
            (mu:cdr form))
           form)))
 
+#|
 (mu:intern core "%macroexpand"
    (:lambda (form env)
      ((:lambda (expanded)
@@ -71,6 +72,14 @@
              expanded
              (core:%macroexpand expanded env)))
        (core:%macroexpand-1 form env))))
+|#
+
+(mu:intern core "%macroexpand"
+   (:lambda (form env)
+     (mu:fix
+      (:lambda (expanded)
+        (core:%macroexpand-1 expanded env))
+      form)))
 
 (mu:intern core "%macro-function"
    (:lambda (symbol env)

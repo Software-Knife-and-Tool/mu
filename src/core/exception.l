@@ -15,7 +15,7 @@
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
               (core:format stream format-string `(,cond ,value ,source ,reason)))
          (:if (core:%andf printenv env)
-              ((:lambda ()
+              (core:%arg2
                   (core:format stream "env:~%" ())
                   (core:%mapc
                    (:lambda (frame)
@@ -23,7 +23,7 @@
                                    `(,(mu:car frame)
                                      ,(mu:car frame)
                                      ,(mu:cdr frame))))
-                   (mu:cdr env))))
+                   (mu:cdr env)))
               ()))
       (core:%exception-prop :cond exception)
       (core:%exception-prop :value exception)
