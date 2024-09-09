@@ -31,9 +31,9 @@
      (mu:fix
       (:lambda (list-cdr)
         (:if list-cdr
-             ((:lambda ()
+             (core:%arg2
                  (mu:apply function (mu:cons (mu:car list-cdr) ()))
-                 (mu:cdr list-cdr)))
+                 (mu:cdr list-cdr))
              ()))
       list)
      list))
@@ -51,9 +51,9 @@
      (mu:fix
       (:lambda (list)
         (:if list
-             ((:lambda ()
+             (core:%arg2
                 (core:%apply function `(,list))
-                (mu:cdr list)))
+                (mu:cdr list))
              ()))
       list)
      list))
