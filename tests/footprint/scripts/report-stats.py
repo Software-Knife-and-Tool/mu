@@ -5,6 +5,7 @@ from statistics import mean
 
 with open(sys.argv[1]) as f: test_results = json.load(f)
 
+room = test_results['room']
 stats = test_results['stats']
 
 system_secs = 0.0
@@ -29,3 +30,8 @@ print(f'user     {user_secs / float(ntests):4.2f}')
 print(f'elapsed  {user_secs / float(ntests):4.2f}')
 print(f'resident {resident_size / float(ntests):4.2f}')
 print(f'waits    {waits / float(ntests):4.2f}')
+
+for type in room:
+    print(f'{type[0]} {type[1]}')
+    print(f'        {type[2]}')
+    print(f'        {type[3]}')
