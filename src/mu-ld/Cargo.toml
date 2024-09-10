@@ -10,4 +10,4 @@ json = "0.12.4"
 mu = { path = "../.." }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = "0.5.4"
+tikv-jemallocator = "0.6.0"
