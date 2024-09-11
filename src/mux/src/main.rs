@@ -4,6 +4,7 @@ mod counts;
 mod crossref;
 mod exec;
 mod options;
+mod profile;
 mod reference;
 mod test;
 
@@ -14,6 +15,7 @@ use {
         crossref::Crossref,
         exec::Exec,
         options::Options,
+        profile::Profile,
         reference::Reference,
         test::Test,
     },
@@ -36,12 +38,13 @@ pub fn main() {
             println!();
             Options::usage()
         }
-        "version" => Options::version(),
         "crossref" => Crossref::crossref(&options),
-        "repl" => Exec::repl(&options),
+        "profile" => Profile::profile(&options),
         "reference" => Reference::reference(&options),
+        "repl" => Exec::repl(&options),
         "symbol-counts" => Counts::counts(&options),
         "test" => Test::test(&options),
+        "version" => Options::version(),
         _ => {
             eprintln!("mux: unimplemented command {command}");
             std::process::exit(-1)

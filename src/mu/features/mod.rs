@@ -7,6 +7,8 @@ pub mod feature;
 pub mod ffi;
 #[cfg(feature = "nix")]
 pub mod nix;
+#[cfg(feature = "prof")]
+pub mod prof;
 #[cfg(feature = "std")]
 pub mod std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]

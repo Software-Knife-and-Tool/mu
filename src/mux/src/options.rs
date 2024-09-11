@@ -1,28 +1,21 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-use lazy_static::lazy_static;
-
 #[derive(Debug)]
 pub struct Options {
     pub options: Vec<Opt>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Opt {
     Namespace(String),
+    Load(String),
+    Eval(String),
     Verbose,
-}
-
-lazy_static! {
-    pub static ref OPTIONMAP: Vec::<(&'static str, Opt)> = vec![
-        ("verbose", Opt::Verbose),
-        ("namespace", Opt::Namespace("".to_string())),
-    ];
 }
 
 impl Options {
     pub fn version() {
-        println!("mux: 0.0.2");
+        println!("mux: 0.0.3");
         std::process::exit(0)
     }
 
@@ -43,14 +36,26 @@ impl Options {
         std::process::exit(0);
     }
 
+    pub fn option_name(opt: Opt) -> String {
+        match opt {
+            Opt::Verbose => "verbose",
+            Opt::Namespace(_) => "namespace",
+            Opt::Load(_) => "load",
+            Opt::Eval(_) => "eval",
+        }
+        .to_string()
+    }
+
     pub fn parse(argv: &[String]) -> Option<Options> {
         let mut opts = getopts::Options::new();
         let mut options = Vec::new();
 
         opts.optflag("", "verbose", "");
         opts.optopt("", "namespace", "", "VALUE");
+        opts.optopt("", "load", "", "VALUE");
+        opts.optopt("", "eval", "", "VALUE");
 
-        let opt_names = vec!["namespace", "verbose"];
+        let opt_names = vec!["namespace", "verbose", "load", "eval"];
 
         let opts = match opts.parse(&argv[2..]) {
             Ok(opts) => opts,
@@ -66,6 +71,8 @@ impl Options {
                     Ok(_) => match name {
                         "verbose" => options.push(Opt::Verbose),
                         "namespace" => options.push(Opt::Namespace(opts.opt_str(name).unwrap())),
+                        "load" => options.push(Opt::Load(opts.opt_str(name).unwrap())),
+                        "eval" => options.push(Opt::Eval(opts.opt_str(name).unwrap())),
                         _ => panic!(),
                     },
                     Err(_) => panic!(),

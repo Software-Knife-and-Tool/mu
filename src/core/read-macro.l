@@ -128,7 +128,7 @@
                              (core:%arg2
                                 (mu:write-char ch core:%reader-stream%)
                                 (core:null loop))
-                             (core:arg2
+                             (core:%arg2
                                 (mu:unread-char ch stream)
                                 (:if (mu:eq base #\x)
                                      (core:parse-integer (mu:get-string core:%reader-stream%) 16)
