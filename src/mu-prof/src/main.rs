@@ -82,7 +82,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
 }
 
 fn usage() {
-    println!("mu-sys: {}: [-h?pvcelq] [file...]", Env::VERSION);
+    println!("mu-prof: {}: [-h?pvcelq] [file...]", Env::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value,...]");

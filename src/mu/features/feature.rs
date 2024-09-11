@@ -8,6 +8,8 @@ use crate::core::symbols::CoreFn;
 use crate::features::ffi::Ffi;
 #[cfg(feature = "nix")]
 use crate::features::nix::Nix;
+#[cfg(feature = "prof")]
+use crate::features::prof::Prof;
 #[cfg(feature = "std")]
 use crate::features::std::Std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
@@ -33,6 +35,8 @@ impl Core for Feature {
             <Feature as Std>::feature(),
             #[cfg(feature = "ffi")]
             <Feature as Ffi>::feature(),
+            #[cfg(feature = "prof")]
+            <Feature as Prof>::feature(),
             #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
             <Feature as Sysinfo>::feature(),
         ];

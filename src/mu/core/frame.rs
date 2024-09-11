@@ -25,6 +25,10 @@ use crate::{
     },
     LIB,
 };
+
+#[cfg(feature = "prof")]
+use crate::features::{feature::Feature, prof::Prof};
+
 use {futures::executor::block_on, futures_locks::RwLock};
 
 pub struct Frame {
@@ -119,6 +123,9 @@ impl Frame {
     // apply
     pub fn apply(mut self, env: &Env, func: Tag) -> exception::Result<Tag> {
         Exception::on_signal(env)?;
+
+        #[cfg(feature = "prof")]
+        <Feature as Prof>::prof_event(env, func).unwrap();
 
         match func.type_of() {
             Type::Symbol => {

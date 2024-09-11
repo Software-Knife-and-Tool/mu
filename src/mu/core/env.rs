@@ -38,6 +38,12 @@ pub struct Env {
     pub mu_ns: Tag,
     pub null_ns: Tag,
 
+    // profiling
+    #[cfg(feature = "prof")]
+    pub prof: RwLock<Vec<(Tag, u64)>>,
+    #[cfg(feature = "prof")]
+    pub prof_on: RwLock<bool>,
+
     // system
     pub tag: RwLock<Tag>,
     pub start_time: ProcessTime,
@@ -57,6 +63,10 @@ impl Env {
             lexical: RwLock::new(HashMap::new()),
             ns_map: RwLock::new(Vec::new()),
             null_ns: Tag::nil(),
+            #[cfg(feature = "prof")]
+            prof: RwLock::new(Vec::new()),
+            #[cfg(feature = "prof")]
+            prof_on: RwLock::new(false),
             start_time: ProcessTime::now(),
             tag: RwLock::new(Tag::nil()),
             vector_map: RwLock::new(HashMap::new()),

@@ -15,8 +15,6 @@ pub mod gc;
 pub mod heap;
 pub mod indirect;
 pub mod lib;
-#[cfg(feature = "perf")]
-pub mod perf;
 pub mod quasi;
 pub mod reader;
 pub mod readtable;
