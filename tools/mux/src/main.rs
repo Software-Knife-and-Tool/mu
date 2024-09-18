@@ -3,6 +3,7 @@
 mod annotate;
 mod bench;
 mod build;
+mod env;
 mod install;
 mod options;
 mod profile;
@@ -16,6 +17,7 @@ use {
         annotate::Annotate,
         bench::Bench,
         build::Build,
+        env::Env,
         install::Install,
         options::Options,
         profile::Profile,
@@ -25,13 +27,16 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.4";
+const VERSION: &str = "0.0.5";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
-    println!("  command:    [annotate bench build help install profile repl symbols test version]");
+    println!(
+        "  command:    [annotate bench build env help install profile repl symbols test version]"
+    );
     println!("    help                               ; this message");
     println!("    version                            ; mux version");
+    println!("    env                                ; mu development environment");
     println!("    build     [--release | --profile | --debug]");
     println!("                                       ; build mu system, debug is default");
     println!("    install                            ; (sudo) install mu system-wide");
@@ -70,6 +75,7 @@ pub fn main() {
         "annotate" => Annotate::annotate(&options),
         "bench" => Bench::bench(&options),
         "build" => Build::build(&options),
+        "env" => Env::printenv(&options),
         "install" => Install::install(&options),
         "profile" => Profile::profile(&options),
         "repl" => Repl::repl(&options),

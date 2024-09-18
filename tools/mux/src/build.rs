@@ -1,7 +1,10 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 use {
-    crate::options::{Opt, Options},
+    crate::{
+        env::Env,
+        options::{Opt, Options},
+    },
     std::process::Command,
 };
 
@@ -14,22 +17,38 @@ impl Build {
             _ => false,
         });
 
-        let verbose_opt = options.options.iter().find(|opt| match opt {
+        match options.options.iter().find(|opt| match opt {
             Opt::Verbose => true,
             _ => false,
-        });
+        }) {
+            Some(_) => match build_opt {
+                Some(style) => match style {
+                    Opt::Debug => println!("mux: build debug"),
+                    Opt::Release => println!("mux: build release"),
+                    Opt::Profile => println!("mux: build profile"),
+                    _ => panic!(),
+                },
+                _ => panic!(),
+            },
+            None => (),
+        };
 
-        let verbose = match verbose_opt {
-            Some(_) => true,
-            None => false,
+        let dist = match Env::mu_home(options) {
+            Some(path) => format!("{path}/dist"),
+            None => {
+                let cwd = std::env::current_dir().unwrap();
+
+                eprintln!(
+                    "error: could not find `.mu` in {:?} or any parent directory",
+                    cwd.to_str().unwrap()
+                );
+                return;
+            }
         };
 
         let _ = match build_opt {
             Some(style) => match style {
                 Opt::Debug => {
-                    if verbose {
-                        println!("mux: build debug")
-                    }
                     let mut build = Command::new("cargo")
                         .arg("build")
                         .arg("--workspace")
@@ -45,17 +64,13 @@ impl Build {
                         .arg("./target/debug/mu-sys")
                         .arg("./target/debug/mux")
                         .arg("./target/debug/sysgen")
-                        .arg("./dist")
+                        .arg(dist)
                         .spawn()
                         .unwrap();
 
                     cp.wait()
                 }
                 Opt::Release => {
-                    if verbose {
-                        println!("mux: build release")
-                    }
-
                     let mut build = Command::new("cargo")
                         .arg("build")
                         .arg("--release")
@@ -72,17 +87,13 @@ impl Build {
                         .arg("./target/release/mu-sys")
                         .arg("./target/release/mux")
                         .arg("./target/release/sysgen")
-                        .arg("./dist")
+                        .arg(dist)
                         .spawn()
                         .unwrap();
 
                     cp.wait()
                 }
                 Opt::Profile => {
-                    if verbose {
-                        println!("mux: build profile")
-                    }
-
                     let mut build = Command::new("cargo")
                         .arg("build")
                         .args(["--release"])
@@ -100,7 +111,7 @@ impl Build {
                         .arg("./target/release/mu-sys")
                         .arg("./target/release/mux")
                         .arg("./target/release/sysgen")
-                        .arg("./dist")
+                        .arg(dist)
                         .spawn()
                         .unwrap();
 
@@ -110,10 +121,6 @@ impl Build {
             },
 
             None => {
-                if verbose {
-                    println!("mux build: debug")
-                }
-
                 let mut build = Command::new("cargo")
                     .arg("build")
                     .arg("--workspace")

@@ -1,4 +1,5 @@
 *.out
+.mu
 .dir-locals.el
 TAGS
 Cargo.lock
