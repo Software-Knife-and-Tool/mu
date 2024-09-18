@@ -85,7 +85,7 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 *mu* leans heavily on functional programming principles.
 
-The *mu* runtime kernel, *mu/lb*, is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file and random user selected features may have unsafe implementations.)
+The *mu* runtime kernel, *mu/mu*, is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file and random user selected features may have unsafe implementations.)
 
 The runtime implements 64 bit tagged pointers, is available as a crate, and extends a Rust API for embedded applications. The runtime is primarily a resource allocator and evaluator for the *mu* kernel language. *mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
 
@@ -94,6 +94,8 @@ The *mu* 2-LISP system is organized as a stack of compilers, culminating in the 
 The *core* library provides *rest* lambdas, closures, expanded struct types, macros, and a reader/compiler for those forms.
 
 Optional libraries provide a variety of enhancements and services, including Common LISP macros and binding special forms.
+
+
 
 
 #### Viewing the documentation
@@ -167,11 +169,7 @@ If you want to repackage *mu* after a change to the library sources:
 
 and then reinstall.
 
-Note: the installation mechanism does not remove the installation directory before writing it and changes to directory structure and files will tend to accumulate. The make *uninstall* target will remove that if desired.
-
-```
-% sudo make uninstall
-```
+Note: the installation mechanism does not remove the installation directory before writing it and changes to directory structure and files will tend to accumulate.
 
 
 
@@ -184,9 +182,10 @@ As of 0.0.40, the *mu* runtime supports conditional compilation of a variety of 
 Currently supported features by namespace:
 
 ```
- default = [ "std", "sysinfo", "nix" ]
+ default = [ "std", "sysinfo", "prof", "nix" ]
  
  nix:     uname
+ prof:    prof-control
  std:     command, exit
  sysinfo: sysinfo
  ffi:

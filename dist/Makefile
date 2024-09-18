@@ -28,7 +28,6 @@ dist:
 	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-server $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
-	@install -m 755 ./mux $(BASE)/bin
 	@install -m 755 ./sysgen $(BASE)/bin
 
 	@install -d $(BASE)/doc/html
@@ -49,4 +48,4 @@ dist:
 	@rm -rf $(BASE)
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) core.l prelude.l mu-exec mu-ld mu-exec mu-server mu-sys mux sysgen
+	@rm -rf $(BASE)-*.tgz $(BASE) core.l prelude.l mu-exec mu-ld mu-exec mu-server mu-sys sysgen
