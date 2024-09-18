@@ -7,7 +7,7 @@
 (mu:intern (mu:find-namespace "") "symbols"
    (:lambda (ns file-name)
       ((:lambda (stream)
-          (core:mapc
+          (core:%mapc
            (:lambda (symbol)
              (core:format stream "~A~%" `(,(mu:symbol-name symbol)))
              (core:format stream "~A:~A~%" `(,ns ,(mu:symbol-name symbol))))

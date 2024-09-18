@@ -7,7 +7,7 @@
 (mu:intern core "%defmacro"
    (:lambda (symbol macro-function)
       ((:lambda (symbol-ns symbol-name)
-         (:if (mu:eq symbol-ns core:%null-ns%)
+         (:if (mu:eq symbol-ns mu:%null-ns%)
               (mu:intern core:%macro-ns% symbol-name macro-function)
               (core:raise symbol-ns 'core:%defmacro "illegal symbol"))
          symbol)

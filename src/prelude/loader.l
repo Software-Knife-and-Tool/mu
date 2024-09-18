@@ -9,41 +9,41 @@
 ;;; loader
 ;;;
 (mu:intern prelude "load"
-  (:lambda (path verbose)
-    (:if (prelude:stringp path)
+   (:lambda (path verbose)
+     (:if (core:stringp path)
          ((:lambda (ifs)
-            (:if (prelude:streamp ifs)
+            (:if (common:streamp ifs)
                  ((:lambda ()
                     (:if verbose
-                         (prelude:format :t ";;; loading ~A~%" `(,path))
+                         (core:format :t ";;; loading ~A~%" `(,path))
                          ())
                     ((:lambda (status)
-                       (:if (mu:eq prelude:%eof% status)
+                       (:if (mu:eq core:%eof% status)
                             :t
                             ()))
                      (mu:fix
                         (:lambda (loop)
-                           (:if (mu:eq prelude:%eof% loop)
-                                prelude:%eof%
-                                (prelude:with-exception
+                           (:if (mu:eq core:%eof% loop)
+                                core:%eof%
+                                (core:with-exception
                                     (:lambda (exception)
-                                      (prelude:%exceptionf
+                                      (core:%exceptionf
                                        mu:error-output
                                        "loader exception: ~A on ~A by ~S, ~A~%"
                                        ()
                                        exception))
                                     (:lambda ()
                                       ((:lambda (form)
-                                          (:if (mu:eq prelude:%eof% form)
-                                               prelude:%eof%
+                                          (:if (mu:eq core:%eof% form)
+                                               core:%eof%
                                                ((:lambda (value)
                                                   (:if verbose
-                                                       (prelude:format :t "~A~%" `(,value))
+                                                       (core:format :t "~A~%" `(,value))
                                                        ())
-                                                  (prelude:null loop))
-                                                (mu:eval (prelude:compile form)))))
-                                       (mu:read ifs () prelude:%eof%))))))
+                                                  (core:null loop))
+                                                (mu:eval (core:compile form)))))
+                                       (mu:read ifs () core:%eof%))))))
                        ()))))
-                  (prelude:raise prelude:streamp ifs 'prelude:load "cannot open input file")))
+                  (core:raise common:streamp ifs 'prelude:load "cannot open input file")))
             (mu:open :file :input path))
-          (prelude:raise path 'prelude:load "not a file designator"))))
+          (core:raise path 'prelude:load "not a file designator"))))

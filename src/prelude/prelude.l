@@ -4,6 +4,6 @@
 ;;;
 ;;; prelude namespace
 ;;;
-(mu:intern (mu:find-namespace "") "prelude" (mu:make-namespace "prelude"))
+(mu:intern mu:%null-ns% "prelude" (mu:make-namespace "prelude"))
 
 (mu:intern prelude "*version*" "0.0.1")

@@ -2,10 +2,13 @@
 ###  SPDX-License-Identifier: MIT
 
 import sys
-# from datetime import datetime
+from datetime import datetime
 
 with open(sys.argv[1]) as f: ref = f.readlines()
-# date = datetime.now().strftime('%m/%d/%Y %H:%M:%S')
+date = datetime.now().strftime('%m/%d/%Y %H:%M:%S')
+
+print(f'symbol reference: {date:<10}')
+print('unbound symbols ------')
 
 def addr_of(byte_vec):
     rev = list(reversed(byte_vec[:-1].split()[1:]))
@@ -14,6 +17,13 @@ def addr_of(byte_vec):
     return f'{int(''.join(hex_le), 16):8x}'
 
 ref.sort()
+for symbol in ref:
+    fields = symbol[:-1].split("\t")
+    name, type, value, addr = fields
+    if name == 'unbound':
+        print(f'{value:<35} {type:<10}')
+print('----------------------')
+
 for symbol in ref:
     fields = symbol[:-1].split("\t")
     name, type, value, addr = fields

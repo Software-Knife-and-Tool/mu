@@ -4,7 +4,7 @@
 ;;;
 ;;; cross reference
 ;;;
-(mu:intern (mu:find-namespace "") "crossref"
+(mu:intern mu:%null-ns% "crossref"
    (:lambda (file-name)
       ((:lambda (stream)
           (core:%mapc

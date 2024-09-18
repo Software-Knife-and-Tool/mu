@@ -13,6 +13,7 @@ help:
 
 install:
 	@cat ./$(BASE)-$(VERSION).tgz | (cd $(ROOT); tar --no-same-owner -xzf -)
+	@install -m 755 ./mux /usr/local/bin
 
 uninstall:
 	@rm -rf $(ROOT)/$(BASE)
