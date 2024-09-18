@@ -90,7 +90,7 @@
    (:lambda (form env)
      (:if (core:%symbolp form)
           ((:lambda (ns name)
-             (:if (mu:eq ns core:%null-ns%)
+             (:if (mu:eq ns mu:%null-ns%)
                   ((:lambda (frame-ref)
                      ;;; (core:warn name "%compiling an unqualified symbol")
                      ;;; (core:warn env "in this environment")

@@ -1,8 +1,8 @@
 ;;; delete me
 
-(mu:intern (mu:find-namespace "") "list" (lambda (&rest list) list))
+(mu:intern mu:%null-ns% "list" (lambda (&rest list) list))
 
-(mu:intern (mu:find-namespace "") "list*"
+(mu:intern mu:%null-ns% "list*"
    (lambda (&rest args)
      (mu:car
       (mu:fix
@@ -17,7 +17,7 @@
           (mu:cdr loop)))
        (mu:cons () args)))))
 
-(mu:intern (mu:find-namespace "") "list+" ;;; delete me
+(mu:intern mu:%null-ns% "list+" ;;; delete me
    (lambda (&rest args)
      (if args
          (if (mu:cdr args)

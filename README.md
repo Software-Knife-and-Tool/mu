@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.1.75
+###### version 0.1.76
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -114,6 +114,8 @@ The *mu* reference documentation is a collection of *markdown* files in `doc/ref
 
 Once built, the *html* for the *reference* material is installed in *doc/reference/html*, starting with *index.html*.
 
+
+
 #### Installing a release
 
 ------
@@ -191,6 +193,36 @@ Currently supported features by namespace:
 ```
 
 The *sysinfo* feature is disabled on *macos* builds.
+
+
+
+#### Tools
+
+------
+
+As of 0.1.76, the *mu* distribution includes tools for configuring and development of the system. The *mux* tool provides these utilities:
+
+```
+Usage: mux 0.0.4 command [option...]
+  command:    [annotate bench build help install profile repl symbols test version]
+    help                               ; this message
+    version                            ; mux version
+    build     [--release | --profile | --debug]
+                                       ; build mu system, debug is default
+    install                            ; (sudo) install mu system-wide
+    repl      [--namespace ns]         ; repl
+    symbols   [--crossref | --counts | --reference | --namespace]
+                                       ; symbol reports
+    test                               ; regression test suite
+    bench     [--base | --current | --footprint | --ntests]
+    profile   [--config]               ; create profile
+    annotate  [--prof | --ref]         ; annotate profile
+
+  general options:
+    --verbose                          ; verbose operation
+    --output path                      ; output file path
+```
+
 
 
 

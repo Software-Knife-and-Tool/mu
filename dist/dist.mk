@@ -44,6 +44,7 @@ COMMON= \
 PRELUDE = \
 	prelude.l      \
 	break.l	       \
+	loader.l       \
 	sequence.l
 
 dist:

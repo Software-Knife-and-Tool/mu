@@ -1,11 +1,11 @@
 [package]
 name = "mu"
-version = "0.1.75"
+version = "0.1.76"
 edition = "2021"
 authors = ["me <putnamjm.design@gmail.com>"]
 
 [workspace]
-members = [ "src/sysgen", "src/mux", "src/mu-*" ]
+members = [ "src/mu-*", "tools/mux", "tools/sysgen" ]
 resolver = "2"
 
 [lib]
@@ -15,7 +15,7 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "std", "sysinfo", "nix", "ffi", "prof" ]
+default = [ "std", "sysinfo", "nix", "ffi" ]
 nix = []
 std = []
 ffi = []

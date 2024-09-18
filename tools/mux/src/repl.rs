@@ -5,9 +5,9 @@ use {
     std::process::Command,
 };
 
-pub struct Exec {}
+pub struct Repl {}
 
-impl Exec {
+impl Repl {
     pub fn repl(options: &Options) {
         let ns_opt = options.options.iter().find(|opt| match opt {
             Opt::Namespace(_) => true,

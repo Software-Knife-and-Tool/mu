@@ -4,7 +4,7 @@
 ;;;
 ;;; quasiquote
 ;;;
-(mu:intern (mu:find-namespace "") "%quasi%" ())
+(mu:intern mu:%null-ns% "%quasi%" ())
 
 (mu:intern core "%list"
    (:lambda (form)

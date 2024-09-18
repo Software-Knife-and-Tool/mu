@@ -4,7 +4,7 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-async-std = "1.12.0"
+async-std = "1.13.0"
 crossbeam = "0.8.4"
 futures = { version = "0.3.30", features = [ "executor", "thread-pool" ]}
 getopt = "1.1.3"

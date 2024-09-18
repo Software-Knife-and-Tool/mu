@@ -4,13 +4,12 @@
 ;;;
 ;;; core namespace
 ;;;
-(mu:intern (mu:find-namespace "") "core" (mu:make-namespace "core"))
+(mu:intern mu:%null-ns% "core" (mu:make-namespace "core"))
 
 (mu:intern core "*version*" "0.0.2")
 
 (mu:intern core "%char-macro-ns%" (mu:make-namespace "%char-macros%"))
 (mu:intern core "%macro-ns%" (mu:make-namespace "%macros%"))
-(mu:intern core "%null-ns%" (mu:find-namespace ""))
 (mu:intern core "%symbol-macro-ns%" (mu:make-namespace "%symbol-macros%"))
 (mu:intern core "%types-ns%" (mu:make-namespace "%core-types%"))
 

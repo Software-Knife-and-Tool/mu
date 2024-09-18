@@ -20,18 +20,21 @@ help:
 	@echo "    summary/current - summary metrics"
 
 report:
+	@echo "----------------------------------"
 	@paste *.report
 
 verbose:
+	@echo "----------------------------------"
 	@sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF)
 	@python3 $(BIN)/regression.py $(TMPF)
 	@rm -f $(TMPF)
 
 commit:
-	@if test -f current.report; then	\
-	    sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF); \
-	    python3 $(BIN)/commit.py $(TMPF);	\
-	    rm -f $(TMPF);			\
+	@if test -f current.report; then			\
+		@echo "----------------------------------"	\
+		sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF); \
+	    	python3 $(BIN)/commit.py $(TMPF);		\
+	    	rm -f $(TMPF);					\
 	fi
 	python3 $(BIN)/summary-ns.py json/current.json > current.summary
 

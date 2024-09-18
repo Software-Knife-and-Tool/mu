@@ -4,7 +4,7 @@
 ;;;
 ;;; common namespace
 ;;;
-(mu:intern (mu:find-namespace "") "common" (mu:make-namespace "common"))
+(mu:intern mu:%null-ns% "common" (mu:make-namespace "common"))
 
 (mu:intern common "*version*" "0.0.1")
 

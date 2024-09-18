@@ -10,6 +10,7 @@ DIST = ../dist
 DOCS = ../doc
 LIB = ../lib
 SRC = ../src
+TOOLS = ../tools
 
 dist:
 	@chmod 755 $(DIST)/mu-sys
@@ -22,6 +23,7 @@ dist:
 	@install -d $(BASE)/modules
 
 	@install -m 755 $(SRC)/dist/mu.sh $(BASE)/bin/mu
+	@install -m 555 $(SRC)/dist/annotate.py $(BASE)/bin/annotate.py
 	@install -m 755 ./mu-exec $(BASE)/bin
 	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-server $(BASE)/bin
@@ -34,7 +36,7 @@ dist:
 	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
 
 	@install -m 644 $(SRC)/dist/mu.l $(BASE)/dist
-	@install -m 644 -D -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
+	@install -m 644 -D -t $(BASE)/lib/sysgen $(TOOLS)/sysgen/templates/*
 	@install -m 644 -D -t $(BASE)/lib/common $(SRC)/common/*.l
 	@install -m 644 -D -t $(BASE)/lib/core $(SRC)/core/*.l
 	@install -m 644 -D -t $(BASE)/lib/prelude $(SRC)/prelude/*.l
