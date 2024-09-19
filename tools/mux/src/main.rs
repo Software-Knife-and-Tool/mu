@@ -3,6 +3,8 @@
 mod annotate;
 mod bench;
 mod build;
+mod clean;
+mod commit;
 mod env;
 mod install;
 mod options;
@@ -17,6 +19,8 @@ use {
         annotate::Annotate,
         bench::Bench,
         build::Build,
+        clean::Clean,
+        commit::Commit,
         env::Env,
         install::Install,
         options::Options,
@@ -27,18 +31,18 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.5";
+const VERSION: &str = "0.0.6";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
-    println!(
-        "  command:    [annotate bench build env help install profile repl symbols test version]"
-    );
+    println!("  command:");
     println!("    help                               ; this message");
     println!("    version                            ; mux version");
     println!("    env                                ; mu development environment");
     println!("    build     [--release | --profile | --debug]");
     println!("                                       ; build mu system, debug is default");
+    println!("    clean                              ; clean all artifacts");
+    println!("    commit                             ; fmt and clippy, pre-commit checking");
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    repl      [--namespace ns]         ; repl");
     println!("    symbols   [--crossref | --counts | --reference | --namespace]");
@@ -75,6 +79,8 @@ pub fn main() {
         "annotate" => Annotate::annotate(&options),
         "bench" => Bench::bench(&options),
         "build" => Build::build(&options),
+        "clean" => Clean::clean(&options),
+        "commit" => Commit::commit(&options),
         "env" => Env::printenv(&options),
         "install" => Install::install(&options),
         "profile" => Profile::profile(&options),
