@@ -34,6 +34,11 @@ impl Annotate {
             None => panic!(),
         };
 
+        match options.find_opt(&Opt::Verbose) {
+            Some(_) => println!("mux annotate: prof {} ref {}", profile_path, reference_path),
+            None => (),
+        };
+
         let mut annotate = Command::new("python3")
             .arg("/opt/mu/bin/annotate.py")
             .arg(profile_path)

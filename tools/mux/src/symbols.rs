@@ -16,6 +16,11 @@ impl Symbols {
             _ => false,
         });
 
+        match options.find_opt(&Opt::Verbose) {
+            Some(_) => println!("mux symbols: {report_opt:?}"),
+            None => (),
+        };
+
         match report_opt {
             Some(opt) => match opt {
                 Opt::Crossref => Self::crossref(options),

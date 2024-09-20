@@ -19,7 +19,7 @@ pub enum Opt {
     Footprint,
     Load(String),
     Namespace(String),
-    Ntests(u32),
+    Ntests(String),
     Output(String),
     Profile,
     Prof(String),
@@ -35,7 +35,30 @@ impl Options {
         std::process::exit(0)
     }
 
-    pub fn option_name(opt: Opt) -> String {
+    pub fn find_opt(&self, opt: &Opt) -> Option<&Opt> {
+        self.options
+            .iter()
+            .find(|next_opt| std::mem::discriminant(*next_opt) == std::mem::discriminant(opt))
+    }
+
+    pub fn opt_value(&self, opt: &Opt) -> Option<String> {
+        match self.find_opt(opt) {
+            Some(opt) => match opt {
+                Opt::Config(str)
+                | Opt::Eval(str)
+                | Opt::Load(str)
+                | Opt::Namespace(str)
+                | Opt::Prof(str)
+                | Opt::Output(str)
+                | Opt::Ref(str)
+                | Opt::Ntests(str) => Some(str.to_string()),
+                _ => panic!(),
+            },
+            None => None,
+        }
+    }
+
+    pub fn opt_name(opt: Opt) -> String {
         match opt {
             Opt::Base => "base",
             Opt::Config(_) => "config",
@@ -93,6 +116,7 @@ impl Options {
             "footprint",
             "load",
             "namespace",
+            "ntests",
             "output",
             "prof",
             "profile",
@@ -124,9 +148,7 @@ impl Options {
                         "footprint" => options.push(Opt::Footprint),
                         "load" => options.push(Opt::Load(opts.opt_str(name).unwrap())),
                         "namespace" => options.push(Opt::Namespace(opts.opt_str(name).unwrap())),
-                        "ntests" => {
-                            options.push(Opt::Ntests(opts.opt_str(name).unwrap().parse().unwrap()))
-                        }
+                        "ntests" => options.push(Opt::Ntests(opts.opt_str(name).unwrap())),
                         "output" => options.push(Opt::Output(opts.opt_str(name).unwrap())),
                         "prof" => options.push(Opt::Prof(opts.opt_str(name).unwrap())),
                         "profile" => options.push(Opt::Profile),
