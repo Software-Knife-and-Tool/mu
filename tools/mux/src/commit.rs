@@ -9,10 +9,7 @@ pub struct Commit {}
 
 impl Commit {
     pub fn commit(options: &Options) {
-        match options.options.iter().find(|opt| match opt {
-            Opt::Verbose => true,
-            _ => false,
-        }) {
+        match options.find_opt(&Opt::Verbose) {
             Some(_) => println!("mux commit: fmt clippy"),
             None => (),
         };

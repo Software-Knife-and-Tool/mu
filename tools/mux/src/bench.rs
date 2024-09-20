@@ -28,17 +28,14 @@ impl Bench {
     }
 
     pub fn base(options: &Options) {
-        let test_opt = options.options.iter().find(|opt| match opt {
-            Opt::Ntests(_) => true,
-            _ => false,
-        });
-
-        let ntests = match test_opt {
-            Some(opt) => match opt {
-                Opt::Ntests(n) => *n,
-                _ => panic!(),
-            },
+        let ntests = match options.opt_value(&Opt::Ntests("".to_string())) {
+            Some(n) => n.parse().unwrap(),
             None => 20u32,
+        };
+
+        match options.find_opt(&Opt::Verbose) {
+            Some(_) => println!("mux bench: base ntests {ntests}"),
+            None => (),
         };
 
         for test_dir in ["tests/footprint", "tests/performance"] {
@@ -55,17 +52,14 @@ impl Bench {
     }
 
     pub fn current(options: &Options) {
-        let test_opt = options.options.iter().find(|opt| match opt {
-            Opt::Ntests(_) => true,
-            _ => false,
-        });
-
-        let ntests = match test_opt {
-            Some(opt) => match opt {
-                Opt::Ntests(n) => *n,
-                _ => panic!(),
-            },
+        let ntests = match options.opt_value(&Opt::Ntests("".to_string())) {
+            Some(n) => n.parse().unwrap(),
             None => 20u32,
+        };
+
+        match options.find_opt(&Opt::Verbose) {
+            Some(_) => println!("mux bench: current ntests {ntests}"),
+            None => (),
         };
 
         let mut test = Command::new("make")

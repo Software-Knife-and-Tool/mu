@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 #![allow(unused_imports)]
 use {
-    crate::options::Options,
+    crate::options::{Opt, Options},
     std::fs::ReadDir,
     std::path::{Path, PathBuf},
 };
@@ -31,10 +31,15 @@ impl Env {
         }
     }
 
-    pub fn printenv(_options: &Options) {
+    pub fn printenv(options: &Options) {
         let ewd = std::env::current_dir().unwrap();
 
-        match Self::mu_home(_options) {
+        match options.find_opt(&Opt::Verbose) {
+            Some(_) => println!("mux env:"),
+            None => (),
+        };
+
+        match Self::mu_home(options) {
             Some(path) => println!("{:?}", path),
             None => {
                 println!(

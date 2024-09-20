@@ -17,10 +17,7 @@ impl Build {
             _ => false,
         });
 
-        match options.options.iter().find(|opt| match opt {
-            Opt::Verbose => true,
-            _ => false,
-        }) {
+        match options.find_opt(&Opt::Verbose) {
             Some(_) => match build_opt {
                 Some(style) => match style {
                     Opt::Debug => println!("mux: build debug"),

@@ -12,6 +12,11 @@ pub struct Clean {}
 
 impl Clean {
     pub fn clean(options: &Options) {
+        match options.find_opt(&Opt::Verbose) {
+            Some(_) => println!("mux clean:"),
+            None => (),
+        };
+
         let dirs = ["dist", "tests/regression", "tests/footprint"];
 
         let mu = match Env::mu_home(options) {

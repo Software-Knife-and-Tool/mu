@@ -9,17 +9,14 @@ pub struct Repl {}
 
 impl Repl {
     pub fn repl(options: &Options) {
-        let ns_opt = options.options.iter().find(|opt| match opt {
-            Opt::Namespace(_) => true,
-            _ => false,
-        });
-
-        let ns_str = match ns_opt {
+        let ns_str = match options.opt_value(&Opt::Namespace("".to_string())) {
+            Some(ns) => &ns.clone(),
             None => "mu",
-            Some(opt) => match opt {
-                Opt::Namespace(ns) => ns,
-                _ => panic!(),
-            },
+        };
+
+        match options.find_opt(&Opt::Verbose) {
+            Some(_) => println!("mux ns: {ns_str}"),
+            None => (),
         };
 
         let mut child = match ns_str {

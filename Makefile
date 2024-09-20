@@ -12,7 +12,7 @@ help:
 	@echo "              MUX_DIR - mux install directory, default /usr/local/bin"
 
 world:
-	@echo '((nil . ((compile-command . "make -f mu.mk release"))))' > .dir-locals.el
+	@echo '((nil . ((compile-command . "mux build --release"))))' > .dir-locals.el
 	@etags `find src/mu -name '*.rs' -print`		
 	@touch .mu
 	@cargo build --release --workspace

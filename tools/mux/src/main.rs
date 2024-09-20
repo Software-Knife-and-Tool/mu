@@ -31,7 +31,7 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.6";
+const VERSION: &str = "0.0.7";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
@@ -48,7 +48,7 @@ pub fn usage() {
     println!("    symbols   [--crossref | --counts | --reference | --namespace]");
     println!("                                       ; symbol reports");
     println!("    test                               ; regression test suite");
-    println!("    bench     [--base | --current | --footprint | --ntests]");
+    println!("    bench     [[--base | --current | --footprint] | --ntests]");
     println!("    profile   [--config]               ; create profile");
     println!("    annotate  [--prof | --ref]         ; annotate profile");
     println!();
