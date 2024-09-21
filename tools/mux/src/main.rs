@@ -45,16 +45,16 @@ pub fn usage() {
     println!("    commit                             ; fmt and clippy, pre-commit checking");
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    repl      [--namespace ...]        ; repl");
-    println!("    symbols   [--crossref | --counts | --reference | --namespace]");
+    println!("    symbols   [--crossref | --counts | --reference | --namespace ...]");
     println!("                                       ; symbol reports");
     println!("    test                               ; regression test suite");
-    println!("    bench     [[--base | --current | --footprint] | --ntests]");
-    println!("    profile   [--config]               ; create profile");
+    println!("    bench     [[--base | --current | --footprint] | --ntests ...]");
+    println!("    profile   [--config ...]           ; create profile");
     println!("    annotate  [--prof ... | --ref ...] ; annotate profile");
     println!();
     println!("  general options:");
     println!("    --verbose                          ; verbose operation");
-    println!("    --output path                      ; output file path");
+    println!("    --output ...                       ; output file path");
 
     std::process::exit(0);
 }
