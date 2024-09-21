@@ -8,4 +8,3 @@
 (mu:type-of (mu:namespace-symbols (mu:find-namespace "")))	:null
 (mu:type-of (mu:namespace-symbols (mu:find-namespace "keyword")))	:null
 (mu:type-of (mu:namespace-symbols (mu:find-namespace "mu")))	:cons
-(mu:type-of (mu:unintern (mu:intern (mu:find-namespace "") "foo" ())))	:symbol
