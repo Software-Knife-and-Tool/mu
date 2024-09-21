@@ -20,12 +20,12 @@ impl Repl {
         };
 
         let mut child = match ns_str {
-            "mu" => Command::new("mu-sys").spawn().unwrap(),
+            "mu" => Command::new("mu-sh").spawn().unwrap(),
             "core" => Command::new("mu-sys")
                 .args(["-l", "/opt/mu/dist/core.l"])
                 .spawn()
                 .unwrap(),
-            "common" => Command::new("mu-sys")
+            "common" => Command::new("mu-sh")
                 .args(["-l", "/opt/mu/dist/core.l"])
                 .args(["-l", "/opt/mu/dist/common.l"])
                 .spawn()

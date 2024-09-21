@@ -18,7 +18,6 @@ def times():
         '-f',
         format,
         mu_cmd,
-        '-p',
         '-l', '../../dist/core.l'
     ],\
     stdout=subprocess.PIPE,\
@@ -34,7 +33,6 @@ def times():
 def storage():
     proc = subprocess.Popen([
         mu_cmd,
-        '-p',
         '-l', '../../dist/core.l',
         '-e', '(mu:heap-stat)'
     ],\

@@ -90,7 +90,6 @@ impl Symbols {
                         "prelude" => Command::new("mu-sys")
                             .args(["-l", "/opt/mu/lib/core/core.l"])
                             .args(["-l", "/opt/mu/lib/prelude/repl.l"])
-                            .args(["-q", "(prelude:%init-ns)"])
                             .args(["-e", "(prelude:repl)"])
                             .stdout(out_file)
                             .spawn()

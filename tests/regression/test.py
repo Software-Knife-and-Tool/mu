@@ -10,14 +10,13 @@ with open(base + '/' + ns + '/' + test) as f: test_source = f.readlines()
 
 def runtest(line, test, expected):
     if ns == 'mu':
-        proc = subprocess.Popen(['../../dist/mu-sys', '-p', '-e' + test],\
+        proc = subprocess.Popen(['../../dist/mu-sys','-e' + test],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
     if ns == 'core':
         proc = subprocess.Popen(['../../dist/mu-sys',
                                  '-l../../dist/core.l',
-                                 '-p',
                                  '-e' + test],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)

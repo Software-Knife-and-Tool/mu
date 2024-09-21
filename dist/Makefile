@@ -14,6 +14,7 @@ TOOLS = ../tools
 
 dist:
 	@chmod 755 $(DIST)/mu-sys
+	@chmod 755 $(DIST)/mu-sh
 
 	@install -d $(BASE)
 	@install -d $(BASE)/bin
@@ -24,9 +25,11 @@ dist:
 
 	@install -m 755 $(SRC)/dist/mu.sh $(BASE)/bin/mu
 	@install -m 555 $(SRC)/dist/annotate.py $(BASE)/bin/annotate.py
+
 	@install -m 755 ./mu-exec $(BASE)/bin
 	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-server $(BASE)/bin
+	@install -m 755 ./mu-sh $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
 	@install -m 755 ./sysgen $(BASE)/bin
 
@@ -48,4 +51,4 @@ dist:
 	@rm -rf $(BASE)
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) core.l prelude.l mu-exec mu-ld mu-exec mu-server mu-sys sysgen
+	@rm -rf $(BASE)-*.tgz $(BASE) core.l prelude.l mu-exec mu-ld mu-exec mu-server mu-sh mu-sys sysgen

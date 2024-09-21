@@ -17,7 +17,6 @@ with open(os.path.join(ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
 def storage(ns, group, line, test):
     if ns == 'mu':
         proc = subprocess.Popen([mu_sys,
-                                 '-p',
                                  '-l./perf.l',
                                  '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -25,7 +24,6 @@ def storage(ns, group, line, test):
 
     if ns == 'frequent':
         proc = subprocess.Popen([mu_sys,
-                                 '-p',
                                  '-l./perf.l',
                                  '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -34,7 +32,6 @@ def storage(ns, group, line, test):
     if ns == 'core':
         proc = subprocess.Popen([mu_sys,
                                  '-l../../dist/core.l',
-                                 '-p',
                                  '-l./perf.l',
                                  '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -53,7 +50,6 @@ def storage(ns, group, line, test):
 def timing(ns, test):
     if ns == 'mu':
         proc = subprocess.Popen([mu_sys,
-                                 '-p',
                                  '-l./perf.l',
                                  '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -61,7 +57,6 @@ def timing(ns, test):
 
     if ns == 'frequent':
         proc = subprocess.Popen([mu_sys,
-                                 '-p',
                                  '-l./perf.l',
                                  '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -70,7 +65,6 @@ def timing(ns, test):
     if ns == 'core':
         proc = subprocess.Popen([mu_sys,
                                  '-l../../dist/core.l',
-                                 '-p',
                                  '-l./perf.l',
                                  '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
