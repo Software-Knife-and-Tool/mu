@@ -24,8 +24,8 @@ enum ShellOpt {
     Quiet(String),
 }
 
-fn options(argv: Vec<String>) -> Option<Vec<ShellOpt>> {
-    let mut opts = getopt::Parser::new(&argv, "c:e:l:q:");
+fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
+    let mut opts = getopt::Parser::new(&argv, "h?vc:e:l:q: ...");
     let mut optv = Vec::new();
 
     loop {
@@ -42,6 +42,11 @@ fn options(argv: Vec<String>) -> Option<Vec<ShellOpt>> {
             }
             Ok(clause) => match clause {
                 Some(opt) => match opt {
+                    Opt('h', None) | Opt('?', None) => usage(),
+                    Opt('v', None) => {
+                        print!("{} ", Env::VERSION);
+                        std::process::exit(0);
+                    }
                     Opt('e', Some(expr)) => {
                         optv.push(ShellOpt::Eval(expr));
                     }
@@ -54,14 +59,89 @@ fn options(argv: Vec<String>) -> Option<Vec<ShellOpt>> {
                     Opt('c', Some(config)) => {
                         optv.push(ShellOpt::Config(config));
                     }
-                    _ => panic!("{opt:?}"),
+                    _ => panic!(),
                 },
                 None => panic!(),
             },
         }
     }
 
+    for file in argv.split_off(opts.index()) {
+        optv.push(ShellOpt::Load(file));
+    }
+
     Some(optv)
+}
+
+fn usage() {
+    println!("mu-sh: {}: [-h?vcelq] [file...]", Env::VERSION);
+    println!("?: usage message");
+    println!("h: usage message");
+    println!("c: [name:value, ...]");
+    println!("e: eval [form] and print result");
+    println!("l: load [path]");
+    println!("q: eval [form] quietly");
+    println!("v: print version and exit");
+
+    std::process::exit(0);
+}
+
+fn listener(env: &Env) {
+    let eof_value = env.eval_str("(mu:make-symbol \"eof\")").unwrap();
+
+    loop {
+        print!("mu> ");
+        let _ = std::io::Stdout::flush(&mut std::io::stdout());
+
+        match env.read(env.std_in(), false, eof_value) {
+            Ok(expr) => {
+                if env.eq(expr, eof_value) {
+                    break;
+                }
+
+                #[allow(clippy::single_match)]
+                match env.compile(expr) {
+                    Ok(form) => match env.eval(form) {
+                        Ok(eval) => {
+                            env.write(eval, true, env.std_out()).unwrap();
+                            println!()
+                        }
+                        Err(e) => {
+                            eprint!(
+                                "eval exception raised by {}, {:?} condition on ",
+                                env.write_to_string(e.source, true),
+                                e.condition
+                            );
+                            env.write(e.object, true, env.err_out()).unwrap();
+                            eprintln!()
+                        }
+                    },
+                    Err(e) => {
+                        eprint!(
+                            "compile exception raised by {}, {:?} condition on ",
+                            env.write_to_string(e.source, true),
+                            e.condition
+                        );
+                        env.write(e.object, true, env.err_out()).unwrap();
+                        eprintln!()
+                    }
+                }
+            }
+            Err(e) => {
+                if let Condition::Eof = e.condition {
+                    std::process::exit(0);
+                } else {
+                    eprint!(
+                        "reader exception raised by {}, {:?} condition on ",
+                        env.write_to_string(e.source, true),
+                        e.condition
+                    );
+                    env.write(e.object, true, env.err_out()).unwrap();
+                    eprintln!()
+                }
+            }
+        }
+    }
 }
 
 pub fn main() {
@@ -71,7 +151,7 @@ pub fn main() {
     match options(std::env::args().collect()) {
         Some(opts) => {
             for opt in opts {
-                // maybe a filter here?
+                // maybe a find here?
                 if let ShellOpt::Config(string) = opt {
                     _config = Some(string)
                 }
@@ -82,6 +162,9 @@ pub fn main() {
             std::process::exit(-1)
         }
     }
+
+    // enable signal exceptions
+    Env::signal_exception();
 
     let env = match Env::config(_config) {
         Some(config) => Env::new(config, None),
@@ -126,4 +209,6 @@ pub fn main() {
         }
         None => std::process::exit(0),
     };
+
+    listener(&env)
 }

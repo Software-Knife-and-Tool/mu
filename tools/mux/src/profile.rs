@@ -38,7 +38,6 @@ impl Profile {
                             File::create(path.clone()).expect(&format!("failed to open {path}"));
 
                         Command::new("mu-sys")
-                            .arg("-p")
                             .args(["-l", "/opt/mu/dist/core.l"])
                             .args(["-l", "/opt/mu/dist/common.l"])
                             .args(["-l", "/opt/mu/dist/prelude.l"])
@@ -49,7 +48,6 @@ impl Profile {
                     }
                     None => {
                         Command::new("mu-sys")
-                            .arg("-p")
                             .args(["-l", "/opt/mu/dist/core.l"])
                             .args(["-l", "/opt/mu/dist/common.l"])
                             .args(["-l", "/opt/mu/dist/prelude.l"])
