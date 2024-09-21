@@ -210,26 +210,27 @@ The *sysinfo* feature is disabled on *macos* builds.
 As of 0.1.76, the *mu* distribution includes tools for configuring and development of the system. The *mux* tool provides these utilities:
 
 ```
-Usage: mux 0.0.6 command [option...]
-  command:    [annotate bench build help install profile repl symbols test version]
+Usage: mux 0.0.8 command [option...]
+  command:
     help                               ; this message
     version                            ; mux version
+    env                                ; mu development environment
     build     [--release | --profile | --debug]
                                        ; build mu system, debug is default
     clean                              ; clean all artifacts
     commit                             ; fmt and clippy, pre-commit checking
     install                            ; (sudo) install mu system-wide
-    repl      [--namespace ns]         ; repl
-    symbols   [--crossref | --counts | --reference | --namespace]
+    repl      [--namespace ...]        ; repl
+    symbols   [--crossref | --counts | --reference | --namespace ...]
                                        ; symbol reports
     test                               ; regression test suite
-    bench     [--base | --current | --footprint | --ntests]
-    profile   [--config]               ; create profile
-    annotate  [--prof | --ref]         ; annotate profile
+    bench     [[--base | --current | --footprint] | --ntests ...]
+    profile   [--config ...]           ; create profile
+    annotate  [--prof ... | --ref ...] ; annotate profile
 
   general options:
     --verbose                          ; verbose operation
-    --output path                      ; output file path
+    --output ...                       ; output file path
 ```
 
 

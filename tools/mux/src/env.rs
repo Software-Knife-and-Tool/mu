@@ -15,7 +15,7 @@ impl Env {
         loop {
             match Path::read_dir(&cwd) {
                 Ok(mut dir) => match dir.find(|entry| match entry {
-                    Ok(entry) => entry.file_name() == ".mu",
+                    Ok(entry) => entry.file_name() == ".mux",
                     _ => false,
                 }) {
                     Some(_) => return Some(cwd.to_str().unwrap().to_string()),
