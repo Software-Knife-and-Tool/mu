@@ -331,29 +331,26 @@ The  `performance`  makefile offers some development options.
 The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory contains the binaries and shell scripts for running the system. The library sources are included in `lib`. *mux*  has an equivalent facility in the *repl* command.
 
 ```
-mu-sys		runtime binary, stdio listener
+mu-sys		runtime binary
+mu-sh		runtime binary, stdio listener
 mu-ld		image loader
 mu-exec     image executor
 mu-server	server runtime, socket listener
-mu			shell script for loading *core*. runs *mu-sys* listener
+mu			shell script for loading *core*. runs *mu-sh* listener
 ```
 
 
 ```
-OVERVIEW: mu-sys - posix platform mu shell command
+OVERVIEW: mu-sys - posix platform mu exec command
 USAGE: mu-sys [options] [file...]
 
-runtime: x.y.z: [-h?psvcelq0] [file...]
+runtime: x.y.z: [-h?svcelq] [file...]
 OPTIONS:
-  -h                   print this message
-  -?                   print this message
   -v                   print version string and exit
-  -p                   pipe mode, no repl
   -l SRCFILE           load SRCFILE in sequence
   -e SEXPR             evaluate SEXPR and print result
   -q SEXPR             evaluate SEXPR quietly
-  -c name:value[,...]  environment configuration  	   
-  -0                   null termination  
+  -c name:value[,...]  environment configuration  	    
   [file ...]           load source file(s)
 ```
 
