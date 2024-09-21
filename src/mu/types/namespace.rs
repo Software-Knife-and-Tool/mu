@@ -15,7 +15,7 @@ use {
         streams::write::Core as _,
         types::{
             cons::{Cons, Core as _},
-            symbol::{Core as _, Symbol, UNBOUND},
+            symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
             vector_image::Core as _,
         },
@@ -166,26 +166,6 @@ impl Namespace {
         }
     }
 
-    pub fn makunbound(env: &Env, symbol: Tag) -> Tag {
-        let mut heap_ref = block_on(env.heap.write());
-
-        let image = Symbol::gc_ref_image(&mut heap_ref, symbol);
-        let slices: &[[u8; 8]] = &[
-            image.namespace.as_slice(),
-            image.name.as_slice(),
-            UNBOUND.as_slice(),
-        ];
-
-        let offset = match symbol {
-            Tag::Indirect(heap) => heap.image_id(),
-            _ => panic!(),
-        } as usize;
-
-        heap_ref.write_image(slices, offset);
-
-        symbol
-    }
-
     pub fn intern(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
         if env.keyword_ns.eq_(&ns) {
             if name.len() > DirectTag::DIRECT_STR_MAX {
@@ -277,53 +257,6 @@ impl Namespace {
 
         Some(symbol)
     }
-
-    pub fn unintern(env: &Env, symbol: Tag) -> Option<Tag> {
-        let ns = Symbol::namespace(env, symbol);
-
-        let image = Symbol::to_image(env, symbol);
-        let slices: &[[u8; 8]] = &[
-            Tag::nil().as_slice(),
-            image.name.as_slice(),
-            image.value.as_slice(),
-        ];
-
-        let offset = match symbol {
-            Tag::Indirect(heap) => heap.image_id(),
-            _ => panic!(),
-        } as usize;
-
-        {
-            let mut heap_ref = block_on(env.heap.write());
-
-            heap_ref.write_image(slices, offset);
-        }
-
-        let ns_ref = block_on(env.ns_map.read());
-
-        match ns_ref.iter().find_map(
-            |(tag, _, ns_map)| {
-                if ns.eq_(tag) {
-                    Some(ns_map)
-                } else {
-                    None
-                }
-            },
-        ) {
-            Some(ns_map) => {
-                let name = Vector::as_string(env, Symbol::name(env, symbol));
-                let mut hash = block_on(match ns_map {
-                    Namespace::Static(_) => return None,
-                    Namespace::Dynamic(hash) => hash.write(),
-                });
-
-                hash.remove(&name);
-            }
-            None => return None,
-        }
-
-        Some(symbol)
-    }
 }
 
 pub trait Core {
@@ -349,34 +282,13 @@ pub trait CoreFunction {
     fn mu_find(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_find_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_intern(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_makunbound(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_make_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_map(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()>;
     fn mu_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_unintern(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Namespace {
-    fn mu_unintern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let symbol = fp.argv[0];
-
-        env.fp_argv_check("mu:unintern", &[Type::Symbol], fp)?;
-        fp.value = match Self::find_symbol(
-            env,
-            Symbol::namespace(env, symbol),
-            &Vector::as_string(env, Symbol::name(env, symbol)),
-        ) {
-            Some(_) => match Self::unintern(env, symbol) {
-                Some(_) => symbol,
-                None => Tag::nil(),
-            },
-            None => Tag::nil(),
-        };
-
-        Ok(())
-    }
-
     fn mu_intern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
         let name = fp.argv[1];
@@ -387,15 +299,6 @@ impl CoreFunction for Namespace {
             Some(ns) => ns,
             None => return Err(Exception::new(env, Condition::Range, "mu:intern", name)),
         };
-
-        Ok(())
-    }
-
-    fn mu_makunbound(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let symbol = fp.argv[0];
-
-        env.fp_argv_check("mu:makunbound", &[Type::Symbol], fp)?;
-        fp.value = Self::makunbound(env, symbol);
 
         Ok(())
     }

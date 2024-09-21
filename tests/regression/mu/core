@@ -53,4 +53,3 @@
 (mu:type-of mu:make-namespace)	:func
 (mu:type-of mu:namespace-map)	:func
 (mu:type-of mu:namespace-symbols)	:func
-(mu:type-of mu:unintern)	:func

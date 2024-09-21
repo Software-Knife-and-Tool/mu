@@ -98,8 +98,6 @@ lazy_static! {
         ( "namespace-map",    0, Namespace::mu_ns_map ),
         ( "namespace-name",   1, Namespace::mu_ns_name ),
         ( "namespace-symbols",   1, Namespace::mu_symbols ),
-        ( "unintern", 1, Namespace::mu_unintern ),
-        ( "makunbound", 1, Namespace::mu_makunbound ),
         // read/write
         ( "read",    3, Env::mu_read ),
         ( "write",   3, Env::mu_write ),
