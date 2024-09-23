@@ -14,27 +14,3 @@
              (loop (cdr l1) (cdr l2))))))
     (loop list-1 list-2)))
 
-(defun copy-list (list)
-  (errorp-unless listp list "copy-list not a list")
-  (letf ((loop (list)
-      (when list
-        (cons (car list) (loop (cdr list))))))
-        (loop list)))
-
-(defun reverse (list)
-  (errorp-unless listp list "reverse: not a list")
-  (letf ((loop (list)
-      (when list
-        (core::append (loop (cdr list)) (cons (car list) ())))))
-    (loop list)))
-  
-(defun filter (predicate list)
-  (errorp-unless functionp predicate "filter: not a function")
-  (errorp-unless listp list "filter: not a list")
-  (letf ((loop (list)
-      (when list
-         (if (predicate (car list))
-             (cons (car list) (loop (cdr list)))
-             (loop (cdr list)))))))
-    (loop list))
-

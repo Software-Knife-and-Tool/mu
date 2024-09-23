@@ -36,7 +36,7 @@ impl Build {
                 let cwd = std::env::current_dir().unwrap();
 
                 eprintln!(
-                    "error: could not find `.mu` in {:?} or any parent directory",
+                    "error: could not find `.mux` in {:?} or any parent directory",
                     cwd.to_str().unwrap()
                 );
                 return;

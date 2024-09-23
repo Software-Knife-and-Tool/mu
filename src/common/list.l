@@ -60,84 +60,6 @@
                 (core:raise list 'common:maplist "not a list"))
            (core:raise function 'common:maplist "not a function"))))
 
-;;;
-;;; finds
-;;;
-(mu:intern common "findl"
-   (:lambda (function list)
-      (:if (core:functionp function)
-           (:if (core:listp list)
-                (mu:cdr
-                 (mu:fix
-                  (:lambda (loop)
-                     (:if (mu:eq :t (mu:car loop))
-                          loop
-                          (:if (mu:cdr loop)
-                               ((:lambda (el)
-                                   (:if (core:%apply function (mu:cons el ()))
-                                        (mu:cons :t el)
-                                        (mu:cons () (mu:nthcdr 2 loop))))
-                                (mu:nth 1 loop))
-                               loop)))
-                  (mu:cons () list)))
-                (core:raise list 'common:findl "not a list"))
-           (core:raise function 'common:findl "not a function"))))
-
-(mu:intern common "findr"
-   (:lambda (function list)
-     (common:findl function (common:reverse list))))
-
-;;;
-;;; positions
-;;;
-(mu:intern common "positionl"
-   (:lambda (function list)
-     (:if (core:functionp function)
-          (:if (core:listp list)
-               (:if list
-                    ((:lambda (length)
-                       (mu:car
-                        (mu:fix
-                         (:lambda (loop)
-                           (:if (core:listp loop)
-                                loop
-                                (:if (mu:less-than length loop)
-                                     ()
-                                     (:if (common:%apply function (mu:cons (mu:nth loop list) ()))
-                                          (mu:cons loop  ())
-                                          (common:1+ loop)))))
-                         0)))
-                     (mu:length list))
-                    ())
-               (core:raise list 'common:positionl "not a list"))
-          (core:raise function 'common:positionl "not a function"))))
-
-(mu:intern common "positionr"
-   (:lambda (function list)
-      (:if (core:functionp function)
-           (:if (core:listp list)
-                (:if (core:null list)
-                     ()
-                     (mu:car
-                      (mu:fix
-                       (:lambda (loop)
-                          (:if (core:listp loop)
-                               loop
-                               (:if (mu:less-than loop 0)
-                                    ()
-                                    (:if (core:%apply function (mu:cons (mu:nth loop list) ()))
-                                         (mu:cons loop ())
-                                         (common:1- loop)))))
-                       (mu:sub (mu:length list) 1))))
-                (core:raise list 'common:positionr "not a list"))
-           (core:raise function 'common:positionr "not a function"))))
-
-(mu:intern common "reverse"
-   (:lambda (list)
-     (:if (core:listp list)
-          (core:%reverse list)
-          (core:raise list 'common:reverse "not a list"))))
-
 (mu:intern common "last"
    (:lambda (list)
       (:if (core:listp list)
@@ -153,17 +75,11 @@
             list)
            (core:raise list 'common:last "not a list"))))
 
-(mu:intern common "count"
-   (:lambda (item list)
+(mu:intern common "copy-list"
+   (:lambda (list)
      (:if (core:listp list)
-          (core:%foldl          
-           (:lambda (elt acc)
-             (:if (mu:eq elt item)
-                  (common:1+ acc)
-                  acc))
-           0
-           list)
-          (core:raise list 'common:count "not a list"))))
+          (core:%mapcar common:identity list)             
+          (core:raise list 'common:copy-list "not a list"))))
 
 ;;;
 ;;; cxxxxr

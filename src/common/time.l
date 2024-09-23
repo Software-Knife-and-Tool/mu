@@ -1,0 +1,47 @@
+;;;  SPDX-FileCopyrightText: Copyright 2023 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-License-Identifier: MIT
+
+;;;
+;;; time function
+;;;
+(mu:intern common "%time"
+   (:lambda (form)
+     ((:lambda (start-vec time-value stop-vec)
+         ((:lambda (time-delta value type-diffs)
+             (core:format :t "Evaluation consumed ~A usec internal time~%" `(,time-delta))
+             (core:format :t "           consed ~A~%" `(,type-diffs))
+             value)
+            (mu:car time-value)
+            (mu:cdr time-value)
+            (mu:fix
+             (:lambda (loop)
+                (:if (mu:eq :vector (mu:type-of loop))
+                     loop
+                     ((:lambda (list n)
+                        ((:lambda (offset)
+                            (:if (mu:less-than offset (mu:vector-len start-vec))
+                                 ((:lambda (type total alloc free)
+                                     (:if (mu:eq 0 alloc)
+                                           `(,list ,@(mu:add 1 n))
+                                           ((:lambda (type-stats)
+                                               (mu:cons `(,@list ,@type-stats) (mu:add 1 n)))
+                                            `(,type ,total ,alloc ,free))))
+                                  (mu:svref start-vec offset)
+                                  (mu:sub (mu:svref stop-vec (mu:add offset 1))
+                                             (mu:svref start-vec (mu:add offset 1)))
+                                  (mu:sub (mu:svref stop-vec (mu:add offset 2))
+                                             (mu:svref start-vec (mu:add offset 2)))
+                                  (mu:sub (mu:svref stop-vec (mu:add offset 3))
+                                             (mu:svref start-vec (mu:add offset 3))))
+                                 (mu:make-vector :t list)))
+                          (mu:mul n 4)))
+                      (mu:car loop)
+                      (mu:cdr loop))))
+             '(() . 1))))
+        (mu:heap-stat)
+      ((:lambda (start)
+           ((:lambda (value)
+              `(,(mu:sub (mu:internal-run-time) start) ,@value))
+            (mu:eval (core:compile form))))
+        (mu:internal-run-time))
+      (mu:heap-stat))))

@@ -34,12 +34,16 @@ COMMON= \
 	common.l       \
 	boole.l	       \
 	defun.l        \
+	describe.l     \
 	predicates.l   \
 	string.l       \
 	fixnum.l       \
 	list.l	       \
+	print.l        \
+	sequence.l     \
 	stream.l       \
-	symbol.l
+	symbol.l       \
+	time.l
 
 PRELUDE = \
 	prelude.l      \

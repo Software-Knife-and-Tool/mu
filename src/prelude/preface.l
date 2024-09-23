@@ -187,7 +187,7 @@
 
 (defun core::reclose (closure)
   (errorp-unless functionp closure "reclose: not a function")
-  (let ((closed (core::lambda-closure (core::fn-lambda-desc closure))))
+  (let ((closed (core:lambda-closure (core:fn-lambda-desc closure))))
     (errorp-unless (lambda (list) (fixnum< 0 (length list))) closed "reclose environment botch")
     (env:fnv-set (car closed) 0 closure))
   closure)
