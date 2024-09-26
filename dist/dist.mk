@@ -27,6 +27,7 @@ CORE= \
 	exception.l    \
 	closure.l      \
 	lambda.l       \
+	load.l         \
 	package.l      \
 	vector.l 
 

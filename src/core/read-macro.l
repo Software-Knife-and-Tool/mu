@@ -14,27 +14,24 @@
 
 (mu:intern core "%read-sharp-comment"
    (:lambda (ch stream)
+      (mu:read-char stream :t ())  ;;; absorb initial |
       (mu:fix
        (:lambda (loop)
          (:if (core:%streamp loop)
               loop
               ((:lambda (ch)
-                 (:if (mu:eq ch #\|)
-                      ((:lambda (ch)
-                         ((:lambda (ch)
-                            (:if (core:null ch)
-                                 (core:raise stream 'core:%read-sharp-comment "unexpected end of file")
-                                 (:if (mu:eq ch #\#)
-                                      stream
-                                      (core:null loop))))
-                          (mu:read-char stream () ())))
-                       (:if (core:null ch)
-                            (core:raise stream 'core:%read-sharp-comment "unexpected end of file")
-                            (mu:read-char stream () ())))
-                      (core:null loop)))
-               (:if (core:null ch)
-                    (core:raise stream 'core:%read-sharp-comment "unexpected end of file")
-                    (mu:read-char stream () ())))))
+                 (:if (core:null ch)
+                      (core:raise stream 'core:%read-sharp-comment "unexpected end of file")
+                      (:if (mu:eq ch #\|)
+                           ((:lambda (ch)
+                              (:if (core:null ch)
+                                   (core:raise stream 'core:%read-sharp-comment "unexpected end of file")
+                                   (:if (mu:eq ch #\#)
+                                        stream
+                                        (core:null loop))))
+                            (mu:read-char stream () ()))
+                           (core:null loop))))
+               (mu:read-char stream () ()))))
        ())))
 
 (mu:intern core "%read-sharp-vector"
