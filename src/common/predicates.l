@@ -47,6 +47,39 @@
 
 (mu:intern common "packagep" (:lambda (t) (mu:eq (core:type-of t) 'package)))
 
+#|
+(mu:intern common "eql" (x y)
+   (core:%cond
+     `(((mu:eq ,x ,y) :t)
+       ((core:null (mu:eq (core:type-of ,x) (core:type-of ,y))) ())
+       ((core:stringp ,x) (core:string= ,x ,y))
+
+       ((core:%andf (core:%andf (core:vectorp ,x) (core:vectorp ,y))
+                    (core:%andf (core:%andf (mu:eq (mu:vector-type ,x) (mu:vector-type ,y)))
+                                (core:%andf (mu:eq (mu:vector-length ,x) (mu:vector-length ,y)))))
+       (core:apply common:eql (vector-to-list x) (vector-to-list y)))
+       ((core:%andf (core:%andf (core:consp ,x) (core:consp ,y))
+                    (core:%andf (mu:eq (core:length ,x) (core:length ,y))))
+        (core:%andf (core:apply common:eql (car ,x) (car ,y))
+                    (core:apply common:eql (mu:cdr x) (mu:cdr ,y))))
+       (:t ()))))
+
+(defun eql (x y)
+   (cond
+     ((eq x y) t)
+     ((null (eq (type-of x) (type-of y))) nil)
+     ((stringp x) (string= x y))
+     ((and (vectorp x) (vectorp y))
+        (and (eq (vector-type x) (vector-type y))
+             (eq (vector-length x) (vector-length y))
+             (core::funcall eql (vector-to-list x) (vector-to-list y))))
+     ((consp x)
+        (and (eq (length x) (length y))
+             (core::funcall eql (car x) (car y))
+             (core::funcall eql (cdr x) (cdr y))))
+     (t ())))
+|#
+
 ;;;
 ;;; mu system classes
 ;;;

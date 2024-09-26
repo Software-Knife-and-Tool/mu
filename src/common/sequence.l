@@ -3,28 +3,20 @@
 
 #|
 System Class SEQUENCE 
-Accessor ELT*
 Accessor SUBSEQ
 Function CONCATENATE
-Function COPY-SEQ*
-Function COUNT, COUNT-IF, COUNT-IF-NOT*
 Function FILL
-Function FIND, FIND-IF, FIND-IF-NOT*
-Function LENGTH*
 Function MAKE-SEQUENCE
 Function MAP
 Function MAP-INTO
 Function MERGE
 Function MISMATCH
-Function POSITION, POSITION-IF, POSITION-IF-NOT*
 Function REDUCE
-Function REMOVE, REMOVE-IF, REMOVE-IF-NOT*
-Function REMOVE-DUPLICATES, DELETE-DUPLICATES
+Function REMOVE-DUPLICATES
 Function REPLACE
-Function REVERSE*
 Function SEARCH
 Function SORT, STABLE-SORT
-Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT, NSUBSTITUTE, NSUBSTITUTE-IF, NSUBSTITUTE-IF-NOT
+Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
 |#
 
 ;;;
@@ -221,7 +213,7 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT, NSUBSTITUTE, NSUBSTITUTE-
           (core:raise predicate 'common:remove "not a function"))))
 
 ;;;
-;;; copy, reverse,
+;;; copy, reverse
 ;;;
 (mu:intern common "copy-seq"
    (:lambda (list)
@@ -255,3 +247,23 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT, NSUBSTITUTE, NSUBSTITUTE-
      (:if (core:listp list)
           (core:%reverse list)
           (core:raise seq 'common:reverse "not a sequence"))))
+
+;;; utilities
+(mu:intern common "%coerce-seq"
+   (:lambda (seq type)
+     ((:lambda (seq-type)
+        (:if (mu:eq seq-type 'cons)
+             (:if (mu:eq type 'cons)
+                  seq
+                  (mu:make-vector :t seq))
+             (mu:fix
+              (:lambda (loop)
+                ((:lambda (nth list)
+                   (core:warn list "list:")
+                   (:if (mu:eq nth (common:length seq))
+                        loop
+                        (mu:cons (common:1+ nth) (mu:cons (common:elt seq nth) list))))
+                 (mu:car loop)
+                 (mu:cdr loop)))
+              (mu:cons 0 ()))))
+      (core:type-of seq))))

@@ -21,7 +21,7 @@ impl Repl {
 
         let mut child = match ns_str {
             "mu" => Command::new("mu-sh").spawn().unwrap(),
-            "core" => Command::new("mu-sys")
+            "core" => Command::new("mu-sh")
                 .args(["-l", "/opt/mu/dist/core.l"])
                 .spawn()
                 .unwrap(),
