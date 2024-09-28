@@ -259,7 +259,6 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
              (mu:fix
               (:lambda (loop)
                 ((:lambda (nth list)
-                   (core:warn list "list:")
                    (:if (mu:eq nth (common:length seq))
                         loop
                         (mu:cons (common:1+ nth) (mu:cons (common:elt seq nth) list))))
