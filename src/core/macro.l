@@ -14,6 +14,7 @@
        (mu:symbol-namespace symbol)
        (mu:symbol-name symbol))))
 
+#|
 (mu:intern core "%describe-fn"
    (:lambda (fn)
      (:if (core:%closurep fn)
@@ -28,18 +29,18 @@
            (core:%closure-prop :fn fn)
            (core:%closure-prop :env fn))
           (core:print (mu:view fn) "%describe-fn:mu-fn"))))
+|#
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
      ((:lambda (macro-function)
         ;;; (core:%describe-fn macro-function)
-        ;;; (core:warn arg-list "%compile-macro-call on")
         ((:lambda (expanded-form)
            (core:%compile expanded-form env))
          (:if (core:%closurep macro-function)
               (core:%fn-apply-quoted
                macro-function
-               (mu:eval (core:%compile-lambda-arg-list macro-function arg-list env)))
+               (core:%compile-quoted-lambda-arg-list macro-function arg-list env))
               (mu:apply macro-function arg-list))))
       (core:%macro-function macro-symbol env))))
 
@@ -47,7 +48,7 @@
 ;;; functions
 ;;;
 (mu:intern core "%macroexpand-1"
-   (:lambda (form env)
+   (:lambda (form env)          
      (:if (core:%consp form)
           ((:lambda (fn-symbol arg-list)
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
@@ -63,16 +64,6 @@
            (mu:car form)
            (mu:cdr form))
           form)))
-
-#|
-(mu:intern core "%macroexpand"
-   (:lambda (form env)
-     ((:lambda (expanded)
-          (:if (mu:eq form expanded)
-             expanded
-             (core:%macroexpand expanded env)))
-       (core:%macroexpand-1 form env))))
-|#
 
 (mu:intern core "%macroexpand"
    (:lambda (form env)

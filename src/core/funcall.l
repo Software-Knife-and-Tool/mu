@@ -33,19 +33,19 @@
            (core:%arg-list arg-list))))
 
 (mu:intern core "%quoted-lambda-arg-list"
-  (:lambda (fn args)
-    (:if (core:%closurep fn)
-         (:if (core:%closure-prop :rest fn)
-              (:if (core:%andf (core:%closure-prop :rest fn) (mu:eq 0 (core:%closure-prop :arity fn)))
-                   (mu:cons args ())
-                   ((:lambda (reqs rest)
-                      (core:%append
-                       reqs
-                       (mu:cons rest ())))
-                    (core:%dropr args (mu:sub (mu:length args) (core:%closure-prop :arity fn)))
-                    (core:%dropl args (core:%closure-prop :arity fn))))
-              args)
-         args)))
+   (:lambda (fn args)
+     (:if (core:%closurep fn)
+          (:if (core:%closure-prop :rest fn)
+               (:if (core:%andf (core:%closure-prop :rest fn) (mu:eq 0 (core:%closure-prop :arity fn)))
+                    (mu:cons args ())
+                    ((:lambda (reqs rest)
+                       (:if (core:%andf (core:null rest) (core:null reqs))
+                            ()
+                            `(,(core:%append reqs) ,rest)))
+                     (core:%dropr args (mu:sub (mu:length args) (core:%closure-prop :arity fn)))
+                     (core:%dropl args (core:%closure-prop :arity fn))))
+               args)
+          args)))
 
 ;;;
 ;;; compile argument lists
@@ -67,8 +67,8 @@
 
 (mu:intern core "%compile-quoted-lambda-arg-list"
    (:lambda (function arg-list env)
-     (core:%compile-lambda-arg-list function (core:%mapcar (:lambda (elt) (core:%compile elt env)) arg-list))))
-
+     (core:%quoted-lambda-arg-list function arg-list)))
+     
 ;;;
 ;;; compile function applications to mu forms
 ;;;
@@ -101,7 +101,6 @@
         (core:%mapc mu:%frame-push env)
         (core:%mapc (:lambda (frame) (mu:%frame-pop (mu:car frame))) env)
         ((:lambda (lib-fn frame-fn)
-           ;;; (core:warn (mu:apply frame-fn `(,lib-fn ,arg-list)) "apply")
            (mu:apply lib-fn (mu:eval (core:%lambda-arg-list fn arg-list))))
          (core:%closure-prop :fn fn)
          (core:%lambda-prop :frame (core:%closure-prop :lambda fn))))
@@ -109,11 +108,14 @@
 
 (mu:intern core "%fn-apply-quoted"
    (:lambda (fn arg-list)
-      ((:lambda (env)
-         (core:%mapc mu:%frame-push env)
-         (core:%mapc (:lambda (frame) (mu:%frame-pop (mu:car frame))) env)
-         (mu:apply (core:%closure-prop :fn fn) arg-list))
-       (core:%closure-prop :env fn))))
+     ((:lambda (env)
+        (core:%mapc mu:%frame-push env)
+        (core:%mapc (:lambda (frame) (mu:%frame-pop (mu:car frame))) env)
+        ((:lambda (lib-fn frame-fn)
+           (mu:apply lib-fn arg-list))
+         (core:%closure-prop :fn fn)
+         (core:%lambda-prop :frame (core:%closure-prop :lambda fn))))
+      (core:%closure-prop :env fn))))
 
 (mu:intern core "%apply"
    (:lambda (function arg-list)
