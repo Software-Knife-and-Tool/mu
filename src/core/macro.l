@@ -48,15 +48,16 @@
 ;;; functions
 ;;;
 (mu:intern core "%macroexpand-1"
-   (:lambda (form env)          
+   (:lambda (form env)
      (:if (core:%consp form)
           ((:lambda (fn-symbol arg-list)
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-function)
                      (:if macro-function
                           (:if (core:%closurep macro-function)
-                               (core:%fn-apply-quoted macro-function
-                                                      (core:%quoted-lambda-arg-list macro-function arg-list))
+                               (core:%fn-apply-quoted
+                                macro-function
+                                (core:%quoted-lambda-arg-list macro-function arg-list))
                                (mu:apply macro-function arg-list))
                           form))
                    (core:%macro-function fn-symbol env))
