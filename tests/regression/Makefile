@@ -1,10 +1,10 @@
 #
 # tests makefile
 #
-.PHONY: help cargo mu clean commit namespaces tests summary core system
+.PHONY: help cargo mu clean commit common namespaces tests summary core system
 
 TMPF:=$(shell mktemp)
-NAMESPACES = mu core
+NAMESPACES = mu core common
 
 help:
 	@echo "mu test makefile -----------------"
@@ -32,6 +32,9 @@ mu:
 
 core:
 	@python3 ./test-ns.py core .	
+
+common:
+	@python3 ./test-ns.py common .	
 
 commit:
 	@make summary --no-print-directory > tests.summary
