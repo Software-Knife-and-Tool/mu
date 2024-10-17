@@ -52,7 +52,7 @@
       (:lambda (list)
         (:if list
              (core:%arg2
-                (core:%apply function `(,list))
+                (core:%apply function (mu:cons list ()))
                 (mu:cdr list))
              ()))
       list)
@@ -71,7 +71,7 @@
                  loop))
           (mu:car loop)
           (mu:cdr loop)))
-       `(() ,@list)))))
+       (mu:cons () list)))))
 
 ;;;
 ;;; association lists

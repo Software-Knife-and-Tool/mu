@@ -27,7 +27,7 @@
 
 (mu:intern core "%make-package"
    (:lambda (name uses)
-     (core:%make-type "%package"
+     (core:%make-core-type "%package"
        `(,(mu:cons :name name)
           ,(mu:cons :intern (mu:make-namespace))
           ,(mu:cons :extern (mu:make-namespace))

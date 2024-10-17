@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; macro definition, compilation, and expansion
+;;; core macros
 ;;;
 (mu:intern core "%defmacro"
    (:lambda (symbol macro-function)
@@ -15,34 +15,26 @@
        (mu:symbol-name symbol))))
 
 #|
-(mu:intern core "%describe-fn"
-   (:lambda (fn)
-     (:if (core:%closurep fn)
-          ((:lambda (lambda arity fn env)
-             (core:eprint "" "%describe-fn:closure")
-             (core:eprint lambda "    lambda")
-             (core:eprint arity "    arity")
-             (core:eprint fn "    fn")
-             (core:eprint env "    env"))
-           (core:%closure-prop :lambda fn)
-           (core:%closure-prop :arity fn)
-           (core:%closure-prop :fn fn)
-           (core:%closure-prop :env fn))
-          (core:print (mu:view fn) "%describe-fn:mu-fn"))))
+(mu:intern core "%compile-macro-call"
+   (:lambda (macro-symbol arg-list env)
+     ((:lambda (macro-function)
+        ((:lambda (expanded-form)
+           (core:%compile expanded-form env))
+         (:if (core:%core-function-p macro-function)
+              ((:lambda ()
+                 (core:%fapply
+                  macro-function
+                  (mu:compile (core:%core-function-prop :mu macro-function))
+                  (core:%compile-quoted-lambda-arg-list macro-function arg-list env))))
+              (mu:apply macro-function arg-list))))
+      (core:%macro-function macro-symbol env))))
 |#
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
-     ((:lambda (macro-function)
-        ;;; (core:%describe-fn macro-function)
-        ((:lambda (expanded-form)
-           (core:%compile expanded-form env))
-         (:if (core:%closurep macro-function)
-              (core:%fn-apply-quoted
-               macro-function
-               (core:%compile-quoted-lambda-arg-list macro-function arg-list env))
-              (mu:apply macro-function arg-list))))
-      (core:%macro-function macro-symbol env))))
+     ((:lambda (expanded-form)
+        (core:%compile expanded-form env))
+      (core:%macroexpand `(,macro-symbol ,@arg-list) env))))
 
 ;;;
 ;;; functions
@@ -54,10 +46,11 @@
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-function)
                      (:if macro-function
-                          (:if (core:%closurep macro-function)
-                               (core:%fn-apply-quoted
+                          (:if (core:%core-function-p macro-function)
+                               (core:%fapply
                                 macro-function
-                                (core:%quoted-lambda-arg-list macro-function arg-list))
+                                (mu:compile (core:%core-function-prop :mu macro-function))
+                                (mu:eval (core:%quoted-lambda-arg-list macro-function arg-list)))
                                (mu:apply macro-function arg-list))
                           form))
                    (core:%macro-function fn-symbol env))

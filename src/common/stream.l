@@ -87,7 +87,7 @@
                (:if (mu:eq form core:%eof%)
                     loop
                     (common:null loop))
-               (mu:eval (core:compile form)))))
+               (mu:eval (core:compile form ())))))
        (core:read stream () core:%eof%))))
 
 ;;;

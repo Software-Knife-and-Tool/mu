@@ -10,8 +10,9 @@
 
 (mu:intern core "%symbolp"
    (:lambda (t)
-      (core:%orf (core:%orf (core:%keywordp t) (mu:eq () t))
-                (mu:eq 'symbol (core:type-of t)))))
+     (core:logor
+      (core:logor (core:%keywordp t) (mu:eq () t))
+      (mu:eq 'symbol (core:type-of t)))))
 
 ;;;
 ;;; utilities
@@ -27,17 +28,17 @@
    (:lambda ()
       ((:lambda (counter)
           (mu:write (mu:add counter 1) () core:%gensym-counter%)
-          (mu:make-symbol (core:format () "g~X" `(,counter))))
+          (mu:make-symbol (core:format () "g~X" (mu:cons counter ()))))
        (mu:read core:%gensym-counter% () ()))))
 
 (mu:intern core "%genkey"
    (:lambda (prefix)
-      (:if (core:%orf (core:null prefix) (core:%charp prefix))
+      (:if (core:logor (core:null prefix) (core:%charp prefix))
            ((:lambda (counter)
               (mu:write (mu:add counter 1) () core:%gensym-counter%)
               (core:%make-keyword
                (:if (core:%charp prefix)
-                    (core:format () "~A~X" `(,prefix ,counter))
-                    (core:format () "<~X>" `(,counter)))))
+                    (core:format () "~A~X" (core:%list2 prefix counter))
+                    (core:format () "<~X>" (mu:cons counter ())))))
             (mu:read core:%gensym-counter% () ()))
            (core:raise name 'core:%genkey "not a legal prefix"))))

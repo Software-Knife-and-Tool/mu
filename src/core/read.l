@@ -103,7 +103,7 @@
     ((:lambda (dispatch-table)
        (mu:apply
         (mu:symbol-value (mu:cdr (core:%assq (core:%read-char-syntax ch) dispatch-table)))
-        `(,ch ,stream)))
+        (core:%list2 ch stream)))
      '((:const   . core:%read-atom)
        (:escape  . core:%read-atom)
        (:macro   . core:%read-macro)
@@ -117,7 +117,7 @@
    (:lambda (stream)
      (mu:fix
       (:lambda (loop)
-        (:if (core:%orf (core:%streamp loop) (core:%charp loop))
+        (:if (core:logor (core:%streamp loop) (core:%charp loop))
              loop
              ((:lambda (ch)
                 (:if (core:null ch)
@@ -150,7 +150,7 @@
             core:%eof%
             ((:lambda (macro)
                (:if macro
-                    (core:%apply (mu:car macro) `(,stream ,ch))
+                    (core:%apply (mu:car macro) (core:%list2 stream ch))
                     (core:%read-dispatch ch stream)))
              (core:get-macro-character ch))))
      (core:%read-consume-ws stream))))

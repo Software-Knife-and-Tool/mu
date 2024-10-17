@@ -42,6 +42,6 @@
       ((:lambda (start)
            ((:lambda (value)
               `(,(mu:sub (mu:internal-run-time) start) ,@value))
-            (mu:eval (core:compile form))))
+            (mu:eval (core:compile form ()))))
         (mu:internal-run-time))
       (mu:heap-stat))))

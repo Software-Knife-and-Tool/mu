@@ -16,36 +16,68 @@
        ()
        arg-list)))
 
+(mu:intern core "%quoted-arg-list"
+   (:lambda (arg-list)
+      (core:%foldr
+       (:lambda (elt acc)
+         `(mu:cons ,(mu:cons :quote (mu:cons elt ())) ,acc))
+       ()
+       arg-list)))
+
 (mu:intern core "%lambda-arg-list"
    (:lambda (function arg-list)
-      (:if (core:%closurep function)
-           ((:lambda (rest nreqs)
-              (:if (core:%andf rest (mu:eq 0 nreqs))
-                   `(mu:cons ,(core:%arg-list arg-list) ())
-                   ((:lambda (reqs rest)
-                      (:if (core:%andf (core:null rest) (core:null reqs))
-                           ()
-                           (core:%arg-list `(,@reqs ,(core:%arg-list rest)))))
-                    (core:%dropr arg-list (mu:sub (mu:length arg-list) nreqs))
-                    (core:%dropl arg-list nreqs))))
-            (core:%closure-prop :rest function)
-            (core:%closure-prop :arity function))
+     (:if (core:%core-function-p function)
+           ((:lambda (arity rest nreqs)
+              (:if rest
+                   (:if (mu:eq 0 nreqs)
+                        `(mu:cons ,(core:%arg-list arg-list) ())
+                        ((:lambda (req-list rest-list)
+                           (:if (core:logand (core:null rest-list) (core:null req-list))
+                                ()
+                                (core:%arg-list `(,@req-list ,(core:%arg-list rest-list)))))
+                         (core:%dropr arg-list (mu:sub (mu:length arg-list) arity))
+                         (core:%dropl arg-list arity)))
+                   (core:%arg-list arg-list)))
+            (core:%core-function-prop :arity function)
+            (core:%core-function-prop :rest function)
+            (mu:length (core:%core-function-prop :require function)))
            (core:%arg-list arg-list))))
 
 (mu:intern core "%quoted-lambda-arg-list"
+   (:lambda (function arg-list)
+     (:if (core:%core-function-p function)
+           ((:lambda (arity rest nreqs)
+              (:if rest
+                   (:if (mu:eq 0 nreqs)
+                        `(mu:cons ,arg-list ())
+                        ((:lambda (req-list rest-list)
+                           (:if (core:logand (core:null rest-list) (core:null req-list))
+                                ()
+                                (core:%quoted-arg-list `(,@req-list ,rest-list))))
+                         (core:%dropr arg-list (mu:sub (mu:length arg-list) arity))
+                         (core:%dropl arg-list arity)))
+                   (core:%quoted-arg-list arg-list)))
+            (core:%core-function-prop :arity function)
+            (core:%core-function-prop :rest function)
+            (mu:length (core:%core-function-prop :require function)))
+           (core:%quoted-arg-list arg-list))))
+
+#|
+(mu:intern core "%quoted-lambda-arg-list"
    (:lambda (fn args)
-     (:if (core:%closurep fn)
-          (:if (core:%closure-prop :rest fn)
-               (:if (core:%andf (core:%closure-prop :rest fn) (mu:eq 0 (core:%closure-prop :arity fn)))
+     (:if (core:%core-function-p fn)
+          (:if (core:%core-function-prop :rest fn)
+               (:if (core:logand (core:%core-function-prop :rest fn) (mu:eq 0 (core:%core-function-prop :arity fn)))
                     (mu:cons args ())
                     ((:lambda (reqs rest)
-                       (:if (core:%andf (core:null rest) (core:null reqs))
+                       (:if (core:logand (core:null rest) (core:null reqs))
                             ()
-                            `(,(core:%append reqs) ,rest)))
-                     (core:%dropr args (mu:sub (mu:length args) (core:%closure-prop :arity fn)))
-                     (core:%dropl args (core:%closure-prop :arity fn))))
+                            (core:%arg-list `(,@reqs ,(core:%arg-list rest)))))
+                     (core:%dropr args (mu:sub (mu:length args) (core:%core-function-prop :arity fn)))
+                     (core:%dropl args (mu:length (core:%core-function-prop :require function)))))
                args)
           args)))
+|#
 
 ;;;
 ;;; compile argument lists
@@ -70,61 +102,41 @@
      (core:%quoted-lambda-arg-list function arg-list)))
      
 ;;;
-;;; compile function applications to mu forms
+;;; compile function application to mu form
+;;;
+;;; ((lambda lambda-list . body) . arg-list) env
+;;; core-function env
+;;; symbol env
 ;;;
 (mu:intern core "compile-funcall"
    (:lambda (function-form arg-list env)
-      (:if (core:%consp function-form)
-           ((:lambda (compiled-function)
-              (:if (core:functionp compiled-function)
-                   (:if (core:%closurep compiled-function)
-                        `(,core:%fn-apply-quoted ,compiled-function ,(core:%compile-lambda-arg-list compiled-function arg-list env))
-                        `(mu:apply ,compiled-function ,(core:%compile-arg-list arg-list env)))
-                   (core:raise compiled-function 'core:compile-funcall "illegal function call")))
-            (core:%compile function-form env))
-           (:if (mu:boundp function-form)
-                ((:lambda (function)
-                   (:if (core:functionp function)
-                        (:if (core:%closurep function)
-                             `(,core:%fn-apply-quoted ,function ,(core:%compile-lambda-arg-list function arg-list env))
-                             `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
-                        (core:raise function 'core:compile-funcall "illegal function call")))
-                 (mu:symbol-value function-form))
-                `(,core:%apply ,function-form ,(core:%compile-arg-list arg-list env))))))
-
-;;;
-;;; apply
-;;;
-(mu:intern core "%fn-apply"
-   (:lambda (fn arg-list)
-     ((:lambda (env)
-        (core:%mapc mu:%frame-push env)
-        (core:%mapc (:lambda (frame) (mu:%frame-pop (mu:car frame))) env)
-        ((:lambda (lib-fn frame-fn)
-           (mu:apply lib-fn (mu:eval (core:%lambda-arg-list fn arg-list))))
-         (core:%closure-prop :fn fn)
-         (core:%lambda-prop :frame (core:%closure-prop :lambda fn))))
-     (core:%closure-prop :env fn))))
-
-(mu:intern core "%fn-apply-quoted"
-   (:lambda (fn arg-list)
-     ((:lambda (env)
-        (core:%mapc mu:%frame-push env)
-        (core:%mapc (:lambda (frame) (mu:%frame-pop (mu:car frame))) env)
-        ((:lambda (lib-fn frame-fn)
-           (mu:apply lib-fn arg-list))
-         (core:%closure-prop :fn fn)
-         (core:%lambda-prop :frame (core:%closure-prop :lambda fn))))
-      (core:%closure-prop :env fn))))
-
-(mu:intern core "%apply"
-   (:lambda (function arg-list)
-     (:if (core:%closurep function)
-          (core:%fn-apply function arg-list)
-          (mu:apply function arg-list))))
-
-(mu:intern core "apply"
-   (:lambda (function arg-list)
-     (:if (core:functionp function)
-          (core:%apply function arg-list)
-          (core:raise function 'core:apply "not a function designator"))))
+     (:if (core:%consp function-form)
+          ((:lambda (function)
+             (:if (core:logor (core:functionp function) (core:%consp function))
+                  (:if (core:%core-function-p function)
+                       ((:lambda (mu-form)
+                          (:if (core:%core-function-p function)
+                               `(,core:%fapply
+                                 ,function
+                                 ,mu-form
+                                 ,(mu:cons (core:%compile-lambda-arg-list function arg-list env) ()))
+                               `(,core:%fapply
+                                 ,function
+                                 ,mu-form
+                                 ,(core:%compile-arg-list arg-list env))))
+                        (core:%core-function-prop :mu function))
+                       `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
+                  (core:raise function 'core:compile-funcall "not a function designator")))
+           (core:%compile function-form env))
+          (:if (mu:boundp function-form)
+               ((:lambda (function)
+                  (:if (core:functionp function)
+                       (:if (core:%core-function-p function)
+                            `(,core:%fapply
+                              ,function
+                              ,(core:%core-function-prop :mu function)
+                              ,(core:%compile-lambda-arg-list function arg-list env))
+                            `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
+                       (core:raise function 'core:compile-funcall "not a function designator")))
+                (mu:symbol-value function-form))
+               `(,core:%apply ,function-form ,(core:%compile-arg-list arg-list env))))))

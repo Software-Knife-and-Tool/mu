@@ -4,17 +4,16 @@
 .PHONY: mu prelude
 SRC = ../src
 
-# core.l needs to be first
 CORE= \
 	core.l         \
 	compile.l      \
 	string.l       \
 	format.l       \
 	funcall.l      \
+	load.l         \
 	list.l         \
 	map.l          \
 	stream.l       \
-	macro.l        \
 	read.l         \
 	quasiquote.l   \
 	parse.l        \
@@ -25,9 +24,9 @@ CORE= \
 	deftype.l      \
 	typespec.l     \
 	exception.l    \
-	closure.l      \
-	lambda.l       \
-	load.l         \
+	macro.l        \
+	function.l     \
+	apply.l	       \
 	package.l      \
 	vector.l 
 

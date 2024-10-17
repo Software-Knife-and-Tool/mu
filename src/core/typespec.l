@@ -25,21 +25,21 @@
                  ((:lambda (predicate-symbol)
                     (:if (core:%symbolp predicate-symbol)
                          (:if (mu:boundp predicate-symbol)
-                              (core:%apply (mu:symbol-value predicate-symbol) `(,value))
+                              (core:apply (mu:symbol-value predicate-symbol) (mu:cons value ()))
                               (core:raise predicate 'core:typep "satisfies typespec format"))
                          (core:raise predicate 'core:typep "satisfies typespec format")))
                   (mu:car spec-list))
                  (core:raise spec-list 'core:typep "satisfies typespec format"))))
      ,(mu:cons 'not (:lambda (value spec-list)
                        (:if (mu:eq 1 (mu:length spec-list))
-                            (core:not (core:typep value (mu:car spec-list)))
+                            (core:lognot (core:typep value (mu:car spec-list)))
                             (core:raise spec-list 'core:typep "no typespec format"))))
      ,(mu:cons 'and (:lambda (value spec-list)
                        (:if (core:null spec-list)
                             :t
                             (core:%foldl
                              (:lambda (elt acc)
-                                (core:%andf acc (core:typep value elt)))
+                                (core:logand acc (core:typep value elt)))
                              :t
                              spec-list))))
      ,(mu:cons 'or (:lambda (value spec-list)
@@ -47,7 +47,7 @@
                           ()
                           (core:%foldl
                            (:lambda (elt acc)
-                             (core:%orf acc (core:typep value elt)))
+                             (core:logor acc (core:typep value elt)))
                            :t
                            spec-list))))))
 
@@ -68,7 +68,7 @@
                             ((:lambda (spec-phrase)
                                (:if (core:null spec-phrase)
                                     (core:raise typespec 'core:typep "typespec not found")
-                                    (mu:apply (mu:cdr spec-phrase) `(,value ,spec-list))))
+                                    (mu:apply (mu:cdr spec-phrase) (core:%list2 value spec-list))))
                              (core:%assq spec core:%compound-typespec-map%)))
                           (mu:car typespec)
                           (mu:cdr typespec))
