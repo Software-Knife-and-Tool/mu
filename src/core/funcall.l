@@ -62,23 +62,6 @@
             (mu:length (core:%core-function-prop :require function)))
            (core:%quoted-arg-list arg-list))))
 
-#|
-(mu:intern core "%quoted-lambda-arg-list"
-   (:lambda (fn args)
-     (:if (core:%core-function-p fn)
-          (:if (core:%core-function-prop :rest fn)
-               (:if (core:logand (core:%core-function-prop :rest fn) (mu:eq 0 (core:%core-function-prop :arity fn)))
-                    (mu:cons args ())
-                    ((:lambda (reqs rest)
-                       (:if (core:logand (core:null rest) (core:null reqs))
-                            ()
-                            (core:%arg-list `(,@reqs ,(core:%arg-list rest)))))
-                     (core:%dropr args (mu:sub (mu:length args) (core:%core-function-prop :arity fn)))
-                     (core:%dropl args (mu:length (core:%core-function-prop :require function)))))
-               args)
-          args)))
-|#
-
 ;;;
 ;;; compile argument lists
 ;;;
@@ -119,7 +102,7 @@
                                `(,core:%fapply
                                  ,function
                                  ,mu-form
-                                 ,(mu:cons (core:%compile-lambda-arg-list function arg-list env) ()))
+                                 ,(core:%compile-lambda-arg-list function arg-list env))
                                `(,core:%fapply
                                  ,function
                                  ,mu-form
