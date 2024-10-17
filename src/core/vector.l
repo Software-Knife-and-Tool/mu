@@ -25,7 +25,7 @@
 
 (mu:intern core "%make-vector"
    (:lambda (vector displace bitvec)
-     (core:%make-type "%vector"
+     (core:%make-core-type "%vector"
        `(,(mu:cons :base   vector)
          ,(mu:cons :disp   displace)
          ,(mu:cons :bitvec bitvec)))))
@@ -43,7 +43,7 @@
    (:lambda (vector)
      (:if (core:%core-type-p vector)
           (:if (mu:eq '%vector (core:type-of vector))
-               (core:not (core:null (core:%vector-prop :bitvec vector)))
+               (core:lognot (core:null (core:%vector-prop :bitvec vector)))
                ())
           ())))
 
@@ -68,12 +68,12 @@
    (:lambda (vector start length)
      (:if (core:typep vector :vector)
           (:if (core:%fixnump start)
-               (:if (core:%orf (core:%minusp start) (mu:less-than (core:vector-length vector) start))
+               (:if (core:logor (core:%minusp start) (mu:less-than (core:vector-length vector) start))
                     (core:raise start 'core:vector-slice "illegal start")
                     (:if (core:%fixnump length)
-                         (:if (core:%orf (core:%minusp length) (mu:less-than (core:vector-length vector) length))
+                         (:if (core:logor (core:%minusp length) (mu:less-than (core:vector-length vector) length))
                               (core:raise length 'core:vector-slice "illegal length")
-                              (core:%make-vector vector `(,start ,@length) ()))
+                              (core:%make-vector vector (mu:cons start length) ()))
                          (core:raise start 'core:vector-slice "not a fixnum")))
                (core:raise length 'core:vector-slice "not a fixnum"))
           (core:raise vector 'core:vector-slice "not a base vector"))))
@@ -102,7 +102,7 @@
    (:lambda (vector nth)
      (:if (core:vectorp vector)
           (:if (core:%fixnump nth)
-               (:if (core:%orf (core:%minusp nth) (mu:less-than (core:vector-length vector) nth))
+               (:if (core:logor (core:%minusp nth) (mu:less-than (core:vector-length vector) nth))
                     (core:raise length 'core:vector-ref "illegal index")
                     (:if (core:bit-vector-p vector)
                          ((:lambda (nth-byte offset)
@@ -160,7 +160,7 @@
                           :fixnum))
                    (core:%foldl
                     (:lambda (elt acc)
-                      (:if (core:%andf (core:not (core:%minusp elt)) (mu:less-than elt 256))
+                      (:if (core:logand (core:lognot (core:%minusp elt)) (mu:less-than elt 256))
                            acc
                            ()))
                       :t
@@ -185,7 +185,7 @@
             (:if (mu:eq nth (mu:vector-len vector))
                  ()
                  (core:%arg2
-                     (core:%apply fn `(,(mu:svref vector nth)))
-                     (mu:add 1 nth)))
+                  (core:%apply fn (mu:cons (mu:svref vector nth) ()))
+                  (mu:add 1 nth)))
             ()))
      0)))

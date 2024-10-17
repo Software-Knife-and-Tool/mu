@@ -62,7 +62,7 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
                       ((:lambda (elt)
                          (:if (core:%apply predicate `(,elt))
                               `(,elt)
-                              (common:1+ nth)))
+                              (core:1+ nth)))
                        (common:elt seq nth)))))
           0))
        (common:length seq)))))
@@ -87,8 +87,8 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
                    ((:lambda (elt)
                       (:if (core:%apply predicate `(,elt))
                            `(,elt)
-                           (common:1- nth)))
-                    (common:elt seq (common:1- nth))))))
+                           (core:1- nth)))
+                    (common:elt seq (core:1- nth))))))
        (common:length seq)))))
 
 (mu:intern common "findr-if"
@@ -115,7 +115,7 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
                       ((:lambda (elt)
                          (:if (core:%apply predicate `(,elt))
                               `(,nth)
-                              (common:1+ nth)))
+                              (core:1+ nth)))
                        (common:elt seq nth)))))
           0))
        (common:length seq)))))
@@ -139,9 +139,9 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
                    ()
                    ((:lambda (elt)
                       (:if (core:%apply predicate `(,elt))
-                           `(,(common:1- nth))
-                           (common:1- nth)))
-                    (common:elt seq (common:1- nth))))))
+                           `(,(core:1- nth))
+                           (core:1- nth)))
+                    (common:elt seq (core:1- nth))))))
        (common:length seq)))))
 
 (mu:intern common "positionr-if"
@@ -166,8 +166,8 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
                      loop
                      ((:lambda (elt)
                          (:if (core:%apply predicate `(,elt))
-                              (mu:cons (common:1+ nth) (common:1+ count))
-                              (mu:cons (common:1+ nth) count)))
+                              (mu:cons (core:1+ nth) (core:1+ count))
+                              (mu:cons (core:1+ nth) count)))
                         (common:elt seq nth))))
               (mu:car loop)
               (mu:cdr loop)))
@@ -196,8 +196,8 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
                      loop
                      ((:lambda (elt)
                          (:if (core:%apply predicate `(,elt))
-                              (mu:cons (common:1+ nth) list)
-                              (mu:cons (common:1+ nth) (mu:cons elt list))))
+                              (mu:cons (core:1+ nth) list)
+                              (mu:cons (core:1+ nth) (mu:cons elt list))))
                         (common:elt seq nth))))
               (mu:car loop)
               (mu:cdr loop)))
@@ -235,7 +235,7 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
                 (:if (mu:eq nth length)
                      loop
                      ((:lambda (elt)
-                        (mu:cons (common:1+ nth) (mu:cons elt list)))
+                        (mu:cons (core:1+ nth) (mu:cons elt list)))
                      (common:elt seq nth))))
               (mu:car loop)
               (mu:cdr loop)))
@@ -261,7 +261,7 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
                 ((:lambda (nth list)
                    (:if (mu:eq nth (common:length seq))
                         loop
-                        (mu:cons (common:1+ nth) (mu:cons (common:elt seq nth) list))))
+                        (mu:cons (core:1+ nth) (mu:cons (common:elt seq nth) list))))
                  (mu:car loop)
                  (mu:cdr loop)))
               (mu:cons 0 ()))))

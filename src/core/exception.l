@@ -14,7 +14,7 @@
          (:if (core:null format-string)
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
               (core:format stream format-string `(,cond ,value ,source ,reason)))
-         (:if (core:%andf printenv env)
+         (:if (core:logand printenv env)
               (core:%arg2
                   (core:format stream "env:~%" ())
                   (core:%mapc
@@ -36,7 +36,7 @@
      (mu:with-exception
       (:lambda (value condition source)
          (:if (mu:eq condition :except)
-              (core:apply handler `(,value))
+              (core:apply handler (mu:cons value ()))
               (core:apply handler `(,(core:make-exception
                                            condition
                                            value
@@ -47,7 +47,7 @@
 
 (mu:intern core "make-exception"
    (:lambda (cond value source reason env)
-      (core:%make-type "%exception"
+      (core:%make-core-type "%exception"
         `(,(mu:cons :cond   cond)
           ,(mu:cons :value  value)
           ,(mu:cons :source source)
@@ -87,17 +87,21 @@
 
 (mu:intern core "eprint"
    (:lambda (value message)          
-     (core:format mu:*error-output* ";;; ~A:~T ~A~%" `(,message ,value))
+     (core:format mu:*error-output* ";;; ~A:~T ~A~%" (core:%list2 message value))
      value))
 
 (mu:intern core "print"
    (:lambda (value message)          
-     (core:format mu:*standard-output* ";;; ~A:~T ~A~%" `(,message ,value))
+     (core:format mu:*standard-output* ";;; ~A:~T ~A~%" (core:%list2 message value))
      value))
 
 (mu:intern core "warn"
    (:lambda (value message)
      (core:format mu:*error-output* ";;; warn: ~A (~A) ; ~S~%" `(,message ,(mu:type-of value) ,value))
+    value))
+
+(mu:intern core "warn-"
+   (:lambda (value message)
     value))
 
 ;;;
@@ -111,7 +115,7 @@
 ;;;
 (mu:intern core "exceptionp"
     (:lambda (ex)
-      (core:%andf
+      (core:logand
        (core:%core-type-p ex)
        (mu:eq '%exception (core:type-of ex)))))
 

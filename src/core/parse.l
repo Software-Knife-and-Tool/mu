@@ -34,7 +34,7 @@
                                                     ()
                                                     (:if (mu:less-than (mu:sub base 1) n)
                                                          ()
-                                                         `(,(mu:add 1 index) ,@(mu:add n (mu:mul acc base))))))
+                                                         ( mu:cons (mu:add 1 index) (mu:add n (mu:mul acc base))))))
                                             (core:%string-position (mu:svref digits index) "0123456789abcdef"))))
                                    (mu:car loop)
                                    (mu:cdr loop))))

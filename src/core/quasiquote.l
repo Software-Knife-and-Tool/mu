@@ -8,7 +8,7 @@
 
 (mu:intern core "%list"
    (:lambda (form)
-     `(,form)))
+     (mu:cons form ())))
 
 (mu:intern core "%quasi-func-map"
    (:lambda (key map)
@@ -21,7 +21,7 @@
              (core:error stream "backquote: early end of file~%" ())
              ((:lambda (type-map)
                 (:if (core:null type-map)
-                     `(:form ,(core:%read-dispatch ch stream))
+                     (core:%list2 :form (core:%read-dispatch ch stream))
                      (mu:apply (mu:cdr type-map) ())))
                 (core:%assq ch syntax-map))))
         (core:%read-consume-ws stream)
@@ -35,7 +35,7 @@
                                        `(:comma@ ,(core:read stream () ()))
                                        (core:%arg2
                                           (mu:unread-char ch stream)
-                                          `(:form ,(core:read stream () ()))))))
+                                          `(:comma ,(core:read stream () ()))))))
                             (mu:read-char stream () ()))))
            ,(mu:cons #\' (:lambda () `(:qquote ,(core:%quasi-read stream))))
            ,(mu:cons #\` (:lambda () `(:quasi ,(core:read stream () ()))))))))
@@ -92,6 +92,7 @@
       (mu:nth 0 quasi-expr)
       (mu:nth 1 quasi-expr)
       `(,(mu:cons :l-comma  (:lambda (expr) `(mu:cons ,expr ())))
+         ,(mu:cons :comma  (:lambda (expr) `(mu:cons ,expr ())))
          ,(mu:cons :l-list  (:lambda (expr)
                               ((:lambda (loop)
                                  (mu:apply loop `(,loop ,expr)))
@@ -116,6 +117,7 @@
                                         ,(core:%quasi-compile (mu:car list))
                                         ,(mu:apply loop `(,loop ,(mu:cdr list)))))))))
          ,(mu:cons :form    (:lambda (expr)
+                              ;;; (core:warn :form "quasi-compile")
                               `(:quote ,expr)))
          ,(mu:cons :quasi   (:lambda (expr)
                               ((:lambda (type)

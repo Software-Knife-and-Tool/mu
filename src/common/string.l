@@ -51,7 +51,7 @@
                    (:if (mu:less-than index length)
                         ((:lambda ()
                             (common:write (common:vector-ref string index) () stream)
-                            (common:1+ index)))
+                            (core:1+ index)))
                         index))
                 0)
                (:if escape
@@ -110,7 +110,7 @@
          (:if (mu:eq :symbol (mu:type-of designator))
               (mu:symbol-name designator)
               (:if (common:charp designator)
-                   (mu:make-vector :char `(,designator))
+                   (mu:make-vector :char (mu:cons designator ()))
                    (core:raise designator 'common:string "not a string designator"))))))
 
 (mu:intern common "string-append"

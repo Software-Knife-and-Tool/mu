@@ -30,20 +30,21 @@
                   loop))
            (mu:car loop)
            (mu:cdr loop)))
-        (mu:cons () args))))))
+        (mu:cons () args)))) ()))
 
 ;;;
 ;;; macros
 ;;;
-(core:compile '(define-macro progn (&rest body) (common:list (common:list* 'lambda () body))))
-(core:compile '(define-macro when (test &rest body) (common:list 'if test (common:list* 'progn body))))
-(core:compile '(define-macro unless (test &rest body) (common:list 'if test () (common:list* 'progn body))))
+(core:compile '(define-macro progn (&rest body) (common:list (common:list* 'lambda () body))) ())
+(core:compile '(define-macro when (test &rest body) (common:list 'if test (common:list* 'progn body))) ())
+(core:compile '(define-macro unless (test &rest body) (common:list 'if test () (common:list* 'progn body))) ())
 
 (core:compile
- '(define-macro let (binds &rest body)
-   (common:list*
-    (common:list* :lambda (core:%mapcar mu:car binds) body)
-    (core:%mapcar (:lambda (el) (mu:nth 1 el)) binds))))
+  '(define-macro let (binds &rest body)
+     (common:list*
+       (common:list* :lambda (core:%mapcar mu:car binds) body)
+       (core:%mapcar (:lambda (el) (mu:nth 1 el)) binds)))
+   ())
 
 (core:compile
  '(define-macro let* (binds &rest body)
@@ -54,7 +55,8 @@
     (lambda (fn binds)
       (if (mu:cdr binds)
           (common:list 'let (common:list (mu:car binds)) (core:%apply fn (core:list fn (mu:cdr binds))))
-          (common:list* 'let (common:list (mu:car binds)) body))))))
+          (common:list* 'let (common:list (mu:car binds)) body)))))
+  ())
 
 (core:compile
  '(define-macro cond (&rest clauses)
@@ -71,7 +73,8 @@
                 (common:list 'let (common:list (common:list gsym test))
                       (common:list* 'if gsym gsym cond)))))))
      ()
-     clauses))))
+    clauses)))
+  ())
 
 (core:compile
  '(defmacro and (&rest terms)
@@ -84,7 +87,8 @@
                 term)))
         ()
         (common:maplist common:identity terms))
-       :t)))
+       :t))
+  ())
 
 (defmacro and (&rest terms)
   (if terms

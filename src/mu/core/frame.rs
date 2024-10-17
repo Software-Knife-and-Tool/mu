@@ -201,11 +201,23 @@ impl CoreFunction for Frame {
     }
 
     fn mu_fr_push(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = fp.argv[0];
+        env.fp_argv_check("mu:frame-push", &[Type::Cons], fp)?;
 
-        env.fp_argv_check("mu:frame-push", &[Type::Vector], fp)?;
+        let func = Cons::car(env, fp.argv[0]);
+        if Tag::type_of(&func) != Type::Function {
+            return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", func));
+        }
 
-        Self::from_tag(env, fp.value).frame_stack_push(env);
+        let av = Cons::cdr(env, fp.argv[0]);
+        if Tag::type_of(&av) != Type::Vector {
+            return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", av));
+        }
+
+        let argv = VectorIter::new(env, av).collect::<Vec<Tag>>();
+
+        let value = Tag::nil();
+
+        Frame { func, argv, value }.frame_stack_push(env);
 
         Ok(())
     }

@@ -17,7 +17,6 @@
 ;;; predicates
 ;;;
 (mu:intern core "null" (:lambda (t) (mu:eq () t)))
-(mu:intern core "not" core:null)
 (mu:intern core "listp" (:lambda (t) (:if (core:%consp t) :t (core:null t))))
 
 (mu:intern core "%numberp"
@@ -49,14 +48,35 @@
 ;;;
 ;;; syntactic sugar
 ;;;
-(mu:intern core "%orf"
+(mu:intern core "lognot" core:null)
+(mu:intern core "logor"
    (:lambda (arg arg1)
      (:if arg arg arg1)))
 
-(mu:intern core "%andf"
+(mu:intern core "logand"
    (:lambda (arg arg1)
      (:if arg arg1 ())))
+
+(mu:intern core "logxor"
+   (:lambda (arg arg1)
+     (core:lognot (mu:eq (core:null arg) (core:null arg1)))))
 
 (mu:intern core "%arg2"
    (:lambda (arg1 arg2)
      arg2))
+
+(mu:intern core "%list2"
+   (:lambda (arg1 arg2)
+     (mu:cons arg1 (mu:cons arg2 ()))))
+
+(mu:intern core "1+"
+   (:lambda (n)
+     (:if (core:%fixnump n)
+          (mu:add n 1)
+          (core:raise n 'core:1+ "not a fixnum"))))
+
+(mu:intern core "1-"
+   (:lambda (n)
+     (:if (core:%fixnump n)
+          (mu:sub n 1)
+          (core:raise n 'core:1- "not a fixnum"))))

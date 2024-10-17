@@ -40,7 +40,7 @@
                  ((:lambda (str-stream)
                      (mu:fix
                       (:lambda (n)
-                         (:if (core:%orf (core:null n) (mu:eq 0 n))
+                         (:if (core:logor (core:null n) (mu:eq 0 n))
                               ()
                               (core:%arg2
                                   (mu:write (mu:svref "0123456789abcdef" (mu:logand n #xf)) () str-stream)
@@ -80,7 +80,7 @@
   (:lambda (dir dest arg-list)
     ((:lambda (fn)
        (:if fn
-            (core:%apply (mu:symbol-value fn) `(,dest ,arg-list))
+            (core:%apply (mu:symbol-value fn) (core:%list2 dest arg-list))
             (core:raise dir 'core:format "unrecognized format directive")))
      (mu:cdr
       (core:%assq

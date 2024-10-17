@@ -21,7 +21,7 @@
                       ((:lambda ()
                          (mu:eval (core:compile form))
                          (core:null loop)))))
-               (core:%read stream))))
+               (core:read stream () core:%eof%))))
         ()))
       (mu:open :file :input path))
      ()))

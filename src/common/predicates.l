@@ -5,7 +5,7 @@
 ;;; common predicates
 ;;;
 (mu:intern common "not" core:null)
-(mu:intern common "atom" (:lambda (value) (core:not (core:%consp value))))
+(mu:intern common "atom" (:lambda (value) (core:null (core:%consp value))))
 
 (mu:intern common "constantp"
    (:lambda (value)

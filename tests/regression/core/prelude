@@ -4,7 +4,6 @@
 (mu:type-of core:functionp)	:func
 (mu:type-of core:listp)	:func
 (mu:type-of core:functionp)	:func
-(mu:type-of core:not)	:func
 (mu:type-of core:null)	:func
 (mu:type-of core:%streamp)	:func
 (mu:type-of core:stringp)	:func

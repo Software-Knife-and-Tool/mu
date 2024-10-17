@@ -3,11 +3,11 @@
 (mu:type-of core:%macroexpand)	:func
 (mu:type-of core:%macro-function)	:func
 (core:compile '(define-macro a-macro ()))	(:quote a-macro)
-(mu:type-of ((:lambda () (core:compile '(define-macro a-macro () a-macro)) (core:%macro-function 'a-macro ()))))	:func
+(mu:type-of ((:lambda () (core:compile '(define-macro a-macro () a-macro)) (core:%macro-function 'a-macro ()))))	:struct
 ((:lambda () (core:compile '(define-macro no-arg-macro () ''no-arg-macro)) (core:%macroexpand '(no-arg-macro) ())))	(:quote no-arg-macro)
 ((:lambda () (core:compile '(define-macro no-arg-macro () ''no-arg-macro)) (mu:eval (core:compile '(no-arg-macro)))))	no-arg-macro
 ((:lambda () (core:compile '(define-macro arg-macro (arg) arg)) (core:%macroexpand '(arg-macro (mu:add 1 2)) ())))	(mu:add 1 2)
 ((:lambda () (core:compile '(define-macro arg-macro (arg) arg)) (mu:eval (core:compile '(arg-macro (mu:add 1 2))))))	3
-((:lambda () (core:compile '(define-macro rest-macro (&rest args) (mu:cons '(lambda (&rest rest) rest) args))) (mu:eval (core:compile '(rest-macro (mu:add 1 2))))))	(3)
-((:lambda () (core:compile '(define-macro rest-macro (&rest args) (mu:cons '(lambda (&rest rest) rest) args))) (mu:eval (core:compile '(rest-macro (mu:add 1 2) (mu:add 3 4))))))	(3 7)
-((:lambda () (core:compile '(define-macro rest-macro (&rest args) (mu:cons '(lambda (&rest rest) rest) args))) (mu:eval (core:compile '(rest-macro 1 2 3)))))	(1 2 3)
+((:lambda () (core:compile '(define-macro rest-macro (&rest args) (mu:car args))) (mu:eval (core:compile '(rest-macro (mu:add 1 2))))))	3
+((:lambda () (core:compile '(define-macro rest-macro (a &rest b)  (mu:cons :quote (mu:cons (mu:cons a b) ())))) (mu:eval (core:compile '(rest-macro 1 2)))))	(1 2)
+((:lambda () (core:compile '(define-macro rest-macro (a &rest b)  (mu:cons :quote (mu:cons (mu:cons a b) ())))) (mu:eval (core:compile '(rest-macro 1 (core:1+ 1))))))	(1 (core:1+ 1))

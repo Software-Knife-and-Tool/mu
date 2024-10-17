@@ -50,7 +50,7 @@
 
 (mu:intern core "make-exception"
    (:lambda (cond value source reason env)
-      (core:%make-type "%except"
+      (core:%make-core-type "%except"
         `(,(mu:cons :cond   cond)
           ,(mu:cons :value  value)
           ,(mu:cons :source source)

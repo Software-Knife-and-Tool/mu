@@ -52,15 +52,15 @@
                  loop
                  ((:lambda (ch)                   
                     (:if (core:null ch)
-                         (mu:cons 0 `(,(mu:sub 8 nbits) ,@(mu:ash byte nbits)))
+                         (mu:cons 0 (mu:cons (mu:sub 8 nbits) (mu:ash byte nbits)))
                          ((:lambda (syntax)
-                            (:if (core:%orf (mu:eq :tmacro syntax) (mu:eq :wspace syntax))
+                            (:if (core:logor (mu:eq :tmacro syntax) (mu:eq :wspace syntax))
                                  (core:%arg2
                                     (:if (mu:eq :tmacro syntax)
                                          (mu:unread-char ch stream)
                                          ())
-                                    (mu:cons 0 `(,(mu:sub 8 nbits) ,@(mu:ash byte nbits))))
-                                 (:if (core:%orf (mu:eq #\0 ch) (mu:eq #\1 ch))
+                                    (mu:cons 0 (mu:cons (mu:sub 8 nbits) (mu:ash byte nbits))))
+                                 (:if (core:logor (mu:eq #\0 ch) (mu:eq #\1 ch))
                                       `(,(mu:sub nbits 1)
                                         ,@(mu:logor
                                            (:if (mu:eq #\1 ch) 1 0)
@@ -82,18 +82,18 @@
                  (:if (core:%consp byte-descriptor)
                       ((:lambda (length byte)
                          (core:%make-vector
-                          (mu:make-vector :byte (core:%reverse `(,byte ,@loop)))
+                          (mu:make-vector :byte (core:%reverse (mu:cons byte loop)))
                           ()
                           `(,(mu:add length (mu:mul 8 (mu:length loop))))))
                        (mu:car byte-descriptor)
                        (mu:cdr byte-descriptor))
-                       `(,byte-descriptor ,@loop)))
+                      (mu:cons byte-descriptor loop)))
                (core:%read-byte-bits stream))))
        ())))
 
 (mu:intern core "%read-sharp-dot"
    (:lambda (ch stream)
-      (mu:eval (core:compile (core:read stream () ())))))
+      (mu:eval (core:%compile (core:read stream () ()) ()))))
 
 (mu:intern core "%read-sharp-colon"
    (:lambda (ch stream)
@@ -141,7 +141,7 @@
     ((:lambda (ch sharp-table)
        (mu:apply
         (mu:symbol-value (mu:cdr (core:%assq ch sharp-table)))
-        `(,ch ,stream)))
+        (core:%list2 ch stream)))
      (mu:read-char stream () ())
      '((#\| . core:%read-sharp-comment)
        (#\( . core:%read-sharp-vector)
@@ -206,7 +206,7 @@
 ;;;
 (mu:intern core "%read-quote"
   (:lambda (ch stream)
-     `(:quote ,(core:%read stream))))
+     (core:%list2 :quote (core:%read stream))))
 
 ;;;
 ;;; line comment
@@ -232,7 +232,7 @@
      ((:lambda (macro-table)
        (mu:apply
             (mu:symbol-value (mu:cdr (core:%assq ch macro-table)))
-            `(,ch ,stream)))
+            (core:%list2 ch stream)))
        '((#\" . core:%read-string)
          (#\# . core:%read-sharp)
          (#\' . core:%read-quote)
@@ -251,14 +251,14 @@
               (:if macro-symbol
                    (mu:symbol-value macro-symbol)
                    ()))
-           (mu:find core:%char-macro-ns% (mu:make-vector :char `(,char))))
+           (mu:find core:%char-macro-ns% (mu:make-vector :char (mu:cons char ()))))
           (core:raise char 'core:get-macro-character "not a character"))))
 
 (mu:intern core "set-macro-character"
-   (:lambda (char fn non-terminating)
+   (:lambda (char function non-terminating)
       (:if (core:%charp char)
-         (:if (core:functionp fn)
-              (mu:intern core:%char-macro-ns% (mu:make-vector :char `(char)) `(,fn ,@non-terminating))
-              (core:raise fn 'core:set-macro-character "not a function"))
+         (:if (core:functionp function)
+              (mu:intern core:%char-macro-ns% (mu:make-vector :char (mu:cons char ())) (mu:cons function non-terminating))
+              (core:raise function 'core:set-macro-character "not a function"))
          (core:raise char 'core:set-macro-character "not a character"))
       :t))
