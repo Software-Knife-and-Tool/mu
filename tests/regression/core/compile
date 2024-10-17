@@ -1,8 +1,8 @@
 (mu:eq :func (mu:type-of core:compile))	:t
-(mu:eq :func (mu:type-of (core:compile '(lambda () 1))))	:t
-(mu:eq :func (mu:type-of (core:compile '(lambda (a b) b))))	:t
-(mu:eq :func (mu:type-of (core:compile '(lambda (a) "hoo"))))	:t
-(mu:eq :func (mu:type-of (core:compile '(lambda (a) a))))	:t
+(mu:eq :struct (mu:type-of (core:compile '(lambda () 1))))	:t
+(mu:eq :struct (mu:type-of (core:compile '(lambda (a b) b))))	:t
+(mu:eq :struct (mu:type-of (core:compile '(lambda (a) "hoo"))))	:t
+(mu:eq :struct (mu:type-of (core:compile '(lambda (a) a))))	:t
 (mu:eval (core:compile '(if :t :t ())))	:t
 (mu:eval (core:compile '(if () () :t)))	:t
 (mu:eval (core:compile '(if :t () :t)))	:nil
