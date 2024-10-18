@@ -11,7 +11,7 @@
 (core:read (mu:open :string :input "a #||#") () ())	a
 (core:read (mu:open :string :input "#||# a;a") () ())	a
 (core:read (mu:open :string :input "#||# a ;a") () ())	a
-(core:read (mu:open :string :input "#:abc") () ())	abc
+(core:read (mu:open :string :input "#:abc") () ())	#:abc
 (core:read (mu:open :string :input "core:a") () ())	core:a
 (core:read (mu:open :string :input "abcdefgh") () ())	abcdefgh
 (core:read (mu:open :string :input "core:abcdefgh") () ())	core:abcdefgh
