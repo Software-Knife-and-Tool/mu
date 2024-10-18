@@ -6,6 +6,47 @@
 ;;;
 
 ;;;
+;;; [*exception descriptor*] #s(%exception cond value source reason env)
+;;;
+;;; cond:   condition type symbol
+;;; value:  exception raised on value
+;;; source: function designator, usually a symbol
+;;; reason: extended condition, usually a string
+;;; env:    dynamic environment, list of frames
+;;;
+(mu:intern core "exceptionp"
+    (:lambda (ex)
+      (core:logand
+       (core:%core-type-p ex)
+       (mu:eq '%exception (core:type-of ex)))))
+
+(core:def-type "%exception"
+    '((:cond   . :symbolp)
+      (:value  . :t)
+      (:source . :symbolp)
+      (:reason . :string)
+      (:env    . :listp)))
+
+(mu:intern core "%exception-prop"
+   (:lambda (prop exception)
+     (core:%type-ref prop exception)))
+
+(mu:intern core "exception-prop"
+   (:lambda (prop exception)
+      (:if (core:%findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
+           (core:%type-ref prop exception)
+           (core:raise prop 'core:%exception-prop "not an exception property"))))
+
+(mu:intern core "make-exception"
+   (:lambda (cond value source reason env)
+      (core:%make-core-type "%exception"
+        `(,(mu:cons :cond   cond)
+          ,(mu:cons :value  value)
+          ,(mu:cons :source source)
+          ,(mu:cons :reason reason)
+          ,(mu:cons :env    env)))))
+
+;;;
 ;;; functions
 ;;;
 (mu:intern core "%exceptionf"
@@ -45,15 +86,6 @@
                                            (mu:%frame-stack))))))
       (:lambda () (core:apply thunk ())))))
 
-(mu:intern core "make-exception"
-   (:lambda (cond value source reason env)
-      (core:%make-core-type "%exception"
-        `(,(mu:cons :cond   cond)
-          ,(mu:cons :value  value)
-          ,(mu:cons :source source)
-          ,(mu:cons :reason reason)
-          ,(mu:cons :env    env)))))
-
 ;;;
 ;;; exception flavors
 ;;;
@@ -90,48 +122,16 @@
      (core:format mu:*error-output* ";;; ~A:~T ~A~%" (core:%list2 message value))
      value))
 
-(mu:intern core "print"
+(mu:intern core "print-message"
    (:lambda (value message)          
      (core:format mu:*standard-output* ";;; ~A:~T ~A~%" (core:%list2 message value))
      value))
 
 (mu:intern core "warn"
    (:lambda (value message)
-     (core:format mu:*error-output* ";;; warn: ~A (~A) ; ~S~%" `(,message ,(mu:type-of value) ,value))
+     (core:format mu:*error-output* ";;; warn: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
     value))
 
 (mu:intern core "warn-"
    (:lambda (value message)
     value))
-
-;;;
-;;; [*exception descriptor*] #s(%exception cond value source reason env)
-;;;
-;;; cond:   condition type symbol
-;;; value:  exception raised on value
-;;; source: function designator, usually a symbol
-;;; reason: extended condition, usually a string
-;;; env:    dynamic environment, list of frames
-;;;
-(mu:intern core "exceptionp"
-    (:lambda (ex)
-      (core:logand
-       (core:%core-type-p ex)
-       (mu:eq '%exception (core:type-of ex)))))
-
-(core:def-type "%exception"
-    '((:cond   . :symbolp)
-      (:value  . :t)
-      (:source . :symbolp)
-      (:reason . :string)
-      (:env    . :listp)))
-
-(mu:intern core "%exception-prop"
-   (:lambda (prop exception)
-     (core:%type-ref prop exception)))
-
-(mu:intern core "exception-prop"
-   (:lambda (prop exception)
-      (:if (core:%findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
-           (core:%type-ref prop exception)
-           (core:raise prop 'core:%exception-prop "not an exception property"))))

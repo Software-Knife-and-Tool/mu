@@ -7,4 +7,4 @@
 (mu:symbol-namespace ())	#<:ns "">
 (mu:symbol-namespace :nil)	#<:ns "">
 (mu:symbol-value 'mu:*standard-input*)	#<stream: 0 :standard-input :input :open>
-(mu:make-symbol "abcde")	abcde
+(mu:make-symbol "abcde")	#:abcde

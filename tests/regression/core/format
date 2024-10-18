@@ -4,7 +4,7 @@
 (core:stringp (core:format () "core:format" ()))	:t
 (core:format :t "core:format unqualified ~A symbol arg" '(f-symbol))	core:format unqualified f-symbol symbol arg:nil
 (core:format :t "core:format unqualified ~S symbol arg" '(f-symbol))	core:format unqualified f-symbol symbol arg:nil
-(core:format :t "core:format qualified ~A symbol arg" '(mu:add))	core:format qualified add symbol arg:nil
+(core:format :t "core:format qualified ~A symbol arg" '(mu:add))	core:format qualified mu:add symbol arg:nil
 (core:format :t "core:format qualified ~S symbol arg" '(mu:add))	core:format qualified mu:add symbol arg:nil
 (core:format :t "core:format ~A string arg" '("f-string"))	core:format f-string string arg:nil
 (core:format :t "core:format ~S string arg" '("f-string"))	core:format "f-string" string arg:nil

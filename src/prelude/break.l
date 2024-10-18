@@ -36,7 +36,7 @@
 (mu:intern prelude "break"
    (:lambda (exception)
      (core:format :t ";;; entering break loop with exception~%" ())
-     (core:%exceptionf :t ";;; ~A on ~A by ~S, ~A~%" () exception)
+     (core:%exceptionf :t ";;; ~A on ~S by ~S, ~A~%" () exception)
      (core:format :t ";;; :h for commands~%" ())
      (mu:fix
       (:lambda (loop)
