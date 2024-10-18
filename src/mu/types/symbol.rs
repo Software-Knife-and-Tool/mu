@@ -315,7 +315,7 @@ impl Core for Symbol {
         }
     }
 
-    fn write(env: &Env, symbol: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+    fn write(env: &Env, symbol: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
         match symbol.type_of() {
             Type::Null | Type::Keyword => match str::from_utf8(&symbol.data(env).to_le_bytes()) {
                 Ok(s) => {
@@ -330,19 +330,18 @@ impl Core for Symbol {
             },
             Type::Symbol => {
                 let name = Self::name(env, symbol);
+                let ns = Self::namespace(env, symbol);
 
-                if escape {
-                    let ns = Self::namespace(env, symbol);
-
-                    if !Tag::null_(&ns) && !env.null_ns.eq_(&ns) {
-                        match Namespace::name(env, ns) {
-                            Some(str) => env.write_string(&str, stream).unwrap(),
-                            None => panic!(),
-                        }
-
-                        env.write_string(":", stream)?;
+                if Tag::nil().eq_(&ns) {
+                    env.write_string("#:", stream)?
+                } else if !env.null_ns.eq_(&ns) {
+                    match Namespace::name(env, ns) {
+                        Some(str) => env.write_string(&str, stream).unwrap(),
+                        None => panic!(),
                     }
+                    env.write_string(":", stream)?;
                 }
+
                 env.write_stream(name, false, stream)
             }
             _ => panic!(),
