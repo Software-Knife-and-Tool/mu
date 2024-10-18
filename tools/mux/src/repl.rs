@@ -38,7 +38,7 @@ impl Repl {
                 .args(["-e", "(prelude:repl)"])
                 .spawn()
                 .unwrap(),
-            "prelude-load" => Command::new("mu-sys")
+            "load" => Command::new("mu-sys")
                 .args(["-l", "/opt/mu/dist/core.l"])
                 .args(["-q", "(core:%load-file \"/opt/mu/dist/common.l\")"])
                 .args(["-l", "/opt/mu/dist/prelude.l"])
@@ -46,7 +46,10 @@ impl Repl {
                 .args(["-e", "(prelude:repl)"])
                 .spawn()
                 .unwrap(),
-            _ => panic!(),
+            _ => {
+                eprintln!("mux repl: unmapped namespace {ns_str}");
+                std::process::exit(-1)
+            }
         };
 
         let _ = child.wait();
