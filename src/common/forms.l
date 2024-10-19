@@ -35,18 +35,18 @@
 ;;;
 ;;; macros
 ;;;
-(core:compile '(define-macro progn (&rest body) (common:list (common:list* 'lambda () body))))
-(core:compile '(define-macro when (test &rest body) (common:list 'if test (common:list* 'progn body))))
-(core:compile '(define-macro unless (test &rest body) (common:list 'if test () (common:list* 'progn body))))
+(core:compile '(%defmacro progn (&rest body) (common:list (common:list* 'lambda () body))))
+(core:compile '(%defmacro when (test &rest body) (common:list 'if test (common:list* 'progn body))))
+(core:compile '(%defmacro unless (test &rest body) (common:list 'if test () (common:list* 'progn body))))
 
 (core:compile
- '(define-macro let (binds &rest body)
+ '(%defmacro let (binds &rest body)
    (common:list*
     (common:list* :lambda (core:%mapcar mu:car binds) body)
     (core:%mapcar (:lambda (el) (mu:nth 1 el)) binds))))
 
 (core:compile
- '(define-macro let* (binds &rest body)
+ '(%defmacro let* (binds &rest body)
    ((lambda (fn)
       (if binds
           (core:%apply fn binds)
@@ -57,7 +57,7 @@
           (common:list* 'let (common:list (mu:car binds)) body))))))
 
 (core:compile
- '(define-macro cond (&rest clauses)
+ '(%defmacro cond (&rest clauses)
    (mu:car
     (core:%foldr
      (lambda (clause cond)
@@ -351,12 +351,12 @@
 (defun complement (fn)
   (compose null fn))
 
-(define-macro progn (&rest body) (list (list* 'lambda () body)))
+(%defmacro progn (&rest body) (list (list* 'lambda () body)))
 
-(define-macro when (test &rest body)
+(%defmacro when (test &rest body)
   (list 'if test (list* 'progn body)))
 
-(define-macro unless (test &rest body)
+(%defmacro unless (test &rest body)
   (list 'if test () (list* 'progn body)))
 
 ;;; defer to prelude

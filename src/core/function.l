@@ -79,19 +79,21 @@
 ;;;
 ;;; constructor
 ;;;
-(mu:intern core "make-core-function"
+(mu:intern core "compile-core-function"
    (:lambda (lambda body env)
      (:if (core:%findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-          (core:raise lambda 'core:make-core-function "lambda list syntax")
+          (core:raise lambda 'core:compile-core-function "lambda list syntax")
           ((:lambda (desc)
-             (:if (core:logor (core:%fixnump desc) (core:null body))
-                  (core:%make-core-function lambda () body `(:lambda ,lambda ,@body) env ())
-                  ((:lambda (lambda rest)
-                     ((:lambda (mu-form)
-                        (core:%make-core-function lambda rest body mu-form env ()))
-                      `(:lambda ,lambda ,@body)))
-                     (mu:car desc)
-                     (mu:cdr desc))))
+             ((:lambda (body)
+                (:if (core:logor (core:%fixnump desc) (core:null body))
+                     (core:%make-core-function lambda () body `(:lambda ,lambda ,@body) env ())
+                     ((:lambda (lambda rest)
+                        ((:lambda (mu-form)
+                           (core:%make-core-function lambda rest body mu-form env ()))
+                         `(:lambda ,lambda ,@body)))
+                      (mu:car desc)
+                      (mu:cdr desc))))
+              (core:%mapcar (:lambda (form) (core:%compile form env)) body)))
 
            (core:%foldl
             (:lambda (el acc)
@@ -101,60 +103,13 @@
                              (mu:cons
                               `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
                               (mu:nth (mu:sub (mu:length lambda) 1) lambda))
-                             (core:raise lambda 'core:make-core-function "rest botch"))
+                             (core:raise lambda 'core:compile-core-function "rest botch"))
                         (mu:add 1 acc))
                    acc))
             0
             lambda)))))
 
-;;;
-;;; compiler
-;;;
 #|
-(mu:intern core "%compile-lambda-list"
-   (:lambda (lambda env)
-     (:if (core:%findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-          (core:raise lambda 'core:%compile-lambda-list "list syntax")
-          ((:lambda (desc)
-             (:if (core:%fixnump desc)
-                  (core:%make-lambda lambda desc env)
-                  desc))
-           (core:%foldl
-            (:lambda (el acc)
-              (:if (core:%core-function-pp acc)
-                   acc
-                   (:if (mu:eq '&rest el)
-                        (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
-                             (core:%make-lambda
-                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
-                              (mu:nth (mu:sub (mu:length lambda) 1) lambda)
-                              env)
-                             (core:raise lambda 'core:%compile-lambda-list "rest botch"))
-                        (mu:add 1 acc))))
-            0
-            lambda)))))
-
-(mu:intern core "%compile-lambda-body"
-   (:lambda (lambda-desc body env)
-      (:if (core:null body)
-           ()
-           ((:lambda (env)
-               (core:%maplist
-                (:lambda (body-cdr)
-                   (:if (mu:cdr body-cdr)
-                        ((:lambda (value)
-                            (core:%compile value env))
-                            (mu:car body-cdr))
-                        ((:lambda (form)
-                            (:if (core:%consp form)
-                                 (:if (mu:eq '%lambda (mu:car form))
-                                      (core:%compile-function form env)
-                                      (core:%compile form env))
-                                 (core:%compile form env)))
-                         (mu:car body-cdr))))
-                body))
-          (mu:cons lambda-desc env)))))
-
 ;;;
 ;;; create closed environment
 ;;;
