@@ -24,12 +24,12 @@
              (mu:cons (mu:car args) (list+ (mu:cdr args)))
              (mu:car args)))))
 
-(define-macro progn (&rest body) (list (list* 'lambda () body)))
+(%defmacro progn (&rest body) (list (list* 'lambda () body)))
 
 #|
-(define-macro when (test &rest body)
+(%defmacro when (test &rest body)
   (list 'if test (list* 'progn body)))
 
-(define-macro unless (test &rest body)
+(%defmacro unless (test &rest body)
   (list 'if test () (list* 'progn body)))
 |#

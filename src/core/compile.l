@@ -17,7 +17,7 @@
      (:if (mu:eq 0 (mu:length form))
           (core:raise form 'core:%compile-lambda "malformed lambda expression")
           ((:lambda (lambda-list body)
-             (core:make-core-function lambda-list body env))
+             (core:compile-core-function lambda-list body env))
            (mu:nth 1 form)
            (mu:nthcdr 2 form)))))
 
@@ -30,7 +30,7 @@
           (core:raise form 'core:%compile-macro "malformed lambda expression")
           ((:lambda (symbol lambda-list body)
              (:if (core:%symbolp symbol)
-                  (core:%defmacro symbol (core:make-core-function lambda-list body env))
+                  (core:%defmacro symbol (core:compile-core-function lambda-list body env))
                   (core:raise symbol 'core:%compile-defmacro "not a symbol"))
              (core:%list2 :quote symbol))
            (mu:nth 1 form)
@@ -90,7 +90,7 @@
                              (mu:cdr
                               (core:%assq
                                function-form
-                               '((define-macro . core:%compile-macro)
+                               '((%defmacro . core:%compile-macro)
                                  (if           . core:%compile-if)
                                  (%quasi%      . core:%compile-quasi)
                                  (lambda       . core:%compile-lambda)))))
