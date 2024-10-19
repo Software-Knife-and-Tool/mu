@@ -32,14 +32,109 @@
         (mu:cons () args))))))
 
 ;;;
-;;; macros
+;;; macros, the hard way
 ;;;
-(core:compile '(%defmacro progn (&rest body)
-                (mu:cons (mu:cons :lambda (mu:cons () body)) ())))
+#|
+(core:compile
+ '(%defmacro progn (&rest body)
+   (mu:cons (mu:cons 'lambda (mu:cons () body)) ())))
 
-(core:compile '(%defmacro when (test &rest body)
-                (core:warn (mu:cons 'if (mu:cons test (mu:cons (mu:cons 'progn body) ()))) "when form")
-                (mu:cons 'if (mu:cons test (mu:cons (mu:cons 'progn body) ())))))
+(core:compile
+ '(%defmacro when (test &rest body)
+   (mu:cons 'if
+    (mu:cons test
+     (mu:cons (mu:cons 'progn body) ())))))
+
+(core:compile
+ '(%defmacro unless (test &rest body)
+   (mu:cons 'if
+    (mu:cons test
+     (mu:cons () (mu:cons (mu:cons 'progn body) ()))))))
+|#
+
+;;;
+;;; macros, the somewhat easier way
+;;;
+(core:compile
+ '(%defmacro progn (&rest body)
+   (mu:cons (mu:cons 'lambda (mu:cons () body)) ())))
+
+#|
+(core:compile
+ '(%defmacro progn (&rest body)
+   (common:list (common:list* 'lambda () body))))
+|#
+
+(core:compile
+ '(%defmacro when (test &rest body)
+   (common:list 'if test (common:list* 'progn body))))
+
+(core:compile
+ '(%defmacro unless (test &rest body)
+   (common:list 'if test () (common:list* 'progn body))))
+
+(core:compile
+  '(%defmacro let (binds &rest body)
+     (common:list*
+       (common:list* 'lambda (core:%mapcar mu:car binds) body)
+       (core:%mapcar (:lambda (el) (mu:nth 1 el)) binds))))
+
+(core:compile
+ '(%defmacro let* (binds &rest body)
+   ((lambda (fn)
+      (if binds
+          (core:%apply fn binds)
+          (common:list* 'progn body)))
+    (lambda (fn binds)
+      (if (mu:cdr binds)
+          (common:list 'let (common:list (mu:car binds)) (core:%apply fn (core:list fn (mu:cdr binds))))
+          (common:list* 'let (common:list (mu:car binds)) body))))))
+
+(core:compile
+ '(%defmacro cond (&rest clauses)
+   (mu:car
+    (core:%foldr
+     (lambda (clause cond)
+        ;;; (form) or (form . body)
+       (let ((test (mu:car clause))
+             (body (mu:cdr clause)))
+         (if body
+             (common:list (common:list* 'if test (list* 'progn body) cond))
+             (common:list
+              (let ((gsym (core:gensym)))
+                (common:list 'let (common:list (common:list gsym test))
+                      (common:list* 'if gsym gsym cond)))))))
+     ()
+    clauses))))
+
+(core:compile
+ '(%defmacro and (&rest terms)
+   (if terms
+       (core:%foldr
+        (lambda (cns acc)
+          (let ((term (mu:car cns)))
+            (if (mu:cdr cns)
+                (core:list 'if term acc)
+                term)))
+        ()
+        (core:%maplist common:identity terms))
+       :t)))
+
+(core:compile
+ '(%defmacro or (&rest terms)
+   (core:%foldr
+    (lambda (cns acc)
+      (let ((term (mu:car cns)))
+        (if (mu:cdr cns)
+            (let ((gsym (core:gensym)))
+              (common:list*
+               (common:list
+                 'let (common:list (list gsym (car cns)))
+                 (common:list 'if gsym gsym acc))))
+            term)))
+    ()
+    (core:%maplist common:identity terms))))
+
 
 #|
 (core:compile '(%defmacro progn (&rest body) (common:list (common:list* 'lambda () body))))
@@ -74,7 +169,7 @@
        (let ((test (mu:car clause))
              (body (mu:cdr clause)))
          (if body
-             (common:list (common:list* 'if test (list* 'progn body) cond))
+             (common:list (common:list* 'if test (common:list* 'progn body) cond))
              (common:list
               (let ((gsym (core:gensym)))
                 (common:list 'let (common:list (common:list gsym test))
@@ -93,7 +188,7 @@
                 (core:list 'if term acc)
                 term)))
         ()
-        (common:maplist common:identity terms))
+        (core:maplist core:identity terms))
        :t))
   ())
 
