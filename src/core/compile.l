@@ -12,7 +12,7 @@
 ;;;
 ;;; compile a lambda form to a core-function
 ;;;
-(mu:intern core "%compile-lambda"
+(mu:intern core "%special-lambda"
    (:lambda (form env)
      (:if (mu:eq 0 (mu:length form))
           (core:raise form 'core:%compile-lambda "malformed lambda expression")
@@ -24,7 +24,7 @@
 ;;;
 ;;; compile a defmacro form to a bound macro symbol
 ;;;
-(mu:intern core "%compile-macro"
+(mu:intern core "%special-macro"
    (:lambda (form env)
      (:if (mu:eq 1 (mu:length form))
           (core:raise form 'core:%compile-macro "malformed lambda expression")
@@ -40,30 +40,24 @@
 ;;;
 ;;; this if form can take two or three arguments
 ;;;
-;;; returns a mu application of the %if function
-;;;
-(mu:intern core "%if"
-   (:lambda (testf t-thunk f-thunk)
-     (:if testf
-          (core:%apply t-thunk ())
-          (core:%apply f-thunk ()))))
-
-(mu:intern core "%compile-if"
+(mu:intern core "%special-if"
    (:lambda (form env)
      ((:lambda (length)
           (:if (core:logor (mu:eq length 3) (mu:eq length 4))
                ((:lambda (test t-arm f-arm)
-                  `(,core:%if ,test ,t-arm ,f-arm))
+                  ((:lambda (form)
+                     (mu:cons 'core:apply (mu:cons form (mu:cons () ()))))
+                   (mu:cons :if (mu:cons test (mu:cons t-arm (mu:cons f-arm ()))))))
                 (core:%compile (mu:nth 1 form) env)
-                (core:%compile `(lambda () ,(mu:nth 2 form)) env)
-                (core:%compile `(lambda () ,(mu:nth 3 form)) env))
-               (core:raise form 'core:%compile-if "takes two or three arguments")))
-       (mu:length form))))
+                (core:%compile (mu:cons 'lambda (mu:cons () (mu:cons (mu:nth 2 form) ()))) env)
+                (core:%compile (mu:cons 'lambda (mu:cons () (mu:cons (mu:nth 3 form) ()))) env))
+               (core:raise form 'core:%compile-if% "takes two or three arguments")))
+      (mu:length form))))
 
 ;;;
 ;;; compile a quasiquote form
 ;;;
-(mu:intern core "%compile-quasi"
+(mu:intern core "%special-quasi"
    (:lambda (form env)
      (core:%compile (core:%quasi-compile (mu:nth 1 form)) env)))               
 
@@ -90,10 +84,10 @@
                              (mu:cdr
                               (core:%assq
                                function-form
-                               '((%defmacro . core:%compile-macro)
-                                 (if           . core:%compile-if)
-                                 (%quasi%      . core:%compile-quasi)
-                                 (lambda       . core:%compile-lambda)))))
+                               '((%defmacro . core:%special-macro)
+                                 (if        . core:%special-if)
+                                 (%quasi%   . core:%special-quasi)
+                                 (lambda    . core:%special-lambda)))))
                             (:if (core:%consp function-form)
                                  (core:compile-funcall function-form arg-list env)
                                  (core:raise form 'core:%compile "malformed lambda expression")))))
