@@ -1,4 +1,4 @@
-(core:%structp (core:make-exception () :error (:quote test) "exception test" ()))
-(core:exceptionp (core:make-exception () :error (:quote test) "exception test" ()))
-(core:with-exception (:lambda (ex) :t) (:lambda () (core:raise () (:quote test) "")))
+(core:%structp (core:make-exception () :error 'test "exception test" ()))
+(core:exceptionp (core:make-exception () :error 'test "exception test" ()))
+(core:with-exception (:lambda (ex) :t) (:lambda () (core:raise () 'test "")))
 (core:with-exception (:lambda (exception) ()) (:lambda () :t))

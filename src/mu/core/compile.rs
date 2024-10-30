@@ -28,7 +28,7 @@ lazy_static! {
     static ref SPECMAP: Vec<(Tag, SpecFn)> = vec![
         (Symbol::keyword("if"), Env::if_),
         (Symbol::keyword("lambda"), Env::lambda),
-        (Symbol::keyword("quote"), Env::quoted_list),
+        (Symbol::keyword("quote"), Env::quote_),
     ];
 }
 
@@ -37,12 +37,11 @@ type LexEnv = Vec<(Tag, Vec<Tag>)>;
 
 pub trait Compile {
     fn if_(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
-    fn quoted_list(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
-    fn special_form(&self, _: Tag, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
-    fn list(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn lambda(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn lexical(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
-    fn compile(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
+    fn list(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
+    fn quote_(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
+    fn special_form(&self, _: Tag, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
 }
 
 impl Compile for Env {
@@ -55,45 +54,21 @@ impl Compile for Env {
 
         let if_vec = vec![
             Namespace::intern(self, self.mu_ns, "%if".to_string(), Tag::nil()).unwrap(),
-            Cons::vlist(
+            Cons::list(
                 self,
                 &[lambda, Tag::nil(), Cons::nth(self, 0, args).unwrap()],
             ),
-            Cons::vlist(
+            Cons::list(
                 self,
                 &[lambda, Tag::nil(), Cons::nth(self, 1, args).unwrap()],
             ),
-            Cons::vlist(
+            Cons::list(
                 self,
                 &[lambda, Tag::nil(), Cons::nth(self, 2, args).unwrap()],
             ),
         ];
 
-        self.compile(Cons::vlist(self, &if_vec), env)
-    }
-
-    fn quoted_list(&self, list: Tag, _: &mut LexEnv) -> exception::Result<Tag> {
-        if Cons::length(self, list) != Some(1) {
-            return Err(Exception::new(self, Condition::Syntax, "mu:compile", list));
-        }
-
-        Ok(Cons::new(Symbol::keyword("quote"), list).evict(self))
-    }
-
-    fn special_form(&self, name: Tag, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
-        match SPECMAP.iter().copied().find(|spec| name.eq_(&spec.0)) {
-            Some(spec) => spec.1(self, args, env),
-            None => Err(Exception::new(self, Condition::Syntax, "mu:compile", args)),
-        }
-    }
-
-    // utilities
-    fn list(&self, body: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
-        let compile_results: exception::Result<Vec<Tag>> = Cons::iter(self, body)
-            .map(|cons| self.compile(Cons::car(self, cons), env))
-            .collect();
-
-        Ok(Cons::vlist(self, &compile_results?))
+        self.compile(Cons::list(self, &if_vec), env)
     }
 
     fn lambda(&self, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
@@ -153,6 +128,26 @@ impl Compile for Env {
         Ok(func)
     }
 
+    fn quote_(&self, list: Tag, _: &mut LexEnv) -> exception::Result<Tag> {
+        Ok(self.quote(&list))
+    }
+
+    // utilities
+    fn special_form(&self, name: Tag, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
+        match SPECMAP.iter().copied().find(|spec| name.eq_(&spec.0)) {
+            Some(spec) => spec.1(self, args, env),
+            None => Err(Exception::new(self, Condition::Syntax, "mu:compile", args)),
+        }
+    }
+
+    fn list(&self, body: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
+        let compile_results: exception::Result<Vec<Tag>> = Cons::iter(self, body)
+            .map(|cons| self.compile(Cons::car(self, cons), env))
+            .collect();
+
+        Ok(Cons::list(self, &compile_results?))
+    }
+
     fn lexical(&self, symbol: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
         for frame in env.iter().rev() {
             let (tag, symbols) = frame;
@@ -165,7 +160,7 @@ impl Compile for Env {
                     Fixnum::with_or_panic(nth),
                 ];
 
-                return self.compile(Cons::vlist(self, &lex_ref), env);
+                return self.compile(Cons::list(self, &lex_ref), env);
             }
         }
 
@@ -177,6 +172,34 @@ impl Compile for Env {
             }
         } else {
             Ok(symbol)
+        }
+    }
+}
+
+pub trait Core {
+    fn compile(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
+    fn quote(&self, _: &Tag) -> Tag;
+    fn is_quoted(&self, _: &Tag) -> bool;
+    fn quoted_form(&self, _: &Tag) -> Tag;
+}
+
+impl Core for Env {
+    fn quote(&self, form: &Tag) -> Tag {
+        Cons::cons(self, Symbol::keyword("quote"), *form)
+    }
+
+    fn quoted_form(&self, form: &Tag) -> Tag {
+        if Self::is_quoted(self, form) {
+            Cons::cdr(self, *form)
+        } else {
+            panic!()
+        }
+    }
+
+    fn is_quoted(&self, form: &Tag) -> bool {
+        match form.type_of() {
+            Type::Cons => Cons::car(self, *form).eq_(&Symbol::keyword("quote")),
+            _ => false,
         }
     }
 
@@ -195,20 +218,20 @@ impl Compile for Env {
                         if Symbol::is_bound(self, func) {
                             let fn_ = Symbol::value(self, func);
                             match fn_.type_of() {
-                                Type::Function => Ok(Cons::new(fn_, args).evict(self)),
+                                Type::Function => Ok(Cons::cons(self, fn_, args)),
                                 _ => Err(Exception::new(self, Condition::Type, "mu:compile", func)),
                             }
                         } else {
-                            Ok(Cons::new(func, args).evict(self))
+                            Ok(Cons::cons(self, func, args))
                         }
                     }
-                    Type::Function => Ok(Cons::new(func, self.list(args, env)?).evict(self)),
+                    Type::Function => Ok(Cons::cons(self, func, self.list(args, env)?)),
                     Type::Cons => {
                         let arglist = self.list(args, env)?;
                         let fn_ = self.compile(func, env)?;
 
                         match fn_.type_of() {
-                            Type::Function => Ok(Cons::new(fn_, arglist).evict(self)),
+                            Type::Function => Ok(Cons::cons(self, fn_, arglist)),
                             _ => Err(Exception::new(self, Condition::Type, "mu:compile", func)),
                         }
                     }
@@ -256,7 +279,7 @@ impl CoreFunction for Env {
 #[cfg(test)]
 mod tests {
     use crate::core::{
-        compile::Compile,
+        compile::{Compile, Core},
         config::Config,
         env::Env,
         types::{Tag, Type},
@@ -267,7 +290,7 @@ mod tests {
         let config = Config::new(None);
         let env: &Env = &Env::new(config.unwrap(), None);
 
-        match Compile::compile(env, Tag::nil(), &mut vec![]) {
+        match Core::compile(env, Tag::nil(), &mut vec![]) {
             Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),

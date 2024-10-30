@@ -1,5 +1,5 @@
 (mu:type-of (:lambda ()))
-(:quote a)
+'a
 ((:lambda ()))
 ((:lambda () 1))
 ((:lambda (a) a) 1)

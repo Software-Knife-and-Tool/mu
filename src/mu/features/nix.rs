@@ -56,34 +56,34 @@ impl CoreFunction for Feature {
                 ))
             }
             Ok(info) => {
-                let uname = vec![Cons::vlist(
+                let uname = vec![Cons::list(
                     env,
                     &[
-                        Cons::new(
+                        Cons::cons(
+                            env,
                             Symbol::keyword("sysname"),
                             Vector::from(info.sysname().to_str().unwrap()).evict(env),
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Symbol::keyword("node"),
                             Vector::from(info.nodename().to_str().unwrap()).evict(env),
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Symbol::keyword("release"),
                             Vector::from(info.release().to_str().unwrap()).evict(env),
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Symbol::keyword("version"),
                             Vector::from(info.version().to_str().unwrap()).evict(env),
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Symbol::keyword("machine"),
                             Vector::from(info.machine().to_str().unwrap()).evict(env),
-                        )
-                        .evict(env),
+                        ),
                     ],
                 )];
 

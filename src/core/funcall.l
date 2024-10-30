@@ -20,7 +20,7 @@
    (:lambda (arg-list)
       (core:%foldr
        (:lambda (elt acc)
-         `(mu:cons ,(mu:cons :quote (mu:cons elt ())) ,acc))
+         `(mu:cons ,(core:quote elt) ,acc))
        ()
        arg-list)))
 

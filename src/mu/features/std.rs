@@ -102,13 +102,14 @@ impl CoreFunction for Feature {
             let mut vars = vec![];
 
             for (key, value) in std::env::vars() {
-                vars.push(
-                    Cons::new(Vector::from(key).evict(env), Vector::from(value).evict(env))
-                        .evict(env),
-                )
+                vars.push(Cons::cons(
+                    env,
+                    Vector::from(key).evict(env),
+                    Vector::from(value).evict(env),
+                ))
             }
 
-            Cons::vlist(env, &vars)
+            Cons::list(env, &vars)
         };
 
         Ok(())

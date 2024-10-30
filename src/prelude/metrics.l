@@ -55,7 +55,7 @@
                        alloc
                        (env:hp-type :heap type :alloc)))))
        type-map)
-      (list :quote value))))
+      ''value)))
 
 ;;;
 ;;; room

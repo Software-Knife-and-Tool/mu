@@ -48,7 +48,12 @@
 ;;;
 ;;; syntactic sugar
 ;;;
+(mu:intern core "quote"
+   (:lambda (form)
+     (mu:cons :quote form)))
+               
 (mu:intern core "lognot" core:null)
+
 (mu:intern core "logor"
    (:lambda (arg arg1)
      (:if arg arg arg1)))

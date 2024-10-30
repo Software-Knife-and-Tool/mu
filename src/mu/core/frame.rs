@@ -204,12 +204,12 @@ impl CoreFunction for Frame {
         env.fp_argv_check("mu:frame-push", &[Type::Cons], fp)?;
 
         let func = Cons::car(env, fp.argv[0]);
-        if Tag::type_of(&func) != Type::Function {
+        if func.type_of() != Type::Function {
             return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", func));
         }
 
         let av = Cons::cdr(env, fp.argv[0]);
-        if Tag::type_of(&av) != Type::Vector {
+        if av.type_of() != Type::Vector {
             return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", av));
         }
 

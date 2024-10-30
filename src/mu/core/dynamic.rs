@@ -65,10 +65,14 @@ impl CoreFunction for Env {
                 .map(|f| (&f.to_le_bytes()).into())
                 .collect();
 
-            Cons::new((&func.to_le_bytes()).into(), Vector::from(vec).evict(env)).evict(env)
+            Cons::cons(
+                env,
+                (&func.to_le_bytes()).into(),
+                Vector::from(vec).evict(env),
+            )
         }));
 
-        fp.value = Cons::vlist(env, &frames);
+        fp.value = Cons::list(env, &frames);
         Ok(())
     }
 }

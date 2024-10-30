@@ -206,7 +206,7 @@
 ;;;
 (mu:intern core "%read-quote"
   (:lambda (ch stream)
-     (core:%list2 :quote (core:%read stream))))
+     (core:quote (core:%read stream))))
 
 ;;;
 ;;; line comment

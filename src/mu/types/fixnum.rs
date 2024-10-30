@@ -200,7 +200,7 @@ impl CoreFunction for Fixnum {
                 env,
                 Condition::Over,
                 "mu:ash",
-                Cons::new(fp.argv[0], fp.argv[1]).evict(env),
+                Cons::cons(env, fp.argv[0], fp.argv[1]),
             ));
         }
 

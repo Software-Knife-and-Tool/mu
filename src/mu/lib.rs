@@ -58,13 +58,7 @@ mod types;
 use futures::executor::block_on;
 use {
     crate::{
-        core::{
-            apply::Core as _,
-            compile::Compile,
-            config::Config,
-            exception::{self, Core as _},
-            lib::LIB,
-        },
+        core::{apply::Core as _, compile::Core as _, config::Config, exception, lib::LIB},
         images::image::Core as _,
         streams::{read::Core as _, write::Core as _},
         types::{
@@ -102,7 +96,7 @@ impl Env {
 
     /// turn on ^C exception signalling
     pub fn signal_exception() {
-        Exception::signal_exception()
+        // Exception::signal_exception()
     }
 
     /// environment configuration

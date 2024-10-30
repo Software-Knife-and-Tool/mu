@@ -394,7 +394,7 @@ impl CoreFunction for Namespace {
 
                 let vec = hash.keys().map(|key| hash[key]).collect::<Vec<Tag>>();
 
-                Cons::vlist(env, &vec)
+                Cons::list(env, &vec)
             }
             None => panic!(),
         };
@@ -411,7 +411,7 @@ impl CoreFunction for Namespace {
             .map(|(_, name, _)| Vector::from((*name).clone()).evict(env))
             .collect::<Vec<Tag>>();
 
-        fp.value = Cons::vlist(env, &vec);
+        fp.value = Cons::list(env, &vec);
 
         Ok(())
     }

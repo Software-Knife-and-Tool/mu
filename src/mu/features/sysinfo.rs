@@ -55,15 +55,16 @@ impl CoreFunction for Feature {
                 ))
             }
             Ok(sysinfo) => {
-                let sysinfo = vec![Cons::vlist(
+                let sysinfo = vec![Cons::list(
                     env,
                     &[
-                        Cons::new(
+                        Cons::cons(
+                            env,
                             Vector::from("uptime").evict(env),
                             Fixnum::with_u64(env, sysinfo.uptime as u64)?,
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Vector::from("loads").evict(env),
                             Vector::from(vec![
                                 sysinfo.loads[0] as f32,
@@ -71,52 +72,53 @@ impl CoreFunction for Feature {
                                 sysinfo.loads[2] as f32,
                             ])
                             .evict(env),
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Vector::from("totalram").evict(env),
                             Fixnum::with_u64(env, sysinfo.totalram)?,
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Vector::from("freeram").evict(env),
                             Fixnum::with_u64(env, sysinfo.freeram)?,
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Vector::from("sharedram").evict(env),
                             Fixnum::with_u64(env, sysinfo.sharedram)?,
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Vector::from("bufferram").evict(env),
                             Fixnum::with_u64(env, sysinfo.bufferram)?,
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Vector::from("totalswap").evict(env),
                             Fixnum::with_u64(env, sysinfo.totalswap)?,
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Vector::from("freeswap").evict(env),
                             Fixnum::with_u64(env, sysinfo.freeswap)?,
-                        )
-                        .evict(env),
-                        Cons::new(Vector::from("procs").evict(env), sysinfo.procs.into())
-                            .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(env, Vector::from("procs").evict(env), sysinfo.procs.into()),
+                        Cons::cons(
+                            env,
                             Vector::from("totalhigh").evict(env),
                             Fixnum::with_u64(env, sysinfo.totalhigh)?,
-                        )
-                        .evict(env),
-                        Cons::new(
+                        ),
+                        Cons::cons(
+                            env,
                             Vector::from("freehigh").evict(env),
                             Fixnum::with_u64(env, sysinfo.freehigh)?,
-                        )
-                        .evict(env),
-                        Cons::new(Vector::from("mem_unit").evict(env), sysinfo.mem_unit.into())
-                            .evict(env),
+                        ),
+                        Cons::cons(
+                            env,
+                            Vector::from("mem_unit").evict(env),
+                            sysinfo.mem_unit.into(),
+                        ),
                     ],
                 )];
 

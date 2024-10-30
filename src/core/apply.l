@@ -7,7 +7,6 @@
 (mu:intern core "%fapply"
    (:lambda (core-function mu-function arg-list)
      ((:lambda (env)
-        ;;; (core:warn `(,mu-function ,arg-list) "%fapply")
         (mu:apply mu-function arg-list))
      (core:%core-function-prop :env core-function))))
 

@@ -14,22 +14,6 @@
        (mu:symbol-namespace symbol)
        (mu:symbol-name symbol))))
 
-#|
-(mu:intern core "%compile-macro-call"
-   (:lambda (macro-symbol arg-list env)
-     ((:lambda (macro-function)
-        ((:lambda (expanded-form)
-           (core:%compile expanded-form env))
-         (:if (core:%core-function-p macro-function)
-              ((:lambda ()
-                 (core:%fapply
-                  macro-function
-                  (mu:compile (core:%core-function-prop :mu macro-function))
-                  (core:%compile-quoted-lambda-arg-list macro-function arg-list env))))
-              (mu:apply macro-function arg-list))))
-      (core:%macro-function macro-symbol env))))
-|#
-
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
      ((:lambda (expanded-form)
@@ -50,7 +34,7 @@
                                (core:%fapply
                                 macro-function
                                 (mu:compile (core:%core-function-prop :mu macro-function))
-                                (mu:eval (core:%quoted-lambda-arg-list macro-function arg-list)))
+                                (mu:eval (core:%compile-quoted-lambda-arg-list macro-function arg-list env)))
                                (mu:apply macro-function arg-list))
                           form))
                    (core:%macro-function fn-symbol env))

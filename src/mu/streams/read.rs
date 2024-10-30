@@ -5,6 +5,7 @@
 use crate::{
     core::{
         apply::Core as _,
+        compile::Core as _,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -17,7 +18,6 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         core_stream::{Core as _, Stream},
-        symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
     },
 };
@@ -76,7 +76,7 @@ impl Core for Env {
                             let tag =
                                 Self::read_stream(self, stream, false, Tag::nil(), recursivep)?;
 
-                            Ok(Cons::vlist(self, &[Symbol::keyword("quote"), tag]))
+                            Ok(self.quote(&tag))
                         }
                         '"' => Ok(Vector::read(self, '"', stream)?),
                         '(' => Ok(Cons::read(self, stream)?),
