@@ -279,7 +279,7 @@ impl CoreFunction for Env {
 #[cfg(test)]
 mod tests {
     use crate::core::{
-        compile::Compile,
+        compile::{Compile, Core},
         config::Config,
         env::Env,
         types::{Tag, Type},
@@ -290,7 +290,7 @@ mod tests {
         let config = Config::new(None);
         let env: &Env = &Env::new(config.unwrap(), None);
 
-        match Compile::compile(env, Tag::nil(), &mut vec![]) {
+        match Core::compile(env, Tag::nil(), &mut vec![]) {
             Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),
