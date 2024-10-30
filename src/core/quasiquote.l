@@ -105,7 +105,7 @@
          ,(mu:cons :l-form  (:lambda (expr)
                               ((:lambda (quote)
                                `(mu:cons ,quote ()))
-                               `(:quote ,expr))))
+                               (core:quote expr))))
          ,(mu:cons :comma@ (:lambda (expr) expr))
          ,(mu:cons :list    (:lambda (list)
                               ((:lambda (loop)
@@ -117,8 +117,7 @@
                                         ,(core:%quasi-compile (mu:car list))
                                         ,(mu:apply loop `(,loop ,(mu:cdr list)))))))))
          ,(mu:cons :form    (:lambda (expr)
-                              ;;; (core:warn :form "quasi-compile")
-                              `(:quote ,expr)))
+                              (core:quote expr)))
          ,(mu:cons :quasi   (:lambda (expr)
                               ((:lambda (type)
                                  (:if (mu:eq :form type)
@@ -128,7 +127,7 @@
                                            ())))
                                (mu:car expr))))
          ,(mu:cons :qquote   (:lambda (expr)
-                               `(:quote ,(core:%quasi-compile expr))))))))
+                               (core:quote (core:%quasi-compile expr))))))))
 
 (mu:intern core "%read-quasi"
    (:lambda (char stream)

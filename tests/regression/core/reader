@@ -58,9 +58,9 @@
 (core:read (mu:open :string :input "#(:fixnum 1 2 3)") () ())	#(:fixnum 1 2 3)
 (core:read (mu:open :string :input "#(:char #\\a #\\b #\\c)") () ())	"abc"
 (core:read (mu:open :string :input "#(:float 1.0 2.0 3.0)") () ())	#(:float 1.0000 2.0000 3.0000)
-(core:read (mu:open :string :input "'core:a") () ())	(:quote core:a)
-(core:read (mu:open :string :input "'abc") () ())	(:quote abc)
-(core:read (mu:open :string :input "'core:abc") () ())	(:quote core:abc)
-(core:read (mu:open :string :input "'abcdefgh") () ())	(:quote abcdefgh)
+(core:read (mu:open :string :input "'core:a") () ())	(:quote . core:a)
+(core:read (mu:open :string :input "'abc") () ())	(:quote . abc)
+(core:read (mu:open :string :input "'core:abc") () ())	(:quote . core:abc)
+(core:read (mu:open :string :input "'abcdefgh") () ())	(:quote . abcdefgh)
 (core:read (mu:open :string :input "#.1") () ())	1
 (core:read (mu:open :string :input "#.(mu:add 1 2)") () ())	3

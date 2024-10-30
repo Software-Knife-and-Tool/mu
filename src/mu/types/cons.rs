@@ -68,28 +68,6 @@ impl Cons {
         }
     }
 
-    pub fn car(env: &Env, cons: Tag) -> Tag {
-        match cons.type_of() {
-            Type::Null => cons,
-            Type::Cons => match cons {
-                Tag::Direct(_) => DirectTag::car(cons),
-                Tag::Indirect(_) => Self::to_image(env, cons).car,
-            },
-            _ => panic!(),
-        }
-    }
-
-    pub fn cdr(env: &Env, cons: Tag) -> Tag {
-        match cons.type_of() {
-            Type::Null => cons,
-            Type::Cons => match cons {
-                Tag::Indirect(_) => Self::to_image(env, cons).cdr,
-                Tag::Direct(_) => DirectTag::cdr(cons),
-            },
-            _ => panic!(),
-        }
-    }
-
     pub fn ref_car(gc: &mut Gc, cons: Tag) -> Tag {
         match cons.type_of() {
             Type::Null => cons,
@@ -108,30 +86,6 @@ impl Cons {
                 Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).cdr,
                 Tag::Direct(_) => DirectTag::cdr(cons),
             },
-            _ => panic!(),
-        }
-    }
-
-    pub fn length(env: &Env, cons: Tag) -> Option<usize> {
-        match cons.type_of() {
-            Type::Null => Some(0),
-            Type::Cons => {
-                let mut cp = cons;
-                let mut n = 0;
-
-                loop {
-                    match cp.type_of() {
-                        Type::Cons => {
-                            n += 1;
-                            cp = Self::cdr(env, cp)
-                        }
-                        Type::Null => break,
-                        _ => return None,
-                    }
-                }
-
-                Some(n)
-            }
             _ => panic!(),
         }
     }
@@ -159,21 +113,74 @@ impl Cons {
     }
 }
 
-// core operations
 pub trait Core {
+    fn append(_: &Env, _: &[Tag], _: Tag) -> Tag;
+    fn car(_: &Env, _: Tag) -> Tag;
+    fn cdr(_: &Env, _: Tag) -> Tag;
+    fn cons(_: &Env, _: Tag, _: Tag) -> Tag;
     fn evict(&self, _: &Env) -> Tag;
     fn heap_size(_: &Env, _: Tag) -> usize;
     fn iter(_: &Env, _: Tag) -> ConsIter;
+    fn length(_: &Env, _: Tag) -> Option<usize>;
+    fn list(_: &Env, _: &[Tag]) -> Tag;
     fn nth(_: &Env, _: usize, _: Tag) -> Option<Tag>;
     fn nthcdr(_: &Env, _: usize, _: Tag) -> Option<Tag>;
     fn read(_: &Env, _: Tag) -> exception::Result<Tag>;
-    fn vappend(_: &Env, _: &[Tag], _: Tag) -> Tag;
     fn view(_: &Env, _: Tag) -> Tag;
-    fn vlist(_: &Env, _: &[Tag]) -> Tag;
     fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
 impl Core for Cons {
+    fn cons(env: &Env, car: Tag, cdr: Tag) -> Tag {
+        Cons::new(car, cdr).evict(env)
+    }
+
+    fn car(env: &Env, cons: Tag) -> Tag {
+        match cons.type_of() {
+            Type::Null => cons,
+            Type::Cons => match cons {
+                Tag::Direct(_) => DirectTag::car(cons),
+                Tag::Indirect(_) => Self::to_image(env, cons).car,
+            },
+            _ => panic!(),
+        }
+    }
+
+    fn cdr(env: &Env, cons: Tag) -> Tag {
+        match cons.type_of() {
+            Type::Null => cons,
+            Type::Cons => match cons {
+                Tag::Indirect(_) => Self::to_image(env, cons).cdr,
+                Tag::Direct(_) => DirectTag::cdr(cons),
+            },
+            _ => panic!(),
+        }
+    }
+
+    fn length(env: &Env, cons: Tag) -> Option<usize> {
+        match cons.type_of() {
+            Type::Null => Some(0),
+            Type::Cons => {
+                let mut cp = cons;
+                let mut n = 0;
+
+                loop {
+                    match cp.type_of() {
+                        Type::Cons => {
+                            n += 1;
+                            cp = Self::cdr(env, cp)
+                        }
+                        Type::Null => break,
+                        _ => return None,
+                    }
+                }
+
+                Some(n)
+            }
+            _ => panic!(),
+        }
+    }
+
     fn view(env: &Env, cons: Tag) -> Tag {
         let vec = vec![Self::car(env, cons), Self::cdr(env, cons)];
 
@@ -241,7 +248,7 @@ impl Core for Cons {
                 _ => {
                     let cdr = Self::read(env, stream)?;
 
-                    Ok(Cons::new(car, cdr).evict(env))
+                    Ok(Cons::cons(env, car, cdr))
                 }
             }
         }
@@ -276,22 +283,22 @@ impl Core for Cons {
         env.write_string(")", stream)
     }
 
-    fn vlist(env: &Env, vec: &[Tag]) -> Tag {
+    fn list(env: &Env, vec: &[Tag]) -> Tag {
         let mut list = Tag::nil();
 
         vec.iter()
             .rev()
-            .for_each(|tag| list = Self::new(*tag, list).evict(env));
+            .for_each(|tag| list = Self::cons(env, *tag, list));
 
         list
     }
 
-    fn vappend(env: &Env, vec: &[Tag], cdr: Tag) -> Tag {
+    fn append(env: &Env, vec: &[Tag], cdr: Tag) -> Tag {
         let mut list = cdr;
 
         vec.iter()
             .rev()
-            .for_each(|tag| list = Self::new(*tag, list).evict(env));
+            .for_each(|tag| list = Self::cons(env, *tag, list));
 
         list
     }
@@ -350,6 +357,7 @@ impl Core for Cons {
 /// env functions
 pub trait CoreFunction {
     fn mu_append(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_append2(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_car(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_cdr(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_cons(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -360,11 +368,42 @@ pub trait CoreFunction {
 
 impl CoreFunction for Cons {
     fn mu_append(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let lists = fp.argv[0];
+
+        env.fp_argv_check("mu:car", &[Type::List], fp)?;
+
+        fp.value = Tag::nil();
+        if !lists.null_() {
+            let mut appended = vec![];
+
+            for cons in Cons::iter(env, lists) {
+                let list = Self::car(env, cons);
+
+                if Self::cdr(env, cons).null_() {
+                    fp.value = Self::append(env, &appended, list)
+                } else {
+                    match list.type_of() {
+                        Type::Null => (),
+                        Type::Cons => {
+                            for cons in Cons::iter(env, list) {
+                                appended.push(Self::car(env, cons))
+                            }
+                        }
+                        _ => return Err(Exception::new(env, Condition::Type, "mu:%append", list)),
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn mu_append2(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let list1 = fp.argv[0];
         let list2 = fp.argv[1];
 
         fp.value = match list1.type_of() {
-            Type::Null | Type::Cons => Cons::vappend(
+            Type::Null | Type::Cons => Cons::append(
                 env,
                 &Cons::iter(env, list1)
                     .map(|elt| Cons::car(env, elt))
@@ -404,7 +443,7 @@ impl CoreFunction for Cons {
     }
 
     fn mu_cons(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Self::new(fp.argv[0], fp.argv[1]).evict(env);
+        fp.value = Self::cons(env, fp.argv[0], fp.argv[1]);
 
         Ok(())
     }

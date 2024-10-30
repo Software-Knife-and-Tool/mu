@@ -4,6 +4,7 @@
 //! env functions
 use crate::{
     core::{
+        compile::Core as _,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -84,15 +85,16 @@ impl Core for Env {
     }
 
     fn eval(&self, expr: Tag) -> exception::Result<Tag> {
+        if self.is_quoted(&expr) {
+            return Ok(self.quoted_form(&expr));
+        }
+
         match expr.type_of() {
             Type::Cons => {
                 let func = Cons::car(self, expr);
                 let args = Cons::cdr(self, expr);
 
                 match func.type_of() {
-                    Type::Keyword if func.eq_(&Symbol::keyword("quote")) => {
-                        Ok(Cons::car(self, args))
-                    }
                     Type::Symbol => {
                         if Symbol::is_bound(self, func) {
                             let fn_ = Symbol::value(self, func);

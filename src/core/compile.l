@@ -15,7 +15,7 @@
 (mu:intern core "%special-lambda"
    (:lambda (form env)
      (:if (mu:eq 0 (mu:length form))
-          (core:raise form 'core:%compile-lambda "malformed lambda expression")
+          (core:raise form 'core:%special-lambda "malformed lambda expression")
           ((:lambda (lambda-list body)
              (core:compile-core-function lambda-list body env))
            (mu:nth 1 form)
@@ -31,14 +31,14 @@
           ((:lambda (symbol lambda-list body)
              (:if (core:%symbolp symbol)
                   (core:%defmacro symbol (core:compile-core-function lambda-list body env))
-                  (core:raise symbol 'core:%compile-defmacro "not a symbol"))
-             (core:%list2 :quote symbol))
+                  (core:raise symbol 'core:%special-macro "not a symbol"))
+             (mu:cons :quote symbol))
            (mu:nth 1 form)
            (mu:nth 2 form)
            (mu:nthcdr 3 form)))))
 
 ;;;
-;;; this if form can take two or three arguments
+;;; if can take two or three arguments
 ;;;
 (mu:intern core "%special-if"
    (:lambda (form env)
@@ -51,7 +51,7 @@
                 (core:%compile (mu:nth 1 form) env)
                 (core:%compile (mu:cons 'lambda (mu:cons () (mu:cons (mu:nth 2 form) ()))) env)
                 (core:%compile (mu:cons 'lambda (mu:cons () (mu:cons (mu:nth 3 form) ()))) env))
-               (core:raise form 'core:%compile-if% "takes two or three arguments")))
+               (core:raise form 'core:%special-if "takes two or three arguments")))
       (mu:length form))))
 
 ;;;

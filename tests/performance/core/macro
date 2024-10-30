@@ -4,5 +4,5 @@
 ((:lambda () (core:compile '(%defmacro arg-macro (arg) arg)) (core:%macroexpand '(arg-macro (mu:add 1 2)) ())))
 ((:lambda () (core:compile '(%defmacro arg-macro (arg) arg)) (mu:eval (core:compile '(arg-macro (mu:add 1 2))))))
 ((:lambda () (core:compile '(%defmacro rest-macro (&rest args) (mu:car args))) (mu:eval (core:compile '(rest-macro (mu:add 1 2))))))
-((:lambda () (core:compile '(%defmacro rest-macro (a &rest b)  (mu:cons :quote (mu:cons (mu:cons a b) ())))) (mu:eval (core:compile '(rest-macro 1 2)))))
-((:lambda () (core:compile '(%defmacro rest-macro (a &rest b)  (mu:cons :quote (mu:cons (mu:cons a b) ())))) (mu:eval (core:compile '(rest-macro 1 (core:1+ 1))))))
+((:lambda () (core:compile '(%defmacro rest-macro (a &rest b)  (mu:cons :quote (mu:cons a b)))) (mu:eval (core:compile '(rest-macro 1 2)))))
+((:lambda () (core:compile '(%defmacro rest-macro (a &rest b)  (mu:cons :quote (mu:cons a b)))) (mu:eval (core:compile '(rest-macro 1 (core:1+ 1))))))

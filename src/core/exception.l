@@ -132,6 +132,6 @@
      (core:format mu:*error-output* ";;; warn: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
     value))
 
-(mu:intern core "warn-"
+(mu:intern core "%warn"
    (:lambda (value message)
     value))

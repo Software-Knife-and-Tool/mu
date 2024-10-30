@@ -47,7 +47,7 @@ pub struct Lib {
 }
 
 impl Lib {
-    pub const VERSION: &'static str = "0.1.79";
+    pub const VERSION: &'static str = "0.1.80";
 
     pub fn new() -> Self {
         Lib {
@@ -186,39 +186,58 @@ impl Lib {
 }
 
 pub trait Core {
-    fn add_env(_: Env) -> Tag;
+    fn add_env(self) -> Tag;
 }
 
 impl Core for Env {
-    fn add_env(env: Env) -> Tag {
+    fn add_env(self) -> Tag {
         let mut env_map_ref = block_on(LIB.env_map.write());
-        let mut tag_ref = block_on(env.tag.write());
+        let mut tag_ref = block_on(self.tag.write());
 
         let key = Symbol::keyword(&format!("{:07x}", env_map_ref.len()));
 
         *tag_ref = key;
-        env_map_ref.insert(key.as_u64(), env);
+        env_map_ref.insert(key.as_u64(), self);
 
         key
     }
 }
 
 pub trait Debug {
-    fn debug_vprintln(&self, _: &str, _: bool, _: Tag);
-    fn debug_vprint(&self, _: &str, _: bool, _: Tag);
+    fn eprint(&self, _: &str, _: bool, _: Tag);
+    fn eprintln(&self, _: &str, _: bool, _: Tag);
+    fn print(&self, _: &str, _: bool, _: Tag);
+    fn println(&self, _: &str, _: bool, _: Tag);
 }
 
 impl Debug for Env {
-    // debug printing
-    fn debug_vprint(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(LIB.stdio.read());
+    fn eprint(&self, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(LIB.stdio.write());
+
+        eprint!("{}: ", label);
+        self.write_stream(tag, verbose, stdio.2).unwrap();
+    }
+
+    fn eprintln(&self, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(LIB.stdio.write());
+
+        eprint!("{}: ", label);
+        self.write_stream(tag, verbose, stdio.2).unwrap();
+        eprintln!();
+    }
+
+    fn print(&self, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(LIB.stdio.write());
 
         print!("{}: ", label);
         self.write_stream(tag, verbose, stdio.1).unwrap();
     }
 
-    fn debug_vprintln(&self, label: &str, verbose: bool, tag: Tag) {
-        self.debug_vprint(label, verbose, tag);
+    fn println(&self, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(LIB.stdio.write());
+
+        print!("{}: ", label);
+        self.write_stream(tag, verbose, stdio.1).unwrap();
         println!();
     }
 }
