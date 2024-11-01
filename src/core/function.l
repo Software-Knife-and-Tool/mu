@@ -54,27 +54,9 @@
 
 (mu:intern core "functionp"
    (:lambda (function)
-     (core:logor
-      (mu:eq :func (mu:type-of function))
-      (core:%core-function-p function))))
-
-;;;
-;;; debugging
-;;;
-#|
-(mu:intern core "%describe-core-function"
-   (:lambda (fn)
-     (:if (core:%closurep fn)
-          ((:lambda (lambda arity fn env)
-             (core:eprint "" "%describe-fn:closure")
-             (core:eprint lambda "    lambda")
-             (core:eprint arity "    arity")
-             (core:eprint env "    env"))
-           (core:%core-function-prop :lambda fn)
-           (core:%core-function-prop :arity fn)
-           (core:%core-function-prop :env fn))
-          (core:print (mu:view fn) "%describe-fn:mu-fn"))))
-|#
+     (:if (mu:eq :func (mu:type-of function))
+          :t
+          (core:%core-function-p function))))
 
 ;;;
 ;;; constructor
@@ -88,9 +70,13 @@
                 (:if (core:logor (core:%fixnump desc) (core:null body))
                      (core:%make-core-function lambda () body `(:lambda ,lambda ,@body) env ())
                      ((:lambda (lambda rest)
-                        ((:lambda (mu-form)
-                           (core:%make-core-function lambda rest body mu-form env ()))
-                         `(:lambda ,lambda ,@body)))
+                        (core:%make-core-function
+                         lambda
+                         rest
+                         body
+                         `(:lambda ,lambda ,@body)
+                         env
+                         ()))
                       (mu:car desc)
                       (mu:cdr desc))))
               (core:%mapcar (:lambda (form) (core:%compile form env)) body)))

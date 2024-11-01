@@ -16,9 +16,7 @@
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
-     ((:lambda (expanded-form)
-        (core:%compile expanded-form env))
-      (core:%macroexpand `(,macro-symbol ,@arg-list) env))))
+     (core:%compile (core:%macroexpand `(,macro-symbol ,@arg-list) env) env)))
 
 ;;;
 ;;; functions

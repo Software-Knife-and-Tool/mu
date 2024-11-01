@@ -147,7 +147,11 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 
 ------
 
-versions past 0.1.69 are built with rustc 1.79.0/1.80.1. versions past 0.1.74 are built with rust 1.81.0.
+versions 0.1.69 - 0.1.73 are built with rustc 1.79.0.
+
+ versions 0.1.74 - 0.1.79 are built with rustc 1.81.0.
+
+version 0.1.80 is built with rustc 1.82.0.
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
