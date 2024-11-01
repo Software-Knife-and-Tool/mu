@@ -32,7 +32,7 @@
       (:lambda (list-cdr)
         (:if list-cdr
              (core:%arg2
-                 (core:apply function (mu:cons (mu:car list-cdr) ()))
+                 (core:%apply function (mu:cons (mu:car list-cdr) ()))
                  (mu:cdr list-cdr))
              ()))
       list)
@@ -42,7 +42,7 @@
    (:lambda (function list)
       (core:%foldl
        (:lambda (elt acc)
-          `(,@acc ,(core:apply function `(,elt))))
+          `(,@acc ,(core:%apply function `(,elt))))
        ()
        list)))
 

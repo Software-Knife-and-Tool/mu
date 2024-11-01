@@ -8,6 +8,9 @@
 
 (mu:intern common "*version*" "0.0.1")
 
+;;;
+;;; functions
+;;;
 (mu:intern common "identity"
    (:lambda (obj)
      obj))
@@ -36,86 +39,35 @@
 ;;;
 (core:compile
  '(%defmacro progn (&rest body)
-   (common:list (common:list* 'lambda () body))))
+   `((lambda () ,@body))))
 
 (core:compile
  '(%defmacro when (test &rest body)
-   (common:list 'if test (common:list* 'progn body))))
+   `(if ,test (progn ,@body))))
 
 (core:compile
  '(%defmacro unless (test &rest body)
-   (common:list 'if test () (common:list* 'progn body))))
-
-#|
-(core:compile
- '(%defmacro let (binds &rest body)
-   (common:list*
-    (common:list* 'lambda (core:%mapcar mu:car binds) body)
-    (core:%mapcar (lambda (el) (mu:nth 1 el)) binds))))
-|#
+   `(if (core:null ,test) (progn ,@body))))
 
 (core:compile
  '(%defmacro let (binds &rest body)
-   (core:warn binds "binds")
-   (if (core:%consp binds)
-       (common:list*
-        (common:list* 'lambda (core:%mapcar mu:car binds) body)
-        (core:%mapcar (lambda (el) (mu:nth 1 el)) binds))
-       (core:raise binds '%defmacro "illegal binding list"))))
+   `((lambda ,(core:%mapcar mu:car binds) ,@body)
+     ,@(core:%mapcar (:lambda (bind) (mu:nth 1 bind)) binds))))
 
-#|
-(core:compile
- '(%defmacro let (binds &rest body)
-   (if (core:%consp binds)
-       (common:list*
-        (common:list*
-         'lambda
-         (core:%mapcar mu:car binds)
-         body)
-        (core:%mapcar
-         (lambda (binding)
-           (if (mu:eq :symbol binding)
-               (if (mu:eq (mu:symbol-namespace binding) mu:%null-ns%)
-                   ()
-                   (core:raise binding () "%defmacro: not a lexical symbol"))
-               (if (core:%consp binding)
-                   (if (mu:eq 2 (mu:length binding))
-                       ((lambda (symbol expr)
-                          (if (mu:eq :symbol symbol)
-                              (if (mu:eq (mu:symbol-namespace symbol) mu:%null-ns%)
-                                  expr
-                                  (core:raise symbol () "%defmacro: illegal symbol"))
-                              (core:raise symbol () "%defmacro: illegal symbol")))
-                        (mu:nth 0 binding)
-                        (mu:nth 1 binding))
-                       (core:raise symbol () "%defmacro: illegal binding expression"))
-                   (core:raise binding () "%defmacro: illegal binding expression"))))
-         binds))
-       (core:raise binds () "%defmacro: not a binding list"))))
-|#
-
-#|
 (core:compile
  '(%defmacro let* (binds &rest body)
-   ((lambda (fn)
-      (if binds
-          (core:%apply fn binds)
-          (common:list* 'progn body)))
-    (lambda (fn binds)
-      (if (mu:cdr binds)
-          (common:list 'let (common:list (mu:car binds)) (core:%apply fn (core:list fn (mu:cdr binds))))
-          (common:list* 'let (common:list (mu:car binds)) body))))))
+   (:if binds
+       `(let (,(mu:car binds)) (let* ,(mu:cdr binds) ,@body))
+       `(let () ,@body))))
 
 (core:compile
  '(%defmacro cond (&rest clauses)
-   (core:warn clauses "clauses")
    (core:%foldr
     (lambda (clause cond-form)
       (core:warn clause "clause")
-       ;;; (form) or (form . body)
       (let ((test (mu:car clause))
             (body (mu:cdr clause)))
-        (if body
+        (:if body
             (common:list (common:list* 'if test (common:list* 'progn body) cond-form))
             (common:list
              (let ((gsym (core:gensym)))
@@ -151,7 +103,6 @@
             term)))
     ()
     (core:%maplist common:identity terms))))
-|#
 
 #|
 (core:compile '(%defmacro progn (&rest body) (common:list (common:list* 'lambda () body))))

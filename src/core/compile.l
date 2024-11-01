@@ -16,10 +16,7 @@
    (:lambda (form env)
      (:if (mu:eq 0 (mu:length form))
           (core:raise form 'core:%special-lambda "malformed lambda expression")
-          ((:lambda (lambda-list body)
-             (core:compile-core-function lambda-list body env))
-           (mu:nth 1 form)
-           (mu:nthcdr 2 form)))))
+          (core:compile-core-function (mu:nth 1 form) (mu:nthcdr 2 form) env))))
 
 ;;;
 ;;; compile a defmacro form to a bound macro symbol
@@ -28,14 +25,12 @@
    (:lambda (form env)
      (:if (mu:eq 1 (mu:length form))
           (core:raise form 'core:%compile-macro "malformed lambda expression")
-          ((:lambda (symbol lambda-list body)
+          ((:lambda (symbol)
              (:if (core:%symbolp symbol)
-                  (core:%defmacro symbol (core:compile-core-function lambda-list body env))
+                  (core:%defmacro symbol (core:compile-core-function (mu:nth 2 form) (mu:nthcdr 3 form) env))
                   (core:raise symbol 'core:%special-macro "not a symbol"))
              (mu:cons :quote symbol))
-           (mu:nth 1 form)
-           (mu:nth 2 form)
-           (mu:nthcdr 3 form)))))
+           (mu:nth 1 form)))))
 
 ;;;
 ;;; if can take two or three arguments

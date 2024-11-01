@@ -30,8 +30,7 @@
           ((:lambda (arity rest nreqs)
              (:if rest
                   (:if (mu:eq 0 arity)
-                       ((:lambda ()
-                          `(mu:cons ,(core:%arg-list arg-list) ())))
+                       `(mu:cons ,(core:%arg-list arg-list) ())
                        ((:lambda (req-list rest-list)
                           (:if (core:logand (core:null rest-list) (core:null req-list))
                                ()

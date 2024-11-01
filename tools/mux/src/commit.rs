@@ -21,5 +21,9 @@ impl Commit {
         let mut clippy = Command::new("cargo").arg("clippy").spawn().unwrap();
 
         clippy.wait().unwrap();
+
+        let mut test = Command::new("cargo").arg("test").spawn().unwrap();
+
+        test.wait().unwrap();
     }
 }

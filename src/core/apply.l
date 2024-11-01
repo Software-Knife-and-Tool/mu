@@ -13,11 +13,9 @@
 (mu:intern core "%apply"
    (:lambda (function arg-list)
      (:if (core:%core-function-p function)
-          ((:lambda (arg-list)
-             (core:%fapply
-              function
-              (mu:compile (core:%core-function-prop :mu function))
-              arg-list))
+          (core:%fapply
+           function
+           (mu:compile (core:%core-function-prop :mu function))
            (mu:eval (core:%compile-lambda-arg-list function arg-list ())))
           (mu:apply function arg-list))))
 
