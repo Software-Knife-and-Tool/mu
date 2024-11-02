@@ -7,22 +7,22 @@ help:
 	@echo "reference: namespace symbol reference"
 
 mu:
-	@mu --pipe --load=./reference.l --quiet-eval='(reference \"mu\" \"reference.out\")'
+	@/opt/mu/bin/mu-sys -l /opt/mu/dist/core.l -l ./reference.l -q '(reference "mu" "reference.out")'
 	@python3 reference.py reference.out
 	@rm -f reference.out
 
 core:
-	@mu --pipe --load=./reference.l --quiet-eval='(reference \"core\" \"reference.out\")'
+	@/opt/mu/bin/mu-sys -l /opt/mu/dist/core.l -l ./reference.l -q '(reference "core" "reference.out")'
 	@python3 reference.py reference.out
 	@rm -f reference.out
 
 mu-verbose:
-	@mu --pipe --load=./reference.l --quiet-eval='(reference \"mu\" \"reference.out\")'
+	@/opt/mu/bin/mu-sys -l /opt/mu/dist/core.l -l ./reference.l -q '(reference "mu" "reference.out")'
 	@python3 verbose.py reference.out
 	@rm -f reference.out
 
 core-verbose:
-	@mu --pipe --load=./reference.l --quiet-eval='(reference \"core\" \"reference.out\")'
+	@/opt/mu/bin/mu-sys -l /opt/mu/dist/core.l -l ./reference.l -q '(reference "core" "reference.out")'
 	@python3 verbose.py reference.out
 	@rm -f reference.out
 

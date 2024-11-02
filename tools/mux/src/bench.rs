@@ -2,13 +2,16 @@
 //  SPDX-License-Identifier: MIT
 use {
     crate::options::{Opt, Options},
-    std::process::Command,
+    std::{
+        io::{self, Write},
+        process::Command,
+    },
 };
 
 pub struct Bench {}
 
 impl Bench {
-    pub fn bench(options: &Options) {
+    pub fn bench(options: &Options, home: &str) {
         let report_opt = options.options.iter().find(|opt| match opt {
             Opt::Base => true,
             Opt::Current => true,
@@ -18,16 +21,16 @@ impl Bench {
 
         match report_opt {
             Some(opt) => match opt {
-                Opt::Base => Self::base(options),
-                Opt::Current => Self::current(options),
-                Opt::Footprint => Self::footprint(options),
+                Opt::Base => Self::base(options, home),
+                Opt::Current => Self::current(options, home),
+                Opt::Footprint => Self::footprint(options, home),
                 _ => panic!(),
             },
-            None => Self::current(options),
+            None => Self::current(options, home),
         }
     }
 
-    pub fn base(options: &Options) {
+    pub fn base(options: &Options, home: &str) {
         let ntests = match options.opt_value(&Opt::Ntests("".to_string())) {
             Some(n) => n.parse().unwrap(),
             None => 20u32,
@@ -39,19 +42,21 @@ impl Bench {
         };
 
         for test_dir in ["tests/footprint", "tests/performance"] {
-            let mut test = Command::new("make")
+            let output = Command::new("make")
+                .current_dir(home)
                 .env("NTESTS", &ntests.to_string())
                 .args(["-C", test_dir])
                 .arg("base")
                 .arg("--no-print-directory")
-                .spawn()
-                .unwrap();
+                .output()
+                .expect("command failed to execute");
 
-            test.wait().unwrap();
+            io::stdout().write_all(&output.stdout).unwrap();
+            io::stderr().write_all(&output.stderr).unwrap();
         }
     }
 
-    pub fn current(options: &Options) {
+    pub fn current(options: &Options, home: &str) {
         let ntests = match options.opt_value(&Opt::Ntests("".to_string())) {
             Some(n) => n.parse().unwrap(),
             None => 20u32,
@@ -62,43 +67,51 @@ impl Bench {
             None => (),
         };
 
-        let mut test = Command::new("make")
+        let output = Command::new("make")
+            .current_dir(home)
             .env("NTESTS", &ntests.to_string())
             .args(["-C", "tests/performance"])
             .arg("current")
             .arg("--no-print-directory")
-            .spawn()
-            .unwrap();
+            .output()
+            .expect("command failed to execute");
 
-        test.wait().unwrap();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
 
-        let mut report = Command::new("make")
+        let output = Command::new("make")
+            .current_dir(home)
             .args(["-C", "tests/performance"])
             .arg("report")
             .arg("--no-print-directory")
-            .spawn()
-            .unwrap();
+            .output()
+            .expect("command failed to execute");
 
-        report.wait().unwrap();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 
-    pub fn footprint(_options: &Options) {
-        let mut test = Command::new("make")
+    pub fn footprint(_options: &Options, home: &str) {
+        let output = Command::new("make")
+            .current_dir(home)
             .args(["-C", "tests/footprint"])
             .arg("current")
             .arg("--no-print-directory")
-            .spawn()
-            .unwrap();
+            .output()
+            .expect("command failed to execute");
 
-        test.wait().unwrap();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
 
-        let mut report = Command::new("make")
+        let output = Command::new("make")
+            .current_dir(home)
             .args(["-C", "tests/footprint"])
             .arg("report")
             .arg("--no-print-directory")
-            .spawn()
-            .unwrap();
+            .output()
+            .expect("command failed to execute");
 
-        report.wait().unwrap();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 }

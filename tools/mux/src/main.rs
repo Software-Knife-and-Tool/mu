@@ -31,7 +31,7 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.8";
+const VERSION: &str = "0.0.9";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
@@ -69,6 +69,19 @@ pub fn main() {
     let command = argv[1].as_str();
     let options = Options::parse(&argv).unwrap();
 
+    let home = match Env::mu_home(&options) {
+        Some(path) => path,
+        None => {
+            let cwd = std::env::current_dir().unwrap();
+
+            eprintln!(
+                "error: could not find `.mux` in {:?} or any parent directory",
+                cwd.to_str().unwrap()
+            );
+            std::process::exit(-1)
+        }
+    };
+
     match command {
         "help" => {
             println!();
@@ -76,17 +89,17 @@ pub fn main() {
             println!();
             usage()
         }
-        "annotate" => Annotate::annotate(&options),
-        "bench" => Bench::bench(&options),
-        "build" => Build::build(&options),
-        "clean" => Clean::clean(&options),
-        "commit" => Commit::commit(&options),
-        "env" => Env::printenv(&options),
-        "install" => Install::install(&options),
-        "profile" => Profile::profile(&options),
-        "repl" => Repl::repl(&options),
-        "symbols" => Symbols::symbols(&options),
-        "test" => Test::test(&options),
+        "annotate" => Annotate::annotate(&options, &home),
+        "bench" => Bench::bench(&options, &home),
+        "build" => Build::build(&options, &home),
+        "clean" => Clean::clean(&options, &home),
+        "commit" => Commit::commit(&options, &home),
+        "env" => Env::printenv(&options, &home),
+        "install" => Install::install(&options, &home),
+        "profile" => Profile::profile(&options, &home),
+        "repl" => Repl::repl(&options, &home),
+        "symbols" => Symbols::symbols(&options, &home),
+        "test" => Test::test(&options, &home),
         "version" => Options::version(),
         _ => {
             eprintln!("mux: unimplemented command {command}");

@@ -2,13 +2,17 @@
 //  SPDX-License-Identifier: MIT
 use {
     crate::options::{Opt, Options},
-    std::{fs::File, process::Command},
+    std::{
+        fs::File,
+        io::{self, Write},
+        process::Command,
+    },
 };
 
 pub struct Symbols {}
 
 impl Symbols {
-    pub fn symbols(options: &Options) {
+    pub fn symbols(options: &Options, home: &str) {
         let report_opt = options.options.iter().find(|opt| match opt {
             Opt::Crossref => true,
             Opt::Counts => true,
@@ -23,32 +27,46 @@ impl Symbols {
 
         match report_opt {
             Some(opt) => match opt {
-                Opt::Crossref => Self::crossref(options),
-                Opt::Counts => Self::counts(options),
-                Opt::Reference => Self::reference(options),
-                _ => panic!(),
+                Opt::Crossref => Self::crossref(options, home),
+                Opt::Counts => Self::counts(options, home),
+                Opt::Reference => Self::reference(options, home),
+                _ => {
+                    eprintln!("mux repl: unmapped symbol report {opt:?}");
+                    std::process::exit(-1)
+                }
             },
-            None => panic!(),
+            None => {
+                eprintln!("mux repl: unspecified symbol report");
+                std::process::exit(-1)
+            }
         }
     }
 
-    fn counts(_options: &Options) {
-        let path = std::path::Path::new("./tools/symbol-counts");
-        std::env::set_current_dir(&path).unwrap();
-        let mut child = Command::new("make").arg("core").spawn().unwrap();
+    fn counts(_options: &Options, home: &str) {
+        let output = Command::new("make")
+            .current_dir(home)
+            .args(["-C", "tools/symbol-counts"])
+            .arg("core")
+            .output()
+            .expect("command failed to execute");
 
-        let _ = child.wait();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 
-    fn crossref(_options: &Options) {
-        let path = std::path::Path::new("./tools/crossref");
-        std::env::set_current_dir(&path).unwrap();
-        let mut child = Command::new("make").arg("crossref").spawn().unwrap();
+    fn crossref(_options: &Options, home: &str) {
+        let output = Command::new("make")
+            .current_dir(home)
+            .args(["-C", "tools/crossref"])
+            .arg("crossref")
+            .output()
+            .expect("command failed to execute");
 
-        let _ = child.wait();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 
-    fn reference(options: &Options) {
+    fn reference(options: &Options, home: &str) {
         let ns_opt = options.options.iter().find(|opt| match opt {
             Opt::Namespace(_) => true,
             _ => false,
@@ -72,60 +90,94 @@ impl Symbols {
                 Opt::Output(path) => {
                     let out_file = File::create(path).expect(&format!("failed to open {path}"));
 
-                    let mut child = match ns_str {
-                        "mu" => Command::new("make")
-                            .args(["-C", "tools/reference"])
-                            .arg("--no-print-directory")
-                            .arg("mu")
-                            .stdout(out_file)
-                            .spawn()
-                            .unwrap(),
-                        "core" => Command::new("make")
-                            .args(["-C", "tools/reference"])
-                            .arg("--no-print-directory")
-                            .arg("core")
-                            .stdout(out_file)
-                            .spawn()
-                            .unwrap(),
-                        "prelude" => Command::new("mu-sys")
-                            .args(["-l", "/opt/mu/lib/core/core.l"])
-                            .args(["-l", "/opt/mu/lib/prelude/repl.l"])
-                            .args(["-e", "(prelude:repl)"])
-                            .stdout(out_file)
-                            .spawn()
-                            .unwrap(),
-                        _ => panic!(),
-                    };
+                    match ns_str {
+                        "mu" => {
+                            let output = Command::new("make")
+                                .current_dir(home)
+                                .args(["-C", "tools/reference"])
+                                .arg("--no-print-directory")
+                                .arg("mu")
+                                .stdout(out_file)
+                                .output()
+                                .expect("command failed to execute");
 
-                    let _ = child.wait();
+                            io::stdout().write_all(&output.stdout).unwrap();
+                            io::stderr().write_all(&output.stderr).unwrap();
+                        }
+                        "core" => {
+                            let output = Command::new("make")
+                                .current_dir(home)
+                                .args(["-C", "tools/reference"])
+                                .arg("--no-print-directory")
+                                .arg("core")
+                                .stdout(out_file)
+                                .output()
+                                .expect("command failed to execute");
+
+                            io::stdout().write_all(&output.stdout).unwrap();
+                            io::stderr().write_all(&output.stderr).unwrap();
+                        }
+                        "prelude" => {
+                            let output = Command::new("mu-sys")
+                                .args(["-l", "/opt/mu/lib/core/core.l"])
+                                .args(["-l", "/opt/mu/lib/prelude/repl.l"])
+                                .args(["-e", "(prelude:repl)"])
+                                .stdout(out_file)
+                                .output()
+                                .expect("command failed to execute");
+
+                            io::stdout().write_all(&output.stdout).unwrap();
+                            io::stderr().write_all(&output.stderr).unwrap();
+                        }
+                        _ => {
+                            eprintln!("mux repl: unmapped namespace {ns_str}");
+                            std::process::exit(-1)
+                        }
+                    };
                 }
                 _ => panic!(),
             },
             None => {
-                let mut child = match ns_str {
-                    "mu" => Command::new("make")
-                        .args(["-C", "tools/reference"])
-                        .arg("--no-print-directory")
-                        .arg("mu")
-                        .spawn()
-                        .unwrap(),
-                    "core" => Command::new("make")
-                        .args(["-C", "tools/reference"])
-                        .arg("--no-print-directory")
-                        .arg("core")
-                        .spawn()
-                        .unwrap(),
-                    "prelude" => Command::new("mu-sys")
-                        .args(["-l", "/opt/mu/lib/core/core.l"])
-                        .args(["-l", "/opt/mu/lib/prelude/repl.l"])
-                        .args(["-q", "(prelude:%init-ns)"])
-                        .args(["-e", "(prelude:repl)"])
-                        .spawn()
-                        .unwrap(),
+                match ns_str {
+                    "mu" => {
+                        let output = Command::new("make")
+                            .current_dir(home)
+                            .args(["-C", "tools/reference"])
+                            .arg("--no-print-directory")
+                            .arg("mu")
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stdout().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+                    }
+                    "core" => {
+                        let output = Command::new("make")
+                            .current_dir(home)
+                            .args(["-C", "tools/reference"])
+                            .arg("--no-print-directory")
+                            .arg("core")
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stdout().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+                    }
+                    "prelude" => {
+                        let output = Command::new("mu-sys")
+                            .current_dir(home)
+                            .args(["-l", "/opt/mu/lib/core/core.l"])
+                            .args(["-l", "/opt/mu/lib/prelude/repl.l"])
+                            .args(["-q", "(prelude:%init-ns)"])
+                            .args(["-e", "(prelude:repl)"])
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stdout().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+                    }
                     _ => panic!(),
                 };
-
-                let _ = child.wait();
             }
         }
     }

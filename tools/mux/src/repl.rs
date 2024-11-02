@@ -8,7 +8,7 @@ use {
 pub struct Repl {}
 
 impl Repl {
-    pub fn repl(options: &Options) {
+    pub fn repl(options: &Options, _home: &str) {
         let ns_str = match options.opt_value(&Opt::Namespace("".to_string())) {
             Some(ns) => &ns.clone(),
             None => "mu",

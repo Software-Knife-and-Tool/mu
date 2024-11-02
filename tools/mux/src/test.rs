@@ -2,25 +2,30 @@
 //  SPDX-License-Identifier: MIT
 use {
     crate::options::{Opt, Options},
-    std::process::Command,
+    std::{
+        io::{self, Write},
+        process::Command,
+    },
 };
 
 pub struct Test {}
 
 impl Test {
-    pub fn test(options: &Options) {
+    pub fn test(options: &Options, home: &str) {
         match options.find_opt(&Opt::Verbose) {
             Some(_) => println!("mux test:"),
             None => (),
         };
 
-        let mut test = Command::new("make")
+        let output = Command::new("make")
+            .current_dir(home)
             .args(["-C", "tests/regression"])
             .arg("summary")
             .arg("--no-print-directory")
-            .spawn()
-            .unwrap();
+            .output()
+            .expect("command failed to execute");
 
-        test.wait().unwrap();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 }

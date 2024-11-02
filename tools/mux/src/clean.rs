@@ -11,7 +11,7 @@ use {
 pub struct Clean {}
 
 impl Clean {
-    pub fn clean(options: &Options) {
+    pub fn clean(options: &Options, home: &str) {
         match options.find_opt(&Opt::Verbose) {
             Some(_) => println!("mux clean:"),
             None => (),
@@ -40,25 +40,23 @@ impl Clean {
             None => (),
         };
 
-        let mut home = Command::new("rm")
+        Command::new("rm")
+            .current_dir(home)
             .arg("-rf")
             .arg(mu.clone() + "/target")
             .arg(mu.clone() + "/Cargo.lock")
             .arg(mu.clone() + "/TAGS")
             .spawn()
-            .unwrap();
-
-        home.wait().unwrap();
+            .expect("command failed to execute");
 
         for dir in dirs {
-            let mut clean = Command::new("make")
+            Command::new("make")
+                .current_dir(home)
                 .args(["-C", &(mu.clone() + "/" + dir)])
                 .arg("clean")
                 .arg("--no-print-directory")
                 .spawn()
-                .unwrap();
-
-            clean.wait().unwrap();
+                .expect("command faled to execute");
         }
     }
 }
