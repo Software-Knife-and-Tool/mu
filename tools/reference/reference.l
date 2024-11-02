@@ -4,7 +4,7 @@
 ;;;
 ;;; symbol reference
 ;;;
-(mu:intern (mu:find-namespace "") "reference"
+(mu:intern mu:%null-ns% "reference"
    (:lambda (ns file-name)
       ((:lambda (stream)
           (core:%mapc

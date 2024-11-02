@@ -2,28 +2,29 @@
 //  SPDX-License-Identifier: MIT
 use {
     crate::options::{Opt, Options},
-    std::process::Command,
+    std::{
+        io::{self, Write},
+        process::Command,
+    },
 };
 
 pub struct Commit {}
 
 impl Commit {
-    pub fn commit(options: &Options) {
+    pub fn commit(options: &Options, _: &str) {
         match options.find_opt(&Opt::Verbose) {
             Some(_) => println!("mux commit: fmt clippy"),
             None => (),
         };
 
-        let mut fmt = Command::new("cargo").arg("fmt").spawn().unwrap();
+        for cmd in vec!["fmt", "clippy", "test"] {
+            let output = Command::new("cargo")
+                .arg(cmd)
+                .output()
+                .expect("command failed to execute");
 
-        fmt.wait().unwrap();
-
-        let mut clippy = Command::new("cargo").arg("clippy").spawn().unwrap();
-
-        clippy.wait().unwrap();
-
-        let mut test = Command::new("cargo").arg("test").spawn().unwrap();
-
-        test.wait().unwrap();
+            io::stdout().write_all(&output.stdout).unwrap();
+            io::stderr().write_all(&output.stderr).unwrap();
+        }
     }
 }

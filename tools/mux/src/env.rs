@@ -31,22 +31,12 @@ impl Env {
         }
     }
 
-    pub fn printenv(options: &Options) {
-        let ewd = std::env::current_dir().unwrap();
-
+    pub fn printenv(options: &Options, home: &str) {
         match options.find_opt(&Opt::Verbose) {
-            Some(_) => println!("mux env:"),
+            Some(_) => println!("mux env: {home}"),
             None => (),
         };
 
-        match Self::mu_home(options) {
-            Some(path) => println!("{:?}", path),
-            None => {
-                println!(
-                    "error: could not find `.mu` in {:?} or any parent directory",
-                    ewd.to_str().unwrap()
-                )
-            }
-        }
+        println!("mu_home: {:?}", home)
     }
 }

@@ -4,7 +4,7 @@
 ;;;
 ;;; symbol table
 ;;;
-(mu:intern (mu:find-namespace "") "symbols"
+(mu:intern mu:%null-ns% "symbols"
    (:lambda (ns file-name)
       ((:lambda (stream)
           (core:%mapc

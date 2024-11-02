@@ -1,13 +1,17 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-use crate::options::{Opt, Options};
-
-use std::process::Command;
+use {
+    crate::options::{Opt, Options},
+    std::{
+        io::{self, Write},
+        process::Command,
+    },
+};
 
 pub struct Annotate {}
 
 impl Annotate {
-    pub fn annotate(options: &Options) {
+    pub fn annotate(options: &Options, _home: &str) {
         let profile_opt = options.options.iter().find(|opt| match opt {
             Opt::Prof(_) => true,
             _ => false,
@@ -39,13 +43,14 @@ impl Annotate {
             None => (),
         };
 
-        let mut annotate = Command::new("python3")
+        let output = Command::new("python3")
             .arg("/opt/mu/bin/annotate.py")
             .arg(profile_path)
             .arg(reference_path)
-            .spawn()
-            .unwrap();
+            .output()
+            .expect("command failed to execute");
 
-        annotate.wait().unwrap();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 }

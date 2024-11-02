@@ -1,17 +1,17 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 use {
-    crate::{
-        env::Env,
-        options::{Opt, Options},
+    crate::options::{Opt, Options},
+    std::{
+        io::{self, Write},
+        process::Command,
     },
-    std::process::Command,
 };
 
 pub struct Build {}
 
 impl Build {
-    pub fn build(options: &Options) {
+    pub fn build(options: &Options, home: &str) {
         let build_opt = options.options.iter().find(|opt| match opt {
             Opt::Release | Opt::Profile | Opt::Debug => true,
             _ => false,
@@ -30,124 +30,127 @@ impl Build {
             None => (),
         };
 
-        let dist = match Env::mu_home(options) {
-            Some(path) => format!("{path}/dist"),
-            None => {
-                let cwd = std::env::current_dir().unwrap();
-
-                eprintln!(
-                    "error: could not find `.mux` in {:?} or any parent directory",
-                    cwd.to_str().unwrap()
-                );
-                return;
-            }
-        };
+        let dist = &format!("{home}/dist");
 
         let _ = match build_opt {
             Some(style) => match style {
                 Opt::Debug => {
-                    let mut build = Command::new("cargo")
+                    let output = Command::new("cargo")
                         .arg("build")
                         .arg("--workspace")
-                        .spawn()
-                        .unwrap();
+                        .output()
+                        .expect("command failed to execute");
 
-                    let _ = build.wait();
+                    io::stdout().write_all(&output.stdout).unwrap();
+                    io::stderr().write_all(&output.stderr).unwrap();
 
-                    let mut cp = Command::new("cp")
-                        .arg("./target/debug/mu-exec")
-                        .arg("./target/debug/mu-ld")
-                        .arg("./target/debug/mu-server")
-                        .arg("./target/debug/mu-sys")
-                        .arg("./target/debug/mu-sh")
-                        .arg("./target/debug/sysgen")
-                        .arg(dist)
-                        .spawn()
-                        .unwrap();
+                    let output = Command::new("cp")
+                        .current_dir(dist.clone())
+                        .arg("../target/debug/mu-exec")
+                        .arg("../target/debug/mu-ld")
+                        .arg("../target/debug/mu-server")
+                        .arg("../target/debug/mu-sys")
+                        .arg("../target/debug/mu-sh")
+                        .arg("../target/debug/sysgen")
+                        .arg(dist.clone())
+                        .output()
+                        .expect("command failed to execute");
 
-                    cp.wait()
+                    io::stdout().write_all(&output.stdout).unwrap();
+                    io::stderr().write_all(&output.stderr).unwrap();
                 }
                 Opt::Release => {
-                    let mut build = Command::new("cargo")
+                    let output = Command::new("cargo")
                         .arg("build")
                         .arg("--release")
                         .arg("--workspace")
-                        .spawn()
-                        .unwrap();
+                        .output()
+                        .expect("command failed to execute");
 
-                    let _ = build.wait();
+                    io::stdout().write_all(&output.stdout).unwrap();
+                    io::stderr().write_all(&output.stderr).unwrap();
 
-                    let mut cp = Command::new("cp")
-                        .arg("./target/release/mu-exec")
-                        .arg("./target/release/mu-ld")
-                        .arg("./target/release/mu-server")
-                        .arg("./target/release/mu-sh")
-                        .arg("./target/release/mu-sys")
-                        .arg("./target/release/sysgen")
-                        .arg(dist)
-                        .spawn()
-                        .unwrap();
+                    let output = Command::new("cp")
+                        .current_dir(dist.clone())
+                        .arg("../target/release/mu-exec")
+                        .arg("../target/release/mu-ld")
+                        .arg("../target/release/mu-server")
+                        .arg("../target/release/mu-sh")
+                        .arg("../target/release/mu-sys")
+                        .arg("../target/release/sysgen")
+                        .arg(dist.clone())
+                        .output()
+                        .expect("command failed to execute");
 
-                    cp.wait()
+                    io::stdout().write_all(&output.stdout).unwrap();
+                    io::stderr().write_all(&output.stderr).unwrap();
                 }
                 Opt::Profile => {
-                    let mut build = Command::new("cargo")
+                    let output = Command::new("cargo")
                         .arg("build")
                         .args(["--release"])
                         .args(["-F", "prof"])
                         .arg("--workspace")
-                        .spawn()
-                        .unwrap();
+                        .output()
+                        .expect("command failed to execute");
 
-                    let _ = build.wait();
+                    io::stdout().write_all(&output.stdout).unwrap();
+                    io::stderr().write_all(&output.stderr).unwrap();
 
-                    let mut cp = Command::new("cp")
-                        .arg("./target/release/mu-exec")
-                        .arg("./target/release/mu-ld")
-                        .arg("./target/release/mu-sh")
-                        .arg("./target/release/mu-server")
-                        .arg("./target/release/mu-sys")
-                        .arg("./target/release/sysgen")
-                        .arg(dist)
-                        .spawn()
-                        .unwrap();
+                    let output = Command::new("cp")
+                        .current_dir(dist.clone())
+                        .arg("../target/release/mu-exec")
+                        .arg("../target/release/mu-ld")
+                        .arg("../target/release/mu-sh")
+                        .arg("../target/release/mu-server")
+                        .arg("../target/release/mu-sys")
+                        .arg("../target/release/sysgen")
+                        .arg(dist.clone())
+                        .output()
+                        .expect("command failed to execute");
 
-                    cp.wait()
+                    io::stdout().write_all(&output.stdout).unwrap();
+                    io::stderr().write_all(&output.stderr).unwrap();
                 }
                 _ => panic!(),
             },
 
             None => {
-                let mut build = Command::new("cargo")
+                let output = Command::new("cargo")
                     .arg("build")
                     .arg("--workspace")
-                    .spawn()
-                    .unwrap();
+                    .output()
+                    .expect("command failed to execute");
 
-                let _ = build.wait();
+                io::stdout().write_all(&output.stdout).unwrap();
+                io::stderr().write_all(&output.stderr).unwrap();
 
-                let mut cp = Command::new("cp")
-                    .arg("./target/debug/mu-exec")
-                    .arg("./target/debug/mu-ld")
-                    .arg("./target/debug/mu-server")
-                    .arg("./target/debug/mu-sys")
-                    .arg("./target/debug/mux")
-                    .arg("./target/debug/sysgen")
-                    .arg("./dist")
-                    .spawn()
-                    .unwrap();
+                let output = Command::new("cp")
+                    .current_dir(dist.clone())
+                    .arg("../target/debug/mu-exec")
+                    .arg("../target/debug/mu-ld")
+                    .arg("../target/debug/mu-server")
+                    .arg("../target/debug/mu-sys")
+                    .arg("../target/debug/mux")
+                    .arg("../target/debug/sysgen")
+                    .arg("../dist")
+                    .output()
+                    .expect("command failed to execute");
 
-                cp.wait()
+                io::stdout().write_all(&output.stdout).unwrap();
+                io::stderr().write_all(&output.stderr).unwrap();
             }
         };
 
         // let the dist makefile decide how to do this
-        let mut dist = Command::new("make")
-            .args(["-C", "./dist"])
+        let output = Command::new("make")
+            .current_dir(dist.clone())
+            .args(["-C", "../dist"])
             .arg("--no-print-directory")
-            .spawn()
-            .unwrap();
+            .output()
+            .expect("command failed to execute");
 
-        let _ = dist.wait();
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 }

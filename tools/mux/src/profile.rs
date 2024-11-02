@@ -7,7 +7,7 @@ use std::{fs::File, process::Command};
 pub struct Profile {}
 
 impl Profile {
-    pub fn profile(options: &Options) {
+    pub fn profile(options: &Options, _home: &str) {
         match options.find_opt(&Opt::Verbose) {
             Some(_) => println!("mux profile:"),
             None => (),
@@ -44,7 +44,7 @@ impl Profile {
                             .args(["-e", profile_expr])
                             .stdout(out_file)
                             .spawn()
-                            .unwrap();
+                            .expect("command failed to exexcute");
                     }
                     None => {
                         Command::new("mu-sys")
@@ -53,7 +53,7 @@ impl Profile {
                             .args(["-l", "/opt/mu/dist/prelude.l"])
                             .args(["-e", profile_expr])
                             .spawn()
-                            .unwrap();
+                            .expect("command failed to exexcute");
                     }
                 }
             }
