@@ -34,6 +34,7 @@
            (mu:cdr loop)))
         (mu:cons () args))))))
 
+#|
 ;;;
 ;;; macros
 ;;;
@@ -103,6 +104,7 @@
             term)))
     ()
     (core:%maplist common:identity terms))))
+|#
 
 #|
 (core:compile '(%defmacro progn (&rest body) (common:list (common:list* 'lambda () body))))
