@@ -28,7 +28,8 @@ CORE= \
 	function.l     \
 	apply.l	       \
 	package.l      \
-	vector.l 
+	vector.l       \
+	core-symbols.l
 
 COMMON= \
 	common.l       \
