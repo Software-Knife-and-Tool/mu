@@ -57,7 +57,7 @@ impl QuasiReader {
         Self {
             stream,
             cons: Namespace::intern(env, env.mu_ns, "cons".to_string(), Tag::nil()).unwrap(), // why?
-            qappend: Namespace::intern(env, env.mu_ns, "%append".to_string(), Tag::nil()).unwrap(),
+            qappend: Namespace::intern(env, env.mu_ns, "append".to_string(), Tag::nil()).unwrap(),
         }
     }
 

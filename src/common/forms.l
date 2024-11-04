@@ -13,162 +13,8 @@
      obj))
 
 #|
-(mu:intern common "list"
-   (core:compile '(lambda (&rest list) list)))         
-
-(mu:intern common "list*"
-   (core:compile
-    '(lambda (&rest args)
-      (mu:car
-       (mu:fix
-        (:lambda (loop)
-          ((:lambda (list args)
-             (:if args
-                  (:if (mu:cdr args)
-                       (mu:cons (mu:append list (mu:cons (mu:car args) ())) (mu:cdr args))
-                       (mu:cons (mu:append list (mu:car args)) ()))
-                  loop))
-           (mu:car loop)
-           (mu:cdr loop)))
-        (mu:cons () args))))))
-
-;;;
-;;; macros
-;;;
-(core:compile '(%defmacro progn (&rest body) (common:list (common:list* 'lambda () body))))
-(core:compile '(%defmacro when (test &rest body) (common:list 'if test (common:list* 'progn body))))
-(core:compile '(%defmacro unless (test &rest body) (common:list 'if test () (common:list* 'progn body))))
-
-(core:compile
- '(%defmacro let (binds &rest body)
-   (common:list*
-    (common:list* :lambda (core:%mapcar mu:car binds) body)
-    (core:%mapcar (:lambda (el) (mu:nth 1 el)) binds))))
-
-(core:compile
- '(%defmacro let* (binds &rest body)
-   ((lambda (fn)
-      (if binds
-          (core:%apply fn binds)
-          (common:list* 'progn body)))
-    (lambda (fn binds)
-      (if (mu:cdr binds)
-          (common:list 'let (common:list (mu:car binds)) (core:%apply fn (core:list fn (mu:cdr binds))))
-          (common:list* 'let (common:list (mu:car binds)) body))))))
-
-(core:compile
- '(%defmacro cond (&rest clauses)
-   (mu:car
-    (core:%foldr
-     (lambda (clause cond)
-        ;;; (form) or (form . body)
-       (let ((test (mu:car clause))
-             (body (mu:cdr clause)))
-         (if body
-             (common:list (common:list* 'if test (list* 'progn body) cond))
-             (common:list
-              (let ((gsym (core:gensym)))
-                (common:list 'let (common:list (common:list gsym test))
-                      (common:list* 'if gsym gsym cond)))))))
-     ()
-     clauses))))
-
-(core:compile
- '(defmacro and (&rest terms)
-   (:if terms
-       (core:%foldr
-        (lambda (cns acc)
-          (let ((term (mu:car cns)))
-            (if (mu:cdr cns)
-                (core:list 'if term acc)
-                term)))
-        ()
-        (common:maplist common:identity terms))
-       :t)))
-
-(defmacro and (&rest terms)
-  (if terms
-    (foldr
-      (lambda (cns acc)
-        (let ((term (car cns)))
-          (if (cdr cns)
-              (list 'if term acc)
-              term)))
-      ()
-      (maplist identity terms))
-    :t))
-
-(defmacro or (&rest terms)
-  (foldr
-    (lambda (cns acc)
-      (let ((term (car cns)))
-        (if (cdr cns)
-            (let ((gsym (gensym)))
-              (list*
-                (list
-                  'let (list (list gsym (car cns)))
-                  (list 'if gsym gsym acc))))
-         term)))
-    ()
-    (maplist identity terms)))
-
-(defun append (&rest lists)
-  (foldr
-    (lambda (el acc)
-      (if (listp el)
-          (foldr (lambda (el acc) (cons el acc)) acc el)
-          el))
-      ()
-      lists))
-
-(defun apply (fn &rest args)
-  (errorp-unless functionp fn "apply: not a function")
-  ((lambda (loop) (fn (loop loop args)))
-   (lambda (loop args)
-     (if (cdr args)
-         (cons (car args) (loop loop (cdr args)))
-         ((lambda ()
-           (errorp-unless listp (car args) "apply: not a list")
-           (car args)))))))
-
 (defun vector (&rest elements)
   (list-sv :t elements))
-
-(defmacro progn (&rest body)
-  (list (list* 'lambda () body)))
-
-(defmacro when (test &rest body)
-  (core:list 'if test (list* 'progn body)))
-
-(defmacro unless (test &rest body)
-  (core:list 'if test () (list* 'progn body)))
-
-(defmacro let (binds &rest body)
-  (errorp-unless core:listp binds "let: not a binding list")
-  (list*
-    (list* 'lambda (mapcar car binds) body)
-    (mapcar (lambda (el) (nth 1 el)) binds)))
-
-(defmacro let* (binds &rest body)
-  ((lambda (fn)
-     (if binds
-       (fn fn binds)
-       (list* 'progn body)))
-   (lambda (fn binds)
-     (if (cdr binds)
-         (list 'let (list (car binds)) (core::funcall fn (list fn (cdr binds))))
-         (list* 'let (list (car binds)) body)))))
-
-(defconst core::gensym
-  (let ((genstream (make-string-stream :output "0")))
-    (lambda () ;;; this becomes a closure
-      ((lambda (n)
-         (core:format genstream "~A" (list (1+ n)))
-         (symbol (core:format () "g~A" (list n))))
-       (core:read (make-string-stream :input (get-output-stream-string genstream)))))))
-
-(defun gensym ()
-  (core::funcall core::gensym ()))
 
 (defmacro bind-seq (pattern source &rest body)
   (errorp-unless consp pattern "bind-seq: pattern not a list")
@@ -187,49 +33,6 @@
                     pattern)))
               (cdr nths)))))
     (list* 'let* (cons (core:list source-gsym source) (destruct)) body)))
-
-(defmacro cond (&rest clauses)
-  (car
-    (foldr
-      (lambda (clause cond)
-        ;;; (form) or (form . body)
-        (errorp-unless consp clause "core:cond not a cons")
-        (let ((test (car clause))
-              (body (cdr clause)))
-          (if body
-            (list (list* 'if test (list* 'progn body) cond))
-            (list
-              (let ((gsym (gensym)))
-                (list 'let (list (list gsym test))
-                  (list* 'if gsym gsym cond)))))))
-    ()
-    clauses)))
-
-(defmacro and (&rest terms)
-  (if terms
-    (foldr
-      (lambda (cns acc)
-        (let ((term (car cns)))
-          (if (cdr cns)
-              (list 'if term acc)
-              term)))
-      ()
-      (maplist identity terms))
-    :t))
-
-(defmacro or (&rest terms)
-  (foldr
-    (lambda (cns acc)
-      (let ((term (car cns)))
-        (if (cdr cns)
-            (let ((gsym (gensym)))
-              (list*
-                (list
-                  'let (list (list gsym (car cns)))
-                  (list 'if gsym gsym acc))))
-         term)))
-    ()
-    (maplist identity terms)))
 
 ;;;
 ;;; do macros
@@ -351,15 +154,6 @@
 (defun complement (fn)
   (compose null fn))
 
-(%defmacro progn (&rest body) (list (list* 'lambda () body)))
-
-(%defmacro when (test &rest body)
-  (list 'if test (list* 'progn body)))
-
-(%defmacro unless (test &rest body)
-  (list 'if test () (list* 'progn body)))
-
-;;; defer to prelude
 ;;;
 ;;; eql
 ;;;

@@ -78,7 +78,7 @@
 (mu:intern common "copy-list"
    (:lambda (list)
      (:if (core:listp list)
-          (core:%mapcar common:identity list)             
+          (core:%mapcar core:identity list)             
           (core:raise list 'common:copy-list "not a list"))))
 
 ;;;

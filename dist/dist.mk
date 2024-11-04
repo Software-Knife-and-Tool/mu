@@ -29,7 +29,7 @@ CORE= \
 	apply.l	       \
 	package.l      \
 	vector.l       \
-	core-symbols.l
+	common.l
 
 COMMON= \
 	common.l       \

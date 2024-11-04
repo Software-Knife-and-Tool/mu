@@ -63,23 +63,23 @@
               (mu:cdr loop)))
            ())))
       `(,(mu:cons :comma   (:lambda (expr list)
-                             (mu:cons () (mu:append list (core:%list `(:l-comma ,(mu:car expr)))))))
+                             (mu:cons () (mu:append (core:%list2 list (core:%list `(:l-comma ,(mu:car expr))))))))
          ,(mu:cons :comma@ (:lambda (expr list)
-                             (mu:cons () (mu:append list (core:%list `(:comma@ ,(mu:car expr)))))))
+                             (mu:cons () (mu:append (core:%list2 list (core:%list `(:comma@ ,(mu:car expr))))))))
          ,(mu:cons :form   (:lambda (expr list)
-                             (mu:cons () (mu:append list (core:%list `(:l-form ,(mu:car expr)))))))
+                             (mu:cons () (mu:append (core:%list2 list (core:%list `(:l-form ,(mu:car expr))))))))
          ,(mu:cons :list   (:lambda (expr list)
                              (:if (core:null (mu:car expr))
-                                  (mu:cons () (mu:append list (core:%list `(:l-form ()))))
+                                  (mu:cons () (mu:append (core:%list2 list (core:%list `(:l-form ())))))
                                   (:if (core:%consp (mu:car expr))
                                        ((:lambda (form)
-                                          (mu:cons () (mu:append list (core:%list `(:l-form ,form)))))
+                                          (mu:cons () (mu:append (core:%list2 list (core:%list `(:l-form ,form))))))
                                         (core:%mapcar (:lambda (expr) (mu:nth 1 expr)) (mu:car expr)))
-                                       (mu:cons () (mu:append list (core:%list `(:l-list ,(mu:car expr)))))))))
+                                       (mu:cons () (mu:append (core:%list2 list (core:%list `(:l-list ,(mu:car expr))))))))))
          ,(mu:cons :list-  (:lambda (expr list)
                              (mu:cons :t list)))
          ,(mu:cons :quasi  (:lambda (expr list)
-                             (mu:cons () (mu:append list `(,(core:%quasi-read stream))))))))))
+                             (mu:cons () (mu:append (core:%list2 list `(,(core:%quasi-read stream)))))))))))
 
 (mu:intern core "%quasi-compile"
    (:lambda (quasi-expr)
@@ -100,8 +100,9 @@
                                  (:if (core:null list)
                                       list
                                       `(mu:append
-                                        ,(core:%quasi-compile (mu:car list))
-                                        ,(mu:apply loop `(,loop ,(mu:cdr list)))))))))
+                                        (core:%list2
+                                         ,(core:%quasi-compile (mu:car list))
+                                         ,(mu:apply loop `(,loop ,(mu:cdr list))))))))))
          ,(mu:cons :l-form  (:lambda (expr)
                               ((:lambda (quote)
                                `(mu:cons ,quote ()))
@@ -114,8 +115,9 @@
                                  (:if (core:null list)
                                       list
                                       `(mu:append
+                                        (core:%list2
                                         ,(core:%quasi-compile (mu:car list))
-                                        ,(mu:apply loop `(,loop ,(mu:cdr list)))))))))
+                                        ,(mu:apply loop `(,loop ,(mu:cdr list))))))))))
          ,(mu:cons :form    (:lambda (expr)
                               (core:quote expr)))
          ,(mu:cons :quasi   (:lambda (expr)
