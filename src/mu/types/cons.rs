@@ -357,7 +357,6 @@ impl Core for Cons {
 /// env functions
 pub trait CoreFunction {
     fn mu_append(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_append2(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_car(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_cdr(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_cons(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -389,29 +388,11 @@ impl CoreFunction for Cons {
                                 appended.push(Self::car(env, cons))
                             }
                         }
-                        _ => return Err(Exception::new(env, Condition::Type, "mu:%append", list)),
+                        _ => return Err(Exception::new(env, Condition::Type, "mu:append", list)),
                     }
                 }
             }
         }
-
-        Ok(())
-    }
-
-    fn mu_append2(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let list1 = fp.argv[0];
-        let list2 = fp.argv[1];
-
-        fp.value = match list1.type_of() {
-            Type::Null | Type::Cons => Cons::append(
-                env,
-                &Cons::iter(env, list1)
-                    .map(|elt| Cons::car(env, elt))
-                    .collect::<Vec<Tag>>(),
-                list2,
-            ),
-            _ => list1,
-        };
 
         Ok(())
     }

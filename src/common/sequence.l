@@ -218,7 +218,7 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
 (mu:intern common "copy-seq"
    (:lambda (list)
      (:if (core:listp list)
-          (core:%mapcar common:identity list)             
+          (core:%mapcar core:identity list)             
           (core:raise list 'common:copy-list "not a list"))))
 
 (mu:intern common "%reverse"

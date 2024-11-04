@@ -1,5 +1,5 @@
-(mu:append '(1) 1)	(1 . 1)
-(mu:append '(1) '(1))	(1 1)
+(mu:append '((1) 1))	(1 . 1)
+(mu:append '((1) (1)))	(1 1)
 (mu:car '(1))	1
 (mu:car ())	:nil
 (mu:cdr '(1 2))	(2)

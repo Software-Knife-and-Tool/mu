@@ -41,8 +41,7 @@ lazy_static! {
         ( "repr",    2, Tag::mu_repr ),
         ( "view",    1, Tag::mu_view ),
         // conses and lists
-        ( "append",  2, Cons::mu_append2 ),
-        ( "%append", 1, Cons::mu_append ),
+        ( "append", 1, Cons::mu_append ),
         ( "car",     1, Cons::mu_car ),
         ( "cdr",     1, Cons::mu_cdr ),
         ( "cons",    2, Cons::mu_cons ),

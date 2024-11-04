@@ -2,14 +2,17 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; core macros
+;;; common forms
 ;;;
+(mu:intern core "identity"
+   (:lambda (obj)
+     obj))
 
 ;;;
 ;;; rest functions
 ;;;
 (mu:intern core "append"
-   (core:compile '(lambda (&rest list) (mu:%append list))))
+   (core:compile '(lambda (&rest list) (mu:append list))))
 
 (mu:intern core "list"
    (core:compile '(lambda (&rest list) list)))         
@@ -23,8 +26,8 @@
           ((:lambda (list args)
              (:if args
                   (:if (mu:cdr args)
-                       (mu:cons (mu:append list (mu:cons (mu:car args) ())) (mu:cdr args))
-                       (mu:cons (mu:append list (mu:car args)) ()))
+                       (mu:cons `(,@list ,@(mu:cons (mu:car args) ())) (mu:cdr args))
+                       (mu:cons `(,@list ,@(mu:car args)) ()))
                   loop))
            (mu:car loop)
            (mu:cdr loop)))
