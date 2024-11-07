@@ -7,7 +7,7 @@ use crate::{
         compile::Core as _,
         env::Env,
         exception::{self, Condition, Exception},
-        lib::{Debug, Lib},
+        lib::Lib,
         reader::Core as _,
         types::Tag,
     },
@@ -56,54 +56,44 @@ impl QuasiReader {
     pub fn new(env: &Env, stream: Tag) -> Self {
         Self {
             stream,
-            cons: Namespace::intern(env, env.mu_ns, "cons".to_string(), Tag::nil()).unwrap(), // why?
+            cons: Namespace::intern(env, env.mu_ns, "cons".to_string(), Tag::nil()).unwrap(),
             qappend: Namespace::intern(env, env.mu_ns, "append".to_string(), Tag::nil()).unwrap(),
         }
     }
 
-    fn print_annotated_tag(env: &Env, preface: &str, tag: Tag) {
-        print!("[{:?}] ", tag.type_of());
-        env.eprintln(preface, true, tag);
-    }
+    /*
+        fn print_annotated_tag(env: &Env, preface: &str, tag: Tag) {
+            print!("[{:?}] ", tag.type_of());
+            env.eprintln(preface, true, tag);
+        }
 
-    fn print_expr(env: &Env, indent: usize, expr: &QuasiExpr) {
-        print!("{}", String::from_iter(vec![' '; indent * 2]));
+        fn print_expr(env: &Env, indent: usize, expr: &QuasiExpr) {
+            print!("{}", String::from_iter(vec![' '; indent * 2]));
 
-        match expr {
-            QuasiExpr::Basic(tag) => env.println("QuasiExpr::Basic", false, *tag),
-            QuasiExpr::Comma(tag) => env.println("QuasiExpr::Comma", false, *tag),
-            QuasiExpr::CommaAt(tag) => env.println("QuasiExpr::CommaAt", false, *tag),
-            QuasiExpr::List(vec) => {
-                println!("QuasiExpr::List: {}", vec.len());
-                for expr in vec {
-                    Self::print_expr(env, indent + 1, expr);
+            match expr {
+                QuasiExpr::Basic(tag) => env.println("QuasiExpr::Basic", false, *tag),
+                QuasiExpr::Comma(tag) => env.println("QuasiExpr::Comma", false, *tag),
+                QuasiExpr::CommaAt(tag) => env.println("QuasiExpr::CommaAt", false, *tag),
+                QuasiExpr::List(vec) => {
+                    println!("QuasiExpr::List: {}", vec.len());
+                    for expr in vec {
+                        Self::print_expr(env, indent + 1, expr);
+                    }
                 }
             }
-        }
     }
+        */
 
     pub fn read(env: &Env, _: bool, stream: Tag, _: bool) -> exception::Result<Tag> {
         let quasi = Self::new(env, stream);
         let expr = quasi.parse(env)?;
-
-        /*
-        println!("expression: ");
-        Self::print_expr(env, 0, &expr);
-        println!();
-        */
-
         let form = quasi.compile(env, &expr, false)?;
-
-        /*
-        eprintln!();
-        env.println("compiles to:", true, form);
-        */
 
         Ok(Cons::list(env, &[quasi.qappend, form]))
     }
 
     fn read_syntax(&self, env: &Env) -> exception::Result<Option<QuasiSyntax>> {
-        Lib::read_ws(env, self.stream).unwrap();
+        Lib::read_ws(env, self.stream)?;
 
         match Stream::read_char(env, self.stream)? {
             None => Ok(None),

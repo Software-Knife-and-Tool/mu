@@ -66,9 +66,13 @@
    (:lambda (arg arg1)
      (core:lognot (mu:eq (core:null arg) (core:null arg1)))))
 
-(mu:intern core "%arg2"
+(mu:intern core "%prog2"
    (:lambda (arg1 arg2)
      arg2))
+
+(mu:intern core "%list"
+   (:lambda (form)
+     (mu:cons form ())))
 
 (mu:intern core "%list2"
    (:lambda (arg1 arg2)

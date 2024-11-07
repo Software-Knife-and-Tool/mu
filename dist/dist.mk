@@ -15,9 +15,8 @@ CORE= \
 	map.l          \
 	stream.l       \
 	read.l         \
-	quasiquote.l   \
+	quasi.l	       \
 	parse.l        \
-	read-macro.l   \
 	read-macro.l   \
 	symbol.l       \
 	symbol-macro.l \

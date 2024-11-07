@@ -55,7 +55,7 @@
                          (mu:cons 0 (mu:cons (mu:sub 8 nbits) (mu:ash byte nbits)))
                          ((:lambda (syntax)
                             (:if (core:logor (mu:eq :tmacro syntax) (mu:eq :wspace syntax))
-                                 (core:%arg2
+                                 (core:%prog2
                                     (:if (mu:eq :tmacro syntax)
                                          (mu:unread-char ch stream)
                                          ())
@@ -122,10 +122,10 @@
                                (core:parse-integer (mu:get-string core:%reader-stream%) 10)))
                      ((:lambda (syntax-type)
                         (:if (mu:eq syntax-type :const)
-                             (core:%arg2
+                             (core:%prog2
                                 (mu:write-char ch core:%reader-stream%)
                                 (core:null loop))
-                             (core:%arg2
+                             (core:%prog2
                                 (mu:unread-char ch stream)
                                 (:if (mu:eq base #\x)
                                      (core:parse-integer (mu:get-string core:%reader-stream%) 16)
@@ -173,7 +173,7 @@
                       (:if (mu:eq (mu:symbol-name el) ".")
                            ((:lambda (dotted)
                               (:if (mu:eq (core:%read stream) core:%read-list-eol%)
-                                   (core:%arg2
+                                   (core:%prog2
                                       (mu:unread-char #\) stream)
                                       dotted)
                                    (core:raise () 'core:%read-list "malformed dotted list")))
@@ -195,7 +195,7 @@
              ((:lambda (ch)
                 (:if (mu:eq ch #\")
                      (mu:get-string core:%reader-stream%)
-                     (core:%arg2
+                     (core:%prog2
                         (mu:write-char ch core:%reader-stream%)
                         (core:null loop))))
               (mu:read-char stream () ()))))

@@ -184,7 +184,7 @@
        (:if nth
             (:if (mu:eq nth (mu:vector-len vector))
                  ()
-                 (core:%arg2
+                 (core:%prog2
                   (core:%apply fn (mu:cons (mu:svref vector nth) ()))
                   (mu:add 1 nth)))
             ()))

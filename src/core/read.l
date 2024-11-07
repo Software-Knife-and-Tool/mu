@@ -79,10 +79,10 @@
                (:if (mu:eq core:%eof% ch)
                     loop
                     (:if (mu:eq :const (core:%read-char-syntax ch))
-                         (core:%arg2
+                         (core:%prog2
                             (mu:write-char ch core:%reader-stream%)
                             (core:null loop))
-                         (core:%arg2
+                         (core:%prog2
                             (mu:unread-char ch stream)
                             loop))))
              (mu:read-char stream () core:%eof%))))
@@ -127,13 +127,13 @@
                           (:if (mu:eq ch #\#)
                                ((:lambda (ch)
                                   (:if (mu:eq ch #\|)
-                                       (core:%arg2
+                                       (core:%prog2
                                           (core:%read-sharp-comment ch stream)
                                           (core:null loop))
                                        #\#))
                                 (core:%peek-char stream () ()))
                                (:if (mu:eq ch #\;)
-                                    (core:%arg2
+                                    (core:%prog2
                                        (core:%read-line-comment ch stream)
                                        (core:null loop))
                                     ch)))))

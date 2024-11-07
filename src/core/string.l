@@ -40,7 +40,7 @@
                (:if (mu:eq nth (mu:vector-len str))
                     ()
                     (:if (mu:less-than nth (mu:add 1 end))
-                         (core:%arg2
+                         (core:%prog2
                             (mu:write (mu:svref str nth) () substr)
                             (mu:add 1 nth))
                          ()))
