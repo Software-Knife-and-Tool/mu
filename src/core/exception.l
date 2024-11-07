@@ -56,7 +56,7 @@
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
               (core:format stream format-string `(,cond ,value ,source ,reason)))
          (:if (core:logand printenv env)
-              (core:%arg2
+              (core:%prog2
                   (core:format stream "env:~%" ())
                   (core:%mapc
                    (:lambda (frame)

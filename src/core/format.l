@@ -26,7 +26,7 @@
 (mu:intern core "%fmt-decimal"
   (:lambda (dest arg-list)
      (:if (core:%fixnump (mu:car arg-list))
-          (core:%arg2
+          (core:%prog2
               (core:write (mu:car arg-list) () dest)
               (mu:cdr arg-list))
           (core:raise (mu:car arg-list) 'core:format "argument to ~D not a fixnum"))))
@@ -42,7 +42,7 @@
                       (:lambda (n)
                          (:if (core:logor (core:null n) (mu:eq 0 n))
                               ()
-                              (core:%arg2
+                              (core:%prog2
                                   (mu:write (mu:svref "0123456789abcdef" (mu:logand n #xf)) () str-stream)
                                   (mu:div n 16))))
                       (:if (mu:less-than fx 0) (mu:mul -1 fx) fx))
@@ -54,7 +54,7 @@
                           (:lambda (len)
                              (:if (mu:eq 0 len)
                                   0
-                                  (core:%arg2
+                                  (core:%prog2
                                      (mu:write (mu:svref hexstr (mu:sub len 1)) () dest)
                                      (mu:sub len 1))))
                           (mu:vector-len hexstr)))
@@ -104,7 +104,7 @@
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
                        (mu:cons (mu:add 2 nth) (core:%fmt-op (mu:svref fmt (mu:add 1 nth)) dest argl))
-                       (core:%arg2
+                       (core:%prog2
                            (mu:write-char ch dest)
                            (mu:cons (mu:add 1 nth) argl))))
                 (mu:svref fmt nth))))
