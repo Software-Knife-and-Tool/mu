@@ -154,7 +154,7 @@ impl Env {
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         let stream = StreamBuilder::new()
-            .string(str.to_string())
+            .string(str.into())
             .input()
             .build(env, &LIB)?;
 
@@ -183,7 +183,7 @@ impl Env {
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         let str_stream = match StreamBuilder::new()
-            .string("".to_string())
+            .string("".into())
             .output()
             .build(env, &LIB)
         {
@@ -239,8 +239,8 @@ impl Env {
 
         if fs::metadata(file_path).is_ok() {
             let load_form = format!("(mu:open :file :input \"{}\")", file_path);
-            let istream = env.eval(self.read_str(&load_form).unwrap()).unwrap();
-            let eof_value = self.read_str(":eof").unwrap(); // need make_symbol here
+            let istream = env.eval(self.read_str(&load_form)?)?;
+            let eof_value = self.read_str(":eof")?; // need make_symbol here
 
             drop(env_ref);
 
@@ -260,7 +260,7 @@ impl Env {
                 env,
                 Condition::Open,
                 "load",
-                self.read_str(&format!("\"{}\"", file_path)).unwrap(),
+                self.read_str(&format!("\"{}\"", file_path))?,
             ))
         }
     }

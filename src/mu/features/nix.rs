@@ -7,7 +7,6 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        symbols::CoreFnDef,
         types::Tag,
     },
     features::feature::Feature,
@@ -21,12 +20,6 @@ use crate::{
 };
 use nix::{self};
 
-// env function dispatch table
-lazy_static! {
-    static ref NIX_SYMBOLS: Vec<CoreFnDef> =
-        vec![("uname", 0, <Feature as CoreFunction>::nix_uname)];
-}
-
 pub trait Nix {
     fn feature() -> Feature;
 }
@@ -34,8 +27,8 @@ pub trait Nix {
 impl Nix for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: NIX_SYMBOLS.to_vec(),
-            namespace: "nix".to_string(),
+            symbols: vec![("uname", 0u16, <Feature as CoreFunction>::nix_uname)],
+            namespace: "nix".into(),
         }
     }
 }

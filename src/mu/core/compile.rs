@@ -53,7 +53,7 @@ impl Compile for Env {
         let lambda = Symbol::keyword("lambda");
 
         let if_vec = vec![
-            Namespace::intern(self, self.mu_ns, "%if".to_string(), Tag::nil()).unwrap(),
+            Namespace::intern(self, self.mu_ns, "%if".into(), Tag::nil()).unwrap(),
             Cons::list(
                 self,
                 &[lambda, Tag::nil(), Cons::nth(self, 0, args).unwrap()],
@@ -154,8 +154,7 @@ impl Compile for Env {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
                 let lex_ref = vec![
-                    Namespace::intern(self, self.mu_ns, "%frame-ref".to_string(), Tag::nil())
-                        .unwrap(),
+                    Namespace::intern(self, self.mu_ns, "%frame-ref".into(), Tag::nil()).unwrap(),
                     *tag,
                     Fixnum::with_or_panic(nth),
                 ];

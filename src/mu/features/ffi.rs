@@ -15,7 +15,7 @@ impl Ffi for Feature {
     fn feature() -> Feature {
         Feature {
             symbols: Vec::new(),
-            namespace: "ffi".to_string(),
+            namespace: "ffi".into(),
         }
     }
 }

@@ -46,7 +46,7 @@ impl Namespace {
             ));
         }
 
-        let ns = DirectTag::to_direct(
+        let ns = DirectTag::to_tag(
             len as u64,
             DirectExt::ExtType(ExtType::Namespace),
             DirectType::Ext,
@@ -54,7 +54,7 @@ impl Namespace {
 
         ns_ref.push((
             ns,
-            name.to_string(),
+            name.into(),
             Namespace::Dynamic(RwLock::new(HashMap::<String, Tag>::new())),
         ));
 
@@ -80,13 +80,13 @@ impl Namespace {
             ));
         }
 
-        let ns = DirectTag::to_direct(
+        let ns = DirectTag::to_tag(
             len as u64,
             DirectExt::ExtType(ExtType::Namespace),
             DirectType::Ext,
         );
 
-        ns_ref.push((ns, name.to_string(), Namespace::Static(ns_map)));
+        ns_ref.push((ns, name.into(), Namespace::Static(ns_map)));
 
         Ok(ns)
     }
@@ -157,9 +157,9 @@ impl Namespace {
         ) {
             Some(tag) => {
                 if tag.is_empty() {
-                    Some("".to_string())
+                    Some("".into())
                 } else {
-                    Some(tag.to_string())
+                    Some(tag.into())
                 }
             }
             None => None,

@@ -41,8 +41,7 @@ pub struct SymbolImage {
 }
 
 lazy_static! {
-    pub static ref UNBOUND: Tag =
-        DirectTag::to_direct(0, DirectExt::Length(0), DirectType::Keyword);
+    pub static ref UNBOUND: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
 }
 
 impl Symbol {
@@ -121,7 +120,7 @@ impl Symbol {
     pub fn name(env: &Env, symbol: Tag) -> Tag {
         match symbol.type_of() {
             Type::Null | Type::Keyword => match symbol {
-                Tag::Direct(dir) => DirectTag::to_direct(
+                Tag::Direct(dir) => DirectTag::to_tag(
                     dir.data(),
                     DirectExt::Length(dir.ext() as usize),
                     DirectType::String,
@@ -144,7 +143,7 @@ impl Symbol {
     pub fn ref_name(gc: &mut Gc, symbol: Tag) -> Tag {
         match symbol.type_of() {
             Type::Null | Type::Keyword => match symbol {
-                Tag::Direct(dir) => DirectTag::to_direct(
+                Tag::Direct(dir) => DirectTag::to_tag(
                     dir.data(),
                     DirectExt::Length(dir.ext() as usize),
                     DirectType::String,
@@ -256,7 +255,7 @@ impl Core for Symbol {
         for (src, dst) in str.iter().zip(data.iter_mut()) {
             *dst = *src
         }
-        DirectTag::to_direct(
+        DirectTag::to_tag(
             u64::from_le_bytes(data),
             DirectExt::Length(len),
             DirectType::Keyword,
@@ -289,8 +288,8 @@ impl Core for Symbol {
             }
             Some(_) => {
                 let sym: Vec<&str> = token.split(':').collect();
-                let ns = sym[0].to_string();
-                let name = sym[1].to_string();
+                let ns: String = sym[0].into();
+                let name = sym[1].into();
 
                 if sym.len() != 2 {
                     return Err(Exception::new(

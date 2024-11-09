@@ -29,7 +29,7 @@ pub enum Fixnum {
 // tag from u32
 impl From<u32> for Tag {
     fn from(fx: u32) -> Tag {
-        DirectTag::to_direct(
+        DirectTag::to_tag(
             ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
@@ -40,7 +40,7 @@ impl From<u32> for Tag {
 // tag from u16
 impl From<u16> for Tag {
     fn from(fx: u16) -> Tag {
-        DirectTag::to_direct(
+        DirectTag::to_tag(
             ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
@@ -51,7 +51,7 @@ impl From<u16> for Tag {
 // tag from u8
 impl From<u8> for Tag {
     fn from(fx: u8) -> Tag {
-        DirectTag::to_direct(
+        DirectTag::to_tag(
             ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
@@ -105,7 +105,7 @@ impl Core for Fixnum {
                     panic!()
                 }
 
-                DirectTag::to_direct(
+                DirectTag::to_tag(
                     (i64_ & (2_i64.pow(56) - 1)) as u64,
                     DirectExt::ExtType(ExtType::Fixnum),
                     DirectType::Ext,
@@ -119,7 +119,7 @@ impl Core for Fixnum {
             panic!()
         }
 
-        DirectTag::to_direct(
+        DirectTag::to_tag(
             (fx & (2_i64.pow(56) - 1)) as u64,
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
@@ -135,7 +135,7 @@ impl Core for Fixnum {
             return Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil()));
         }
 
-        Ok(DirectTag::to_direct(
+        Ok(DirectTag::to_tag(
             (fx & (2_i64.pow(56) - 1)) as u64,
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
@@ -150,7 +150,7 @@ impl Core for Fixnum {
                     return Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil()));
                 }
 
-                Ok(DirectTag::to_direct(
+                Ok(DirectTag::to_tag(
                     ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
                     DirectExt::ExtType(ExtType::Fixnum),
                     DirectType::Ext,

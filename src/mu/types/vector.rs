@@ -241,7 +241,7 @@ impl<'a> Core<'a> for Vector {
                 Tag::Direct(dir) => match dir.dtype() {
                     DirectType::String => str::from_utf8(&dir.data().to_le_bytes()).unwrap()
                         [..dir.ext() as usize]
-                        .to_string(),
+                        .into(),
                     _ => panic!(),
                 },
                 Tag::Indirect(image) => {
@@ -258,7 +258,7 @@ impl<'a> Core<'a> for Vector {
                             .unwrap(),
                     )
                     .unwrap()
-                    .to_string()
+                    .into()
                 }
             },
             _ => panic!(),

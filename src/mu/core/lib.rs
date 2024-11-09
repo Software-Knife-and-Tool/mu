@@ -123,26 +123,18 @@ impl Lib {
         Namespace::intern_static(
             env,
             env.mu_ns,
-            "*version*".to_string(),
+            "*version*".into(),
             Vector::from(LIB.version).evict(env),
         )
         .unwrap();
 
-        Namespace::intern_static(env, env.mu_ns, "%null-ns%".to_string(), env.null_ns);
+        Namespace::intern_static(env, env.mu_ns, "%null-ns%".into(), env.null_ns);
 
-        Namespace::intern_static(env, env.mu_ns, "*standard-input*".to_string(), LIB.stdin())
-            .unwrap();
+        Namespace::intern_static(env, env.mu_ns, "*standard-input*".into(), LIB.stdin()).unwrap();
 
-        Namespace::intern_static(
-            env,
-            env.mu_ns,
-            "*standard-output*".to_string(),
-            LIB.stdout(),
-        )
-        .unwrap();
+        Namespace::intern_static(env, env.mu_ns, "*standard-output*".into(), LIB.stdout()).unwrap();
 
-        Namespace::intern_static(env, env.mu_ns, "*error-output*".to_string(), LIB.errout())
-            .unwrap();
+        Namespace::intern_static(env, env.mu_ns, "*error-output*".into(), LIB.errout()).unwrap();
 
         for (name, nreqs, fn_) in &*LIB_SYMBOLS {
             let vec = vec![
@@ -154,7 +146,7 @@ impl Lib {
             let fn_vec = Vector::from(vec).evict(env);
             let func = Function::new((*nreqs).into(), fn_vec).evict(env);
 
-            Namespace::intern_static(env, env.mu_ns, name.to_string(), func).unwrap();
+            Namespace::intern_static(env, env.mu_ns, (*name).into(), func).unwrap();
 
             functions.push(*fn_)
         }
@@ -177,7 +169,7 @@ impl Lib {
                 let fn_vec = Vector::from(vec).evict(env);
                 let func = Function::new((*nreqs).into(), fn_vec).evict(env);
 
-                Namespace::intern(env, ns, name.to_string(), func).unwrap();
+                Namespace::intern(env, ns, (*name).into(), func).unwrap();
 
                 functions.push(*fn_)
             }

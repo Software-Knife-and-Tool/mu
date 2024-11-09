@@ -231,7 +231,7 @@ impl CoreFunction for Stream {
 
         let streams_ref = block_on(LIB.streams.read());
 
-        fp.value = match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        fp.value = match streams_ref.get(Self::stream_index(env, tag)?) {
             Some(stream_ref) => {
                 if Self::is_open(env, tag) {
                     let stream = block_on(stream_ref.read());
@@ -335,7 +335,7 @@ mod tests {
     #[test]
     fn stream_builder() {
         let stream = SystemStreamBuilder::new()
-            .string("hello".to_string())
+            .string("hello".into())
             .input()
             .build();
 

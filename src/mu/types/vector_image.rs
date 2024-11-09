@@ -70,7 +70,7 @@ impl From<&str> for Vector {
                 length: Fixnum::with_or_panic(str.len()),
             };
 
-            Vector::Indirect(image, VectorImageType::Char(str.to_string()))
+            Vector::Indirect(image, VectorImageType::Char(str.into()))
         } else {
             let mut data: [u8; 8] = 0_u64.to_le_bytes();
 
@@ -78,7 +78,7 @@ impl From<&str> for Vector {
                 *dst = *src
             }
 
-            Vector::Direct(DirectTag::to_direct(
+            Vector::Direct(DirectTag::to_tag(
                 u64::from_le_bytes(data),
                 DirectExt::Length(len),
                 DirectType::String,
@@ -105,7 +105,7 @@ impl From<&[u8]> for Vector {
                 *dst = *src
             }
 
-            Vector::Direct(DirectTag::to_direct(
+            Vector::Direct(DirectTag::to_tag(
                 u64::from_le_bytes(data),
                 DirectExt::Length(len),
                 DirectType::ByteVec,
@@ -127,7 +127,7 @@ impl From<Vec<i64>> for Vector {
             length: Fixnum::with_or_panic(vec.len()),
         };
 
-        Vector::Indirect(image, VectorImageType::Fixnum(vec.to_vec()))
+        Vector::Indirect(image, VectorImageType::Fixnum(vec.clone()))
     }
 }
 
@@ -159,7 +159,7 @@ impl From<Vec<f32>> for Vector {
             length: Fixnum::with_or_panic(vec.len()),
         };
 
-        Vector::Indirect(image, VectorImageType::Float(vec.to_vec()))
+        Vector::Indirect(image, VectorImageType::Float(vec.clone()))
     }
 }
 

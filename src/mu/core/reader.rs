@@ -33,7 +33,7 @@ use crate::{
 //
 
 lazy_static! {
-    pub static ref EOL: Tag = DirectTag::to_direct(0, DirectExt::Length(0), DirectType::Keyword);
+    pub static ref EOL: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
 }
 
 pub trait Core {

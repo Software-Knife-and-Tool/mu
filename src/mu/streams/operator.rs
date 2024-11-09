@@ -103,13 +103,10 @@ impl SystemStream {
 impl Core for SystemStream {
     fn open_file(env: &Env, path: &str, is_input: bool) -> exception::Result<Tag> {
         let system_stream = if is_input {
-            SystemStreamBuilder::new()
-                .file(path.to_string())
-                .input()
-                .build()
+            SystemStreamBuilder::new().file(path.into()).input().build()
         } else {
             SystemStreamBuilder::new()
-                .file(path.to_string())
+                .file(path.into())
                 .output()
                 .build()
         };
@@ -128,7 +125,7 @@ impl Core for SystemStream {
                     unch: Tag::nil(),
                 }));
 
-                Ok(DirectTag::to_direct(
+                Ok(DirectTag::to_tag(
                     index as u64,
                     DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,
@@ -148,15 +145,15 @@ impl Core for SystemStream {
     fn open_string(env: &Env, contents: &str, dir: StringDirection) -> exception::Result<Tag> {
         let system_stream = match dir {
             StringDirection::Input => SystemStreamBuilder::new()
-                .string(contents.to_string())
+                .string(contents.into())
                 .input()
                 .build(),
             StringDirection::Output => SystemStreamBuilder::new()
-                .string(contents.to_string())
+                .string(contents.into())
                 .output()
                 .build(),
             StringDirection::Bidir => SystemStreamBuilder::new()
-                .string(contents.to_string())
+                .string(contents.into())
                 .bidir()
                 .build(),
         };
@@ -179,7 +176,7 @@ impl Core for SystemStream {
                     unch: Tag::nil(),
                 }));
 
-                Ok(DirectTag::to_direct(
+                Ok(DirectTag::to_tag(
                     index as u64,
                     DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,
@@ -220,7 +217,7 @@ impl Core for SystemStream {
                     unch: Tag::nil(),
                 }));
 
-                Ok(DirectTag::to_direct(
+                Ok(DirectTag::to_tag(
                     index as u64,
                     DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,

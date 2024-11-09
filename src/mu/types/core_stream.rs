@@ -41,7 +41,7 @@ pub struct Stream {
 
 impl From<Stream> for Tag {
     fn from(stream: Stream) -> Tag {
-        DirectTag::to_direct(
+        DirectTag::to_tag(
             stream.index as u64,
             DirectExt::ExtType(ExtType::Stream),
             DirectType::Ext,
@@ -50,7 +50,7 @@ impl From<Stream> for Tag {
 }
 
 pub trait Core {
-    fn to_stream_index(_: &Env, _: Tag) -> exception::Result<usize>;
+    fn stream_index(_: &Env, _: Tag) -> exception::Result<usize>;
     fn close(_: &Env, _: Tag);
     fn get_string(_: &Env, _: Tag) -> exception::Result<String>;
     fn is_open(_: &Env, _: Tag) -> bool;
@@ -64,7 +64,7 @@ pub trait Core {
 }
 
 impl Core for Stream {
-    fn to_stream_index(env: &Env, tag: Tag) -> exception::Result<usize> {
+    fn stream_index(env: &Env, tag: Tag) -> exception::Result<usize> {
         match tag {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.ext().try_into() {
@@ -80,7 +80,7 @@ impl Core for Stream {
     fn view(env: &Env, tag: Tag) -> Tag {
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
                 let vec = vec![
@@ -98,7 +98,7 @@ impl Core for Stream {
     fn is_open(env: &Env, tag: Tag) -> bool {
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -111,7 +111,7 @@ impl Core for Stream {
     fn close(env: &Env, tag: Tag) {
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -128,7 +128,7 @@ impl Core for Stream {
 
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -143,7 +143,7 @@ impl Core for Stream {
             Type::Stream => {
                 let streams_ref = block_on(LIB.streams.read());
 
-                match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+                match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
                     Some(stream_ref) => {
                         let stream = block_on(stream_ref.read());
 
@@ -191,7 +191,7 @@ impl Core for Stream {
 
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
@@ -224,7 +224,7 @@ impl Core for Stream {
 
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
@@ -259,7 +259,7 @@ impl Core for Stream {
 
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
@@ -296,7 +296,7 @@ impl Core for Stream {
 
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -320,7 +320,7 @@ impl Core for Stream {
 
         let streams_ref = block_on(LIB.streams.read());
 
-        match streams_ref.get(Self::to_stream_index(env, tag).unwrap()) {
+        match streams_ref.get(Self::stream_index(env, tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 

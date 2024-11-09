@@ -25,12 +25,6 @@ use crate::{
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
-// env function dispatch table
-lazy_static! {
-    static ref PROF_SYMBOLS: Vec<CoreFnDef> =
-        vec![("prof-control", 1, <Feature as CoreFunction>::prof_control)];
-}
-
 pub trait Prof {
     fn feature() -> Feature;
     fn prof_event(_: &Env, _: Tag) -> exception::Result<()>;
@@ -39,8 +33,8 @@ pub trait Prof {
 impl Prof for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: PROF_SYMBOLS.to_vec(),
-            namespace: "prof".to_string(),
+            symbols: vec![("prof-control", 1, <Feature as CoreFunction>::prof_control)],
+            namespace: "prof".into(),
         }
     }
 
@@ -84,7 +78,7 @@ impl CoreFunction for Feature {
         } else if cmd.eq_(&Symbol::keyword("get")) {
             let prof_vec = (*profile_map_ref)
                 .iter()
-                .map(|item| Cons::cons(env, item.0, Fixnum::with_u64(env, item.1).unwrap()))
+                .map(|item| Cons::cons(env, item.0, Fixnum::with_u64(env, item.1)?))
                 .collect::<Vec<Tag>>();
 
             fp.value = Vector::from(prof_vec).evict(env)

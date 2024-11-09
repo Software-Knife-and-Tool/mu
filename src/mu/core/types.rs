@@ -78,7 +78,7 @@ pub enum TagType {
 }
 
 lazy_static! {
-    static ref NIL: Tag = DirectTag::to_direct(
+    static ref NIL: Tag = DirectTag::to_tag(
         (('l' as u64) << 16) | (('i' as u64) << 8) | ('n' as u64),
         DirectExt::Length(3),
         DirectType::Keyword
