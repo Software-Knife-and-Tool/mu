@@ -141,16 +141,14 @@ impl Core for Function {
                 let form = Function::form(env, func);
 
                 let desc = match form.type_of() {
-                    Type::Cons | Type::Null => {
-                        ("lambda".to_string(), format!("{:x}", form.as_u64()))
-                    }
+                    Type::Cons | Type::Null => ("lambda".into(), format!("{:x}", form.as_u64())),
                     Type::Vector => {
                         let ns = Vector::ref_(env, form, 0).unwrap();
                         let name = Vector::ref_(env, form, 1).unwrap();
 
                         (
                             Namespace::name(env, ns).unwrap(),
-                            Vector::as_string(env, name).to_string(),
+                            Vector::as_string(env, name),
                         )
                     }
                     _ => panic!(),

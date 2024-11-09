@@ -56,7 +56,7 @@ impl CoreFunction for Env {
         let mut frames = Vec::new();
 
         frames.extend(frames_ref.iter().map(|(func, offset)| {
-            let mut argv = Vec::new();
+            let mut argv = vec![];
 
             Frame::frame_stack_ref(env, (&func.to_le_bytes()).into(), *offset, &mut argv);
 

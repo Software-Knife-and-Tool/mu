@@ -25,7 +25,7 @@ pub enum Char {
 
 impl From<char> for Tag {
     fn from(ch: char) -> Tag {
-        DirectTag::to_direct(
+        DirectTag::to_tag(
             ch as u64,
             DirectExt::ExtType(ExtType::Char),
             DirectType::Ext,

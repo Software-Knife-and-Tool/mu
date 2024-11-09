@@ -11,7 +11,6 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        symbols::CoreFnDef,
         types::Type,
     },
     features::feature::Feature,
@@ -24,16 +23,6 @@ use crate::{
     },
 };
 
-// env function dispatch table
-lazy_static! {
-    static ref STD_SYMBOLS: Vec<CoreFnDef> = vec![
-        ("command", 2, <Feature as CoreFunction>::std_command),
-        ("env", 0, <Feature as CoreFunction>::std_env),
-        ("exit", 1, <Feature as CoreFunction>::std_exit),
-        ("sleep", 1, <Feature as CoreFunction>::std_sleep),
-    ];
-}
-
 pub trait Std {
     fn feature() -> Feature;
 }
@@ -41,8 +30,13 @@ pub trait Std {
 impl Std for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: STD_SYMBOLS.to_vec(),
-            namespace: "std".to_string(),
+            symbols: vec![
+                ("command", 2, <Feature as CoreFunction>::std_command),
+                ("env", 0, <Feature as CoreFunction>::std_env),
+                ("exit", 1, <Feature as CoreFunction>::std_exit),
+                ("sleep", 1, <Feature as CoreFunction>::std_sleep),
+            ],
+            namespace: "std".into(),
         }
     }
 }

@@ -31,7 +31,7 @@ pub enum Float {
 impl From<f32> for Tag {
     fn from(fl: f32) -> Tag {
         let bytes = fl.to_le_bytes();
-        DirectTag::to_direct(
+        DirectTag::to_tag(
             u32::from_le_bytes(bytes) as u64,
             DirectExt::ExtType(ExtType::Float),
             DirectType::Ext,

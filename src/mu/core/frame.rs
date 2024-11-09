@@ -39,7 +39,7 @@ pub struct Frame {
 
 impl Frame {
     fn to_tag(&self, env: &Env) -> Tag {
-        let vec = self.argv.to_vec();
+        let vec = self.argv.clone();
 
         Struct::new(env, "frame", vec).evict(env)
     }

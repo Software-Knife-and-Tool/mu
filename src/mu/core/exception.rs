@@ -94,7 +94,7 @@ impl fmt::Display for Exception {
 
 impl Exception {
     pub fn new(env: &Env, condition: Condition, symbol: &str, object: Tag) -> Self {
-        let source = Symbol::parse(env, symbol.to_string()).unwrap();
+        let source = Symbol::parse(env, symbol.into()).unwrap();
 
         Exception {
             object,
@@ -104,24 +104,16 @@ impl Exception {
     }
 
     fn map_condition(env: &Env, keyword: Tag) -> Result<Condition> {
-        #[allow(clippy::unnecessary_to_owned)]
-        let condmap = CONDMAP
-            .to_vec()
-            .into_iter()
-            .find(|cond| keyword.eq_(&cond.0));
+        let condmap = CONDMAP.iter().find(|cond| keyword.eq_(&cond.0));
 
         match condmap {
-            Some(entry) => Ok(entry.1),
+            Some(entry) => Ok(entry.1.clone()),
             _ => Err(Exception::new(env, Condition::Syntax, "mu:raise", keyword)),
         }
     }
 
     fn map_condkey(cond: Condition) -> Result<Tag> {
-        #[allow(clippy::unnecessary_to_owned)]
-        let condmap = CONDMAP
-            .to_vec()
-            .into_iter()
-            .find(|condtab| cond == condtab.1);
+        let condmap = CONDMAP.iter().find(|condtab| cond == condtab.1);
 
         match condmap {
             Some(entry) => Ok(entry.0),

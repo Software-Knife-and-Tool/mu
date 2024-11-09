@@ -73,7 +73,7 @@ impl DirectTag {
         }
     }
 
-    pub fn to_direct(data: u64, ext: DirectExt, tag: DirectType) -> Tag {
+    pub fn to_tag(data: u64, ext: DirectExt, tag: DirectType) -> Tag {
         let ext: u8 = match ext {
             DirectExt::Length(size) => size as u8,
             DirectExt::ExtType(ext_type) => ext_type as u8,
@@ -113,7 +113,7 @@ impl DirectTag {
         let car_ = Self::sext_from_tag(car)?;
 
         Self::sext_from_tag(cdr).map(|cdr_| {
-            Self::to_direct(
+            Self::to_tag(
                 (car_ as u64) << 28 | cdr_ as u64,
                 DirectExt::ExtType(ExtType::Cons),
                 DirectType::Ext,

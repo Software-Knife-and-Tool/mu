@@ -7,7 +7,6 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        symbols::CoreFnDef,
         types::Tag,
     },
     features::feature::Feature,
@@ -20,12 +19,6 @@ use crate::{
 };
 use sysinfo_dot_h::{self};
 
-// env function dispatch table
-lazy_static! {
-    static ref SYSINFO_SYMBOLS: Vec<CoreFnDef> =
-        vec![("sysinfo", 0, <Feature as CoreFunction>::sysinfo_sysinfo),];
-}
-
 pub trait Sysinfo {
     fn feature() -> Feature;
 }
@@ -33,8 +26,8 @@ pub trait Sysinfo {
 impl Sysinfo for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: SYSINFO_SYMBOLS.to_vec(),
-            namespace: "sysinfo".to_string(),
+            symbols: vec![("sysinfo", 0, <Feature as CoreFunction>::sysinfo_sysinfo)],
+            namespace: "sysinfo".into(),
         }
     }
 }
