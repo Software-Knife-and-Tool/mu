@@ -150,7 +150,7 @@
             core:%eof%
             ((:lambda (macro)
                (:if macro
-                    (core:%apply (mu:car macro) (core:%list2 stream ch))
+                    (core:apply (mu:car macro) (core:%list2 stream ch))
                     (core:%read-dispatch ch stream)))
              (core:get-macro-character ch))))
      (core:%read-consume-ws stream))))

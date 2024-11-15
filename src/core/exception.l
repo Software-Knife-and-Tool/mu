@@ -2,11 +2,9 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; exceptions
+;;; exception deftype
 ;;;
 
-;;;
-;;; [*exception descriptor*] #s(%exception cond value source reason env)
 ;;;
 ;;; cond:   condition type symbol
 ;;; value:  exception raised on value
@@ -14,12 +12,6 @@
 ;;; reason: extended condition, usually a string
 ;;; env:    dynamic environment, list of frames
 ;;;
-(mu:intern core "exceptionp"
-    (:lambda (ex)
-      (core:logand
-       (core:%core-type-p ex)
-       (mu:eq '%exception (core:type-of ex)))))
-
 (core:def-type "%exception"
     '((:cond   . :symbolp)
       (:value  . :t)
@@ -33,7 +25,7 @@
 
 (mu:intern core "exception-prop"
    (:lambda (prop exception)
-      (:if (core:%findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
+      (:if (core:%findl-if (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
            (core:%type-ref prop exception)
            (core:raise prop 'core:%exception-prop "not an exception property"))))
 
@@ -45,6 +37,15 @@
           ,(mu:cons :source source)
           ,(mu:cons :reason reason)
           ,(mu:cons :env    env)))))
+
+;;;
+;;; predicate
+;;;
+(mu:intern core "exceptionp"
+    (:lambda (ex)
+      (core:logand
+       (core:%core-type-p ex)
+       (mu:eq '%exception (core:type-of ex)))))
 
 ;;;
 ;;; functions

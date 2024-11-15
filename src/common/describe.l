@@ -7,7 +7,7 @@
 #|
 (mu:intern common "%describe-core-fn"
    (:lambda (fn)
-     (:if (core:%core-function-p fn)
+     (:if (core:%closure-p fn)
           ((:lambda (lambda arity fn env)
              (core:eprint "" "%describe-fn:core")
              (core:eprint lambda "    lambda")

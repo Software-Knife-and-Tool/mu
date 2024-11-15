@@ -20,8 +20,8 @@ use crate::{
         function::Function,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::VectorIter,
-        vector::{Core as _, Vector},
+        vector::Core as _,
+        vector::Vector,
     },
     LIB,
 };
@@ -60,7 +60,7 @@ impl Frame {
 
                         Frame {
                             func,
-                            argv: VectorIter::new(env, frame).skip(1).collect::<Vec<Tag>>(),
+                            argv: Vector::iter(env, frame).skip(1).collect::<Vec<Tag>>(),
                             value: Tag::nil(),
                         }
                     }
@@ -213,7 +213,7 @@ impl CoreFunction for Frame {
             return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", av));
         }
 
-        let argv = VectorIter::new(env, av).collect::<Vec<Tag>>();
+        let argv = Vector::iter(env, av).collect::<Vec<Tag>>();
 
         let value = Tag::nil();
 

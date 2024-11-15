@@ -4,23 +4,19 @@
 ;;;
 ;;; apply functions
 ;;;
-(mu:intern core "%fapply"
-   (:lambda (core-function mu-function arg-list)
-     ((:lambda (env)
-        (mu:apply mu-function arg-list))
-     (core:%core-function-prop :env core-function))))
-
 (mu:intern core "%apply"
-   (:lambda (function arg-list)
-     (:if (core:%core-function-p function)
-          (core:%fapply
-           function
-           (mu:compile (core:%core-function-prop :mu function))
-           (mu:eval (core:%compile-lambda-arg-list function arg-list ())))
-          (mu:apply function arg-list))))
+   (:lambda (closure frame arg-list-form)
+     ((:lambda (env)
+        (mu:apply frame arg-list-form))
+     (core:%closure-prop :env closure))))
 
 (mu:intern core "apply"
    (:lambda (function arg-list)
      (:if (core:functionp function)
-          (core:%apply function arg-list)
+          (:if (core:%closurep function)
+               (core:%apply
+                function
+                (core:compile (core:%closure-prop :form function))
+                (mu:eval (core:%compile-lambda-arg-list function arg-list ())))
+               (mu:apply function arg-list))
           (core:raise function 'core:apply "not a function designator"))))

@@ -17,7 +17,7 @@ use {
             core_stream::{Core as _, Stream},
             fixnum::{Core as _, Fixnum},
             symbol::{Core as _, Symbol},
-            vector::{Vector, VectorIter},
+            vector::{Core as _, Vector},
         },
     },
     futures::executor::block_on,
@@ -503,7 +503,7 @@ impl<'a> Core<'a> for Vector {
                 DirectType::ByteVec => {
                     env.write_string("#(:byte", stream)?;
 
-                    for tag in VectorIter::new(env, vector) {
+                    for tag in Vector::iter(env, vector) {
                         env.write_string(" ", stream)?;
                         env.write_stream(tag, false, stream)?;
                     }
@@ -518,7 +518,7 @@ impl<'a> Core<'a> for Vector {
                         env.write_string("\"", stream)?;
                     }
 
-                    for ch in VectorIter::new(env, vector) {
+                    for ch in Vector::iter(env, vector) {
                         env.write_stream(ch, false, stream)?;
                     }
 
@@ -532,7 +532,7 @@ impl<'a> Core<'a> for Vector {
                     env.write_string("#*", stream)?;
 
                     let _len = Vector::length(env, vector);
-                    for bit in VectorIter::new(env, vector) {
+                    for bit in Vector::iter(env, vector) {
                         let digit = Fixnum::as_i64(bit);
 
                         env.write_string(if digit == 1 { "1" } else { "0" }, stream)?
@@ -544,7 +544,7 @@ impl<'a> Core<'a> for Vector {
                     env.write_string("#(", stream)?;
                     env.write_stream(Self::to_image(env, vector).type_, true, stream)?;
 
-                    for tag in VectorIter::new(env, vector) {
+                    for tag in Vector::iter(env, vector) {
                         env.write_string(" ", stream)?;
                         env.write_stream(tag, false, stream)?;
                     }

@@ -2,95 +2,89 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; core functions
+;;; closures
 ;;;
-(core:def-type "%core-function"
+
+;;;
+;;; closure deftype
+;;;
+
+;;;
+;;;  (:require . :listp)      closure required arg symbols
+;;;  (:rest    . :symbolp)    closure rest arg symbol
+;;;  (:env     . :listp)      closure captured environment
+;;;  (:form    . :listp)      frame lambda
+;;;  (:arity   . :fixnum)     frame lambda number of required args
+;;;
+(core:def-type "%closure"
     '((:require . :listp)
       (:rest    . :symbolp)
-      (:form    . :listp)
       (:arity   . :fixnum)
-      (:mu      . :listp)
-      (:env     . :listp)
-      (:lexenv  . :listp)))
+      (:form    . :listp)
+      (:env     . :listp)))
 
-(mu:intern core "%core-function-prop"
+(mu:intern core "%closure-prop"
    (:lambda (prop function)
      (mu:cdr (core:%type-ref prop function))))
 
-(mu:intern core "core-function-prop"
+(mu:intern core "closure-prop"
    (:lambda (prop function)
-     (:if (core:%findl
+     (:if (core:%findl-if
            (:lambda (fprop)
              (mu:eq prop fprop))
-           '(:require :rest :form :arity :mu :env :lexenv))
-          (core:%core-function-prop prop function)
-          (core:raise prop 'core:%core-function-prop "not a function property"))))
+           '(:require :rest :arity :form :env))
+          (core:%closure-prop prop function)
+          (core:raise prop 'core:%closure-prop "not a function property"))))
 
-(mu:intern core "%make-core-function"
-   (:lambda (requires rest-sym form mu lexenv env)
-     (core:%make-core-type "%core-function"
+(mu:intern core "%make-closure"
+   (:lambda (requires rest-sym form env)
+     (core:%make-core-type "%closure"
        `(,(mu:cons :require   requires)
           ,(mu:cons :rest     rest-sym)
           ,(mu:cons :form     form)
-          ,(mu:cons :mu       mu)
           ,(mu:cons :arity    (mu:sub (mu:length requires) (:if rest-sym 1 0)))
-          ,(mu:cons :env      env)
-          ,(mu:cons :lexenv   lexenv)))))
+          ,(mu:cons :env      env)))))
 
 ;;;
 ;;; predicates
 ;;;
-(mu:intern core "%core-function-p"
-   (:lambda (function)
-     (:if (core:%core-type-p function)
-          (mu:eq '%core-function (core:type-of function))
-          ())))
-
 (mu:intern core "%closurep"
    (:lambda (function)
-     (:if (core:%core-function-p function)
-          (core:null (core:null (core:%core-function-prop :env function)))
+     (:if (core:%core-type-p function)
+          (mu:eq '%closure (core:type-of function))
           ())))
 
 (mu:intern core "functionp"
    (:lambda (function)
      (:if (mu:eq :func (mu:type-of function))
           :t
-          (core:%core-function-p function))))
+          (core:%closurep function))))
 
 ;;;
-;;; constructor
+;;; compile closure
 ;;;
-(mu:intern core "compile-core-function"
+(mu:intern core "compile-closure"
    (:lambda (lambda body env)
-     (:if (core:%findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-          (core:raise lambda 'core:compile-core-function "lambda list syntax")
+     (:if (core:%findl-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
+          (core:raise lambda 'core:compile-closure "malformed lambda expression")
           ((:lambda (desc)
              ((:lambda (body)
                 (:if (core:logor (core:%fixnump desc) (core:null body))
-                     (core:%make-core-function lambda () body `(:lambda ,lambda ,@body) env ())
-                     ((:lambda (lambda rest)
-                        (core:%make-core-function
-                         lambda
-                         rest
-                         body
-                         `(:lambda ,lambda ,@body)
-                         env
-                         ()))
-                      (mu:car desc)
-                      (mu:cdr desc))))
+                     (core:%make-closure lambda () `(:lambda ,lambda ,@body) ())
+                     ((:lambda ()
+                        ;;; (core:warn `(:lambda ,(mu:car desc) ,@(mu:cdr desc)) "compile-closure")
+                        (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) ())))))
               (core:%mapcar (:lambda (form) (core:%compile form env)) body)))
-
            (core:%foldl
             (:lambda (el acc)
               (:if (core:%numberp acc)
                    (:if (mu:eq '&rest el)
                         (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
                              (mu:cons
-                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
-                              (mu:nth (mu:sub (mu:length lambda) 1) lambda))
-                             (core:raise lambda 'core:compile-core-function "rest botch"))
-                        (mu:add 1 acc))
+                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (core:1- (mu:length lambda))))
+                              (mu:nth (core:1- (mu:length lambda)) lambda))
+                             (core:raise lambda 'core:compile-closure "rest botch"))
+                        (core:1+ acc))
                    acc))
             0
             lambda)))))
@@ -119,13 +113,13 @@
                                           (:if binding-lambda
                                                 (mu:cons (mu:cons form binding-lambda) acc)
                                                 acc))
-                                       (core:%findl
+                                       (core:%findl-if
                                         (:lambda (lambda)
-                                           (core:%findl
+                                           (core:%findl-if
                                             (:lambda (symbol) (mu:eq symbol form))
                                             (core:%type-ref :require lambda)))
                                         env))))
-                                 (core:%findl (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
+                                 (core:%findl-if (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
                              acc)
                         acc)))
            ()

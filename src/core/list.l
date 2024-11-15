@@ -8,8 +8,8 @@
 ;;;
 ;;; finds
 ;;;
-(mu:intern core "%findl"
-   (:lambda (function list)
+(mu:intern core "%findl-if"
+   (:lambda (predicate list)
      (mu:cdr
       (mu:fix
        (:lambda (loop)
@@ -17,7 +17,7 @@
               loop
               (:if (mu:cdr loop)
                    ((:lambda (el)
-                      (:if (core:%apply function (mu:cons el ()))
+                      (:if (core:apply predicate (mu:cons el ()))
                            (mu:cons :t el)
                            (mu:cons () (mu:nthcdr 2 loop))))
                     (mu:nth 1 loop))
@@ -27,7 +27,7 @@
 ;;;
 ;;; positions
 ;;;
-(mu:intern core "%positionl"
+(mu:intern core "%positionl-if"
    (:lambda (function list)
      (:if list
           ((:lambda (length)
@@ -38,7 +38,7 @@
                       loop
                       (:if (mu:less-than length loop)
                            ()
-                           (:if (core:%apply function (mu:cons (mu:nth loop list) ()))
+                           (:if (core:apply function (mu:cons (mu:nth loop list) ()))
                                 (mu:cons loop  ())
                                 (mu:add loop 1)))))
                0)))

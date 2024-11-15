@@ -217,6 +217,7 @@ impl Vector {
 pub trait Core<'a> {
     fn as_string(_: &Env, _: Tag) -> String;
     fn gc_ref(_: &mut Gc, _: &Env, _: Tag, _: usize) -> Option<Tag>;
+    fn iter(_: &Env, _: Tag) -> VectorIter;
     fn read(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
     fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
     fn view(_: &Env, _: Tag) -> Tag;
@@ -277,6 +278,10 @@ impl<'a> Core<'a> for Vector {
             },
             _ => panic!(),
         }
+    }
+
+    fn iter(env: &Env, vec: Tag) -> VectorIter {
+        VectorIter { env, vec, index: 0 }
     }
 
     fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
