@@ -149,7 +149,7 @@ versions 0.1.69 - 0.1.73 are built with rustc 1.79.0.
 
  versions 0.1.74 - 0.1.79 are built with rustc 1.81.0.
 
-version 0.1.80 is built with rustc 1.82.0.
+version 0.1.8{12} are built with rustc 1.82.0.
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
@@ -159,7 +159,7 @@ Tests and regression metrics require some version of `python 3`.
 git clone https://github.com/Software-Knife-and-Tool/mu.git
 ```
 
-After cloning the *mu* repository, the *mu* system can be built and installed with the supplied makefile. The *world* target builds a release version of the system and the *mux* development tool. 
+After cloning the *mu* repository, the *mu* system can be built and installed with the supplied makefile. The *world* target builds a release version of the system and the *mux* development tool.  `make` with no arguments prints the available targets. 
 
 ```
 % make world
@@ -173,7 +173,13 @@ Having built the distribution, install it in `/opt/mu`. You can change where the
 % sudo MUX_DIR=/usr/local/bin make install
 ```
 
-`make` with no arguments prints the available targets. Subsequent builds and packaging of the system can be facilitated with *mux*. See *mux* section below for usage instructions. A copy of the prior makefile can be found in the root directory as `mu.mk`.  *mu.mk* is deprecated in favor of the more *cargo*-like *mux*, but is left as a resource for the curious.
+Having built and installed `mux`,  establish the current directory as a `mux`  workspace. In releases prior to 0.1.82, the make `world` target does this automatically. In 0.1.82 and later releases:
+
+```
+% mux init
+```
+
+Subsequent builds and packaging of the system can be facilitated with *mux*. See *mux* section below for usage instructions. A copy of the prior makefile can be found in the root directory as `mu.mk`.  *mu.mk* is deprecated in favor of the more *cargo*-like *mux*, but is left as a resource for the curious.
 
 Note: the *mux* and *makefile* installation mechanisms do not remove the installation directory before writing it and changes to directory structure and files will accumulate.
 
@@ -208,16 +214,18 @@ The *sysinfo* feature is disabled on *macos* builds.
 As of 0.1.76, the *mu* distribution includes tools for configuring and development of the system. The *mux* tool provides these utilities:
 
 ```
-Usage: mux 0.0.8 command [option...]
+Usage: mux 0.0.10 command [option...]
   command:
     help                               ; this message
     version                            ; mux version
+
+    init                               ; init
     env                                ; mu development environment
     build     [--release | --profile | --debug]
                                        ; build mu system, debug is default
+    install                            ; (sudo) install mu system-wide
     clean                              ; clean all artifacts
     commit                             ; fmt and clippy, pre-commit checking
-    install                            ; (sudo) install mu system-wide
     repl      [--namespace ...]        ; repl
     symbols   [--crossref | --counts | --reference | --namespace ...]
                                        ; symbol reports
@@ -231,6 +239,33 @@ Usage: mux 0.0.8 command [option...]
     --output ...                       ; output file path
 ```
 
+`mux` is styled after `cargo` and fulfills many of the same needs. While the help message should be relatively explanatory, the general development workflow is something like this.
+
+Before making any changes, you will want to establish a performance baseline.
+
+```
+ mux bench --base --ntests 50
+```
+
+As you make changes, you can verify correctness and note any performance regressions. Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
+
+```
+ mux build --release				# build the mu release version 
+ mux test                     		# run the regression tests
+ mux bench --current --ntests 50	# benchmark the current build and print results
+```
+
+`mux` provides an interactive listener for the `mu`, `core`, and `prelude` namespaces. `mu` and `core` use the `mu-sh` listener, `prelude` uses its own REPL.
+
+```
+ sudo mux install
+ mux repl --namespace prelude
+ prelude>
+```
+
+The `symbols` command prints a list of the symbols in various namespace and their types.
+
+Profiling is nascent and will be expanded in future releases. 
 
 
 
@@ -264,8 +299,6 @@ The `tests` makefile has additional facilities for development. The `help` targe
     test - run single test in $NS/$TEST
     base - run all tests in all namespaces and print summary
 ```
-
-
 
 #### Performance metrics
 
