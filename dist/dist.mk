@@ -5,29 +5,29 @@
 SRC = ../src
 
 CORE= \
-	core.l         \
-	compile.l      \
-	string.l       \
-	format.l       \
-	funcall.l      \
-	load.l         \
-	list.l         \
-	map.l          \
-	stream.l       \
-	read.l         \
-	quasi.l	       \
-	parse.l        \
-	read-macro.l   \
-	symbol.l       \
-	symbol-macro.l \
-	deftype.l      \
-	typespec.l     \
-	exception.l    \
-	macro.l        \
-	function.l     \
-	apply.l	       \
-	package.l      \
-	vector.l       \
+	core.l		\
+	compile.l	\
+	string.l	\
+	format.l	\
+	funcall.l	\
+	load.l		\
+	list.l		\
+	map.l		\
+	stream.l	\
+	read.l		\
+	quasi.l		\
+	parse.l		\
+	read-macro.l	\
+	symbol.l	\
+	symbol-macro.l	\
+	deftype.l	\
+	typespec.l	\
+	exception.l	\
+	macro.l		\
+	closure.l	\
+	apply.l		\
+	package.l	\
+	vector.l	\
 	common.l
 
 COMMON= \

@@ -2,14 +2,14 @@
 (mu:type-of core:%assq)	:func
 (mu:type-of core:%dropl)	:func
 (mu:type-of core:%dropr)	:func
-(mu:type-of core:%findl)	:func
+(mu:type-of core:%findl-if)	:func
 (mu:type-of core:%foldl)	:func
 (mu:type-of core:%foldr)	:func
 (mu:type-of core:%mapc)	:func
 (mu:type-of core:%mapcar)	:func
 (mu:type-of core:%mapl)	:func
 (mu:type-of core:%maplist)	:func
-(mu:type-of core:%positionl)	:func
+(mu:type-of core:%positionl-if)	:func
 (mu:type-of core:%reverse)	:func
 (mu:type-of core:%rassq)	:func
 (core:%append '(() ()))	:nil
@@ -21,8 +21,8 @@
 (core:%dropl '(1 2 3) 1)	(2 3)
 (core:%dropr '(1 2 3) 0)	(1 2 3)
 (core:%dropr '(1 2 3) 1)	(1 2)
-(core:%findl core:%symbolp '(1 2 3))	:nil
-(core:%findl core:%symbolp '(a b c))	a
+(core:%findl-if core:%symbolp '(1 2 3))	:nil
+(core:%findl-if core:%symbolp '(a b c))	a
 (core:%foldl (:lambda (el acc) (:if (core:null acc) :nil (core:%symbolp el))) :t '(1 2 3))	:nil
 (core:%foldl (:lambda (el acc) (:if (core:null acc) :nil (core:%symbolp el))) :t '(a b c))	:t
 (core:%foldl (:lambda (el acc) (mu:cons el acc)) () '(1 2 3 4))	(4 3 2 1)
@@ -48,10 +48,10 @@
 (core:%maplist (:lambda (el) el) '(1 2 3))	((1 2 3) (2 3) (3))
 (core:%maplist (:lambda (el) el) '(1))	((1))
 (core:%maplist (:lambda (el) el) ())	:nil
-(core:%positionl (:lambda (el) (mu:eq el 'foo)) ())	:nil
-(core:%positionl (:lambda (el) (mu:eq el 'foo)) '(1))	:nil
-(core:%positionl (:lambda (el) (mu:eq el 'foo)) '(foo))	0
-(core:%positionl (:lambda (el) (mu:eq el 'foo)) '(1 foo))	1
+(core:%positionl-if (:lambda (el) (mu:eq el 'foo)) ())	:nil
+(core:%positionl-if (:lambda (el) (mu:eq el 'foo)) '(1))	:nil
+(core:%positionl-if (:lambda (el) (mu:eq el 'foo)) '(foo))	0
+(core:%positionl-if (:lambda (el) (mu:eq el 'foo)) '(1 foo))	1
 (core:%reverse '(1 2 3 4))	(4 3 2 1)
 (mu:cdr (core:%assq #\a '((#\a . foo))))	foo
 (mu:cdr (core:%assq #\a '(() (#\a . foo))))	foo

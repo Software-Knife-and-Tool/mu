@@ -2,11 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;;  core package
-;;;
-
-;;;
-;;; package type
+;;; package deftype
 ;;;
 (core:def-type "%package"
     '((:name    . :string)
@@ -18,7 +14,7 @@
 
 (mu:intern core "%package-prop"
    (:lambda (prop package)
-      (:if (core:%findl
+      (:if (core:%findl-if
             (:lambda (lambda-prop)
                (mu:eq prop lambda-prop))
             '(:name :intern :extern :ch-mac :sy-mac :uses))
@@ -34,6 +30,15 @@
           ,(mu:cons :ch-mac (mu:make-namespace))
           ,(mu:cons :sy-mac (mu:make-namespace))
           ,(mu:cons :uses uses)))))
+
+;;;
+;;; predicate
+;;;
+(mu:intern core "packagep"
+    (:lambda (ex)
+      (core:logand
+       (core:%core-type-p ex)
+       (mu:eq '%exception (core:type-of ex)))))
 
 ;;;
 ;;; functions

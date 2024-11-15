@@ -10,13 +10,13 @@
 ;;;
 
 ;;;
-;;; compile a lambda form to a core-function
+;;; compile a lambda form to a closure
 ;;;
 (mu:intern core "%special-lambda"
    (:lambda (form env)
      (:if (mu:eq 0 (mu:length form))
           (core:raise form 'core:%special-lambda "malformed lambda expression")
-          (core:compile-core-function (mu:nth 1 form) (mu:nthcdr 2 form) env))))
+          (core:compile-closure (mu:nth 1 form) (mu:nthcdr 2 form) env))))
 
 ;;;
 ;;; compile a defmacro form to a bound macro symbol
@@ -27,7 +27,7 @@
           (core:raise form 'core:%compile-macro "malformed lambda expression")
           ((:lambda (symbol)
              (:if (core:%symbolp symbol)
-                  (core:%defmacro symbol (core:compile-core-function (mu:nth 2 form) (mu:nthcdr 3 form) env))
+                  (core:%defmacro symbol (core:compile-closure (mu:nth 2 form) (mu:nthcdr 3 form) env))
                   (core:raise symbol 'core:%special-macro "not a symbol"))
              (mu:cons :quote symbol))
            (mu:nth 1 form)))))
@@ -38,15 +38,13 @@
 (mu:intern core "%special-if"
    (:lambda (form env)
      ((:lambda (length)
-          (:if (core:logor (mu:eq length 3) (mu:eq length 4))
-               ((:lambda (test t-arm f-arm)
-                  ((:lambda (form)
-                     (mu:cons 'core:apply (mu:cons form (mu:cons () ()))))
-                   (mu:cons :if (mu:cons test (mu:cons t-arm (mu:cons f-arm ()))))))
-                (core:%compile (mu:nth 1 form) env)
-                (core:%compile (mu:cons 'lambda (mu:cons () (mu:cons (mu:nth 2 form) ()))) env)
-                (core:%compile (mu:cons 'lambda (mu:cons () (mu:cons (mu:nth 3 form) ()))) env))
-               (core:raise form 'core:%special-if "takes two or three arguments")))
+        (:if (core:logor (mu:eq length 3) (mu:eq length 4))
+             ((:lambda (test t-arm f-arm)
+                `(:if ,test ,t-arm ,f-arm))
+              (core:%compile (mu:nth 1 form) env)
+              (core:%compile `(core:apply (lambda () ,(mu:nth 2 form)) ()) env)
+              (core:%compile `(core:apply (lambda () ,(mu:nth 3 form)) ()) env))
+        (core:raise form 'core:%special-if "takes two or three arguments")))
       (mu:length form))))
 
 ;;;
@@ -92,4 +90,6 @@
 
 (mu:intern core "compile"
    (:lambda (form)
-     (mu:compile (core:%compile form ()))))          
+     ((:lambda (mu-form)
+        (mu:compile mu-form))
+      (core:%compile form ()))))

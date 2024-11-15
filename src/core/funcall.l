@@ -26,7 +26,7 @@
 
 (mu:intern core "%lambda-arg-list"
    (:lambda (function arg-list)
-     (:if (core:%core-function-p function)
+     (:if (core:%closurep function)
           ((:lambda (arity rest nreqs)
              (:if rest
                   (:if (mu:eq 0 arity)
@@ -38,14 +38,14 @@
                         (core:%dropr arg-list (mu:sub (mu:length arg-list) arity))
                         (core:%dropl arg-list arity)))
                   (core:%arg-list arg-list)))
-           (core:%core-function-prop :arity function)
-           (core:%core-function-prop :rest function)
-           (mu:length (core:%core-function-prop :require function)))
+           (core:%closure-prop :arity function)
+           (core:%closure-prop :rest function)
+           (mu:length (core:%closure-prop :require function)))
           (core:%arg-list arg-list))))
 
 (mu:intern core "%quoted-lambda-arg-list"
    (:lambda (function arg-list)
-     (:if (core:%core-function-p function)
+     (:if (core:%closurep function)
           ((:lambda (arity rest nreqs)
               (:if rest
                    (:if (mu:eq 0 arity)
@@ -57,9 +57,9 @@
                          (core:%dropr arg-list (mu:sub (mu:length arg-list) arity))
                          (core:%dropl arg-list arity)))
                    (core:%quoted-arg-list arg-list)))
-            (core:%core-function-prop :arity function)
-            (core:%core-function-prop :rest function)
-            (mu:length (core:%core-function-prop :require function)))
+            (core:%closure-prop :arity function)
+            (core:%closure-prop :rest function)
+            (mu:length (core:%closure-prop :require function)))
            (core:%quoted-arg-list arg-list))))
 
 ;;;
@@ -87,39 +87,30 @@
 ;;;
 ;;; compile function application to mu form
 ;;;
-;;; ((lambda lambda-list . body) . arg-list) env
-;;; core-function env
-;;; symbol env
-;;;
 (mu:intern core "compile-funcall"
    (:lambda (function-form arg-list env)
      (:if (core:%consp function-form)
           ((:lambda (function)
              (:if (core:logor (core:functionp function) (core:%consp function))
-                  (:if (core:%core-function-p function)
-                       ((:lambda (mu-form)
-                          (:if (core:%core-function-p function)
-                               `(,core:%fapply
-                                 ,function
-                                 ,mu-form
-                                 ,(core:%compile-lambda-arg-list function arg-list env))
-                               `(,core:%fapply
-                                 ,function
-                                 ,mu-form
-                                 ,(core:%compile-arg-list arg-list env))))
-                        (core:%core-function-prop :mu function))
-                       `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
-                  (core:raise function 'core:compile-funcall "not a function designator")))
+                  (:if (core:functionp function)
+                       (:if (core:%closurep function)
+                            `(,core:%apply
+                              ,function
+                              ,(core:%closure-prop :form function)
+                              ,(core:%compile-lambda-arg-list function arg-list env))
+                            `(,mu:apply ,function ,(core:%compile-arg-list arg-list env)))
+                  `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
+             (core:raise function 'core:compile-funcall "not a function designator")))
            (core:%compile function-form env))
           (:if (mu:boundp function-form)
                ((:lambda (function)
                   (:if (core:functionp function)
-                       (:if (core:%core-function-p function)
-                            `(,core:%fapply
+                       (:if (core:%closurep function)
+                            `(,core:%apply
                               ,function
-                              ,(core:%core-function-prop :mu function)
+                              ,(core:%closure-prop :form function)
                               ,(core:%compile-lambda-arg-list function arg-list env))
                             `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                        (core:raise function 'core:compile-funcall "not a function designator")))
                 (mu:symbol-value function-form))
-               `(,core:%apply ,function-form ,(core:%compile-arg-list arg-list env))))))
+               `(,core:apply ,function-form ,(core:%compile-arg-list arg-list env))))))

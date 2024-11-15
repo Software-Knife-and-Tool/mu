@@ -13,7 +13,7 @@
              (:if list
                   (mu:cons
                    (mu:cdr list)
-                   (core:%apply function (mu:cons (mu:car list) (mu:cons acc ()))))
+                   (core:apply function (mu:cons (mu:car list) (mu:cons acc ()))))
                   arg))
            (mu:car arg)
            (mu:cdr arg)))
@@ -32,7 +32,7 @@
       (:lambda (list-cdr)
         (:if list-cdr
              (core:%prog2
-                 (core:%apply function (mu:cons (mu:car list-cdr) ()))
+                 (core:apply function (mu:cons (mu:car list-cdr) ()))
                  (mu:cdr list-cdr))
              ()))
       list)
@@ -42,7 +42,7 @@
    (:lambda (function list)
       (core:%foldl
        (:lambda (elt acc)
-          `(,@acc ,(core:%apply function `(,elt))))
+          `(,@acc ,(core:apply function `(,elt))))
        ()
        list)))
 
@@ -52,7 +52,7 @@
       (:lambda (list)
         (:if list
              (core:%prog2
-                (core:%apply function (mu:cons list ()))
+                (core:apply function (mu:cons list ()))
                 (mu:cdr list))
              ()))
       list)
@@ -66,7 +66,7 @@
          ((:lambda (acc list)
             (:if list
                  (mu:cons
-                  `(,@acc ,(core:%apply function `(,list)))
+                  `(,@acc ,(core:apply function `(,list)))
                   (mu:cdr list))
                  loop))
           (mu:car loop)

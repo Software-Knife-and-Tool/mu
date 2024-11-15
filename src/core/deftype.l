@@ -53,7 +53,7 @@
       ((:lambda (type-symbol)
          (core:%mapc
           (:lambda (property-value)
-            (core:%findl
+            (core:%findl-if
              (:lambda (property-def)
                (:if (mu:eq (mu:car property-value) (mu:car property-def))
                         ((:lambda (type value)

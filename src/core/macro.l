@@ -16,7 +16,7 @@
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
-     (core:%compile (core:%macroexpand `(,macro-symbol ,@arg-list) env) env)))
+     (core:%compile (core:%macroexpand `(,macro-symbol ,@arg-list) ()) env)))
 
 ;;;
 ;;; functions
@@ -24,18 +24,17 @@
 (mu:intern core "%macroexpand-1"
    (:lambda (form env)
      (:if (core:%consp form)
-          ((:lambda (fn-symbol arg-list)
-             (:if (mu:eq :symbol (mu:type-of fn-symbol))
+          ((:lambda (macro-symbol arg-list)
+             (:if (mu:eq :symbol (mu:type-of macro-symbol))
                   ((:lambda (macro-function)
                      (:if macro-function
-                          (:if (core:%core-function-p macro-function)
-                               (core:%fapply
-                                macro-function
-                                (mu:compile (core:%core-function-prop :mu macro-function))
+                          (:if (core:%closurep macro-function)
+                               (mu:apply
+                                (mu:compile (core:%compile (core:%closure-prop :form macro-function) env))
                                 (mu:eval (core:%compile-quoted-lambda-arg-list macro-function arg-list env)))
                                (mu:apply macro-function arg-list))
                           form))
-                   (core:%macro-function fn-symbol env))
+                   (core:%macro-function macro-symbol env))
                   form))
            (mu:car form)
            (mu:cdr form))

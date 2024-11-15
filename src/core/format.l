@@ -80,7 +80,7 @@
   (:lambda (dir dest arg-list)
     ((:lambda (fn)
        (:if fn
-            (core:%apply (mu:symbol-value fn) (core:%list2 dest arg-list))
+            (core:apply (mu:symbol-value fn) (core:%list2 dest arg-list))
             (core:raise dir 'core:format "unrecognized format directive")))
      (mu:cdr
       (core:%assq

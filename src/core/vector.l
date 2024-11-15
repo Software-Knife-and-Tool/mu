@@ -6,7 +6,7 @@
 ;;;
 
 ;;;
-;;; core type
+;;; vector deftype
 ;;;
 (core:def-type "%vector"
     '((:base    . :vector)
@@ -19,7 +19,7 @@
 
 (mu:intern core "vector-prop"
    (:lambda (prop vector)
-      (:if (core:%findl (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :disp :bitvec))
+      (:if (core:%findl-if (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :disp :bitvec))
            (core:%vector-prop prop vector)
            (core:raise prop 'core:vector-prop "not a vector property"))))
 
@@ -152,7 +152,7 @@
 (mu:intern core "%specialized-vector-type"
    (:lambda (list)
      ((:lambda (type)
-        (:if (core:%findl (:lambda (stype) (mu:eq type stype)) '(:t :char :fixnum :float))
+        (:if (core:%findl-if (:lambda (stype) (mu:eq type stype)) '(:t :char :fixnum :float))
              (:if (mu:eq type :fixnum)
                   ((:lambda (is-byte)
                      (:if is-byte
@@ -185,7 +185,7 @@
             (:if (mu:eq nth (mu:vector-len vector))
                  ()
                  (core:%prog2
-                  (core:%apply fn (mu:cons (mu:svref vector nth) ()))
+                  (core:apply fn (mu:cons (mu:svref vector nth) ()))
                   (mu:add 1 nth)))
             ()))
      0)))
