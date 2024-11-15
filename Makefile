@@ -14,7 +14,6 @@ help:
 world:
 	@echo '((nil . ((compile-command . "mux build --release"))))' > .dir-locals.el
 	@etags `find src/mu -name '*.rs' -print`		
-	@touch .mux
 	@cargo build --release --workspace
 	@cp target/release/mu-exec dist
 	@cp target/release/mu-ld dist
