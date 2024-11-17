@@ -19,7 +19,7 @@
 ;;;
 (mu:intern core "read"
    (:lambda (stream eof-error eof-value)
-     (:if (core:%streamp stream)
+     (:if (core:streamp stream)
           ((:lambda (form)
              (:if (mu:eq form core:%read-list-eol%)
                   (core:raise stream 'core:read "unmatched close parenthesis")
@@ -33,7 +33,7 @@
 
 (mu:intern core "write"
    (:lambda (object escape stream)
-     (:if (core:%streamp stream)
+     (:if (core:streamp stream)
           (:if (core:logand (core:vectorp object) (core:%core-type-p object))
                (core:%vector-write object escape stream)
                (mu:write object escape stream))

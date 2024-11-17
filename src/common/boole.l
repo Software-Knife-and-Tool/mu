@@ -25,9 +25,9 @@
 (mu:intern common "boole"
    (:lambda (op integer-1 integer-2)
      ((:lambda (op-table)
-        (:if (core:%keywordp op)
-             (:if (core:%fixnump integer-1)
-                  (:if (core:%fixnump integer-2)
+        (:if (core:keywordp op)
+             (:if (core:fixnump integer-1)
+                  (:if (core:fixnump integer-2)
                        ((:lambda (entry)
                           (:if (core:null entry)
                                (core:raise op 'common:boole "not an op")

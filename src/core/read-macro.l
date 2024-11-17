@@ -17,7 +17,7 @@
       (mu:read-char stream :t ())  ;;; absorb initial |
       (mu:fix
        (:lambda (loop)
-         (:if (core:%streamp loop)
+         (:if (core:streamp loop)
               loop
               ((:lambda (ch)
                  (:if (core:null ch)
@@ -37,7 +37,7 @@
 (mu:intern core "%read-sharp-vector"
    (:lambda (ch stream)
       ((:lambda (type)
-          (:if (core:%keywordp type)
+          (:if (core:keywordp type)
                (mu:make-vector type (core:%read-list #\( stream))
                (core:raise type 'core:%read-sharp-vector "not a type keyword")))
           (core:%read stream))))
@@ -79,7 +79,7 @@
          (:if (core:vectorp loop)
               loop
               ((:lambda (byte-descriptor)
-                 (:if (core:%consp byte-descriptor)
+                 (:if (core:consp byte-descriptor)
                       ((:lambda (length byte)
                          (core:%make-vector
                           (mu:make-vector :byte (core:%reverse (mu:cons byte loop)))
@@ -116,10 +116,10 @@
              ((:lambda (ch)
                 (:if (core:null ch)
                      (:if (mu:eq base #\x)
-                          (core:parse-integer (mu:get-string core:%reader-stream%) 16)
+                          (core:%parse-integer (mu:get-string core:%reader-stream%) 16)
                           (:if (mu:eq base #\b)
-                               (core:parse-integer (mu:get-string core:%reader-stream%) 2)
-                               (core:parse-integer (mu:get-string core:%reader-stream%) 10)))
+                               (core:%parse-integer (mu:get-string core:%reader-stream%) 2)
+                               (core:%parse-integer (mu:get-string core:%reader-stream%) 10)))
                      ((:lambda (syntax-type)
                         (:if (mu:eq syntax-type :const)
                              (core:%prog2
@@ -128,10 +128,10 @@
                              (core:%prog2
                                 (mu:unread-char ch stream)
                                 (:if (mu:eq base #\x)
-                                     (core:parse-integer (mu:get-string core:%reader-stream%) 16)
+                                     (core:%parse-integer (mu:get-string core:%reader-stream%) 16)
                                      (:if (mu:eq base #\b)
-                                          (core:parse-integer (mu:get-string core:%reader-stream%) 2)
-                                          (core:parse-integer (mu:get-string core:%reader-stream%) 10))))))
+                                          (core:%parse-integer (mu:get-string core:%reader-stream%) 2)
+                                          (core:%parse-integer (mu:get-string core:%reader-stream%) 10))))))
                      (core:%read-char-syntax ch))))
               (mu:read-char stream () ()))))
       ())))
@@ -206,7 +206,7 @@
 ;;;
 (mu:intern core "%read-quote"
   (:lambda (ch stream)
-     (core:quote (core:%read stream))))
+     (core:%quote (core:%read stream))))
 
 ;;;
 ;;; line comment
@@ -215,7 +215,7 @@
     (:lambda (ch stream)
       (mu:fix
        (:lambda (loop)
-         (:if (core:%streamp loop)
+         (:if (core:streamp loop)
               loop
               ((:lambda (ch)
                  (:if (mu:eq ch #\linefeed)
@@ -246,7 +246,7 @@
 ;;;
 (mu:intern core "get-macro-character"
    (:lambda (char)
-     (:if (core:%charp char)
+     (:if (core:charp char)
           ((:lambda (macro-symbol)
               (:if macro-symbol
                    (mu:symbol-value macro-symbol)
@@ -256,7 +256,7 @@
 
 (mu:intern core "set-macro-character"
    (:lambda (char function non-terminating)
-      (:if (core:%charp char)
+      (:if (core:charp char)
          (:if (core:functionp function)
               (mu:intern core:%char-macro-ns% (mu:make-vector :char (mu:cons char ())) (mu:cons function non-terminating))
               (core:raise function 'core:set-macro-character "not a function"))

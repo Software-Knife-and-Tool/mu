@@ -16,14 +16,14 @@
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
-     (core:%compile (core:%macroexpand `(,macro-symbol ,@arg-list) ()) env)))
+     (core:%compile (core:macroexpand `(,macro-symbol ,@arg-list) ()) env)))
 
 ;;;
 ;;; functions
 ;;;
-(mu:intern core "%macroexpand-1"
+(mu:intern core "macroexpand-1"
    (:lambda (form env)
-     (:if (core:%consp form)
+     (:if (core:consp form)
           ((:lambda (macro-symbol arg-list)
              (:if (mu:eq :symbol (mu:type-of macro-symbol))
                   ((:lambda (macro-function)
@@ -34,25 +34,25 @@
                                 (mu:eval (core:%compile-quoted-lambda-arg-list macro-function arg-list env)))
                                (mu:apply macro-function arg-list))
                           form))
-                   (core:%macro-function macro-symbol env))
+                   (core:macro-function macro-symbol env))
                   form))
            (mu:car form)
            (mu:cdr form))
           form)))
 
-(mu:intern core "%macroexpand"
+(mu:intern core "macroexpand"
    (:lambda (form env)
      (mu:fix
       (:lambda (expanded)
-        (core:%macroexpand-1 expanded env))
+        (core:macroexpand-1 expanded env))
       form)))
 
-(mu:intern core "%macro-function"
+(mu:intern core "macro-function"
    (:lambda (symbol env)
-     (:if (mu:eq :symbol (mu:type-of symbol))
+     (:if (core:symbolp symbol)
           ((:lambda (macro)
              (:if macro
                   (mu:symbol-value macro)
                   ()))
            (mu:find core:%macro-ns% (mu:symbol-name symbol)))
-          ())))
+          (core:raise symbol 'core:macro-function "not a symbol"))))

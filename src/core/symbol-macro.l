@@ -68,7 +68,7 @@
 ;;;
 (mu:intern core "%symbol-macro-expand"
    (:lambda (symbol)
-     (:if (core:logor (core:null symbol) (core:%keywordp symbol))
+     (:if (core:logor (core:null symbol) (core:keywordp symbol))
           symbol
           (:if (core:%uninternedp symbol)
                ((:lambda (sym)

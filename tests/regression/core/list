@@ -21,16 +21,16 @@
 (core:%dropl '(1 2 3) 1)	(2 3)
 (core:%dropr '(1 2 3) 0)	(1 2 3)
 (core:%dropr '(1 2 3) 1)	(1 2)
-(core:%findl-if core:%symbolp '(1 2 3))	:nil
-(core:%findl-if core:%symbolp '(a b c))	a
-(core:%foldl (:lambda (el acc) (:if (core:null acc) :nil (core:%symbolp el))) :t '(1 2 3))	:nil
-(core:%foldl (:lambda (el acc) (:if (core:null acc) :nil (core:%symbolp el))) :t '(a b c))	:t
+(core:%findl-if core:symbolp '(1 2 3))	:nil
+(core:%findl-if core:symbolp '(a b c))	a
+(core:%foldl (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(1 2 3))	:nil
+(core:%foldl (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(a b c))	:t
 (core:%foldl (:lambda (el acc) (mu:cons el acc)) () '(1 2 3 4))	(4 3 2 1)
 (core:%foldl (:lambda (el acc) (mu:cons el acc)) () '(1))	(1)
 (core:%foldl (:lambda (el acc) (mu:cons el acc)) () ())	:nil
 (core:%foldl (:lambda (x y) (mu:add x y)) 0 '(1 2 3))	6
-(core:%foldr (:lambda (el acc) (:if (core:null acc) :nil (core:%symbolp el))) :t '(1 2 3))	:nil
-(core:%foldr (:lambda (el acc) (:if (core:null acc) :nil (core:%symbolp el))) :t '(a b c))	:t
+(core:%foldr (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(1 2 3))	:nil
+(core:%foldr (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp` el))) :t '(a b c))	:t
 (core:%foldr (:lambda (el acc) (mu:cons el acc)) () '(1 2 3 4))	(1 2 3 4)
 (core:%foldr (:lambda (el acc) (mu:cons el acc)) () '(1))	(1)
 (core:%foldr (:lambda (el acc) (mu:cons el acc)) () ())	:nil

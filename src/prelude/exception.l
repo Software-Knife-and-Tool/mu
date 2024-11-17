@@ -40,7 +40,7 @@
       (:lambda (value condition source)
          (:if (mu:eq condition :except)
               (core:apply handler `(,value))
-              (core:apply handler `(,(core:make-exception
+              (core:apply handler `(,(core:%make-exception
                                            condition
                                            value
                                            source
@@ -58,25 +58,25 @@
           ,(mu:cons :env    env)))))
 
 ;;;
-;;; exception flavors
+;;; functions
 ;;;
 (mu:intern core "error"
    (:lambda (value format-string arg-list)
       (core:format mu:*error-output* format-string arg-list)
       (mu:raise
-       (core:make-exception :error value :error "" ())
+       (core:%make-exception :error value :error "" ())
        :except)))
 
 (mu:intern core "raise"
    (:lambda (value source reason)
      (mu:raise
-      (core:make-exception :error value source reason ())
+      (core:%make-exception :error value source reason ())
       :except)))
 
 (mu:intern core "raise-env"
    (:lambda (value source reason)
      (mu:raise
-      (core:make-exception :error value source reason (mu:%frame-stack))
+      (core:%make-exception :error value source reason (mu:%frame-stack))
       :except)))
 
 (mu:intern core "debug"

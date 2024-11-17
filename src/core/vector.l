@@ -56,7 +56,7 @@
           ())))
 
 ;;;
-;;; constructors
+;;; functions
 ;;;
 (mu:intern core "make-vector"
    (:lambda (list)
@@ -67,10 +67,10 @@
 (mu:intern core "vector-slice"
    (:lambda (vector start length)
      (:if (core:typep vector :vector)
-          (:if (core:%fixnump start)
+          (:if (core:fixnump start)
                (:if (core:logor (core:%minusp start) (mu:less-than (core:vector-length vector) start))
                     (core:raise start 'core:vector-slice "illegal start")
-                    (:if (core:%fixnump length)
+                    (:if (core:fixnump length)
                          (:if (core:logor (core:%minusp length) (mu:less-than (core:vector-length vector) length))
                               (core:raise length 'core:vector-slice "illegal length")
                               (core:%make-vector vector (mu:cons start length) ()))
@@ -101,7 +101,7 @@
 (mu:intern core "vector-ref"
    (:lambda (vector nth)
      (:if (core:vectorp vector)
-          (:if (core:%fixnump nth)
+          (:if (core:fixnump nth)
                (:if (core:logor (core:%minusp nth) (mu:less-than (core:vector-length vector) nth))
                     (core:raise length 'core:vector-ref "illegal index")
                     (:if (core:bit-vector-p vector)
@@ -130,19 +130,19 @@
        (:if (core:typep vector :vector)
            (mu:write vector escape stream)
            ((:lambda (length)
-               (core:format stream "#(" ())
+               (core:%format stream "#(" ())
                (mu:fix
                 (:lambda (index)
                    (:if (mu:less-than index length)
                         ((:lambda ()
                             (core:write (core:vector-ref vector index) escape stream)
                             (:if (mu:less-than index (mu:sub length 1))
-                                 (core:format stream " " ())
+                                 (core:%format stream " " ())
                                  ())
                             (mu:add index 1)))
                         index))
                 0)
-               (core:format stream ")" ()))
+               (core:%format stream ")" ()))
             (core:vector-length vector)))
       ()))
 

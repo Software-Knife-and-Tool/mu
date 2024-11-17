@@ -25,7 +25,6 @@ CORE= \
 	exception.l	\
 	macro.l		\
 	closure.l	\
-	apply.l		\
 	package.l	\
 	vector.l	\
 	common.l

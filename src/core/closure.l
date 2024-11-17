@@ -27,15 +27,6 @@
    (:lambda (prop function)
      (mu:cdr (core:%type-ref prop function))))
 
-(mu:intern core "closure-prop"
-   (:lambda (prop function)
-     (:if (core:%findl-if
-           (:lambda (fprop)
-             (mu:eq prop fprop))
-           '(:require :rest :arity :form :env))
-          (core:%closure-prop prop function)
-          (core:raise prop 'core:%closure-prop "not a function property"))))
-
 (mu:intern core "%make-closure"
    (:lambda (requires rest-sym form env)
      (core:%make-core-type "%closure"
@@ -61,15 +52,35 @@
           (core:%closurep function))))
 
 ;;;
+;;; functions 
+;;;
+(mu:intern core "%apply"
+   (:lambda (closure frame arg-list-form)
+     ((:lambda (env)
+        (mu:apply frame arg-list-form))
+     (core:%closure-prop :env closure))))
+
+(mu:intern core "apply"
+   (:lambda (function arg-list)
+     (:if (core:functionp function)
+          (:if (core:%closurep function)
+               (core:%apply
+                function
+                (core:compile (core:%closure-prop :form function))
+                (mu:eval (core:%compile-lambda-arg-list function arg-list ())))
+               (mu:apply function arg-list))
+          (core:raise function 'core:apply "not a function designator"))))
+
+;;;
 ;;; compile closure
 ;;;
-(mu:intern core "compile-closure"
+(mu:intern core "%compile-closure"
    (:lambda (lambda body env)
      (:if (core:%findl-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-          (core:raise lambda 'core:compile-closure "malformed lambda expression")
+          (core:raise lambda 'core:%compile-closure "malformed lambda expression")
           ((:lambda (desc)
              ((:lambda (body)
-                (:if (core:logor (core:%fixnump desc) (core:null body))
+                (:if (core:logor (core:fixnump desc) (core:null body))
                      (core:%make-closure lambda () `(:lambda ,lambda ,@body) ())
                      ((:lambda ()
                         ;;; (core:warn `(:lambda ,(mu:car desc) ,@(mu:cdr desc)) "compile-closure")
@@ -83,7 +94,7 @@
                              (mu:cons
                               `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (core:1- (mu:length lambda))))
                               (mu:nth (core:1- (mu:length lambda)) lambda))
-                             (core:raise lambda 'core:compile-closure "rest botch"))
+                             (core:raise lambda 'core:%compile-closure "rest botch"))
                         (core:1+ acc))
                    acc))
             0
@@ -98,9 +109,9 @@
       ((:lambda (bound-symbols)
           (core:%foldl
            (:lambda (elt acc)
-              (:if (core:%consp elt)
+              (:if (core:consp elt)
                    ((:lambda (function-form)
-                       (:if (core:%consp function-form)
+                       (:if (core:consp function-form)
                             `(,@(core:%closure-env lambda function-form env) ,@acc)
                             `(,@(core:%closure-env lambda (mu:cdr elt) env) ,@acc)))
                     (mu:car elt))

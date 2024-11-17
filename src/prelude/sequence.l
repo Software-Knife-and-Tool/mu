@@ -17,7 +17,7 @@
 (mu:intern prelude "elt"
    (:lambda (seq nth)
       (:if (prelude:sequencep seq)
-           (:if (core:%fixnump nth)
+           (:if (core:fixnump nth)
                 (:if (core:listp seq)
                      (mu:nth nth seq)
                      (mu:vector-ref seq nth))

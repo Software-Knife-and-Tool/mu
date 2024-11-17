@@ -62,8 +62,8 @@
                 (:if fl
                      fl
                      ()))
-             (core:parse-float atom))))
-      (core:parse-integer atom 10))))
+             (core:%parse-float atom))))
+      (core:%parse-integer atom 10))))
 
 ;;;
 ;;; atom reader
@@ -73,7 +73,7 @@
     (mu:write-char ch core:%reader-stream%)
     (mu:fix
      (:lambda (loop)
-       (:if (core:%consp loop)
+       (:if (core:consp loop)
             loop
             ((:lambda (ch)
                (:if (mu:eq core:%eof% ch)
@@ -117,7 +117,7 @@
    (:lambda (stream)
      (mu:fix
       (:lambda (loop)
-        (:if (core:logor (core:%streamp loop) (core:%charp loop))
+        (:if (core:logor (core:streamp loop) (core:charp loop))
              loop
              ((:lambda (ch)
                 (:if (core:null ch)
@@ -146,7 +146,7 @@
 (mu:intern core "%read"
   (:lambda (stream)
     ((:lambda (ch)
-       (:if (core:%streamp ch)
+       (:if (core:streamp ch)
             core:%eof%
             ((:lambda (macro)
                (:if macro

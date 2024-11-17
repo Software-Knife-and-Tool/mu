@@ -20,7 +20,7 @@
    (:lambda (arg-list)
       (core:%foldr
        (:lambda (elt acc)
-         `(mu:cons ,(core:quote elt) ,acc))
+         `(mu:cons ,(core:%quote elt) ,acc))
        ()
        arg-list)))
 
@@ -87,11 +87,11 @@
 ;;;
 ;;; compile function application to mu form
 ;;;
-(mu:intern core "compile-funcall"
+(mu:intern core "%compile-funcall"
    (:lambda (function-form arg-list env)
-     (:if (core:%consp function-form)
+     (:if (core:consp function-form)
           ((:lambda (function)
-             (:if (core:logor (core:functionp function) (core:%consp function))
+             (:if (core:logor (core:functionp function) (core:consp function))
                   (:if (core:functionp function)
                        (:if (core:%closurep function)
                             `(,core:%apply
@@ -100,7 +100,7 @@
                               ,(core:%compile-lambda-arg-list function arg-list env))
                             `(,mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                   `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
-             (core:raise function 'core:compile-funcall "not a function designator")))
+             (core:raise function 'core:%compile-funcall "not a function designator")))
            (core:%compile function-form env))
           (:if (mu:boundp function-form)
                ((:lambda (function)
@@ -111,6 +111,6 @@
                               ,(core:%closure-prop :form function)
                               ,(core:%compile-lambda-arg-list function arg-list env))
                             `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
-                       (core:raise function 'core:compile-funcall "not a function designator")))
+                       (core:raise function 'core:%compile-funcall "not a function designator")))
                 (mu:symbol-value function-form))
                `(,core:apply ,function-form ,(core:%compile-arg-list arg-list env))))))

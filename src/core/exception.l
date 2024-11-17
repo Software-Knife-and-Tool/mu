@@ -23,13 +23,7 @@
    (:lambda (prop exception)
      (core:%type-ref prop exception)))
 
-(mu:intern core "exception-prop"
-   (:lambda (prop exception)
-      (:if (core:%findl-if (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
-           (core:%type-ref prop exception)
-           (core:raise prop 'core:%exception-prop "not an exception property"))))
-
-(mu:intern core "make-exception"
+(mu:intern core "%make-exception"
    (:lambda (cond value source reason env)
       (core:%make-core-type "%exception"
         `(,(mu:cons :cond   cond)
@@ -54,14 +48,14 @@
    (:lambda (stream format-string printenv exception)
      ((:lambda (cond value source reason env)
          (:if (core:null format-string)
-              (core:format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
-              (core:format stream format-string `(,cond ,value ,source ,reason)))
+              (core:%format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
+              (core:%format stream format-string `(,cond ,value ,source ,reason)))
          (:if (core:logand printenv env)
               (core:%prog2
-                  (core:format stream "env:~%" ())
+                  (core:%format stream "env:~%" ())
                   (core:%mapc
                    (:lambda (frame)
-                      (core:format stream "  ~A~T(~A ~A)~%"
+                      (core:%format stream "  ~A~T(~A ~A)~%"
                                    `(,(mu:car frame)
                                      ,(mu:car frame)
                                      ,(mu:cdr frame))))
@@ -79,7 +73,7 @@
       (:lambda (value condition source)
          (:if (mu:eq condition :except)
               (core:apply handler (mu:cons value ()))
-              (core:apply handler `(,(core:make-exception
+              (core:apply handler `(,(core:%make-exception
                                            condition
                                            value
                                            source
@@ -92,23 +86,24 @@
 ;;;
 (mu:intern core "error"
    (:lambda (value format-string arg-list)
-      (core:format mu:*error-output* format-string arg-list)
+      (core:%format mu:*error-output* format-string arg-list)
       (mu:raise
-       (core:make-exception :error value :error "" ())
+       (core:%make-exception :error value :error "" ())
        :except)))
 
 (mu:intern core "raise"
    (:lambda (value source reason)
      (mu:raise
-      (core:make-exception :error value source reason ())
+      (core:%make-exception :error value source reason ())
       :except)))
 
 (mu:intern core "raise-env"
    (:lambda (value source reason)
      (mu:raise
-      (core:make-exception :error value source reason (mu:%frame-stack))
+      (core:%make-exception :error value source reason (mu:%frame-stack))
       :except)))
 
+#|
 (mu:intern core "debug"
    (:lambda (value message)
      (mu:write ";;; debug: " () mu:*error-output*)          
@@ -117,22 +112,9 @@
      (mu:write message () mu:*error-output*)
      (mu:write-char #\linefeed mu:*error-output*)
      value))
-
-(mu:intern core "eprint"
-   (:lambda (value message)          
-     (core:format mu:*error-output* ";;; ~A:~T ~A~%" (core:%list2 message value))
-     value))
-
-(mu:intern core "print-message"
-   (:lambda (value message)          
-     (core:format mu:*standard-output* ";;; ~A:~T ~A~%" (core:%list2 message value))
-     value))
+|#
 
 (mu:intern core "warn"
    (:lambda (value message)
-     (core:format mu:*error-output* ";;; warn: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
-    value))
-
-(mu:intern core "%warn"
-   (:lambda (value message)
+     (core:%format mu:*error-output* ";;; warn: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
     value))

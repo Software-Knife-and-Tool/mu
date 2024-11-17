@@ -39,7 +39,7 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
 (mu:intern common "elt"
    (:lambda (seq nth)
       (:if (common:sequencep seq)
-           (:if (core:%fixnump nth)
+           (:if (core:fixnump nth)
                 (:if (core:listp seq)
                      (mu:nth nth seq)
                      (mu:svref seq nth))
