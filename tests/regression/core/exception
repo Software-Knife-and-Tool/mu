@@ -1,7 +1,7 @@
-(mu:type-of core:make-exception)	:func
+(mu:type-of core:%make-exception)	:func
 (mu:type-of core:error)	:func
 (mu:type-of core:raise)	:func
 (mu:type-of core:warn)	:func
-(core:%structp (core:make-exception () :error 'test "exception test" ()))	:t
-(core:exceptionp (core:make-exception () :error 'test "exception test" ()))	:t
+(core:structp (core:%make-exception () :error 'test "exception test" ()))	:t
+(core:exceptionp (core:%make-exception () :error 'test "exception test" ()))	:t
 (core:with-exception (:lambda (exception) ()) (:lambda () :t))	:t

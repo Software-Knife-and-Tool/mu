@@ -80,16 +80,16 @@
    (:lambda (item alist)
       (mu:car
        (mu:fix
-        (:lambda (lst)
-           (:if lst
+        (:lambda (list)
+           (:if list
                 ((:lambda (entry cdr)
                     (:if entry
                          (:if (mu:eq item (mu:car entry))
-                              lst
+                              list
                               cdr)
                          cdr))
-                 (mu:car lst)
-                 (mu:cdr lst))
+                 (mu:car list)
+                 (mu:cdr list))
                 ()))
         alist))))
 
@@ -97,15 +97,15 @@
    (:lambda (item alist)
       (mu:car
        (mu:fix
-        (:lambda (lst)
-           (:if lst
+        (:lambda (list)
+           (:if list
                 ((:lambda (entry cdr)
                     (:if entry
                          (:if (mu:eq item (mu:cdr entry))
-                              lst
+                              list
                               cdr)
                          cdr))
-                 (mu:car lst)
-                 (mu:cdr lst))
+                 (mu:car list)
+                 (mu:cdr list))
                 ()))
         alist))))

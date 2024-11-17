@@ -22,5 +22,5 @@
 
 (mu:intern common "symbolp"
    (:lambda (t)
-      (core:%orf (core:%orf (core:%keywordp t) (mu:eq () t))
+      (core:%orf (core:%orf (core:keywordp t) (mu:eq () t))
                  (mu:eq 'symbol (core:type-of t)))))

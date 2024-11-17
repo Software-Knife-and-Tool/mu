@@ -17,11 +17,11 @@
 (core:typep () :null)	:t
 (core:typep () 'symbol)	:t
 (core:typep () '(satisfies core:null))	:t
-(core:typep 1 '(satisfies core:%fixnump))	:t
-(core:typep 1024e23 '(satisfies core:%floatp))	:t
-(core:typep '(1 2 3) '(satisfies core:%consp))	:t
+(core:typep 1 '(satisfies core:fixnump))	:t
+(core:typep 1024e23 '(satisfies core:floatp))	:t
+(core:typep '(1 2 3) '(satisfies core:consp))	:t
 (core:typep #(:t 1 2 3) '(satisfies core:vectorp))	:t
-(core:typep #\a '(satisfies core:%charp))	:t
+(core:typep #\a '(satisfies core:charp))	:t
 (core:typep () '(not symbol))	:nil
 (core:typep () '(and))	:t
 (core:typep () '(and (satisfies core:null)))	:t

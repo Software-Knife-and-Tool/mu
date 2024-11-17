@@ -43,14 +43,6 @@
 ;;;
 ;;; functions
 ;;;
-(mu:intern core "make-package"
-   (:lambda (name uses)
-      (:if (core:stringp name)
-           (:if (core:listp uses)
-                (core:%make-package name uses)
-                (core:raise uses 'core:make-package "not a uses list"))
-           (core:raise name 'core:make-package "not a name string"))))
-
 (mu:intern core "intern"
    (:lambda (symbol value)          
       (:if (core:%uninternedp symbol)

@@ -25,16 +25,16 @@
 
 (mu:intern core "%fmt-decimal"
   (:lambda (dest arg-list)
-     (:if (core:%fixnump (mu:car arg-list))
+     (:if (core:fixnump (mu:car arg-list))
           (core:%prog2
               (core:write (mu:car arg-list) () dest)
               (mu:cdr arg-list))
-          (core:raise (mu:car arg-list) 'core:format "argument to ~D not a fixnum"))))
+          (core:raise (mu:car arg-list) 'core:%format "argument to ~D not a fixnum"))))
 
 (mu:intern core "%fmt-hex"
   (:lambda (dest arg-list)
      ((:lambda (fx)
-       (:if (core:%fixnump fx)
+       (:if (core:fixnump fx)
             (:if (mu:eq 0 fx)
                  (core:write "0" () dest)
                  ((:lambda (str-stream)
@@ -60,7 +60,7 @@
                           (mu:vector-len hexstr)))
                       (mu:get-string str-stream)))
                   (mu:open :string :output "")))
-            (core:raise fx 'core:format "argument to ~X not a fixnum")))
+            (core:raise fx 'core:%format "argument to ~X not a fixnum")))
       (mu:car arg-list))))
 
 (mu:intern core "%fmt-aesthetic"
@@ -81,7 +81,7 @@
     ((:lambda (fn)
        (:if fn
             (core:apply (mu:symbol-value fn) (core:%list2 dest arg-list))
-            (core:raise dir 'core:format "unrecognized format directive")))
+            (core:raise dir 'core:%format "unrecognized format directive")))
      (mu:cdr
       (core:%assq
        dir
@@ -115,7 +115,7 @@
          (mu:get-string dest)
          ())))
 
-(mu:intern core "format"
+(mu:intern core "%format"
    (:lambda (stream format-string arg-list)
       (:if (core:stringp format-string)
            (:if (core:listp arg-list)
@@ -128,8 +128,8 @@
                            (mu:open :string :output "")
                            (:if (mu:eq stream :t)
                                 mu:*standard-output*
-                                (:if (core:%streamp stream)
+                                (:if (core:streamp stream)
                                      stream
-                                     (core:raise stream 'core:format "not a stream designator"))))))
-                (core:raise arg-list 'core:format "not a list"))
-           (core:raise fmt 'core:format "not a format string"))))
+                                     (core:raise stream 'core:%format "not a stream designator"))))))
+                (core:raise arg-list 'core:%format "not a list"))
+           (core:raise fmt 'core:%format "not a format string"))))

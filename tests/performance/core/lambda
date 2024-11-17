@@ -5,7 +5,7 @@
 (core:apply (core:compile '(lambda (a b) (mu:type-of b))) '(1 2))
 (core:apply (core:compile '(lambda (a) a)) '(1))
 (core:apply (core:compile '(lambda (a b) 1)) '(2 3))
-(core:apply (core:compile '(lambda (a b) (core:%fixnump b))) '(1 2))
+(core:apply (core:compile '(lambda (a b) (core:fixnump b))) '(1 2))
 (core:apply (core:compile '(lambda (a b) (mu:add a b))) '(1 2))
 (core:apply (core:compile '(lambda (&rest e) e)) '(1 2 3 4 5))
 (core:apply (core:compile '(lambda (a &rest e) e)) '(1 2 3 4 5))

@@ -58,6 +58,12 @@
       ()
       list)))
 
+(mu:intern core "reverse"
+   (:lambda (list)
+     (:if (core:listp list)
+          (core:%foldl mu:cons () list)
+          (core:raise stream 'core:reverse "not a list"))))
+
 (mu:intern core "%reverse"
    (:lambda (list)
      (core:%foldl mu:cons () list)))

@@ -5,7 +5,7 @@
 ;;; common predicates
 ;;;
 (mu:intern common "not" core:null)
-(mu:intern common "atom" (:lambda (value) (core:null (core:%consp value))))
+(mu:intern common "atom" (:lambda (value) (core:null (core:consp value))))
 
 (mu:intern common "constantp"
    (:lambda (value)
@@ -17,9 +17,9 @@
 
 (mu:intern common "numberp"
   (:lambda (n)
-     (:if (core:%fixnump n)
+     (:if (core:fixnump n)
           :t
-          (core:%floatp n))))
+          (core:floatp n))))
 
 (mu:intern common "zerop"
    (:lambda (n)
@@ -32,7 +32,7 @@
 (mu:intern common "minusp"
    (:lambda (n)
       (:if (common:numberp n)
-           (:if (core:%floatp n)
+           (:if (core:floatp n)
                 (mu:fless-than n 0.0)
                 (mu:less-than n 0))
            (core:raise n 'common:minusp "not a number"))))
@@ -40,7 +40,7 @@
 (mu:intern common "plusp"
    (:lambda (n)
       (:if (common:numberp n)
-           (:if (core:%floatp n)
+           (:if (core:floatp n)
                 (mu:fless-than 0.0 n)
                 (mu:less-than 0 n))
            (core:raise n 'common:plusp "not a number"))))

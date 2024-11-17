@@ -11,7 +11,7 @@
 (mu:intern common "schar"
   (:lambda (str index)
      (:if (core:stringp str)
-          (:if (core:%fixnump index)
+          (:if (core:fixnump index)
                (mu:svref str index)
                (core:raise index 'common:schar "not a string"))
           (core:raise str 'common:schar "not a string"))))

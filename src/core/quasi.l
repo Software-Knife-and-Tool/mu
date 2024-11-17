@@ -19,7 +19,7 @@
    (:lambda (stream)
      (mu:fix
       (:lambda (loop)
-        (:if (core:logor (core:%streamp loop) (core:%charp loop))
+        (:if (core:logor (core:streamp loop) (core:charp loop))
              loop
              ((:lambda (ch)
                 (:if (core:null ch)
@@ -68,7 +68,7 @@
         ((:lambda (type-function)
             (mu:apply type-function `(,(mu:cdr expr))))
          (core:%quasi-map-func (mu:car expr) syntax-map)))
-     `(,(mu:cons :basic (:lambda (form) (core:quote (core:%list form))))
+     `(,(mu:cons :basic (:lambda (form) (core:%quote (core:%list form))))
         ,(mu:cons :comma (:lambda (form) `(mu:cons ,form ())))
         ,(mu:cons :comma@ core:identity)
         ,(mu:cons :list

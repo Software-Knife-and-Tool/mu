@@ -33,6 +33,20 @@
            (mu:cdr loop)))
         (mu:cons () args))))))
 
+(mu:intern core "vector"
+   (core:compile
+    `(lambda (&rest list) (mu:make-vector :t list))))
+
+(mu:intern core "format"
+   (core:compile
+    `(lambda (stream format &rest args)
+       (core:%format stream format args))))
+
+(mu:intern core "funcall"
+   (core:compile
+    `(lambda (fn &rest args)
+       (core:apply fn args))))
+
 ;;;
 ;;; macros
 ;;;

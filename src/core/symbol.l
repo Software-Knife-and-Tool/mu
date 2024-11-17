@@ -8,10 +8,10 @@
    (:lambda (sym)
       (core:null (mu:symbol-namespace sym))))
 
-(mu:intern core "%symbolp"
+(mu:intern core "symbolp"
    (:lambda (t)
      (core:logor
-      (core:logor (core:%keywordp t) (mu:eq () t))
+      (core:logor (core:keywordp t) (mu:eq () t))
       (mu:eq 'symbol (core:type-of t)))))
 
 ;;;
@@ -28,17 +28,17 @@
    (:lambda ()
       ((:lambda (counter)
           (mu:write (mu:add counter 1) () core:%gensym-counter%)
-          (mu:make-symbol (core:format () "g~X" (mu:cons counter ()))))
+          (mu:make-symbol (core:%format () "g~X" (mu:cons counter ()))))
        (mu:read core:%gensym-counter% () ()))))
 
 (mu:intern core "%genkey"
    (:lambda (prefix)
-      (:if (core:logor (core:null prefix) (core:%charp prefix))
+      (:if (core:logor (core:null prefix) (core:charp prefix))
            ((:lambda (counter)
               (mu:write (mu:add counter 1) () core:%gensym-counter%)
               (core:%make-keyword
-               (:if (core:%charp prefix)
-                    (core:format () "~A~X" (core:%list2 prefix counter))
-                    (core:format () "<~X>" (mu:cons counter ())))))
+               (:if (core:charp prefix)
+                    (core:%format () "~A~X" (core:%list2 prefix counter))
+                    (core:%format () "<~X>" (mu:cons counter ())))))
             (mu:read core:%gensym-counter% () ()))
            (core:raise name 'core:%genkey "not a legal prefix"))))

@@ -27,7 +27,7 @@
 ;;;
 (mu:intern common "make-string-stream"
    (:lambda (dir init)
-      (:if (core:%keywordp dir)
+      (:if (core:keywordp dir)
            (:if (core:stringp init)
                 (:if (mu:eq dir :input)
                      (mu:open :string :input init)
@@ -42,7 +42,7 @@
 (mu:intern common "open"
   (:lambda (dir path)
      (:if (core:stringp path)
-          (:if (core:%keywordp dir)
+          (:if (core:keywordp dir)
                (:if (mu:eq dir :input)
                     (mu:open :file :input path)
                     (:if (mu:eq dir :output)
@@ -56,7 +56,7 @@
 ;;;
 (mu:intern common "close"
    (:lambda (stream)
-      (:if (core:%streamp stream)
+      (:if (core:streamp stream)
            (mu:close stream)
            (core:raise stream 'common:close "not a stream"))))
 
@@ -96,7 +96,7 @@
 (mu:intern common "write-char"
    (:lambda (ch designator)
      ((:lambda (stream)
-        (:if (core:%streamp stream)
+        (:if (core:streamp stream)
              (mu:write-char ch stream)
              (core:raise stream 'common:write-char "not a stream designator")))
       (common:%write-stream-designator designator))))
@@ -104,7 +104,7 @@
 (mu:intern common "write-byte"
    (:lambda (ch designator)
      ((:lambda (stream)
-        (:if (core:%streamp stream)
+        (:if (core:streamp stream)
              (mu:write-byte ch stream)
              (core:raise stream 'common:write-byte "not a stream designator")))
       (common:%write-stream-designator designator))))
@@ -112,7 +112,7 @@
 (mu:intern common "read-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
-       (:if (core:%streamp stream)
+       (:if (core:streamp stream)
             (mu:read-char stream error-eofp eof-value)
             (core:raise stream 'common:read-char "not a stream designator")))
      (common:%read-stream-designator designator))))
@@ -120,7 +120,7 @@
 (mu:intern common "read-byte"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
-       (:if (core:%streamp stream)
+       (:if (core:streamp stream)
             (mu:read-byte stream error-eofp eof-value)
             (core:raise stream 'common:read-byte "not a stream designator")))
      (common:%read-stream-designator designator))))
@@ -128,7 +128,7 @@
 (mu:intern common "peek-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
-       (:if (core:%streamp stream)
+       (:if (core:streamp stream)
             (mu:unread-char
              (common:read-char stream error-eofp eof-value)
              stream)
