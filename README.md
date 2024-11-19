@@ -187,7 +187,7 @@ Having built and installed `mux`,  establish the current directory as a `mux`  w
 % mux init
 ```
 
-Subsequent builds and packaging of the system can be facilitated with *mux*. See *mux* section below for usage instructions. A copy of the prior makefile can be found in the root directory as `mu.mk`.  *mu.mk* is deprecated in favor of the more *cargo*-like *mux*, but is left as a resource for the curious.
+Subsequent builds and packaging of the system are facilitated with *mux*. See the *mux* section below for usage instructions.
 
 Note: the *mux* and *makefile* installation mechanisms do not remove the installation directory before writing it and changes to directory structure and files will accumulate.
 
