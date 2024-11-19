@@ -12,7 +12,7 @@
   (let ((lib (symbol-name lib-sym)))
     (if (core:ns-find core::require-ns :extern lib)
       ()
-      (let ((lib-path (core:format () "~A/~A:~A.l" (list core::require-path "eko" lib))))
+      (let ((lib-path (core:%format () "~A/~A:~A.l" (list core::require-path "eko" lib))))
         (core:intern core::require-ns :extern lib)
         (core:load lib-path () ())))))
 
@@ -21,7 +21,7 @@
   (let ((lib (symbol-name lib-sym)))
     (if (core:ns-find core::require-ns :extern lib)
       ()
-      (let ((lib-path (core:format () "~A/~A:~A.l" (list core::require-path "eko" lib))))
+      (let ((lib-path (core:%format () "~A/~A:~A.l" (list core::require-path "eko" lib))))
         (core:intern core::require-ns :extern lib)
         (core:load lib-path :t ())))))
 

@@ -9,8 +9,8 @@
       ((:lambda (stream)
           (core:%mapc
            (:lambda (symbol)
-             (core:format stream "~A~%" `(,(mu:symbol-name symbol)))
-             (core:format stream "~A:~A~%" `(,ns ,(mu:symbol-name symbol))))
+             (core:%format stream "~A~%" `(,(mu:symbol-name symbol)))
+             (core:%format stream "~A:~A~%" `(,ns ,(mu:symbol-name symbol))))
            (mu:namespace-symbols (mu:find-namespace ns)))
           (mu:close stream))
        (mu:open :file :output file-name))

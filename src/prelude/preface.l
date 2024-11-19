@@ -14,7 +14,7 @@
   (core::funcall fn args))
 
 (defun format (stream fmt-string &rest args)
-  (core:format stream fmt-string args))
+  (core:%format stream fmt-string args))
 
 (defun append (&rest lists)
   (foldr
@@ -77,8 +77,8 @@
   (let ((genstream (make-string-stream :output "0")))
     (lambda () ;;; this becomes a closure
       ((lambda (n)
-         (core:format genstream "~A" (list (1+ n)))
-         (symbol (core:format () "g~A" (list n))))
+         (core:%format genstream "~A" (list (1+ n)))
+         (symbol (core:%format () "g~A" (list n))))
        (core:read (make-string-stream :input (get-output-stream-string genstream)))))))
 
 (defun gensym ()

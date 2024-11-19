@@ -15,7 +15,7 @@
             (:if (common:streamp ifs)
                  ((:lambda ()
                     (:if verbose
-                         (core:format :t ";;; loading ~A~%" `(,path))
+                         (core:%format :t ";;; loading ~A~%" `(,path))
                          ())
                     ((:lambda (status)
                        (:if (mu:eq core:%eof% status)
@@ -38,7 +38,7 @@
                                                core:%eof%
                                                ((:lambda (value)
                                                   (:if verbose
-                                                       (core:format :t "~A~%" `(,value))
+                                                       (core:%format :t "~A~%" `(,value))
                                                        ())
                                                   (core:null loop))
                                                 (mu:eval (core:compile form)))))

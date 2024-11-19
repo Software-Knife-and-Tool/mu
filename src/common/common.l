@@ -8,146 +8,88 @@
 
 (mu:intern common "*version*" "0.0.1")
 
+;;;
+;;; def macros
+;;;
+(core:compile
+ '(%defmacro defun (name lambda &rest body)
+   (core:%quote
+    (mu:intern
+     mu:%null-ns%
+     (mu:symbol-name name)
+     (core:compile `(lambda ,lambda ,@body))))))
+
+(core:compile
+ '(%defmacro defmacro (name lambda &rest body)
+   (core:compile `(%defmacro ,name ,lambda ,@body))
+   (core:%quote name)))
+
+(core:compile
+ '(%defmacro defconstant (name value)
+   (core:%quote
+    (mu:intern
+     mu:%null-ns%
+     (mu:symbol-name name)
+     value))))
+
+(core:compile
+ '(defun eql (x y)
+   (cond
+     ((mu:eq x y) :t)
+     ((core:null (mu:eq (core:type-of x) (core:type-of y))) ())
+     ((core:stringp x) (common:string= x y))
+     ((and (core:vectorp x) (core:vectorp y))
+        (and (mu:eq (core:vector-type x) (core:vector-type y))
+             (mu:eq (core:vector-length x) (core:vector-length y))
+             (core:funcall eql (common:vector-to-list x) (common:vector-to-list y))))
+     ((core:consp x)
+        (and (mu:eq (mu:length x) (mu:length y))
+             (core:funcall eql (mu:car x) (mu:car y))
+             (core:funcall eql (mu:cdr x) (mu:cdr y))))
+     (:t ()))))
+
+(core:compile
+ '(defmacro dolist (init-list &rest body)
+   (if (core:consp init-list)
+       (let ((init (mu:nth 1 init-list))
+             (sym (mu:car init-list)))
+         (if (core:symbolp sym)
+            (if (core:listp init)
+                (core:list
+                 (core:list 'lambda ()
+                            (core:list
+                             'core:mapc
+                             (core:list* 'lambda (core:list sym) body)
+                             (core:list 'mu:eval init))
+                            ()))
+               (core:raise init 'dolist "not a list"))
+           (core:raise sym 'dolist "not a symbol")))
+       (core:raise init-list 'dolist "not a list"))))
+
 #|
-(core:compile '(%defmacro progn (&rest body) (common:list (common:list* 'lambda () body))))
-(core:compile '(%defmacro when (test &rest body) (common:list 'if test (common:list* 'progn body))))
-(core:compile '(%defmacro unless (test &rest body) (common:list 'if test () (common:list* 'progn body))))
+;;;
+;;; eql
+;;;
+(defun eql (x y)
+   (cond
+     ((eq x y) t)
+     ((null (eq (type-of x) (type-of y))) nil)
+     ((stringp x) (string= x y))
+     ((and (vectorp x) (vectorp y))
+        (and (eq (vector-type x) (vector-type y))
+             (eq (vector-length x) (vector-length y))
+             (core::funcall eql (vector-to-list x) (vector-to-list y))))
+     ((consp x)
+        (and (eq (length x) (length y))
+             (core::funcall eql (car x) (car y))
+             (core::funcall eql (cdr x) (cdr y))))
+     (t ())))
+|#
 
-(core:compile
-  '(%defmacro let (binds &rest body)
-     (common:list*
-       (common:list* :lambda (core:%mapcar mu:car binds) body)
-       (core:%mapcar (:lambda (el) (mu:nth 1 el)) binds)))
-   ())
-
-(core:compile
- '(%defmacro let* (binds &rest body)
-   ((lambda (fn)
-      (if binds
-          (core:%apply fn binds)
-          (common:list* 'progn body)))
-    (lambda (fn binds)
-      (if (mu:cdr binds)
-          (common:list 'let (common:list (mu:car binds)) (core:%apply fn (core:list fn (mu:cdr binds))))
-          (common:list* 'let (common:list (mu:car binds)) body)))))
-  ())
-
-(core:compile
- '(%defmacro cond (&rest clauses)
-   (mu:car
-    (core:%foldr
-     (lambda (clause cond)
-        ;;; (form) or (form . body)
-       (let ((test (mu:car clause))
-             (body (mu:cdr clause)))
-         (if body
-             (common:list (common:list* 'if test (common:list* 'progn body) cond))
-             (common:list
-              (let ((gsym (core:gensym)))
-                (common:list 'let (common:list (common:list gsym test))
-                      (common:list* 'if gsym gsym cond)))))))
-     ()
-    clauses)))
-  ())
-
-(core:compile
- '(defmacro and (&rest terms)
-   (:if terms
-       (core:%foldr
-        (lambda (cns acc)
-          (let ((term (mu:car cns)))
-            (if (mu:cdr cns)
-                (core:list 'if term acc)
-                term)))
-        ()
-        (core:maplist core:identity terms))
-       :t))
-  ())
-
-(defmacro and (&rest terms)
-  (if terms
-    (foldr
-      (lambda (cns acc)
-        (let ((term (car cns)))
-          (if (cdr cns)
-              (list 'if term acc)
-              term)))
-      ()
-      (maplist identity terms))
-    :t))
-
-(defmacro or (&rest terms)
-  (foldr
-    (lambda (cns acc)
-      (let ((term (car cns)))
-        (if (cdr cns)
-            (let ((gsym (gensym)))
-              (list*
-                (list
-                  'let (list (list gsym (car cns)))
-                  (list 'if gsym gsym acc))))
-         term)))
-    ()
-    (maplist identity terms)))
-
-(defun append (&rest lists)
-  (foldr
-    (lambda (el acc)
-      (if (listp el)
-          (foldr (lambda (el acc) (cons el acc)) acc el)
-          el))
-      ()
-      lists))
-
-(defun apply (fn &rest args)
-  (errorp-unless functionp fn "apply: not a function")
-  ((lambda (loop) (fn (loop loop args)))
-   (lambda (loop args)
-     (if (cdr args)
-         (cons (car args) (loop loop (cdr args)))
-         ((lambda ()
-           (errorp-unless listp (car args) "apply: not a list")
-           (car args)))))))
-
-(defun vector (&rest elements)
-  (list-sv :t elements))
-
-(defmacro progn (&rest body)
-  (list (list* 'lambda () body)))
-
-(defmacro when (test &rest body)
-  (core:list 'if test (list* 'progn body)))
-
-(defmacro unless (test &rest body)
-  (core:list 'if test () (list* 'progn body)))
-
-(defmacro let (binds &rest body)
-  (errorp-unless core:listp binds "let: not a binding list")
-  (list*
-    (list* 'lambda (mapcar car binds) body)
-    (mapcar (lambda (el) (nth 1 el)) binds)))
-
-(defmacro let* (binds &rest body)
-  ((lambda (fn)
-     (if binds
-       (fn fn binds)
-       (list* 'progn body)))
-   (lambda (fn binds)
-     (if (cdr binds)
-         (list 'let (list (car binds)) (core::funcall fn (list fn (cdr binds))))
-         (list* 'let (list (car binds)) body)))))
-
-(defconst core::gensym
-  (let ((genstream (make-string-stream :output "0")))
-    (lambda () ;;; this becomes a closure
-      ((lambda (n)
-         (core:%format genstream "~A" (list (1+ n)))
-         (symbol (core:%format () "g~A" (list n))))
-       (core:read (make-string-stream :input (get-output-stream-string genstream)))))))
-
-(defun gensym ()
-  (core::funcall core::gensym ()))
-
+#|
+;;;
+;;; destructuring
+;;;
 (defmacro bind-seq (pattern source &rest body)
   (errorp-unless consp pattern "bind-seq: pattern not a list")
   (let* ((source-gsym (gensym))
@@ -165,50 +107,9 @@
                     pattern)))
               (cdr nths)))))
     (list* 'let* (cons (core:list source-gsym source) (destruct)) body)))
+|#
 
-(defmacro cond (&rest clauses)
-  (car
-    (foldr
-      (lambda (clause cond)
-        ;;; (form) or (form . body)
-        (errorp-unless consp clause "core:cond not a cons")
-        (let ((test (car clause))
-              (body (cdr clause)))
-          (if body
-            (list (list* 'if test (list* 'progn body) cond))
-            (list
-              (let ((gsym (gensym)))
-                (list 'let (list (list gsym test))
-                  (list* 'if gsym gsym cond)))))))
-    ()
-    clauses)))
-
-(defmacro and (&rest terms)
-  (if terms
-    (foldr
-      (lambda (cns acc)
-        (let ((term (car cns)))
-          (if (cdr cns)
-              (list 'if term acc)
-              term)))
-      ()
-      (maplist identity terms))
-    :t))
-
-(defmacro or (&rest terms)
-  (foldr
-    (lambda (cns acc)
-      (let ((term (car cns)))
-        (if (cdr cns)
-            (let ((gsym (gensym)))
-              (list*
-                (list
-                  'let (list (list gsym (car cns)))
-                  (list 'if gsym gsym acc))))
-         term)))
-    ()
-    (maplist identity terms)))
-
+#|
 ;;;
 ;;; do macros
 ;;;
@@ -247,8 +148,49 @@
                                    step-list)))))
           (list 'list* () () (cons 'list init-list)))))
 
-;;; (do let-form (end-test result) . body)
+;;;
+;;; dotimes macro
+;;;
+(defmacro dotimes (ctr-list &rest body)
+  (errorp-unless consp ctr-list "dotimes: not an init list")
+  (error-if (fixnum< (length ctr-list) 2) ctr-list "dotimes: malformed init list")
+  (error-if (fixnum< 3 (length ctr-list)) ctr-list "dotimes: malformed init list")
+  (let ((count-var  (nth 0 ctr-list))
+        (count-form (nth 1 ctr-list))
+        (result-form (nth 2 ctr-list))
+        (limit-gsym (gensym)))
+    (errorp-unless symbolp count-var "dotimes: not a symbol")
+    (list (list 'lambda (list limit-gsym)
+                (list 'if (list 'fixnum< limit-gsym 0)
+                      ()
+                      (list 'core::fix
+                            (list 'lambda (list count-var)
+                                  (list 'if (list 'eq count-var limit-gsym)
+                                        count-var
+                                        (list* 'progn (append body (list (list '1+ count-var))))))
+                            0))
+                result-form)
+          count-form)))
 
+;;;
+;;; dolist macro
+;;;
+(defmacro dolist (init-list &rest body)
+  (errorp-unless consp init-list "dolist; not an init list")
+  (let ((init (nth 1 init-list))
+        (sym (car init-list)))
+    (errorp-unless symbolp sym "dolist; not a symbol")  
+    (errorp-unless listp init "dolist; not a list")
+    (list
+      (list 'lambda ()
+        (list
+         'mapc
+         (list* 'lambda (list sym) body)
+         (list 'eval init))
+        ()))))
+|#
+
+#|
 (defun core::reclose (closure)
   (errorp-unless functionp closure "reclose: not a function")
   (let ((closed (core::lambda-closure (core::fn-lambda-desc closure))))
@@ -317,86 +259,9 @@
         (core:compile (list 'lambda lambda (list* 'letf (list (list* name lambda body)) body)))
         ())
   (list :quote name))
+|#
 
-(defun compose (&rest fns)
-  (lambda (arg)
-    (foldl
-     (lambda (fn acc)
-       (funcall fn acc))
-     arg
-     fns)))
-
-(defun complement (fn)
-  (compose null fn))
-
-(%defmacro progn (&rest body) (list (list* 'lambda () body)))
-
-(%defmacro when (test &rest body)
-  (list 'if test (list* 'progn body)))
-
-(%defmacro unless (test &rest body)
-  (list 'if test () (list* 'progn body)))
-
-;;; defer to prelude
-;;;
-;;; eql
-;;;
-(defun eql (x y)
-   (cond
-     ((eq x y) t)
-     ((null (eq (type-of x) (type-of y))) nil)
-     ((stringp x) (string= x y))
-     ((and (vectorp x) (vectorp y))
-        (and (eq (vector-type x) (vector-type y))
-             (eq (vector-length x) (vector-length y))
-             (core::funcall eql (vector-to-list x) (vector-to-list y))))
-     ((consp x)
-        (and (eq (length x) (length y))
-             (core::funcall eql (car x) (car y))
-             (core::funcall eql (cdr x) (cdr y))))
-     (t ())))
-
-;;;
-;;; dotimes macro
-;;;
-(defmacro dotimes (ctr-list &rest body)
-  (errorp-unless consp ctr-list "dotimes: not an init list")
-  (error-if (fixnum< (length ctr-list) 2) ctr-list "dotimes: malformed init list")
-  (error-if (fixnum< 3 (length ctr-list)) ctr-list "dotimes: malformed init list")
-  (let ((count-var  (nth 0 ctr-list))
-        (count-form (nth 1 ctr-list))
-        (result-form (nth 2 ctr-list))
-        (limit-gsym (gensym)))
-    (errorp-unless symbolp count-var "dotimes: not a symbol")
-    (list (list 'lambda (list limit-gsym)
-                (list 'if (list 'fixnum< limit-gsym 0)
-                      ()
-                      (list 'core::fix
-                            (list 'lambda (list count-var)
-                                  (list 'if (list 'eq count-var limit-gsym)
-                                        count-var
-                                        (list* 'progn (append body (list (list '1+ count-var))))))
-                            0))
-                result-form)
-          count-form)))
-
-;;;
-;;; dolist macro
-;;;
-(defmacro dolist (init-list &rest body)
-  (errorp-unless consp init-list "dolist; not an init list")
-  (let ((init (nth 1 init-list))
-        (sym (car init-list)))
-    (errorp-unless symbolp sym "dolist; not a symbol")  
-    (errorp-unless listp init "dolist; not a list")
-    (list
-      (list 'lambda ()
-        (list
-         'mapc
-         (list* 'lambda (list sym) body)
-         (list 'eval init))
-        ()))))
-
+#|
 ;;;
 ;;; with-open-file macro
 ;;;
