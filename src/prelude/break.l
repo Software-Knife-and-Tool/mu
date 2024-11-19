@@ -35,9 +35,9 @@
 ;;;
 (mu:intern prelude "break"
    (:lambda (exception)
-     (core:format :t ";;; entering break loop with exception~%" ())
+     (core:%format :t ";;; entering break loop with exception~%" ())
      (core:%exceptionf :t ";;; ~A on ~S by ~S, ~A~%" () exception)
-     (core:format :t ";;; :h for commands~%" ())
+     (core:%format :t ";;; :h for commands~%" ())
      (mu:fix
       (:lambda (loop)
         ((:lambda (form)
@@ -45,11 +45,11 @@
                 loop
                 (:if (mu:eq form :h)
                      ((:lambda ()
-                        (core:format :t "break help:~%" ())
-                        (core:format :t ":d - describe exception value~%" ())
-                        (core:format :t ":e - print the full exception~%" ())
-                        (core:format :t ":r - return from break~%" ())
-                        (core:format :t ":x - exit process~%" ())
+                        (core:%format :t "break help:~%" ())
+                        (core:%format :t ":d - describe exception value~%" ())
+                        (core:%format :t ":e - print the full exception~%" ())
+                        (core:%format :t ":r - return from break~%" ())
+                        (core:%format :t ":x - exit process~%" ())
                         (core:null loop)))
                      (:if (mu:eq form :d)
                           ((:lambda (value)
@@ -65,10 +65,10 @@
                                     (:if (mu:eq form :r)
                                          loop
                                          ((:lambda ()
-                                            (core:format :t ";;; unrecognized debugger command: h for help~%" ())
+                                            (core:%format :t ";;; unrecognized debugger command: h for help~%" ())
                                             (core:null loop))))))))))
          ((:lambda ()
-            (core:format :t "prelude:debug> " ())
+            (core:%format :t "prelude:debug> " ())
             (mu:flush mu:*standard-output*)
             (core:read mu:*standard-input* () core:%eof%)))))
      ())))
@@ -88,7 +88,7 @@
 (core:intern core::ns :extern "print-exception"
   (:lambda (stream exception)
     ((:lambda (obj source condition)
-       (core:format stream 
+       (core:%format stream 
                     ";;; exception raised on ~A, condition ~A by ~A~%"
                     (core::list-3 obj source condition)))
      (core:vector-ref (core:struct-vec exception) 0)
@@ -99,7 +99,7 @@
   (:lambda (frames)
     (core:mapc
       (:lambda (frame)
-        (core:format :t "(~A ~A)~%" frame))
+        (core:%format :t "(~A ~A)~%" frame))
         frames)))
 
 (core:intern core::ns :intern "eprinc"

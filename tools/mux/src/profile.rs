@@ -27,7 +27,7 @@ impl Profile {
                               (prof:prof-control :off)                \
                               (core:%map-vector                       \
                               (:lambda (fn-count)                     \
-                              (core:format :t \"~A~T~A~%\" `(,(mu:car fn-count) ,(mu:cdr fn-count)))) \
+                              (core:%format :t \"~A~T~A~%\" `(,(mu:car fn-count) ,(mu:cdr fn-count)))) \
                               (prof:prof-control :get)))              \
                               (mu:intern mu:%null-ns% (mu:nth 1 config) ()))) \
                               '{})", config);

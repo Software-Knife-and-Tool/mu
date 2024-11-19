@@ -13,7 +13,7 @@
                         (boundp form)
                         (not (symbolp (symbol-value form)))
                         (not (consp (symbol-value form))))
-                   (core:format t ";;; constant propagation: ~A ~A~%" form (symbol-value form))
+                   (core:%format t ";;; constant propagation: ~A ~A~%" form (symbol-value form))
                    (symbol-value form))
                   (t form)))
          (review (form)
