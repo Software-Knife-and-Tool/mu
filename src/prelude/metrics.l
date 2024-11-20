@@ -38,7 +38,7 @@
                   (fixnum- (svref stop 1) (svref start 1))
                   (fixnum- (svref stop 2) (svref start 2))))
       (mapc
-       (lambda (type-info)
+       (%lambda (type-info)
          (let* ((type (car type-info))
                 (in-heap (nth 0 (cdr (assoc type pre))))
                 (alloc (nth 1 (cdr (assoc type pre)))))
@@ -60,13 +60,14 @@
 ;;;
 ;;; room
 ;;;
+#|
 (defun room (verbosity)
   (if verbosity
       (progn
         (format t ";;; eko version: ~A~%" core::eko-version)
         (format t ";;; automatic garbage collection is disabled~%")))
   (mapc
-   (lambda (desc)
+   (%lambda (desc)
      (if verbosity
          (format t "~A: ~A in heap, (bytes ~A), free ~A~%"
                  (cdr desc)
@@ -85,3 +86,4 @@
      (:symbol . "symbols    ")
      (:vector . "vectors    ")))
   verbosity)
+|#

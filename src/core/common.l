@@ -12,14 +12,14 @@
 ;;; rest functions
 ;;;
 (mu:intern core "append"
-   (core:compile '(lambda (&rest list) (mu:append list))))
+   (core:compile '(%lambda (&rest list) (mu:append list))))
 
 (mu:intern core "list"
-   (core:compile '(lambda (&rest list) list)))         
+   (core:compile '(%lambda (&rest list) list)))         
 
 (mu:intern core "list*"
    (core:compile
-    '(lambda (&rest args)
+    '(%lambda (&rest args)
       (mu:car
        (mu:fix
         (:lambda (loop)
@@ -35,16 +35,16 @@
 
 (mu:intern core "vector"
    (core:compile
-    `(lambda (&rest list) (mu:make-vector :t list))))
+    `(%lambda (&rest list) (mu:make-vector :t list))))
 
 (mu:intern core "format"
    (core:compile
-    `(lambda (stream format &rest args)
+    `(%lambda (stream format &rest args)
        (core:%format stream format args))))
 
 (mu:intern core "funcall"
    (core:compile
-    `(lambda (fn &rest args)
+    `(%lambda (fn &rest args)
        (core:apply fn args))))
 
 ;;;
@@ -52,7 +52,7 @@
 ;;;
 (core:compile
  '(%defmacro progn (&rest body)
-   `((lambda () ,@body))))
+   `((%lambda () ,@body))))
 
 (core:compile
  '(%defmacro when (test &rest body)
@@ -64,7 +64,7 @@
 
 (core:compile
  '(%defmacro let (binds &rest body)
-   `((lambda ,(core:%mapcar mu:car binds) ,@body)
+   `((%lambda ,(core:%mapcar mu:car binds) ,@body)
      ,@(core:%mapcar (:lambda (bind) (mu:nth 1 bind)) binds))))
 
 (core:compile

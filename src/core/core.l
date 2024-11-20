@@ -6,12 +6,13 @@
 ;;;
 (mu:intern mu:%null-ns% "core" (mu:make-namespace "core"))
 
-(mu:intern core "*version*" "0.0.3")
+(mu:intern core "+version+" "0.0.4")
 
 (mu:intern core "%char-macro-ns%" (mu:make-namespace "%char-macros%"))
 (mu:intern core "%macro-ns%" (mu:make-namespace "%macros%"))
 (mu:intern core "%symbol-macro-ns%" (mu:make-namespace "%symbol-macros%"))
 (mu:intern core "%types-ns%" (mu:make-namespace "%core-types%"))
+(mu:intern core "%modules%" (mu:make-namespace "%modules%"))
 
 ;;;
 ;;; predicates
@@ -19,19 +20,19 @@
 (mu:intern core "null" (:lambda (t) (mu:eq () t)))
 (mu:intern core "listp" (:lambda (t) (:if (core:consp t) :t (mu:eq () t))))
 
-(mu:intern core "%numberp"
+(mu:intern core "numberp"
   (:lambda (n)
      (:if (core:fixnump n)
           :t
           (core:floatp n))))
 
-(mu:intern core "%minusp"
+(mu:intern core "minusp"
    (:lambda (n)
-      (:if (core:%numberp n)
+      (:if (core:numberp n)
            (:if (core:floatp n)
                 (mu:fless-than n 0.0)
                 (mu:less-than n 0))
-           (core:raise n 'core:%minusp "not a number"))))
+           (core:raise n 'core:minusp "not a number"))))
 
 ;;;
 ;;; mu system classes

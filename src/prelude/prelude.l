@@ -8,15 +8,16 @@
 
 (mu:intern prelude "*version*" "0.0.1")
 
-#| https://www.lispworks.com/documentation/HyperSpec/Issues/iss172_w.htm |#
+#| https://www.lispworks.com/documentation/HyperSpec/Issues/iss172_w.htm
 (defun compose (&rest fns)
   (lambda (arg)
     (core:%foldl
      (lambda (fn acc)
        (core:funcall fn acc))
      arg
-     fns)))
+fns)))
 
 ;;; (core:macroexpand '(defun compose (&rest fns) (lambda (arg) (core:%foldl (lambda (fn acc) (core:funcall fn acc)) arg fns))) ())
 (defun complement (fn)
   (compose null fn))
+|#

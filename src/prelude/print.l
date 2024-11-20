@@ -4,6 +4,7 @@
 ;;;
 ;;; common printing
 ;;;
+#|
 (defun prin1 (form stream)
    (write form stream t))
 
@@ -30,7 +31,7 @@
               (flet ((loop (loop n)
                       (if (zerop n)
                           ()
-                          ((lambda ()
+                          ((%lambda ()
                              (write " " stream ())
                              (loop loop (1- n)))))))
                 (loop loop n)))
@@ -45,11 +46,11 @@
                          (cond
                            ((eq (nth 0 indent-desc) 1) 
                             (format stream "(~A ~A~%" (nth 0 form) (nth 1 form))
-                            (mapc (lambda (el) (loop loop el (fixnum+ indent (nth 1 indent-desc)))) (nthcdr 2 form))
+                            (mapc (%lambda (el) (loop loop el (fixnum+ indent (nth 1 indent-desc)))) (nthcdr 2 form))
                             (format stream ")"))
                            ((eq (nth 0 indent-desc) 2) 
                             (format stream "(~A ~A ~A~%" (nth 0 form) (nth 1 form) (nth 2 form))
-                            (mapc (lambda (el) (loop loop el (fixnum+ indent (nth 1 indent-desc)))) (nthcdr 3 form))
+                            (mapc (%lambda (el) (loop loop el (fixnum+ indent (nth 1 indent-desc)))) (nthcdr 3 form))
                             (format stream ")"))
                            (t (error form "pprint botch")))
                          (progn
@@ -59,4 +60,4 @@
                   (t (format stream "~A~%" form))))
                (t (format stream "~A" form)))))
             (loop loop form 0))))
-
+|#

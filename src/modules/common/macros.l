@@ -2,58 +2,31 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; common namespace
+;;; common macros
 ;;;
-(mu:intern mu:%null-ns% "common" (mu:make-namespace "common"))
-
-(mu:intern common "*version*" "0.0.1")
-
-;;;
-;;; def macros
-;;;
-(core:compile
- '(%defmacro defun (name lambda &rest body)
+(%defmacro defun (name lambda &rest body)
    (core:%quote
     (mu:intern
      mu:%null-ns%
      (mu:symbol-name name)
-     (core:compile `(lambda ,lambda ,@body))))))
+     (core:compile `(%lambda ,lambda ,@body)))))
 
-(core:compile
- '(%defmacro defmacro (name lambda &rest body)
+(%defmacro defmacro (name lambda &rest body)
    (core:compile `(%defmacro ,name ,lambda ,@body))
-   (core:%quote name)))
+   (core:%quote name))
 
-(core:compile
- '(%defmacro defconstant (name value)
+(%defmacro defconstant (name value)
    (core:%quote
     (mu:intern
      mu:%null-ns%
      (mu:symbol-name name)
-     value))))
+     value)))
 
-(core:compile
- '(defun eql (x y)
-   (cond
-     ((mu:eq x y) :t)
-     ((core:null (mu:eq (core:type-of x) (core:type-of y))) ())
-     ((core:stringp x) (common:string= x y))
-     ((and (core:vectorp x) (core:vectorp y))
-        (and (mu:eq (core:vector-type x) (core:vector-type y))
-             (mu:eq (core:vector-length x) (core:vector-length y))
-             (core:funcall eql (common:vector-to-list x) (common:vector-to-list y))))
-     ((core:consp x)
-        (and (mu:eq (mu:length x) (mu:length y))
-             (core:funcall eql (mu:car x) (mu:car y))
-             (core:funcall eql (mu:cdr x) (mu:cdr y))))
-     (:t ()))))
-
-(core:compile
- '(defmacro dolist (init-list &rest body)
-   (if (core:consp init-list)
-       (let ((init (mu:nth 1 init-list))
-             (sym (mu:car init-list)))
-         (if (core:symbolp sym)
+(defmacro dolist (init-list &rest body)
+  (if (core:consp init-list)
+      (let ((init (mu:nth 1 init-list))
+            (sym (mu:car init-list)))
+        (if (core:symbolp sym)
             (if (core:listp init)
                 (core:list
                  (core:list 'lambda ()
@@ -62,11 +35,26 @@
                              (core:list* 'lambda (core:list sym) body)
                              (core:list 'mu:eval init))
                             ()))
-               (core:raise init 'dolist "not a list"))
-           (core:raise sym 'dolist "not a symbol")))
-       (core:raise init-list 'dolist "not a list"))))
+                (core:raise init 'dolist "not a list"))
+            (core:raise sym 'dolist "not a symbol")))
+      (core:raise init-list 'dolist "not a list")))
 
 #|
+(defun eql (x y)
+  (cond
+    ((mu:eq x y) :t)
+    ((core:null (mu:eq (core:type-of x) (core:type-of y))) ())
+    ((core:stringp x) (common:string= x y))
+    ((and (core:vectorp x) (core:vectorp y))
+     (and (mu:eq (core:vector-type x) (core:vector-type y))
+          (mu:eq (core:vector-length x) (core:vector-length y))
+          (core:funcall eql (common:vector-to-list x) (common:vector-to-list y))))
+    ((core:consp x)
+     (and (mu:eq (mu:length x) (mu:length y))
+          (core:funcall eql (mu:car x) (mu:car y))
+          (core:funcall eql (mu:cdr x) (mu:cdr y))))
+    (:t ())))
+
 ;;;
 ;;; eql
 ;;;

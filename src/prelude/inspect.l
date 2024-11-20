@@ -86,6 +86,7 @@
 ;;;
 ;;; inspector
 ;;;
+#|
 (defun inspect (object)
   ((lambda (ifs)
      (errorp-unless streamp ifs "inspect: cannot open input stream")
@@ -127,3 +128,4 @@
                    (format t "~A~%" form))
                 (loop loop stack)))))))
      std-in))
+|#

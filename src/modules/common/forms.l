@@ -4,15 +4,12 @@
 ;;;
 ;;; common namespace
 ;;;
-(mu:intern mu:%null-ns% "common" (mu:make-namespace "common"))
-
-(mu:intern common "*version*" "0.0.1")
-
+#|
 (mu:intern common "identity"
    (:lambda (obj)
      obj))
 
-#|
+
 (defun vector (&rest elements)
   (list-sv :t elements))
 

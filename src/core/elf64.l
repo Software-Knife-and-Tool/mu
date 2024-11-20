@@ -19,7 +19,7 @@
 
 (mu:intern core "%elf64-read"
    (:lambda (type elf64)
-  (let ((elf64-read (lambda (type stream) (funcall core:elf64-read type stream))))
+  (let ((elf64-read (%lambda (type stream) (funcall core:elf64-read type stream))))
     (cond
       ((eq type :half)
        (fixnum+ (read-byte elf64 t ()) (ash (read-byte elf64 t ()) 8)))
@@ -32,7 +32,7 @@
       (t (error size "elf64-read: not a legal type")))))
 
 (defun elf64-write (type n stream)
-  (let ((elf64-write (lambda (type n stream) (funcall core:elf64-write type n stream))))
+  (let ((elf64-write (%lambda (type n stream) (funcall core:elf64-write type n stream))))
     (cond
       ((eq type :half)
        (elf64-write-bytes stream
@@ -78,11 +78,11 @@
 
 (defun elf64-read-header (elf64)
   (core:unwind-protect
-      (lambda (ex)
+      (%lambda (ex)
         (core:%format t "error: exception while reading header~%")
         (print-except ex "read-header")
         ())
-    (lambda ()
+    (%lambda ()
       (let ((top
              (core:list
               (mu:cons "magic" (elf64-read :u64 elf64))
@@ -121,7 +121,7 @@
 (defun elf64-print-header (elf64-header)
   (errorp-unless consp elf64-header "print-header: not an association list")
   (mapc
-   (lambda (entry)
+   (%lambda (entry)
      (core:%format t "    ~A: ~A~%" (car entry) (cdr entry)))
    elf64-header))
 

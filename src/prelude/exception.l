@@ -126,6 +126,7 @@
            (core:%type-ref prop exception)
            (core:raise prop 'core:%exception-prop "not an exception property"))))
 
+#|
 (defun current-working-directory ()
   (system:cwd))
 
@@ -149,3 +150,4 @@
 
 (defun utimes ()
    (system:utimes))
+|#

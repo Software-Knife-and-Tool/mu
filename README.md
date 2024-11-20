@@ -61,7 +61,7 @@ Most of our core computational frameworks are built on static systems and are fr
 ------
 
 - *mu*, a functional forward system language
-- *mu/lib*, a small, configurable runtime library amd language
+- *mu/mu*, a small, configurable runtime library amd language
 - *mu-sys*, minimal POSIX runtime suitable for containers
 - *mu/codegen*, a native code compiler
 - *mux* , a cargo-like development and packaging tool
@@ -222,7 +222,7 @@ The *sysinfo* feature is disabled on *macos* builds.
 As of 0.1.76, the *mu* distribution includes tools for configuring and development of the system. The *mux* tool provides these utilities:
 
 ```
-Usage: mux 0.0.10 command [option...]
+Usage: mux 0.0.11 command [option...]
   command:
     help                               ; this message
     version                            ; mux version
@@ -234,7 +234,7 @@ Usage: mux 0.0.10 command [option...]
     install                            ; (sudo) install mu system-wide
     clean                              ; clean all artifacts
     commit                             ; fmt and clippy, pre-commit checking
-    repl      [--namespace ...]        ; repl
+    repl      [--namespace ...]        ; repl: mu, core, and prelude namespaces
     symbols   [--crossref | --counts | --reference | --namespace ...]
                                        ; symbol reports
     test                               ; regression test suite

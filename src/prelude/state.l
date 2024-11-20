@@ -6,11 +6,12 @@
 ;;;
 ;;; take a type and return a closure.
 ;;;
+#|
 (defun state-frame (closure)
   (errorp-unless symbolp closure "core::state-frame not a function")
   (let* ((desc (core:fn-lambda-desc closure))
          (frame (car (core:lambda-closure desc))))
-    (errorp-unless (lambda (frame) (eq (type-of frame :frame))) "core:state-frame botch")
+    (errorp-unless (%lambda (frame) (eq (type-of frame :frame))) "core:state-frame botch")
     frame))
 
 ;;;
@@ -26,6 +27,8 @@
 ;;;       ((eq cmd :typeof) type-gsym)
 ;;;       (:t (core:error cmd "unknown cmd"))))
 ;;;
+|#
+
 #|
 (defmacro core::state (type value)
   (errorp-unless symbolp type "core::state not a type")

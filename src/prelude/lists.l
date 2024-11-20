@@ -4,6 +4,7 @@
 ;;;
 ;;; mu lists
 ;;;
+#|
 (defun zip (list-1 list-2)
   (errorp-unless listp list-1 "zip: not a list")
   (errorp-unless listp list-2 "zip: not a list")
@@ -13,4 +14,4 @@
              (list (list (car l1) (car l2)))
              (loop (cdr l1) (cdr l2))))))
     (loop list-1 list-2)))
-
+|#

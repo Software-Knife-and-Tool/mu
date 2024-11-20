@@ -11,6 +11,7 @@ CORE= \
 	format.l	\
 	funcall.l	\
 	load.l		\
+	module.l	\
 	list.l		\
 	map.l		\
 	stream.l	\
@@ -30,7 +31,7 @@ CORE= \
 	common.l
 
 COMMON= \
-	common.l       \
+	testing.l      \
 	boole.l	       \
 	defun.l        \
 	describe.l     \
@@ -59,7 +60,7 @@ dist:
 
 	@rm -f common.l
 	@for common in $(COMMON); do			\
-	    cat $(SRC)/common/$$common >> common.l;	\
+	    cat $(SRC)/modules/common/$$common >> common.l;	\
 	done
 	@cp common.l mu/dist
 

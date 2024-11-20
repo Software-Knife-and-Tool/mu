@@ -111,7 +111,7 @@
   (:lambda (base stream)
     (mu:fix
       (:lambda (loop)
-        (:if (core:%numberp loop)
+        (:if (core:numberp loop)
              loop
              ((:lambda (ch)
                 (:if (core:null ch)

@@ -12,7 +12,7 @@
    (:lambda (path verbose)
      (:if (core:stringp path)
          ((:lambda (ifs)
-            (:if (common:streamp ifs)
+            (:if (core:streamp ifs)
                  ((:lambda ()
                     (:if verbose
                          (core:%format :t ";;; loading ~A~%" `(,path))
@@ -44,6 +44,6 @@
                                                 (mu:eval (core:compile form)))))
                                        (mu:read ifs () core:%eof%))))))
                        ()))))
-                  (core:raise common:streamp ifs 'prelude:load "cannot open input file")))
+                  (core:raise ifs 'prelude:load "cannot open input file")))
             (mu:open :file :input path))
           (core:raise path 'prelude:load "not a file designator"))))
