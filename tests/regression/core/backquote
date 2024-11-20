@@ -1,5 +1,5 @@
 (mu:eq mu:add (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:add") () ()))))	:t
-(mu:eq mu:*version* (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:*version*") () ()))))	:t
+(mu:eq mu:+version+ (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:+version+") () ()))))	:t
 (mu:eval (core:compile (core:read (mu:open :string :input "`\"abc\"") () ())))	"abc"
 (mu:eval (core:compile (core:read (mu:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
 (mu:eval (core:compile (core:read (mu:open :string :input "`#\\a") () ())))	#\a
