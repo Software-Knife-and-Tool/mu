@@ -1,5 +1,5 @@
 (mu:type-of `,mu:add)	:func
-(mu:type-of `,mu:*version*)	:vector
+(mu:type-of `,mu:+version+)	:vector
 `"abc"	"abc"
 `#(:t 1 2 3)	#(:t 1 2 3)
 `#\a	#\a

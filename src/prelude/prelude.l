@@ -6,7 +6,7 @@
 ;;;
 (mu:intern mu:%null-ns% "prelude" (mu:make-namespace "prelude"))
 
-(mu:intern prelude "*version*" "0.0.1")
+(mu:intern prelude "+version+" "0.0.1")
 
 #| https://www.lispworks.com/documentation/HyperSpec/Issues/iss172_w.htm
 (defun compose (&rest fns)
