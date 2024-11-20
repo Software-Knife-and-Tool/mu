@@ -33,7 +33,7 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.10";
+const VERSION: &str = "0.0.11";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
@@ -48,7 +48,7 @@ pub fn usage() {
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    clean                              ; clean all artifacts");
     println!("    commit                             ; fmt and clippy, pre-commit checking");
-    println!("    repl      [--namespace ...]        ; repl");
+    println!("    repl      [--namespace ...]        ; repl: mu, core, and prelude namespaces");
     println!("    symbols   [--crossref | --counts | --reference | --namespace ...]");
     println!("                                       ; symbol reports");
     println!("    test                               ; regression test suite");

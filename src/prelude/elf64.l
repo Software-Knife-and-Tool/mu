@@ -4,9 +4,10 @@
 ;;;
 ;;; elf64 utilities
 ;;;
+#|
 (defun elf64-write-bytes (stream &rest bytes)
   (mapc
-   (lambda (bytes)
+   (%lambda (bytes)
      (cond
        ((charp bytes) (write-byte (ch-ansi bytes) stream))
        ((fixnump bytes) (write-byte bytes stream))
@@ -18,7 +19,7 @@
    bytes))
 
 (defun elf64-read (type elf64)
-  (let ((elf64-read (lambda (type stream) (funcall core:elf64-read type stream))))
+  (let ((elf64-read (%lambda (type stream) (funcall core:elf64-read type stream))))
     (cond
       ((eq type :half)
        (fixnum+ (read-byte elf64 t ()) (ash (read-byte elf64 t ()) 8)))
@@ -31,7 +32,7 @@
       (t (error size "elf64-read: not a legal type")))))
 
 (defun elf64-write (type n stream)
-  (let ((elf64-write (lambda (type n stream) (funcall core:elf64-write type n stream))))
+  (let ((elf64-write (%lambda (type n stream) (funcall core:elf64-write type n stream))))
     (cond
       ((eq type :half)
        (elf64-write-bytes stream
@@ -77,11 +78,11 @@
 
 (defun elf64-read-header (elf64)
   (core:unwind-protect
-      (lambda (ex)
+      (%lambda (ex)
         (format t "error: exception while reading header~%")
         (print-except ex "read-header")
         ())
-    (lambda ()
+    (%lambda ()
       (let ((top
              (list
               (cons "magic" (elf64-read :u64 elf64))
@@ -141,3 +142,4 @@
              (do* ((tag (elf64-read :tag elf64) (elf64-read :tag elf64)))
                   ((eofp elf64) t)
                (format t "[~A]~%" (type-of tag) tag)))))))
+|#

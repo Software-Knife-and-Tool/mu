@@ -25,15 +25,9 @@ impl Repl {
                 .args(["-l", "/opt/mu/dist/core.l"])
                 .spawn()
                 .unwrap(),
-            "common" => Command::new("mu-sh")
-                .args(["-l", "/opt/mu/dist/core.l"])
-                .args(["-l", "/opt/mu/dist/common.l"])
-                .spawn()
-                .unwrap(),
             "prelude" => Command::new("mu-sys")
                 .args(["-l", "/opt/mu/dist/core.l"])
-                .args(["-l", "/opt/mu/dist/common.l"])
-                .args(["-q", "(core:%load-file \"/opt/mu/dist/prelude.l\")"])
+                .args(["-q", "(core:load-file \"/opt/mu/dist/prelude.l\")"])
                 .args(["-l", "/opt/mu/lib/prelude/repl.l"])
                 .args(["-e", "(prelude:repl)"])
                 .spawn()

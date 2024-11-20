@@ -2,26 +2,28 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; loaders
+;;; loader
 ;;;
 
 ;;;
-;;; %load-file
+;;; load-file
 ;;;
-(mu:intern core "%load-file"
+(mu:intern core "load-file"
    (:lambda (path)
-     ((:lambda (stream)
-       (mu:fix
-        (:lambda (loop)
-          (:if (mu:eq loop core:%eof%)
-              core:%eof%
-              ((:lambda (form)
-                 (:if (mu:eq form core:%eof%)
-                      core:%eof%
-                      ((:lambda ()
-                         (mu:eval (core:compile form))
-                         (core:null loop)))))
-               (core:read stream () core:%eof%))))
-        ()))
-      (mu:open :file :input path))
-     ()))
+     (:if (core:stringp path)
+          ((:lambda (stream)
+             (mu:fix
+              (:lambda (loop)
+                (:if (mu:eq loop core:%eof%)
+                     core:%eof%
+                     ((:lambda (form)
+                        (:if (mu:eq form core:%eof%)
+                             core:%eof%
+                             ((:lambda ()
+                                (mu:eval (core:compile form))
+                                (core:null loop)))))
+                      (core:read stream () core:%eof%))))
+              ()))
+           (mu:open :file :input path))
+          (core:raise path 'core:load-file "not a file path"))
+     :t))

@@ -39,11 +39,11 @@ dist:
 
 	@install -m 644 $(SRC)/dist/mu.l $(BASE)/dist
 	@install -m 644 -D -t $(BASE)/lib/sysgen $(TOOLS)/sysgen/templates/*
-	@install -m 644 -D -t $(BASE)/lib/common $(SRC)/common/*.l
 	@install -m 644 -D -t $(BASE)/lib/core $(SRC)/core/*.l
 	@install -m 644 -D -t $(BASE)/lib/prelude $(SRC)/prelude/*.l
 
 	@install -D -t $(BASE)/modules/codegen $(SRC)/modules/codegen/*.l
+	@install -D -t $(BASE)/modules/common $(SRC)/modules/common/*.l
 
 	@make -f dist.mk dist
 

@@ -88,7 +88,7 @@
               (core:%mapcar (:lambda (form) (core:%compile form env)) body)))
            (core:%foldl
             (:lambda (el acc)
-              (:if (core:%numberp acc)
+              (:if (core:numberp acc)
                    (:if (mu:eq '&rest el)
                         (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
                              (mu:cons

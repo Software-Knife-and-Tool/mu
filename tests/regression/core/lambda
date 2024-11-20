@@ -1,48 +1,48 @@
-(core:apply (core:compile '(lambda () 1)) ())	1
-(core:apply (core:compile '(lambda (a b) (core:null b))) '(1 2))	:nil
-(core:apply (core:compile '(lambda (a b) (mu:add 1 2))) '(1 2))	3
-(core:apply (core:compile '(lambda (a b) (mu:add a b))) '(1 2))	3
-(core:apply (core:compile '(lambda (a b) (mu:type-of b))) '(1 2))	:fixnum
-(core:apply (core:compile '(lambda ())) ())	:nil
-(core:apply (core:compile '(lambda () 1)) ()))	1
-(core:apply (core:compile '(lambda (a) a)) '(1))	1
-(core:apply (core:compile '(lambda (a) 1)) '(2))	1
-(core:apply (core:compile '(lambda (a b) 1)) '(2 3))	1
-(core:apply (core:compile '(lambda (a b) (core:fixnump b))) '(1 2))	:t
-(core:apply (core:compile '(lambda (a b) (core:null b))) '(1 2))	:nil
-(core:apply (core:compile '(lambda (a b) (mu:add 1 2))) '(1 2))	3
-(core:apply (core:compile '(lambda (a b) (mu:add a b))) '(1 2))	3
-(core:apply (core:compile '(lambda (a b) (mu:type-of b))) '(1 2))	:fixnum
-(core:apply (core:compile '(lambda (&rest e) e)) '(1 2 3 4 5))	(1 2 3 4 5)
-(core:apply (core:compile '(lambda (a &rest e) e)) '(1 2 3 4 5))	(2 3 4 5)
-(core:apply (core:compile '(lambda (a b &rest e) e)) '(1 2 3 4 5))	(3 4 5)
-(core:apply (core:compile '(lambda (a b c &rest e) e)) '(1 2 3 4 5))	(4 5)
-(core:apply (core:compile '(lambda (a b c d &rest e) e)) '(1 2 3 4 5))	(5)
-(core:apply (core:compile '(lambda (a b c d e &rest f) f)) '(1 2 3 4 5))	:nil
-(core:apply (core:compile '(lambda (a b c d &rest f) (mu:write f () mu:*standard-output*))) '(1 2 3 4 5))	(5)(5)
-(mu:eval (core:compile '((lambda () 1))))	1
-(mu:eval (core:compile '((lambda (a b) (core:null b)) 1 2)))	:nil
-(mu:eval (core:compile '((lambda (a b) (mu:add 1 2)) 1 2)))	3
-(mu:eval (core:compile '((lambda (a b) (mu:add a b)) 1 2)))	3
-(mu:eval (core:compile '((lambda (a b) (mu:type-of b)) 1 2)))	:fixnum
-(mu:eval (core:compile '((lambda ()))))	:nil
-(mu:eval (core:compile '((lambda () 1))))	1
-(mu:eval (core:compile '((lambda (a) a) 1)))	1
-(mu:eval (core:compile '((lambda (a) 1) 2)))	1
-(mu:eval (core:compile '((lambda (a b) 1) 2 3)))	1
-(mu:eval (core:compile '((lambda (a b) (core:fixnump b)) 1 2)))	:t
-(mu:eval (core:compile '((lambda (a b) (core:null b)) 1 2)))	:nil
-(mu:eval (core:compile '((lambda (a b) (mu:add 1 2)) 1 2)))	3
-(mu:eval (core:compile '((lambda (a b) (mu:add a b)) 1 2)))	3
-(mu:eval (core:compile '((lambda (a b) (mu:type-of b)) 1 2)))	:fixnum
-(mu:eval (core:compile '((lambda (&rest e) e))))	:nil
-(mu:eval (core:compile '((lambda (&rest e) e) 1 2 3)))	(1 2 3)
-(mu:eval (core:compile '((lambda (a &rest b) b) 1)))	:nil
-(mu:eval (core:compile '((lambda (&rest e) e) 1 2 3 4 5)))	(1 2 3 4 5)
-(mu:eval (core:compile '((lambda (a &rest e) e) 1 2 3 4 5)))	(2 3 4 5)
-(mu:eval (core:compile '((lambda (a b &rest e) e) 1 2 3 4 5)))	(3 4 5)
-(mu:eval (core:compile '((lambda (a b c &rest e) e) 1 2 3 4 5)))	(4 5)
-(mu:eval (core:compile '((lambda (a b c d &rest e) e) 1 2 3 4 5)))	(5)
-(mu:eval (core:compile '((lambda (a b c d e &rest f) f) 1 2 3 4 5)))	:nil
-(mu:eval (core:compile '((lambda (a b c d &rest f) (mu:write f () mu:*standard-output*)) 1 2 3 4 5)))	(5)(5)
-(mu:type-of (core:apply (core:compile '(lambda (a) (mu:apply a ()))) (mu:cons (:lambda () 1) ())))	:fixnum
+(core:apply (core:compile '(%lambda () 1)) ())	1
+(core:apply (core:compile '(%lambda (a b) (core:null b))) '(1 2))	:nil
+(core:apply (core:compile '(%lambda (a b) (mu:add 1 2))) '(1 2))	3
+(core:apply (core:compile '(%lambda (a b) (mu:add a b))) '(1 2))	3
+(core:apply (core:compile '(%lambda (a b) (mu:type-of b))) '(1 2))	:fixnum
+(core:apply (core:compile '(%lambda ())) ())	:nil
+(core:apply (core:compile '(%lambda () 1)) ()))	1
+(core:apply (core:compile '(%lambda (a) a)) '(1))	1
+(core:apply (core:compile '(%lambda (a) 1)) '(2))	1
+(core:apply (core:compile '(%lambda (a b) 1)) '(2 3))	1
+(core:apply (core:compile '(%lambda (a b) (core:fixnump b))) '(1 2))	:t
+(core:apply (core:compile '(%lambda (a b) (core:null b))) '(1 2))	:nil
+(core:apply (core:compile '(%lambda (a b) (mu:add 1 2))) '(1 2))	3
+(core:apply (core:compile '(%lambda (a b) (mu:add a b))) '(1 2))	3
+(core:apply (core:compile '(%lambda (a b) (mu:type-of b))) '(1 2))	:fixnum
+(core:apply (core:compile '(%lambda (&rest e) e)) '(1 2 3 4 5))	(1 2 3 4 5)
+(core:apply (core:compile '(%lambda (a &rest e) e)) '(1 2 3 4 5))	(2 3 4 5)
+(core:apply (core:compile '(%lambda (a b &rest e) e)) '(1 2 3 4 5))	(3 4 5)
+(core:apply (core:compile '(%lambda (a b c &rest e) e)) '(1 2 3 4 5))	(4 5)
+(core:apply (core:compile '(%lambda (a b c d &rest e) e)) '(1 2 3 4 5))	(5)
+(core:apply (core:compile '(%lambda (a b c d e &rest f) f)) '(1 2 3 4 5))	:nil
+(core:apply (core:compile '(%lambda (a b c d &rest f) (mu:write f () mu:*standard-output*))) '(1 2 3 4 5))	(5)(5)
+(mu:eval (core:compile '((%lambda () 1))))	1
+(mu:eval (core:compile '((%lambda (a b) (core:null b)) 1 2)))	:nil
+(mu:eval (core:compile '((%lambda (a b) (mu:add 1 2)) 1 2)))	3
+(mu:eval (core:compile '((%lambda (a b) (mu:add a b)) 1 2)))	3
+(mu:eval (core:compile '((%lambda (a b) (mu:type-of b)) 1 2)))	:fixnum
+(mu:eval (core:compile '((%lambda ()))))	:nil
+(mu:eval (core:compile '((%lambda () 1))))	1
+(mu:eval (core:compile '((%lambda (a) a) 1)))	1
+(mu:eval (core:compile '((%lambda (a) 1) 2)))	1
+(mu:eval (core:compile '((%lambda (a b) 1) 2 3)))	1
+(mu:eval (core:compile '((%lambda (a b) (core:fixnump b)) 1 2)))	:t
+(mu:eval (core:compile '((%lambda (a b) (core:null b)) 1 2)))	:nil
+(mu:eval (core:compile '((%lambda (a b) (mu:add 1 2)) 1 2)))	3
+(mu:eval (core:compile '((%lambda (a b) (mu:add a b)) 1 2)))	3
+(mu:eval (core:compile '((%lambda (a b) (mu:type-of b)) 1 2)))	:fixnum
+(mu:eval (core:compile '((%lambda (&rest e) e))))	:nil
+(mu:eval (core:compile '((%lambda (&rest e) e) 1 2 3)))	(1 2 3)
+(mu:eval (core:compile '((%lambda (a &rest b) b) 1)))	:nil
+(mu:eval (core:compile '((%lambda (&rest e) e) 1 2 3 4 5)))	(1 2 3 4 5)
+(mu:eval (core:compile '((%lambda (a &rest e) e) 1 2 3 4 5)))	(2 3 4 5)
+(mu:eval (core:compile '((%lambda (a b &rest e) e) 1 2 3 4 5)))	(3 4 5)
+(mu:eval (core:compile '((%lambda (a b c &rest e) e) 1 2 3 4 5)))	(4 5)
+(mu:eval (core:compile '((%lambda (a b c d &rest e) e) 1 2 3 4 5)))	(5)
+(mu:eval (core:compile '((%lambda (a b c d e &rest f) f) 1 2 3 4 5)))	:nil
+(mu:eval (core:compile '((%lambda (a b c d &rest f) (mu:write f () mu:*standard-output*)) 1 2 3 4 5)))	(5)(5)
+(mu:type-of (core:apply (core:compile '(%lambda (a) (mu:apply a ()))) (mu:cons (:lambda () 1) ())))	:fixnum
