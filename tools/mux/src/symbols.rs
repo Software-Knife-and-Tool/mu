@@ -121,7 +121,8 @@ impl Symbols {
                             let output = Command::new("mu-sys")
                                 .args(["-l", "/opt/mu/lib/core/core.l"])
                                 .args(["-l", "/opt/mu/lib/prelude/repl.l"])
-                                .args(["-e", "(prelude:repl)"])
+                                .args(["-q", "(core:require \"repl\")"])
+                                .args(["-e", "(repl:repl)"])
                                 .stdout(out_file)
                                 .output()
                                 .expect("command failed to execute");
@@ -167,9 +168,9 @@ impl Symbols {
                         let output = Command::new("mu-sys")
                             .current_dir(home)
                             .args(["-l", "/opt/mu/lib/core/core.l"])
-                            .args(["-l", "/opt/mu/lib/prelude/repl.l"])
-                            .args(["-q", "(prelude:%init-ns)"])
-                            .args(["-e", "(prelude:repl)"])
+                            .args(["-l", "/opt/mu/lib/prelude.l"])
+                            .args(["-q", "(core:require \"repl\")"])
+                            .args(["-q", "(repl:repl)"])
                             .output()
                             .expect("command failed to execute");
 

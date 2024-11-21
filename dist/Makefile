@@ -44,6 +44,7 @@ dist:
 
 	@install -D -t $(BASE)/modules/codegen $(SRC)/modules/codegen/*.l
 	@install -D -t $(BASE)/modules/common $(SRC)/modules/common/*.l
+	@install -D -t $(BASE)/modules/repl $(SRC)/modules/repl/*.l
 
 	@make -f dist.mk dist
 
