@@ -5,8 +5,7 @@
 ;;; common namespace
 ;;;
 (mu:intern mu:%null-ns% "common" (mu:make-namespace "common"))
-
-(mu:intern common "*version*" "0.0.1")
+(mu:intern common "+version+" "0.0.1")
 
 (core:provide
  "common"

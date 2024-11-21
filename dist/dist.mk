@@ -46,7 +46,7 @@ COMMON= \
 	time.l
 
 PRELUDE = \
-	prelude.l      \
+	testing.l      \
 	list.l	       \
 	loader.l
 
@@ -61,10 +61,9 @@ dist:
 	@for common in $(COMMON); do			\
 	    cat $(SRC)/modules/common/$$common >> common.l;	\
 	done
-	@cp common.l mu/dist
 
 	@rm -f prelude.l
 	@for prelude in $(PRELUDE); do			\
-	    cat $(SRC)/prelude/$$prelude >> prelude.l;	\
+	    cat $(SRC)/modules/prelude/$$prelude >> prelude.l;	\
 	done
-	@cp prelude.l mu/dist
+
