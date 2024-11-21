@@ -5,8 +5,7 @@
 ;;; repl namespace
 ;;;
 (mu:intern mu:%null-ns% "repl" (mu:make-namespace "repl"))
-
-(mu:intern repl "*version*" "0.0.1")
+(mu:intern repl "+version+" "0.0.1")
 
 (core:provide
  "repl"

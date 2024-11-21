@@ -39,8 +39,8 @@ impl Profile {
 
                         Command::new("mu-sys")
                             .args(["-l", "/opt/mu/dist/core.l"])
-                            .args(["-l", "/opt/mu/dist/common.l"])
-                            .args(["-l", "/opt/mu/dist/prelude.l"])
+                            .args(["-q", "(core:require-lib \"common\")"])
+                            .args(["-q", "(core:require-lib \"prelude\")"])
                             .args(["-e", profile_expr])
                             .stdout(out_file)
                             .spawn()
@@ -49,8 +49,8 @@ impl Profile {
                     None => {
                         Command::new("mu-sys")
                             .args(["-l", "/opt/mu/dist/core.l"])
-                            .args(["-l", "/opt/mu/dist/common.l"])
-                            .args(["-l", "/opt/mu/dist/prelude.l"])
+                            .args(["-q", "(core:require-lib \"common\")"])
+                            .args(["-q", "(core:require-lib \"prelude\")"])
                             .args(["-e", profile_expr])
                             .spawn()
                             .expect("command failed to exexcute");

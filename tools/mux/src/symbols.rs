@@ -118,17 +118,7 @@ impl Symbols {
                             io::stderr().write_all(&output.stderr).unwrap();
                         }
                         "prelude" => {
-                            let output = Command::new("mu-sys")
-                                .args(["-l", "/opt/mu/lib/core/core.l"])
-                                .args(["-l", "/opt/mu/lib/prelude/repl.l"])
-                                .args(["-q", "(core:require \"repl\")"])
-                                .args(["-e", "(repl:repl)"])
-                                .stdout(out_file)
-                                .output()
-                                .expect("command failed to execute");
-
-                            io::stdout().write_all(&output.stdout).unwrap();
-                            io::stderr().write_all(&output.stderr).unwrap();
+                            panic!()
                         }
                         _ => {
                             eprintln!("mux repl: unmapped namespace {ns_str}");
@@ -165,17 +155,7 @@ impl Symbols {
                         io::stderr().write_all(&output.stderr).unwrap();
                     }
                     "prelude" => {
-                        let output = Command::new("mu-sys")
-                            .current_dir(home)
-                            .args(["-l", "/opt/mu/lib/core/core.l"])
-                            .args(["-l", "/opt/mu/lib/prelude.l"])
-                            .args(["-q", "(core:require \"repl\")"])
-                            .args(["-q", "(repl:repl)"])
-                            .output()
-                            .expect("command failed to execute");
-
-                        io::stdout().write_all(&output.stdout).unwrap();
-                        io::stderr().write_all(&output.stderr).unwrap();
+                        panic!()
                     }
                     _ => panic!(),
                 };
