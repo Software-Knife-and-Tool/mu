@@ -28,7 +28,6 @@ impl Repl {
             "prelude" => Command::new("mu-sys")
                 .args(["-l", "/opt/mu/dist/core.l"])
                 .args(["-q", "(core:load-file \"/opt/mu/dist/prelude.l\")"])
-                .args(["-l", "/opt/mu/lib/prelude/repl.l"])
                 .args(["-e", "(prelude:repl)"])
                 .spawn()
                 .unwrap(),
