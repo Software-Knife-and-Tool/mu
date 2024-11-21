@@ -47,10 +47,8 @@ COMMON= \
 
 PRELUDE = \
 	prelude.l      \
-	break.l	       \
 	list.l	       \
-	loader.l       \
-	repl.l
+	loader.l
 
 dist:
 	@rm -f core.l
