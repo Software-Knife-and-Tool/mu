@@ -2,19 +2,32 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; time function
+;;; time
 ;;;
-(mu:intern prelude "time"
+(core:compile
+ '(%defmacro time (form)
+   `((%lambda () ,@body))))
+
+(mu:intern metrics "%time-delta-apply"
+  (:lambda (fn args)
+    ((:lambda (start stop)
+       (mu:sub stop start))
+       (mu:internal-run-time)
+       ((:lambda ()
+          (core:apply fn args)
+          (mu:internal-run-time))))))
+
+(mu:intern metrics "time-apply"
    (:lambda (fn args)
-      (:if (prelude:functionp fn)
-           (:if (prelude:listp args)
+      (:if (core:functionp fn)
+           (:if (core:listp args)
                 ()
-                (prelude:raise args 'prelude:time "is not a list"))
-           (prelude:raise fn 'prelude:time "is not a function"))
+                (core:raise args 'metrics:time "is not a list"))
+           (core:raise fn 'metrics:time "is not a function"))
      ((:lambda (start-vec time-value stop-vec)
          ((:lambda (time-delta value type-diffs)
-             (prelude:format :t "Evaluation consumed ~A usec runtime~%" `(,time-delta))
-             (prelude:format :t "           consed ~A~%" `(,type-diffs))
+             (core:%format :t "Evaluation consumed ~A usec runtime~%" `(,time-delta))
+             (core:%format :t "           consed ~A~%" `(,type-diffs))
              value)
             (mu:car time-value)
             (mu:cdr time-value)
@@ -24,9 +37,9 @@
                      loop
                      ((:lambda (list n)
                         ((:lambda (offset)
-                            (:if (mu:less-than offset (mu:vector-len start-vec))
+                            (:if (mu:less-than offset (mu:vector-length start-vec))
                                  ((:lambda (type total alloc free)
-                                     (:if (prelude:zerop alloc)
+                                     (:if (core:zerop alloc)
                                            `(,list ,@(mu:add 1 n))
                                            ((:lambda (type-stats)
                                                (mu:cons `(,@list ,@type-stats) (mu:add 1 n)))
@@ -47,6 +60,6 @@
         ((:lambda (start)
            ((:lambda (value)
               `(,(mu:sub (mu:proc-tm) start) ,@value))
-            (prelude:apply fn args)))
+            (core:apply fn args)))
         (mu:proc-tm))
        (mu:heap-stat))))

@@ -84,7 +84,7 @@
           (:if (core:bit-vector-p vector)
                (mu:car (core:%vector-prop :bitvec vector))
                (:if (core:typep vector :vector)
-                    (mu:vector-len vector)
+                    (mu:vector-length vector)
                     (mu:cdr (core:%vector-prop :disp vector))))
           (core:raise vector 'core:vector-length "not a vector"))))
 
@@ -182,7 +182,7 @@
     (mu:fix
      (:lambda (nth)
        (:if nth
-            (:if (mu:eq nth (mu:vector-len vector))
+            (:if (mu:eq nth (mu:vector-length vector))
                  ()
                  (core:%prog2
                   (core:apply fn (mu:cons (mu:svref vector nth) ()))

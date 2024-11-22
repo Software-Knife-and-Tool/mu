@@ -10,7 +10,7 @@
 ;;;
 (mu:intern core "%parse-integer"
   (:lambda (digits base)
-    (:if (mu:eq 0 (mu:vector-len digits))
+    (:if (mu:eq 0 (mu:vector-length digits))
          ()
          ((:lambda (sign)
             ((:lambda (integer)
@@ -25,7 +25,7 @@
                  (:if (core:null loop)
                       ()
                       ((:lambda (index acc)
-                         (:if (mu:less-than (mu:sub (mu:vector-len digits) 1) index)
+                         (:if (mu:less-than (mu:sub (mu:vector-length digits) 1) index)
                               loop
                               ((:lambda (n)
                                  (:if (core:null n)

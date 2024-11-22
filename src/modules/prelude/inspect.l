@@ -50,7 +50,7 @@
      ((:lambda (tags)          
          (mu:make-struct :inspect `(vector ,(mu:heap-size obj) ,tags)))
       `(,(mu:cons :type (mu:vector-type obj))
-        ,(mu:cons :length (mu:vector-len obj))))))
+        ,(mu:cons :length (mu:vector-length obj))))))
 
 (mu:intern prelude "%inspect-cons"
    (:lambda (obj)

@@ -22,11 +22,11 @@
            (:if (core:stringp str-2)
                 (:if (mu:eq str-1 str-2)
                      :t
-                     (:if (mu:eq (mu:vector-len str-1) (mu:vector-len str-2))
+                     (:if (mu:eq (mu:vector-length str-1) (mu:vector-length str-2))
                           (mu:fix
                            (:lambda (nth)
                               (:if (common:numberp nth)
-                                   (:if (mu:eq nth (mu:vector-len str-1))
+                                   (:if (mu:eq nth (mu:vector-length str-1))
                                         :t
                                         (:if (mu:eq (mu:svref str-1 nth) (mu:svref str-2 nth))
                                              (mu:add 1 nth)
@@ -65,7 +65,7 @@
   (:lambda (ch str)
     (:if (common:charp ch)
          (:if (common:stringp str)
-              (:if (common:zerop (mu:vector-len str))
+              (:if (common:zerop (mu:vector-length str))
                    ()
                    ((:lambda (len)
                        (mu:fix
@@ -78,7 +78,7 @@
                                           (mu:add 1 loop)))
                                 loop))
                         0))
-                    (mu:vector-len str)))
+                    (mu:vector-length str)))
               (core:raise str 'common:string-position "not a string"))
          (core:raise ch 'common:string-position "not a char"))))
 
@@ -86,7 +86,7 @@
   (:lambda (ch str)
     (:if (common:charp ch)
          (:if (common:stringp str)
-              (:if (common:zerop (mu:vector-len str))
+              (:if (common:zerop (mu:vector-length str))
                    ()
                    ((:lambda (len)
                        (mu:fix
@@ -99,7 +99,7 @@
                                           (mu:add 1 loop)))
                                 loop))
                         0))
-                    (mu:vector-len str)))
+                    (mu:vector-length str)))
               (core:raise str 'common:string-find "not a string"))
          (core:raise ch 'common:string-find "not a char"))))
 
@@ -142,7 +142,7 @@
                         (mu:fix
                          (:lambda (nth)
                             (:if (common:numberp nth)
-                                 (:if (mu:eq nth (mu:vector-len str))
+                                 (:if (mu:eq nth (mu:vector-length str))
                                       ()
                                       (:if (mu:less-than nth (mu:add 1 end))
                                            ((:lambda ()

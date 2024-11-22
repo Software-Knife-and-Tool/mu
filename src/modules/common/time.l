@@ -19,7 +19,7 @@
                      loop
                      ((:lambda (list n)
                         ((:lambda (offset)
-                            (:if (mu:less-than offset (mu:vector-len start-vec))
+                            (:if (mu:less-than offset (mu:vector-length start-vec))
                                  ((:lambda (type total alloc free)
                                      (:if (mu:eq 0 alloc)
                                            `(,list ,@(mu:add 1 n))

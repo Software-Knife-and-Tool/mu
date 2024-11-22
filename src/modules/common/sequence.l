@@ -33,7 +33,7 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
       (:if (common:sequencep seq)
            (:if (core:listp seq)
                 (mu:length seq)
-                (mu:vector-len seq))
+                (mu:vector-length seq))
            (core:raise seq 'common:length "not a sequence"))))
 
 (mu:intern common "elt"

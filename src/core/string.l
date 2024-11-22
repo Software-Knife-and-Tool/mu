@@ -16,7 +16,7 @@
 
 (mu:intern core "%string-position"
   (:lambda (ch str)
-    (:if (mu:eq 0 (mu:vector-len str))
+    (:if (mu:eq 0 (mu:vector-length str))
          ()
          ((:lambda (len)
             (mu:fix
@@ -29,7 +29,7 @@
                               (mu:add 1 loop)))
                     loop))
              0))
-          (mu:vector-len str)))))
+          (mu:vector-length str)))))
 
 (mu:intern core "%substr"
   (:lambda (str start end)
@@ -37,7 +37,7 @@
        (mu:fix
         (:lambda (nth)
           (:if (core:numberp nth)
-               (:if (mu:eq nth (mu:vector-len str))
+               (:if (mu:eq nth (mu:vector-length str))
                     ()
                     (:if (mu:less-than nth (mu:add 1 end))
                          (core:%prog2
