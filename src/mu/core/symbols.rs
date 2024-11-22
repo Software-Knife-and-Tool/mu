@@ -108,10 +108,10 @@ lazy_static! {
         ( "symbol-namespace",     1, Symbol::mu_ns ),
         ( "symbol-value",  1, Symbol::mu_value ),
         // simple vectors
-        ( "make-vector", 2, Vector::mu_make_vector ),
-        ( "svref",       2, Vector::mu_svref ),
-        ( "vector-len",  1, Vector::mu_length ),
-        ( "vector-type", 1, Vector::mu_type ),
+        ( "make-vector",   2, Vector::mu_make_vector ),
+        ( "svref",         2, Vector::mu_svref ),
+        ( "vector-length", 1, Vector::mu_length ),
+        ( "vector-type",   1, Vector::mu_type ),
         // structs
         ( "make-struct", 2, Struct::mu_make_struct ),
         ( "struct-type", 1, Struct::mu_struct_type ),

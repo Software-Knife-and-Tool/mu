@@ -684,7 +684,7 @@ impl CoreFunction for Vector {
     fn mu_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        env.fp_argv_check("mu:vector-len", &[Type::Vector], fp)?;
+        env.fp_argv_check("mu:vector-length", &[Type::Vector], fp)?;
         fp.value = Fixnum::with_or_panic(Self::length(env, vector));
 
         Ok(())

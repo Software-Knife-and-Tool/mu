@@ -244,7 +244,7 @@ Usage: mux 0.0.11 command [option...]
 Before making any changes, you will want to establish a performance baseline.
 
 ```
- mux bench --base --ntests 50
+ mux bench --base --ntests 20
 ```
 
 As you make changes, you can verify correctness and note any performance regressions. Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
@@ -252,7 +252,7 @@ As you make changes, you can verify correctness and note any performance regress
 ```
  mux build --release				# build the mu release version 
  mux test                     		# run the regression tests
- mux bench --current --ntests 50	# benchmark the current build and print results
+ mux bench --current --ntests 20	# benchmark the current build and print results
 ```
 
 `mux` provides an interactive listener for the `mu`, `core`, and `prelude` namespaces. `mu` and `core` use the `mu-sh` listener, `prelude` uses its own REPL.
@@ -308,7 +308,7 @@ Metrics include the average amount of time (in microsconds) taken for an individ
 
 The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
 
-On a modern Core I7 CPU at 3+ GHz, the default performance tests take in excess of five minutes of elapsed time. See the *mux* usage section for the equivalent *mux*  `bench` command.
+On a modern Core I7 CPU at 3+ GHz, the default performance tests take around 15 minutes of elapsed time. See the *mux* usage section for the equivalent *mux*  `bench` command.
 
 ```
 % make -C tests/performance base
@@ -328,15 +328,6 @@ In specific, a summary of significant performance changes (differences in measur
 ```
 
 produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary.
-
-For convenience, the *mu* Makefile provides:
-
-```
-% make performance/base		# establish a baseline report
-% make performance/current	# produce a secondary report
-% make performance/report	# diff baseline and current
-% make performance/commit	# diff baseline and current, prepare for commit
-```
 
 The  `performance`  makefile offers some development options.
 
@@ -366,9 +357,9 @@ The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory 
 mu-sys		runtime binary
 mu-sh		runtime binary, stdio listener
 mu-ld		image loader
-mu-exec     image executor
+mu-exec     	image executor
 mu-server	server runtime, socket listener
-mu			shell script for loading *core*. runs *mu-sh* listener
+mu		shell script for loading *core*. runs *mu-sh* listener
 ```
 
 
@@ -441,5 +432,3 @@ mu-sys -c "npages:1024,gcmode:auto"	default configuration
 mu --config="npages:4096,gcmode:demand"
 					4096 pages, garbage collection runs on demand 
 ```
-
-Tests show that currently (and as of 0.0.23) 256 4k pages is about the minimum you could expect to load the *preface* library and run the listener. Any significant consing will likely run out of heap space in short order.

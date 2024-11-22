@@ -57,7 +57,7 @@
                                   (core:%prog2
                                      (mu:write (mu:svref hexstr (mu:sub len 1)) () dest)
                                      (mu:sub len 1))))
-                          (mu:vector-len hexstr)))
+                          (mu:vector-length hexstr)))
                       (mu:get-string str-stream)))
                   (mu:open :string :output "")))
             (core:raise fx 'core:%format "argument to ~X not a fixnum")))
@@ -99,7 +99,7 @@
     (mu:fix
      (:lambda (loop)
        ((:lambda (nth argl)
-          (:if (mu:eq nth (mu:vector-len fmt))
+          (:if (mu:eq nth (mu:vector-length fmt))
                loop
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
@@ -119,7 +119,7 @@
    (:lambda (stream format-string arg-list)
       (:if (core:stringp format-string)
            (:if (core:listp arg-list)
-                (:if (mu:eq 0 (mu:vector-len format-string))
+                (:if (mu:eq 0 (mu:vector-length format-string))
                      (:if stream
                           ""
                           ())

@@ -29,7 +29,7 @@
                loop
                ((:lambda (list n)
                   ((:lambda (offset)
-                     (:if (mu:less-than offset (mu:vector-len start-vec))
+                     (:if (mu:less-than offset (mu:vector-length start-vec))
                           ((:lambda (type total alloc in-use)
                              ((:lambda (type-stats)
                                 (mu:cons `(,@list ,@type-stats) (mu:add 1 n)))

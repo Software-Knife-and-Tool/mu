@@ -40,8 +40,8 @@
                      (mu:add 2 colon)
                      (mu:add 1 colon))
                 (:if (mu:eq #\: (mu:svref name (mu:add 1 colon)))
-                     (mu:add colon (mu:sub (mu:vector-len name) colon))
-                     (mu:add colon (mu:sub (mu:vector-len name) (mu:add 1 colon)))))))
+                     (mu:add colon (mu:sub (mu:vector-length name) colon))
+                     (mu:add colon (mu:sub (mu:vector-length name) (mu:add 1 colon)))))))
       (core:%string-position #\: name))))
 
 (mu:intern core "%read-symbol"
