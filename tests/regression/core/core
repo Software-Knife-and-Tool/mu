@@ -1,3 +1,4 @@
+(mu:type-of core:eval)	:func
 (mu:eval (core:compile '(core:append)))	:nil
 (mu:eval (core:compile '(core:append '(1 2 3) 4)))	(1 2 3 . 4)
 (mu:eval (core:compile '(core:append '(1 2 3) '(4))))	(1 2 3 4)
