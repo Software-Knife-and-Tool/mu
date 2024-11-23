@@ -6,7 +6,7 @@
 ;;;
 (mu:intern mu:%null-ns% "core" (mu:make-namespace "core"))
 
-(mu:intern core "+version+" "0.0.5")
+(mu:intern core "+version+" "0.0.6")
 
 (mu:intern core "%char-macro-ns%" (mu:make-namespace "%char-macros%"))
 (mu:intern core "%macro-ns%" (mu:make-namespace "%macros%"))
@@ -45,6 +45,15 @@
 (mu:intern core "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
 (mu:intern core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
 (mu:intern core "keywordp" (:lambda (t) (mu:eq (core:type-of t) 'keyword)))
+
+;;;
+;;; eval
+;;;
+(mu:intern core "eval"
+   (:lambda (form)
+     (:if (core:logand (core:consp form) (core:%closurep (mu:car form)))
+          (core:apply (core:compile (mu:car form)) (mu:cdr form))
+          (mu:eval form))))
 
 ;;;
 ;;; syntactic sugar
