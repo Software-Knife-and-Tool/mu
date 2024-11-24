@@ -14,15 +14,16 @@ use {
         },
         streams::write::Core as _,
         types::{
-            core_stream::{Core as _, Stream},
             fixnum::{Core as _, Fixnum},
+            stream::{Core as _, Stream},
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
         },
     },
-    futures::executor::block_on,
     std::str,
 };
+
+use futures::executor::block_on;
 
 pub struct VectorImage {
     pub type_: Tag,  // type keyword

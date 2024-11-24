@@ -60,11 +60,8 @@ use {
     crate::{
         core::{apply::Core as _, compile::Core as _, config::Config, exception, lib::LIB},
         images::image::Core as _,
-        streams::{read::Core as _, write::Core as _},
-        types::{
-            core_stream::{Core as _, Stream},
-            stream::StreamBuilder,
-        },
+        streams::{core::StreamBuilder, read::Core as _, write::Core as _},
+        types::stream::{Core as _, Stream},
     },
     std::fs,
 };

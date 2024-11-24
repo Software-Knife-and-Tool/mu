@@ -19,11 +19,10 @@ use crate::{
     system::utime::CoreFunction as _,
     types::{
         cons::{Cons, CoreFunction as _},
-        core_stream::Stream,
         fixnum::{CoreFunction as _, Fixnum},
         float::{CoreFunction as _, Float},
         namespace::{CoreFunction as _, Namespace},
-        stream::CoreFunction as _,
+        stream::{CoreFunction as _, Stream},
         struct_::{CoreFunction as _, Struct},
         symbol::{CoreFunction as _, Symbol},
         vector::{CoreFunction as _, Vector},

@@ -15,7 +15,7 @@ use crate::{
     streams::write::Core as _,
     types::{
         cons::{Cons, Core as _},
-        core_stream::{Core as _, Stream},
+        stream::{Core as _, Stream},
         symbol::{Core as _, Symbol},
         vector::Vector,
         vector_image::Core as _,

@@ -14,8 +14,8 @@ use crate::{
     },
     streams::read::Core as _,
     types::{
-        core_stream::{Core as _, Stream},
         fixnum::{Core as _, Fixnum},
+        stream::{Core as _, Stream},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},

@@ -14,7 +14,7 @@ use {
         },
         streams::system::{StringDirection, SystemStream, SystemStreamBuilder},
         types::{
-            core_stream::Stream,
+            stream::{Core as _, Stream},
             symbol::{Core as _, Symbol},
         },
     },
