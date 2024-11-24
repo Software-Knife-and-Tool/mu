@@ -17,7 +17,7 @@ use crate::{
     },
     types::{
         cons::{Cons, Core as _},
-        core_stream::{Core as _, Stream},
+        stream::{Core as _, Stream},
         vector::{Core as _, Vector},
     },
 };

@@ -17,10 +17,10 @@ use {
         types::{
             char::{Char, Core as _},
             cons::{Cons, Core as _},
-            core_stream::{Core as _, Stream},
             fixnum::{Core as _, Fixnum},
             float::{Core as _, Float},
             function::{Core as _, Function},
+            stream::{Core as _, Stream},
             struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},

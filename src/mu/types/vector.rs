@@ -17,9 +17,9 @@ use {
         types::{
             char::Char,
             cons::{Cons, Core as _},
-            core_stream::{Core as _, Stream},
             fixnum::{Core as _, Fixnum},
             float::Float,
+            stream::{Core as _, Stream},
             symbol::{Core as _, Symbol},
             vector_image::{Core as _, VecImage, VecImageType, VectorImage, VectorImageType},
         },

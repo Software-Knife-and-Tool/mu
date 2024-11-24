@@ -18,8 +18,8 @@ use {
         },
         streams::write::Core as _,
         types::{
-            core_stream::{Core as _, Stream},
             namespace::Namespace,
+            stream::{Core as _, Stream},
             vector::{Core as _, Vector},
             vector_image::Core as _,
         },
