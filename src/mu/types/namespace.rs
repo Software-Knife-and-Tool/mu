@@ -17,8 +17,8 @@ use {
             cons::{Cons, Core as _},
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
-            vector_image::Core as _,
         },
+        vectors::core::Core as _,
     },
     std::{collections::HashMap, str},
 };

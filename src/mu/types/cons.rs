@@ -19,8 +19,8 @@ use crate::{
         fixnum::{Core as _, Fixnum},
         symbol::Symbol,
         vector::Vector,
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 
 use futures::executor::block_on;
@@ -74,6 +74,7 @@ impl Cons {
             Type::Cons => match cons {
                 Tag::Direct(_) => DirectTag::car(cons),
                 Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).car,
+                Tag::Nursery(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -85,6 +86,7 @@ impl Cons {
             Type::Cons => match cons {
                 Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).cdr,
                 Tag::Direct(_) => DirectTag::cdr(cons),
+                Tag::Nursery(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -109,6 +111,7 @@ impl Cons {
                     gc.mark(env, cdr)
                 }
             }
+            Tag::Nursery(_) => panic!(),
         }
     }
 }
@@ -141,6 +144,7 @@ impl Core for Cons {
             Type::Cons => match cons {
                 Tag::Direct(_) => DirectTag::car(cons),
                 Tag::Indirect(_) => Self::to_image(env, cons).car,
+                Tag::Nursery(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -152,6 +156,7 @@ impl Core for Cons {
             Type::Cons => match cons {
                 Tag::Indirect(_) => Self::to_image(env, cons).cdr,
                 Tag::Direct(_) => DirectTag::cdr(cons),
+                Tag::Nursery(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -201,6 +206,7 @@ impl Core for Cons {
                 _ => panic!(),
             },
             Tag::Indirect(_) => std::mem::size_of::<Cons>(),
+            Tag::Nursery(_) => panic!(),
         }
     }
 

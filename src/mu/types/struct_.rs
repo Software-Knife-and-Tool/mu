@@ -18,13 +18,14 @@ use crate::{
         stream::{Core as _, Stream},
         symbol::{Core as _, Symbol},
         vector::Vector,
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 
 use futures::executor::block_on;
 
 // a struct is a vector with an arbitrary type keyword
+#[derive(Copy, Clone)]
 pub struct Struct {
     pub stype: Tag,
     pub vector: Tag,

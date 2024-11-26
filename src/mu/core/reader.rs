@@ -18,9 +18,9 @@ use crate::{
         stream::{Core as _, Stream},
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
-        vector_image::Core as _,
+        vector::Vector,
     },
+    vectors::{core::Core as _, read::Core as _},
 };
 
 //

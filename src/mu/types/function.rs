@@ -14,9 +14,10 @@ use crate::{
     types::{
         fixnum::Fixnum,
         namespace::Namespace,
+        symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 
 use futures::executor::block_on;
@@ -129,7 +130,9 @@ impl Core for Function {
         match Self::form(env, fn_).type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
             Type::Vector => std::mem::size_of::<Function>(),
-            Type::Symbol => std::mem::size_of::<Function>(),
+            Type::Symbol => {
+                std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, Self::form(env, fn_))
+            }
             _ => panic!(),
         }
     }

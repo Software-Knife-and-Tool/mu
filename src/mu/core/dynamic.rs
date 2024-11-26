@@ -17,8 +17,8 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         vector::Vector,
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 
 use futures::executor::block_on;

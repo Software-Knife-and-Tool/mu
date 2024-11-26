@@ -12,4 +12,3 @@ pub mod stream;
 pub mod struct_;
 pub mod symbol;
 pub mod vector;
-pub mod vector_image;

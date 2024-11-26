@@ -18,8 +18,9 @@ use crate::{
     types::{
         cons::{Cons, Core as _},
         stream::{Core as _, Stream},
-        vector::{Core as _, Vector},
+        vector::Vector,
     },
+    vectors::read::Core as _,
 };
 
 pub trait Core {

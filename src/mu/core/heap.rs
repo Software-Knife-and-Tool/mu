@@ -12,8 +12,7 @@ use crate::{
         indirect::{self, IndirectTag},
         types::{Tag, Type},
     },
-    images::allocator::AllocTypeInfo,
-    images::bump_allocator::BumpAllocator,
+    images::{allocator::AllocTypeInfo, bump_allocator::BumpAllocator},
     types::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},
@@ -21,8 +20,8 @@ use crate::{
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::Vector,
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 
 use futures::executor::block_on;

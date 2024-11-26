@@ -15,6 +15,7 @@ pub mod gc;
 pub mod heap;
 pub mod indirect;
 pub mod lib;
+pub mod nursery;
 pub mod quasi;
 pub mod reader;
 pub mod readtable;
