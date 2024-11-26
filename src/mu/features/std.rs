@@ -19,8 +19,8 @@ use crate::{
         fixnum::{Core as _, Fixnum},
         float::Float,
         vector::{Core as _, Vector},
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 
 pub trait Std {

@@ -21,19 +21,21 @@ use {
             namespace::Namespace,
             stream::{Core as _, Stream},
             vector::{Core as _, Vector},
-            vector_image::Core as _,
         },
+        vectors::core::Core as _,
     },
     std::str,
 };
 
 use futures::executor::block_on;
 
+#[derive(Copy, Clone)]
 pub enum Symbol {
     Keyword(Tag),
     Symbol(SymbolImage),
 }
 
+#[derive(Copy, Clone)]
 pub struct SymbolImage {
     pub namespace: Tag,
     pub name: Tag,
@@ -177,6 +179,7 @@ impl Symbol {
                     gc.mark(env, value);
                 }
             }
+            Tag::Nursery(_) => panic!(),
         }
     }
 }
@@ -214,7 +217,7 @@ impl Core for Symbol {
         let name_sz = Heap::heap_size(env, Self::name(env, symbol));
         let value_sz = Heap::heap_size(env, Self::value(env, symbol));
 
-        std::mem::size_of::<Symbol>()
+        std::mem::size_of::<SymbolImage>()
             + if name_sz > 8 { name_sz } else { 0 }
             + if value_sz > 8 { value_sz } else { 0 }
     }

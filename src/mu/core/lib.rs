@@ -19,8 +19,8 @@ use {
             stream::Stream,
             symbol::{Core as _, Symbol},
             vector::Vector,
-            vector_image::Core as _,
         },
+        vectors::core::Core as _,
     },
     std::collections::HashMap,
 };

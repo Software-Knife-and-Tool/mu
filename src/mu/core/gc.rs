@@ -71,6 +71,7 @@ impl Gc {
 
                 marked
             }
+            Tag::Nursery(_) => panic!(),
         }
     }
 

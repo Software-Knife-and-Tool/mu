@@ -16,8 +16,8 @@ use {
         types::{
             symbol::{Core as _, Symbol},
             vector::Vector,
-            vector_image::Core as _,
         },
+        vectors::core::Core as _,
     },
     std::ops::{Add, Div, Mul, Sub},
 };

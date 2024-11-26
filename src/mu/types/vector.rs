@@ -11,7 +11,6 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::Gc,
-            readtable::{map_char_syntax, SyntaxType},
             types::{Tag, Type},
         },
         types::{
@@ -19,14 +18,15 @@ use {
             cons::{Cons, Core as _},
             fixnum::{Core as _, Fixnum},
             float::Float,
-            stream::{Core as _, Stream},
             symbol::{Core as _, Symbol},
-            vector_image::{Core as _, VecImage, VecImageType, VectorImage, VectorImageType},
+        },
+        vectors::{
+            core::Core as _,
+            image::{VecImage, VecImageType, VectorImage, VectorImageType},
         },
     },
     futures::executor::block_on,
-    futures_locks::RwLock,
-    std::{collections::HashMap, str},
+    std::str,
 };
 
 lazy_static! {
@@ -40,8 +40,7 @@ lazy_static! {
     ];
 }
 
-pub type VecCacheMap = HashMap<(Type, i32), RwLock<Vec<Tag>>>;
-
+#[derive(Clone)]
 pub enum Vector {
     Direct(Tag),
     Indirect(VectorImage, VectorImageType),
@@ -77,6 +76,7 @@ impl Vector {
                     None => panic!(),
                 }
             }
+            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -87,6 +87,7 @@ impl Vector {
                 let image = Self::to_image(env, vector);
                 Fixnum::as_i64(image.length) as usize
             }
+            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -109,6 +110,7 @@ impl Vector {
                     None => panic!(),
                 }
             }
+            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -119,79 +121,7 @@ impl Vector {
                 let image = Self::gc_ref_image(&mut gc.lock, vector);
                 Fixnum::as_i64(image.length) as usize
             }
-        }
-    }
-
-    pub fn cache(env: &Env, vector: Tag) {
-        let vtype = Self::type_of(env, vector);
-        let length = Self::length(env, vector) as i32;
-        let mut cache = block_on(env.vector_map.write());
-
-        match (*cache).get(&(vtype, length)) {
-            Some(vec_map) => {
-                let mut vec = block_on(vec_map.write());
-
-                vec.push(vector)
-            }
-            None => {
-                if (*cache)
-                    .insert((vtype, length), RwLock::new(vec![vector]))
-                    .is_some()
-                {
-                    panic!()
-                }
-            }
-        }
-    }
-
-    pub fn cached(env: &Env, indirect: &VecImageType) -> Option<Tag> {
-        let cache = block_on(env.vector_map.read());
-
-        let (vtype, length, ivec) = match indirect {
-            VecImageType::Bit(image, ivec)
-            | VecImageType::Byte(image, ivec)
-            | VecImageType::Char(image, ivec)
-            | VecImageType::Fixnum(image, ivec)
-            | VecImageType::Float(image, ivec) => {
-                (image.type_, Fixnum::as_i64(image.length) as i32, ivec)
-            }
-            _ => panic!(),
-        };
-
-        match (*cache).get(&(Tag::key_type(vtype).unwrap(), length)) {
-            Some(vec_map) => {
-                let tag_vec = block_on(vec_map.read());
-
-                let tag = match ivec {
-                    VectorImageType::Bit(u8_vec) => tag_vec.iter().find(|src| {
-                        u8_vec.iter().enumerate().all(|(index, byte)| {
-                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
-                        })
-                    }),
-                    VectorImageType::Byte(u8_vec) => tag_vec.iter().find(|src| {
-                        u8_vec.iter().enumerate().all(|(index, byte)| {
-                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
-                        })
-                    }),
-                    VectorImageType::Char(string) => tag_vec
-                        .iter()
-                        .find(|src| *string == Vector::as_string(env, **src)),
-                    VectorImageType::Fixnum(i64_vec) => tag_vec.iter().find(|src| {
-                        i64_vec.iter().enumerate().all(|(index, fixnum)| {
-                            *fixnum == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
-                        })
-                    }),
-                    VectorImageType::Float(float_vec) => tag_vec.iter().find(|src| {
-                        float_vec.iter().enumerate().all(|(index, float)| {
-                            *float == Float::as_f32(env, Vector::ref_(env, **src, index).unwrap())
-                        })
-                    }),
-                    _ => panic!(),
-                };
-
-                tag.copied()
-            }
-            None => None,
+            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -209,16 +139,15 @@ impl Vector {
                     }
                 }
             }
+            Tag::Nursery(_) => panic!(),
         }
     }
 }
 
-// core
 pub trait Core<'a> {
     fn as_string(_: &Env, _: Tag) -> String;
     fn gc_ref(_: &mut Gc, _: &Env, _: Tag, _: usize) -> Option<Tag>;
     fn iter(_: &Env, _: Tag) -> VectorIter;
-    fn read(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
     fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
     fn view(_: &Env, _: Tag) -> Tag;
 }
@@ -261,6 +190,7 @@ impl<'a> Core<'a> for Vector {
                     .unwrap()
                     .into()
                 }
+                Tag::Nursery(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -275,6 +205,7 @@ impl<'a> Core<'a> for Vector {
                     Some(ch.into())
                 }
                 Tag::Indirect(_) => VecImageType::gc_ref(gc, vector, index),
+                Tag::Nursery(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -301,210 +232,11 @@ impl<'a> Core<'a> for Vector {
                     _ => panic!(),
                 },
                 Tag::Indirect(_) => VecImageType::ref_(env, vector, index),
+                Tag::Nursery(_) => panic!(),
             },
             _ => {
                 panic!()
             }
-        }
-    }
-
-    fn read(env: &Env, syntax: char, stream: Tag) -> exception::Result<Tag> {
-        match syntax {
-            '"' => {
-                let mut str: String = String::new();
-
-                loop {
-                    match Stream::read_char(env, stream)? {
-                        Some('"') => break,
-                        Some(ch) => match map_char_syntax(ch).unwrap() {
-                            SyntaxType::Escape => match Stream::read_char(env, stream)? {
-                                Some(ch) => str.push(ch),
-                                None => {
-                                    return Err(Exception::new(
-                                        env,
-                                        Condition::Eof,
-                                        "mu:read",
-                                        stream,
-                                    ));
-                                }
-                            },
-                            _ => str.push(ch),
-                        },
-                        None => {
-                            return Err(Exception::new(env, Condition::Eof, "mu:read", stream));
-                        }
-                    }
-                }
-
-                Ok(Self::from(str).evict(env))
-            }
-            '*' => {
-                let mut digits: String = String::new();
-
-                loop {
-                    match Stream::read_char(env, stream)? {
-                        Some(ch) => match map_char_syntax(ch).unwrap() {
-                            SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                                Stream::unread_char(env, stream, ch)?;
-                                break;
-                            }
-                            SyntaxType::Escape => match Stream::read_char(env, stream)? {
-                                Some(ch) => {
-                                    if ch == '0' || ch == '1' {
-                                        digits.push(ch)
-                                    } else {
-                                        return Err(Exception::new(
-                                            env,
-                                            Condition::Eof,
-                                            "mu:read",
-                                            stream,
-                                        ));
-                                    }
-                                }
-                                None => {
-                                    return Err(Exception::new(
-                                        env,
-                                        Condition::Eof,
-                                        "mu:read",
-                                        stream,
-                                    ));
-                                }
-                            },
-                            _ => {
-                                if ch == '0' || ch == '1' {
-                                    digits.push(ch)
-                                } else {
-                                    return Err(Exception::new(
-                                        env,
-                                        Condition::Eof,
-                                        "mu:read",
-                                        stream,
-                                    ));
-                                }
-                            }
-                        },
-                        None => {
-                            return Err(Exception::new(env, Condition::Eof, "mu:read", stream));
-                        }
-                    }
-                }
-
-                let mut vec = vec![0; (digits.len() + 7) / 8];
-                let bvec = &mut vec;
-
-                for (i, ch) in digits.chars().enumerate() {
-                    if ch == '1' {
-                        bvec[i / 8] |= (1_i8) << (7 - i % 8)
-                    }
-                }
-
-                Ok(Self::from((vec, digits.len())).evict(env))
-            }
-            '(' => {
-                let vec_list = match Cons::read(env, stream) {
-                    Ok(list) => {
-                        if list.null_() {
-                            return Err(Exception::new(
-                                env,
-                                Condition::Type,
-                                "mu:read",
-                                Tag::nil(),
-                            ));
-                        }
-                        list
-                    }
-                    Err(_) => {
-                        return Err(Exception::new(env, Condition::Syntax, "mu:read", stream));
-                    }
-                };
-
-                let vec_type = Cons::car(env, vec_list);
-
-                match VTYPEMAP.iter().copied().find(|tab| vec_type.eq_(&tab.0)) {
-                    Some(tab) => match tab.1 {
-                        Type::T => {
-                            let vec = Cons::iter(env, Cons::cdr(env, vec_list))
-                                .map(|cons| Cons::car(env, cons))
-                                .collect::<Vec<Tag>>();
-
-                            Ok(Vector::from(vec).evict(env))
-                        }
-                        Type::Char => {
-                            let vec: exception::Result<String> =
-                                Cons::iter(env, Cons::cdr(env, vec_list))
-                                    .map(|cons| {
-                                        let ch = Cons::car(env, cons);
-                                        if ch.type_of() == Type::Char {
-                                            Ok(Char::as_char(env, ch))
-                                        } else {
-                                            Err(Exception::new(env, Condition::Type, "mu:read", ch))
-                                        }
-                                    })
-                                    .collect();
-
-                            Ok(Vector::from(vec?).evict(env))
-                        }
-                        Type::Byte => {
-                            let vec: exception::Result<Vec<u8>> =
-                                Cons::iter(env, Cons::cdr(env, vec_list))
-                                    .map(|cons| {
-                                        let fx = Cons::car(env, cons);
-                                        if fx.type_of() == Type::Fixnum {
-                                            let byte = Fixnum::as_i64(fx);
-                                            if !(0..255).contains(&byte) {
-                                                Err(Exception::new(
-                                                    env,
-                                                    Condition::Range,
-                                                    "mu:read",
-                                                    fx,
-                                                ))
-                                            } else {
-                                                Ok(byte as u8)
-                                            }
-                                        } else {
-                                            Err(Exception::new(env, Condition::Type, "mu:read", fx))
-                                        }
-                                    })
-                                    .collect();
-
-                            Ok(Vector::from(vec?).evict(env))
-                        }
-                        Type::Fixnum => {
-                            let vec: exception::Result<Vec<i64>> =
-                                Cons::iter(env, Cons::cdr(env, vec_list))
-                                    .map(|cons| {
-                                        let fx = Cons::car(env, cons);
-                                        if fx.type_of() == Type::Fixnum {
-                                            Ok(Fixnum::as_i64(fx))
-                                        } else {
-                                            Err(Exception::new(env, Condition::Type, "mu:read", fx))
-                                        }
-                                    })
-                                    .collect();
-
-                            Ok(Vector::from(vec?).evict(env))
-                        }
-                        Type::Float => {
-                            let vec: exception::Result<Vec<f32>> =
-                                Cons::iter(env, Cons::cdr(env, vec_list))
-                                    .map(|cons| {
-                                        let fl = Cons::car(env, cons);
-                                        if fl.type_of() == Type::Float {
-                                            Ok(Float::as_f32(env, fl))
-                                        } else {
-                                            Err(Exception::new(env, Condition::Type, "mu:read", fl))
-                                        }
-                                    })
-                                    .collect();
-
-                            Ok(Vector::from(vec?).evict(env))
-                        }
-                        _ => panic!(),
-                    },
-                    None => Err(Exception::new(env, Condition::Type, "mu:read", vec_type)),
-                }
-            }
-            _ => panic!(),
         }
     }
 }

@@ -13,8 +13,8 @@ use crate::{
     types::{
         stream::{Core as _, Stream},
         vector::Vector,
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 
 #[derive(Copy, Clone)]

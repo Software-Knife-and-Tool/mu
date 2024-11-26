@@ -1,0 +1,106 @@
+//  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-License-Identifier: MIT
+
+//! vector cache
+use {
+    crate::{
+        core::{
+            env::Env,
+            types::{Tag, Type},
+        },
+        types::{
+            fixnum::Fixnum,
+            float::Float,
+            vector::{Core as _, Vector},
+        },
+        vectors::image::{VecImageType, VectorImageType},
+    },
+    futures::executor::block_on,
+    futures_locks::RwLock,
+    std::collections::HashMap,
+};
+
+pub type VecCacheMap = HashMap<(Type, i32), RwLock<Vec<Tag>>>;
+
+impl Vector {
+    pub fn cache(env: &Env, vector: Tag) {
+        let vtype = Self::type_of(env, vector);
+        let length = Self::length(env, vector) as i32;
+        let mut cache = block_on(env.vector_map.write());
+
+        match (*cache).get(&(vtype, length)) {
+            Some(vec_map) => {
+                let mut vec = block_on(vec_map.write());
+
+                vec.push(vector)
+            }
+            None => {
+                if (*cache)
+                    .insert((vtype, length), RwLock::new(vec![vector]))
+                    .is_some()
+                {
+                    panic!()
+                }
+            }
+        }
+    }
+
+    pub fn cached(env: &Env, indirect: &VecImageType) -> Option<Tag> {
+        let cache = block_on(env.vector_map.read());
+
+        let (vtype, length, ivec) = match indirect {
+            VecImageType::Bit(image, ivec)
+            | VecImageType::Byte(image, ivec)
+            | VecImageType::Char(image, ivec)
+            | VecImageType::Fixnum(image, ivec)
+            | VecImageType::Float(image, ivec) => {
+                (image.type_, Fixnum::as_i64(image.length) as i32, ivec)
+            }
+            _ => panic!(),
+        };
+
+        match (*cache).get(&(Tag::key_type(vtype).unwrap(), length)) {
+            Some(vec_map) => {
+                let tag_vec = block_on(vec_map.read());
+
+                let tag = match ivec {
+                    VectorImageType::Bit(u8_vec) => tag_vec.iter().find(|src| {
+                        u8_vec.iter().enumerate().all(|(index, byte)| {
+                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
+                        })
+                    }),
+                    VectorImageType::Byte(u8_vec) => tag_vec.iter().find(|src| {
+                        u8_vec.iter().enumerate().all(|(index, byte)| {
+                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
+                        })
+                    }),
+                    VectorImageType::Char(string) => tag_vec
+                        .iter()
+                        .find(|src| *string == Vector::as_string(env, **src)),
+                    VectorImageType::Fixnum(i64_vec) => tag_vec.iter().find(|src| {
+                        i64_vec.iter().enumerate().all(|(index, fixnum)| {
+                            *fixnum == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
+                        })
+                    }),
+                    VectorImageType::Float(float_vec) => tag_vec.iter().find(|src| {
+                        float_vec.iter().enumerate().all(|(index, float)| {
+                            *float == Float::as_f32(env, Vector::ref_(env, **src, index).unwrap())
+                        })
+                    }),
+                    _ => panic!(),
+                };
+
+                tag.copied()
+            }
+            None => None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}

@@ -16,8 +16,8 @@ use crate::{
         cons::{Cons, Core as _},
         symbol::{Core as _, Symbol},
         vector::Vector,
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 
 #[derive(Copy, Clone)]

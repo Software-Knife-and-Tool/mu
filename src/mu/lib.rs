@@ -22,7 +22,7 @@
 //! - symbol namespaces
 //!
 //! library data types:
-//!    56 bit immediate fixnums
+//!    56 bit immediate signed fixnums
 //!    Lisp-1 namespaced symbols
 //!    character, string, and byte streams
 //!    immediate ASCII characters
@@ -54,6 +54,7 @@ mod images;
 mod streams;
 mod system;
 mod types;
+mod vectors;
 
 use futures::executor::block_on;
 use {

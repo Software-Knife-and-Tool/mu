@@ -78,6 +78,7 @@ impl Allocator for Heap {
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => (self.allocator).image_info(indirect.image_id() as usize),
+            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -85,6 +86,7 @@ impl Allocator for Heap {
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(_) => self.image_info(tag).map(|info| info.mark()),
+            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -104,6 +106,7 @@ impl Allocator for Heap {
                     Some(mark)
                 }
             },
+            Tag::Nursery(_) => panic!(),
         }
     }
 

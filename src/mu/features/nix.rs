@@ -15,8 +15,8 @@ use crate::{
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::Vector,
-        vector_image::Core as _,
     },
+    vectors::core::Core as _,
 };
 use nix::{self};
 
