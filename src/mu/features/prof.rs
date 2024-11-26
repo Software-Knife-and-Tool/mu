@@ -21,7 +21,7 @@ use crate::{
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
     },
-    vectors::image::Core as _,
+    vectors::core::Core as _,
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
