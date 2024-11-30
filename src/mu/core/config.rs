@@ -4,7 +4,7 @@
 //! env config
 use crate::{
     core::{gc::GcMode, types::Tag},
-    images::bump_allocator::BumpAllocator,
+    heaps::bump_allocator::BumpAllocator,
 };
 
 // config builder

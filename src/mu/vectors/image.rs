@@ -172,7 +172,7 @@ pub trait VecImage {
     fn gc_ref(_: &mut Gc, _: Tag, _: usize) -> Option<Tag>;
 }
 
-impl<'a> VecImage for VecImageType<'a> {
+impl VecImage for VecImageType<'_> {
     fn image(image: &VectorImage) -> Vec<[u8; 8]> {
         let slices = vec![image.type_.as_slice(), image.length.as_slice()];
 

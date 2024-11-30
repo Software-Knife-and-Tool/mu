@@ -50,7 +50,7 @@ extern crate modular_bitfield;
 
 mod core;
 mod features;
-mod images;
+mod heaps;
 mod streams;
 mod system;
 mod types;
@@ -60,7 +60,7 @@ use futures::executor::block_on;
 use {
     crate::{
         core::{apply::Core as _, compile::Core as _, config::Config, exception, lib::LIB},
-        images::image::Core as _,
+        heaps::image::Core as _,
         streams::{core::StreamBuilder, read::Core as _, write::Core as _},
         types::stream::{Core as _, Stream},
     },
@@ -75,7 +75,6 @@ use {
 /// - Lib, environment and API namespace
 /// - Result, specialized result for API functions that can fail
 /// - Tag, tagged data representation
-
 ///   tagged data representation
 pub type Tag = core::types::Tag;
 /// API function Result

@@ -10,7 +10,7 @@ use crate::{
         frame::Frame,
         types::{Tag, Type},
     },
-    images::bump_allocator::BumpAllocator,
+    heaps::bump_allocator::BumpAllocator,
     types::{
         cons::Cons,
         function::Function,
@@ -71,7 +71,6 @@ impl Gc {
 
                 marked
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 

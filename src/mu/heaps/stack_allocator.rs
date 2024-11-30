@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! env heap
-use crate::images::allocator::{AllocTypeInfo, AllocatorImageInfo};
+use crate::heaps::allocator::{AllocTypeInfo, AllocatorImageInfo};
 use {futures::executor::block_on, futures_locks::RwLock};
 
 #[derive(Debug)]
@@ -216,7 +216,7 @@ pub struct StackAllocatorIter<'a> {
     pub offset: usize,
 }
 
-impl<'a> Iterator for StackAllocatorIter<'a> {
+impl Iterator for StackAllocatorIter<'_> {
     type Item = (AllocatorImageInfo, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
