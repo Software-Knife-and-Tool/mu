@@ -2,6 +2,8 @@
 //  SPDX-License-Identifier: MIT
 
 //! features module
+#[cfg(feature = "cpu_time")]
+pub mod cpu_time;
 pub mod feature;
 #[cfg(feature = "ffi")]
 pub mod ffi;

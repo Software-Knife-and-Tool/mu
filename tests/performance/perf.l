@@ -11,10 +11,10 @@
   (:lambda (fn args)
     ((:lambda (start stop)
        (mu:sub stop start))
-       (mu:internal-run-time)
+       (cpu-time:process-time)
        ((:lambda ()
           (mu:apply fn args)
-          (mu:internal-run-time))))))
+          (cpu-time:process-time))))))
 
 ;;;
 ;;; return an vector of storage consumed

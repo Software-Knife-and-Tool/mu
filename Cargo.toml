@@ -15,7 +15,8 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "std", "sysinfo", "nix", "ffi" ]
+default = [ "std", "cpu_time", "sysinfo", "nix", "ffi" ]
+cpu_time = []
 nix = []
 std = []
 ffi = []
