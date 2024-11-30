@@ -12,7 +12,7 @@ use crate::{
         indirect::{self, IndirectTag},
         types::{Tag, Type},
     },
-    images::{allocator::AllocTypeInfo, bump_allocator::BumpAllocator},
+    heaps::{allocator::AllocTypeInfo, bump_allocator::BumpAllocator},
     types::{
         cons::{Cons, Core as _},
         fixnum::{Core as _, Fixnum},

@@ -179,7 +179,6 @@ impl Symbol {
                     gc.mark(env, value);
                 }
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 }

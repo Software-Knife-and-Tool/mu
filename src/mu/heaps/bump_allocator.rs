@@ -3,7 +3,7 @@
 
 //! env heap
 use {
-    crate::images::allocator::{AllocTypeInfo, AllocatorImageInfo},
+    crate::heaps::allocator::{AllocTypeInfo, AllocatorImageInfo},
     memmap, page_size,
     std::{
         fs::{remove_file, OpenOptions},
@@ -325,7 +325,7 @@ pub struct BumpAllocatorIter<'a> {
     pub index: usize,
 }
 
-impl<'a> Iterator for BumpAllocatorIter<'a> {
+impl Iterator for BumpAllocatorIter<'_> {
     type Item = (AllocatorImageInfo, usize);
 
     fn next(&mut self) -> Option<Self::Item> {

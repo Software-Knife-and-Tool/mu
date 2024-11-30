@@ -108,7 +108,7 @@ pub trait Core<'a> {
     fn heap_size(_: &Env, _: Tag) -> usize;
 }
 
-impl<'a> Core<'a> for Struct {
+impl Core<'_> for Struct {
     fn new(env: &Env, key: &str, vec: Vec<Tag>) -> Self {
         Struct {
             stype: Symbol::keyword(key),

@@ -26,7 +26,7 @@ Subsequent layers based on the runtime offer advanced features.
 
 ------
 
-- core as module
+- common as module
 
   
 

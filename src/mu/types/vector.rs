@@ -76,7 +76,6 @@ impl Vector {
                     None => panic!(),
                 }
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -87,7 +86,6 @@ impl Vector {
                 let image = Self::to_image(env, vector);
                 Fixnum::as_i64(image.length) as usize
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -110,7 +108,6 @@ impl Vector {
                     None => panic!(),
                 }
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -121,7 +118,6 @@ impl Vector {
                 let image = Self::gc_ref_image(&mut gc.lock, vector);
                 Fixnum::as_i64(image.length) as usize
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -139,7 +135,6 @@ impl Vector {
                     }
                 }
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 }
@@ -152,7 +147,7 @@ pub trait Core<'a> {
     fn view(_: &Env, _: Tag) -> Tag;
 }
 
-impl<'a> Core<'a> for Vector {
+impl Core<'_> for Vector {
     fn view(env: &Env, vector: Tag) -> Tag {
         let vec = vec![
             Fixnum::with_or_panic(Self::length(env, vector)),
@@ -190,7 +185,6 @@ impl<'a> Core<'a> for Vector {
                     .unwrap()
                     .into()
                 }
-                Tag::Nursery(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -205,7 +199,6 @@ impl<'a> Core<'a> for Vector {
                     Some(ch.into())
                 }
                 Tag::Indirect(_) => VecImageType::gc_ref(gc, vector, index),
-                Tag::Nursery(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -232,7 +225,6 @@ impl<'a> Core<'a> for Vector {
                     _ => panic!(),
                 },
                 Tag::Indirect(_) => VecImageType::ref_(env, vector, index),
-                Tag::Nursery(_) => panic!(),
             },
             _ => {
                 panic!()
@@ -436,7 +428,7 @@ impl<'a> VectorIter<'a> {
     }
 }
 
-impl<'a> Iterator for VectorIter<'a> {
+impl Iterator for VectorIter<'_> {
     type Item = Tag;
 
     fn next(&mut self) -> Option<Self::Item> {

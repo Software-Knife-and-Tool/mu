@@ -67,7 +67,7 @@ pub trait Core<'a> {
     fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
-impl<'a> Core<'a> for Vector {
+impl Core<'_> for Vector {
     fn heap_size(env: &Env, vector: Tag) -> usize {
         match vector {
             Tag::Direct(_) => std::mem::size_of::<DirectTag>(),
@@ -81,7 +81,6 @@ impl<'a> Core<'a> for Vector {
 
                 std::mem::size_of::<VectorImage>() + (size * len)
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -187,7 +186,6 @@ impl<'a> Core<'a> for Vector {
                     env.write_string(")", stream)
                 }
             },
-            Tag::Nursery(_) => panic!(),
         }
     }
 }

@@ -34,7 +34,11 @@ use {
 use futures::executor::block_on;
 
 // tag storage classes
-pub type ImageId = usize;
+#[derive(Copy, Clone)]
+pub enum Tag {
+    Direct(DirectTag),
+    Indirect(IndirectTag),
+}
 
 #[derive(Clone)]
 pub enum TypeImage {
@@ -48,13 +52,6 @@ pub enum TypeImage {
     Struct(Struct),
     Symbol(Symbol),
     Vector(Vector),
-}
-
-#[derive(Copy, Clone)]
-pub enum Tag {
-    Direct(DirectTag),
-    Indirect(IndirectTag),
-    Nursery(ImageId),
 }
 
 // types
@@ -125,7 +122,6 @@ impl fmt::Display for Tag {
         match self {
             Tag::Direct(direct) => write!(f, "direct: type {:?}", direct.dtype() as u8),
             Tag::Indirect(indirect) => write!(f, "indirect: type {:?}", indirect.tag()),
-            Tag::Nursery(_) => panic!(),
         }
     }
 }
@@ -153,7 +149,6 @@ impl Tag {
                     None => panic!(),
                 }
             }
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -161,7 +156,6 @@ impl Tag {
         match self {
             Tag::Direct(tag) => tag.into_bytes(),
             Tag::Indirect(tag) => tag.into_bytes(),
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -224,7 +218,6 @@ impl Tag {
                     TagType::Vector => Type::Vector,
                     _ => panic!("indirect type botch {:x}", self.as_u64()),
                 },
-                Tag::Nursery(_) => panic!(),
             }
         }
     }

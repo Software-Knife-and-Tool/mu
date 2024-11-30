@@ -10,7 +10,7 @@ use {
             heap::Heap,
             types::{Tag, Type},
         },
-        images::{bump_allocator::BumpAllocator, stack_allocator::StackAllocator},
+        heaps::{bump_allocator::BumpAllocator, stack_allocator::StackAllocator},
     },
     modular_bitfield::specifiers::{B11, B4},
     std::fmt,
@@ -78,7 +78,6 @@ impl Allocator for Heap {
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => (self.allocator).image_info(indirect.image_id() as usize),
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -86,7 +85,6 @@ impl Allocator for Heap {
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(_) => self.image_info(tag).map(|info| info.mark()),
-            Tag::Nursery(_) => panic!(),
         }
     }
 
@@ -106,7 +104,6 @@ impl Allocator for Heap {
                     Some(mark)
                 }
             },
-            Tag::Nursery(_) => panic!(),
         }
     }
 

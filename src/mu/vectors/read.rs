@@ -24,7 +24,7 @@ pub trait Core<'a> {
     fn read(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
 }
 
-impl<'a> Core<'a> for Vector {
+impl Core<'_> for Vector {
     fn read(env: &Env, syntax: char, stream: Tag) -> exception::Result<Tag> {
         match syntax {
             '"' => {

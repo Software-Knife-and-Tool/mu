@@ -5,14 +5,8 @@
 #[allow(unused_imports)]
 use {
     crate::{
-        core::{
-            config::Config,
-            frame::Frame,
-            lib::Lib,
-            nursery::{Core as _, Nursery},
-            types::{Tag, TypeImage},
-        },
-        images::bump_allocator::BumpAllocator,
+        core::{config::Config, frame::Frame, lib::Lib, types::Tag},
+        heaps::bump_allocator::BumpAllocator,
         types::namespace::Namespace,
         vectors::cache::VecCacheMap,
         LIB,
@@ -31,7 +25,6 @@ pub struct Env {
 
     // heap
     pub heap: RwLock<BumpAllocator>,
-    pub nursery: RwLock<Nursery>,
     pub gc_root: RwLock<Vec<Tag>>,
     pub vector_map: RwLock<VecCacheMap>,
 
@@ -60,7 +53,6 @@ pub struct Env {
 impl Env {
     pub fn new(config: Config, _image: Option<Vec<u8>>) -> Self {
         let heap = BumpAllocator::new(config.npages, Tag::NTYPES);
-        let nursery = Nursery::new();
 
         let mut env = Env {
             config,
@@ -72,7 +64,6 @@ impl Env {
             lexical: RwLock::new(HashMap::new()),
             ns_map: RwLock::new(Vec::new()),
             null_ns: Tag::nil(),
-            nursery: RwLock::new(nursery),
             #[cfg(feature = "prof")]
             prof: RwLock::new(Vec::new()),
             #[cfg(feature = "prof")]
