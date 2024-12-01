@@ -46,10 +46,9 @@ pub trait CoreFunction {
 impl CoreFunction for Feature {
     fn cpu_time_process_time(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match ProcessTime::try_now() {
-            Ok(_) => match env.start_time.try_elapsed() {
-                Ok(current) => Fixnum::with_u64(env, current.as_micros() as u64)?, // this is a u128
-                Err(_) => panic!(),
-            },
+            Ok(process_time) => {
+                Fixnum::with_u64(env, process_time.as_duration().as_micros() as u64)?
+            } // this is a u128
             Err(_) => panic!(),
         };
 
