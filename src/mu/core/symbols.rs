@@ -16,7 +16,6 @@ use crate::{
         types::{CoreFunction as _, Tag},
     },
     streams::{read::CoreFunction as _, write::CoreFunction as _},
-    system::utime::CoreFunction as _,
     types::{
         cons::{Cons, CoreFunction as _},
         fixnum::{CoreFunction as _, Fixnum},
@@ -126,7 +125,5 @@ lazy_static! {
         ( "unread-char", 2, Stream::mu_unread_char ),
         ( "write-byte",  2, Stream::mu_write_byte ),
         ( "write-char",  2, Stream::mu_write_char ),
-        // system
-        ( "internal-run-time",   0, Env::mu_utime ),
     ];
 }

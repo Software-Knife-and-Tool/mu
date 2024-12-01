@@ -25,6 +25,7 @@ use {
 
 use {futures::executor::block_on, futures_locks::RwLock};
 
+#[derive(Clone)]
 pub enum Namespace {
     Static(&'static RwLock<HashMap<String, Tag>>),
     Dynamic(RwLock<HashMap<String, Tag>>),

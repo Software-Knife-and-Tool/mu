@@ -2,8 +2,8 @@
 //  SPDX-License-Identifier: MIT
 
 //! env indirect
-#![allow(unused_braces)]
 #![allow(clippy::identity_op)]
+#![allow(unused_braces)]
 use crate::{
     core::types::{Tag, TagType, Type},
     modular_bitfield::specifiers::{B2, B59},

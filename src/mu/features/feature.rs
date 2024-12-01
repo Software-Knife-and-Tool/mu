@@ -4,6 +4,8 @@
 //! features
 use crate::core::symbols::CoreFn;
 
+#[cfg(feature = "cpu_time")]
+use crate::features::cpu_time::CpuTime;
 #[cfg(feature = "ffi")]
 use crate::features::ffi::Ffi;
 #[cfg(feature = "nix")]
@@ -29,6 +31,8 @@ impl Core for Feature {
     fn install_features() -> Vec<Feature> {
         #[allow(clippy::let_and_return)]
         let features = vec![
+            #[cfg(feature = "cpu_time")]
+            <Feature as CpuTime>::feature(),
             #[cfg(feature = "nix")]
             <Feature as Nix>::feature(),
             #[cfg(feature = "std")]

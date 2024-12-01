@@ -1,8 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env structure
-#[allow(unused_imports)]
+//! environment bindings
 use {
     crate::{
         core::{config::Config, frame::Frame, lib::Lib, types::Tag},

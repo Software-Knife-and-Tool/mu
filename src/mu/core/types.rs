@@ -2,7 +2,6 @@
 //  SPDX-License-Identifier: MIT
 
 //! env tagged types
-#![allow(unused_braces)]
 #![allow(clippy::identity_op)]
 use {
     crate::{

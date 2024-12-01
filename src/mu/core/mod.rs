@@ -19,4 +19,5 @@ pub mod quasi;
 pub mod reader;
 pub mod readtable;
 pub mod symbols;
+pub mod type_image;
 pub mod types;

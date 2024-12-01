@@ -194,12 +194,13 @@ As of 0.0.40, the *mu* runtime supports conditional compilation of a variety of 
 Currently supported features by namespace:
 
 ```
- default = [ "std", "sysinfo", "prof", "nix" ]
+ default = [ "cpu-time", std", "sysinfo", "prof", "nix" ]
  
- nix:     uname
- prof:    prof-control
- std:     command, exit
- sysinfo: sysinfo
+ cpu-time:	process-time
+ nix:     	uname
+ prof:    	prof-control
+ std:     	command, exit
+ sysinfo: 	sysinfo
  ffi:
 ```
 
