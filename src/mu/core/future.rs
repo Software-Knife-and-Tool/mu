@@ -71,7 +71,7 @@ impl Future {
     }
 
     fn make_detach_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(env.tag.read());
+        let env_ref = block_on(env.env_key.read());
         let env_tag = (*env_ref).as_u64();
 
         let (tx, rx) = mpsc::unbounded::<Tag>();

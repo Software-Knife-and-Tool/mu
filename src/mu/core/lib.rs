@@ -183,7 +183,7 @@ pub trait Core {
 impl Core for Env {
     fn add_env(self) -> Tag {
         let mut env_map_ref = block_on(LIB.env_map.write());
-        let mut tag_ref = block_on(self.tag.write());
+        let mut tag_ref = block_on(self.env_key.write());
 
         let key = Symbol::keyword(&format!("{:07x}", env_map_ref.len()));
 

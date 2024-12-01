@@ -10,7 +10,6 @@ use {
         vectors::cache::VecCacheMap,
         LIB,
     },
-    cpu_time::ProcessTime,
     std::collections::HashMap,
 };
 
@@ -44,9 +43,8 @@ pub struct Env {
     #[cfg(feature = "prof")]
     pub prof_on: RwLock<bool>,
 
-    // system
-    pub tag: RwLock<Tag>,
-    pub start_time: ProcessTime,
+    // env map
+    pub env_key: RwLock<Tag>,
 }
 
 impl Env {
@@ -55,20 +53,19 @@ impl Env {
 
         let mut env = Env {
             config,
-            mu_ns: Tag::nil(),
             dynamic: RwLock::new(Vec::new()),
+            env_key: RwLock::new(Tag::nil()),
             gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(heap),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
+            mu_ns: Tag::nil(),
             ns_map: RwLock::new(Vec::new()),
             null_ns: Tag::nil(),
             #[cfg(feature = "prof")]
             prof: RwLock::new(Vec::new()),
             #[cfg(feature = "prof")]
             prof_on: RwLock::new(false),
-            start_time: ProcessTime::now(),
-            tag: RwLock::new(Tag::nil()),
             vector_map: RwLock::new(HashMap::new()),
         };
 
