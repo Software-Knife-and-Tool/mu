@@ -11,46 +11,49 @@ use {
 pub struct Annotate {}
 
 impl Annotate {
-    pub fn annotate(options: &Options, _home: &str) {
-        let profile_opt = options.options.iter().find(|opt| match opt {
-            Opt::Prof(_) => true,
-            _ => false,
-        });
-
-        let profile_path = match profile_opt {
-            Some(opt) => match opt {
-                Opt::Prof(path) => path,
-                _ => panic!(),
-            },
-            None => panic!(),
-        };
-
-        let reference_opt = options.options.iter().find(|opt| match opt {
-            Opt::Ref(_) => true,
-            _ => false,
-        });
-
-        let reference_path = match reference_opt {
-            Some(opt) => match opt {
-                Opt::Ref(path) => path,
-                _ => panic!(),
-            },
-            None => panic!(),
-        };
-
-        match options.find_opt(&Opt::Verbose) {
-            Some(_) => println!("mux annotate: prof {} ref {}", profile_path, reference_path),
+    pub fn annotate(argv: &Vec<String>, _home: &str) {
+        match Options::parse_options(argv, &[], &["prof", "ref", "verbose"]) {
             None => (),
-        };
+            Some(options) => {
+                let mut prof_opt: Option<String> = None;
+                let mut ref_opt: Option<String> = None;
 
-        let output = Command::new("python3")
-            .arg("/opt/mu/bin/annotate.py")
-            .arg(profile_path)
-            .arg(reference_path)
-            .output()
-            .expect("command failed to execute");
+                for opt in &options.options {
+                    match opt {
+                        Opt::Prof(path) => prof_opt = Some(path.to_string()),
+                        Opt::Ref(path) => ref_opt = Some(path.to_string()),
+                        _ => panic!("opt consistency"),
+                    }
+                }
 
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
+                let profile_path = match prof_opt {
+                    Some(path) => path,
+                    None => panic!(),
+                };
+
+                let reference_path = match ref_opt {
+                    Some(path) => path,
+                    None => "ref.out".to_string(),
+                };
+
+                match Options::find_opt(&options, &Opt::Verbose) {
+                    Some(_) => println!(
+                        "mux annotate: --prof {} --ref {}",
+                        profile_path, reference_path
+                    ),
+                    None => (),
+                };
+
+                let output = Command::new("python3")
+                    .arg("/opt/mu/bin/annotate.py")
+                    .arg(profile_path)
+                    .arg(reference_path)
+                    .output()
+                    .expect("command failed to execute");
+
+                io::stdout().write_all(&output.stdout).unwrap();
+                io::stderr().write_all(&output.stderr).unwrap();
+            }
+        }
     }
 }

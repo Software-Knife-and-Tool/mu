@@ -1,46 +1,51 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 use {
-    crate::options::{Opt, Options},
+    crate::options::{Mode, Opt, Options},
     std::{
         io::{self, Write},
         process::Command,
     },
 };
 
-pub struct Bench {}
+pub struct Bench;
 
 impl Bench {
-    pub fn bench(options: &Options, home: &str) {
-        let report_opt = options.options.iter().find(|opt| match opt {
-            Opt::Base => true,
-            Opt::Current => true,
-            Opt::Footprint => true,
-            _ => false,
-        });
+    pub fn bench(argv: &Vec<String>, home: &str) {
+        match Options::parse_options(
+            argv,
+            &["base", "current", "footprint"],
+            &["ntests", "verbose"],
+        ) {
+            None => (),
+            Some(options) => {
+                if options.modes.len() != 1 {
+                    panic!()
+                }
 
-        match report_opt {
-            Some(opt) => match opt {
-                Opt::Base => Self::base(options, home),
-                Opt::Current => Self::current(options, home),
-                Opt::Footprint => Self::footprint(options, home),
-                _ => panic!(),
-            },
-            None => Self::current(options, home),
+                let mode = &options.modes[0];
+
+                let ntests = match Options::opt_value(&options, &Opt::Ntests("".to_string())) {
+                    Some(n) => n.parse().unwrap(),
+                    None => 20usize,
+                };
+
+                match Options::find_opt(&options, &Opt::Verbose) {
+                    Some(_) => println!("mux bench: {:?} --ntests {ntests} --verbose", mode),
+                    None => (),
+                };
+
+                match mode {
+                    Mode::Base => Self::base(ntests, home),
+                    Mode::Current => Self::current(ntests, home),
+                    Mode::Footprint => Self::footprint(ntests, home),
+                    _ => panic!(),
+                }
+            }
         }
     }
 
-    pub fn base(options: &Options, home: &str) {
-        let ntests = match options.opt_value(&Opt::Ntests("".to_string())) {
-            Some(n) => n.parse().unwrap(),
-            None => 20u32,
-        };
-
-        match options.find_opt(&Opt::Verbose) {
-            Some(_) => println!("mux bench: base ntests {ntests}"),
-            None => (),
-        };
-
+    pub fn base(ntests: usize, home: &str) {
         for test_dir in ["tests/footprint", "tests/performance"] {
             let output = Command::new("make")
                 .current_dir(home)
@@ -56,17 +61,7 @@ impl Bench {
         }
     }
 
-    pub fn current(options: &Options, home: &str) {
-        let ntests = match options.opt_value(&Opt::Ntests("".to_string())) {
-            Some(n) => n.parse().unwrap(),
-            None => 20u32,
-        };
-
-        match options.find_opt(&Opt::Verbose) {
-            Some(_) => println!("mux bench: current ntests {ntests}"),
-            None => (),
-        };
-
+    pub fn current(ntests: usize, home: &str) {
         let output = Command::new("make")
             .current_dir(home)
             .env("NTESTS", &ntests.to_string())
@@ -91,7 +86,7 @@ impl Bench {
         io::stderr().write_all(&output.stderr).unwrap();
     }
 
-    pub fn footprint(_options: &Options, home: &str) {
+    pub fn footprint(_ntests: usize, home: &str) {
         let output = Command::new("make")
             .current_dir(home)
             .args(["-C", "tests/footprint"])

@@ -11,20 +11,25 @@ use {
 pub struct Commit {}
 
 impl Commit {
-    pub fn commit(options: &Options, _: &str) {
-        match options.find_opt(&Opt::Verbose) {
-            Some(_) => println!("mux commit: fmt clippy"),
+    pub fn commit(argv: &Vec<String>) {
+        match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
-        };
+            Some(options) => {
+                match Options::find_opt(&options, &Opt::Verbose) {
+                    Some(_) => println!("mux commit: --verbose"),
+                    None => (),
+                };
 
-        for cmd in vec!["fmt", "clippy", "test"] {
-            let output = Command::new("cargo")
-                .arg(cmd)
-                .output()
-                .expect("command failed to execute");
+                for cmd in vec!["fmt", "clippy", "test"] {
+                    let output = Command::new("cargo")
+                        .arg(cmd)
+                        .output()
+                        .expect("command failed to execute");
 
-            io::stdout().write_all(&output.stdout).unwrap();
-            io::stderr().write_all(&output.stderr).unwrap();
+                    io::stdout().write_all(&output.stdout).unwrap();
+                    io::stderr().write_all(&output.stderr).unwrap();
+                }
+            }
         }
     }
 }
