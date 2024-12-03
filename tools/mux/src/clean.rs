@@ -11,52 +11,51 @@ use {
 pub struct Clean {}
 
 impl Clean {
-    pub fn clean(options: &Options, home: &str) {
-        match options.find_opt(&Opt::Verbose) {
-            Some(_) => println!("mux clean:"),
+    pub fn clean(argv: &Vec<String>, home: &str) {
+        match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
-        };
+            Some(options) => {
+                match Options::find_opt(&options, &Opt::Verbose) {
+                    Some(_) => println!("mux clean: --verbose"),
+                    None => (),
+                };
 
-        let dirs = ["dist", "tests/regression", "tests/footprint"];
+                let _dist = &format!("{home}/dist");
 
-        let mu = match Env::mu_home(options) {
-            Some(path) => path,
-            None => {
-                let cwd = std::env::current_dir().unwrap();
+                let dirs = ["dist", "tests/regression", "tests/footprint"];
 
-                eprintln!(
-                    "error: could not find `.mu` in {:?} or any parent directory",
-                    cwd.to_str().unwrap()
-                );
-                return;
+                let mu = match Env::mu_home() {
+                    Some(path) => path,
+                    None => {
+                        let cwd = std::env::current_dir().unwrap();
+
+                        eprintln!(
+                            "error: could not find `.mu` in {:?} or any parent directory",
+                            cwd.to_str().unwrap()
+                        );
+                        return;
+                    }
+                };
+
+                Command::new("rm")
+                    .current_dir(home)
+                    .arg("-rf")
+                    .arg(mu.clone() + "/target")
+                    .arg(mu.clone() + "/Cargo.lock")
+                    .arg(mu.clone() + "/TAGS")
+                    .spawn()
+                    .expect("command failed to execute");
+
+                for dir in dirs {
+                    Command::new("make")
+                        .current_dir(home)
+                        .args(["-C", &(mu.clone() + "/" + dir)])
+                        .arg("clean")
+                        .arg("--no-print-directory")
+                        .spawn()
+                        .expect("command faled to execute");
+                }
             }
-        };
-
-        match options.options.iter().find(|opt| match opt {
-            Opt::Verbose => true,
-            _ => false,
-        }) {
-            Some(_) => println!("mux clean: {dirs:?}"),
-            None => (),
-        };
-
-        Command::new("rm")
-            .current_dir(home)
-            .arg("-rf")
-            .arg(mu.clone() + "/target")
-            .arg(mu.clone() + "/Cargo.lock")
-            .arg(mu.clone() + "/TAGS")
-            .spawn()
-            .expect("command failed to execute");
-
-        for dir in dirs {
-            Command::new("make")
-                .current_dir(home)
-                .args(["-C", &(mu.clone() + "/" + dir)])
-                .arg("clean")
-                .arg("--no-print-directory")
-                .spawn()
-                .expect("command faled to execute");
         }
     }
 }

@@ -66,4 +66,4 @@ dist:
 	@for prelude in $(PRELUDE); do			\
 	    cat $(SRC)/modules/prelude/$$prelude >> prelude.l;	\
 	done
-
+	@cp prelude.l mu/dist

@@ -33,7 +33,7 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.11";
+const VERSION: &str = "0.0.12";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
@@ -42,23 +42,22 @@ pub fn usage() {
     println!("    version                            ; mux version");
     println!();
     println!("    init                               ; init");
-    println!("    env                                ; mu development environment");
-    println!("    build     [--release | --profile | --debug]");
-    println!("                                       ; build mu system, debug is default");
+    println!("    env                                ; print development environment");
+    println!("    build     release | profile | debug");
+    println!("                                       ; build mu system, release is default");
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    clean                              ; clean all artifacts");
     println!("    commit                             ; fmt and clippy, pre-commit checking");
-    println!("    repl      [--namespace ...]        ; repl: mu, core, and prelude namespaces");
-    println!("    symbols   [--crossref | --counts | --reference | --namespace ...]");
-    println!("                                       ; symbol reports");
+    println!("    repl      mu | core | prelude      ; repl: mu, core, and prelude namespaces");
+    println!("    symbols   reference | crossref | metrics [--module=name | --namespace=name]");
+    println!("                                       ; symbol reports, defaults to mu");
     println!("    test                               ; regression test suite");
-    println!("    bench     [[--base | --current | --footprint] | --ntests ...]");
-    println!("    profile   [--config ...]           ; create profile");
-    println!("    annotate  [--prof ... | --ref ...] ; annotate profile");
+    println!("    bench     base | current | footprint [--ntests=number]");
+    println!("    profile   --config=path            ; create profile");
+    println!("    annotate  --prof=path [--ref=path] ; annotate profile");
     println!();
     println!("  general options:");
     println!("    --verbose                          ; verbose operation");
-    println!("    --output ...                       ; output file path");
 
     std::process::exit(0);
 }
@@ -71,12 +70,13 @@ pub fn main() {
     }
 
     let command = argv[1].as_str();
-    let options = Options::parse(&argv).unwrap();
 
     match command {
-        "init" => Init::init(&options),
+        "init" => Init::init(&argv),
+        "commit" => Commit::commit(&argv),
+        "version" => Options::version(),
         _ => {
-            let home = match Env::mu_home(&options) {
+            let home = match Env::mu_home() {
                 Some(path) => path,
                 None => {
                     let cwd = std::env::current_dir().unwrap();
@@ -96,18 +96,16 @@ pub fn main() {
                     println!();
                     usage()
                 }
-                "annotate" => Annotate::annotate(&options, &home),
-                "bench" => Bench::bench(&options, &home),
-                "build" => Build::build(&options, &home),
-                "clean" => Clean::clean(&options, &home),
-                "commit" => Commit::commit(&options, &home),
-                "env" => Env::printenv(&options, &home),
-                "install" => Install::install(&options, &home),
-                "profile" => Profile::profile(&options, &home),
-                "repl" => Repl::repl(&options, &home),
-                "symbols" => Symbols::symbols(&options, &home),
-                "test" => Test::test(&options, &home),
-                "version" => Options::version(),
+                "annotate" => Annotate::annotate(&argv, &home),
+                "bench" => Bench::bench(&argv, &home),
+                "build" => Build::build(&argv, &home),
+                "clean" => Clean::clean(&argv, &home),
+                "env" => Env::printenv(&argv, &home),
+                "install" => Install::install(&argv, &home),
+                "profile" => Profile::profile(&argv, &home),
+                "repl" => Repl::repl(&argv, &home),
+                "symbols" => Symbols::symbols(&argv, &home),
+                "test" => Test::test(&argv, &home),
                 _ => {
                     eprintln!("mux: unimplemented command {command}");
                     std::process::exit(-1)

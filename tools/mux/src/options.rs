@@ -1,32 +1,39 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
+#![allow(dead_code)]
 use crate::VERSION;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Options {
+    pub modes: Vec<Mode>,
     pub options: Vec<Opt>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Opt {
-    Base,
     Config(String),
-    Counts,
+    Module(String),
+    Namespace(String),
+    Ntests(String),
+    Prof(String),
+    Ref(String),
+    Verbose,
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum Mode {
+    Base,
+    Core,
     Crossref,
     Current,
     Debug,
-    Eval(String),
     Footprint,
-    Load(String),
-    Namespace(String),
-    Ntests(String),
-    Output(String),
+    Metrics,
+    Mu,
+    Prelude,
     Profile,
-    Prof(String),
     Reference,
-    Ref(String),
     Release,
-    Verbose,
 }
 
 impl Options {
@@ -35,21 +42,24 @@ impl Options {
         std::process::exit(0)
     }
 
-    pub fn find_opt(&self, opt: &Opt) -> Option<&Opt> {
-        self.options
+    pub fn find_opt(options: &Options, opt: &Opt) -> Option<Opt> {
+        match options
+            .options
             .iter()
-            .find(|next_opt| std::mem::discriminant(*next_opt) == std::mem::discriminant(opt))
+            .find(|next| std::mem::discriminant(*next) == std::mem::discriminant(opt))
+        {
+            None => None,
+            Some(opt) => Some(opt.clone()),
+        }
     }
 
-    pub fn opt_value(&self, opt: &Opt) -> Option<String> {
-        match self.find_opt(opt) {
+    pub fn opt_value(options: &Options, opt: &Opt) -> Option<String> {
+        match Self::find_opt(&options, opt) {
             Some(opt) => match opt {
                 Opt::Config(str)
-                | Opt::Eval(str)
-                | Opt::Load(str)
+                | Opt::Module(str)
                 | Opt::Namespace(str)
                 | Opt::Prof(str)
-                | Opt::Output(str)
                 | Opt::Ref(str)
                 | Opt::Ntests(str) => Some(str.to_string()),
                 _ => panic!(),
@@ -60,109 +70,108 @@ impl Options {
 
     pub fn opt_name(opt: Opt) -> String {
         match opt {
-            Opt::Base => "base",
             Opt::Config(_) => "config",
-            Opt::Counts => "counts",
-            Opt::Crossref => "crossref",
-            Opt::Current => "current",
-            Opt::Debug => "debug",
-            Opt::Eval(_) => "eval",
-            Opt::Footprint => "footprint",
-            Opt::Load(_) => "load",
+            Opt::Module(_) => "module",
             Opt::Namespace(_) => "namespace",
             Opt::Ntests(_) => "ntests",
-            Opt::Output(_) => "output",
             Opt::Prof(_) => "prof",
-            Opt::Profile => "profile",
             Opt::Ref(_) => "ref",
-            Opt::Reference => "reference",
-            Opt::Release => "release",
             Opt::Verbose => "verbose",
         }
         .to_string()
     }
 
-    pub fn parse(argv: &[String]) -> Option<Options> {
+    pub fn parse_options(
+        argv: &Vec<String>,
+        mode_list: &[&str],
+        opt_list: &[&str],
+    ) -> Option<Options> {
         let mut opts = getopts::Options::new();
-        let mut options = Vec::new();
 
-        opts.optflag("", "base", "");
-        opts.optflag("", "counts", "");
-        opts.optflag("", "crossref", "");
-        opts.optflag("", "current", "");
-        opts.optflag("", "debug", "");
-        opts.optflag("", "footprint", "");
-        opts.optflag("", "profile", "");
-        opts.optflag("", "reference", "");
-        opts.optflag("", "release", "");
         opts.optflag("", "verbose", "");
-
         opts.optopt("", "config", "", "VALUE");
-        opts.optopt("", "eval", "", "VALUE");
-        opts.optopt("", "load", "", "VALUE");
+        opts.optopt("", "module", "", "VALUE");
         opts.optopt("", "namespace", "", "VALUE");
         opts.optopt("", "ntests", "", "VALUE");
-        opts.optopt("", "output", "", "VALUE");
         opts.optopt("", "prof", "", "VALUE");
         opts.optopt("", "ref", "", "VALUE");
 
-        let opt_names = vec![
-            "base",
-            "config",
-            "counts",
-            "crossref",
-            "current",
-            "eval",
-            "footprint",
-            "load",
-            "namespace",
-            "ntests",
-            "output",
-            "prof",
-            "profile",
-            "ref",
-            "reference",
-            "release",
-            "verbose",
-        ];
+        let mode_args = argv[2..]
+            .iter()
+            .filter(|mode| mode.chars().next().unwrap() != '-')
+            .map(|string| string.as_str())
+            .collect::<Vec<&str>>();
 
-        let opts = match opts.parse(&argv[2..]) {
-            Ok(opts) => opts,
+        for mode in &mode_args {
+            if !mode_list.iter().any(|el| el == mode) {
+                eprintln!("mux: unknown mode {mode:?}");
+                return None;
+            }
+        }
+
+        let modes = mode_args
+            .iter()
+            .map(|mode| match *mode {
+                "base" => Mode::Base,
+                "core" => Mode::Core,
+                "crossref" => Mode::Crossref,
+                "current" => Mode::Current,
+                "debug" => Mode::Debug,
+                "footprint" => Mode::Footprint,
+                "metrics" => Mode::Metrics,
+                "mu" => Mode::Mu,
+                "prelude" => Mode::Prelude,
+                "profile" => Mode::Profile,
+                "reference" => Mode::Reference,
+                "release" => Mode::Release,
+                _ => panic!(),
+            })
+            .collect();
+
+        let mut opt_args = argv[2..]
+            .iter()
+            .filter(|opt| opt.chars().next().unwrap() == '-')
+            .collect::<Vec<&String>>();
+
+        for opt in &mut opt_args {
+            let expr = opt.clone().split_off(2);
+
+            let base = match expr.find('=') {
+                Some(index) => {
+                    let mut clone = expr.clone();
+                    clone.truncate(index);
+                    clone
+                }
+                None => expr,
+            };
+
+            if !opt_list.iter().any(|el| el == &base) {
+                eprintln!("mux: unknown option {opt:?}");
+                return None;
+            }
+        }
+
+        let options = match opts.parse(opt_args) {
+            Ok(opts) => opt_list
+                .iter()
+                .filter(|opt| opts.opt_present(opt))
+                .map(|opt| match *opt {
+                    "verbose" => Opt::Verbose,
+                    "config" => Opt::Config(opts.opt_str("config").unwrap()),
+                    "module" => Opt::Module(opts.opt_str("module").unwrap()),
+                    "namespace" => Opt::Namespace(opts.opt_str("namespace").unwrap()),
+                    "ntests" => Opt::Ntests(opts.opt_str("ntests").unwrap()),
+                    "prof" => Opt::Prof(opts.opt_str("prof").unwrap()),
+                    "ref" => Opt::Ref(opts.opt_str("ref").unwrap()),
+                    _ => panic!(),
+                })
+                .collect::<Vec<Opt>>(),
             Err(error) => {
                 eprintln!("mux options: {error:?}");
                 std::process::exit(-1);
             }
         };
 
-        for name in opt_names {
-            if opts.opt_present(name) {
-                match opts.opt_get::<String>(name) {
-                    Ok(_) => match name {
-                        "base" => options.push(Opt::Base),
-                        "config" => options.push(Opt::Config(opts.opt_str(name).unwrap())),
-                        "counts" => options.push(Opt::Counts),
-                        "crossref" => options.push(Opt::Crossref),
-                        "current" => options.push(Opt::Current),
-                        "debug" => options.push(Opt::Debug),
-                        "eval" => options.push(Opt::Eval(opts.opt_str(name).unwrap())),
-                        "footprint" => options.push(Opt::Footprint),
-                        "load" => options.push(Opt::Load(opts.opt_str(name).unwrap())),
-                        "namespace" => options.push(Opt::Namespace(opts.opt_str(name).unwrap())),
-                        "ntests" => options.push(Opt::Ntests(opts.opt_str(name).unwrap())),
-                        "output" => options.push(Opt::Output(opts.opt_str(name).unwrap())),
-                        "prof" => options.push(Opt::Prof(opts.opt_str(name).unwrap())),
-                        "profile" => options.push(Opt::Profile),
-                        "ref" => options.push(Opt::Ref(opts.opt_str(name).unwrap())),
-                        "reference" => options.push(Opt::Reference),
-                        "release" => options.push(Opt::Release),
-                        "verbose" => options.push(Opt::Verbose),
-                        _ => panic!(),
-                    },
-                    Err(_) => panic!(),
-                }
-            }
-        }
-
-        Some(Options { options })
+        Some(Options { modes, options })
     }
 }

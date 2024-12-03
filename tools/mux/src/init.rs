@@ -12,18 +12,25 @@ use {
 pub struct Init {}
 
 impl Init {
-    pub fn init(options: &Options) {
-        match options.find_opt(&Opt::Verbose) {
-            Some(_) => println!("mux init: {:?}", env::current_dir().unwrap()),
+    pub fn init(argv: &Vec<String>) {
+        println!("init {argv:?}");
+        match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
-        };
+            Some(options) => {
+                println!("{options:?}");
+                match Options::find_opt(&options, &Opt::Verbose) {
+                    Some(_) => println!("mux init {:?}: --verbose", env::current_dir().unwrap()),
+                    None => (),
+                };
 
-        let output = Command::new("touch")
-            .arg(".mux")
-            .output()
-            .expect("command failed to execute");
+                let output = Command::new("touch")
+                    .arg(".mux")
+                    .output()
+                    .expect("command failed to execute");
 
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
+                io::stdout().write_all(&output.stdout).unwrap();
+                io::stderr().write_all(&output.stderr).unwrap();
+            }
+        }
     }
 }

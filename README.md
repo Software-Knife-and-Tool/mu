@@ -28,6 +28,8 @@ Subsequent layers based on the runtime offer advanced features.
 
 - common as module
 
+- mux version 0.0.12
+
   
 
 #### Rationale
@@ -215,52 +217,51 @@ The *sysinfo* feature is disabled on *macos* builds.
 As of 0.1.76, the *mu* distribution includes tools for configuring and development of the system. The *mux* tool provides these utilities:
 
 ```
-Usage: mux 0.0.11 command [option...]
+Usage: mux 0.0.12 command [option...]
   command:
     help                               ; this message
     version                            ; mux version
 
     init                               ; init
-    env                                ; mu development environment
-    build     [--release | --profile | --debug]
-                                       ; build mu system, debug is default
+    env                                ; print development environment
+    build     release | profile | debug
+                                       ; build mu system, release is default
     install                            ; (sudo) install mu system-wide
     clean                              ; clean all artifacts
     commit                             ; fmt and clippy, pre-commit checking
-    repl      [--namespace ...]        ; repl: mu, core, and prelude namespaces
-    symbols   [--crossref | --counts | --reference | --namespace ...]
-                                       ; symbol reports
+    repl      mu | core | prelude      ; repl: mu, core, and prelude namespaces
+    symbols   reference | crossref | metrics [--module=name | --namespace=name]
+                                       ; symbol reports, defaults to mu
     test                               ; regression test suite
-    bench     [[--base | --current | --footprint] | --ntests ...]
-    profile   [--config ...]           ; create profile
-    annotate  [--prof ... | --ref ...] ; annotate profile
+    bench     base | current | footprint [--ntests=number]
+    profile   --config=path            ; create profile
+    annotate  --prof=path [--ref=path] ; annotate profile
 
   general options:
     --verbose                          ; verbose operation
-    --output ...                       ; output file path
 ```
 
-`mux` is styled after `cargo` and fulfills many of the same needs. While the help message should be relatively explanatory, the general development workflow is something like this.
+`mux` is styled after `cargo` and fulfills many of the same needs. While the help message should be relatively explanatory, the general development workflow is something like this. Note that in this version **=** are mandatory for options with arguments.
 
 Before making any changes, you will want to establish a performance baseline.
 
 ```
- mux bench --base --ntests 20
+ mux bench base --ntests=20
 ```
 
 As you make changes, you can verify correctness and note any performance regressions. Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
 
 ```
- mux build --release				# build the mu release version 
- mux test                     		# run the regression tests
- mux bench --current --ntests 20	# benchmark the current build and print results
+ mux build release				# build the mu release version 
+ mux test						# run the regression tests
+ mux bench current --ntests=20	# benchmark the current build and print results
 ```
 
 `mux` provides an interactive listener for the `mu`, `core`, and `prelude` namespaces. `mu` and `core` use the `mu-sh` listener, `prelude` uses its own REPL.
 
 ```
  sudo mux install
- mux repl --namespace prelude
+ mux repl prelude
  prelude>
 ```
 
