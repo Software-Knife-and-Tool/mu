@@ -9,7 +9,7 @@ pub struct Repl {}
 
 impl Repl {
     pub fn repl(argv: &Vec<String>, _home: &str) {
-        match Options::parse_options(argv, &["mu", "core", "perelude"], &["verbose"]) {
+        match Options::parse_options(argv, &["mu", "core", "prelude"], &["verbose"]) {
             None => (),
             Some(options) => {
                 if options.modes.len() != 1 {

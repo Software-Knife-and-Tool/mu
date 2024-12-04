@@ -13,11 +13,9 @@ pub struct Init {}
 
 impl Init {
     pub fn init(argv: &Vec<String>) {
-        println!("init {argv:?}");
         match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
             Some(options) => {
-                println!("{options:?}");
                 match Options::find_opt(&options, &Opt::Verbose) {
                     Some(_) => println!("mux init {:?}: --verbose", env::current_dir().unwrap()),
                     None => (),
