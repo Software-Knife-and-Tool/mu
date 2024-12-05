@@ -415,7 +415,7 @@ impl CoreFunction for Symbol {
                     ));
                 }
             }
-            Type::Keyword => symbol,
+            Type::Keyword | Type::Null => symbol,
             _ => {
                 return Err(Exception::new(
                     env,
