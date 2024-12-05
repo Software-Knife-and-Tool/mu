@@ -1,0 +1,24 @@
+;;;  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-License-Identifier: MIT
+
+;;;
+;;; module
+;;;
+(core:provide
+ "common"
+ '((:version . "0.0.1")
+   (:lang    . "mu")
+   (:load    . (
+                "common.l"
+                "boole.l"
+	        "defun.l"
+	        "predicates.l"
+	        "string.l"
+	        "fixnum.l"
+	        "list.l"
+	        "print.l"
+	        "sequence.l"
+	        "stream.l"
+	        "symbol.l"
+                "time.l"
+                ))))            

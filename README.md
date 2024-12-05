@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.1.83
+###### version 0.1.84
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -26,9 +26,13 @@ Subsequent layers based on the runtime offer advanced features.
 
 ------
 
-- common as module
+- common and prelude as modules
 
 - mux version 0.0.12
+
+- core require/provide functionality improvement
+
+- nested modules
 
   
 
@@ -153,6 +157,8 @@ versions 0.1.69 - 0.1.73 are built with rustc 1.79.0.
 
 version 0.1.8{123} are built with rustc 1.82.0.
 
+version 0.1.84 is built with rustc 1.83.0
+
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
 Tests and regression metrics require some version of `python 3`.
@@ -252,8 +258,8 @@ Before making any changes, you will want to establish a performance baseline.
 As you make changes, you can verify correctness and note any performance regressions. Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
 
 ```
- mux build release				# build the mu release version 
- mux test						# run the regression tests
+ mux build release			# build the mu release version 
+ mux test				# run the regression tests
  mux bench current --ntests=20	# benchmark the current build and print results
 ```
 
