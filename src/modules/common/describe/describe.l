@@ -4,15 +4,7 @@
 ;;;
 ;;; describe
 ;;;
-(mu:intern mu:%null-ns% "describe" (mu:make-namespace "describe"))
-(mu:intern describe "+version+" "0.0.1")
-
-(core:provide "describe" ())
-
-;;;
-;;; describe
-;;;
-(mu:intern describe "%describe-fn"
+(mu:intern common "%describe-fn"
    (:lambda (fn)
      (:if (core:%closure-p fn)
           ((:lambda (lambda arity fn env)
@@ -27,7 +19,7 @@
            (core:%fn-prop :env fn))
           (core:eprint (mu:view fn) "%describe-fn:mu-fn"))))
 
-(mu:intern describe "%describe-function"
+(mu:intern common "%describe-function"
    (:lambda (fn stream)
       ((:lambda (view)
           (core:%format stream
@@ -39,7 +31,7 @@
               ,(mu:svref view 1))))
        (mu:view fn))))
 
-(mu:intern describe "%describe-prelude-type"
+(mu:intern common "%describe-prelude-type"
    (:lambda (value stream)
       (core:%format stream
        "prelude-type: (~A bytes) :<type> ~A~%    type:  ~A~%    props: ~A~%"
@@ -48,7 +40,7 @@
          ,(mu:struct-ref (mu:st-vec value) 0)
          ,(mu:struct-ref (mu:st-vec value) 0)))))
 
-(mu:intern describe "%describe-struct"
+(mu:intern common "%describe-struct"
    (:lambda (struct stream)
       (core:%format stream
        "struct: (~A bytes) :struct ~A~%    type:  ~A~%    props: ~A~%"
@@ -57,7 +49,7 @@
          ,(mu:st-type struct)
          ,(mu:st-vec struct)))))
 
-(mu:intern describe "%describe-symbol"
+(mu:intern common "%describe-symbol"
    (:lambda (symbol stream)
       (:if (core:null symbol)
            (core:%format stream
@@ -85,45 +77,45 @@
                             ,(mu:struct-ref view 2))))
                       (mu:view symbol)))))))
 
-(mu:intern describe "%describe-fixnum"
+(mu:intern common "%describe-fixnum"
    (:lambda (fx stream)
       (core:%format stream "fixnum: (~A bytes) :fixnum ~A~%    format: 56b signed integer immediate~%    value:  ~A~%"
-        `(,(mu:heap-size fx) ,(describe:type-of fx) ,fx))))
+        `(,(mu:heap-size fx) ,(common:type-of fx) ,fx))))
 
-(mu:intern describe "%describe-char"
+(mu:intern common "%describe-char"
    (:lambda (ch stream)
       (core:%format stream "char: (~A bytes) :char ~A~%    format: 8b ASCII character immediate~%    value:  ~A~%"
-        `(,(mu:heap-size ch) ,(describe:type-of ch) ,ch))))
+        `(,(mu:heap-size ch) ,(common:type-of ch) ,ch))))
 
-(mu:intern describe "%describe-float"
+(mu:intern common "%describe-float"
    (:lambda (fl stream)
       (core:%format stream
        "float: :float ~A~%    format: 32b IEEE single float immediate~%    value:  ~A~%"
-       `(,(describe:type-of fl) ,fl))))
+       `(,(common:type-of fl) ,fl))))
 
-(mu:intern describe "%describe-string"
+(mu:intern common "%describe-string"
    (:lambda (str stream)
       (core:%format stream
        "string: (~A bytes) :vector string~%    format: unsigned 8b character vector~%    length: ~A~%    value:  ~A~%"
        `(,(mu:heap-size str) ,(mu:struct-len str) ,str))))
 
-(mu:intern describe "%describe-vector"
+(mu:intern common "%describe-vector"
    (:lambda (vec stream)
       (core:%format stream
        "vector: (~A bytes) :vector ~A~%    format: ~A~%    length: ~A~%    elements:  ~A~%"
-       `(,(mu:heap-size vec) ,(describe:type-of vec) ,(mu:struct-type vec) ,(mu:struct-type vec) ,vec))))
+       `(,(mu:heap-size vec) ,(common:type-of vec) ,(mu:struct-type vec) ,(mu:struct-type vec) ,vec))))
 
-(mu:intern describe "%describe-cons"
+(mu:intern common "%describe-cons"
    (:lambda (cons stream)
-      (:if (describe:dotted-pair-p cons)
+      (:if (common:dotted-pair-p cons)
            (core:%format stream
             "dotted pair: (~A bytes) :cons ~A~%    value:  ~A~%"
-            `(,(mu:heap-size cons) ,(describe:type-of cons) ,cons))
+            `(,(mu:heap-size cons) ,(common:type-of cons) ,cons))
            (core:%format stream
             "cons: (~A bytes) :cons ~A~%    length: ~A~%    value:  ~A~%"
-            `(,(mu:heap-size cons) ,(describe:type-of cons) ,(mu:length cons) ,cons)))))
+            `(,(mu:heap-size cons) ,(common:type-of cons) ,(mu:length cons) ,cons)))))
 
-(mu:intern describe "describe"
+(mu:intern common "describe"
    (:lambda (value stream)
       (mu:fix
        (:lambda (list)
@@ -137,13 +129,13 @@
                         (mu:cdr list)))
                (mu:car (mu:car list))
                (mu:cdr (mu:car list)))))
-       `(,(mu:cons core:functionp describe:%describe-function)
-         ,(mu:cons core:charp describe:%describe-char)
-         ,(mu:cons core:%core-type-p describe:%describe-describe-type)
-         ,(mu:cons core:structp describe:%describe-struct)
-         ,(mu:cons core:symbolp describe:%describe-symbol)
-         ,(mu:cons core:fixnump describe:%describe-fixnum)
-         ,(mu:cons core:floatp describe:%describe-float)
-         ,(mu:cons core:stringp describe:%describe-string)
-         ,(mu:cons core:vectorp describe:%describe-vector)
-          ,(mu:cons core:consp describe:%describe-cons)))))
+       `(,(mu:cons core:functionp common:%describe-function)
+          ,(mu:cons core:charp common:%describe-char)
+          ,(mu:cons core:%core-type-p common:%describe-describe-type)
+          ,(mu:cons core:structp common:%describe-struct)
+          ,(mu:cons core:symbolp common:%describe-symbol)
+          ,(mu:cons core:fixnump common:%describe-fixnum)
+          ,(mu:cons core:floatp common:%describe-float)
+          ,(mu:cons core:stringp common:%describe-string)
+          ,(mu:cons core:vectorp common:%describe-vector)
+          ,(mu:cons core:consp common:%describe-cons)))))
