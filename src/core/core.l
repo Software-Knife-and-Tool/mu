@@ -6,7 +6,7 @@
 ;;;
 (mu:intern mu:%null-ns% "core" (mu:make-namespace "core"))
 
-(mu:intern core "+version+" "0.0.6")
+(mu:intern core "+version+" "0.0.7")
 
 (mu:intern core "%char-macro-ns%" (mu:make-namespace "%char-macros%"))
 (mu:intern core "%macro-ns%" (mu:make-namespace "%macros%"))

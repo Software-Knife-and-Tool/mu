@@ -44,10 +44,12 @@ dist:
 
 	@install -D -t $(BASE)/modules/codegen $(SRC)/modules/codegen/*.l
 	@install -D -t $(BASE)/modules/common $(SRC)/modules/common/*.l
-	@install -D -t $(BASE)/modules/describe $(SRC)/modules/describe/*.l
-	@install -D -t $(BASE)/modules/metrics $(SRC)/modules/metrics/*.l
+	@install -D -t $(BASE)/modules/common/describe $(SRC)/modules/common/describe/*.l
+	@install -D -t $(BASE)/modules/common/metrics $(SRC)/modules/common/metrics/*.l
 	@install -D -t $(BASE)/modules/prelude $(SRC)/modules/prelude/*.l
-	@install -D -t $(BASE)/modules/repl $(SRC)/modules/repl/*.l
+	@install -D -t $(BASE)/modules/prelude $(SRC)/modules/prelude/mod.def
+	@install -D -t $(BASE)/modules/prelude/repl $(SRC)/modules/prelude/repl/*.l
+	@install -D -t $(BASE)/modules/prelude/repl $(SRC)/modules/prelude/repl/mod.def
 
 	@make -f dist.mk dist
 

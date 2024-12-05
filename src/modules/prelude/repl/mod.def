@@ -1,0 +1,12 @@
+;;;  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-License-Identifier: MIT
+
+;;;
+;;; prelude/repl module
+;;;
+(core:provide
+ "prelude/repl"
+ '((:version . "0.0.1")
+   (:lang . "mu")
+   (:require "prelude")
+   (:load "break.l" "loop.l")))

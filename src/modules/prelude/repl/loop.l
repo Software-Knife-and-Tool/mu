@@ -4,13 +4,13 @@
 ;;;
 ;;; repl
 ;;;
-(mu:intern repl "repl"
+(mu:intern prelude "repl"
    (:lambda ()
      (mu:fix
        (:lambda (loop)
          (core:with-exception
              (:lambda (ex)
-               (repl:break ex)
+               (prelude:break ex)
                (core:null loop))
            (:lambda ()
              (core:%format :t "prelude> " ())

@@ -4,7 +4,7 @@
 ;;;
 ;;; break loop
 ;;;
-(mu:intern repl "break"
+(mu:intern prelude "break"
    (:lambda (exception)
      (core:%format :t ";;; entering break loop with exception~%" ())
      (core:%exceptionf :t ";;; ~A on ~S by ~S, ~A~%" () exception)
