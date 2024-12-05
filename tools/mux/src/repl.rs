@@ -32,9 +32,9 @@ impl Repl {
                         .unwrap(),
                     Mode::Prelude => Command::new("mu-sys")
                         .args(["-l", "/opt/mu/dist/core.l"])
-                        .args(["-q", "(core:require-lib \"prelude\")"])
-                        .args(["-q", "(core:require-lib \"repl\")"])
-                        .args(["-e", "(repl:repl)"])
+                        .args(["-q", "(core:require \"prelude\")"])
+                        .args(["-q", "(core:require \"prelude/repl\")"])
+                        .args(["-e", "(prelude:repl)"])
                         .spawn()
                         .unwrap(),
                     _ => {
