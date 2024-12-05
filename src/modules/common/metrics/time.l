@@ -8,7 +8,7 @@
  '(%defmacro time (form)
    `((%lambda () ,@body))))
 
-(mu:intern metrics "%time-delta-apply"
+(mu:intern common "%time-delta-apply"
   (:lambda (fn args)
     ((:lambda (start stop)
        (mu:sub stop start))
@@ -17,13 +17,13 @@
           (core:apply fn args)
           (mu:internal-run-time))))))
 
-(mu:intern metrics "time-apply"
+(mu:intern common "time-apply"
    (:lambda (fn args)
       (:if (core:functionp fn)
            (:if (core:listp args)
                 ()
-                (core:raise args 'metrics:time "is not a list"))
-           (core:raise fn 'metrics:time "is not a function"))
+                (core:raise args 'common:time "is not a list"))
+           (core:raise fn 'common:time "is not a function"))
      ((:lambda (start-vec time-value stop-vec)
          ((:lambda (time-delta value type-diffs)
              (core:%format :t "Evaluation consumed ~A usec runtime~%" `(,time-delta))

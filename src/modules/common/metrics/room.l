@@ -4,7 +4,7 @@
 ;;;
 ;;;  room
 ;;;
-(mu:intern metrics "%heap-delta-apply"
+(mu:intern common "%heap-delta-apply"
   (:lambda (fn args)
     ((:lambda (start-vec stop-vec)
        (mu:fix
@@ -32,7 +32,7 @@
         (mu:apply fn args)
         (mu:heap-stat))))))
 
-(mu:intern metrics "room"
+(mu:intern common "room"
    (:lambda (verbosity)
      ((:lambda (level-key)
         (:if (core:%findl-if (:lambda (level) (mu:eq level level-key)) '(:t :null :default))
@@ -87,7 +87,7 @@
                               0))
                            (mu:heap-info)))))
               (mu:heap-stat))
-             (core:raise verbosity 'metrics:room "not a room detail level")))
+             (core:raise verbosity 'common:room "not a room detail level")))
      (:if (core:null verbosity)
           :null
           verbosity))))
