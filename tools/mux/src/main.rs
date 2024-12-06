@@ -33,7 +33,7 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.12";
+const VERSION: &str = "0.0.13";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
@@ -49,8 +49,10 @@ pub fn usage() {
     println!("    clean                              ; clean all artifacts");
     println!("    commit                             ; fmt and clippy, pre-commit checking");
     println!("    repl      mu | core | prelude      ; repl: mu, core, and prelude namespaces");
-    println!("    symbols   reference | crossref | metrics [--module=name | --namespace=name]");
-    println!("                                       ; symbol reports, defaults to mu");
+    println!(
+        "    symbols   reference | crossref | metrics [--namespace=name [--module-name=name]]"
+    );
+    println!("                                       ; symbol reports, defaults to core");
     println!("    test                               ; regression test suite");
     println!("    bench     base | current | footprint [--ntests=number]");
     println!("    profile   --config=path            ; create profile");

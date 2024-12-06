@@ -135,19 +135,56 @@ impl Symbols {
                 io::stdout().write_all(&output.stdout).unwrap();
                 io::stderr().write_all(&output.stderr).unwrap();
             }
-            "prelude" => {
-                let output = Command::new("make")
-                    .current_dir(home)
-                    .args(["-C", "tools/reference"])
-                    .arg("--no-print-directory")
-                    .arg("prelude")
+            _ => {
+                let module = match Options::opt_value(&options, &Opt::Module("".to_string())) {
+                    Some(name) => name,
+                    None => {
+                        eprintln!("symbols reference: --module required");
+                        std::process::exit(-1)
+                    }
+                };
+
+                let ns = match Options::opt_value(&options, &Opt::Namespace("".to_string())) {
+                    Some(name) => name,
+                    None => {
+                        eprintln!("symbols reference: --namespace required");
+                        std::process::exit(-1)
+                    }
+                };
+
+                let output = Command::new("/opt/mu/bin/mu-sys")
+                    .current_dir(format!("{home}/tools/reference"))
+                    .args(["-l", "/opt/mu/dist/core.l"])
+                    .args(["-q", &format!("(core:require \"{module}\")")])
+                    .args(["-l", "./reference.l"])
+                    .args(["-q", &format!("(reference \"{ns}\" \"reference.out\")")])
+                    .output()
+                    .expect("mu-sys command failed to execute");
+
+                io::stdout().write_all(&output.stdout).unwrap();
+                io::stderr().write_all(&output.stderr).unwrap();
+
+                let output = Command::new("python3")
+                    .current_dir(format!("{home}/tools/reference"))
+                    .arg("reference.py")
+                    .arg("reference.out")
                     .output()
                     .expect("command failed to execute");
 
                 io::stdout().write_all(&output.stdout).unwrap();
                 io::stderr().write_all(&output.stderr).unwrap();
+
+                /*
+                let output = Command::new("rm")
+                    .current_dir(format!("{home}/tools/reference"))
+                    .arg("reference.out")
+                    .output()
+                    .expect("command failed to execute");
+
+                io::stdout().write_all(&output.stdout).unwrap();
+                io::stderr().write_all(&output.stderr).unwrap();
+                */
             }
-            _ => panic!(),
         }
     }
 }
