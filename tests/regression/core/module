@@ -1,0 +1,2 @@
+(mu:type-of core:provide)	:func
+(mu:type-of core:require)	:func

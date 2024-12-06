@@ -7,6 +7,6 @@
 (core:provide
  "common/describe"
  '((:version . "0.0.1")
-   (:lang    . "mu")
+   (:lang    . :mu)
    (:require . ("common"))
    (:load    . ("describe.l"))))
