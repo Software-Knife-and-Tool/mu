@@ -7,7 +7,7 @@
 (core:provide
  "common"
  '((:version . "0.0.1")
-   (:lang    . "mu")
+   (:lang    . :mu)
    (:load    . (
                 "common.l"
                 "boole.l"
