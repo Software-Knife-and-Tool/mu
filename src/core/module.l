@@ -31,7 +31,7 @@
      :t))
 
 (mu:intern core "%load-module-def"
-   (:lambda (path)
+   (:lambda (path module)
      (:if (core:stringp path)
           ((:lambda (stream)
              (mu:fix
@@ -43,13 +43,13 @@
                              core:%eof%
                              ((:lambda ()
                                 (mu:eval (mu:compile form))
-                                ;;; do a bunch of parsing here
+                                (mu:close stream)
                                 (core:null loop)))))
                       (mu:read stream () core:%eof%))))
               ()))
            (mu:open :file :input path))
           (core:raise path 'core:%load-module-def "not a file path"))
-     :t))
+     (mu:symbol-value (mu:find core:%modules% module))))
 
 ;;;
 ;;; provide/require
@@ -67,22 +67,24 @@
      (:if (core:stringp module)
           (:if (mu:find core:%modules% module)
                ()
-               ((:lambda ()
-                  (core:%load-module-def (core:%format () "/opt/mu/modules/~A/mod.def" `(,module)))
-                  ((:lambda (module-def)
-                     ((:lambda (requires files)
-                        (core:%mapc
-                         (:lambda (module)
-                           (core:require module))
-                         requires)
-                        (core:%mapc
-                         (:lambda (file-name)
-                           (core:%load-module-file
-                            (core:%format () "/opt/mu/modules/~A/~A" `(,module ,file-name))
-                            (mu:cdr (core:%assq :lang module-def))))
-                         files)
-                        :t)
-                      (mu:cdr (core:%assq :require module-def))
-                      (mu:cdr (core:%assq :load module-def))))
-                (mu:symbol-value (mu:find core:%modules% module))))))
+               ((:lambda (module-def)
+                  (:if module-def
+                       ((:lambda (requires files)
+                          (core:%mapc
+                           (:lambda (module)
+                             (core:require module))
+                           requires)
+                          (core:%mapc
+                           (:lambda (file-name)
+                             (core:%load-module-file
+                              (core:%format () "/opt/mu/modules/~A/~A" `(,module ,file-name))
+                              (mu:cdr (core:%assq :lang module-def))))
+                           files)
+                          :t)
+                        (mu:cdr (core:%assq :require module-def))
+                        (mu:cdr (core:%assq :load module-def)))
+                       (core:raise module 'core:require "cannot open module-def")))
+                  (core:%load-module-def
+                   (core:%format () "/opt/mu/modules/~A/mod.def" `(,module))
+                   module)))
           (core:raise module 'core:require "is not a module name"))))
