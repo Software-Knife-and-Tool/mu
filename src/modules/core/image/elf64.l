@@ -31,7 +31,7 @@
        (core::of-tag (elf64-read :u64 elf64)))
       (t (error size "elf64-read: not a legal type")))))
 
-(defun elf64-write (type n stream)
+(mu:intern core elf64-write (type n stream)
   (let ((elf64-write (%lambda (type n stream) (funcall core:elf64-write type n stream))))
     (cond
       ((eq type :half)
@@ -48,7 +48,7 @@
        (elf64-write :u64 (core::tag-of n) stream))
       (t (error size "el64-write: not a legal type")))))
 
-(defun elf64-write-header (out size)
+(mu:intern core elf64-write-header (out size)
   (errorp-unless streamp out "elf64-write-header: not a stream")
   ;;; header 64 bit little endian current version
   (elf64-write-bytes out #x7f "ELF" 2 1 1 0 0 0 0 0 0 0 0 0) ;;; 0 e_ident
@@ -76,7 +76,7 @@
   (elf64-write :u64 0 out)   ;;; 110 sh_addralign
   (elf64-write :u64 0 out))  ;;; 118 sh_entsize
 
-(defun elf64-read-header (elf64)
+(mu:intern core elf64-read-header (elf64)
   (core:unwind-protect
       (%lambda (ex)
         (core:%format t "error: exception while reading header~%")
@@ -118,14 +118,14 @@
                  (mu:cons "sh_addralign" (elf64-read :u64 elf64))
                  (mu:cons "sh_entsize" (elf64-read :u64 elf64))))))))
 
-(defun elf64-print-header (elf64-header)
+(mu:intern core elf64-print-header (elf64-header)
   (errorp-unless consp elf64-header "print-header: not an association list")
   (mapc
    (%lambda (entry)
      (core:%format t "    ~A: ~A~%" (car entry) (cdr entry)))
    elf64-header))
 
-(defun elf64-dump (path)
+(mu:intern core elf64-dump (path)
   (errorp-unless stringp path "elf64-dump: not a pathname")
   (with-open-file elf64 path :input
      (let ((magic (read-byte elf64 () ())))

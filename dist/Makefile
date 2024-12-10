@@ -11,6 +11,15 @@ DOCS = ../doc
 LIB = ../lib
 SRC = ../src
 TOOLS = ../tools
+MODULES = 		\
+	core 		\
+	core/fasl	\
+	core/image	\
+	common		\
+	common/describe	\
+	common/metrics	\
+	prelude		\
+	prelude/repl
 
 dist:
 	@chmod 755 $(DIST)/mu-sys
@@ -42,18 +51,10 @@ dist:
 	@install -m 644 -D -t $(BASE)/lib/core $(SRC)/core/*.l
 	@install -m 644 -D -t $(BASE)/lib/prelude $(SRC)/modules/prelude/*.l
 
-	@install -D -t $(BASE)/modules/codegen $(SRC)/modules/codegen/*.l
-	@install -D -t $(BASE)/modules/common $(SRC)/modules/common/*.l
-	@install -D -t $(BASE)/modules/common $(SRC)/modules/common/mod.def
-	@install -D -t $(BASE)/modules/common/describe $(SRC)/modules/common/describe/*.l
-	@install -D -t $(BASE)/modules/common/describe $(SRC)/modules/common/describe/mod.def
-	@install -D -t $(BASE)/modules/common/metrics $(SRC)/modules/common/metrics/*.l
-	@install -D -t $(BASE)/modules/common/metrics $(SRC)/modules/common/metrics/mod.def
-	@install -D -t $(BASE)/modules/prelude $(SRC)/modules/prelude/mod.def
-	@install -D -t $(BASE)/modules/prelude $(SRC)/modules/prelude/*.l
-	@install -D -t $(BASE)/modules/prelude $(SRC)/modules/prelude/mod.def
-	@install -D -t $(BASE)/modules/prelude/repl $(SRC)/modules/prelude/repl/*.l
-	@install -D -t $(BASE)/modules/prelude/repl $(SRC)/modules/prelude/repl/mod.def
+	@for m in $(MODULES); do	\
+	    install -D -t $(BASE)/modules/$$m $(SRC)/modules/$$m/*.l;	 \
+	    install -D -t $(BASE)/modules/$$m $(SRC)/modules/$$m/mod.def;	 \
+	done
 
 	@make -f dist.mk dist
 

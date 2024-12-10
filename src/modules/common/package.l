@@ -34,7 +34,7 @@
 ;;;
 ;;; predicate
 ;;;
-(mu:intern core "packagep"
+(mu:intern common "packagep"
     (:lambda (ex)
       (core:logand
        (core:%core-type-p ex)
@@ -43,7 +43,7 @@
 ;;;
 ;;; functions
 ;;;
-(mu:intern core "intern"
+(mu:intern common "intern"
    (:lambda (symbol value)          
       (:if (core:%uninternedp symbol)
            ((:lambda (sym)
