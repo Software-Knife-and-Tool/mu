@@ -4,7 +4,7 @@ from datetime import datetime
 
 with open(sys.argv[1]) as f: test_results = json.load(f)
 
-ns = test_results['ns']
+module = test_results['module']
 groups = test_results['results']
 
 test_total = 0
@@ -24,15 +24,14 @@ for group in groups:
         exceptions += 1 if result['exception'] else 0
 
     failed = total - passed - exceptions
-    print(f'{ns:<10} {group_label:<14} total: {total:<8} pass: {passed:<8} fail: {failed:<8} exceptions: {exceptions:<8}')
+    print(f'{module:<14} {group_label:<10} total: {total:<8} pass: {passed:<8} fail: {failed:<8} exceptions: {exceptions:<8}')
     test_total += total
     test_fails += failed
     test_exceptions += exceptions
 
 test_passes = test_total - (test_fails + test_exceptions)
-print(f'{ns:<26}', end='')
+print(f'{module:<26}', end='')
 print(f'total: {test_total:<9}', end='')
 print(f'pass: {test_passes:<9}', end='')
 print(f'fail: {test_fails:<9}', end='')
 print(f'exceptions: {test_exceptions:<10}')
-print()
