@@ -26,7 +26,6 @@ CORE= \
 	exception.l	\
 	macro.l		\
 	closure.l	\
-	package.l	\
 	vector.l	\
 	common.l
 
@@ -35,13 +34,14 @@ COMMON= \
 	boole.l	       \
 	defun.l        \
 	describe.l     \
-	predicates.l   \
-	string.l       \
 	fixnum.l       \
 	list.l	       \
+	package.l      \
+	predicates.l   \
 	print.l        \
 	sequence.l     \
 	stream.l       \
+	string.l       \
 	symbol.l       \
 	time.l
 

@@ -43,6 +43,7 @@ impl Vector {
             _ => panic!(),
         }
     }
+
     pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> VectorImage {
         match tag.type_of() {
             Type::Vector => match tag {
