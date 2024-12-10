@@ -45,5 +45,5 @@
                                        (mu:read ifs () core:%eof%))))))
                        ()))))
                   (core:raise ifs 'prelude:load "cannot open input file")))
-            (mu:open :file :input path))
+            (mu:open :file :input path :t))
           (core:raise path 'prelude:load "not a file designator"))))

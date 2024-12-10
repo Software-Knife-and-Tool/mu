@@ -1,10 +1,10 @@
-(mu:read (mu:open :string :input "a ;") () ())	a
-(mu:read (mu:open :string :input "a ; 1") () ())	a
-(mu:read (mu:open :string :input "#||#a") () ())	a
-(mu:read (mu:open :string :input "#||# a") () ())	a
-(mu:read (mu:open :string :input "a #||#") () ())	a
-(mu:read (mu:open :string :input "#||# a;a") () ())	a
-(mu:read (mu:open :string :input "#||# a ;a") () ())	a
+(mu:read (mu:open :string :input "a ;" :t) () ())	a
+(mu:read (mu:open :string :input "a ; 1" :t) () ())	a
+(mu:read (mu:open :string :input "#||#a" :t) () ())	a
+(mu:read (mu:open :string :input "#||# a" :t) () ())	a
+(mu:read (mu:open :string :input "a #||#" :t) () ())	a
+(mu:read (mu:open :string :input "#||# a;a" :t) () ())	a
+(mu:read (mu:open :string :input "#||# a ;a" :t) () ())	a
 #(:t)	#(:t)
 #(:t 1 2 3)	#(:t 1 2 3)
 #(:byte)	#(:byte)

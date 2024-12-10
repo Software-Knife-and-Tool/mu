@@ -1,37 +1,37 @@
-(mu:eq mu:add (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:add") () ()))))	:t
-(mu:eq mu:+version+ (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:+version+") () ()))))	:t
-(mu:eval (core:compile (core:read (mu:open :string :input "`\"abc\"") () ())))	"abc"
-(mu:eval (core:compile (core:read (mu:open :string :input "`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
-(mu:eval (core:compile (core:read (mu:open :string :input "`#\\a") () ())))	#\a
-(mu:eval (core:compile (core:read (mu:open :string :input "`mu:*standard-output*") () ())))	mu:*standard-output*
-(mu:eval (core:compile (core:read (mu:open :string :input "`1234") () ())))	1234
-(mu:eval (core:compile (core:read (mu:open :string :input "`(,(mu:cons 'satisfies ()))") () ())))	((satisfies))
-(mu:eval (core:compile (core:read (mu:open :string :input "`(\"abc\")") () ())))	("abc")
-(mu:eval (core:compile (core:read (mu:open :string :input "`(#(:t 1 2 3))") () ())))	(#(:t 1 2 3))
-(mu:eval (core:compile (core:read (mu:open :string :input "`(#\\a)") () ())))	(#\a)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(())") () ())))	(:nil)
-(mu:eval (core:compile (core:read (mu:open :string :input "`((1234) 1234 symbol)") () ())))	((1234) 1234 symbol)
-(mu:eval (core:compile (core:read (mu:open :string :input "`((a b) c)") () ())))	((a b) c)
-(mu:eval (core:compile (core:read (mu:open :string :input "`()") () ())))	:nil
-(mu:eval (core:compile (core:read (mu:open :string :input "`(,(mu:add 1 2))") () ())))	(3)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(,1 (2) 3)") () ())))	(1 (2) 3)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(,1234 ,@'(a b c))") () ())))	(1234 a b c)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(,@'(a b c))") () ())))	(a b c)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(,@(mu:add 1 2))") () ())))	3
-(mu:eval (core:compile (core:read (mu:open :string :input "`(0 ,@'(a b c) 1)") () ())))	(0 a b c 1)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(1 2 ,@3)") () ())))	(1 2 . 3)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(1 2 3)") () ())))	(1 2 3)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(1.0 b (2))") () ())))	(1.0000 b (2))
-(mu:eval (core:compile (core:read (mu:open :string :input "`(1234 symbol)") () ())))	(1234 symbol)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(1234)") () ())))	(1234)
-(mu:eval (core:compile (core:read (mu:open :string :input "`(a b c)") () ())))	(a b c)
-(mu:eval (core:compile (core:read (mu:open :string :input "`,(mu:add 1 2)") () ())))	3
-(mu:eval (core:compile (core:read (mu:open :string :input "`,(mu:type-of 'symbol)") () ())))	:symbol
-(mu:eval (core:compile (core:read (mu:open :string :input "`,1234") () ())))	1234
-(mu:eval (core:compile (core:read (mu:open :string :input "`,`\"abc\"") () ())))	"abc"
-(mu:eval (core:compile (core:read (mu:open :string :input "`,`#(:t 1 2 3)") () ())))	#(:t 1 2 3)
-(mu:eval (core:compile (core:read (mu:open :string :input "`,`#\\a") () ())))	#\a
-(mu:eval (core:compile (core:read (mu:open :string :input "`,`mu:*standard-output*") () ())))	mu:*standard-output*
-(mu:eval (core:compile (core:read (mu:open :string :input "`,`1234") () ())))	1234
-(mu:eval (core:compile (core:read (mu:open :string :input "`,`(1234)") () ())))	(1234)
-(mu:eval (core:compile (core:read (mu:open :string :input "``1234") () ())))	`1234
+(mu:eq mu:add (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:add" :t) () ()))))	:t
+(mu:eq mu:+version+ (mu:eval (core:compile (core:read (mu:open :string :input "`,mu:+version+" :t) () ()))))	:t
+(mu:eval (core:compile (core:read (mu:open :string :input "`\"abc\"" :t) () ())))	"abc"
+(mu:eval (core:compile (core:read (mu:open :string :input "`#(:t 1 2 3)" :t) () ())))	#(:t 1 2 3)
+(mu:eval (core:compile (core:read (mu:open :string :input "`#\\a" :t) () ())))	#\a
+(mu:eval (core:compile (core:read (mu:open :string :input "`mu:*standard-output*" :t) () ())))	mu:*standard-output*
+(mu:eval (core:compile (core:read (mu:open :string :input "`1234" :t) () ())))	1234
+(mu:eval (core:compile (core:read (mu:open :string :input "`(,(mu:cons 'satisfies ()))" :t) () ())))	((satisfies))
+(mu:eval (core:compile (core:read (mu:open :string :input "`(\"abc\")" :t) () ())))	("abc")
+(mu:eval (core:compile (core:read (mu:open :string :input "`(#(:t 1 2 3))" :t) () ())))	(#(:t 1 2 3))
+(mu:eval (core:compile (core:read (mu:open :string :input "`(#\\a)" :t) () ())))	(#\a)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(())" :t) () ())))	(:nil)
+(mu:eval (core:compile (core:read (mu:open :string :input "`((1234) 1234 symbol)" :t) () ())))	((1234) 1234 symbol)
+(mu:eval (core:compile (core:read (mu:open :string :input "`((a b) c)" :t) () ())))	((a b) c)
+(mu:eval (core:compile (core:read (mu:open :string :input "`()" :t) () ())))	:nil
+(mu:eval (core:compile (core:read (mu:open :string :input "`(,(mu:add 1 2))" :t) () ())))	(3)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(,1 (2) 3)" :t) () ())))	(1 (2) 3)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(,1234 ,@'(a b c))" :t) () ())))	(1234 a b c)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(,@'(a b c))" :t) () ())))	(a b c)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(,@(mu:add 1 2))" :t) () ())))	3
+(mu:eval (core:compile (core:read (mu:open :string :input "`(0 ,@'(a b c) 1)" :t) () ())))	(0 a b c 1)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(1 2 ,@3)" :t) () ())))	(1 2 . 3)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(1 2 3)" :t) () ())))	(1 2 3)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(1.0 b (2))" :t) () ())))	(1.0000 b (2))
+(mu:eval (core:compile (core:read (mu:open :string :input "`(1234 symbol)" :t) () ())))	(1234 symbol)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(1234)" :t) () ())))	(1234)
+(mu:eval (core:compile (core:read (mu:open :string :input "`(a b c)" :t) () ())))	(a b c)
+(mu:eval (core:compile (core:read (mu:open :string :input "`,(mu:add 1 2)" :t) () ())))	3
+(mu:eval (core:compile (core:read (mu:open :string :input "`,(mu:type-of 'symbol)" :t) () ())))	:symbol
+(mu:eval (core:compile (core:read (mu:open :string :input "`,1234" :t) () ())))	1234
+(mu:eval (core:compile (core:read (mu:open :string :input "`,`\"abc\"" :t) () ())))	"abc"
+(mu:eval (core:compile (core:read (mu:open :string :input "`,`#(:t 1 2 3)" :t) () ())))	#(:t 1 2 3)
+(mu:eval (core:compile (core:read (mu:open :string :input "`,`#\\a" :t) () ())))	#\a
+(mu:eval (core:compile (core:read (mu:open :string :input "`,`mu:*standard-output*" :t) () ())))	mu:*standard-output*
+(mu:eval (core:compile (core:read (mu:open :string :input "`,`1234" :t) () ())))	1234
+(mu:eval (core:compile (core:read (mu:open :string :input "`,`(1234)" :t) () ())))	(1234)
+(mu:eval (core:compile (core:read (mu:open :string :input "``1234" :t) () ())))	`1234

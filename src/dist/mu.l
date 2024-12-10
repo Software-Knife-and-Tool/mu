@@ -19,7 +19,7 @@
 
 (core:mapc
  (:lambda (fn) (core:load fn :t ()))
- (mu:read (mu:open :string :input (system:getenv "MU_LOAD_LIST"))))
+ (mu:read (mu:open :string :input (system:getenv "MU_LOAD_LIST") :t)))
 
 (mu:intern (mu:find-ns "mu") :intern "mu-version" "0.0.1")
 

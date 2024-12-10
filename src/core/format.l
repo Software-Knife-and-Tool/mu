@@ -59,7 +59,7 @@
                                      (mu:sub len 1))))
                           (mu:vector-length hexstr)))
                       (mu:get-string str-stream)))
-                  (mu:open :string :output "")))
+                  (mu:open :string :output "" :t)))
             (core:raise fx 'core:%format "argument to ~X not a fixnum")))
       (mu:car arg-list))))
 
@@ -125,7 +125,7 @@
                           ())
                      ((:lambda (dest) (core:%fmt-loop stream dest format-string arg-list))
                       (:if (core:null stream)
-                           (mu:open :string :output "")
+                           (mu:open :string :output "" :t)
                            (:if (mu:eq stream :t)
                                 mu:*standard-output*
                                 (:if (core:streamp stream)

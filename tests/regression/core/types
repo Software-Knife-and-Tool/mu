@@ -39,4 +39,4 @@
 (core:typep mu:*standard-input* 'stream)	:t
 (core:typep :sym 'symbol)	:t
 (core:typep 'sym 'symbol)	:t
-(core:typep (core:read (mu:open :string :input "#*1111") () ()) 'bit-vector)	:t
+(core:typep (core:read (mu:open :string :input "#*1111" :t) () ()) 'bit-vector)	:t

@@ -47,4 +47,4 @@
                nth))
         start)
        (mu:get-string substr))
-     (mu:open :string :output ""))))
+     (mu:open :string :output "" :t))))

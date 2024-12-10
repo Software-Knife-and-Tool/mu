@@ -9,4 +9,4 @@
      (mu:eval
       (core:compile
        (core:read
-        (mu:open :string :input form-str) :t ())))))
+        (mu:open :string :input form-str :t) :t ())))))

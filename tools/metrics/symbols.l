@@ -13,5 +13,5 @@
              (core:%format stream "~A:~A~%" `(,ns ,(mu:symbol-name symbol))))
            (mu:namespace-symbols (mu:find-namespace ns)))
           (mu:close stream))
-       (mu:open :file :output file-name))
+       (mu:open :file :output file-name :t))
       :t))

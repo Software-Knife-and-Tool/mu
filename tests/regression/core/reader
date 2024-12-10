@@ -1,66 +1,66 @@
 (mu:type-of core:read)	:func
-(mu:symbol-name (core:read (mu:open :string :input "a") () ()))	"a"
-(mu:symbol-name (core:read (mu:open :string :input "core:a") () ()))	"a"
-(mu:symbol-namespace (core:read (mu:open :string :input "a") () ()))	#<:ns "">
-(mu:symbol-namespace (core:read (mu:open :string :input "core:a") () ()))	#<:ns "core">
-(core:read (mu:open :string :input "a ;") () ())	a
-(core:read (mu:open :string :input "a ; a") () ())	a
-(core:read (mu:open :string :input "a") () ())	a
-(core:read (mu:open :string :input "#||#a") () ())	a
-(core:read (mu:open :string :input "#||# a") () ())	a
-(core:read (mu:open :string :input "a #||#") () ())	a
-(core:read (mu:open :string :input "#||# a;a") () ())	a
-(core:read (mu:open :string :input "#||# a ;a") () ())	a
-(core:read (mu:open :string :input "#:abc") () ())	#:abc
-(core:read (mu:open :string :input "core:a") () ())	core:a
-(core:read (mu:open :string :input "abcdefgh") () ())	abcdefgh
-(core:read (mu:open :string :input "core:abcdefgh") () ())	core:abcdefgh
-(core:read (mu:open :string :input "0") () ())	0
-(core:read (mu:open :string :input "+0") () ())	0
-(core:read (mu:open :string :input "-0") () ())	0
-(core:read (mu:open :string :input "1024") () ())	1024
-(core:read (mu:open :string :input "-1024") () ())	-1024
-(core:read (mu:open :string :input "+1024") () ())	1024
-(core:read (mu:open :string :input "1.024") () ())	1.0240
-(core:read (mu:open :string :input "#b10101100") () ())	172
-(core:read (mu:open :string :input "#d1024") () ())	1024
-(core:read (mu:open :string :input "#xabc") () ())	2748
-(core:read (mu:open :string :input "#xabcdef") () ())	11259375
-(core:read (mu:open :string :input "()") () ())	:nil
-(core:read (mu:open :string :input "(())") () ())	(:nil)
-(core:read (mu:open :string :input "(() ())") () ())	(:nil :nil)
-(core:read (mu:open :string :input "(123 ())") () ())	(123 :nil)
-(core:read (mu:open :string :input "(() 123)") () ())	(:nil 123)
-(core:read (mu:open :string :input "(a ())") () ())	(a :nil)
-(core:read (mu:open :string :input "(a () )") () ())	(a :nil)
-(core:read (mu:open :string :input "(a())") () ())	(a :nil)
-(core:read (mu:open :string :input "(a() )") () ())	(a :nil)
-(core:read (mu:open :string :input "(()a)") () ())	(:nil a)
-(core:read (mu:open :string :input "(()a )") () ())	(:nil a)
-(core:read (mu:open :string :input "(a b )") () ())	(a b)
-(core:read (mu:open :string :input "(a b)") () ())	(a b)
-(core:read (mu:open :string :input "(abc ())") () ())	(abc :nil)
-(core:read (mu:open :string :input "(() abc )") () ())	(:nil abc)
-(core:read (mu:open :string :input "(:a :b )") () ())	(:a :b)
-(core:read (mu:open :string :input "(:a :b)") () ())	(:a :b)
-(core:read (mu:open :string :input "(:abc ())") () ())	(:abc :nil)
-(core:read (mu:open :string :input "(() :abc )") () ())	(:nil :abc)
-(core:read (mu:open :string :input "(1 2)") () ())	(1 2)
-(core:read (mu:open :string :input "(1 . 2)") () ())	(1 . 2)
-(core:read (mu:open :string :input "(1 2 . 3)") () ())	(1 2 . 3)
-(core:read (mu:open :string :input "((1 2) . 3)") () ())	((1 2) . 3)
-(core:read (mu:open :string :input "((1 2) . (3 4))") () ())	((1 2) 3 4)
-(core:read (mu:open :string :input "#\\a") () ())	#\a
-(core:read (mu:open :string :input "#\\ ") () ())	#\space
-(core:read (mu:open :string :input "#\\)") () ())	#\)
-(core:read (mu:open :string :input "#(:t 1 2 3)") () ())	#(:t 1 2 3)
-(core:read (mu:open :string :input "#(:byte 1 2 3)") () ())	#(:byte 1 2 3)
-(core:read (mu:open :string :input "#(:fixnum 1 2 3)") () ())	#(:fixnum 1 2 3)
-(core:read (mu:open :string :input "#(:char #\\a #\\b #\\c)") () ())	"abc"
-(core:read (mu:open :string :input "#(:float 1.0 2.0 3.0)") () ())	#(:float 1.0000 2.0000 3.0000)
-(core:read (mu:open :string :input "'core:a") () ())	(:quote . core:a)
-(core:read (mu:open :string :input "'abc") () ())	(:quote . abc)
-(core:read (mu:open :string :input "'core:abc") () ())	(:quote . core:abc)
-(core:read (mu:open :string :input "'abcdefgh") () ())	(:quote . abcdefgh)
-(core:read (mu:open :string :input "#.1") () ())	1
-(core:read (mu:open :string :input "#.(mu:add 1 2)") () ())	3
+(mu:symbol-name (core:read (mu:open :string :input "a" :t) () ()))	"a"
+(mu:symbol-name (core:read (mu:open :string :input "core:a" :t) () ()))	"a"
+(mu:symbol-namespace (core:read (mu:open :string :input "a" :t) () ()))	#<:ns "">
+(mu:symbol-namespace (core:read (mu:open :string :input "core:a" :t) () ()))	#<:ns "core">
+(core:read (mu:open :string :input "a ;" :t) () ())	a
+(core:read (mu:open :string :input "a ; a" :t) () ())	a
+(core:read (mu:open :string :input "a" :t) () ())	a
+(core:read (mu:open :string :input "#||#a" :t) () ())	a
+(core:read (mu:open :string :input "#||# a" :t) () ())	a
+(core:read (mu:open :string :input "a #||#" :t) () ())	a
+(core:read (mu:open :string :input "#||# a;a" :t) () ())	a
+(core:read (mu:open :string :input "#||# a ;a" :t) () ())	a
+(core:read (mu:open :string :input "#:abc" :t) () ())	#:abc
+(core:read (mu:open :string :input "core:a" :t) () ())	core:a
+(core:read (mu:open :string :input "abcdefgh" :t) () ())	abcdefgh
+(core:read (mu:open :string :input "core:abcdefgh" :t) () ())	core:abcdefgh
+(core:read (mu:open :string :input "0" :t) () ())	0
+(core:read (mu:open :string :input "+0" :t) () ())	0
+(core:read (mu:open :string :input "-0" :t) () ())	0
+(core:read (mu:open :string :input "1024" :t) () ())	1024
+(core:read (mu:open :string :input "-1024" :t) () ())	-1024
+(core:read (mu:open :string :input "+1024" :t) () ())	1024
+(core:read (mu:open :string :input "1.024" :t) () ())	1.0240
+(core:read (mu:open :string :input "#b10101100" :t) () ())	172
+(core:read (mu:open :string :input "#d1024" :t) () ())	1024
+(core:read (mu:open :string :input "#xabc" :t) () ())	2748
+(core:read (mu:open :string :input "#xabcdef" :t) () ())	11259375
+(core:read (mu:open :string :input "()" :t) () ())	:nil
+(core:read (mu:open :string :input "(())" :t) () ())	(:nil)
+(core:read (mu:open :string :input "(() ())" :t) () ())	(:nil :nil)
+(core:read (mu:open :string :input "(123 ())" :t) () ())	(123 :nil)
+(core:read (mu:open :string :input "(() 123)" :t) () ())	(:nil 123)
+(core:read (mu:open :string :input "(a ())" :t) () ())	(a :nil)
+(core:read (mu:open :string :input "(a () )" :t) () ())	(a :nil)
+(core:read (mu:open :string :input "(a())" :t) () ())	(a :nil)
+(core:read (mu:open :string :input "(a() )" :t) () ())	(a :nil)
+(core:read (mu:open :string :input "(()a)" :t) () ())	(:nil a)
+(core:read (mu:open :string :input "(()a )" :t) () ())	(:nil a)
+(core:read (mu:open :string :input "(a b )" :t) () ())	(a b)
+(core:read (mu:open :string :input "(a b)" :t) () ())	(a b)
+(core:read (mu:open :string :input "(abc ())" :t) () ())	(abc :nil)
+(core:read (mu:open :string :input "(() abc )" :t) () ())	(:nil abc)
+(core:read (mu:open :string :input "(:a :b )" :t) () ())	(:a :b)
+(core:read (mu:open :string :input "(:a :b)" :t) () ())	(:a :b)
+(core:read (mu:open :string :input "(:abc ())" :t) () ())	(:abc :nil)
+(core:read (mu:open :string :input "(() :abc )" :t) () ())	(:nil :abc)
+(core:read (mu:open :string :input "(1 2)" :t) () ())	(1 2)
+(core:read (mu:open :string :input "(1 . 2)" :t) () ())	(1 . 2)
+(core:read (mu:open :string :input "(1 2 . 3)" :t) () ())	(1 2 . 3)
+(core:read (mu:open :string :input "((1 2) . 3)" :t) () ())	((1 2) . 3)
+(core:read (mu:open :string :input "((1 2) . (3 4))" :t) () ())	((1 2) 3 4)
+(core:read (mu:open :string :input "#\\a" :t) () ())	#\a
+(core:read (mu:open :string :input "#\\ " :t) () ())	#\space
+(core:read (mu:open :string :input "#\\)" :t) () ())	#\)
+(core:read (mu:open :string :input "#(:t 1 2 3)" :t) () ())	#(:t 1 2 3)
+(core:read (mu:open :string :input "#(:byte 1 2 3)" :t) () ())	#(:byte 1 2 3)
+(core:read (mu:open :string :input "#(:fixnum 1 2 3)" :t) () ())	#(:fixnum 1 2 3)
+(core:read (mu:open :string :input "#(:char #\\a #\\b #\\c)" :t) () ())	"abc"
+(core:read (mu:open :string :input "#(:float 1.0 2.0 3.0)" :t) () ())	#(:float 1.0000 2.0000 3.0000)
+(core:read (mu:open :string :input "'core:a" :t) () ())	(:quote . core:a)
+(core:read (mu:open :string :input "'abc" :t) () ())	(:quote . abc)
+(core:read (mu:open :string :input "'core:abc" :t) () ())	(:quote . core:abc)
+(core:read (mu:open :string :input "'abcdefgh" :t) () ())	(:quote . abcdefgh)
+(core:read (mu:open :string :input "#.1" :t) () ())	1
+(core:read (mu:open :string :input "#.(mu:add 1 2)" :t) () ())	3

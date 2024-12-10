@@ -1,2 +1,2 @@
-(mu:write 1000 () (mu:open :string :output ""))
-(mu:write (mu:mul 100 200) () (mu:open :string :output ""))
+(mu:write 1000 () (mu:open :string :output "" :t))
+(mu:write (mu:mul 100 200) () (mu:open :string :output "" :t))
