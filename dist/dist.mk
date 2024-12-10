@@ -5,7 +5,8 @@
 SRC = ../src
 
 CORE= \
-	core.l		\
+	testing.l	\
+	base.l		\
 	compile.l	\
 	string.l	\
 	format.l	\

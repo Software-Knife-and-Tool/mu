@@ -51,9 +51,9 @@ dist:
 	@install -m 644 -D -t $(BASE)/lib/core $(SRC)/core/*.l
 	@install -m 644 -D -t $(BASE)/lib/prelude $(SRC)/modules/prelude/*.l
 
-	@for m in $(MODULES); do	\
-	    install -D -t $(BASE)/modules/$$m $(SRC)/modules/$$m/*.l;	 \
-	    install -D -t $(BASE)/modules/$$m $(SRC)/modules/$$m/mod.def;	 \
+	@for module in $(MODULES); do	\
+	    install -D -t $(BASE)/modules/$$module $(SRC)/modules/$$module/*.l;		\
+	    install -D -t $(BASE)/modules/$$module $(SRC)/modules/$$module/mod.def;	\
 	done
 
 	@make -f dist.mk dist
