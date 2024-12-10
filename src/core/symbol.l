@@ -22,7 +22,7 @@
      (mu:intern (mu:find-namespace "keyword") name ())))
             
 (mu:intern core "%gensym-counter%"
-   (mu:open :string :bidir "0"))
+   (mu:open :string :bidir "0" :t))
 
 (mu:intern core "gensym"
    (:lambda ()

@@ -132,5 +132,5 @@
             (core:%format out-stream ")))~%" '())
             (mu:close out-stream)
             :t)))
-       (mu:open :file :input in-path)
-       (mu:open :file :output out-path))))
+       (mu:open :file :input in-path :t)
+       (mu:open :file :output out-path :t))))

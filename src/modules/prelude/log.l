@@ -16,7 +16,7 @@
 
 (mu:intern prelude "%open-log-file"
    (:lambda (file-name env)
-      (mu:open :file :output file-name)))
+      (mu:open :file :output file-name :t)))
 
 ;;;
 ;;; exception flavors

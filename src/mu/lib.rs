@@ -234,7 +234,7 @@ impl Env {
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         if fs::metadata(file_path).is_ok() {
-            let load_form = format!("(mu:open :file :input \"{}\")", file_path);
+            let load_form = format!("(mu:open :file :input \"{}\" :t)", file_path);
             let istream = env.eval(self.read_str(&load_form)?)?;
             let eof_value = self.read_str(":eof")?; // need make_symbol here
 

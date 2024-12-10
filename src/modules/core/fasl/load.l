@@ -85,6 +85,6 @@
                       (mu:cdr (core:%assq :version header))
                       (mu:cdr (core:%assq :bytes header)))))
               (core:%read-fasl-header stream)))
-             (mu:open :file :input path))
+             (mu:open :file :input path :t))
           (core:raise path 'core:fasl-load "not a file path"))
      ()))

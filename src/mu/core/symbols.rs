@@ -118,7 +118,7 @@ lazy_static! {
         ( "close",       1, Stream::mu_close ),
         ( "flush",       1, Stream::mu_flush ),
         ( "get-string",  1, Stream::mu_get_string ),
-        ( "open",        3, Stream::mu_open ),
+        ( "open",        4, Stream::mu_open ),
         ( "openp",       1, Stream::mu_openp ),
         ( "read-byte",   3, Stream::mu_read_byte ),
         ( "read-char",   3, Stream::mu_read_char ),

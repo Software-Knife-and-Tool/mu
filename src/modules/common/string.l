@@ -130,7 +130,7 @@
                         ()))
                 list)
                (mu:get-string stream))
-            (mu:open :string :output ""))
+            (mu:open :string :output "" :t))
            (core:raise list 'common:string "is not a list"))))
 
 (mu:intern common "substr"
@@ -152,7 +152,7 @@
                                  nth))
                          start)
                         (mu:get-string substr))
-                     (mu:open :string :output ""))
+                     (mu:open :string :output "" :t))
                     (core:raise end 'common:substr "end is not a fixnum"))
                (core:raise str 'common:substr "is not a string"))
           (core:raise start 'common:substr "start is not a fixnum"))))
@@ -169,7 +169,7 @@
           (core:raise start 'common:substr "is not a fixnum"))))
 |#
 
-(mu:intern common "%read-string%" (mu:open :string :bidir ""))
+(mu:intern common "%read-string%" (mu:open :string :bidir "" :t))
 (mu:intern common "read-string"
    (:lambda (str eof-error eof-value)
       (:if (common:stringp str)

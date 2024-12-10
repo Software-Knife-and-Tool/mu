@@ -1,2 +1,2 @@
 (mu:close mu:*error-output*)
-(mu:get-string (mu:open :string :output (mu:symbol-name 'abcdef)))
+(mu:get-string (mu:open :string :output (mu:symbol-name 'abcdef) :t))

@@ -386,8 +386,13 @@ impl CoreFunction for Stream {
         let st_type = fp.argv[0];
         let st_dir = fp.argv[1];
         let st_arg = fp.argv[2];
+        let st_error_p = fp.argv[3];
 
-        env.fp_argv_check("mu:open", &[Type::Keyword, Type::Keyword, Type::String], fp)?;
+        env.fp_argv_check(
+            "mu:open",
+            &[Type::Keyword, Type::Keyword, Type::String, Type::T],
+            fp,
+        )?;
 
         fp.value = if st_type.eq_(&Symbol::keyword("file")) {
             let arg = Vector::as_string(env, st_arg);
@@ -396,6 +401,8 @@ impl CoreFunction for Stream {
                 StreamBuilder::new().file(arg).input().build(env, &LIB)
             } else if st_dir.eq_(&Symbol::keyword("output")) {
                 StreamBuilder::new().file(arg).output().build(env, &LIB)
+            } else if st_error_p.null_() {
+                Ok(Tag::nil())
             } else {
                 return Err(Exception::new(env, Condition::Type, "mu:open", st_dir));
             };
@@ -410,6 +417,8 @@ impl CoreFunction for Stream {
                 StreamBuilder::new().string(arg).output().build(env, &LIB)
             } else if st_dir.eq_(&Symbol::keyword("bidir")) {
                 StreamBuilder::new().string(arg).bidir().build(env, &LIB)
+            } else if st_error_p.null_() {
+                Ok(Tag::nil())
             } else {
                 return Err(Exception::new(env, Condition::Type, "mu:open", st_dir));
             };

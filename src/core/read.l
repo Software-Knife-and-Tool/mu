@@ -5,8 +5,8 @@
 ;;; reader
 ;;;
 (mu:intern core "%eof%" (mu:make-symbol "eof"))
-(mu:intern core "%reader-stream%" (mu:open :string :output ""))
-(mu:intern core "%reader-current-ns%" (mu:open :string :bidir "core"))
+(mu:intern core "%reader-stream%" (mu:open :string :output "" :t))
+(mu:intern core "%reader-current-ns%" (mu:open :string :bidir "core" :t))
 
 (mu:intern core "%reader-get-ns"
    (:lambda ()

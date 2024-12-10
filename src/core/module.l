@@ -26,7 +26,7 @@
                                 (core:null loop)))))
                       (mu:read stream () core:%eof%))))
               ()))
-           (mu:open :file :input path))
+           (mu:open :file :input path :t))
           (core:raise path 'core:%load-module-file "not a file path"))
      :t))
 
@@ -47,7 +47,7 @@
                                 (core:null loop)))))
                       (mu:read stream () core:%eof%))))
               ()))
-           (mu:open :file :input path))
+           (mu:open :file :input path :t))
           (core:raise path 'core:%load-module-def "not a file path"))
      (mu:symbol-value (mu:find core:%modules% module))))
 

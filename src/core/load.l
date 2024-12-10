@@ -24,6 +24,6 @@
                                 (core:null loop)))))
                       (core:read stream () core:%eof%))))
               ()))
-           (mu:open :file :input path))
+           (mu:open :file :input path :t))
           (core:raise path 'core:load-file "not a file path"))
      :t))

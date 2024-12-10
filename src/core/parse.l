@@ -55,4 +55,4 @@
                float
                ()))
           (mu:read stream () ())))
-       (mu:open :string :input str))))
+       (mu:open :string :input str :t))))
