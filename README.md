@@ -292,14 +292,12 @@ The `tests` makefile has additional facilities for development. The `help` targe
 ```
 % make -C tests/regression help
 
+regression test makefile -----------------
+
 --- test options
-    namespaces - list namespaces
-    modules - list modules
     commit - create test summary
-    test - tests in $NS
-    mu | cargo - run all tests in namespace, raw output
-    test - run single test in $NS/$TEST
-    summary - run all tests in all namespaces and modules and print summary
+    test - run single test group in $NS/$TEST
+    summary - run all tests in all namespaces and print summary
     
 ```
 

@@ -9,26 +9,9 @@ test = sys.argv[3]
 with open(base + '/' + ns + '/' + test) as f: test_source = f.readlines()
 
 def runtest(line, test, expected):
-    if ns == 'mu':
-        proc = subprocess.Popen(['../../dist/mu-sys','-e' + test],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
-
-    if ns == 'core':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.l',
-                                 '-e' + test],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
-
-    if ns == 'common':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.l',
-                                 '-l../../dist/common.l',
-                                 '-l./common.l',
-                                 '-e (eval-common-form "' + test + '")'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+    proc = subprocess.Popen(['../../dist/mu-sys','-e' + test],\
+                            stdout=subprocess.PIPE,\
+                            stderr=subprocess.PIPE)
 
     obtained = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf-8')
