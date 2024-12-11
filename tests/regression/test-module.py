@@ -12,7 +12,7 @@ def runtest(line, group, test, expected):
                              '-l../../dist/core.l',
                              '-q (core:test-require "' + module + '" \"../../src/modules\")',
                              '-l./module.l',
-                             '-e (eval-module-form "' + test + '")'],\
+                             '-e' + test],\
                             stdout=subprocess.PIPE,\
                             stderr=subprocess.PIPE)
 
