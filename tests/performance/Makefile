@@ -12,7 +12,7 @@ NAMESPACES=\
 	frequent \
 	core
 
-help:
+help: deltemp
 	@echo "mu regression makefile -----------------"
 	@echo
 	@echo "--- perf options"
@@ -27,10 +27,13 @@ help:
 	@echo "    metrics/current - verbose metrics"
 	@echo "    summary/current - summary metrics"
 
+deltemp:
+	@rm -f $(TMPF)
+
 report:
 	@sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF)
 	@python3 $(BIN)/report.py $(TMPF)
-	@rm -f $(TMPF)
+	@rm -f $(TMPF)	
 
 regression:
 	@sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF)
@@ -49,22 +52,22 @@ commit:
 	    python3 $(BIN)/summary-ns.py json/current.$$ns.json >> current.summary;	\
 	done
 
-mu:
+mu: deltemp
 	@python3 $(BIN)/perf-ns.py mu . $(NTESTS)
 
-frequent:
-	@python3 $(BIN)/perf-ns.py frequent . $(NTESTS)	
+frequent: deltemp
+	@python3 $(BIN)/perf-ns.py frequent . $(NTESTS)
 
-core:
-	@python3 $(BIN)/perf-ns.py core . $(NTESTS)	
+core: deltemp
+	@python3 $(BIN)/perf-ns.py core . $(NTESTS)
 
-namespaces:
+namespaces: deltemp
 	@echo $(NAMESPACES)
 
-list:
-	@cat $$NS/tests
+list: deltemp
+	@cat $$NS/test
 
-base:
+base: deltemp
 	@rm -f base.report
 	@mkdir -p json
 	@for ns in $(NAMESPACES); do						\
@@ -72,7 +75,7 @@ base:
 	    python3 $(BIN)/report-ns.py json/base.$$ns.json >> base.report;	\
 	done
 
-current:
+current: deltemp
 	@rm -f current.report
 	@mkdir -p json
 	@for ns in $(NAMESPACES); do							\
@@ -80,15 +83,15 @@ current:
 	    python3 $(BIN)/report-ns.py json/current.$$ns.json>> current.report;	\
 	done
 
-metrics/current:
+metrics/current: deltemp
 	@for ns in $(NAMESPACES); do					\
 	    python3 $(BIN)/metrics-ns.py json/current.$$ns.json;	\
 	done
 
-summary/current:
+summary/current: deltemp
 	@for ns in $(NAMESPACES); do					\
 	    python3 $(BIN)/summary-ns.py json/current.$$ns.json;	\
 	done
 
-clean:
+clean: deltemp
 	@rm -rf json current.report
