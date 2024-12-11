@@ -151,7 +151,7 @@ versions 0.1.69 - 0.1.73 are built with rustc 1.79.0.
 
 version 0.1.8{123} are built with rustc 1.82.0.
 
-version 0.1.84 is built with rustc 1.83.0
+version 0.1.8{45} are built with rustc 1.83.0
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
@@ -290,16 +290,17 @@ The `report` target produces a human readable test report.
 The `tests` makefile has additional facilities for development. The `help` target will list them.
 
 ```
-% make -C tests help
+% make -C tests/regression help
 
 --- test options
-    cargo - run rust tests
     namespaces - list namespaces
+    modules - list modules
     commit - create test summary
-    tests - tests in $NS
+    test - tests in $NS
     mu | cargo - run all tests in namespace, raw output
     test - run single test in $NS/$TEST
-    base - run all tests in all namespaces and print summary
+    summary - run all tests in all namespaces and modules and print summary
+    
 ```
 
 #### Performance metrics

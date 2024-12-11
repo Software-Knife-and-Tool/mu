@@ -8,10 +8,9 @@ base = sys.argv[2]
 with open(base + '/' + module + '/tests') as f: group_list = f.readlines()
 
 def runtest(line, group, test, expected):
-    print('-q (core:test-require "' + module + '" + "../../src/modules")') 
     proc = subprocess.Popen(['../../dist/mu-sys',
-                             '-l../../dist/core.l'
-                             '-q (core:test-require "' + module + '" + "../../src/modules")' 
+                             '-l../../dist/core.l',
+                             '-q (core:test-require "' + module + '" \"../../src/modules\")',
                              '-l./module.l',
                              '-e (eval-module-form "' + test + '")'],\
                             stdout=subprocess.PIPE,\

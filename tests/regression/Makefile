@@ -1,23 +1,19 @@
 #
 # tests makefile
 #
-.PHONY: help cargo mu clean commit common \
-        namespaces tests summary core system \
-	core/core core/fasl core/image common/common	\
-	common/describe	common/metrics prelude/prelude	\
-	prelude/repl
+.PHONY: help cargo mu clean commit common namespaces tests summary core system
 
 TMPF:=$(shell mktemp)
 NAMESPACES = mu core common
 
 MODULES = 		\
-	core/core	\
+	core		\
 	core/fasl	\
 	core/image	\
-	common/common	\
+	common		\
 	common/describe	\
 	common/metrics	\
-	prelude/prelude	\
+	prelude		\
 	prelude/repl
 
 help: deltemp
@@ -27,8 +23,6 @@ help: deltemp
 	@echo "    namespaces - list namespaces"
 	@echo "    modules - list modules"
 	@echo "    commit - create test summary"
-	@echo "    $(NAMESPACES) - run all tests in namespace, raw output"
-	@echo "    $(MODULES) - run all tests in module, raw output"
 	@echo "    test - run single test in \$$NS/\$$TEST"
 	@echo "    summary - run all tests in all namespaces and modules and print summary"
 
@@ -40,12 +34,6 @@ namespaces: deltemp
 
 modules: deltemp
 	@echo $(MODULES)
-
-$(NAMESPACES): deltemp
-	@python3 ./test-ns.py $@ .
-
-$(MODULES): deltemp
-	@python3 ./test-module.py $@ modules
 
 commit: deltemp
 	@make summary --no-print-directory > tests.summary
@@ -61,13 +49,13 @@ test: deltemp
 	@-python3 summarize-test.py $(TMPF)
 
 summary:
-	@-for namespace in $(NAMESPACES); do			\
-	    make $$namespace --no-print-directory > $(TMPF);	\
-	    python3 summarize-ns.py $(TMPF);			\
+	@-for namespace in $(NAMESPACES); do				\
+	    python3 ./test-ns.py $$namespace . > $(TMPF);		\
+	    python3 summarize-ns.py $(TMPF);				\
 	done
-	@-for module in $(MODULES); do				\
-	    make $$module --no-print-directory > $(TMPF);	\
-	    python3 summarize-module.py $(TMPF);		\
+	@-for module in $(MODULES); do					\
+	    python3 ./test-module.py $$module modules > $(TMPF);	\
+	    python3 summarize-module.py $(TMPF);			\
 	done
 	@rm -f $(TMPF)
 
