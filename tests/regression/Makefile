@@ -20,7 +20,7 @@ MODULES = 		\
 	prelude/prelude	\
 	prelude/repl
 
-help:
+help: deltemp
 	@echo "mu test makefile -----------------"
 	@echo
 	@echo "--- test options"
@@ -32,19 +32,22 @@ help:
 	@echo "    test - run single test in \$$NS/\$$TEST"
 	@echo "    summary - run all tests in all namespaces and modules and print summary"
 
-namespaces:
+deltemp:
+	@rm -f $(TMPF)
+
+namespaces: deltemp
 	@echo $(NAMESPACES)
 
-modules:
+modules: deltemp
 	@echo $(MODULES)
 
-$(NAMESPACES):
+$(NAMESPACES): deltemp
 	@python3 ./test-ns.py $@ .
 
-$(MODULES):
+$(MODULES): deltemp
 	@python3 ./test-module.py $@ modules
 
-commit:
+commit: deltemp
 	@make summary --no-print-directory > tests.summary
 	@echo "Test Summaries"
 	@echo "--------------"
@@ -53,21 +56,20 @@ commit:
 	@echo "-------------"
 	@git diff --unified=0 tests.summary
 
-test:
-	@python3 test.py $$NS . $$TEST > $(TMPF)
-	@python3 summarize-test.py $(TMPF)
-	@rm -f $(TMPF)
+test: deltemp
+	@-python3 test.py $$NS . $$TEST > $(TMPF)
+	@-python3 summarize-test.py $(TMPF)
 
 summary:
-	@for namespace in $(NAMESPACES); do			\
+	@-for namespace in $(NAMESPACES); do			\
 	    make $$namespace --no-print-directory > $(TMPF);	\
 	    python3 summarize-ns.py $(TMPF);			\
 	done
-	@for module in $(MODULES); do				\
+	@-for module in $(MODULES); do				\
 	    make $$module --no-print-directory > $(TMPF);	\
 	    python3 summarize-module.py $(TMPF);		\
 	done
 	@rm -f $(TMPF)
 
-clean:
+clean: deltemp
 	@rm -f *.diff *.out
