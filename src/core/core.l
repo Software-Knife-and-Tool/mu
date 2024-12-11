@@ -5,5 +5,3 @@
 ;;; core namespace
 ;;;
 (mu:intern mu:%null-ns% "core" (mu:make-namespace "core"))
-
-(mu:intern core "+version+" "0.0.7")

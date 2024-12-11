@@ -6,8 +6,6 @@
 ;;;
 (mu:intern mu:%null-ns% "core" (mu:make-namespace "core"))
 
-(mu:intern core "+version+" "0.0.1")
-
 (mu:intern core "test-require"
    (:lambda (module src)
      (:if (core:stringp module)
@@ -31,6 +29,6 @@
                         (mu:cdr (core:%assq :load module-def)))
                        (core:raise module 'core:require "cannot open module-def")))
                   (core:%load-module-def
-                   (core:%format () "/opt/mu/modules/~A/mod.def" `(,module))
+                   (core:%format () "~A/~A/mod.def" `(,src ,module))
                    module)))
           (core:raise module 'core:require "is not a module name"))))
