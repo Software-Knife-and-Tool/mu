@@ -31,7 +31,9 @@ def storage(ns, group, line, test):
 
     if ns == 'core':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.l',
+                                 '-l../../dist/image.l',
+                                 '-l../../dist/test-image.l',
+                                 '-q (image:%test-require "' + "core" + '" \"../../src/modules\")', 
                                  '-l./perf.l',
                                  '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -64,7 +66,9 @@ def timing(ns, test):
 
     if ns == 'core':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.l',
+                                 '-l../../dist/image.l',
+                                 '-l../../dist/test-image.l',
+                                 '-q (image:%test-require "' + "core" + '" \"../../src/modules\")', 
                                  '-l./perf.l',
                                  '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\

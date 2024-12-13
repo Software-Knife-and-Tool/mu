@@ -2,5 +2,6 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; core optional modules
+;;; core namespace
 ;;;
+(mu:intern mu:%null-ns% "core" (mu:make-namespace "core"))

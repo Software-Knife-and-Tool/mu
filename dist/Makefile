@@ -48,7 +48,7 @@ dist:
 
 	@install -m 644 $(SRC)/dist/mu.l $(BASE)/dist
 	@install -m 644 -D -t $(BASE)/lib/sysgen $(TOOLS)/sysgen/templates/*
-	@install -m 644 -D -t $(BASE)/lib/core $(SRC)/core/*.l
+	@install -m 644 -D -t $(BASE)/lib/core $(SRC)/modules/core/*.l
 	@install -m 644 -D -t $(BASE)/lib/prelude $(SRC)/modules/prelude/*.l
 
 	@for module in $(MODULES); do	\

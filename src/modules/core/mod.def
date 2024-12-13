@@ -4,8 +4,33 @@
 ;;;
 ;;; core module
 ;;;
-(core:provide
+(image:%provide
  "core"
- '((:version . "0.0.1")
+ '((:version . "0.0.7")
    (:lang    . :mu)
-   (:load    . ())))
+   (:load    . (
+                "core.l"
+                "base.l"
+                "compile.l"
+                "string.l"
+                "format.l"
+                "funcall.l"
+                "load.l"
+                "list.l"
+                "map.l"
+                "module.l"
+                "stream.l"
+                "read.l"
+                "quasi.l"
+                "parse.l"
+                "read-macro.l"
+                "symbol.l"
+                "symbol-macro.l"
+                "deftype.l"
+                "typespec.l"
+                "exception.l"
+                "macro.l"
+                "closure.l"
+                "vector.l"
+                "common.l"
+                ))))

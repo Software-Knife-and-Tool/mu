@@ -9,8 +9,9 @@ with open(base + '/' + module + '/tests') as f: group_list = f.readlines()
 
 def runtest(line, group, test, expected):
     proc = subprocess.Popen(['../../dist/mu-sys',
-                             '-l../../dist/core.l',
-                             '-q (core:test-require "' + module + '" \"../../src/modules\")',
+                             '-l../../dist/image.l',
+                             '-l../../dist/test-image.l',
+                             '-q (image:%test-require "' + module + '" \"../../src/modules\")',
                              '-l./module.l',
                              '-e' + test],\
                             stdout=subprocess.PIPE,\
