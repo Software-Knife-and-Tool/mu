@@ -8,6 +8,9 @@
    (:lambda ()
      (core:%mapcar mu:symbol-name (mu:namespace-symbols core:%modules%))))
 
+;;;
+;;; utilities
+;;;
 (mu:intern core "%load-module-file"
    (:lambda (path lang)
      (:if (core:stringp path)
