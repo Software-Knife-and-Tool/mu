@@ -27,7 +27,6 @@ dist:
 
 	@install -d $(BASE)
 	@install -d $(BASE)/bin
-	@install -d $(BASE)/dist
 	@install -d $(BASE)/doc
 	@install -d $(BASE)/lib
 	@install -d $(BASE)/modules
@@ -46,10 +45,9 @@ dist:
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
 	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
 
-	@install -m 644 $(SRC)/dist/mu.l $(BASE)/dist
+	@install -m 644 $(SRC)/dist/mu.l $(BASE)/lib
 	@install -m 644 -D -t $(BASE)/lib/sysgen $(TOOLS)/sysgen/templates/*
-	@install -m 644 -D -t $(BASE)/lib/core $(SRC)/modules/core/*.l
-	@install -m 644 -D -t $(BASE)/lib/prelude $(SRC)/modules/prelude/*.l
+	@install -m 644 $(SRC)/image/image.l $(BASE)/lib
 
 	@for module in $(MODULES); do	\
 	    install -D -t $(BASE)/modules/$$module $(SRC)/modules/$$module/*.l;		\

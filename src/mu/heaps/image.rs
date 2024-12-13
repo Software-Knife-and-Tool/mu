@@ -9,7 +9,7 @@ pub struct Image {
     image: Vec<u8>,
 }
 
-impl Image { }
+impl Image {}
 
 pub trait Core {
     fn image(&self) -> Vec<u8>;

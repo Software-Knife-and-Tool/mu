@@ -27,11 +27,13 @@ impl Repl {
                 let mut child = match ns {
                     Mode::Mu => Command::new("mu-sh").spawn().unwrap(),
                     Mode::Core => Command::new("mu-sh")
-                        .args(["-l", "/opt/mu/dist/core.l"])
+                        .args(["-l", "/opt/mu/lib/image.l"])
+                        .args(["-q", "(image:%require \"core\")"])
                         .spawn()
                         .unwrap(),
                     Mode::Prelude => Command::new("mu-sys")
-                        .args(["-l", "/opt/mu/dist/core.l"])
+                        .args(["-l", "/opt/mu/lib/image.l"])
+                        .args(["-q", "(image:%require \"core\")"])
                         .args(["-q", "(core:require \"prelude/repl\")"])
                         .args(["-e", "(prelude:repl)"])
                         .spawn()
