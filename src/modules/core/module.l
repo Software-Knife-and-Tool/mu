@@ -4,6 +4,8 @@
 ;;;
 ;;; modules
 ;;;
+(mu:intern core "%modules%" image:%modules%)
+
 (mu:intern core "modules"
    (:lambda ()
      (core:%mapcar mu:symbol-name (mu:namespace-symbols core:%modules%))))
