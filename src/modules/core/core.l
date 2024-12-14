@@ -34,43 +34,24 @@
                 (mu:fless-than n 0.0)
                 (mu:less-than n 0))
            (core:raise n 'core:minusp "not a number"))))
-#|
-(defun eql (x y)
-   (cond
-     ((eq x y) t)
-     ((null (eq (type-of x) (type-of y))) nil)
-     ((stringp x) (string= x y))
-     ((and (vectorp x) (vectorp y))
-        (and (eq (vector-type x) (vector-type y))
-             (eq (vector-length x) (vector-length y))
-             (core::funcall eql (vector-to-list x) (vector-to-list y))))
-     ((consp x)
-        (and (eq (length x) (length y))
-             (core::funcall eql (car x) (car y))
-             (core::funcall eql (cdr x) (cdr y))))
-     (t ())))
-|#
 
 (mu:intern core "eql"
    (:lambda (x y)
      (:if (mu:eq x y)
           :t
-          (:if (core:null (mu:eq (mu:type-of x) (mu:type-of y)))
-               ()
+          (:if (mu:eq (mu:type-of x) (mu:type-of y))
                (:if (core:%and (core:stringp x) (core:stringp y))
-                    (core:string= x y)
+                    (core:%string= x y)
                     (:if (core:%and (core:vectorp x) (core:vectorp y))
-                    (core:%and
-                     (core:%and (core:vector-type x) (core:vector-type y))
-                     (core:%and (core:eql (core:%vector-to-list x) (core:%vector-to-list y))))
-                    (:if (core:consp x)
-                         (:if (core:%and (mu:length x) (mu:length y))
+                         (core:%and
+                          (core:%and (core:vector-type x) (core:vector-type y))
+                          (core:eql (core:%vector-to-list x) (core:%vector-to-list y)))
+                         (:if (core:consp x)
                               (core:%and
                                (core:eql (mu:car x) (mu:car y))
                                (core:eql (mu:cdr x) (mu:cdr y)))
-                              ())
-                         ())))))))
-
+                              ())))
+               ()))))
 ;;;
 ;;; mu system classes
 ;;;
