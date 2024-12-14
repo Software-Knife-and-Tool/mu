@@ -7,7 +7,7 @@ help:
 	@echo "crossref: mu/core symbol cross reference"
 
 crossref:
-	/opt/mu/bin/mu-sys -l /opt/mu/dist/core.l -l ./crossref.l -q '(crossref "crossref.out")'
+	@/opt/mu/bin/mu-sys -l /opt/mu/lib/image.l -q '(image:%require "core")' -l ./crossref.l -q '(crossref "crossref.out")'
 	@python3 crossref.py crossref.out
 
 clean:

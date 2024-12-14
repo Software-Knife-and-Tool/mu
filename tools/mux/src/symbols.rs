@@ -135,6 +135,18 @@ impl Symbols {
                 io::stdout().write_all(&output.stdout).unwrap();
                 io::stderr().write_all(&output.stderr).unwrap();
             }
+            "prelude" => {
+                let output = Command::new("make")
+                    .current_dir(home)
+                    .args(["-C", "tools/reference"])
+                    .arg("--no-print-directory")
+                    .arg("prelude")
+                    .output()
+                    .expect("command failed to execute");
+
+                io::stdout().write_all(&output.stdout).unwrap();
+                io::stderr().write_all(&output.stderr).unwrap();
+            }
             _ => {
                 let module = match Options::opt_value(&options, &Opt::Module("".to_string())) {
                     Some(name) => name,
