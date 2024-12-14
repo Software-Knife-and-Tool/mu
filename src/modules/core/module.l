@@ -25,7 +25,7 @@
                         (:if (mu:eq form core:%eof%)
                              core:%eof%
                              ((:lambda ()
-                                (:if (core:logor (mu:eq :mu lang) (core:null lang)) 
+                                (:if (core:%or (mu:eq :mu lang) (core:null lang)) 
                                      (mu:eval (mu:compile form))
                                      (mu:eval (core:compile form)))
                                 (core:null loop)))))

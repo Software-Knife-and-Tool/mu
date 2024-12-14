@@ -48,3 +48,18 @@
         start)
        (mu:get-string substr))
      (mu:open :string :output "" :t))))
+
+(mu:intern core "%string="
+   (:lambda (s1 s2)
+     (:if (mu:eq (mu:vector-length s1) (mu:vector-length s2))
+          (mu:fix
+           (:lambda (loop)
+             (:if (core:fixnump loop)
+                  (:if (mu:less-than loop (mu:vector-length s1))
+                       (:if (mu:eq (mu:svref s1 loop) (mu:svref s2 loop))
+                            (mu:add 1 loop)
+                            ())
+                       :t)
+                  loop))
+           0)
+          ())))

@@ -54,13 +54,13 @@
                     (:if (core:null ch)
                          (mu:cons 0 (mu:cons (mu:sub 8 nbits) (mu:ash byte nbits)))
                          ((:lambda (syntax)
-                            (:if (core:logor (mu:eq :tmacro syntax) (mu:eq :wspace syntax))
+                            (:if (core:%or (mu:eq :tmacro syntax) (mu:eq :wspace syntax))
                                  (core:%prog2
                                     (:if (mu:eq :tmacro syntax)
                                          (mu:unread-char ch stream)
                                          ())
                                     (mu:cons 0 (mu:cons (mu:sub 8 nbits) (mu:ash byte nbits))))
-                                 (:if (core:logor (mu:eq #\0 ch) (mu:eq #\1 ch))
+                                 (:if (core:%or (mu:eq #\0 ch) (mu:eq #\1 ch))
                                       `(,(mu:sub nbits 1)
                                         ,@(mu:logor
                                            (:if (mu:eq #\1 ch) 1 0)

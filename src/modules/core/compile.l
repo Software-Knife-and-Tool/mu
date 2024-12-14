@@ -38,7 +38,7 @@
 (mu:intern core "%special-if"
    (:lambda (form env)
      ((:lambda (length)
-        (:if (core:logor (mu:eq length 3) (mu:eq length 4))
+        (:if (core:%or (mu:eq length 3) (mu:eq length 4))
              ((:lambda (test t-arm f-arm)
                 `(:if ,test ,t-arm ,f-arm))
               (core:%compile (mu:nth 1 form) env)

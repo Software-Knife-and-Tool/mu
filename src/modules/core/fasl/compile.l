@@ -113,20 +113,20 @@
             (mu:fix
              (:lambda (loop)
                (:if (mu:eq core:%eof% loop)
-                    ((:lambda ()
+                    (core:%prog2
                        (mu:close in-stream)
-                       core:%eof%))
+                       core:%eof%)
                     ((:lambda (sexpr)
                        (:if (mu:eq core:%eof% sexpr)
                             core:%eof%
-                            ((:lambda ()
+                            (core:%prog2
                                (core:apply
                                 (mu:cdr
                                  (core:%assq
                                   (core:type-of sexpr)
                                   core:%fasl-type-compiler-map))
                                 `(,sexpr ,out-stream))
-                               (core:null loop)))))
+                               (core:null loop))))
                      (core:read in-stream () core:%eof%))))
              ())
             (core:%format out-stream ")))~%" '())

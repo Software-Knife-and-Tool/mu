@@ -37,7 +37,7 @@
 ;;;
 (mu:intern core "exceptionp"
     (:lambda (ex)
-      (core:logand
+      (core:%and
        (core:%core-type-p ex)
        (mu:eq '%exception (core:type-of ex)))))
 
@@ -50,7 +50,7 @@
          (:if (core:null format-string)
               (core:%format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
               (core:%format stream format-string `(,cond ,value ,source ,reason)))
-         (:if (core:logand printenv env)
+         (:if (core:%and printenv env)
               (core:%prog2
                   (core:%format stream "env:~%" ())
                   (core:%mapc

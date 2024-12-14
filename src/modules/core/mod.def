@@ -10,7 +10,6 @@
    (:lang    . :mu)
    (:load    . (
                 "core.l"
-                "base.l"
                 "compile.l"
                 "string.l"
                 "format.l"

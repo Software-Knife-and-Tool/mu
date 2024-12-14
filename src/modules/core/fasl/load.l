@@ -38,7 +38,7 @@
           ((:lambda (index list)
              (:if (mu:less-than index (core:vector-length slice))
                   (mu:cons
-                   (core:1+ index)
+                   (mu:add 1 index)
                    (mu:append (core:%list2 list (core:%list (core:vector-ref slice index)))))
                   loop))
            (mu:car loop)
@@ -79,7 +79,7 @@
                                      length))
                                    (mu:add length (mu:add 2 index)))
                                  (mu:svref bytes index)
-                                 (mu:svref bytes (core:1+ index)))
+                                 (mu:svref bytes (mu:add 1 index)))
                                 index))
                          0))
                       (mu:cdr (core:%assq :version header))

@@ -80,7 +80,7 @@
           (core:raise lambda 'core:%compile-closure "malformed lambda expression")
           ((:lambda (desc)
              ((:lambda (body)
-                (:if (core:logor (core:fixnump desc) (core:null body))
+                (:if (core:%or (core:fixnump desc) (core:null body))
                      (core:%make-closure lambda () `(:lambda ,lambda ,@body) ())
                      ((:lambda ()
                         ;;; (core:warn `(:lambda ,(mu:car desc) ,@(mu:cdr desc)) "compile-closure")
@@ -92,10 +92,10 @@
                    (:if (mu:eq '&rest el)
                         (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
                              (mu:cons
-                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (core:1- (mu:length lambda))))
-                              (mu:nth (core:1- (mu:length lambda)) lambda))
+                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
+                              (mu:nth (mu:sub (mu:length lambda) 1) lambda))
                              (core:raise lambda 'core:%compile-closure "rest botch"))
-                        (core:1+ acc))
+                        (mu:add 1 acc))
                    acc))
             0
             lambda)))))

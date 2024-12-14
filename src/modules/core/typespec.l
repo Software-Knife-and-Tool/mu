@@ -32,14 +32,14 @@
                  (core:raise spec-list 'core:typep "satisfies typespec format"))))
      ,(mu:cons 'not (:lambda (value spec-list)
                        (:if (mu:eq 1 (mu:length spec-list))
-                            (core:lognot (core:typep value (mu:car spec-list)))
+                            (core:%not (core:typep value (mu:car spec-list)))
                             (core:raise spec-list 'core:typep "missing typespec format"))))
      ,(mu:cons 'and (:lambda (value spec-list)
                        (:if (core:null spec-list)
                             :t
                             (core:%foldl
                              (:lambda (elt acc)
-                                (core:logand acc (core:typep value elt)))
+                                (core:%and acc (core:typep value elt)))
                              :t
                              spec-list))))
      ,(mu:cons 'or (:lambda (value spec-list)
@@ -47,7 +47,7 @@
                           ()
                           (core:%foldl
                            (:lambda (elt acc)
-                             (core:logor acc (core:typep value elt)))
+                             (core:%or acc (core:typep value elt)))
                            :t
                            spec-list))))))
 

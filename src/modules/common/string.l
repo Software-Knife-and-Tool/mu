@@ -51,7 +51,7 @@
                    (:if (mu:less-than index length)
                         ((:lambda ()
                             (common:write (common:vector-ref string index) () stream)
-                            (core:1+ index)))
+                            (common:1+ index)))
                         index))
                 0)
                (:if escape
