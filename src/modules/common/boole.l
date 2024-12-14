@@ -12,7 +12,7 @@
          ((:lambda (index xor)
             (:if (mu:less-than index 55)
                  ((:lambda (value)
-                    (mu:cons (core:1+ index) value))
+                    (mu:cons (mu:add 1 index) value))
                    (:if (mu:eq (mu:logand (mu:ash 1 index) integer-1)
                                (mu:logand (mu:ash 1 index) integer-2))
                         xor

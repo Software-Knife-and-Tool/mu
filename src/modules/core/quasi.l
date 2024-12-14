@@ -19,7 +19,7 @@
    (:lambda (stream)
      (mu:fix
       (:lambda (loop)
-        (:if (core:logor (core:streamp loop) (core:charp loop))
+        (:if (core:%or (core:streamp loop) (core:charp loop))
              loop
              ((:lambda (ch)
                 (:if (core:null ch)

@@ -10,8 +10,8 @@
 
 (mu:intern core "symbolp"
    (:lambda (t)
-     (core:logor
-      (core:logor (core:keywordp t) (mu:eq () t))
+     (core:%or
+      (core:%or (core:keywordp t) (mu:eq () t))
       (mu:eq 'symbol (core:type-of t)))))
 
 ;;;
@@ -33,7 +33,7 @@
 
 (mu:intern core "%genkey"
    (:lambda (prefix)
-      (:if (core:logor (core:null prefix) (core:charp prefix))
+      (:if (core:%or (core:null prefix) (core:charp prefix))
            ((:lambda (counter)
               (mu:write (mu:add counter 1) () core:%gensym-counter%)
               (core:%make-keyword
