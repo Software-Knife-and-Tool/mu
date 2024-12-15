@@ -214,10 +214,14 @@ The *sysinfo* feature is disabled on *macos* builds.
 
 ------
 
-As of 0.1.76, the *mu* distribution includes tools for configuring and development of the system. The *mux* tool provides these utilities:
+As of 0.1.76, the *mu* distribution includes tools for configuring and development of the system. 
+
+The  *mux* binary is part of a release, found at `/opt/mu/bin/mux`.
+
+The *mux* tool provides these utilities:
 
 ```
-Usage: mux 0.0.12 command [option...]
+Usage: mux 0.0.13 command [option...]
   command:
     help                               ; this message
     version                            ; mux version

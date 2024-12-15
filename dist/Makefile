@@ -39,6 +39,7 @@ dist:
 	@install -m 755 ./mu-server $(BASE)/bin
 	@install -m 755 ./mu-sh $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
+	@install -m 755 ./mux $(BASE)/bin
 	@install -m 755 ./sysgen $(BASE)/bin
 
 	@install -d $(BASE)/doc/html
