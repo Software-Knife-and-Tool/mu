@@ -19,6 +19,7 @@ impl Symbols {
         ) {
             None => (),
             Some(options) => {
+                println!("{:?}", options.modes);
                 if options.modes.len() != 1 {
                     eprintln!("illegal options: {argv:?}");
                     std::process::exit(-1)

@@ -101,7 +101,7 @@ impl Env {
     }
 
     /// constructor
-    pub fn new(config: Config, image: Option<Vec<u8>>) -> Self {
+    pub fn new(config: Config, image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
         Env(<core::env::Env as core::lib::Core>::add_env(
             core::env::Env::new(config, image),
         ))
@@ -262,7 +262,7 @@ impl Env {
     }
 
     /// get environment image
-    pub fn image(&self) -> exception::Result<Vec<u8>> {
+    pub fn image(&self) -> exception::Result<(Vec<u8>, Vec<u8>)> {
         let env_ref = block_on(LIB.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 

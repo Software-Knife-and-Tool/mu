@@ -4,10 +4,10 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-getopt = "1.1.3"
-object = {version = "0.35.0", features = [ "build_core" ]}
-json = "0.12.4"
+getopt = "1.1"
+object = {version = "0.35", features = [ "build_core" ]}
+json = "0.12"
 mu = { path = "../.." }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = "0.6.0"
+tikv-jemallocator = "0.6"

@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["me <putnamjm.design@gmail.com>"]
 
 [workspace]
-members = [ "src/mu-*", "tools/mux", "tools/sysgen" ]
+members = [ "src/mu-*", "src/mux", "src/sysgen" ]
 resolver = "2"
 
 [lib]
@@ -36,6 +36,7 @@ inherits = "release"
 
 [dependencies]
 async-std = "1.13"
+bincode = "1.3"
 cpu-time = "1.0"
 ctrlc = "3.4"
 futures = { version = "0.3", features = [ "executor", "thread-pool" ]}
