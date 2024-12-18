@@ -8,4 +8,5 @@
  "core/fasl"
  '((:version . "0.0.1")
    (:lang    . :mu)
+   (:ns      . "core")
    (:load    . ("compile.l" "load.l"))))

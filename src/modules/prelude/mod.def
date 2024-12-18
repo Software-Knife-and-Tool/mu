@@ -8,4 +8,5 @@
  "prelude"
  '((:version . "0.0.1")
    (:lang    . :mu)
+   (:ns      . "prelude")
    (:load    . ("prelude.l" "list.l" "loader.l"))))

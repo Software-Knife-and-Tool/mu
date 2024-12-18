@@ -10,6 +10,26 @@
    (:lambda ()
      (core:%mapcar mu:symbol-name (mu:namespace-symbols core:%modules%))))
 
+(mu:intern core "module-version"
+   (:lambda (module)
+     (:if (core:stringp module)
+          ((:lambda (module-def)
+             (:if module-def
+               (mu:cdr (core:%assq :version module-def))
+               (core:raise module 'core:module-version "no such module")))
+           (mu:symbol-value (mu:find core:%modules% module)))
+     (core:raise module 'core:module-version "not a module name"))))
+
+(mu:intern core "module-namespace"
+   (:lambda (module)
+     (:if (core:stringp module)
+          ((:lambda (module-def)
+             (:if module-def
+                  (mu:cdr (core:%assq :ns module-def))
+                  (core:raise module 'core:module-namespace "no such module")))
+           (mu:symbol-value (mu:find core:%modules% module)))
+     (core:raise module 'core:module-namespace "not a module name"))))
+
 ;;;
 ;;; utilities
 ;;;

@@ -8,5 +8,6 @@
  "prelude/repl"
  '((:version . "0.0.1")
    (:lang . :mu)
+   (:ns   . "prelude")
    (:require "prelude")
    (:load "break.l" "loop.l")))

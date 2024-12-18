@@ -8,4 +8,5 @@
  "core"
  '((:version . "0.0.1")
    (:lang    . :mu)
+   (:ns      . "core")
    (:load    . ("core.l"))))

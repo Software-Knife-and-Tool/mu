@@ -8,5 +8,6 @@
  "common/metrics"
  '((:version . "0.0.1")
    (:lang    . :mu)
+   (:ns      . "common")
    (:require . ("common"))
    (:load    . ("room.l" "time.l"))))
