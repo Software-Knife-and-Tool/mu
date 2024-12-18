@@ -8,6 +8,7 @@
  "common"
  '((:version . "0.0.1")
    (:lang    . :mu)
+   (:ns      . "core")
    (:require . ("core"))
    (:load    . (
                 "common.l"
