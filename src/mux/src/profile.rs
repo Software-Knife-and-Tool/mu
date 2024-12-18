@@ -8,7 +8,7 @@ pub struct Profile {}
 
 impl Profile {
     pub fn profile(argv: &Vec<String>, _home: &str) {
-        match Options::parse_options(argv, &[], &["config", "verbose"]) {
+        match Options::parse_options(argv, &[], &["profile-config", "verbose"]) {
             None => (),
             Some(options) => {
                 let config_opt = Options::opt_value(&options, &Opt::Config("".to_string()));

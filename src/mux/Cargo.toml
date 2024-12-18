@@ -1,0 +1,18 @@
+[package]
+name = "mux"
+version = "0.0.13"
+edition = "2021"
+
+[dependencies]
+capitalize = "0.3"
+object = { version = "0.35", features = [ "build_core" ] }
+json = "0.12"
+getopts = "0.2"
+git2 = "0.19"
+lazy_static = "1.4"
+mu = { git = "https://github.com/Software-Knife-and-Tool/mu.git" }
+public-api = "0.35"
+rust-fsm = "0.7"
+rustdoc-json = "0.9"
+temp-file = "0.1"
+upon = "0.8"

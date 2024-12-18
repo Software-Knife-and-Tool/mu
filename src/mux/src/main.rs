@@ -6,6 +6,7 @@ mod build;
 mod clean;
 mod commit;
 mod env;
+mod image;
 mod init;
 mod install;
 mod options;
@@ -23,8 +24,9 @@ use {
         clean::Clean,
         commit::Commit,
         env::Env,
-        install::Install,
+        image::image::Image,
         init::Init,
+        install::Install,
         options::Options,
         profile::Profile,
         repl::Repl,
@@ -33,7 +35,7 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.13";
+const VERSION: &str = "0.0.14";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
@@ -45,14 +47,17 @@ pub fn usage() {
     println!("    env                                ; print development environment");
     println!("    build     release | profile | debug");
     println!("                                       ; build mu system, release is default");
+    println!("    image     build --out=path | [--image=path | -config=config] *[--load=path | --eval=sexpr]] |");
+    println!("              view --image=path");
+    println!("                                       ; manage heap images");
+    println!("    symbols   reference [--module=name] |");
+    println!("              crossref [--module=name]  |");
+    println!("              metrics [--module=name]");
+    println!("                                       ; symbol reports, default to mu");
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    clean                              ; clean all artifacts");
     println!("    commit                             ; fmt and clippy, pre-commit checking");
-    println!("    repl      mu | core | prelude      ; repl: mu, core, and prelude namespaces");
-    println!(
-        "    symbols   reference | crossref | metrics [--namespace=name [--module-name=name]]"
-    );
-    println!("                                       ; symbol reports, defaults to core");
+    println!("    repl      mu | core | prelude      ; repl: mu, core, and prelude repls");
     println!("    test                               ; regression test suite");
     println!("    bench     base | current | footprint [--ntests=number]");
     println!("    profile   --config=path            ; create profile");
@@ -103,6 +108,7 @@ pub fn main() {
                 "build" => Build::build(&argv, &home),
                 "clean" => Clean::clean(&argv, &home),
                 "env" => Env::printenv(&argv, &home),
+                "image" => Image::image(&argv, &home),
                 "install" => Install::install(&argv, &home),
                 "profile" => Profile::profile(&argv, &home),
                 "repl" => Repl::repl(&argv, &home),

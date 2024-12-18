@@ -12,15 +12,15 @@ pub struct Image {
 impl Image {}
 
 pub trait Core {
-    fn image(&self) -> Vec<u8>;
+    fn image(&self) -> (Vec<u8>, Vec<u8>);
 }
 
 impl Core for Env {
-    fn image(&self) -> Vec<u8> {
+    fn image(&self) -> (Vec<u8>, Vec<u8>) {
         let heap_ref = block_on(self.heap.write());
         let image = heap_ref.heap_slice();
 
-        image.to_vec()
+        (image.to_vec(), vec![])
     }
 }
 

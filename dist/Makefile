@@ -47,7 +47,7 @@ dist:
 	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
 
 	@install -m 644 $(SRC)/dist/mu.l $(BASE)/lib
-	@install -m 644 -D -t $(BASE)/lib/sysgen $(TOOLS)/sysgen/templates/*
+	@install -m 644 -D -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
 	@install -m 644 $(SRC)/image/image.l $(BASE)/lib
 
 	@for module in $(MODULES); do	\

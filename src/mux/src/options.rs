@@ -12,9 +12,13 @@ pub struct Options {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Opt {
     Config(String),
+    Eval(String),
+    Image(String),
+    Load(String),
     Module(String),
     Namespace(String),
     Ntests(String),
+    Out(String),
     Prof(String),
     Ref(String),
     Verbose,
@@ -23,6 +27,7 @@ pub enum Opt {
 #[derive(PartialEq, Debug, Clone)]
 pub enum Mode {
     Base,
+    Build,
     Core,
     Crossref,
     Current,
@@ -34,6 +39,7 @@ pub enum Mode {
     Profile,
     Reference,
     Release,
+    View,
 }
 
 impl Options {
@@ -58,6 +64,10 @@ impl Options {
             Some(opt) => match opt {
                 Opt::Config(str)
                 | Opt::Module(str)
+                | Opt::Image(str)
+                | Opt::Load(str)
+                | Opt::Out(str)
+                | Opt::Eval(str)
                 | Opt::Namespace(str)
                 | Opt::Prof(str)
                 | Opt::Ref(str)
@@ -71,9 +81,13 @@ impl Options {
     pub fn opt_name(opt: Opt) -> String {
         match opt {
             Opt::Config(_) => "config",
+            Opt::Eval(_) => "exec",
+            Opt::Image(_) => "image",
+            Opt::Load(_) => "load",
             Opt::Module(_) => "module",
             Opt::Namespace(_) => "namespace",
             Opt::Ntests(_) => "ntests",
+            Opt::Out(_) => "out",
             Opt::Prof(_) => "prof",
             Opt::Ref(_) => "ref",
             Opt::Verbose => "verbose",
@@ -81,18 +95,18 @@ impl Options {
         .to_string()
     }
 
-    pub fn parse_options(
-        argv: &Vec<String>,
-        mode_list: &[&str],
-        opt_list: &[&str],
-    ) -> Option<Options> {
+    pub fn parse_options(argv: &Vec<String>, modes: &[&str], opt_list: &[&str]) -> Option<Options> {
         let mut opts = getopts::Options::new();
 
         opts.optflag("", "verbose", "");
         opts.optopt("", "config", "", "VALUE");
+        opts.optopt("", "eval", "", "VALUE");
+        opts.optopt("", "image", "", "VALUE");
+        opts.optopt("", "load", "", "VALUE");
         opts.optopt("", "module", "", "VALUE");
         opts.optopt("", "namespace", "", "VALUE");
         opts.optopt("", "ntests", "", "VALUE");
+        opts.optopt("", "out", "", "VALUE");
         opts.optopt("", "prof", "", "VALUE");
         opts.optopt("", "ref", "", "VALUE");
 
@@ -103,7 +117,7 @@ impl Options {
             .collect::<Vec<&str>>();
 
         for mode in &mode_args {
-            if !mode_list.iter().any(|el| el == mode) {
+            if !modes.iter().any(|el| el == mode) {
                 eprintln!("mux: unknown mode {mode:?}");
                 return None;
             }
@@ -113,6 +127,7 @@ impl Options {
             .iter()
             .map(|mode| match *mode {
                 "base" => Mode::Base,
+                "build" => Mode::Build,
                 "core" => Mode::Core,
                 "crossref" => Mode::Crossref,
                 "current" => Mode::Current,
@@ -124,6 +139,7 @@ impl Options {
                 "profile" => Mode::Profile,
                 "reference" => Mode::Reference,
                 "release" => Mode::Release,
+                "view" => Mode::View,
                 _ => panic!(),
             })
             .collect();
@@ -156,13 +172,17 @@ impl Options {
                 .iter()
                 .filter(|opt| opts.opt_present(opt))
                 .map(|opt| match *opt {
-                    "verbose" => Opt::Verbose,
                     "config" => Opt::Config(opts.opt_str("config").unwrap()),
+                    "eval" => Opt::Eval(opts.opt_str("eval").unwrap()),
+                    "image" => Opt::Image(opts.opt_str("image").unwrap()),
+                    "load" => Opt::Load(opts.opt_str("load").unwrap()),
                     "module" => Opt::Module(opts.opt_str("module").unwrap()),
                     "namespace" => Opt::Namespace(opts.opt_str("namespace").unwrap()),
                     "ntests" => Opt::Ntests(opts.opt_str("ntests").unwrap()),
+                    "out" => Opt::Out(opts.opt_str("out").unwrap()),
                     "prof" => Opt::Prof(opts.opt_str("prof").unwrap()),
                     "ref" => Opt::Ref(opts.opt_str("ref").unwrap()),
+                    "verbose" => Opt::Verbose,
                     _ => panic!(),
                 })
                 .collect::<Vec<Opt>>(),

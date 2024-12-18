@@ -1,10 +1,6 @@
-//  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
-//  SPDX-License-Identifier: MIT
-
-//! image writer
 #[allow(unused_imports)]
 use {
-    crate::image::Image,
+    crate::image::heap_info::{HeapInfo, HeapInfoBuilder},
     object::{
         build::elf,
         elf::{FileHeader64, SectionHeader64},
@@ -21,35 +17,35 @@ use {
 
 pub struct Writer {
     pub path: String,
-    pub ident: Vec<u8>,
-    pub image: (Vec<u8>, Vec<u8>),
+    pub image: HeapInfo,
 }
 
 impl Writer {
-    pub fn with(path: &str, ident: Vec<u8>, image: (Vec<u8>, Vec<u8>)) -> Result<Self> {
+    pub fn with_writer(path: &str, allocator: HeapInfo) -> Result<Self> {
         Ok(Writer {
             path: path.to_string(),
-            ident: ident.clone(),
-            image,
+            image: allocator,
         })
     }
 
     fn image(&self, elf: &mut Object) {
         let image_id = elf.add_section(
             elf.segment_name(StandardSegment::Data).to_vec(),
-            ".ident".as_bytes().to_vec(),
-            SectionKind::Data,
-        );
-
-        elf.set_section_data(image_id, self.ident.clone(), 8);
-
-        let image_id = elf.add_section(
-            elf.segment_name(StandardSegment::Data).to_vec(),
             ".image".as_bytes().to_vec(),
             SectionKind::Data,
         );
 
-        elf.set_section_data(image_id, self.image.0.clone(), 8);
+        elf.set_section_data(image_id, self.image.image.clone(), 8);
+
+        let allocator_data: Vec<u8> = self.image.to_json().unwrap().into_bytes();
+
+        let allocator_id = elf.add_section(
+            elf.segment_name(StandardSegment::Data).to_vec(),
+            ".allocator".as_bytes().to_vec(),
+            SectionKind::Data,
+        );
+
+        elf.set_section_data(allocator_id, allocator_data, 8);
     }
 
     pub fn write(&self) -> Result<()> {

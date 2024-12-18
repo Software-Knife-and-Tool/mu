@@ -48,7 +48,7 @@ pub struct Env {
 }
 
 impl Env {
-    pub fn new(config: Config, _image: Option<Vec<u8>>) -> Self {
+    pub fn new(config: Config, _image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
         let heap = BumpAllocator::new(config.npages, Tag::NTYPES);
 
         let mut env = Env {
