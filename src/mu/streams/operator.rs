@@ -2,43 +2,24 @@
 //  SPDX-License-Identifier: MIT
 
 //! stream operators
-#![allow(unused_imports)]
 use {
     crate::{
         core::{
+            core::{Core, CORE},
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
-            lib::{Lib, LIB},
             types::Tag,
         },
         streams::system::{StringDirection, SystemStream, SystemStreamBuilder},
-        types::{
-            stream::{Core as _, Stream},
-            symbol::{Core as _, Symbol},
-        },
+        types::{stream::Stream, symbol::Symbol},
     },
-    async_std::{
-        fs,
-        io::{self, BufReader, BufWriter, ReadExt, WriteExt},
-        task,
-    },
+    async_std::{io::WriteExt, task},
     std::{io::Write, str},
 };
 
 use futures::executor::block_on;
 use futures_locks::RwLock;
-
-pub trait Core {
-    fn open_file(_: &Env, _: &str, _: bool) -> exception::Result<Tag>;
-    fn open_input_file(_: &Env, _: &str) -> exception::Result<Tag>;
-    fn open_output_file(_: &Env, _: &str) -> exception::Result<Tag>;
-    fn open_string(_: &Env, _: &str, _: StringDirection) -> exception::Result<Tag>;
-    fn open_input_string(_: &Env, _: &str) -> exception::Result<Tag>;
-    fn open_output_string(_: &Env, _: &str) -> exception::Result<Tag>;
-    fn open_bidir_string(_: &Env, _: &str) -> exception::Result<Tag>;
-    fn open_std_stream(_: SystemStream, _: &Lib) -> exception::Result<Tag>;
-}
 
 impl SystemStream {
     pub fn is_file(&self) -> Option<bool> {
@@ -98,10 +79,8 @@ impl SystemStream {
             }
         }
     }
-}
 
-impl Core for SystemStream {
-    fn open_file(env: &Env, path: &str, is_input: bool) -> exception::Result<Tag> {
+    pub fn open_file(env: &Env, path: &str, is_input: bool) -> exception::Result<Tag> {
         let system_stream = if is_input {
             SystemStreamBuilder::new().file(path.into()).input().build()
         } else {
@@ -114,7 +93,7 @@ impl Core for SystemStream {
         match system_stream {
             None => Err(Exception::new(env, Condition::Open, "mu:open", Tag::nil())),
             Some(_) => {
-                let mut streams_ref = block_on(LIB.streams.write());
+                let mut streams_ref = block_on(CORE.streams.write());
                 let index = streams_ref.len();
 
                 streams_ref.push(RwLock::new(Stream {
@@ -134,15 +113,15 @@ impl Core for SystemStream {
         }
     }
 
-    fn open_input_file(env: &Env, path: &str) -> exception::Result<Tag> {
+    pub fn open_input_file(env: &Env, path: &str) -> exception::Result<Tag> {
         Self::open_file(env, path, true)
     }
 
-    fn open_output_file(env: &Env, path: &str) -> exception::Result<Tag> {
+    pub fn open_output_file(env: &Env, path: &str) -> exception::Result<Tag> {
         Self::open_file(env, path, false)
     }
 
-    fn open_string(env: &Env, contents: &str, dir: StringDirection) -> exception::Result<Tag> {
+    pub fn open_string(env: &Env, contents: &str, dir: StringDirection) -> exception::Result<Tag> {
         let system_stream = match dir {
             StringDirection::Input => SystemStreamBuilder::new()
                 .string(contents.into())
@@ -161,7 +140,7 @@ impl Core for SystemStream {
         match system_stream {
             None => Err(Exception::new(env, Condition::Open, "env:open", Tag::nil())),
             Some(_) => {
-                let mut streams_ref = block_on(LIB.streams.write());
+                let mut streams_ref = block_on(CORE.streams.write());
                 let index = streams_ref.len();
 
                 streams_ref.push(RwLock::new(Stream {
@@ -185,19 +164,19 @@ impl Core for SystemStream {
         }
     }
 
-    fn open_input_string(env: &Env, path: &str) -> exception::Result<Tag> {
+    pub fn open_input_string(env: &Env, path: &str) -> exception::Result<Tag> {
         Self::open_string(env, path, StringDirection::Input)
     }
 
-    fn open_output_string(env: &Env, path: &str) -> exception::Result<Tag> {
+    pub fn open_output_string(env: &Env, path: &str) -> exception::Result<Tag> {
         Self::open_string(env, path, StringDirection::Output)
     }
 
-    fn open_bidir_string(env: &Env, path: &str) -> exception::Result<Tag> {
+    pub fn open_bidir_string(env: &Env, path: &str) -> exception::Result<Tag> {
         Self::open_string(env, path, StringDirection::Bidir)
     }
 
-    fn open_std_stream(std_stream: SystemStream, core: &Lib) -> exception::Result<Tag> {
+    pub fn open_std_stream(std_stream: SystemStream, core: &Core) -> exception::Result<Tag> {
         match std_stream {
             SystemStream::StdInput | SystemStream::StdOutput | SystemStream::StdError => {
                 let mut streams_ref = block_on(core.streams.write());

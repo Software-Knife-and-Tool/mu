@@ -4,27 +4,19 @@
 //! env fixnum type
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
         direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,
-        exception::{self, Condition, Exception, Result},
+        exception::{self, Condition, Exception},
         frame::Frame,
         types::{Tag, Type},
     },
-    streams::write::Core as _,
-    types::{
-        cons::{Cons, Core as _},
-        symbol::{Core as _, Symbol},
-        vector::Vector,
-    },
-    vectors::core::Core as _,
+    streams::write::Write as _,
+    types::{cons::Cons, symbol::Symbol, vector::Vector},
 };
 
 #[derive(Copy, Clone)]
-#[allow(dead_code)]
-pub enum Fixnum {
-    Direct(u64),
-}
+pub struct Fixnum {}
 
 // tag from u32
 impl From<u32> for Tag {
@@ -75,29 +67,12 @@ impl Fixnum {
             _ => panic!(),
         }
     }
-}
 
-pub trait Core {
-    fn with(_: &Env, _: usize) -> exception::Result<Tag>;
-    fn with_or_panic(_: usize) -> Tag;
-    fn with_i64(env: &Env, fx: i64) -> exception::Result<Tag>;
-    fn with_i64_or_panic(_: i64) -> Tag;
-    fn with_u64(_: &Env, _: u64) -> exception::Result<Tag>;
-    fn with_u64_or_panic(_: u64) -> Tag;
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> Result<()>;
-    fn view(_: &Env, _: Tag) -> Tag;
-}
-
-//
-// assume that u64 and usize are the same size
-// and an as cast works without losing information
-//
-impl Core for Fixnum {
-    fn with_or_panic(fx: usize) -> Tag {
+    pub fn with_or_panic(fx: usize) -> Tag {
         Self::with_u64_or_panic(fx as u64)
     }
 
-    fn with_u64_or_panic(fx: u64) -> Tag {
+    pub fn with_u64_or_panic(fx: u64) -> Tag {
         match i64::try_from(fx) {
             Err(_) => panic!(),
             Ok(i64_) => {
@@ -114,7 +89,7 @@ impl Core for Fixnum {
         }
     }
 
-    fn with_i64_or_panic(fx: i64) -> Tag {
+    pub fn with_i64_or_panic(fx: i64) -> Tag {
         if !Fixnum::is_i56(fx) {
             panic!()
         }
@@ -126,23 +101,7 @@ impl Core for Fixnum {
         )
     }
 
-    fn with(env: &Env, fx: usize) -> exception::Result<Tag> {
-        Self::with_u64(env, fx as u64)
-    }
-
-    fn with_i64(env: &Env, fx: i64) -> exception::Result<Tag> {
-        if !Fixnum::is_i56(fx) {
-            return Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil()));
-        }
-
-        Ok(DirectTag::to_tag(
-            (fx & (2_i64.pow(56) - 1)) as u64,
-            DirectExt::ExtType(ExtType::Fixnum),
-            DirectType::Ext,
-        ))
-    }
-
-    fn with_u64(env: &Env, fx: u64) -> exception::Result<Tag> {
+    pub fn with_u64(env: &Env, fx: u64) -> exception::Result<Tag> {
         match i64::try_from(fx) {
             Err(_) => Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil())),
             Ok(i64_) => {
@@ -159,11 +118,11 @@ impl Core for Fixnum {
         }
     }
 
-    fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
+    pub fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
         env.write_string(&Self::as_i64(tag).to_string(), stream)
     }
 
-    fn view(env: &Env, fx: Tag) -> Tag {
+    pub fn view(env: &Env, fx: Tag) -> Tag {
         Vector::from(vec![fx]).evict(env)
     }
 }

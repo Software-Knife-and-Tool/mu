@@ -8,11 +8,7 @@ use {
             env::Env,
             types::{Tag, Type},
         },
-        types::{
-            fixnum::Fixnum,
-            float::Float,
-            vector::{Core as _, Vector},
-        },
+        types::{fixnum::Fixnum, float::Float, vector::Vector},
         vectors::image::{VecImageType, VectorImageType},
     },
     futures::executor::block_on,

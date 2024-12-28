@@ -4,30 +4,24 @@
 //! stream read functions
 use crate::{
     core::{
-        apply::Core as _,
-        compile::Core as _,
+        apply::Apply as _,
+        compile::Compile,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        lib::Lib,
         quasi::QuasiReader,
-        reader::{Core as _, EOL},
+        reader::{Reader, EOL},
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
     },
-    types::{
-        cons::{Cons, Core as _},
-        stream::{Core as _, Stream},
-        vector::Vector,
-    },
-    vectors::read::Core as _,
+    types::{cons::Cons, stream::Read as _, vector::Vector},
 };
 
-pub trait Core {
+pub trait Read {
     fn read_stream(&self, _: Tag, _: bool, _: Tag, _: bool) -> exception::Result<Tag>;
 }
 
-impl Core for Env {
+impl Read for Env {
     // read_stream:
     //
     //  returns:
@@ -35,7 +29,6 @@ impl Core for Env {
     //     Ok(eof_value) if end of file and eofp
     //     Ok(tag) if the read succeeded,
     //
-    #[allow(clippy::only_used_in_recursion)]
     fn read_stream(
         &self,
         stream: Tag,
@@ -43,7 +36,7 @@ impl Core for Env {
         eof_value: Tag,
         recursivep: bool,
     ) -> exception::Result<Tag> {
-        if Lib::read_ws(self, stream)?.is_none() {
+        if self.read_ws(stream)?.is_none() {
             return if eof_error_p {
                 Err(Exception::new(self, Condition::Eof, "mu:read", stream))
             } else {
@@ -51,7 +44,7 @@ impl Core for Env {
             };
         };
 
-        match Stream::read_char(self, stream)? {
+        match self.read_char(stream)? {
             None => {
                 if eof_error_p {
                     Err(Exception::new(self, Condition::Eof, "mu:read", stream))
@@ -61,9 +54,9 @@ impl Core for Env {
             }
             Some(ch) => match map_char_syntax(ch) {
                 Some(stype) => match stype {
-                    SyntaxType::Constituent => Lib::read_atom(self, ch, stream),
+                    SyntaxType::Constituent => self.read_atom(ch, stream),
                     SyntaxType::Macro => match ch {
-                        '#' => match Lib::sharpsign_macro(self, stream)? {
+                        '#' => match self.sharpsign_macro(stream)? {
                             Some(tag) => Ok(tag),
                             None => {
                                 Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
@@ -89,7 +82,7 @@ impl Core for Env {
                             }
                         }
                         ';' => {
-                            Lib::read_comment(self, stream)?;
+                            self.read_comment(stream)?;
 
                             Self::read_stream(self, stream, eof_error_p, eof_value, recursivep)
                         }

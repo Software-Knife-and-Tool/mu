@@ -2,9 +2,6 @@
 //  SPDX-License-Identifier: MIT
 
 //! ffi interface
-#![allow(unreachable_code)]
-#![allow(clippy::diverging_sub_expression)]
-
 use crate::features::feature::Feature;
 
 pub trait Ffi {

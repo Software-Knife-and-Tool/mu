@@ -5,28 +5,21 @@
 use {
     crate::{
         core::{
-            apply::Core as _,
+            apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
             types::{Tag, Type},
         },
-        streams::write::Core as _,
-        types::{
-            symbol::{Core as _, Symbol},
-            vector::Vector,
-        },
-        vectors::core::Core as _,
+        streams::write::Write as _,
+        types::{symbol::Symbol, vector::Vector},
     },
     std::ops::{Add, Div, Mul, Sub},
 };
 
 #[derive(Copy, Clone)]
-#[allow(dead_code)]
-pub enum Float {
-    Direct(u64),
-}
+pub struct Float {}
 
 impl From<f32> for Tag {
     fn from(fl: f32) -> Tag {
@@ -54,19 +47,12 @@ impl Float {
             _ => panic!(),
         }
     }
-}
 
-pub trait Core {
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn view(_: &Env, _: Tag) -> Tag;
-}
-
-impl Core for Float {
-    fn view(env: &Env, fl: Tag) -> Tag {
+    pub fn view(env: &Env, fl: Tag) -> Tag {
         Vector::from(vec![fl]).evict(env)
     }
 
-    fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
+    pub fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
         env.write_string(format!("{:.4}", Self::as_f32(env, tag)).as_str(), stream)
     }
 }

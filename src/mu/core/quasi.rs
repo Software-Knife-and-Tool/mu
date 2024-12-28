@@ -4,20 +4,14 @@
 //! quasiquote reader
 use crate::{
     core::{
-        compile::Core as _,
+        compile::Compile,
         env::Env,
         exception::{self, Condition, Exception},
-        lib::Lib,
-        reader::Core as _,
+        reader::Reader,
         types::Tag,
     },
-    streams::read::Core as _,
-    types::{
-        cons::{Cons, Core as _},
-        namespace::Namespace,
-        stream::{Core as _, Stream},
-        symbol::{Core as _, Symbol},
-    },
+    streams::read::Read,
+    types::{cons::Cons, namespace::Namespace, stream::Read as _, symbol::Symbol},
 };
 use std::fmt;
 
@@ -93,14 +87,14 @@ impl QuasiReader {
     }
 
     fn read_syntax(&self, env: &Env) -> exception::Result<Option<QuasiSyntax>> {
-        Lib::read_ws(env, self.stream)?;
+        env.read_ws(self.stream)?;
 
-        match Stream::read_char(env, self.stream)? {
+        match env.read_char(self.stream)? {
             None => Ok(None),
             Some(ch) => match ch {
                 '(' => Ok(Some(QuasiSyntax::ListStart)),
                 ')' => Ok(Some(QuasiSyntax::ListEnd)),
-                ',' => match Stream::read_char(env, self.stream)? {
+                ',' => match env.read_char(self.stream)? {
                     None => Err(Exception::new(
                         env,
                         Condition::Stream,
@@ -111,14 +105,14 @@ impl QuasiReader {
                         if ch == '@' {
                             Ok(Some(QuasiSyntax::CommaAt))
                         } else {
-                            Stream::unread_char(env, self.stream, ch).unwrap();
+                            env.unread_char(self.stream, ch).unwrap();
                             Ok(Some(QuasiSyntax::Comma))
                         }
                     }
                 },
                 '`' => Ok(Some(QuasiSyntax::Quasi)),
                 _ => {
-                    Stream::unread_char(env, self.stream, ch).unwrap();
+                    env.unread_char(self.stream, ch).unwrap();
                     Ok(Some(QuasiSyntax::Atom))
                 }
             },

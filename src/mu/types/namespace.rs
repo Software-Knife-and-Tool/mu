@@ -5,20 +5,20 @@
 use {
     crate::{
         core::{
-            apply::Core as _,
+            apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
+            gc::Gc,
             types::{Tag, Type},
         },
-        streams::write::Core as _,
+        streams::write::Write as _,
         types::{
-            cons::{Cons, Core as _},
-            symbol::{Core as _, Symbol},
-            vector::{Core as _, Vector},
+            cons::Cons,
+            symbol::{Symbol, GC as _},
+            vector::Vector,
         },
-        vectors::core::Core as _,
     },
     std::{collections::HashMap, str},
 };
@@ -29,6 +29,25 @@ use {futures::executor::block_on, futures_locks::RwLock};
 pub enum Namespace {
     Static(&'static RwLock<HashMap<String, Tag>>),
     Dynamic(RwLock<HashMap<String, Tag>>),
+}
+
+pub trait GC {
+    #[allow(dead_code)]
+    fn gc(&mut self, gc: &mut Gc, env: &Env);
+}
+
+impl GC for Namespace {
+    #[allow(dead_code)]
+    fn gc(&mut self, gc: &mut Gc, env: &Env) {
+        let hash_ref = block_on(match self {
+            Namespace::Static(hash) => hash.read(),
+            Namespace::Dynamic(ref hash) => hash.read(),
+        });
+
+        for (_, symbol) in hash_ref.iter() {
+            Symbol::mark(gc, env, *symbol)
+        }
+    }
 }
 
 impl Namespace {
@@ -258,14 +277,8 @@ impl Namespace {
 
         Some(symbol)
     }
-}
 
-pub trait Core {
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-}
-
-impl Core for Namespace {
-    fn write(env: &Env, ns: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+    pub fn write(env: &Env, ns: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         if escape {
             env.write_string(
                 &format!("#<:ns \"{}\">", Namespace::name(env, ns).unwrap()),

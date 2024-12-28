@@ -9,19 +9,14 @@ use crate::{
         env::Env,
         exception,
         frame::Frame,
-        indirect::{self, IndirectTag},
+        indirect::IndirectTag,
         types::{Tag, Type},
     },
     heaps::{allocator::AllocTypeInfo, bump_allocator::BumpAllocator},
     types::{
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        function::{Core as _, Function},
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
+        cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
         vector::Vector,
     },
-    vectors::core::Core as _,
 };
 
 use futures::executor::block_on;
@@ -41,14 +36,8 @@ pub struct Heap {
     pub allocator: BumpAllocator,
 }
 
-pub trait Core {
-    fn heap_size(_: &Env, _: Tag) -> usize;
-    fn heap_info(_: &Env) -> (usize, usize);
-    fn heap_type(_: &Env, _: Type) -> AllocTypeInfo;
-}
-
-impl Core for Heap {
-    fn heap_size(env: &Env, tag: Tag) -> usize {
+impl Heap {
+    pub fn heap_size(env: &Env, tag: Tag) -> usize {
         match tag.type_of() {
             Type::Cons => Cons::heap_size(env, tag),
             Type::Function => Function::heap_size(env, tag),
@@ -59,13 +48,13 @@ impl Core for Heap {
         }
     }
 
-    fn heap_info(env: &Env) -> (usize, usize) {
+    pub fn heap_info(env: &Env) -> (usize, usize) {
         let heap_ref = block_on(env.heap.read());
 
         (heap_ref.page_size, heap_ref.npages)
     }
 
-    fn heap_type(env: &Env, type_: Type) -> AllocTypeInfo {
+    pub fn heap_type(env: &Env, type_: Type) -> AllocTypeInfo {
         let heap_ref = block_on(env.heap.read());
         let alloc_ref = block_on(heap_ref.alloc_map.read());
         let alloc_type = block_on(alloc_ref[type_ as usize].read());
@@ -92,10 +81,7 @@ impl CoreFunction for Heap {
         ];
 
         for htype in INFOTYPE.iter() {
-            let type_map = Self::heap_type(
-                env,
-                <IndirectTag as indirect::Core>::to_indirect_type(*htype).unwrap(),
-            );
+            let type_map = Self::heap_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
 
             vec.extend(vec![
                 *htype,

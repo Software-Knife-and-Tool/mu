@@ -4,7 +4,7 @@
 //! env struct type
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -12,14 +12,8 @@ use crate::{
         indirect::IndirectTag,
         types::{Tag, TagType, Type},
     },
-    streams::write::Core as _,
-    types::{
-        cons::{Cons, Core as _},
-        stream::{Core as _, Stream},
-        symbol::{Core as _, Symbol},
-        vector::Vector,
-    },
-    vectors::core::Core as _,
+    streams::write::Write as _,
+    types::{cons::Cons, stream::Read, symbol::Symbol, vector::Vector},
 };
 
 use futures::executor::block_on;
@@ -31,10 +25,13 @@ pub struct Struct {
     pub vector: Tag,
 }
 
-impl Struct {
-    pub fn to_image(env: &Env, tag: Tag) -> Self {
-        let heap_ref = block_on(env.heap.read());
+pub trait GC {
+    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self;
+    fn mark(gc: &mut Gc, env: &Env, struct_: Tag);
+}
 
+impl GC for Struct {
+    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
         match tag.type_of() {
             Type::Struct => match tag {
                 Tag::Indirect(image) => Struct {
@@ -51,7 +48,21 @@ impl Struct {
         }
     }
 
-    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
+    fn mark(gc: &mut Gc, env: &Env, struct_: Tag) {
+        let mark = gc.mark_image(struct_).unwrap();
+
+        if !mark {
+            let vector = Self::gc_ref_image(&mut gc.lock, struct_).vector;
+
+            gc.mark(env, vector)
+        }
+    }
+}
+
+impl Struct {
+    pub fn to_image(env: &Env, tag: Tag) -> Self {
+        let heap_ref = block_on(env.heap.read());
+
         match tag.type_of() {
             Type::Struct => match tag {
                 Tag::Indirect(image) => Struct {
@@ -87,46 +98,24 @@ impl Struct {
         }
     }
 
-    pub fn mark(gc: &mut Gc, env: &Env, struct_: Tag) {
-        let mark = gc.mark_image(struct_).unwrap();
-
-        if !mark {
-            let vector = Self::gc_ref_image(&mut gc.lock, struct_).vector;
-
-            gc.mark(env, vector)
-        }
-    }
-}
-
-// core
-pub trait Core<'a> {
-    fn new(_: &Env, _: &str, _: Vec<Tag>) -> Self;
-    fn read(_: &Env, _: Tag) -> exception::Result<Tag>;
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn evict(&self, _: &Env) -> Tag;
-    fn view(_: &Env, _: Tag) -> Tag;
-    fn heap_size(_: &Env, _: Tag) -> usize;
-}
-
-impl Core<'_> for Struct {
-    fn new(env: &Env, key: &str, vec: Vec<Tag>) -> Self {
+    pub fn new(env: &Env, key: &str, vec: Vec<Tag>) -> Self {
         Struct {
             stype: Symbol::keyword(key),
             vector: Vector::from(vec).evict(env),
         }
     }
 
-    fn view(env: &Env, tag: Tag) -> Tag {
+    pub fn view(env: &Env, tag: Tag) -> Tag {
         let image = Self::to_image(env, tag);
 
         Vector::from(vec![image.stype, image.vector]).evict(env)
     }
 
-    fn heap_size(env: &Env, struct_: Tag) -> usize {
+    pub fn heap_size(env: &Env, struct_: Tag) -> usize {
         std::mem::size_of::<Struct>() + Vector::heap_size(env, Self::vector(env, struct_))
     }
 
-    fn write(env: &Env, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
+    pub fn write(env: &Env, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match tag {
             Tag::Indirect(_) => {
                 env.write_string("#s(", stream)?;
@@ -139,8 +128,8 @@ impl Core<'_> for Struct {
         }
     }
 
-    fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
-        match Stream::read_char(env, stream)? {
+    pub fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
+        match env.read_char(stream)? {
             Some('(') => {
                 let vec_list = match Cons::read(env, stream) {
                     Ok(list) => {
@@ -175,7 +164,7 @@ impl Core<'_> for Struct {
         }
     }
 
-    fn evict(&self, env: &Env) -> Tag {
+    pub fn evict(&self, env: &Env) -> Tag {
         let image: &[[u8; 8]] = &[self.stype.as_slice(), self.vector.as_slice()];
         let mut heap_ref = block_on(env.heap.write());
 

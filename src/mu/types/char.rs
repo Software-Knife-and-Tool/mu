@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! env character class
+#![allow(dead_code)]
 use crate::{
     core::{
         direct::{DirectExt, DirectTag, DirectType, ExtType},
@@ -9,16 +10,11 @@ use crate::{
         exception,
         types::Tag,
     },
-    streams::write::Core as _,
-    types::{
-        stream::{Core as _, Stream},
-        vector::Vector,
-    },
-    vectors::core::Core as _,
+    streams::write::Write as _,
+    types::{stream::Write as _, vector::Vector},
 };
 
 #[derive(Copy, Clone)]
-#[allow(dead_code)]
 pub enum Char {
     Direct(u64),
 }
@@ -37,15 +33,8 @@ impl Char {
     pub fn as_char(env: &Env, ch: Tag) -> char {
         ((ch.data(env) & 0xff) as u8) as char
     }
-}
 
-pub trait Core {
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn view(_: &Env, _: Tag) -> Tag;
-}
-
-impl Core for Char {
-    fn write(env: &Env, chr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+    pub fn write(env: &Env, chr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         let ch: u8 = (chr.data(env) & 0xff) as u8;
 
         if escape {
@@ -64,13 +53,13 @@ impl Core for Char {
 
             env.write_string(phrase, stream)?;
         } else {
-            Stream::write_char(env, stream, ch as char)?;
+            env.write_char(stream, ch as char)?;
         }
 
         Ok(())
     }
 
-    fn view(env: &Env, chr: Tag) -> Tag {
+    pub fn view(env: &Env, chr: Tag) -> Tag {
         Vector::from(vec![chr]).evict(env)
     }
 }

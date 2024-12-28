@@ -12,13 +12,14 @@ use crate::{
     },
     heaps::bump_allocator::BumpAllocator,
     types::{
-        cons::Cons,
-        function::Function,
+        cons::{Cons, GC as _},
+        function::{Function, GC as _},
         namespace::Namespace,
-        struct_::Struct,
-        symbol::{Core as _, Symbol},
+        struct_::{Struct, GC as _},
+        symbol::{Symbol, GC as _},
         vector::Vector,
     },
+    vectors::vector::GC as _,
 };
 
 use futures::executor::block_on;
@@ -37,6 +38,7 @@ pub enum GcMode {
 }
 
 impl Gc {
+    #[allow(dead_code)]
     fn add_root(env: &Env, tag: Tag) {
         let mut root_ref = block_on(env.gc_root.write());
 
@@ -106,14 +108,8 @@ impl Gc {
             }
         }
     }
-}
 
-pub trait Core {
-    fn gc(_: &Env) -> exception::Result<bool>;
-}
-
-impl Core for Gc {
-    fn gc(env: &Env) -> exception::Result<bool> {
+    pub fn gc(env: &Env) -> exception::Result<bool> {
         let root_ref = block_on(env.gc_root.write());
         let mut gc = Gc {
             lock: block_on(env.heap.write()),

@@ -5,29 +5,28 @@
 use {
     crate::{
         core::{
-            apply::Core as _,
+            apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::{Gc, HeapGcRef},
-            heap::{Core as _, Heap},
+            heap::Heap,
             indirect::IndirectTag,
             readtable::{map_char_syntax, SyntaxType},
             types::{Tag, TagType, Type},
         },
-        streams::write::Core as _,
-        types::{
-            namespace::Namespace,
-            stream::{Core as _, Stream},
-            vector::{Core as _, Vector},
-        },
-        vectors::core::Core as _,
+        streams::write::Write as _,
+        types::{namespace::Namespace, stream::Write as _, vector::Vector},
     },
     std::str,
 };
 
 use futures::executor::block_on;
+
+lazy_static! {
+    pub static ref UNBOUND: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
+}
 
 #[derive(Copy, Clone)]
 pub enum Symbol {
@@ -42,8 +41,73 @@ pub struct SymbolImage {
     pub value: Tag,
 }
 
-lazy_static! {
-    pub static ref UNBOUND: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
+pub trait GC {
+    fn gc_ref_image(_: &mut HeapGcRef, _: Tag) -> SymbolImage;
+    fn ref_name(_: &mut Gc, _: Tag) -> Tag;
+    fn ref_value(_: &mut Gc, _: Tag) -> Tag;
+    fn mark(_: &mut Gc, _: &Env, _: Tag);
+}
+
+impl GC for Symbol {
+    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> SymbolImage {
+        match tag.type_of() {
+            Type::Symbol => match tag {
+                Tag::Indirect(main) => SymbolImage {
+                    namespace: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize).unwrap(),
+                    ),
+                    name: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                    ),
+                    value: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
+                    ),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
+
+    fn ref_name(gc: &mut Gc, symbol: Tag) -> Tag {
+        match symbol.type_of() {
+            Type::Null | Type::Keyword => match symbol {
+                Tag::Direct(dir) => DirectTag::to_tag(
+                    dir.data(),
+                    DirectExt::Length(dir.ext() as usize),
+                    DirectType::String,
+                ),
+                _ => panic!(),
+            },
+            Type::Symbol => Self::gc_ref_image(&mut gc.lock, symbol).name,
+            _ => panic!(),
+        }
+    }
+
+    fn ref_value(gc: &mut Gc, symbol: Tag) -> Tag {
+        match symbol.type_of() {
+            Type::Null | Type::Keyword => symbol,
+            Type::Symbol => Self::gc_ref_image(&mut gc.lock, symbol).value,
+            _ => panic!(),
+        }
+    }
+
+    fn mark(gc: &mut Gc, env: &Env, symbol: Tag) {
+        match symbol {
+            Tag::Direct(_) => (),
+            Tag::Indirect(_) => {
+                let mark = gc.mark_image(symbol).unwrap();
+
+                if !mark {
+                    let name = Self::ref_name(gc, symbol);
+                    let value = Self::ref_value(gc, symbol);
+
+                    gc.mark(env, name);
+                    gc.mark(env, value);
+                }
+            }
+        }
+    }
 }
 
 impl Symbol {
@@ -71,26 +135,6 @@ impl Symbol {
     pub fn to_image(env: &Env, tag: Tag) -> SymbolImage {
         let heap_ref = block_on(env.heap.read());
 
-        match tag.type_of() {
-            Type::Symbol => match tag {
-                Tag::Indirect(main) => SymbolImage {
-                    namespace: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize).unwrap(),
-                    ),
-                    name: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
-                    ),
-                    value: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
-                    ),
-                },
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
-    }
-
-    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> SymbolImage {
         match tag.type_of() {
             Type::Symbol => match tag {
                 Tag::Indirect(main) => SymbolImage {
@@ -142,59 +186,7 @@ impl Symbol {
         }
     }
 
-    pub fn ref_name(gc: &mut Gc, symbol: Tag) -> Tag {
-        match symbol.type_of() {
-            Type::Null | Type::Keyword => match symbol {
-                Tag::Direct(dir) => DirectTag::to_tag(
-                    dir.data(),
-                    DirectExt::Length(dir.ext() as usize),
-                    DirectType::String,
-                ),
-                _ => panic!(),
-            },
-            Type::Symbol => Self::gc_ref_image(&mut gc.lock, symbol).name,
-            _ => panic!(),
-        }
-    }
-
-    pub fn ref_value(gc: &mut Gc, symbol: Tag) -> Tag {
-        match symbol.type_of() {
-            Type::Null | Type::Keyword => symbol,
-            Type::Symbol => Self::gc_ref_image(&mut gc.lock, symbol).value,
-            _ => panic!(),
-        }
-    }
-
-    pub fn mark(gc: &mut Gc, env: &Env, symbol: Tag) {
-        match symbol {
-            Tag::Direct(_) => (),
-            Tag::Indirect(_) => {
-                let mark = gc.mark_image(symbol).unwrap();
-
-                if !mark {
-                    let name = Self::ref_name(gc, symbol);
-                    let value = Self::ref_value(gc, symbol);
-
-                    gc.mark(env, name);
-                    gc.mark(env, value);
-                }
-            }
-        }
-    }
-}
-
-pub trait Core {
-    fn evict(&self, _: &Env) -> Tag;
-    fn heap_size(_: &Env, _: Tag) -> usize;
-    fn is_bound(_: &Env, _: Tag) -> bool;
-    fn keyword(_: &str) -> Tag;
-    fn parse(_: &Env, _: String) -> exception::Result<Tag>;
-    fn view(_: &Env, _: Tag) -> Tag;
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-}
-
-impl Core for Symbol {
-    fn view(env: &Env, symbol: Tag) -> Tag {
+    pub fn view(env: &Env, symbol: Tag) -> Tag {
         let vec = vec![
             Vector::from(format!(
                 "\"{}\"",
@@ -212,7 +204,7 @@ impl Core for Symbol {
         Vector::from(vec).evict(env)
     }
 
-    fn heap_size(env: &Env, symbol: Tag) -> usize {
+    pub fn heap_size(env: &Env, symbol: Tag) -> usize {
         let name_sz = Heap::heap_size(env, Self::name(env, symbol));
         let value_sz = Heap::heap_size(env, Self::value(env, symbol));
 
@@ -221,7 +213,7 @@ impl Core for Symbol {
             + if value_sz > 8 { value_sz } else { 0 }
     }
 
-    fn evict(&self, env: &Env) -> Tag {
+    pub fn evict(&self, env: &Env) -> Tag {
         match self {
             Symbol::Keyword(tag) => *tag,
             Symbol::Symbol(image) => {
@@ -245,7 +237,7 @@ impl Core for Symbol {
         }
     }
 
-    fn keyword(name: &str) -> Tag {
+    pub fn keyword(name: &str) -> Tag {
         let str = name.as_bytes();
         let len = str.len();
 
@@ -264,7 +256,7 @@ impl Core for Symbol {
         )
     }
 
-    fn parse(env: &Env, token: String) -> exception::Result<Tag> {
+    pub fn parse(env: &Env, token: String) -> exception::Result<Tag> {
         for ch in token.chars() {
             match map_char_syntax(ch) {
                 Some(SyntaxType::Constituent) => (),
@@ -316,13 +308,13 @@ impl Core for Symbol {
         }
     }
 
-    fn write(env: &Env, symbol: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
+    pub fn write(env: &Env, symbol: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
         match symbol.type_of() {
             Type::Null | Type::Keyword => match str::from_utf8(&symbol.data(env).to_le_bytes()) {
                 Ok(s) => {
-                    Stream::write_char(env, stream, ':').unwrap();
+                    env.write_char(stream, ':').unwrap();
                     for nth in 0..DirectTag::length(symbol) {
-                        Stream::write_char(env, stream, s.as_bytes()[nth] as char)?;
+                        env.write_char(stream, s.as_bytes()[nth] as char)?;
                     }
 
                     Ok(())
@@ -349,7 +341,7 @@ impl Core for Symbol {
         }
     }
 
-    fn is_bound(env: &Env, symbol: Tag) -> bool {
+    pub fn is_bound(env: &Env, symbol: Tag) -> bool {
         !Self::value(env, symbol).eq_(&UNBOUND)
     }
 }

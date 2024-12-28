@@ -2,20 +2,15 @@
 //  SPDX-License-Identifier: MIT
 
 //! env stream type
-#![allow(unused_braces)]
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(clippy::identity_op)]
-
 use crate::{
     core::{
+        core::Core,
         env::Env,
         exception::{self, Condition, Exception},
-        lib::Lib,
         types::Tag,
     },
-    streams::{operator::Core as _, system::SystemStream},
-    types::symbol::{Core as _, Symbol},
+    streams::system::SystemStream,
+    types::symbol::Symbol,
 };
 
 pub struct StreamBuilder {
@@ -83,7 +78,7 @@ impl StreamBuilder {
         self
     }
 
-    pub fn std_build(&self, core: &Lib) -> exception::Result<Tag> {
+    pub fn std_build(&self, core: &Core) -> exception::Result<Tag> {
         match self.stdin {
             Some(_) => SystemStream::open_std_stream(SystemStream::StdInput, core),
             None => match self.stdout {
@@ -96,7 +91,7 @@ impl StreamBuilder {
         }
     }
 
-    pub fn build(&self, env: &Env, core: &Lib) -> exception::Result<Tag> {
+    pub fn build(&self, env: &Env, core: &Core) -> exception::Result<Tag> {
         match &self.file {
             Some(path) => match self.input {
                 Some(_) => SystemStream::open_input_file(env, path),

@@ -4,33 +4,32 @@
 //! stream write functions
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
         env::Env,
         exception::{self},
         frame::Frame,
         types::{Tag, Type},
     },
     types::{
-        char::{Char, Core as _},
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        float::{Core as _, Float},
-        function::{Core as _, Function},
-        namespace::{Core as _, Namespace},
-        stream::{Core as _, Stream},
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
+        char::Char,
+        cons::Cons,
+        fixnum::Fixnum,
+        float::Float,
+        function::Function,
+        namespace::Namespace,
+        stream::{Stream, Write as _},
+        struct_::Struct,
+        symbol::Symbol,
         vector::Vector,
     },
-    vectors::core::Core as _,
 };
 
-pub trait Core {
+pub trait Write {
     fn write_stream(&self, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn write_string(&self, _: &str, _: Tag) -> exception::Result<()>;
 }
 
-impl Core for Env {
+impl Write for Env {
     fn write_stream(&self, tag: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         if stream.type_of() != Type::Stream {
             panic!("{:?}", stream.type_of())
@@ -59,7 +58,7 @@ impl Core for Env {
         }
 
         for ch in str.chars() {
-            Stream::write_char(self, stream, ch)?;
+            self.write_char(stream, ch)?;
         }
 
         Ok(())

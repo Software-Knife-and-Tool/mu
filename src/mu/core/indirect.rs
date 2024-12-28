@@ -7,7 +7,7 @@
 use crate::{
     core::types::{Tag, TagType, Type},
     modular_bitfield::specifiers::{B2, B59},
-    types::symbol::{Core as _, Symbol},
+    types::symbol::Symbol,
 };
 
 // little-endian tag format
@@ -40,12 +40,8 @@ lazy_static! {
     ];
 }
 
-pub trait Core {
-    fn to_indirect_type(_: Tag) -> Option<Type>;
-}
-
-impl Core for IndirectTag {
-    fn to_indirect_type(keyword: Tag) -> Option<Type> {
+impl IndirectTag {
+    pub fn to_indirect_type(keyword: Tag) -> Option<Type> {
         TYPEMAP
             .iter()
             .copied()

@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! env heap
+#![allow(dead_code)]
 use {
     crate::heaps::allocator::{AllocTypeInfo, AllocatorImageInfo},
     memmap, page_size,

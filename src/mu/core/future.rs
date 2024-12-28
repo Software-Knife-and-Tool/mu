@@ -2,26 +2,16 @@
 //  SPDX-License-Identifier: MIT
 
 //! futures
-#[allow(unused_imports)]
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
+        core::CORE,
         env::Env,
-        exception::{self, Condition, Core as _, Exception},
+        exception::{self, Condition, Exception},
         frame::Frame,
-        gc::Core as _,
-        lib::{Core as _, LIB},
         types::{Tag, Type},
     },
-    types::{
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        function::Function,
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
-    },
-    vectors::core::Core as _,
+    types::{fixnum::Fixnum, struct_::Struct, symbol::Symbol, vector::Vector},
 };
 
 #[allow(unused_imports)]
@@ -43,6 +33,12 @@ pub struct FuturePool {
     pool: ThreadPool,
 }
 
+impl Default for FuturePool {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FuturePool {
     pub fn new() -> Self {
         FuturePool {
@@ -53,8 +49,8 @@ impl FuturePool {
 
 impl Future {
     fn make_defer_future(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let mut futures_ref = block_on(LIB.futures.write());
-        let mut future_id_ref = block_on(LIB.future_id.write());
+        let mut futures_ref = block_on(CORE.futures.write());
+        let mut future_id_ref = block_on(CORE.future_id.write());
         let future_id = *future_id_ref;
 
         *future_id_ref = future_id + 1;
@@ -85,15 +81,15 @@ impl Future {
                 }
             };
 
-            LIB.threads.pool.spawn_ok(fut_tx_result);
+            CORE.threads.pool.spawn_ok(fut_tx_result);
 
             let fut_values = rx.map(|v| v).collect();
 
             fut_values.await
         };
 
-        let mut futures_ref = block_on(LIB.futures.write());
-        let mut future_id_ref = block_on(LIB.future_id.write());
+        let mut futures_ref = block_on(CORE.futures.write());
+        let mut future_id_ref = block_on(CORE.future_id.write());
         let future_id = *future_id_ref;
 
         *future_id_ref = future_id + 1;
@@ -105,7 +101,7 @@ impl Future {
         .evict(env);
 
         let join_id = std::thread::spawn(move || {
-            let env_ref = block_on(LIB.env_map.read());
+            let env_ref = block_on(CORE.env_map.read());
             let env = env_ref.get(&env_tag).unwrap();
 
             let values: Vec<Tag> = executor::block_on(fut_values);
@@ -118,7 +114,7 @@ impl Future {
     }
 
     fn is_future_complete(env: &Env, future: Tag) -> bool {
-        let futures_ref = block_on(LIB.futures.read());
+        let futures_ref = block_on(CORE.futures.read());
 
         let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
 
@@ -145,7 +141,7 @@ impl CoreFunction for Future {
         env.fp_argv_check("mu:force", &[Type::Struct], fp)?;
 
         fp.value = if Struct::stype(env, future).eq_(&Symbol::keyword("future")) {
-            let mut futures_ref = block_on(LIB.futures.write());
+            let mut futures_ref = block_on(CORE.futures.write());
             let index = Vector::ref_(env, Struct::vector(env, future), 0).unwrap();
 
             match futures_ref.remove(&(Fixnum::as_i64(index) as u64)).unwrap() {

@@ -6,19 +6,13 @@
 //!     special forms
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         types::{Tag, Type},
     },
-    types::{
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        function::Function,
-        namespace::Namespace,
-        symbol::{Core as _, Symbol},
-    },
+    types::{cons::Cons, fixnum::Fixnum, function::Function, namespace::Namespace, symbol::Symbol},
 };
 
 // special forms
@@ -36,11 +30,15 @@ lazy_static! {
 type LexEnv = Vec<(Tag, Vec<Tag>)>;
 
 pub trait Compile {
+    fn compile(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn if_(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
+    fn is_quoted(&self, _: &Tag) -> bool;
     fn lambda(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn lexical(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn list(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
+    fn quote(&self, _: &Tag) -> Tag;
     fn quote_(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
+    fn quoted_form(&self, _: &Tag) -> Tag;
     fn special_form(&self, _: Tag, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
 }
 
@@ -173,16 +171,7 @@ impl Compile for Env {
             Ok(symbol)
         }
     }
-}
 
-pub trait Core {
-    fn compile(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
-    fn quote(&self, _: &Tag) -> Tag;
-    fn is_quoted(&self, _: &Tag) -> bool;
-    fn quoted_form(&self, _: &Tag) -> Tag;
-}
-
-impl Core for Env {
     fn quote(&self, form: &Tag) -> Tag {
         Cons::cons(self, Symbol::keyword("quote"), *form)
     }
@@ -278,7 +267,7 @@ impl CoreFunction for Env {
 #[cfg(test)]
 mod tests {
     use crate::core::{
-        compile::{Compile, Core},
+        compile::Compile,
         config::Config,
         env::Env,
         types::{Tag, Type},
@@ -289,7 +278,7 @@ mod tests {
         let config = Config::new(None);
         let env: &Env = &Env::new(config.unwrap(), None);
 
-        match Core::compile(env, Tag::nil(), &mut vec![]) {
+        match env.compile(Tag::nil(), &mut vec![]) {
             Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),

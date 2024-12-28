@@ -5,24 +5,17 @@
 use {
     crate::{
         core::{
-            apply::Core as _,
+            direct::DirectTag,
             direct::DirectType,
             env::Env,
-            exception::{self, Condition, Exception},
-            frame::Frame,
-            gc::Gc,
+            exception,
             types::{Tag, Type},
         },
-        types::{
-            char::Char,
-            cons::{Cons, Core as _},
-            fixnum::{Core as _, Fixnum},
-            float::Float,
-            symbol::{Core as _, Symbol},
-        },
+        types::{fixnum::Fixnum, symbol::Symbol},
         vectors::{
-            core::Core as _,
             image::{VecImage, VecImageType, VectorImage, VectorImageType},
+            read::Read,
+            write::Write,
         },
     },
     futures::executor::block_on,
@@ -89,66 +82,7 @@ impl Vector {
         }
     }
 
-    pub fn ref_type_of(gc: &mut Gc, vector: Tag) -> Type {
-        match vector {
-            Tag::Direct(direct) => match direct.dtype() {
-                DirectType::String => Type::Char,
-                DirectType::ByteVec => Type::Byte,
-                _ => panic!(),
-            },
-            Tag::Indirect(_) => {
-                let image = Self::gc_ref_image(&mut gc.lock, vector);
-
-                match VTYPEMAP
-                    .iter()
-                    .copied()
-                    .find(|desc| image.type_.eq_(&desc.0))
-                {
-                    Some(desc) => desc.1,
-                    None => panic!(),
-                }
-            }
-        }
-    }
-
-    pub fn ref_length(gc: &mut Gc, vector: Tag) -> usize {
-        match vector {
-            Tag::Direct(direct) => direct.ext() as usize,
-            Tag::Indirect(_) => {
-                let image = Self::gc_ref_image(&mut gc.lock, vector);
-                Fixnum::as_i64(image.length) as usize
-            }
-        }
-    }
-
-    pub fn mark(gc: &mut Gc, env: &Env, vector: Tag) {
-        match vector {
-            Tag::Direct(_) => (),
-            Tag::Indirect(_) => {
-                let marked = gc.mark_image(vector).unwrap();
-
-                if !marked && Self::ref_type_of(gc, vector) == Type::T {
-                    for index in 0..Self::ref_length(gc, vector) {
-                        let value = Self::gc_ref(gc, env, vector, index).unwrap();
-
-                        gc.mark(env, value)
-                    }
-                }
-            }
-        }
-    }
-}
-
-pub trait Core<'a> {
-    fn as_string(_: &Env, _: Tag) -> String;
-    fn gc_ref(_: &mut Gc, _: &Env, _: Tag, _: usize) -> Option<Tag>;
-    fn iter(_: &Env, _: Tag) -> VectorIter;
-    fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
-    fn view(_: &Env, _: Tag) -> Tag;
-}
-
-impl Core<'_> for Vector {
-    fn view(env: &Env, vector: Tag) -> Tag {
+    pub fn view(env: &Env, vector: Tag) -> Tag {
         let vec = vec![
             Fixnum::with_or_panic(Self::length(env, vector)),
             match Tag::type_key(Self::type_of(env, vector)) {
@@ -160,7 +94,7 @@ impl Core<'_> for Vector {
         Vector::from(vec).evict(env)
     }
 
-    fn as_string(env: &Env, tag: Tag) -> String {
+    pub fn as_string(env: &Env, tag: Tag) -> String {
         match tag.type_of() {
             Type::Vector => match tag {
                 Tag::Direct(dir) => match dir.dtype() {
@@ -190,25 +124,11 @@ impl Core<'_> for Vector {
         }
     }
 
-    fn gc_ref(gc: &mut Gc, env: &Env, vector: Tag, index: usize) -> Option<Tag> {
-        match vector.type_of() {
-            Type::Vector => match vector {
-                Tag::Direct(_direct) => {
-                    let ch: char = vector.data(env).to_le_bytes()[index].into();
-
-                    Some(ch.into())
-                }
-                Tag::Indirect(_) => VecImageType::gc_ref(gc, vector, index),
-            },
-            _ => panic!(),
-        }
-    }
-
-    fn iter(env: &Env, vec: Tag) -> VectorIter {
+    pub fn iter(env: &Env, vec: Tag) -> VectorIter {
         VectorIter { env, vec, index: 0 }
     }
 
-    fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
+    pub fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         match vector.type_of() {
             Type::Vector => match vector {
                 Tag::Direct(direct) => match direct.dtype() {
@@ -231,187 +151,77 @@ impl Core<'_> for Vector {
             }
         }
     }
-}
 
-// env functions
-pub trait CoreFunction {
-    fn mu_type(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_length(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_make_vector(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_svref(_: &Env, _: &mut Frame) -> exception::Result<()>;
-}
+    pub fn to_image(env: &Env, tag: Tag) -> VectorImage {
+        let heap_ref = block_on(env.heap.read());
 
-impl CoreFunction for Vector {
-    fn mu_make_vector(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let type_sym = fp.argv[0];
-        let list = fp.argv[1];
-
-        env.fp_argv_check("mu:make-vector", &[Type::Keyword, Type::List], fp)?;
-
-        fp.value = match Self::to_type(type_sym) {
-            Some(vtype) => match vtype {
-                Type::Null => {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Type,
-                        "mu:make-vector",
-                        type_sym,
-                    ))
-                }
-                Type::T => {
-                    let vec = Cons::iter(env, list)
-                        .map(|cons| Cons::car(env, cons))
-                        .collect::<Vec<Tag>>();
-
-                    Vector::from(vec).evict(env)
-                }
-                Type::Char => {
-                    let vec: exception::Result<String> = Cons::iter(env, list)
-                        .map(|cons| {
-                            let ch = Cons::car(env, cons);
-                            if ch.type_of() == Type::Char {
-                                Ok(Char::as_char(env, ch))
-                            } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", ch))
-                            }
-                        })
-                        .collect();
-
-                    Vector::from(vec?).evict(env)
-                }
-                Type::Bit => {
-                    let mut vec = vec![0; (Cons::length(env, list).unwrap() + 7) / 8];
-                    let bvec = &mut vec;
-
-                    for (i, cons) in Cons::iter(env, list).enumerate() {
-                        let fx = Cons::car(env, cons);
-                        if fx.type_of() == Type::Fixnum {
-                            let bit = Fixnum::as_i64(fx);
-                            if !(0..1).contains(&bit) {
-                                return Err(Exception::new(
-                                    env,
-                                    Condition::Range,
-                                    "mu:make-vector",
-                                    fx,
-                                ));
-                            } else {
-                                bvec[i / 8] |= (bit as u8) << (7 - i % 8)
-                            }
-                        } else {
-                            return Err(Exception::new(env, Condition::Type, "mu:make-vector", fx));
-                        }
-                    }
-
-                    Vector::from(vec).evict(env)
-                }
-                Type::Byte => {
-                    let vec: exception::Result<Vec<u8>> = Cons::iter(env, list)
-                        .map(|cons| {
-                            let fx = Cons::car(env, cons);
-                            if fx.type_of() == Type::Fixnum {
-                                let byte = Fixnum::as_i64(fx);
-                                if !(0..255).contains(&byte) {
-                                    Err(Exception::new(env, Condition::Range, "mu:make-vector", fx))
-                                } else {
-                                    Ok(byte as u8)
-                                }
-                            } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))
-                            }
-                        })
-                        .collect();
-
-                    Vector::from(vec?).evict(env)
-                }
-                Type::Fixnum => {
-                    let vec: exception::Result<Vec<i64>> = Cons::iter(env, list)
-                        .map(|cons| {
-                            let fx = Cons::car(env, cons);
-                            if fx.type_of() == Type::Fixnum {
-                                Ok(Fixnum::as_i64(fx))
-                            } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))
-                            }
-                        })
-                        .collect();
-
-                    Vector::from(vec?).evict(env)
-                }
-                Type::Float => {
-                    let vec: exception::Result<Vec<f32>> = Cons::iter(env, list)
-                        .map(|cons| {
-                            let fl = Cons::car(env, cons);
-                            if fl.type_of() == Type::Float {
-                                Ok(Float::as_f32(env, fl))
-                            } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fl))
-                            }
-                        })
-                        .collect();
-
-                    Vector::from(vec?).evict(env)
-                }
-                _ => {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Type,
-                        "mu:make-vector",
-                        type_sym,
-                    ));
-                }
+        match tag.type_of() {
+            Type::Vector => match tag {
+                Tag::Indirect(image) => VectorImage {
+                    type_: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
+                    ),
+                    length: Tag::from_slice(
+                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                    ),
+                },
+                _ => panic!(),
             },
-            None => {
-                return Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "mu:make-vector",
-                    type_sym,
-                ));
-            }
-        };
-
-        Ok(())
-    }
-
-    fn mu_svref(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let vector = fp.argv[0];
-        let index = fp.argv[1];
-
-        env.fp_argv_check("mu:svref", &[Type::Vector, Type::Fixnum], fp)?;
-
-        let nth = Fixnum::as_i64(index);
-
-        if nth < 0 || nth as usize >= Self::length(env, vector) {
-            return Err(Exception::new(env, Condition::Range, "mu:svref", index));
+            _ => panic!(),
         }
-
-        fp.value = match Self::ref_(env, vector, nth as usize) {
-            Some(nth) => nth,
-            None => panic!(),
-        };
-
-        Ok(())
     }
 
-    fn mu_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let vector = fp.argv[0];
+    pub fn heap_size(env: &Env, vector: Tag) -> usize {
+        match vector {
+            Tag::Direct(_) => std::mem::size_of::<DirectTag>(),
+            Tag::Indirect(_) => {
+                let len = Self::length(env, vector);
+                let size = match Self::type_of(env, vector) {
+                    Type::Byte | Type::Char => 1,
+                    Type::Fixnum | Type::Float | Type::T => 8,
+                    _ => panic!(),
+                };
 
-        env.fp_argv_check("mu:vector-type", &[Type::Vector], fp)?;
-        fp.value = match Tag::type_key(Self::type_of(env, vector)) {
-            Some(key) => key,
-            None => panic!(),
-        };
-
-        Ok(())
+                std::mem::size_of::<VectorImage>() + (size * len)
+            }
+        }
     }
 
-    fn mu_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let vector = fp.argv[0];
+    pub fn evict(&self, env: &Env) -> Tag {
+        match self {
+            Vector::Direct(tag) => *tag,
+            Vector::Indirect(image, ivec) => {
+                let indirect = match ivec {
+                    VectorImageType::T(_) => VecImageType::T(image, ivec),
+                    VectorImageType::Char(_) => VecImageType::Char(image, ivec),
+                    VectorImageType::Bit(_) => VecImageType::Bit(image, ivec),
+                    VectorImageType::Byte(_) => VecImageType::Byte(image, ivec),
+                    VectorImageType::Fixnum(_) => VecImageType::Fixnum(image, ivec),
+                    VectorImageType::Float(_) => VecImageType::Float(image, ivec),
+                };
 
-        env.fp_argv_check("mu:vector-length", &[Type::Vector], fp)?;
-        fp.value = Fixnum::with_or_panic(Self::length(env, vector));
+                match ivec {
+                    VectorImageType::T(_) => indirect.evict(env),
+                    _ => match Self::cached(env, &indirect) {
+                        Some(tag) => tag,
+                        None => {
+                            let tag = indirect.evict(env);
 
-        Ok(())
+                            Self::cache(env, tag);
+                            tag
+                        }
+                    },
+                }
+            }
+        }
+    }
+
+    pub fn read(env: &Env, syntax: char, stream: Tag) -> exception::Result<Tag> {
+        <Vector as Read>::read(env, syntax, stream)
+    }
+
+    pub fn write(env: &Env, vector: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+        <Vector as Write>::write(env, vector, escape, stream)
     }
 }
 
@@ -423,6 +233,7 @@ pub struct VectorIter<'a> {
 }
 
 impl<'a> VectorIter<'a> {
+    #[allow(dead_code)]
     pub fn new(env: &'a Env, vec: Tag) -> Self {
         Self { env, vec, index: 0 }
     }

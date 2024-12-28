@@ -10,13 +10,7 @@ use crate::{
         types::Tag,
     },
     features::feature::Feature,
-    types::{
-        cons::{Cons, Core as _},
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
-        vector::Vector,
-    },
-    vectors::core::Core as _,
+    types::{cons::Cons, struct_::Struct, symbol::Symbol, vector::Vector},
 };
 use nix::{self};
 

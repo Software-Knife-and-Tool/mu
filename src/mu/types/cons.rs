@@ -4,7 +4,7 @@
 //! cons class
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
         direct::{DirectTag, DirectType, ExtType},
         env::Env,
         exception::{self, Condition, Exception},
@@ -14,13 +14,8 @@ use crate::{
         reader::EOL,
         types::{Tag, TagType, Type},
     },
-    streams::{read::Core as _, write::Core as _},
-    types::{
-        fixnum::{Core as _, Fixnum},
-        symbol::Symbol,
-        vector::Vector,
-    },
-    vectors::core::Core as _,
+    streams::{read::Read as _, write::Write as _},
+    types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 
 use futures::executor::block_on;
@@ -29,6 +24,74 @@ use futures::executor::block_on;
 pub struct Cons {
     car: Tag,
     cdr: Tag,
+}
+
+pub trait GC {
+    fn gc_ref_image(_: &mut HeapGcRef, _: Tag) -> Self;
+    fn ref_car(_: &mut Gc, _: Tag) -> Tag;
+    fn ref_cdr(_: &mut Gc, _: Tag) -> Tag;
+    fn mark(_: &mut Gc, _: &Env, _: Tag);
+}
+
+impl GC for Cons {
+    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
+        match tag.type_of() {
+            Type::Cons => match tag {
+                Tag::Indirect(main) => Cons {
+                    car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
+                    cdr: Tag::from_slice(
+                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                    ),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
+
+    fn ref_car(gc: &mut Gc, cons: Tag) -> Tag {
+        match cons.type_of() {
+            Type::Null => cons,
+            Type::Cons => match cons {
+                Tag::Direct(_) => DirectTag::car(cons),
+                Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).car,
+            },
+            _ => panic!(),
+        }
+    }
+
+    fn ref_cdr(gc: &mut Gc, cons: Tag) -> Tag {
+        match cons.type_of() {
+            Type::Null => cons,
+            Type::Cons => match cons {
+                Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).cdr,
+                Tag::Direct(_) => DirectTag::cdr(cons),
+            },
+            _ => panic!(),
+        }
+    }
+
+    fn mark(gc: &mut Gc, env: &Env, cons: Tag) {
+        match cons {
+            Tag::Direct(_) => {
+                let car = Self::ref_car(gc, cons);
+                let cdr = Self::ref_cdr(gc, cons);
+
+                gc.mark(env, car);
+                gc.mark(env, cdr)
+            }
+            Tag::Indirect(_) => {
+                let mark = gc.mark_image(cons).unwrap();
+                if !mark {
+                    let car = Self::ref_car(gc, cons);
+                    let cdr = Self::ref_cdr(gc, cons);
+
+                    gc.mark(env, car);
+                    gc.mark(env, cdr)
+                }
+            }
+        }
+    }
 }
 
 impl Cons {
@@ -53,89 +116,11 @@ impl Cons {
         }
     }
 
-    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
-        match tag.type_of() {
-            Type::Cons => match tag {
-                Tag::Indirect(main) => Cons {
-                    car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
-                    cdr: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
-                    ),
-                },
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
-    }
-
-    pub fn ref_car(gc: &mut Gc, cons: Tag) -> Tag {
-        match cons.type_of() {
-            Type::Null => cons,
-            Type::Cons => match cons {
-                Tag::Direct(_) => DirectTag::car(cons),
-                Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).car,
-            },
-            _ => panic!(),
-        }
-    }
-
-    pub fn ref_cdr(gc: &mut Gc, cons: Tag) -> Tag {
-        match cons.type_of() {
-            Type::Null => cons,
-            Type::Cons => match cons {
-                Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).cdr,
-                Tag::Direct(_) => DirectTag::cdr(cons),
-            },
-            _ => panic!(),
-        }
-    }
-
-    pub fn mark(gc: &mut Gc, env: &Env, cons: Tag) {
-        match cons {
-            Tag::Direct(_) => {
-                let car = Self::ref_car(gc, cons);
-                let cdr = Self::ref_cdr(gc, cons);
-
-                gc.mark(env, car);
-                gc.mark(env, cdr)
-            }
-            Tag::Indirect(_) => {
-                let mark = gc.mark_image(cons).unwrap();
-                if !mark {
-                    let car = Self::ref_car(gc, cons);
-                    let cdr = Self::ref_cdr(gc, cons);
-
-                    gc.mark(env, car);
-                    gc.mark(env, cdr)
-                }
-            }
-        }
-    }
-}
-
-pub trait Core {
-    fn append(_: &Env, _: &[Tag], _: Tag) -> Tag;
-    fn car(_: &Env, _: Tag) -> Tag;
-    fn cdr(_: &Env, _: Tag) -> Tag;
-    fn cons(_: &Env, _: Tag, _: Tag) -> Tag;
-    fn evict(&self, _: &Env) -> Tag;
-    fn heap_size(_: &Env, _: Tag) -> usize;
-    fn iter(_: &Env, _: Tag) -> ConsIter;
-    fn length(_: &Env, _: Tag) -> Option<usize>;
-    fn list(_: &Env, _: &[Tag]) -> Tag;
-    fn nth(_: &Env, _: usize, _: Tag) -> Option<Tag>;
-    fn nthcdr(_: &Env, _: usize, _: Tag) -> Option<Tag>;
-    fn read(_: &Env, _: Tag) -> exception::Result<Tag>;
-    fn view(_: &Env, _: Tag) -> Tag;
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-}
-
-impl Core for Cons {
-    fn cons(env: &Env, car: Tag, cdr: Tag) -> Tag {
+    pub fn cons(env: &Env, car: Tag, cdr: Tag) -> Tag {
         Cons::new(car, cdr).evict(env)
     }
 
-    fn car(env: &Env, cons: Tag) -> Tag {
+    pub fn car(env: &Env, cons: Tag) -> Tag {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
@@ -146,7 +131,7 @@ impl Core for Cons {
         }
     }
 
-    fn cdr(env: &Env, cons: Tag) -> Tag {
+    pub fn cdr(env: &Env, cons: Tag) -> Tag {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
@@ -157,7 +142,7 @@ impl Core for Cons {
         }
     }
 
-    fn length(env: &Env, cons: Tag) -> Option<usize> {
+    pub fn length(env: &Env, cons: Tag) -> Option<usize> {
         match cons.type_of() {
             Type::Null => Some(0),
             Type::Cons => {
@@ -181,17 +166,17 @@ impl Core for Cons {
         }
     }
 
-    fn view(env: &Env, cons: Tag) -> Tag {
+    pub fn view(env: &Env, cons: Tag) -> Tag {
         let vec = vec![Self::car(env, cons), Self::cdr(env, cons)];
 
         Vector::from(vec).evict(env)
     }
 
-    fn iter(env: &Env, cons: Tag) -> ConsIter {
+    pub fn iter(env: &Env, cons: Tag) -> ConsIter {
         ConsIter { env, cons }
     }
 
-    fn heap_size(_: &Env, cons: Tag) -> usize {
+    pub fn heap_size(_: &Env, cons: Tag) -> usize {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.ext().try_into() {
@@ -204,7 +189,7 @@ impl Core for Cons {
         }
     }
 
-    fn evict(&self, env: &Env) -> Tag {
+    pub fn evict(&self, env: &Env) -> Tag {
         match DirectTag::cons(self.car, self.cdr) {
             Some(tag) => tag,
             None => {
@@ -221,7 +206,7 @@ impl Core for Cons {
         }
     }
 
-    fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
+    pub fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
         let dot = Vector::from(".").evict(env);
 
         let car = env.read_stream(stream, false, Tag::nil(), true)?;
@@ -254,7 +239,7 @@ impl Core for Cons {
         }
     }
 
-    fn write(env: &Env, cons: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+    pub fn write(env: &Env, cons: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         let car = Self::car(env, cons);
 
         env.write_string("(", stream).unwrap();
@@ -283,7 +268,7 @@ impl Core for Cons {
         env.write_string(")", stream)
     }
 
-    fn list(env: &Env, vec: &[Tag]) -> Tag {
+    pub fn list(env: &Env, vec: &[Tag]) -> Tag {
         let mut list = Tag::nil();
 
         vec.iter()
@@ -293,7 +278,7 @@ impl Core for Cons {
         list
     }
 
-    fn append(env: &Env, vec: &[Tag], cdr: Tag) -> Tag {
+    pub fn append(env: &Env, vec: &[Tag], cdr: Tag) -> Tag {
         let mut list = cdr;
 
         vec.iter()
@@ -303,7 +288,7 @@ impl Core for Cons {
         list
     }
 
-    fn nth(env: &Env, n: usize, cons: Tag) -> Option<Tag> {
+    pub fn nth(env: &Env, n: usize, cons: Tag) -> Option<Tag> {
         let mut nth = n;
         let mut tail = cons;
 
@@ -328,7 +313,7 @@ impl Core for Cons {
         }
     }
 
-    fn nthcdr(env: &Env, n: usize, cons: Tag) -> Option<Tag> {
+    pub fn nthcdr(env: &Env, n: usize, cons: Tag) -> Option<Tag> {
         let mut nth = n;
         let mut tail = cons;
 

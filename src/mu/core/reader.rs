@@ -4,23 +4,15 @@
 //! env reader
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
         direct::{DirectExt, DirectTag, DirectType},
         env::Env,
         exception::{self, Condition, Exception},
-        lib::Lib,
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
     },
-    streams::read::Core as _,
-    types::{
-        fixnum::{Core as _, Fixnum},
-        stream::{Core as _, Stream},
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
-        vector::Vector,
-    },
-    vectors::{core::Core as _, read::Core as _},
+    streams::read::Read as _,
+    types::{fixnum::Fixnum, stream::Read, struct_::Struct, symbol::Symbol, vector::Vector},
 };
 
 //
@@ -36,17 +28,17 @@ lazy_static! {
     pub static ref EOL: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
 }
 
-pub trait Core {
-    fn read_atom(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
-    fn read_block_comment(_: &Env, _: Tag) -> exception::Result<Option<()>>;
-    fn read_char_literal(_: &Env, _: Tag) -> exception::Result<Option<Tag>>;
-    fn read_comment(_: &Env, _: Tag) -> exception::Result<Option<()>>;
-    fn read_ws(_: &Env, _: Tag) -> exception::Result<Option<()>>;
-    fn sharpsign_macro(_: &Env, _: Tag) -> exception::Result<Option<Tag>>;
-    fn read_token(_: &Env, _: Tag) -> exception::Result<Option<String>>;
+pub trait Reader {
+    fn read_atom(&self, _: char, _: Tag) -> exception::Result<Tag>;
+    fn read_block_comment(&self, _: Tag) -> exception::Result<Option<()>>;
+    fn read_char_literal(&self, _: Tag) -> exception::Result<Option<Tag>>;
+    fn read_comment(&self, _: Tag) -> exception::Result<Option<()>>;
+    fn read_ws(&self, _: Tag) -> exception::Result<Option<()>>;
+    fn sharpsign_macro(&self, _: Tag) -> exception::Result<Option<Tag>>;
+    fn read_token(&self, _: Tag) -> exception::Result<Option<String>>;
 }
 
-impl Core for Lib {
+impl Reader for Env {
     //
     // read whitespace:
     //
@@ -55,15 +47,15 @@ impl Core for Lib {
     //    return Err exception for stream error
     //    return Ok(Some(())) for ws consumed
     //
-    fn read_ws(env: &Env, stream: Tag) -> exception::Result<Option<()>> {
+    fn read_ws(&self, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match Stream::read_char(env, stream)? {
+            match self.read_char(stream)? {
                 Some(ch) => {
                     if let Some(stype) = map_char_syntax(ch) {
                         match stype {
                             SyntaxType::Whitespace => (),
                             _ => {
-                                Stream::unread_char(env, stream, ch).unwrap();
+                                self.unread_char(stream, ch).unwrap();
                                 break;
                             }
                         }
@@ -81,15 +73,15 @@ impl Core for Lib {
     //     return Err exception for stream error
     //     return Ok(Some(())) for comment consumed
     //
-    fn read_comment(env: &Env, stream: Tag) -> exception::Result<Option<()>> {
+    fn read_comment(&self, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match Stream::read_char(env, stream)? {
+            match self.read_char(stream)? {
                 Some(ch) => {
                     if ch == '\n' {
                         break;
                     }
                 }
-                None => return Err(Exception::new(env, Condition::Eof, "mu:read", stream)),
+                None => return Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
             }
         }
 
@@ -102,24 +94,24 @@ impl Core for Lib {
     //     return Err exception for stream error
     //     return Ok(Some(())) for comment consumed
     //
-    fn read_block_comment(env: &Env, stream: Tag) -> exception::Result<Option<()>> {
+    fn read_block_comment(&self, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match Stream::read_char(env, stream)? {
+            match self.read_char(stream)? {
                 Some(ch) => {
                     if ch == '|' {
-                        match Stream::read_char(env, stream)? {
+                        match self.read_char(stream)? {
                             Some(ch) => {
                                 if ch == '#' {
                                     break;
                                 }
                             }
                             None => {
-                                return Err(Exception::new(env, Condition::Eof, "mu:read", stream))
+                                return Err(Exception::new(self, Condition::Eof, "mu:read", stream))
                             }
                         }
                     }
                 }
-                None => return Err(Exception::new(env, Condition::Eof, "mu:read", stream)),
+                None => return Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
             }
         }
 
@@ -131,20 +123,20 @@ impl Core for Lib {
     //     return Err exception for stream error
     //     return Ok(Some(String))
     //
-    fn read_token(env: &Env, stream: Tag) -> exception::Result<Option<String>> {
+    fn read_token(&self, stream: Tag) -> exception::Result<Option<String>> {
         let mut token = String::new();
 
-        while let Some(ch) = Stream::read_char(env, stream)? {
+        while let Some(ch) = self.read_char(stream)? {
             match map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => token.push(ch),
                     SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                        Stream::unread_char(env, stream, ch).unwrap();
+                        self.unread_char(stream, ch).unwrap();
                         break;
                     }
-                    _ => return Err(Exception::new(env, Condition::Range, "mu:read", stream)),
+                    _ => return Err(Exception::new(self, Condition::Range, "mu:read", stream)),
                 },
-                None => return Err(Exception::new(env, Condition::Range, "mu:read", stream)),
+                None => return Err(Exception::new(self, Condition::Range, "mu:read", stream)),
             }
         }
 
@@ -157,22 +149,22 @@ impl Core for Lib {
     //      return Some(tag) for successful read
     //      return Err exception for stream I/O error or unexpected eof
     //
-    fn read_atom(env: &Env, ch: char, stream: Tag) -> exception::Result<Tag> {
+    fn read_atom(&self, ch: char, stream: Tag) -> exception::Result<Tag> {
         let mut token = String::new();
 
         token.push(ch);
 
-        while let Some(ch) = Stream::read_char(env, stream)? {
+        while let Some(ch) = self.read_char(stream)? {
             match map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => token.push(ch),
                     SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                        Stream::unread_char(env, stream, ch).unwrap();
+                        self.unread_char(stream, ch).unwrap();
                         break;
                     }
-                    _ => return Err(Exception::new(env, Condition::Range, "mu:read", ch.into())),
+                    _ => return Err(Exception::new(self, Condition::Range, "mu:read", ch.into())),
                 },
-                None => return Err(Exception::new(env, Condition::Range, "mu:read", ch.into())),
+                None => return Err(Exception::new(self, Condition::Range, "mu:read", ch.into())),
             }
         }
 
@@ -182,16 +174,16 @@ impl Core for Lib {
                     Ok(Fixnum::with_i64_or_panic(fx))
                 } else {
                     Err(Exception::new(
-                        env,
+                        self,
                         Condition::Over,
                         "mu:read",
-                        Vector::from(token).evict(env),
+                        Vector::from(token).evict(self),
                     ))
                 }
             }
             Err(_) => match token.parse::<f32>() {
                 Ok(fl) => Ok(fl.into()),
-                Err(_) => Ok(Symbol::parse(env, token)?),
+                Err(_) => Ok(Symbol::parse(self, token)?),
             },
         }
     }
@@ -201,15 +193,15 @@ impl Core for Lib {
     //     Err exception if I/O problem or syntax error
     //     Ok(tag) if the read succeeded,
     //
-    fn read_char_literal(env: &Env, stream: Tag) -> exception::Result<Option<Tag>> {
-        match Stream::read_char(env, stream)? {
-            Some(ch) => match Stream::read_char(env, stream)? {
+    fn read_char_literal(&self, stream: Tag) -> exception::Result<Option<Tag>> {
+        match self.read_char(stream)? {
+            Some(ch) => match self.read_char(stream)? {
                 Some(space) => match map_char_syntax(space) {
                     Some(sp_type) => match sp_type {
                         SyntaxType::Whitespace => Ok(Some(ch.into())),
                         SyntaxType::Constituent => {
-                            Stream::unread_char(env, stream, space).unwrap();
-                            match Self::read_token(env, stream)? {
+                            self.unread_char(stream, space).unwrap();
+                            match Self::read_token(self, stream)? {
                                 Some(str) => {
                                     let phrase = ch.to_string() + &str;
                                     match phrase.as_str() {
@@ -219,26 +211,28 @@ impl Core for Lib {
                                         "page" => Ok(Some('\x0c'.into())),
                                         "return" => Ok(Some('\r'.into())),
                                         _ => Err(Exception::new(
-                                            env,
+                                            self,
                                             Condition::Type,
                                             "mu:read",
-                                            Vector::from(phrase).evict(env),
+                                            Vector::from(phrase).evict(self),
                                         )),
                                     }
                                 }
-                                None => Err(Exception::new(env, Condition::Eof, "mu:read", stream)),
+                                None => {
+                                    Err(Exception::new(self, Condition::Eof, "mu:read", stream))
+                                }
                             }
                         }
                         _ => {
-                            Stream::unread_char(env, stream, space).unwrap();
+                            self.unread_char(stream, space).unwrap();
                             Ok(Some(ch.into()))
                         }
                     },
-                    None => Err(Exception::new(env, Condition::Syntax, "mu:read", stream)),
+                    None => Err(Exception::new(self, Condition::Syntax, "mu:read", stream)),
                 },
                 None => Ok(Some(ch.into())),
             },
-            None => Err(Exception::new(env, Condition::Eof, "mu:read", stream)),
+            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
         }
     }
 
@@ -247,34 +241,34 @@ impl Core for Lib {
     //     Err exception if I/O problem or syntax error
     //     Ok(tag) if the read succeeded,
     //
-    fn sharpsign_macro(env: &Env, stream: Tag) -> exception::Result<Option<Tag>> {
-        match Stream::read_char(env, stream)? {
+    fn sharpsign_macro(&self, stream: Tag) -> exception::Result<Option<Tag>> {
+        match self.read_char(stream)? {
             Some(ch) => match ch {
-                ':' => match Stream::read_char(env, stream)? {
+                ':' => match self.read_char(stream)? {
                     Some(ch) => {
-                        let atom = Self::read_atom(env, ch, stream)?;
+                        let atom = Self::read_atom(self, ch, stream)?;
 
                         match atom.type_of() {
                             Type::Symbol => Ok(Some(atom)),
-                            _ => Err(Exception::new(env, Condition::Type, "mu:read", stream)),
+                            _ => Err(Exception::new(self, Condition::Type, "mu:read", stream)),
                         }
                     }
-                    None => Err(Exception::new(env, Condition::Eof, "mu:read", stream)),
+                    None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
                 },
                 '.' => {
-                    let expr = env.read_stream(stream, false, Tag::nil(), false)?;
+                    let expr = self.read_stream(stream, false, Tag::nil(), false)?;
 
-                    Ok(Some(env.eval(expr)?))
+                    Ok(Some(self.eval(expr)?))
                 }
                 '|' => {
-                    Self::read_block_comment(env, stream)?;
+                    Self::read_block_comment(self, stream)?;
 
                     Ok(None)
                 }
-                '\\' => Self::read_char_literal(env, stream),
-                'S' | 's' => Ok(Some(Struct::read(env, stream)?)),
-                '(' | '*' => Ok(Some(Vector::read(env, ch, stream)?)),
-                'x' => match Self::read_token(env, stream) {
+                '\\' => Self::read_char_literal(self, stream),
+                'S' | 's' => Ok(Some(Struct::read(self, stream)?)),
+                '(' | '*' => Ok(Some(Vector::read(self, ch, stream)?)),
+                'x' => match Self::read_token(self, stream) {
                     Ok(token) => match token {
                         Some(hex) => match i64::from_str_radix(&hex, 16) {
                             Ok(fx) => {
@@ -282,24 +276,32 @@ impl Core for Lib {
                                     Ok(Some(Fixnum::with_i64_or_panic(fx)))
                                 } else {
                                     Err(Exception::new(
-                                        env,
+                                        self,
                                         Condition::Over,
                                         "mu:read",
-                                        Vector::from(hex).evict(env),
+                                        Vector::from(hex).evict(self),
                                     ))
                                 }
                             }
-                            Err(_) => {
-                                Err(Exception::new(env, Condition::Syntax, "mu:read", ch.into()))
-                            }
+                            Err(_) => Err(Exception::new(
+                                self,
+                                Condition::Syntax,
+                                "mu:read",
+                                ch.into(),
+                            )),
                         },
                         None => panic!(),
                     },
-                    Err(_) => Err(Exception::new(env, Condition::Syntax, "mu:read", ch.into())),
+                    Err(_) => Err(Exception::new(
+                        self,
+                        Condition::Syntax,
+                        "mu:read",
+                        ch.into(),
+                    )),
                 },
-                _ => Err(Exception::new(env, Condition::Type, "mu:read", ch.into())),
+                _ => Err(Exception::new(self, Condition::Type, "mu:read", ch.into())),
             },
-            None => Err(Exception::new(env, Condition::Eof, "mu:read", stream)),
+            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
         }
     }
 }
