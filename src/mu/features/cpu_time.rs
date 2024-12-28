@@ -9,7 +9,7 @@ use crate::{
         frame::Frame,
     },
     features::feature::Feature,
-    types::fixnum::{Core as _, Fixnum},
+    types::fixnum::Fixnum,
 };
 use cpu_time::ProcessTime;
 use cpu_time::{self};

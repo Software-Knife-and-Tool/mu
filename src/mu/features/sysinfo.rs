@@ -10,12 +10,7 @@ use crate::{
         types::Tag,
     },
     features::feature::Feature,
-    types::{
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        vector::Vector,
-    },
-    vectors::core::Core as _,
+    types::{cons::Cons, fixnum::Fixnum, vector::Vector},
 };
 use sysinfo_dot_h::{self};
 

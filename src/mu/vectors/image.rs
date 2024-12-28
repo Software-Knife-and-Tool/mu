@@ -11,11 +11,8 @@ use {
             indirect::IndirectTag,
             types::{Tag, TagType, Type},
         },
-        types::{
-            fixnum::{Core as _, Fixnum},
-            symbol::{Core as _, Symbol},
-            vector::Vector,
-        },
+        types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
+        vectors::vector::GC as _,
     },
     std::str,
 };
@@ -39,7 +36,6 @@ pub enum VectorImageType {
 }
 
 // vector types
-#[allow(dead_code)]
 pub enum VecImageType<'a> {
     Bit(&'a VectorImage, &'a VectorImageType),
     Byte(&'a VectorImage, &'a VectorImageType),

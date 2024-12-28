@@ -4,28 +4,23 @@
 //! env functions
 use crate::{
     core::{
-        compile::Core as _,
+        compile::Compile,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         types::{Tag, Type},
     },
-    types::{
-        cons::{Cons, Core as _},
-        fixnum::Fixnum,
-        symbol::{Core as _, Symbol},
-        vector::Vector,
-    },
+    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 
-pub trait Core {
+pub trait Apply {
     fn fp_argv_check(&self, _: &str, _: &[Type], _: &Frame) -> exception::Result<()>;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
 }
 
-impl Core for Env {
+impl Apply for Env {
     fn fp_argv_check(&self, source: &str, types: &[Type], fp: &Frame) -> exception::Result<()> {
         for (index, arg_type) in types.iter().enumerate() {
             let fp_arg = fp.argv[index];

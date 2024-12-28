@@ -2,11 +2,11 @@
 //  SPDX-License-Identifier: MIT
 
 //! env tagged types
-#![allow(clippy::identity_op)]
+#![allow(dead_code)]
 use {
     crate::{
         core::{
-            apply::Core as _,
+            apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
@@ -14,17 +14,9 @@ use {
             indirect::IndirectTag,
         },
         types::{
-            char::{Char, Core as _},
-            cons::{Cons, Core as _},
-            fixnum::{Core as _, Fixnum},
-            float::{Core as _, Float},
-            function::{Core as _, Function},
-            stream::{Core as _, Stream},
-            struct_::{Core as _, Struct},
-            symbol::{Core as _, Symbol},
-            vector::{Core as _, Vector},
+            char::Char, cons::Cons, fixnum::Fixnum, float::Float, function::Function,
+            stream::Stream, struct_::Struct, symbol::Symbol, vector::Vector,
         },
-        vectors::core::Core as _,
     },
     num_enum::TryFromPrimitive,
     std::{convert::From, fmt},

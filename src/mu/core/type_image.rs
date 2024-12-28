@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! env tagged types
+#![allow(dead_code)]
 use crate::{
     core::types::{Tag, Type},
     types::{

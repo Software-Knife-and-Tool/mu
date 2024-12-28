@@ -3,6 +3,7 @@
 
 //! env allocators
 //!    Env
+#![allow(dead_code)]
 use {
     crate::{
         core::{

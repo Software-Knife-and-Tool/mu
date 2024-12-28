@@ -23,13 +23,8 @@ pub struct Feature {
     pub namespace: String,
 }
 
-pub trait Core {
-    fn install_features() -> Vec<Feature>;
-}
-
-impl Core for Feature {
-    fn install_features() -> Vec<Feature> {
-        #[allow(clippy::let_and_return)]
+impl Feature {
+    pub fn install_features() -> Vec<Feature> {
         let features = vec![
             #[cfg(feature = "cpu_time")]
             <Feature as CpuTime>::feature(),

@@ -24,8 +24,9 @@ use crate::{
         stream::{CoreFunction as _, Stream},
         struct_::{CoreFunction as _, Struct},
         symbol::{CoreFunction as _, Symbol},
-        vector::{CoreFunction as _, Vector},
+        vector::Vector,
     },
+    vectors::vector::CoreFunction as _,
 };
 
 pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;

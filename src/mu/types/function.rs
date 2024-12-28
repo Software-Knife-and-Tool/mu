@@ -10,14 +10,8 @@ use crate::{
         indirect::IndirectTag,
         types::{Tag, TagType, Type},
     },
-    streams::write::Core as _,
-    types::{
-        fixnum::Fixnum,
-        namespace::Namespace,
-        symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
-    },
-    vectors::core::Core as _,
+    streams::write::Write as _,
+    types::{fixnum::Fixnum, namespace::Namespace, symbol::Symbol, vector::Vector},
 };
 
 use futures::executor::block_on;
@@ -26,6 +20,43 @@ use futures::executor::block_on;
 pub struct Function {
     pub arity: Tag, // fixnum # of required arguments
     pub form: Tag,  // list or symbol
+}
+
+pub trait GC {
+    fn ref_form(_: &mut Gc, _: Tag) -> Tag;
+    fn mark(_: &mut Gc, _: &Env, _: Tag);
+    fn gc_ref_image(_: &mut HeapGcRef, _: Tag) -> Self;
+}
+
+impl GC for Function {
+    fn ref_form(gc: &mut Gc, func: Tag) -> Tag {
+        Self::gc_ref_image(&mut gc.lock, func).form
+    }
+
+    fn mark(gc: &mut Gc, env: &Env, function: Tag) {
+        let mark = gc.mark_image(function).unwrap();
+
+        if !mark {
+            let form = Self::ref_form(gc, function);
+
+            gc.mark(env, form)
+        }
+    }
+
+    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
+        match tag.type_of() {
+            Type::Function => match tag {
+                Tag::Indirect(fn_) => Function {
+                    arity: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
+                    form: Tag::from_slice(
+                        heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap(),
+                    ),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
 }
 
 impl Function {
@@ -62,21 +93,6 @@ impl Function {
         }
     }
 
-    pub fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
-        match tag.type_of() {
-            Type::Function => match tag {
-                Tag::Indirect(fn_) => Function {
-                    arity: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                    form: Tag::from_slice(
-                        heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap(),
-                    ),
-                },
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
-    }
-
     pub fn update(env: &Env, image: &Function, func: Tag) {
         let slices: &[[u8; 8]] = &[image.arity.as_slice(), image.form.as_slice()];
 
@@ -90,10 +106,6 @@ impl Function {
         heap_ref.write_image(slices, offset);
     }
 
-    pub fn ref_form(gc: &mut Gc, func: Tag) -> Tag {
-        Self::gc_ref_image(&mut gc.lock, func).form
-    }
-
     pub fn arity(env: &Env, func: Tag) -> Tag {
         Self::to_image(env, func).arity
     }
@@ -102,31 +114,13 @@ impl Function {
         Self::to_image(env, func).form
     }
 
-    pub fn mark(gc: &mut Gc, env: &Env, function: Tag) {
-        let mark = gc.mark_image(function).unwrap();
-
-        if !mark {
-            let form = Self::ref_form(gc, function);
-
-            gc.mark(env, form)
-        }
-    }
-}
-
-pub trait Core {
-    fn heap_size(_: &Env, _: Tag) -> usize;
-    fn view(_: &Env, _: Tag) -> Tag;
-    fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-}
-
-impl Core for Function {
-    fn view(env: &Env, func: Tag) -> Tag {
+    pub fn view(env: &Env, func: Tag) -> Tag {
         let vec = vec![Self::arity(env, func), Self::form(env, func)];
 
         Vector::from(vec).evict(env)
     }
 
-    fn heap_size(env: &Env, fn_: Tag) -> usize {
+    pub fn heap_size(env: &Env, fn_: Tag) -> usize {
         match Self::form(env, fn_).type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
             Type::Vector => std::mem::size_of::<Function>(),
@@ -137,7 +131,7 @@ impl Core for Function {
         }
     }
 
-    fn write(env: &Env, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
+    pub fn write(env: &Env, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match func.type_of() {
             Type::Function => {
                 let nreq = Fixnum::as_i64(Function::arity(env, func));

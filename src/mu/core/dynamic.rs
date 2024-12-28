@@ -14,11 +14,7 @@ use crate::{
         frame::Frame,
         types::Tag,
     },
-    types::{
-        cons::{Cons, Core as _},
-        vector::Vector,
-    },
-    vectors::core::Core as _,
+    types::{cons::Cons, vector::Vector},
 };
 
 use futures::executor::block_on;

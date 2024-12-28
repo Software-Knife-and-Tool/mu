@@ -4,11 +4,15 @@
 //! environment bindings
 use {
     crate::{
-        core::{config::Config, frame::Frame, lib::Lib, types::Tag},
+        core::{
+            config::Config,
+            core::{Core, CORE},
+            frame::Frame,
+            types::Tag,
+        },
         heaps::bump_allocator::BumpAllocator,
         types::namespace::Namespace,
         vectors::cache::VecCacheMap,
-        LIB,
     },
     std::collections::HashMap,
 };
@@ -19,6 +23,7 @@ use futures_locks::RwLock;
 // env environment
 pub struct Env {
     // configuration
+    #[allow(dead_code)]
     config: Config,
 
     // heap
@@ -75,18 +80,18 @@ impl Env {
             Err(_) => panic!(),
         };
 
-        env.keyword_ns = match Namespace::with_static(&env, "keyword", &LIB.keywords) {
+        env.keyword_ns = match Namespace::with_static(&env, "keyword", &CORE.keywords) {
             Ok(ns) => ns,
             Err(_) => panic!(),
         };
 
-        env.mu_ns = match Namespace::with_static(&env, "mu", &LIB.symbols) {
+        env.mu_ns = match Namespace::with_static(&env, "mu", &CORE.symbols) {
             Ok(ns) => ns,
             Err(_) => panic!(),
         };
 
-        // initialize lib namespaces
-        Lib::namespaces(&env);
+        // initialize core namespaces
+        Core::namespaces(&env);
 
         env
     }

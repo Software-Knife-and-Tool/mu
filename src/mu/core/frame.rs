@@ -9,21 +9,16 @@
 //!    frame_ref
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
+        core::CORE,
         env::Env,
-        exception::{self, Condition, Core as _, Exception},
+        exception::{self, Condition, Exception},
         types::{Tag, Type},
     },
     types::{
-        cons::{Cons, Core as _},
-        fixnum::Fixnum,
-        function::Function,
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
-        vector::Core as _,
+        cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
         vector::Vector,
     },
-    LIB,
 };
 
 #[cfg(feature = "prof")]
@@ -38,12 +33,14 @@ pub struct Frame {
 }
 
 impl Frame {
+    #[allow(dead_code)]
     fn to_tag(&self, env: &Env) -> Tag {
         let vec = self.argv.clone();
 
         Struct::new(env, "frame", vec).evict(env)
     }
 
+    #[allow(dead_code)]
     fn from_tag(env: &Env, tag: Tag) -> Self {
         match tag.type_of() {
             Type::Struct => {
@@ -148,7 +145,7 @@ impl Frame {
                     let offset =
                         Fixnum::as_i64(Vector::ref_(env, Function::form(env, func), 2).unwrap());
 
-                    let functions_ref = block_on(LIB.functions.read());
+                    let functions_ref = block_on(CORE.functions.read());
                     functions_ref[offset as usize](env, &mut self)?;
 
                     Ok(self.value)

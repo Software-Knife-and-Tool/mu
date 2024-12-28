@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! lib environment
+#![allow(dead_code)]
 use {
     crate::{
         core::{
@@ -10,27 +11,22 @@ use {
             symbols::{CoreFn, LIB_SYMBOLS},
             types::Tag,
         },
-        features::feature::{Core as _, Feature},
-        streams::{core::StreamBuilder, write::Core as _},
+        features::feature::Feature,
+        streams::{stream::StreamBuilder, write::Write},
         types::{
-            fixnum::{Core as _, Fixnum},
-            function::Function,
-            namespace::Namespace,
-            stream::Stream,
-            symbol::{Core as _, Symbol},
-            vector::Vector,
+            fixnum::Fixnum, function::Function, namespace::Namespace, stream::Stream,
+            symbol::Symbol, vector::Vector,
         },
-        vectors::core::Core as _,
     },
     std::collections::HashMap,
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
 lazy_static! {
-    pub static ref LIB: Lib = Lib::new().features().stdio();
+    pub static ref CORE: Core = Core::new().features().stdio();
 }
 
-pub struct Lib {
+pub struct Core {
     pub version: &'static str,
 
     pub env_map: RwLock<HashMap<u64, Env>>,
@@ -45,11 +41,17 @@ pub struct Lib {
     pub threads: FuturePool,
 }
 
-impl Lib {
+impl Default for Core {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Core {
     pub const VERSION: &'static str = "0.1.85";
 
     pub fn new() -> Self {
-        Lib {
+        Core {
             env_map: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
             functions: RwLock::new(Vec::new()),
@@ -115,25 +117,26 @@ impl Lib {
         stdio.2
     }
 
-    // lib symbols
+    // core symbols
     pub fn namespaces(env: &Env) {
-        let mut functions = block_on(LIB.functions.write());
+        let mut functions = block_on(CORE.functions.write());
 
         Namespace::intern_static(
             env,
             env.mu_ns,
             "+version+".into(),
-            Vector::from(LIB.version).evict(env),
+            Vector::from(CORE.version).evict(env),
         )
         .unwrap();
 
         Namespace::intern_static(env, env.mu_ns, "%null-ns%".into(), env.null_ns);
 
-        Namespace::intern_static(env, env.mu_ns, "*standard-input*".into(), LIB.stdin()).unwrap();
+        Namespace::intern_static(env, env.mu_ns, "*standard-input*".into(), CORE.stdin()).unwrap();
 
-        Namespace::intern_static(env, env.mu_ns, "*standard-output*".into(), LIB.stdout()).unwrap();
+        Namespace::intern_static(env, env.mu_ns, "*standard-output*".into(), CORE.stdout())
+            .unwrap();
 
-        Namespace::intern_static(env, env.mu_ns, "*error-output*".into(), LIB.errout()).unwrap();
+        Namespace::intern_static(env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
 
         for (name, nreqs, fn_) in &*LIB_SYMBOLS {
             let vec = vec![
@@ -150,7 +153,7 @@ impl Lib {
             functions.push(*fn_)
         }
 
-        let features = block_on(LIB.features.read());
+        let features = block_on(CORE.features.read());
 
         for feature in &*features {
             let ns = match Namespace::with(env, &feature.namespace) {
@@ -174,21 +177,15 @@ impl Lib {
             }
         }
     }
-}
 
-pub trait Core {
-    fn add_env(self) -> Tag;
-}
-
-impl Core for Env {
-    fn add_env(self) -> Tag {
-        let mut env_map_ref = block_on(LIB.env_map.write());
-        let mut tag_ref = block_on(self.env_key.write());
+    pub fn add_env(env: Env) -> Tag {
+        let mut env_map_ref = block_on(CORE.env_map.write());
+        let mut tag_ref = block_on(env.env_key.write());
 
         let key = Symbol::keyword(&format!("{:07x}", env_map_ref.len()));
 
         *tag_ref = key;
-        env_map_ref.insert(key.as_u64(), self);
+        env_map_ref.insert(key.as_u64(), env);
 
         key
     }
@@ -203,14 +200,14 @@ pub trait Debug {
 
 impl Debug for Env {
     fn eprint(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(LIB.stdio.write());
+        let stdio = block_on(CORE.stdio.write());
 
         eprint!("{}: ", label);
         self.write_stream(tag, verbose, stdio.2).unwrap();
     }
 
     fn eprintln(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(LIB.stdio.write());
+        let stdio = block_on(CORE.stdio.write());
 
         eprint!("{}: ", label);
         self.write_stream(tag, verbose, stdio.2).unwrap();
@@ -218,14 +215,14 @@ impl Debug for Env {
     }
 
     fn print(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(LIB.stdio.write());
+        let stdio = block_on(CORE.stdio.write());
 
         print!("{}: ", label);
         self.write_stream(tag, verbose, stdio.1).unwrap();
     }
 
     fn println(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(LIB.stdio.write());
+        let stdio = block_on(CORE.stdio.write());
 
         print!("{}: ", label);
         self.write_stream(tag, verbose, stdio.1).unwrap();

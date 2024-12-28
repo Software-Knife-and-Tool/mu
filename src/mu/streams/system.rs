@@ -117,13 +117,8 @@ pub enum StringDirection {
     Bidir,
 }
 
-pub trait Core {
-    fn read_byte(&self, _: &Env) -> exception::Result<Option<u8>>;
-    fn write_byte(&self, _: &Env, _: u8) -> exception::Result<Option<()>>;
-}
-
-impl Core for SystemStream {
-    fn read_byte(&self, env: &Env) -> exception::Result<Option<u8>> {
+impl SystemStream {
+    pub fn read_byte(&self, env: &Env) -> exception::Result<Option<u8>> {
         let mut buf = [0; 1];
 
         match self {
@@ -181,7 +176,7 @@ impl Core for SystemStream {
         }
     }
 
-    fn write_byte(&self, env: &Env, byte: u8) -> exception::Result<Option<()>> {
+    pub fn write_byte(&self, env: &Env, byte: u8) -> exception::Result<Option<()>> {
         let buf = [byte; 1];
 
         match self {

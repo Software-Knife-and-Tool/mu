@@ -2,25 +2,16 @@
 //  SPDX-License-Identifier: MIT
 
 //! std interface
-#![allow(unreachable_code)]
-#![allow(clippy::diverging_sub_expression)]
-
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         types::Type,
     },
     features::feature::Feature,
-    types::{
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        float::Float,
-        vector::{Core as _, Vector},
-    },
-    vectors::core::Core as _,
+    types::{cons::Cons, fixnum::Fixnum, float::Float, vector::Vector},
 };
 
 pub trait Std {
@@ -86,9 +77,7 @@ impl CoreFunction for Feature {
 
         env.fp_argv_check("std:exit", &[Type::Fixnum], fp)?;
 
-        fp.value = std::process::exit(Fixnum::as_i64(rc) as i32);
-
-        Ok(())
+        std::process::exit(Fixnum::as_i64(rc) as i32);
     }
 
     fn std_env(env: &Env, fp: &mut Frame) -> exception::Result<()> {

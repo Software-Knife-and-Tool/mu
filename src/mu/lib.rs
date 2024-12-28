@@ -40,8 +40,6 @@
 //!
 //! [`mu programming environment`]: <https://github.com/Software-Knife-and-Tool/mu>
 //!
-#![allow(dead_code)]
-
 #[macro_use]
 extern crate lazy_static;
 
@@ -58,10 +56,16 @@ mod vectors;
 use futures::executor::block_on;
 use {
     crate::{
-        core::{apply::Core as _, compile::Core as _, config::Config, exception, lib::LIB},
-        heaps::image::Core as _,
-        streams::{core::StreamBuilder, read::Core as _, write::Core as _},
-        types::stream::{Core as _, Stream},
+        core::{
+            apply::Apply as _,
+            compile::Compile,
+            config::Config,
+            core::{Core, CORE},
+            exception,
+        },
+        heaps::image::Image,
+        streams::{read::Read as _, stream::StreamBuilder, write::Write as _},
+        types::stream::Stream,
     },
     std::fs,
 };
@@ -88,7 +92,7 @@ pub struct Env(Tag);
 
 impl Env {
     /// current version
-    pub const VERSION: &'static str = core::lib::Lib::VERSION;
+    pub const VERSION: &'static str = core::core::Core::VERSION;
 
     /// turn on ^C exception signalling
     pub fn signal_exception() {
@@ -102,14 +106,12 @@ impl Env {
 
     /// constructor
     pub fn new(config: Config, image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
-        Env(<core::env::Env as core::lib::Core>::add_env(
-            core::env::Env::new(config, image),
-        ))
+        Env(Core::add_env(core::env::Env::new(config, image)))
     }
 
     /// apply a function to a list of arguments
     pub fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         env.apply(func, args)
@@ -122,7 +124,7 @@ impl Env {
 
     /// evaluate an s-expression
     pub fn eval(&self, expr: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         env.eval(expr)
@@ -130,7 +132,7 @@ impl Env {
 
     /// compile an s-expression
     pub fn compile(&self, expr: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         env.compile(expr, &mut vec![])
@@ -138,7 +140,7 @@ impl Env {
 
     /// read an s-expression from a core stream
     pub fn read(&self, stream: Tag, eof_error_p: bool, eof_value: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         env.read_stream(stream, eof_error_p, eof_value, false)
@@ -146,20 +148,20 @@ impl Env {
 
     /// convert a &str to a tagged s-expression
     pub fn read_str(&self, str: &str) -> exception::Result<Tag> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         let stream = StreamBuilder::new()
             .string(str.into())
             .input()
-            .build(env, &LIB)?;
+            .build(env, &CORE)?;
 
         env.read_stream(stream, true, Tag::nil(), false)
     }
 
     /// write an s-expression to a core stream
     pub fn write(&self, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         env.write_stream(expr, escape, stream)
@@ -167,7 +169,7 @@ impl Env {
 
     /// write an &str to a core stream
     pub fn write_str(&self, str: &str, stream: Tag) -> exception::Result<()> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         env.write_string(str, stream)
@@ -175,13 +177,13 @@ impl Env {
 
     /// write an s-expression to a String
     pub fn write_to_string(&self, expr: Tag, esc: bool) -> String {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         let str_stream = match StreamBuilder::new()
             .string("".into())
             .output()
-            .build(env, &LIB)
+            .build(env, &CORE)
         {
             Ok(stream) => {
                 let str_tag = stream;
@@ -197,22 +199,22 @@ impl Env {
 
     /// return the standard-input core stream
     pub fn std_in(&self) -> Tag {
-        LIB.stdin()
+        CORE.stdin()
     }
 
     /// return the standard-output core stream
     pub fn std_out(&self) -> Tag {
-        LIB.stdout()
+        CORE.stdout()
     }
 
     /// return the error-output core stream
     pub fn err_out(&self) -> Tag {
-        LIB.errout()
+        CORE.errout()
     }
 
     /// eval &str
     pub fn eval_str(&self, expr: &str) -> exception::Result<Tag> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         env.eval(self.compile(self.read_str(expr)?)?)
@@ -230,7 +232,7 @@ impl Env {
 
     /// load source file
     pub fn load(&self, file_path: &str) -> exception::Result<bool> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
         if fs::metadata(file_path).is_ok() {
@@ -263,9 +265,9 @@ impl Env {
 
     /// get environment image
     pub fn image(&self) -> exception::Result<(Vec<u8>, Vec<u8>)> {
-        let env_ref = block_on(LIB.env_map.read());
+        let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
-        Ok(env.image())
+        Ok(Image::image(env))
     }
 }

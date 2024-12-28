@@ -2,10 +2,9 @@
 //  SPDX-License-Identifier: MIT
 
 //! profile interface
-#![allow(unused_imports)]
 use crate::{
     core::{
-        apply::Core as _,
+        apply::Apply as _,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -14,14 +13,9 @@ use crate::{
     },
     features::feature::Feature,
     types::{
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        namespace::Namespace,
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
-        vector::{Core as _, Vector},
+        cons::Cons, fixnum::Fixnum, namespace::Namespace, struct_::Struct, symbol::Symbol,
+        vector::Vector,
     },
-    vectors::core::Core as _,
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 

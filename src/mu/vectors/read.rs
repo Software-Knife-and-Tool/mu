@@ -11,30 +11,29 @@ use crate::{
     },
     types::{
         char::Char,
-        cons::{Cons, Core as _},
+        cons::Cons,
         fixnum::Fixnum,
         float::Float,
-        stream::{Core as _, Stream},
+        stream::Read as _,
         vector::{Vector, VTYPEMAP},
     },
-    vectors::core::Core as _,
 };
 
-pub trait Core<'a> {
+pub trait Read {
     fn read(_: &Env, _: char, _: Tag) -> exception::Result<Tag>;
 }
 
-impl Core<'_> for Vector {
+impl Read for Vector {
     fn read(env: &Env, syntax: char, stream: Tag) -> exception::Result<Tag> {
         match syntax {
             '"' => {
                 let mut str: String = String::new();
 
                 loop {
-                    match Stream::read_char(env, stream)? {
+                    match env.read_char(stream)? {
                         Some('"') => break,
                         Some(ch) => match map_char_syntax(ch).unwrap() {
-                            SyntaxType::Escape => match Stream::read_char(env, stream)? {
+                            SyntaxType::Escape => match env.read_char(stream)? {
                                 Some(ch) => str.push(ch),
                                 None => {
                                     return Err(Exception::new(
@@ -59,13 +58,13 @@ impl Core<'_> for Vector {
                 let mut digits: String = String::new();
 
                 loop {
-                    match Stream::read_char(env, stream)? {
+                    match env.read_char(stream)? {
                         Some(ch) => match map_char_syntax(ch).unwrap() {
                             SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                                Stream::unread_char(env, stream, ch)?;
+                                env.unread_char(stream, ch)?;
                                 break;
                             }
-                            SyntaxType::Escape => match Stream::read_char(env, stream)? {
+                            SyntaxType::Escape => match env.read_char(stream)? {
                                 Some(ch) => {
                                     if ch == '0' || ch == '1' {
                                         digits.push(ch)

@@ -8,12 +8,12 @@
 use {
     crate::{
         core::{
-            apply::Core as _,
+            apply::Apply as _,
             env::Env,
             frame::Frame,
             types::{Tag, Type},
         },
-        types::symbol::{Core as _, Symbol},
+        types::symbol::Symbol,
     },
     std::fmt,
 };
@@ -120,15 +120,9 @@ impl Exception {
             _ => panic!(),
         }
     }
-}
 
-pub trait Core {
-    fn signal_exception();
-    fn on_signal(_: &Env) -> Result<()>;
-}
-
-impl Core for Exception {
-    fn signal_exception() {
+    #[allow(dead_code)]
+    pub fn signal_exception() {
         ctrlc::set_handler(|| {
             let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
             *signal_ref = true
@@ -136,7 +130,7 @@ impl Core for Exception {
         .expect("Error setting Ctrl-C handler");
     }
 
-    fn on_signal(env: &Env) -> Result<()> {
+    pub fn on_signal(env: &Env) -> Result<()> {
         let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
 
         if *signal_ref {
