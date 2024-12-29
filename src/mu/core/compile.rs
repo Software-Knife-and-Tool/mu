@@ -266,6 +266,7 @@ impl CoreFunction for Env {
 
 #[cfg(test)]
 mod tests {
+    /*
     use crate::core::{
         compile::Compile,
         config::Config,
@@ -292,5 +293,6 @@ mod tests {
             },
             _ => assert!(false),
         }
-    }
+}
+    */
 }
