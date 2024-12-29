@@ -2,13 +2,14 @@
 //  SPDX-License-Identifier: MIT
 
 //! env config
-use crate::{core::gc::GcMode, heaps::bump_allocator::BumpAllocator};
+use crate::core::gc::GcMode;
+use page_size;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Config {
     pub npages: usize,
     pub gcmode: GcMode,
-    pub heap: Option<BumpAllocator>,
+    pub page_size: usize,
 }
 
 impl Config {
@@ -16,7 +17,7 @@ impl Config {
         let mut config = Config {
             npages: 1024,
             gcmode: GcMode::Auto,
-            heap: None,
+            page_size: page_size::get(),
         };
 
         match conf_option {
@@ -31,6 +32,10 @@ impl Config {
                         match name {
                             "npages" => match arg.parse::<usize>() {
                                 Ok(n) => config.npages = n,
+                                Err(_) => return None,
+                            },
+                            "page_size" => match arg.parse::<usize>() {
+                                Ok(n) => config.page_size = n,
                                 Err(_) => return None,
                             },
                             "gcmode" => {

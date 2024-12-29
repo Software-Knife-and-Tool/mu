@@ -12,6 +12,8 @@ use crate::features::ffi::Ffi;
 use crate::features::nix::Nix;
 #[cfg(feature = "prof")]
 use crate::features::prof::Prof;
+#[cfg(feature = "semispace_heap")]
+use crate::features::semispace_heap::SemiSpace;
 #[cfg(feature = "std")]
 use crate::features::std::Std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
@@ -36,6 +38,8 @@ impl Feature {
             <Feature as Ffi>::feature(),
             #[cfg(feature = "prof")]
             <Feature as Prof>::feature(),
+            #[cfg(feature = "semispace_heap")]
+            <Feature as SemiSpace>::feature(),
             #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
             <Feature as Sysinfo>::feature(),
         ];

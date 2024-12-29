@@ -11,7 +11,7 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::{Gc, HeapGcRef},
-            heap::Heap,
+            heap::HeapAllocator,
             indirect::IndirectTag,
             readtable::{map_char_syntax, SyntaxType},
             types::{Tag, TagType, Type},
@@ -205,8 +205,8 @@ impl Symbol {
     }
 
     pub fn heap_size(env: &Env, symbol: Tag) -> usize {
-        let name_sz = Heap::heap_size(env, Self::name(env, symbol));
-        let value_sz = Heap::heap_size(env, Self::value(env, symbol));
+        let name_sz = HeapAllocator::heap_size(env, Self::name(env, symbol));
+        let value_sz = HeapAllocator::heap_size(env, Self::value(env, symbol));
 
         std::mem::size_of::<SymbolImage>()
             + if name_sz > 8 { name_sz } else { 0 }

@@ -8,9 +8,9 @@ use crate::{
         env::Env,
         exception,
         frame::Frame,
+        heap::{HeapAllocator, GC},
         types::{Tag, Type},
     },
-    heaps::bump_allocator::BumpAllocator,
     types::{
         cons::{Cons, GC as _},
         function::{Function, GC as _},
@@ -24,7 +24,7 @@ use crate::{
 
 use futures::executor::block_on;
 
-pub type HeapGcRef = futures_locks::RwLockWriteGuard<BumpAllocator>;
+pub type HeapGcRef = futures_locks::RwLockWriteGuard<HeapAllocator>;
 
 pub struct Gc {
     pub lock: HeapGcRef,

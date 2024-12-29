@@ -276,7 +276,7 @@ mod tests {
     #[test]
     fn compile_test() {
         let config = Config::new(None);
-        let env: &Env = &Env::new(config.unwrap(), None);
+        let env: &Env = &Env::new(&config.unwrap(), None);
 
         match env.compile(Tag::nil(), &mut vec![]) {
             Ok(form) => match form.type_of() {

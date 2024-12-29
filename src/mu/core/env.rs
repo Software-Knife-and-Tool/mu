@@ -8,9 +8,9 @@ use {
             config::Config,
             core::{Core, CORE},
             frame::Frame,
+            heap::HeapAllocator,
             types::Tag,
         },
-        heaps::bump_allocator::BumpAllocator,
         types::namespace::Namespace,
         vectors::cache::VecCacheMap,
     },
@@ -23,11 +23,10 @@ use futures_locks::RwLock;
 // env environment
 pub struct Env {
     // configuration
-    #[allow(dead_code)]
-    config: Config,
+    pub config: Config,
 
     // heap
-    pub heap: RwLock<BumpAllocator>,
+    pub heap: RwLock<HeapAllocator>,
     pub gc_root: RwLock<Vec<Tag>>,
     pub vector_map: RwLock<VecCacheMap>,
 
@@ -53,15 +52,13 @@ pub struct Env {
 }
 
 impl Env {
-    pub fn new(config: Config, _image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
-        let heap = BumpAllocator::new(config.npages, Tag::NTYPES);
-
+    pub fn new(config: &Config, _image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
         let mut env = Env {
-            config,
+            config: config.clone(),
             dynamic: RwLock::new(Vec::new()),
             env_key: RwLock::new(Tag::nil()),
             gc_root: RwLock::new(Vec::<Tag>::new()),
-            heap: RwLock::new(heap),
+            heap: RwLock::new(HeapAllocator::new(config)),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),

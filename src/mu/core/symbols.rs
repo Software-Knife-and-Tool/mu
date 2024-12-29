@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! lib symbols
+//! core symbols
 use crate::{
     core::{
         apply::CoreFunction as _,
@@ -12,7 +12,7 @@ use crate::{
         frame::{CoreFunction as _, Frame},
         future::{CoreFunction as _, Future},
         gc::{CoreFunction as _, Gc},
-        heap::{CoreFunction as _, Heap},
+        heap::{CoreFunction as _, HeapAllocator},
         types::{CoreFunction as _, Tag},
     },
     streams::{read::CoreFunction as _, write::CoreFunction as _},
@@ -53,9 +53,9 @@ lazy_static! {
         // gc
         ( "gc",      0, Gc::mu_gc ),
         // heap
-        ( "heap-info", 0, Heap::mu_hp_info ),
-        ( "heap-stat", 0, Heap::mu_hp_stat ),
-        ( "heap-size", 1, Heap::mu_hp_size ),
+        ( "heap-info", 0, HeapAllocator::mu_hp_info ),
+        ( "heap-stat", 0, HeapAllocator::mu_hp_stat ),
+        ( "heap-size", 1, HeapAllocator::mu_hp_size ),
         // env
         ( "apply",   2, Env::mu_apply ),
         ( "eval",    1, Env::mu_eval ),

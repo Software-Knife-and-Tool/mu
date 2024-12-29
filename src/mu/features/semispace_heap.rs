@@ -1,28 +1,23 @@
-//  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env heap interface
-//!    Env
-use {
-    crate::{
-        core::{
-            config::Config,
-            direct::DirectTag,
-            env::Env,
-            exception,
-            frame::Frame,
-            indirect::IndirectTag,
-            types::{Tag, Type},
-        },
-        types::{
-            cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
-            vector::Vector,
-        },
+//! semispace allocator interface
+#![allow(dead_code)]
+use crate::{
+    core::{
+        config::Config,
+        direct::DirectTag,
+        env::Env,
+        heap::{HeapImageInfo, HeapTypeInfo},
+        types::{Tag, Type},
     },
+    features::feature::Feature,
+    types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
+};
+
+use {
     memmap,
-    modular_bitfield::specifiers::{B11, B4},
     std::{
-        fmt,
         fs::{remove_file, OpenOptions},
         io::{Seek, SeekFrom, Write},
     },
@@ -30,56 +25,21 @@ use {
 
 use {futures::executor::block_on, futures_locks::RwLock};
 
-lazy_static! {
-    static ref INFOTYPE: Vec<Tag> = vec![
-        Symbol::keyword("cons"),
-        Symbol::keyword("func"),
-        Symbol::keyword("stream"),
-        Symbol::keyword("struct"),
-        Symbol::keyword("symbol"),
-        Symbol::keyword("vector"),
-    ];
+pub trait SemiSpace {
+    fn feature() -> Feature;
 }
 
-#[bitfield]
-#[repr(align(8))]
-#[derive(Debug, Copy, Clone)]
-pub struct HeapImageInfo {
-    pub reloc: u32, // relocation
-    #[skip]
-    __: B11, // expansion
-    pub mark: bool, // reference counting
-    pub len: u16,   // in bytes
-    pub image_type: B4, // tag type
-}
-
-impl Default for HeapImageInfo {
-    fn default() -> Self {
-        Self::new()
+impl SemiSpace for Feature {
+    fn feature() -> Feature {
+        Feature {
+            symbols: vec![],
+            namespace: "mu".into(),
+        }
     }
-}
-
-impl fmt::Display for HeapImageInfo {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "mark: {}, len: {} type: {}",
-            self.mark(),
-            (self.len() / 8) - 1,
-            self.image_type()
-        )
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct HeapTypeInfo {
-    pub size: usize,
-    pub total: usize,
-    pub free: usize,
 }
 
 #[derive(Debug)]
-pub struct HeapAllocator {
+pub struct SemiSpaceAllocator {
     pub mmap: Box<memmap::MmapMut>,
     pub alloc_map: RwLock<Vec<RwLock<HeapTypeInfo>>>,
     pub free_map: Vec<Vec<usize>>,
@@ -89,7 +49,7 @@ pub struct HeapAllocator {
     pub write_barrier: usize, // byte offset
 }
 
-impl HeapAllocator {
+impl SemiSpaceAllocator {
     const SIZEOF_U64: usize = std::mem::size_of::<u64>();
 
     pub fn new(config: &Config) -> Self {
@@ -119,7 +79,7 @@ impl HeapAllocator {
                 .expect("Could not access data from memory mapped file")
         };
 
-        let mut heap = HeapAllocator {
+        let mut heap = SemiSpaceAllocator {
             alloc_map: RwLock::new(Vec::new()),
             free_map: Vec::new(),
             mmap: Box::new(data),
@@ -153,8 +113,8 @@ impl HeapAllocator {
         (image.to_vec(), vec![])
     }
 
-    pub fn iter(&self) -> HeapAllocatorIter {
-        HeapAllocatorIter {
+    pub fn iter(&self) -> SemiSpaceAllocatorIter {
+        SemiSpaceAllocatorIter {
             heap: self,
             index: 1,
         }
@@ -374,7 +334,7 @@ pub trait GC {
     fn get_image_mark(&self, _: usize) -> Option<bool>;
 }
 
-impl GC for HeapAllocator {
+impl GC for SemiSpaceAllocator {
     fn clear_marks(&mut self) {
         let mut index: usize = 1;
         let alloc_ref = block_on(self.alloc_map.read());
@@ -430,12 +390,12 @@ impl GC for HeapAllocator {
 }
 
 // iterator
-pub struct HeapAllocatorIter<'a> {
-    pub heap: &'a HeapAllocator,
+pub struct SemiSpaceAllocatorIter<'a> {
+    pub heap: &'a SemiSpaceAllocator,
     pub index: usize,
 }
 
-impl Iterator for HeapAllocatorIter<'_> {
+impl Iterator for SemiSpaceAllocatorIter<'_> {
     type Item = (HeapImageInfo, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -450,64 +410,5 @@ impl Iterator for HeapAllocatorIter<'_> {
     }
 }
 
-pub trait CoreFunction {
-    fn mu_hp_info(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_hp_size(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_hp_stat(_: &Env, _: &mut Frame) -> exception::Result<()>;
-}
-
-impl CoreFunction for HeapAllocator {
-    fn mu_hp_stat(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let (pagesz, npages) = Self::heap_info(env);
-
-        let mut vec = vec![
-            Symbol::keyword("heap"),
-            Fixnum::with_or_panic(pagesz * npages),
-            Fixnum::with_or_panic(npages),
-            Fixnum::with_or_panic(0),
-        ];
-
-        for htype in INFOTYPE.iter() {
-            let type_map = Self::heap_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
-
-            vec.extend(vec![
-                *htype,
-                Fixnum::with_or_panic(type_map.size),
-                Fixnum::with_or_panic(type_map.total),
-                Fixnum::with_or_panic(type_map.free),
-            ])
-        }
-
-        fp.value = Vector::from(vec).evict(env);
-
-        Ok(())
-    }
-
-    fn mu_hp_info(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let (page_size, npages) = Self::heap_info(env);
-
-        let vec = vec![
-            Symbol::keyword("bump"),
-            Fixnum::with_or_panic(page_size),
-            Fixnum::with_or_panic(npages),
-        ];
-
-        fp.value = Vector::from(vec).evict(env);
-
-        Ok(())
-    }
-
-    fn mu_hp_size(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::with_or_panic(Self::heap_size(env, fp.argv[0]));
-
-        Ok(())
-    }
-}
-
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn env() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+mod tests {}
