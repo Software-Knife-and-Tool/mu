@@ -48,7 +48,6 @@ extern crate modular_bitfield;
 
 mod core;
 mod features;
-mod heaps;
 mod streams;
 mod types;
 mod vectors;
@@ -62,8 +61,8 @@ use {
             config::Config,
             core::{Core, CORE},
             exception,
+            heap::HeapAllocator,
         },
-        heaps::image::Image,
         streams::{read::Read as _, stream::StreamBuilder, write::Write as _},
         types::stream::Stream,
     },
@@ -106,7 +105,7 @@ impl Env {
 
     /// constructor
     pub fn new(config: Config, image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
-        Env(Core::add_env(core::env::Env::new(config, image)))
+        Env(Core::add_env(core::env::Env::new(&config, image)))
     }
 
     /// apply a function to a list of arguments
@@ -268,6 +267,6 @@ impl Env {
         let env_ref = block_on(CORE.env_map.read());
         let env = env_ref.get(&self.0.as_u64()).unwrap();
 
-        Ok(Image::image(env))
+        Ok(HeapAllocator::image(env))
     }
 }
