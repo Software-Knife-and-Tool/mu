@@ -1,6 +1,6 @@
 [package]
 name = "mu"
-version = "0.1.85"
+version = "0.1.86"
 edition = "2021"
 authors = ["me <putnamjm.design@gmail.com>"]
 
@@ -21,7 +21,7 @@ nix = []
 std = []
 ffi = []
 prof = []
-semispace_heap = []
+semispace = []
 sysinfo = []  # not for macos
 
 [profile.dev]

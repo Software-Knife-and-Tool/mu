@@ -6,6 +6,7 @@ use crate::{
     core::{
         apply::CoreFunction as _,
         compile::CoreFunction as _,
+        config::CoreFunction as _,
         dynamic::CoreFunction as _,
         env::Env,
         exception::{self, CoreFunction as _, Exception},
@@ -57,10 +58,11 @@ lazy_static! {
         ( "heap-stat", 0, HeapAllocator::mu_hp_stat ),
         ( "heap-size", 1, HeapAllocator::mu_hp_size ),
         // env
-        ( "apply",   2, Env::mu_apply ),
-        ( "eval",    1, Env::mu_eval ),
+        ( "config",        0, Env::mu_config ),
+        ( "apply",         2, Env::mu_apply ),
+        ( "eval",          1, Env::mu_eval ),
         ( "%frame-stack",  0, Env::mu_frames ),
-        ( "fix",     2, Env::mu_fix ),
+        ( "fix",           2, Env::mu_fix ),
         // futures
         ( "defer",   2, Future::mu_future_defer ),
         ( "detach",  2, Future::mu_future_detach ),
