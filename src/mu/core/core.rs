@@ -48,7 +48,7 @@ impl Default for Core {
 }
 
 impl Core {
-    pub const VERSION: &'static str = "0.1.85";
+    pub const VERSION: &'static str = "0.1.86";
 
     pub fn new() -> Self {
         Core {
@@ -120,14 +120,6 @@ impl Core {
     // core symbols
     pub fn namespaces(env: &Env) {
         let mut functions = block_on(CORE.functions.write());
-
-        Namespace::intern_static(
-            env,
-            env.mu_ns,
-            "+version+".into(),
-            Vector::from(CORE.version).evict(env),
-        )
-        .unwrap();
 
         Namespace::intern_static(env, env.mu_ns, "%null-ns%".into(), env.null_ns);
 

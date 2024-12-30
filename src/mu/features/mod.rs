@@ -11,7 +11,7 @@ pub mod ffi;
 pub mod nix;
 #[cfg(feature = "prof")]
 pub mod prof;
-#[cfg(feature = "semispace_heap")]
+#[cfg(feature = "semispace")]
 pub mod semispace_heap;
 #[cfg(feature = "std")]
 pub mod std;

@@ -30,13 +30,6 @@ pub struct Gc {
     pub lock: HeapGcRef,
 }
 
-#[derive(Debug, Copy, Clone)]
-pub enum GcMode {
-    None,
-    Auto,
-    Demand,
-}
-
 impl Gc {
     #[allow(dead_code)]
     fn add_root(env: &Env, tag: Tag) {
