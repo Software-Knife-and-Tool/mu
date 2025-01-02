@@ -4,11 +4,11 @@
 //! env tagged types
 #![allow(dead_code)]
 use crate::{
-    core::types::{Tag, Type},
-    types::{
-        cons::Cons, function::Function, namespace::Namespace, struct_::Struct, symbol::Symbol,
-        vector::Vector,
+    core::{
+        namespace::Namespace,
+        types::{Tag, Type},
     },
+    types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
 };
 
 #[derive(Clone)]

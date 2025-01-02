@@ -11,7 +11,8 @@ pub trait Ffi {
 impl Ffi for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: Vec::new(),
+            functions: None,
+            symbols: None,
             namespace: "ffi".into(),
         }
     }

@@ -2,7 +2,8 @@
 //  SPDX-License-Identifier: MIT
 
 //!
-//! The core library, *mu*, is the implementation surface for the [`mu programming environment`].
+//! The core library is the implementation surface for the [`mu programming environment`] and
+//! implements the *mu* and *features* namespaces.
 //!
 //! As much as is practible, *mu's* functions and data types resemble Common Lisp in order to be
 //! familiar to the traditional Lisp programmer.
@@ -59,7 +60,7 @@ use {
             apply::Apply as _,
             compile::Compile,
             config::Config,
-            core::{Core, CORE},
+            core::{Core, CORE, VERSION},
             exception,
             heap::HeapAllocator,
         },
@@ -90,8 +91,8 @@ pub type Exception = core::exception::Exception;
 pub struct Env(Tag);
 
 impl Env {
-    /// current version
-    pub const VERSION: &'static str = core::core::Core::VERSION;
+    /// version
+    pub const VERSION: &'static str = VERSION;
 
     /// turn on ^C exception signalling
     pub fn signal_exception() {

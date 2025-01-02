@@ -2,7 +2,10 @@
 //  SPDX-License-Identifier: MIT
 
 //! features
-use crate::core::symbols::CoreFn;
+use crate::core::{core::CoreFnDef, types::Tag};
+
+use futures_locks::RwLock;
+use std::collections::HashMap;
 
 #[cfg(feature = "cpu_time")]
 use crate::features::cpu_time::CpuTime;
@@ -21,8 +24,9 @@ use crate::features::sysinfo::Sysinfo;
 
 #[derive(Clone)]
 pub struct Feature {
-    pub symbols: Vec<(&'static str, u16, CoreFn)>,
+    pub functions: Option<&'static Vec<CoreFnDef>>,
     pub namespace: String,
+    pub symbols: Option<&'static RwLock<HashMap<String, Tag>>>,
 }
 
 impl Feature {

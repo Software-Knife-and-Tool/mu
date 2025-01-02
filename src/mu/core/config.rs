@@ -3,17 +3,8 @@
 
 //! env config
 use crate::{
-    core::{
-        env::Env,
-        frame::Frame,
-        exception,
-        core::CORE
-    },
-    types::{
-        cons::Cons,
-        fixnum::Fixnum,
-        vector::Vector,
-    },
+    core::{core, env::Env, exception, frame::Frame},
+    types::{cons::Cons, fixnum::Fixnum, vector::Vector},
 };
 use page_size;
 
@@ -35,7 +26,7 @@ pub enum GcMode {
 impl Config {
     pub fn new(conf_option: Option<String>) -> Option<Config> {
         let mut config = Config {
-            version: CORE.version.to_string(),
+            version: core::VERSION.to_string(),
             npages: 1024,
             gcmode: GcMode::Auto,
             page_size: page_size::get(),
@@ -84,19 +75,32 @@ pub trait CoreFunction {
 
 impl CoreFunction for Env {
     fn mu_config(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let mut alist = vec![];
-
-        alist.push(Cons::cons(env,
-                              Vector::from("gcmode").evict(env),
-                              match env.config.gcmode {
-                                  GcMode::None => Vector::from("none").evict(env),
-                                  GcMode::Auto => Vector::from("auto").evict(env),
-                                  GcMode::Demand => Vector::from("demand").evict(env),
-                              }));
-
-        alist.push(Cons::cons(env, Vector::from("npages").evict(env), Fixnum::with_or_panic(env.config.npages)));
-        alist.push(Cons::cons(env, Vector::from("page_size").evict(env), Fixnum::with_or_panic(env.config.page_size)));
-        alist.push(Cons::cons(env, Vector::from("version").evict(env), Vector::from(env.config.version.as_str()).evict(env)));
+        let alist = vec![
+            Cons::cons(
+                env,
+                Vector::from("gcmode").evict(env),
+                match env.config.gcmode {
+                    GcMode::None => Vector::from("none").evict(env),
+                    GcMode::Auto => Vector::from("auto").evict(env),
+                    GcMode::Demand => Vector::from("demand").evict(env),
+                },
+            ),
+            Cons::cons(
+                env,
+                Vector::from("npages").evict(env),
+                Fixnum::with_or_panic(env.config.npages),
+            ),
+            Cons::cons(
+                env,
+                Vector::from("page_size").evict(env),
+                Fixnum::with_or_panic(env.config.page_size),
+            ),
+            Cons::cons(
+                env,
+                Vector::from("version").evict(env),
+                Vector::from(env.config.version.as_str()).evict(env),
+            ),
+        ];
 
         fp.value = Cons::list(env, &alist);
 

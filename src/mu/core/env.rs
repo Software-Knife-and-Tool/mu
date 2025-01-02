@@ -9,9 +9,10 @@ use {
             core::{Core, CORE},
             frame::Frame,
             heap::HeapAllocator,
+            namespace::Namespace,
+            symbols::MU_FUNCTIONS,
             types::Tag,
         },
-        types::namespace::Namespace,
         vectors::cache::VecCacheMap,
     },
     std::collections::HashMap,
@@ -77,12 +78,13 @@ impl Env {
             Err(_) => panic!(),
         };
 
-        env.keyword_ns = match Namespace::with_static(&env, "keyword", &CORE.keywords) {
-            Ok(ns) => ns,
-            Err(_) => panic!(),
-        };
+        env.mu_ns =
+            match Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(&MU_FUNCTIONS)) {
+                Ok(ns) => ns,
+                Err(_) => panic!(),
+            };
 
-        env.mu_ns = match Namespace::with_static(&env, "mu", &CORE.symbols) {
+        env.keyword_ns = match Namespace::with_static(&env, "keyword", None, None) {
             Ok(ns) => ns,
             Err(_) => panic!(),
         };

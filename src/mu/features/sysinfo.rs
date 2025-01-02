@@ -4,6 +4,7 @@
 //! sysinfo interface
 use crate::{
     core::{
+        core::CoreFnDef,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -12,7 +13,17 @@ use crate::{
     features::feature::Feature,
     types::{cons::Cons, fixnum::Fixnum, vector::Vector},
 };
+
+use futures_locks::RwLock;
+use std::collections::HashMap;
+
 use sysinfo_dot_h::{self};
+
+lazy_static! {
+    pub static ref SYSINFO_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    pub static ref SYSINFO_FUNCTIONS: Vec<CoreFnDef> =
+        vec![("sysinfo", 0, Feature::sysinfo_sysinfo),];
+}
 
 pub trait Sysinfo {
     fn feature() -> Feature;
@@ -21,8 +32,9 @@ pub trait Sysinfo {
 impl Sysinfo for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: vec![("sysinfo", 0, <Feature as CoreFunction>::sysinfo_sysinfo)],
+            functions: Some(&SYSINFO_FUNCTIONS),
             namespace: "sysinfo".into(),
+            symbols: Some(&SYSINFO_SYMBOLS),
         }
     }
 }

@@ -2,7 +2,7 @@
 name = "mu"
 version = "0.1.86"
 edition = "2021"
-authors = ["me <putnamjm.design@gmail.com>"]
+authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
 [workspace]
 members = [ "src/mu-*", "src/mux", "src/sysgen" ]
@@ -16,7 +16,7 @@ bench = false
 
 [features]
 default = [ "std", "cpu_time", "sysinfo", "nix", "ffi" ]
-cpu_time = []
+cpu_time = []     # needed for development
 nix = []
 std = []
 ffi = []

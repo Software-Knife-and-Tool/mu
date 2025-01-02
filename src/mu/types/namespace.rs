@@ -2,34 +2,26 @@
 //  SPDX-License-Identifier: MIT
 
 //! env namespaces
-use {
-    crate::{
-        core::{
-            apply::Apply as _,
-            direct::{DirectExt, DirectTag, DirectType, ExtType},
-            env::Env,
-            exception::{self, Condition, Exception},
-            frame::Frame,
-            gc::Gc,
-            types::{Tag, Type},
-        },
-        streams::write::Write as _,
-        types::{
-            cons::Cons,
-            symbol::{Symbol, GC as _},
-            vector::Vector,
-        },
+use crate::{
+    core::{
+        apply::Apply as _,
+        direct::DirectTag,
+        env::Env,
+        exception::{self, Condition, Exception},
+        frame::Frame,
+        gc::Gc,
+        namespace::Namespace,
+        types::{Tag, Type},
     },
-    std::{collections::HashMap, str},
+    streams::write::Write as _,
+    types::{
+        cons::Cons,
+        symbol::{Symbol, GC as _},
+        vector::Vector,
+    },
 };
 
-use {futures::executor::block_on, futures_locks::RwLock};
-
-#[derive(Clone)]
-pub enum Namespace {
-    Static(&'static RwLock<HashMap<String, Tag>>),
-    Dynamic(RwLock<HashMap<String, Tag>>),
-}
+use futures::executor::block_on;
 
 pub trait GC {
     #[allow(dead_code)]
@@ -40,7 +32,10 @@ impl GC for Namespace {
     #[allow(dead_code)]
     fn gc(&mut self, gc: &mut Gc, env: &Env) {
         let hash_ref = block_on(match self {
-            Namespace::Static(hash) => hash.read(),
+            Namespace::Static(static_) => match static_.hash {
+                Some(hash) => hash.read(),
+                None => return,
+            },
             Namespace::Dynamic(ref hash) => hash.read(),
         });
 
@@ -51,141 +46,6 @@ impl GC for Namespace {
 }
 
 impl Namespace {
-    pub fn with(env: &Env, name: &str) -> exception::Result<Tag> {
-        let mut ns_ref = block_on(env.ns_map.write());
-        let len = ns_ref.len();
-
-        if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
-            drop(ns_ref);
-
-            return Err(Exception::new(
-                env,
-                Condition::Type,
-                "mu:make-namespace",
-                Vector::from(name).evict(env),
-            ));
-        }
-
-        let ns = DirectTag::to_tag(
-            len as u64,
-            DirectExt::ExtType(ExtType::Namespace),
-            DirectType::Ext,
-        );
-
-        ns_ref.push((
-            ns,
-            name.into(),
-            Namespace::Dynamic(RwLock::new(HashMap::<String, Tag>::new())),
-        ));
-
-        Ok(ns)
-    }
-
-    pub fn with_static(
-        env: &Env,
-        name: &str,
-        ns_map: &'static RwLock<HashMap<String, Tag>>,
-    ) -> exception::Result<Tag> {
-        let mut ns_ref = block_on(env.ns_map.write());
-        let len = ns_ref.len();
-
-        if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
-            drop(ns_ref);
-
-            return Err(Exception::new(
-                env,
-                Condition::Type,
-                "mu:make-namespace",
-                Vector::from(name).evict(env),
-            ));
-        }
-
-        let ns = DirectTag::to_tag(
-            len as u64,
-            DirectExt::ExtType(ExtType::Namespace),
-            DirectType::Ext,
-        );
-
-        ns_ref.push((ns, name.into(), Namespace::Static(ns_map)));
-
-        Ok(ns)
-    }
-
-    fn find_symbol(env: &Env, ns: Tag, name: &str) -> Option<Tag> {
-        let ns_ref = block_on(env.ns_map.read());
-
-        match ns_ref.iter().find_map(
-            |(tag, _, ns_cache)| {
-                if ns.eq_(tag) {
-                    Some(ns_cache)
-                } else {
-                    None
-                }
-            },
-        ) {
-            Some(ns_cache) => {
-                let hash = block_on(match ns_cache {
-                    Namespace::Static(hash) => hash.read(),
-                    Namespace::Dynamic(hash) => hash.read(),
-                });
-
-                if hash.contains_key(name) {
-                    Some(hash[name])
-                } else {
-                    None
-                }
-            }
-            None => None,
-        }
-    }
-
-    pub fn is_(tag: Tag) -> Option<Tag> {
-        match tag.type_of() {
-            Type::Namespace => Some(tag),
-            _ => None,
-        }
-    }
-
-    pub fn find(env: &Env, name: &str) -> Option<Tag> {
-        let ns_ref = block_on(env.ns_map.read());
-
-        ns_ref
-            .iter()
-            .find_map(
-                |(tag, ns_name, _)| {
-                    if name == ns_name {
-                        Some(tag)
-                    } else {
-                        None
-                    }
-                },
-            )
-            .copied()
-    }
-
-    pub fn name(env: &Env, ns: Tag) -> Option<String> {
-        let ns_ref = block_on(env.ns_map.read());
-
-        match ns_ref.iter().find_map(
-            |(tag, ns_name, _)| {
-                if ns.eq_(tag) {
-                    Some(ns_name)
-                } else {
-                    None
-                }
-            },
-        ) {
-            Some(tag) => {
-                if tag.is_empty() {
-                    Some("".into())
-                } else {
-                    Some(tag.into())
-                }
-            }
-            None => None,
-        }
-    }
-
     pub fn intern(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
         if env.keyword_ns.eq_(&ns) {
             if name.len() > DirectTag::DIRECT_STR_MAX {
@@ -236,7 +96,10 @@ impl Namespace {
                     Some(ns_map) => {
                         let name = Vector::as_string(env, Symbol::name(env, symbol));
                         let mut hash = block_on(match ns_map {
-                            Namespace::Static(hash) => hash.write(),
+                            Namespace::Static(static_) => match static_.hash {
+                                Some(hash) => hash.write(),
+                                None => return None,
+                            },
                             Namespace::Dynamic(hash) => hash.write(),
                         });
 
@@ -266,7 +129,10 @@ impl Namespace {
             Some(ns_map) => {
                 let name = Vector::as_string(env, Symbol::name(env, symbol));
                 let mut hash = block_on(match ns_map {
-                    Namespace::Static(hash) => hash.write(),
+                    Namespace::Static(static_) => match static_.hash {
+                        Some(hash) => hash.write(),
+                        None => return None,
+                    },
                     Namespace::Dynamic(_) => return None,
                 });
 
@@ -299,7 +165,7 @@ pub trait CoreFunction {
     fn mu_make_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_map(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()>;
-    fn mu_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_ns_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Namespace {
@@ -384,7 +250,7 @@ impl CoreFunction for Namespace {
         Ok(())
     }
 
-    fn mu_symbols(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_ns_symbols(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
         env.fp_argv_check("mu:symbols", &[Type::Namespace], fp)?;
@@ -402,7 +268,13 @@ impl CoreFunction for Namespace {
         ) {
             Some(ns_map) => {
                 let hash = block_on(match ns_map {
-                    Namespace::Static(hash) => hash.read(),
+                    Namespace::Static(static_) => match static_.hash {
+                        Some(hash) => hash.read(),
+                        None => {
+                            fp.value = Tag::nil();
+                            return Ok(());
+                        }
+                    },
                     Namespace::Dynamic(hash) => hash.read(),
                 });
 

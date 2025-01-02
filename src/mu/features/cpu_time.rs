@@ -4,15 +4,31 @@
 //! cpu-time interface
 use crate::{
     core::{
+        core::CoreFnDef,
         env::Env,
         exception::{self},
         frame::Frame,
+        types::Tag,
     },
     features::feature::Feature,
     types::fixnum::Fixnum,
 };
-use cpu_time::ProcessTime;
-use cpu_time::{self};
+use futures_locks::RwLock;
+use std::collections::HashMap;
+
+use cpu_time::{self, ProcessTime};
+
+lazy_static! {
+    pub static ref CPU_TIME_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    pub static ref CPU_TIME_FUNCTIONS: Vec<CoreFnDef> = vec![
+        ("process-time", 0, Feature::cpu_time_process_time),
+        (
+            "time-units-per-second",
+            0,
+            Feature::cpu_time_units_per_second
+        ),
+    ];
+}
 
 pub trait CpuTime {
     fn feature() -> Feature;
@@ -21,18 +37,8 @@ pub trait CpuTime {
 impl CpuTime for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: vec![
-                (
-                    "process-time",
-                    0,
-                    <Feature as CoreFunction>::cpu_time_process_time,
-                ),
-                (
-                    "time-units-per-second",
-                    0,
-                    <Feature as CoreFunction>::cpu_time_units_per_second,
-                ),
-            ],
+            symbols: Some(&CPU_TIME_SYMBOLS),
+            functions: Some(&CPU_TIME_FUNCTIONS),
             namespace: "cpu-time".into(),
         }
     }

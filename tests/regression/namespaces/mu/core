@@ -28,8 +28,8 @@
 (mu:view #(:t 1 2))	#(:t 2 :t)
 (mu:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
 (mu:view 'a)	#(:t "" a :UNBOUND)
-(mu:view 'mu:eq)	#(:t "mu" eq #<:function :mu [req:2, form:eq]>)
-(mu:view mu:eq)	#(:t 2 #(:t mu eq 0))
+(mu:view 'mu:eq)	#(:t "mu" eq #<:function :mu [req:2, form:2]>)
+(mu:view mu:eq)	#(:t 2 #(:t mu 0))
 (mu:view mu:*standard-input*)	#(:t 0 :input :nil)
 (mu:heap-size ())	8
 (mu:heap-size :keyword)	8

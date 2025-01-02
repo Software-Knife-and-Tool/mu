@@ -17,6 +17,7 @@ use crate::{
         vector::Vector,
     },
 };
+use std::collections::HashMap;
 use {futures::executor::block_on, futures_locks::RwLock};
 
 pub trait Prof {

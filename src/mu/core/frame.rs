@@ -10,9 +10,9 @@
 use crate::{
     core::{
         apply::Apply as _,
-        core::CORE,
         env::Env,
         exception::{self, Condition, Exception},
+        namespace::Namespace,
         types::{Tag, Type},
     },
     types::{
@@ -124,6 +124,13 @@ impl Frame {
         #[cfg(feature = "prof")]
         <Feature as Prof>::prof_event(env, func).unwrap();
 
+        let nreqs = Fixnum::as_i64(Function::arity(env, func)) as usize;
+        let nargs = self.argv.len();
+
+        if nargs != nreqs {
+            return Err(Exception::new(env, Condition::Arity, "mu:apply", func));
+        }
+
         match func.type_of() {
             Type::Symbol => {
                 if Symbol::is_bound(env, func) {
@@ -132,49 +139,52 @@ impl Frame {
                     Err(Exception::new(env, Condition::Unbound, "mu:apply", func))
                 }
             }
-            Type::Function => match Function::form(env, func).type_of() {
-                Type::Null => Ok(Tag::nil()),
-                Type::Vector => {
-                    let nreqs = Fixnum::as_i64(Function::arity(env, func)) as usize;
-                    let nargs = self.argv.len();
+            Type::Function => {
+                let form = Function::form(env, func);
 
-                    if nargs != nreqs {
-                        return Err(Exception::new(env, Condition::Arity, "mu:apply", func));
+                match form.type_of() {
+                    Type::Null => Ok(Tag::nil()),
+                    Type::Vector => {
+                        let ns = Vector::ref_(env, form, 0).unwrap();
+                        let offset = Vector::ref_(env, form, 1).unwrap();
+
+                        let ns_ref = block_on(env.ns_map.read());
+                        let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
+
+                        match namespace {
+                            Namespace::Static(static_) => {
+                                let func = match static_.functions {
+                                    Some(functab) => functab[Fixnum::as_i64(offset) as usize].2,
+                                    None => panic!(),
+                                };
+
+                                drop(ns_ref);
+                                func(env, &mut self)?
+                            }
+                            _ => panic!(),
+                        };
+
+                        Ok(self.value)
                     }
+                    Type::Cons => {
+                        let mut value = Tag::nil();
+                        let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
 
-                    let offset =
-                        Fixnum::as_i64(Vector::ref_(env, Function::form(env, func), 2).unwrap());
+                        env.dynamic_push(self.func, offset);
+                        self.frame_stack_push(env);
 
-                    let functions_ref = block_on(CORE.functions.read());
-                    functions_ref[offset as usize](env, &mut self)?;
+                        for cons in Cons::iter(env, form) {
+                            value = env.eval(Cons::car(env, cons))?;
+                        }
 
-                    Ok(self.value)
+                        Self::frame_stack_pop(env, func);
+                        env.dynamic_pop();
+
+                        Ok(value)
+                    }
+                    _ => Err(Exception::new(env, Condition::Type, "mu:apply", func)),
                 }
-                Type::Cons => {
-                    let nreqs = Fixnum::as_i64(Function::arity(env, func)) as usize;
-                    let nargs = self.argv.len();
-
-                    if nargs != nreqs {
-                        return Err(Exception::new(env, Condition::Arity, "mu:apply", func));
-                    }
-
-                    let mut value = Tag::nil();
-                    let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
-
-                    env.dynamic_push(self.func, offset);
-                    self.frame_stack_push(env);
-
-                    for cons in Cons::iter(env, Function::form(env, func)) {
-                        value = env.eval(Cons::car(env, cons))?;
-                    }
-
-                    Self::frame_stack_pop(env, func);
-                    env.dynamic_pop();
-
-                    Ok(value)
-                }
-                _ => Err(Exception::new(env, Condition::Type, "mu:apply", func)),
-            },
+            }
             _ => Err(Exception::new(env, Condition::Type, "mu:apply", func)),
         }
     }
