@@ -15,6 +15,7 @@ use crate::{
     features::feature::Feature,
     types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
+use std::collections::HashMap;
 use {futures::executor::block_on, futures_locks::RwLock};
 
 pub trait Prof {
@@ -24,7 +25,8 @@ pub trait Prof {
 
 lazy_static! {
     pub static ref PROF_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref PROF_FUNCTIONS: Vec<CoreFnDef> = vec![("prof-control", 1, Feature::prof_control)],
+    pub static ref PROF_FUNCTIONS: Vec<CoreFnDef> =
+        vec![("prof-control", 1, Feature::prof_control)];
 }
 
 impl Prof for Feature {
