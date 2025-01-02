@@ -5,14 +5,27 @@
 use crate::{
     core::{
         apply::Apply as _,
+        core::CoreFnDef,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        types::Type,
+        types::{Tag, Type},
     },
     features::feature::Feature,
     types::{cons::Cons, fixnum::Fixnum, float::Float, vector::Vector},
 };
+use futures_locks::RwLock;
+use std::collections::HashMap;
+
+lazy_static! {
+    pub static ref STD_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    pub static ref STD_FUNCTIONS: Vec<CoreFnDef> = vec![
+        ("command", 2, Feature::std_command),
+        ("env", 0, Feature::std_env),
+        ("exit", 1, Feature::std_exit),
+        ("sleep", 1, Feature::std_sleep),
+    ];
+}
 
 pub trait Std {
     fn feature() -> Feature;
@@ -21,13 +34,9 @@ pub trait Std {
 impl Std for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: vec![
-                ("command", 2, <Feature as CoreFunction>::std_command),
-                ("env", 0, <Feature as CoreFunction>::std_env),
-                ("exit", 1, <Feature as CoreFunction>::std_exit),
-                ("sleep", 1, <Feature as CoreFunction>::std_sleep),
-            ],
+            functions: Some(&STD_FUNCTIONS),
             namespace: "std".into(),
+            symbols: Some(&STD_SYMBOLS),
         }
     }
 }

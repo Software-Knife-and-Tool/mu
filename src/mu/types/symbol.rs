@@ -13,11 +13,12 @@ use {
             gc::{Gc, HeapGcRef},
             heap::HeapAllocator,
             indirect::IndirectTag,
+            namespace::Namespace,
             readtable::{map_char_syntax, SyntaxType},
             types::{Tag, TagType, Type},
         },
         streams::write::Write as _,
-        types::{namespace::Namespace, stream::Write as _, vector::Vector},
+        types::{stream::Write as _, vector::Vector},
     },
     std::str,
 };

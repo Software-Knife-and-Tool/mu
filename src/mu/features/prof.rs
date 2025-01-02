@@ -5,18 +5,17 @@
 use crate::{
     core::{
         apply::Apply as _,
+        core::CoreFnDef,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        symbols::CoreFnDef,
+        namespace::Namespace,
         types::{Tag, Type},
     },
     features::feature::Feature,
-    types::{
-        cons::Cons, fixnum::Fixnum, namespace::Namespace, struct_::Struct, symbol::Symbol,
-        vector::Vector,
-    },
+    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
+use std::collections::HashMap;
 use {futures::executor::block_on, futures_locks::RwLock};
 
 pub trait Prof {
@@ -24,10 +23,17 @@ pub trait Prof {
     fn prof_event(_: &Env, _: Tag) -> exception::Result<()>;
 }
 
+lazy_static! {
+    pub static ref PROF_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    pub static ref PROF_FUNCTIONS: Vec<CoreFnDef> =
+        vec![("prof-control", 1, Feature::prof_control)];
+}
+
 impl Prof for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: vec![("prof-control", 1, <Feature as CoreFunction>::prof_control)],
+            functions: Some(&PROF_FUNCTIONS),
+            symbols: Some(&PROF_SYMBOLS),
             namespace: "prof".into(),
         }
     }

@@ -10,9 +10,10 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
+        namespace::Namespace,
         types::{Tag, Type},
     },
-    types::{cons::Cons, fixnum::Fixnum, function::Function, namespace::Namespace, symbol::Symbol},
+    types::{cons::Cons, fixnum::Fixnum, function::Function, symbol::Symbol},
 };
 
 // special forms
@@ -267,32 +268,32 @@ impl CoreFunction for Env {
 #[cfg(test)]
 mod tests {
     /*
-    use crate::core::{
-        compile::Compile,
-        config::Config,
-        env::Env,
-        types::{Tag, Type},
-    };
+        use crate::core::{
+            compile::Compile,
+            config::Config,
+            env::Env,
+            types::{Tag, Type},
+        };
 
-    #[test]
-    fn compile_test() {
-        let config = Config::new(None);
-        let env: &Env = &Env::new(&config.unwrap(), None);
+        #[test]
+        fn compile_test() {
+            let config = Config::new(None);
+            let env: &Env = &Env::new(&config.unwrap(), None);
 
-        match env.compile(Tag::nil(), &mut vec![]) {
-            Ok(form) => match form.type_of() {
-                Type::Null => assert!(true),
+            match env.compile(Tag::nil(), &mut vec![]) {
+                Ok(form) => match form.type_of() {
+                    Type::Null => assert!(true),
+                    _ => assert!(false),
+                },
                 _ => assert!(false),
-            },
-            _ => assert!(false),
-        }
-        match Compile::list(env, Tag::nil(), &mut vec![]) {
-            Ok(form) => match form.type_of() {
-                Type::Null => assert!(true),
+            }
+            match Compile::list(env, Tag::nil(), &mut vec![]) {
+                Ok(form) => match form.type_of() {
+                    Type::Null => assert!(true),
+                    _ => assert!(false),
+                },
                 _ => assert!(false),
-            },
-            _ => assert!(false),
-        }
-}
-    */
+            }
+    }
+        */
 }

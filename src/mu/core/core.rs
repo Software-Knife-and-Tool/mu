@@ -7,34 +7,36 @@ use {
     crate::{
         core::{
             env::Env,
+            exception,
+            frame::Frame,
             future::{Future, FuturePool},
-            symbols::{CoreFn, LIB_SYMBOLS},
+            namespace::Namespace,
+            symbols::MU_FUNCTIONS,
             types::Tag,
         },
         features::feature::Feature,
         streams::{stream::StreamBuilder, write::Write},
         types::{
-            fixnum::Fixnum, function::Function, namespace::Namespace, stream::Stream,
-            symbol::Symbol, vector::Vector,
+            fixnum::Fixnum, function::Function, stream::Stream, symbol::Symbol, vector::Vector,
         },
     },
     std::collections::HashMap,
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
+pub const VERSION: &str = "0.1.86";
+pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
+pub type CoreFnDef = (&'static str, u16, CoreFn);
+
 lazy_static! {
     pub static ref CORE: Core = Core::new().features().stdio();
 }
 
 pub struct Core {
-    pub version: &'static str,
-
     pub env_map: RwLock<HashMap<u64, Env>>,
     pub features: RwLock<Vec<Feature>>,
-    pub functions: RwLock<Vec<CoreFn>>,
     pub future_id: RwLock<u64>,
     pub futures: RwLock<HashMap<u64, Future>>,
-    pub keywords: RwLock<HashMap<String, Tag>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub symbols: RwLock<HashMap<String, Tag>>,
@@ -48,21 +50,16 @@ impl Default for Core {
 }
 
 impl Core {
-    pub const VERSION: &'static str = "0.1.86";
-
     pub fn new() -> Self {
         Core {
             env_map: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
-            functions: RwLock::new(Vec::new()),
             future_id: RwLock::new(0),
             futures: RwLock::new(HashMap::new()),
-            keywords: RwLock::new(HashMap::new()),
             threads: FuturePool::new(),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(Vec::new()),
             symbols: RwLock::new(HashMap::new()),
-            version: Self::VERSION,
         }
     }
 
@@ -119,8 +116,6 @@ impl Core {
 
     // core symbols
     pub fn namespaces(env: &Env) {
-        let mut functions = block_on(CORE.functions.write());
-
         Namespace::intern_static(env, env.mu_ns, "%null-ns%".into(), env.null_ns);
 
         Namespace::intern_static(env, env.mu_ns, "*standard-input*".into(), CORE.stdin()).unwrap();
@@ -130,43 +125,40 @@ impl Core {
 
         Namespace::intern_static(env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
 
-        for (name, nreqs, fn_) in &*LIB_SYMBOLS {
-            let vec = vec![
-                env.mu_ns,
-                Vector::from(*name).evict(env),
-                Fixnum::with_or_panic(functions.len()),
-            ];
+        for (index, desc) in MU_FUNCTIONS.iter().enumerate() {
+            let (name, nreqs, _fn) = desc;
+
+            let vec = vec![env.mu_ns, Fixnum::with_or_panic(index)];
 
             let fn_vec = Vector::from(vec).evict(env);
             let func = Function::new((*nreqs).into(), fn_vec).evict(env);
 
             Namespace::intern_static(env, env.mu_ns, (*name).into(), func).unwrap();
-
-            functions.push(*fn_)
         }
 
         let features = block_on(CORE.features.read());
 
         for feature in &*features {
-            let ns = match Namespace::with(env, &feature.namespace) {
-                Ok(ns) => ns,
+            match Namespace::with_static(
+                env,
+                &feature.namespace,
+                feature.symbols,
+                feature.functions,
+            ) {
+                Ok(ns) => {
+                    if let Some(functions) = feature.functions {
+                        for (index, desc) in functions.iter().enumerate() {
+                            let (name, nreqs, _fn) = *desc;
+                            let vec = vec![ns, Fixnum::with_or_panic(index)];
+                            let fn_vec = Vector::from(vec).evict(env);
+                            let func = Function::new((nreqs).into(), fn_vec).evict(env);
+
+                            Namespace::intern_static(env, ns, (*name).into(), func).unwrap();
+                        }
+                    }
+                }
                 Err(_) => panic!(),
             };
-
-            for (name, nreqs, fn_) in &*feature.symbols {
-                let vec = vec![
-                    ns,
-                    Vector::from(*name).evict(env),
-                    Fixnum::with_or_panic(functions.len()),
-                ];
-
-                let fn_vec = Vector::from(vec).evict(env);
-                let func = Function::new((*nreqs).into(), fn_vec).evict(env);
-
-                Namespace::intern(env, ns, (*name).into(), func).unwrap();
-
-                functions.push(*fn_)
-            }
         }
     }
 

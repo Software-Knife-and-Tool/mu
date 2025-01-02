@@ -9,12 +9,12 @@ use crate::{
         exception,
         frame::Frame,
         heap::{HeapAllocator, GC},
+        namespace::Namespace,
         types::{Tag, Type},
     },
     types::{
         cons::{Cons, GC as _},
         function::{Function, GC as _},
-        namespace::Namespace,
         struct_::{Struct, GC as _},
         symbol::{Symbol, GC as _},
         vector::Vector,
@@ -92,7 +92,10 @@ impl Gc {
 
         for (_, _, ns_cache) in &*ns_map_ref {
             let hash_ref = block_on(match ns_cache {
-                Namespace::Static(hash) => hash.read(),
+                Namespace::Static(static_) => match static_.hash {
+                    Some(hash) => hash.read(),
+                    None => return,
+                },
                 Namespace::Dynamic(ref hash) => hash.read(),
             });
 

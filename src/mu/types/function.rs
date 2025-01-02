@@ -8,10 +8,11 @@ use crate::{
         exception,
         gc::{Gc, HeapGcRef},
         indirect::IndirectTag,
+        namespace::Namespace,
         types::{Tag, TagType, Type},
     },
     streams::write::Write as _,
-    types::{fixnum::Fixnum, namespace::Namespace, symbol::Symbol, vector::Vector},
+    types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 
 use futures::executor::block_on;
@@ -19,7 +20,7 @@ use futures::executor::block_on;
 #[derive(Copy, Clone)]
 pub struct Function {
     pub arity: Tag, // fixnum # of required arguments
-    pub form: Tag,  // list or symbol
+    pub form: Tag,  // list or vector
 }
 
 pub trait GC {
@@ -141,12 +142,22 @@ impl Function {
                     Type::Cons | Type::Null => ("lambda".into(), format!("{:x}", form.as_u64())),
                     Type::Vector => {
                         let ns = Vector::ref_(env, form, 0).unwrap();
-                        let name = Vector::ref_(env, form, 1).unwrap();
+                        let offset = Vector::ref_(env, form, 1).unwrap();
 
-                        (
-                            Namespace::name(env, ns).unwrap(),
-                            Vector::as_string(env, name),
-                        )
+                        let ns_ref = block_on(env.ns_map.read());
+                        let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
+
+                        let fn_name = match namespace {
+                            Namespace::Static(static_) => match static_.functions {
+                                Some(functions) => {
+                                    functions[Fixnum::as_i64(offset) as usize].1.to_string()
+                                }
+                                None => "<no functions>".to_string(),
+                            },
+                            _ => panic!(),
+                        };
+
+                        (Namespace::name(env, ns).unwrap(), fn_name)
                     }
                     _ => panic!(),
                 };

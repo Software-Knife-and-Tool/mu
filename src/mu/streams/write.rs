@@ -8,6 +8,7 @@ use crate::{
         env::Env,
         exception::{self},
         frame::Frame,
+        namespace::Namespace,
         types::{Tag, Type},
     },
     types::{
@@ -16,7 +17,6 @@ use crate::{
         fixnum::Fixnum,
         float::Float,
         function::Function,
-        namespace::Namespace,
         stream::{Stream, Write as _},
         struct_::Struct,
         symbol::Symbol,

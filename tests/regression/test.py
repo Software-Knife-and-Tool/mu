@@ -6,7 +6,7 @@ ns = sys.argv[1]
 base = sys.argv[2]
 test = sys.argv[3]
 
-with open(base + '/' + ns + '/' + test) as f: test_source = f.readlines()
+with open("namespaces/" + base + '/' + ns + '/' + test) as f: test_source = f.readlines()
 
 def runtest(line, test, expected):
     proc = subprocess.Popen(['../../dist/mu-sys','-e' + test],\

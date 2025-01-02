@@ -4,6 +4,7 @@
 //! nix interface
 use crate::{
     core::{
+        core::CoreFnDef,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -12,7 +13,15 @@ use crate::{
     features::feature::Feature,
     types::{cons::Cons, struct_::Struct, symbol::Symbol, vector::Vector},
 };
+use futures_locks::RwLock;
+use std::collections::HashMap;
+
 use nix::{self};
+
+lazy_static! {
+    pub static ref NIX_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    pub static ref NIX_FUNCTIONS: Vec<CoreFnDef> = vec![("uname", 0u16, Feature::nix_uname),];
+}
 
 pub trait Nix {
     fn feature() -> Feature;
@@ -21,7 +30,8 @@ pub trait Nix {
 impl Nix for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: vec![("uname", 0u16, <Feature as CoreFunction>::nix_uname)],
+            functions: Some(&NIX_FUNCTIONS),
+            symbols: Some(&NIX_SYMBOLS),
             namespace: "nix".into(),
         }
     }

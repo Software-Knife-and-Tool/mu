@@ -7,11 +7,12 @@ use crate::{
         compile::Compile,
         env::Env,
         exception::{self, Condition, Exception},
+        namespace::Namespace,
         reader::Reader,
         types::Tag,
     },
     streams::read::Read,
-    types::{cons::Cons, namespace::Namespace, stream::Read as _, symbol::Symbol},
+    types::{cons::Cons, stream::Read as _, symbol::Symbol},
 };
 use std::fmt;
 

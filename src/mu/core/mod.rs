@@ -16,6 +16,7 @@ pub mod future;
 pub mod gc;
 pub mod heap;
 pub mod indirect;
+pub mod namespace;
 pub mod quasi;
 pub mod reader;
 pub mod readtable;
