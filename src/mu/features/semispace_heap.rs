@@ -32,8 +32,9 @@ pub trait SemiSpace {
 impl SemiSpace for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: vec![],
-            namespace: "mu".into(),
+            functions: None,
+            symbols: None,
+            namespace: "semispace".into(),
         }
     }
 }
