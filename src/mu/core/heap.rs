@@ -9,15 +9,9 @@ use {
             config::Config,
             direct::DirectTag,
             env::Env,
-            exception,
-            frame::Frame,
-            indirect::IndirectTag,
             types::{Tag, Type},
         },
-        types::{
-            cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
-            vector::Vector,
-        },
+        types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
     },
     memmap,
     modular_bitfield::specifiers::{B11, B4},
@@ -29,17 +23,6 @@ use {
 };
 
 use {futures::executor::block_on, futures_locks::RwLock};
-
-lazy_static! {
-    static ref INFOTYPE: Vec<Tag> = vec![
-        Symbol::keyword("cons"),
-        Symbol::keyword("func"),
-        Symbol::keyword("stream"),
-        Symbol::keyword("struct"),
-        Symbol::keyword("symbol"),
-        Symbol::keyword("vector"),
-    ];
-}
 
 #[bitfield]
 #[repr(align(8))]
@@ -447,60 +430,6 @@ impl Iterator for HeapAllocatorIter<'_> {
             }
             None => None,
         }
-    }
-}
-
-pub trait CoreFunction {
-    fn mu_hp_info(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_hp_size(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_hp_stat(_: &Env, _: &mut Frame) -> exception::Result<()>;
-}
-
-impl CoreFunction for HeapAllocator {
-    fn mu_hp_stat(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let (pagesz, npages) = Self::heap_info(env);
-
-        let mut vec = vec![
-            Symbol::keyword("heap"),
-            Fixnum::with_or_panic(pagesz * npages),
-            Fixnum::with_or_panic(npages),
-            Fixnum::with_or_panic(0),
-        ];
-
-        for htype in INFOTYPE.iter() {
-            let type_map = Self::heap_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
-
-            vec.extend(vec![
-                *htype,
-                Fixnum::with_or_panic(type_map.size),
-                Fixnum::with_or_panic(type_map.total),
-                Fixnum::with_or_panic(type_map.free),
-            ])
-        }
-
-        fp.value = Vector::from(vec).evict(env);
-
-        Ok(())
-    }
-
-    fn mu_hp_info(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let (page_size, npages) = Self::heap_info(env);
-
-        let vec = vec![
-            Symbol::keyword("bump"),
-            Fixnum::with_or_panic(page_size),
-            Fixnum::with_or_panic(npages),
-        ];
-
-        fp.value = Vector::from(vec).evict(env);
-
-        Ok(())
-    }
-
-    fn mu_hp_size(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::with_or_panic(Self::heap_size(env, fp.argv[0]));
-
-        Ok(())
     }
 }
 

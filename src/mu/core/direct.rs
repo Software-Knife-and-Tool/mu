@@ -96,7 +96,7 @@ impl DirectTag {
     pub fn sext_from_tag(tag: Tag) -> Option<u32> {
         let u64_ = tag.as_u64();
 
-        let mask_28: u64 = 0xfffffff;
+        let mask_28: u64 = 0x0fffffff;
         let mask_32: u64 = 0xffffffff;
         let up_32: u64 = u64_ >> 28;
         let bot_28: u32 = (u64_ & mask_28).try_into().unwrap();

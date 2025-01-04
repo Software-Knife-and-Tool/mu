@@ -28,7 +28,7 @@
       ((:lambda (view)
           (prelude:format stream
             "function: (~A bytes) :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
-            `(,(mu:heap-size fn)
+            `(,(env:heap-size fn)
               ,(prelude:type-of fn)
               ,(mu:svref view 2)
               ,(mu:svref view 0)
@@ -39,7 +39,7 @@
    (:lambda (value stream)
       (prelude:format stream
        "prelude-type: (~A bytes) :<type> ~A~%    type:  ~A~%    props: ~A~%"
-       `(,(mu:heap-size value)
+       `(,(env:heap-size value)
          ,(prelude:type-of value)
          ,(mu:struct-ref (mu:st-vec value) 0)
          ,(mu:struct-ref (mu:st-vec value) 0)))))
@@ -48,7 +48,7 @@
    (:lambda (struct stream)
       (prelude:format stream
        "struct: (~A bytes) :struct ~A~%    type:  ~A~%    props: ~A~%"
-       `(,(mu:heap-size struct)
+       `(,(env:heap-size struct)
          ,(prelude:type-of struct)
          ,(mu:st-type struct)
          ,(mu:st-vec struct)))))
@@ -58,16 +58,16 @@
       (:if (prelude:null symbol)
            (prelude:format stream
             "symbol: (~A bytes) :null null~%    ns:    ()~%    name:  :nil~%    value: ()~%"
-            `(,(mu:heap-size symbol)))
+            `(,(env:heap-size symbol)))
            (:if (prelude:keywordp symbol)
                 (prelude:format stream
                  "symbol: (~A bytes) :symbol keyword~%    ns:    ()~%    name:  ~A~%    value: ~A~%"
-                 `(,(mu:heap-size symbol) ,(mu:symbol-name symbol) ,(mu:symbol-value symbol)))
+                 `(,(env:heap-size symbol) ,(mu:symbol-name symbol) ,(mu:symbol-value symbol)))
                 (:if (mu:boundp symbol)
                      ((:lambda (view)
                          (prelude:format stream
                           "symbol: (~A bytes) :symbol symbol~%    ns:    ~A~%    name:  ~A~%    value: ~A~%"
-                          `(,(mu:heap-size symbol)
+                          `(,(env:heap-size symbol)
                             ,(mu:struct-ref view 0)
                             ,(mu:struct-ref view 1)
                             ,(mu:struct-ref view 2))))
@@ -75,7 +75,7 @@
                      ((:lambda (view)
                          (prelude:format stream
                           "symbol: (~A bytes) :symbol symbol~%    ns:      ~A~%    name:    ~A~%    unbound: :t~%"
-                          `(,(mu:heap-size symbol)
+                          `(,(env:heap-size symbol)
                             ,(mu:struct-ref view 0)
                             ,(mu:struct-ref view 1)
                             ,(mu:struct-ref view 2))))
@@ -84,12 +84,12 @@
 (mu:intern prelude "%describe-fixnum"
    (:lambda (fx stream)
       (prelude:format stream "fixnum: (~A bytes) :fixnum ~A~%    format: 56b signed integer immediate~%    value:  ~A~%"
-        `(,(mu:heap-size fx) ,(prelude:type-of fx) ,fx))))
+        `(,(env:heap-size fx) ,(prelude:type-of fx) ,fx))))
 
 (mu:intern prelude "%describe-char"
    (:lambda (ch stream)
       (prelude:format stream "char: (~A bytes) :char ~A~%    format: 8b ASCII character immediate~%    value:  ~A~%"
-        `(,(mu:heap-size ch) ,(prelude:type-of ch) ,ch))))
+        `(,(env:heap-size ch) ,(prelude:type-of ch) ,ch))))
 
 (mu:intern prelude "%describe-float"
    (:lambda (fl stream)
@@ -101,23 +101,23 @@
    (:lambda (str stream)
       (prelude:format stream
        "string: (~A bytes) :vector string~%    format: unsigned 8b character vector~%    length: ~A~%    value:  ~A~%"
-       `(,(mu:heap-size str) ,(mu:struct-len str) ,str))))
+       `(,(env:heap-size str) ,(mu:struct-len str) ,str))))
 
 (mu:intern prelude "%describe-vector"
    (:lambda (vec stream)
       (prelude:format stream
        "vector: (~A bytes) :vector ~A~%    format: ~A~%    length: ~A~%    elements:  ~A~%"
-       `(,(mu:heap-size vec) ,(prelude:type-of vec) ,(mu:struct-type vec) ,(mu:struct-type vec) ,vec))))
+       `(,(env:heap-size vec) ,(prelude:type-of vec) ,(mu:struct-type vec) ,(mu:struct-type vec) ,vec))))
 
 (mu:intern prelude "%describe-cons"
    (:lambda (cons stream)
       (:if (prelude:dotted-pair-p cons)
            (prelude:format stream
             "dotted pair: (~A bytes) :cons ~A~%    value:  ~A~%"
-            `(,(mu:heap-size cons) ,(prelude:type-of cons) ,cons))
+            `(,(env:heap-size cons) ,(prelude:type-of cons) ,cons))
            (prelude:format stream
             "cons: (~A bytes) :cons ~A~%    length: ~A~%    value:  ~A~%"
-            `(,(mu:heap-size cons) ,(prelude:type-of cons) ,(mu:length cons) ,cons)))))
+            `(,(env:heap-size cons) ,(prelude:type-of cons) ,(mu:length cons) ,cons)))))
 
 (mu:intern prelude "describe"
    (:lambda (value stream)

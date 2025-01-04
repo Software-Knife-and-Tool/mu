@@ -1,6 +1,6 @@
 [package]
 name = "mu"
-version = "0.1.86"
+version = "0.2.0"
 edition = "2021"
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
@@ -15,14 +15,15 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "std", "cpu_time", "sysinfo", "nix", "ffi" ]
-cpu_time = []     # needed for development
-nix = []
-std = []
+default = [ "std", "env", "cpu_time", "sysinfo", "nix", "ffi" ]
+cpu_time = []     # needed for testing
+env = []          # needed for testing, common
 ffi = []
-prof = []
+nix = []
+prof = []         # profiling
 semispace = []
-sysinfo = []  # not for macos
+std = []
+sysinfo = []      # not for macos
 
 [profile.dev]
 opt-level = 0

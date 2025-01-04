@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.1.86
+###### version 0.2.0
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -26,9 +26,9 @@ Subsequent layers based on the runtime offer advanced features.
 
 ------
 
-- better configuration management
+- better configurability through features
 
-- revised heap framework
+- rework native function dispatch
 
   
 
@@ -63,6 +63,7 @@ Most of our core computational frameworks are built on static systems and are fr
 - add interactivity and extensibility to application implementations
 - Rust FFI system
 - mostly Common Lisp syntax
+- Common Lisp macro system
 - resource overhead equivalent to a UNIX shell
 - minimal external crate dependencies
 - futures for async and non-blocking I/O
@@ -153,7 +154,7 @@ versions 0.1.69 - 0.1.73 are built with rustc 1.79.0.
 
 version 0.1.8{123} are built with rustc 1.82.0.
 
-version 0.1.8{456} are built with rustc 1.83.0
+version 0.1.8{456}, 0.2.0 are built with rustc 1.83.0
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
@@ -199,9 +200,10 @@ Currently supported features by namespace:
  default = [ "cpu-time", std", "sysinfo", "prof", "nix" ]
  
  cpu-time:	process-time
+ env:       state heap-info heap-stat heap-size
  nix:     	uname
  prof:    	prof-control
- std:     	command, exit
+ std:     	command exit
  sysinfo: 	sysinfo
  ffi:
  semispace:

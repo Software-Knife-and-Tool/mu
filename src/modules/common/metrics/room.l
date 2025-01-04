@@ -27,10 +27,10 @@
                  (mu:car loop)
                  (mu:cdr loop))))
          (mu:cons () 1)))
-     (mu:heap-stat)
+     (env:heap-stat)
      ((:lambda ()
         (mu:apply fn args)
-        (mu:heap-stat))))))
+        (env:heap-stat))))))
 
 (mu:intern common "room"
    (:lambda (verbosity)
@@ -62,7 +62,7 @@
                                         (mu:add 4 index)))
                                      ())))
                          0))
-                      (mu:heap-info))
+                      (env:heap-info))
                      (:if (mu:eq :null level-key)
                           (core:%prog2 (core:%format :t "~A~%" `(,stats)) ())
                           ((:lambda (heap-info)
@@ -85,8 +85,8 @@
                                            (mu:svref stats (mu:add 3 index)))
                                           ())))
                               0))
-                           (mu:heap-info)))))
-              (mu:heap-stat))
+                           (env:heap-info)))))
+              (env:heap-stat))
              (core:raise verbosity 'common:room "not a room detail level")))
      (:if (core:null verbosity)
           :null

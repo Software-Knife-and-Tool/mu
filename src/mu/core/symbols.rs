@@ -6,7 +6,6 @@ use crate::{
     core::{
         apply::CoreFunction as _,
         compile::CoreFunction as _,
-        config::CoreFunction as _,
         core::CoreFnDef,
         dynamic::CoreFunction as _,
         env::Env,
@@ -14,7 +13,6 @@ use crate::{
         frame::{CoreFunction as _, Frame},
         future::{CoreFunction as _, Future},
         gc::{CoreFunction as _, Gc},
-        heap::{CoreFunction as _, HeapAllocator},
         namespace::Namespace,
         types::{CoreFunction as _, Tag},
     },
@@ -49,15 +47,10 @@ lazy_static! {
         ( "nthcdr", 2, Cons::mu_nthcdr ),
         // compiler
         ( "compile", 1, Env::mu_compile ),
-        ( "%if",    3, Env::mu_if),
+        ( "%if",     3, Env::mu_if),
         // gc
         ( "gc",     0, Gc::mu_gc ),
-        // heap
-        ( "heap-info", 0, HeapAllocator::mu_hp_info ),
-        ( "heap-stat", 0, HeapAllocator::mu_hp_stat ),
-        ( "heap-size", 1, HeapAllocator::mu_hp_size ),
         // env
-        ( "config",       0, Env::mu_config ),
         ( "apply",        2, Env::mu_apply ),
         ( "eval",         1, Env::mu_eval ),
         ( "%frame-stack", 0, Env::mu_frames ),

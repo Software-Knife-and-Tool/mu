@@ -26,7 +26,7 @@
       ((:lambda (view)
           (core:%format stream
             "function: (~A bytes) :func ~A~%    arity: ~A~%    body:  ~A~%"
-            `(,(mu:heap-size fn)
+            `(,(env:heap-size fn)
               ,(core:type-of fn)
               ,(mu:svref view 0)
               ,(mu:svref view 1))))
@@ -36,7 +36,7 @@
    (:lambda (value stream)
       (core:%format stream
        "core-type: (~A bytes) :<type> ~A~%    type:  ~A~%    props: ~A~%"
-       `(,(mu:heap-size value)
+       `(,(env:heap-size value)
          ,(common:type-of value)
          ,(mu:struct-ref (mu:st-vec value) 0)
          ,(mu:struct-ref (mu:st-vec value) 0)))))
@@ -45,7 +45,7 @@
    (:lambda (struct stream)
       (core:%format stream
        "struct: (~A bytes) :struct ~A~%    type:  ~A~%    props: ~A~%"
-       `(,(mu:heap-size struct)
+       `(,(env:heap-size struct)
          ,(core:type-of struct)
          ,(mu:st-type struct)
          ,(mu:st-vec struct)))))
@@ -55,16 +55,16 @@
       (:if (core:null symbol)
            (core:%format stream
             "symbol: (~A bytes) :null null~%    ns:    ()~%    name:  :nil~%    value: ()~%"
-            `(,(mu:heap-size symbol)))
+            `(,(env:heap-size symbol)))
            (:if (core:keywordp symbol)
                 (core:%format stream
                  "symbol: (~A bytes) :symbol keyword~%    ns:    ()~%    name:  ~A~%    value: ~A~%"
-                 `(,(mu:heap-size symbol) ,(mu:symbol-name symbol) ,(mu:symbol-value symbol)))
+                 `(,(env:heap-size symbol) ,(mu:symbol-name symbol) ,(mu:symbol-value symbol)))
                 (:if (mu:boundp symbol)
                      ((:lambda (view)
                          (core:%format stream
                           "symbol: (~A bytes) :symbol symbol~%    ns:    ~A~%    name:  ~A~%    value: ~A~%"
-                          `(,(mu:heap-size symbol)
+                          `(,(env:heap-size symbol)
                             ,(mu:struct-ref view 0)
                             ,(mu:struct-ref view 1)
                             ,(mu:struct-ref view 2))))
@@ -72,7 +72,7 @@
                      ((:lambda (view)
                          (core:%format stream
                           "symbol: (~A bytes) :symbol symbol~%    ns:      ~A~%    name:    ~A~%    unbound: :t~%"
-                          `(,(mu:heap-size symbol)
+                          `(,(env:heap-size symbol)
                             ,(mu:struct-ref view 0)
                             ,(mu:struct-ref view 1)
                             ,(mu:struct-ref view 2))))
@@ -81,12 +81,12 @@
 (mu:intern common "%describe-fixnum"
    (:lambda (fx stream)
       (core:%format stream "fixnum: (~A bytes) :fixnum ~A~%    format: 56b signed integer immediate~%    value:  ~A~%"
-        `(,(mu:heap-size fx) ,(common:type-of fx) ,fx))))
+        `(,(env:heap-size fx) ,(common:type-of fx) ,fx))))
 
 (mu:intern common "%describe-char"
    (:lambda (ch stream)
       (core:%format stream "char: (~A bytes) :char ~A~%    format: 8b ASCII character immediate~%    value:  ~A~%"
-        `(,(mu:heap-size ch) ,(common:type-of ch) ,ch))))
+        `(,(env:heap-size ch) ,(common:type-of ch) ,ch))))
 
 (mu:intern common "%describe-float"
    (:lambda (fl stream)
@@ -98,23 +98,23 @@
    (:lambda (str stream)
       (core:%format stream
        "string: (~A bytes) :vector string~%    format: unsigned 8b character vector~%    length: ~A~%    value:  ~A~%"
-       `(,(mu:heap-size str) ,(mu:struct-len str) ,str))))
+       `(,(env:heap-size str) ,(mu:struct-len str) ,str))))
 
 (mu:intern common "%describe-vector"
    (:lambda (vec stream)
       (core:%format stream
        "vector: (~A bytes) :vector ~A~%    format: ~A~%    length: ~A~%    elements:  ~A~%"
-       `(,(mu:heap-size vec) ,(common:type-of vec) ,(mu:struct-type vec) ,(mu:struct-type vec) ,vec))))
+       `(,(env:heap-size vec) ,(common:type-of vec) ,(mu:struct-type vec) ,(mu:struct-type vec) ,vec))))
 
 (mu:intern common "%describe-cons"
    (:lambda (cons stream)
       (:if (common:dotted-pair-p cons)
            (core:%format stream
             "dotted pair: (~A bytes) :cons ~A~%    value:  ~A~%"
-            `(,(mu:heap-size cons) ,(common:type-of cons) ,cons))
+            `(,(env:heap-size cons) ,(common:type-of cons) ,cons))
            (core:%format stream
             "cons: (~A bytes) :cons ~A~%    length: ~A~%    value:  ~A~%"
-            `(,(mu:heap-size cons) ,(common:type-of cons) ,(mu:length cons) ,cons)))))
+            `(,(env:heap-size cons) ,(common:type-of cons) ,(mu:length cons) ,cons)))))
 
 (mu:intern common "describe"
    (:lambda (value stream)
