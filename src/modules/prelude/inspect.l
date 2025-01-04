@@ -8,7 +8,7 @@
    (:lambda (obj)
       ((:lambda (view)
           ((:lambda (tags)
-             (mu:make-struct :inspect `(function ,(mu:heap-size obj) ,tags)))
+             (mu:make-struct :inspect `(function ,(env:heap-size obj) ,tags)))
            `(,(mu:cons :arity (mu:svref view 0))
              ,(mu:cons :body (mu:svref view 1)))))
        (mu:view obj))))
@@ -17,7 +17,7 @@
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)
-            (mu:make-struct :inspect `(:<type> ,(mu:heap-size obj) ,tags)))
+            (mu:make-struct :inspect `(:<type> ,(env:heap-size obj) ,tags)))
           `(,(mu:cons :type (mu:svref (mu:struct-vec obj) 0))
             ,(mu:cons :values (mu:svref (mu:struct-vec obj) 1)))))
       (mu:view obj))))
@@ -26,7 +26,7 @@
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (mu:make-struct :inspect `(struct ,(mu:heap-size obj) ,tags)))
+            (mu:make-struct :inspect `(struct ,(env:heap-size obj) ,tags)))
           `(,(mu:cons :type (mu:struct-type obj))
             ,(mu:cons :values (mu:struct-vec obj)))))
       (mu:view obj))))
@@ -35,7 +35,7 @@
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (mu:make-struct :inspect `(symbol ,(mu:heap-size obj) ,tags)))
+            (mu:make-struct :inspect `(symbol ,(env:heap-size obj) ,tags)))
           `(,(mu:cons :ns (mu:svref view 0))
             ,(mu:cons :name (mu:svref view 1))
             ,(mu:cons :value (mu:svref view 2)))))
@@ -43,19 +43,19 @@
 
 (mu:intern prelude "%inspect-const"
    (:lambda (obj)
-     (mu:make-struct :inspect `(,(prelude:type-of obj) ,(mu:heap-size obj) ()))))
+     (mu:make-struct :inspect `(,(prelude:type-of obj) ,(env:heap-size obj) ()))))
 
 (mu:intern prelude "%inspect-vector"
    (:lambda (obj)
      ((:lambda (tags)          
-         (mu:make-struct :inspect `(vector ,(mu:heap-size obj) ,tags)))
+         (mu:make-struct :inspect `(vector ,(env:heap-size obj) ,tags)))
       `(,(mu:cons :type (mu:vector-type obj))
         ,(mu:cons :length (mu:vector-length obj))))))
 
 (mu:intern prelude "%inspect-cons"
    (:lambda (obj)
      ((:lambda (tags)          
-         (mu:make-struct :inspect `(cons ,(mu:heap-size obj) ,tags)))
+         (mu:make-struct :inspect `(cons ,(env:heap-size obj) ,tags)))
       `(,(mu:cons :car (mu:car obj))
         ,(mu:cons :cdr (mu:cdr obj))))))
 

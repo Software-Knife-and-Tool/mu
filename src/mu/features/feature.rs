@@ -9,6 +9,8 @@ use std::collections::HashMap;
 
 #[cfg(feature = "cpu_time")]
 use crate::features::cpu_time::CpuTime;
+#[cfg(feature = "env")]
+use crate::features::env::Env;
 #[cfg(feature = "ffi")]
 use crate::features::ffi::Ffi;
 #[cfg(feature = "nix")]
@@ -34,6 +36,8 @@ impl Feature {
         let features = vec![
             #[cfg(feature = "cpu_time")]
             <Feature as CpuTime>::feature(),
+            #[cfg(feature = "env")]
+            <Feature as Env>::feature(),
             #[cfg(feature = "nix")]
             <Feature as Nix>::feature(),
             #[cfg(feature = "std")]

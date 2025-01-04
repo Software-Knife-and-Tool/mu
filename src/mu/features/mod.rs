@@ -4,6 +4,8 @@
 //! features module
 #[cfg(feature = "cpu_time")]
 pub mod cpu_time;
+#[cfg(feature = "env")]
+pub mod env;
 pub mod feature;
 #[cfg(feature = "ffi")]
 pub mod ffi;

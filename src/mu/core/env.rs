@@ -18,10 +18,8 @@ use {
     std::collections::HashMap,
 };
 
-// locking protocols
 use futures_locks::RwLock;
 
-// env environment
 pub struct Env {
     // configuration
     pub config: Config,
@@ -89,7 +87,7 @@ impl Env {
             Err(_) => panic!(),
         };
 
-        // initialize core namespaces
+        // initialize core/feature namespaces
         Core::namespaces(&env);
 
         env

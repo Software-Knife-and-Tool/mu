@@ -245,13 +245,14 @@ impl CoreFunction for Env {
 
         env.fp_argv_check("mu:%if", &[Type::T, Type::Function, Type::Function], fp)?;
 
-        let test = if env.apply(test, Tag::nil())?.null_() {
-            false_fn
-        } else {
-            true_fn
-        };
-
-        fp.value = env.apply(test, Tag::nil())?;
+        fp.value = env.apply(
+            if env.apply(test, Tag::nil())?.null_() {
+                false_fn
+            } else {
+                true_fn
+            },
+            Tag::nil(),
+        )?;
 
         Ok(())
     }

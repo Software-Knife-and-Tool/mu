@@ -24,7 +24,7 @@ use {
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
-pub const VERSION: &str = "0.1.86";
+pub const VERSION: &str = "0.2.0";
 pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
 pub type CoreFnDef = (&'static str, u16, CoreFn);
 
@@ -63,7 +63,7 @@ impl Core {
         }
     }
 
-    // builders
+    // builder
     pub fn features(self) -> Self {
         let mut features = block_on(self.features.write());
 
@@ -114,7 +114,7 @@ impl Core {
         stdio.2
     }
 
-    // core symbols
+    // core/feature symbols
     pub fn namespaces(env: &Env) {
         Namespace::intern_static(env, env.mu_ns, "%null-ns%".into(), env.null_ns);
 

@@ -2,10 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! env config
-use crate::{
-    core::{core, env::Env, exception, frame::Frame},
-    types::{cons::Cons, fixnum::Fixnum, vector::Vector},
-};
+use crate::core::core;
 use page_size;
 
 #[derive(Debug, Clone)]
@@ -66,45 +63,6 @@ impl Config {
                 Some(config)
             }
         }
-    }
-}
-
-pub trait CoreFunction {
-    fn mu_config(_: &Env, _: &mut Frame) -> exception::Result<()>;
-}
-
-impl CoreFunction for Env {
-    fn mu_config(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let alist = vec![
-            Cons::cons(
-                env,
-                Vector::from("gcmode").evict(env),
-                match env.config.gcmode {
-                    GcMode::None => Vector::from("none").evict(env),
-                    GcMode::Auto => Vector::from("auto").evict(env),
-                    GcMode::Demand => Vector::from("demand").evict(env),
-                },
-            ),
-            Cons::cons(
-                env,
-                Vector::from("npages").evict(env),
-                Fixnum::with_or_panic(env.config.npages),
-            ),
-            Cons::cons(
-                env,
-                Vector::from("page_size").evict(env),
-                Fixnum::with_or_panic(env.config.page_size),
-            ),
-            Cons::cons(
-                env,
-                Vector::from("version").evict(env),
-                Vector::from(env.config.version.as_str()).evict(env),
-            ),
-        ];
-
-        fp.value = Cons::list(env, &alist);
-
-        Ok(())
     }
 }
 

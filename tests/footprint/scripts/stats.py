@@ -38,7 +38,7 @@ def storage():
         '-l', '../../dist/image.l',
         '-l', '../../dist/test-image.l',
         '-q', '(image:%test-require "' + "core" + '" \"../../src/modules\")', 
-        '-e', '(mu:heap-stat)'
+        '-e', '(env:heap-stat)'
     ],\
     stdout=subprocess.PIPE,\
     stderr=subprocess.PIPE)
