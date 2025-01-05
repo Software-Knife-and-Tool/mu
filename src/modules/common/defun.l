@@ -2,9 +2,12 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; defun/defmacro/defvar
+;;; defun/defmacro
 ;;;
-#|
-(core:defmacro "defun"
-    (:lambda 
-|#
+(mu:eval (core:compile
+  '(%defmacro defun (name lambda &rest body)
+     `(mu:intern mu:%null-ns% ,(mu:symbol-name name) (%lambda ,lambda ,@body)))))
+
+(mu:eval (core:compile
+  '(%defmacro defmacro (name lambda &rest body)
+     `(%defmacro ,(mu:symbol-name name) ,lambda ,@body))))
