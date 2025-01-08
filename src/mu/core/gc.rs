@@ -31,13 +31,6 @@ pub struct Gc {
 }
 
 impl Gc {
-    #[allow(dead_code)]
-    fn add_root(env: &Env, tag: Tag) {
-        let mut root_ref = block_on(env.gc_root.write());
-
-        root_ref.push(tag);
-    }
-
     pub fn mark(&mut self, env: &Env, tag: Tag) {
         match tag.type_of() {
             Type::Cons => Cons::mark(self, env, tag),
@@ -106,20 +99,13 @@ impl Gc {
     }
 
     pub fn gc(env: &Env) -> exception::Result<bool> {
-        let root_ref = block_on(env.gc_root.write());
         let mut gc = Gc {
             lock: block_on(env.heap.write()),
         };
 
         gc.lock.clear_marks();
-
         gc.namespaces(env);
         gc.lexicals(env);
-
-        for tag in &*root_ref {
-            gc.mark(env, *tag)
-        }
-
         gc.lock.sweep();
 
         Ok(true)
