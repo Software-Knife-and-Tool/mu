@@ -321,10 +321,8 @@ impl SemiSpaceAllocator {
 
     pub fn heap_type(env: &Env, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
-        let alloc_ref = block_on(heap_ref.alloc_map.read());
-        let alloc_type = block_on(alloc_ref[type_ as usize].read());
 
-        *alloc_type
+        heap_ref.alloc_map[type_ as usize]
     }
 }
 

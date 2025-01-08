@@ -9,7 +9,6 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        namespace::Namespace,
         types::{Tag, Type},
     },
     features::feature::Feature,

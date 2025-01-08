@@ -15,10 +15,9 @@ use {
         },
         vectors::cache::VecCacheMap,
     },
+    futures_locks::RwLock,
     std::collections::HashMap,
 };
-
-use futures_locks::RwLock;
 
 pub struct Env {
     // configuration
@@ -26,12 +25,13 @@ pub struct Env {
 
     // heap
     pub heap: RwLock<HeapAllocator>,
-    pub gc_root: RwLock<Vec<Tag>>,
     pub vector_map: RwLock<VecCacheMap>,
 
     // environments
-    pub dynamic: RwLock<Vec<(u64, usize)>>,
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
+
+    // dynamic state
+    pub dynamic: RwLock<Vec<(u64, usize)>>,
 
     // namespaces
     pub ns_map: RwLock<Vec<(Tag, String, Namespace)>>,
@@ -56,7 +56,6 @@ impl Env {
             config: config.clone(),
             dynamic: RwLock::new(Vec::new()),
             env_key: RwLock::new(Tag::nil()),
-            gc_root: RwLock::new(Vec::<Tag>::new()),
             heap: RwLock::new(HeapAllocator::new(config)),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),

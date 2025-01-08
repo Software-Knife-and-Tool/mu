@@ -22,7 +22,7 @@ use {
     },
 };
 
-use {futures::executor::block_on, futures_locks::RwLock};
+use futures::executor::block_on;
 
 #[bitfield]
 #[repr(align(8))]
@@ -64,7 +64,7 @@ pub struct HeapTypeInfo {
 #[derive(Debug)]
 pub struct HeapAllocator {
     pub mmap: Box<memmap::MmapMut>,
-    pub alloc_map: RwLock<Vec<RwLock<HeapTypeInfo>>>,
+    pub alloc_map: Vec<HeapTypeInfo>,
     pub free_map: Vec<Vec<usize>>,
     pub page_size: usize,
     pub npages: usize,
@@ -102,31 +102,23 @@ impl HeapAllocator {
                 .expect("Could not access data from memory mapped file")
         };
 
-        let mut heap = HeapAllocator {
-            alloc_map: RwLock::new(Vec::new()),
-            free_map: Vec::new(),
+        HeapAllocator {
+            alloc_map: (0..Tag::NTYPES)
+                .map(|_| HeapTypeInfo {
+                    size: 0,
+                    total: 0,
+                    free: 0,
+                })
+                .collect::<Vec<HeapTypeInfo>>(),
+            free_map: (0..Tag::NTYPES)
+                .map(|_| Vec::<usize>::new())
+                .collect::<Vec<Vec<usize>>>(),
             mmap: Box::new(data),
             npages,
             page_size,
             size: npages * page_size,
             write_barrier: 0,
-        };
-
-        for _ in 0..Tag::NTYPES {
-            heap.free_map.push(Vec::<usize>::new())
         }
-
-        let mut alloc_ref = block_on(heap.alloc_map.write());
-
-        for _ in 0..Tag::NTYPES {
-            alloc_ref.push(RwLock::new(HeapTypeInfo {
-                size: 0,
-                total: 0,
-                free: 0,
-            }))
-        }
-
-        heap
     }
 
     pub fn image(env: &Env) -> (Vec<u8>, Vec<u8>) {
@@ -141,23 +133,6 @@ impl HeapAllocator {
             heap: self,
             index: 1,
         }
-    }
-
-    // allocation metrics
-    #[allow(dead_code)]
-    fn alloc_id(&self, id: u8) -> HeapTypeInfo {
-        let alloc_ref = block_on(self.alloc_map.read());
-        let alloc_type = block_on(alloc_ref[id as usize].read());
-
-        *alloc_type
-    }
-
-    fn alloc_map(&self, id: u8, size: usize) {
-        let alloc_ref = block_on(self.alloc_map.write());
-        let mut alloc_type = block_on(alloc_ref[id as usize].write());
-
-        alloc_type.size += size;
-        alloc_type.total += 1;
     }
 
     // allocate
@@ -218,7 +193,10 @@ impl HeapAllocator {
                 self.write_barrier += vdata_size;
             }
 
-            self.alloc_map(id, (image_len * Self::SIZEOF_U64) + vdata_size);
+            let alloc_type = &mut self.alloc_map[id as usize];
+
+            alloc_type.size += (image_len * Self::SIZEOF_U64) + vdata_size;
+            alloc_type.total += 1;
 
             Some(index)
         }
@@ -230,13 +208,9 @@ impl HeapAllocator {
             match self.image_info(*off) {
                 Some(info) => {
                     if info.len() >= size as u16 {
-                        let alloc_ref = block_on(self.alloc_map.read());
-                        let mut alloc_type = block_on(alloc_ref[id as usize].write());
+                        let mut alloc_type = self.alloc_map[id as usize];
 
                         alloc_type.free -= 1;
-
-                        drop(alloc_ref);
-                        drop(alloc_type);
 
                         return Some(self.free_map[id as usize].remove(index));
                     }
@@ -343,10 +317,8 @@ impl HeapAllocator {
 
     pub fn heap_type(env: &Env, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
-        let alloc_ref = block_on(heap_ref.alloc_map.read());
-        let alloc_type = block_on(alloc_ref[type_ as usize].read());
 
-        *alloc_type
+        heap_ref.alloc_map[type_ as usize]
     }
 }
 
@@ -360,7 +332,6 @@ pub trait GC {
 impl GC for HeapAllocator {
     fn clear_marks(&mut self) {
         let mut index: usize = 1;
-        let alloc_ref = block_on(self.alloc_map.read());
 
         while let Some(mut info) = self.image_info(index) {
             info.set_mark(false);
@@ -368,9 +339,8 @@ impl GC for HeapAllocator {
             index += (info.len() as usize) / Self::SIZEOF_U64
         }
 
-        for type_map in (*alloc_ref).iter() {
-            let mut alloc_type = block_on(type_map.write());
-            alloc_type.free = 0
+        for type_map in self.alloc_map.iter_mut() {
+            type_map.free = 0
         }
 
         for free_map in self.free_map.iter_mut() {
@@ -379,8 +349,6 @@ impl GC for HeapAllocator {
     }
 
     fn sweep(&mut self) {
-        let alloc_ref = block_on(self.alloc_map.write());
-
         let free_list = self
             .iter()
             .filter(|(info, _)| !info.mark())
@@ -388,7 +356,7 @@ impl GC for HeapAllocator {
 
         for (info, index) in free_list {
             let id = info.image_type() as usize;
-            let mut alloc_type = block_on(alloc_ref[id].write());
+            let mut alloc_type = self.alloc_map[id];
 
             alloc_type.free += 1;
             self.free_map[id].push(index);
@@ -406,8 +374,6 @@ impl GC for HeapAllocator {
     }
 
     fn get_image_mark(&self, index: usize) -> Option<bool> {
-        let _ = block_on(self.alloc_map.read());
-
         self.image_info(index).map(|info| info.mark())
     }
 }

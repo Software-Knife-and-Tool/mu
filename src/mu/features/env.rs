@@ -2,27 +2,29 @@
 //  SPDX-License-Identifier: MIT
 
 //! env interface
-use crate::{
-    core::{
-        config::GcMode,
-        core::CoreFnDef,
-        direct::DirectTag,
-        env::Env as Env_,
-        exception::{self},
-        frame::Frame,
-        heap::HeapTypeInfo,
-        indirect::IndirectTag,
-        types::{Tag, Type},
+use {
+    crate::{
+        core::{
+            config::GcMode,
+            core::CoreFnDef,
+            direct::DirectTag,
+            env::Env as Env_,
+            exception::{self},
+            frame::Frame,
+            heap::HeapTypeInfo,
+            indirect::IndirectTag,
+            types::{Tag, Type},
+        },
+        features::feature::Feature,
+        types::{
+            cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
+            vector::Vector,
+        },
     },
-    features::feature::Feature,
-    types::{
-        cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
-        vector::Vector,
-    },
+    futures::executor::block_on,
+    futures_locks::RwLock,
+    std::collections::HashMap,
 };
-use futures::executor::block_on;
-use futures_locks::RwLock;
-use std::collections::HashMap;
 
 lazy_static! {
     pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
@@ -80,10 +82,8 @@ impl Env for Feature {
 
     fn heap_type(env: &Env_, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
-        let alloc_ref = block_on(heap_ref.alloc_map.read());
-        let alloc_type = block_on(alloc_ref[type_ as usize].read());
 
-        *alloc_type
+        heap_ref.alloc_map[type_ as usize]
     }
 
     fn heap_stat(env: &Env_) -> Tag {
