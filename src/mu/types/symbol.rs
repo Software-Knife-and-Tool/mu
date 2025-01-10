@@ -15,6 +15,7 @@ use {
             indirect::IndirectTag,
             namespace::Namespace,
             readtable::{map_char_syntax, SyntaxType},
+            type_image::TypeImage,
             types::{Tag, TagType, Type},
         },
         streams::write::Write as _,
@@ -156,6 +157,12 @@ impl Symbol {
         }
     }
 
+    pub fn to_image_tag(self, env: &Env) -> Tag {
+        let image = TypeImage::Symbol(self);
+
+        TypeImage::to_tag(&image, env, Type::Symbol as u8)
+    }
+
     pub fn namespace(env: &Env, symbol: Tag) -> Tag {
         match symbol.type_of() {
             Type::Null => env.null_ns,
@@ -236,6 +243,13 @@ impl Symbol {
                         .with_tag(TagType::Symbol),
                 )
             }
+        }
+    }
+
+    pub fn evict_image(tag: Tag, env: &Env) -> Tag {
+        match tag {
+            Tag::Image(_) => Symbol::Symbol(Self::to_image(env, tag)).evict(env),
+            _ => panic!(),
         }
     }
 
