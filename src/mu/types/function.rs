@@ -101,6 +101,13 @@ impl Function {
         Tag::Indirect(ind)
     }
 
+    pub fn evict_image(tag: Tag, env: &Env) -> Tag {
+        match tag {
+            Tag::Image(_) => Self::to_image(env, tag).evict(env),
+            _ => panic!(),
+        }
+    }
+
     pub fn update(env: &Env, image: &Function, func: Tag) {
         let slices: &[[u8; 8]] = &[image.arity.as_slice(), image.form.as_slice()];
 
