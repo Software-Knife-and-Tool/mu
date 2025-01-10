@@ -6,12 +6,14 @@ use crate::{
     core::{
         apply::Apply as _,
         direct::{DirectTag, DirectType, ExtType},
+        dynamic::Dynamic,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         gc::{Gc, HeapGcRef},
         indirect::IndirectTag,
         reader::EOL,
+        type_image::TypeImage,
         types::{Tag, TagType, Type},
     },
     streams::{read::Read as _, write::Write as _},
@@ -53,6 +55,7 @@ impl GC for Cons {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
+                Tag::Image(_) => panic!(),
                 Tag::Direct(_) => DirectTag::car(cons),
                 Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).car,
             },
@@ -64,6 +67,7 @@ impl GC for Cons {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
+                Tag::Image(_) => panic!(),
                 Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).cdr,
                 Tag::Direct(_) => DirectTag::cdr(cons),
             },
@@ -73,6 +77,7 @@ impl GC for Cons {
 
     fn mark(gc: &mut Gc, env: &Env, cons: Tag) {
         match cons {
+            Tag::Image(_) => panic!(),
             Tag::Direct(_) => {
                 let car = Self::ref_car(gc, cons);
                 let cdr = Self::ref_cdr(gc, cons);
@@ -99,11 +104,21 @@ impl Cons {
         Cons { car, cdr }
     }
 
+    pub fn to_image_tag(self, env: &Env) -> Tag {
+        let image = TypeImage::Cons(self);
+
+        TypeImage::to_tag(&image, env, Type::Cons as u8)
+    }
+
     pub fn to_image(env: &Env, tag: Tag) -> Self {
         let heap_ref = block_on(env.heap.read());
 
         match tag.type_of() {
             Type::Cons => match tag {
+                Tag::Image(image) => match Dynamic::images_ref(env, image.data() as usize) {
+                    TypeImage::Cons(cons) => cons,
+                    _ => panic!(),
+                },
                 Tag::Indirect(main) => Cons {
                     car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
                     cdr: Tag::from_slice(
@@ -116,8 +131,24 @@ impl Cons {
         }
     }
 
+    pub fn cons_image(env: &Env, car: Tag, cdr: Tag) -> Tag {
+        Self::to_image_tag(Self::new(car, cdr), env)
+    }
+
     pub fn cons(env: &Env, car: Tag, cdr: Tag) -> Tag {
-        Cons::new(car, cdr).evict(env)
+        let cons = Self::new(car, cdr);
+
+        cons.evict(env)
+    }
+
+    pub fn list(env: &Env, vec: &[Tag]) -> Tag {
+        let mut list = Tag::nil();
+
+        vec.iter()
+            .rev()
+            .for_each(|tag| list = Self::cons(env, *tag, list));
+
+        list
     }
 
     pub fn car(env: &Env, cons: Tag) -> Tag {
@@ -125,7 +156,7 @@ impl Cons {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Direct(_) => DirectTag::car(cons),
-                Tag::Indirect(_) => Self::to_image(env, cons).car,
+                Tag::Image(_) | Tag::Indirect(_) => Self::to_image(env, cons).car,
             },
             _ => panic!(),
         }
@@ -135,8 +166,8 @@ impl Cons {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
-                Tag::Indirect(_) => Self::to_image(env, cons).cdr,
                 Tag::Direct(_) => DirectTag::cdr(cons),
+                Tag::Image(_) | Tag::Indirect(_) => Self::to_image(env, cons).cdr,
             },
             _ => panic!(),
         }
@@ -178,6 +209,7 @@ impl Cons {
 
     pub fn heap_size(_: &Env, cons: Tag) -> usize {
         match cons {
+            Tag::Image(_) => panic!(),
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.ext().try_into() {
                     Ok(ExtType::Cons) => std::mem::size_of::<DirectTag>(),
@@ -206,9 +238,15 @@ impl Cons {
         }
     }
 
+    pub fn evict_image(tag: Tag, env: &Env) -> Tag {
+        match tag {
+            Tag::Image(_) => Self::to_image(env, tag).evict(env),
+            _ => panic!(),
+        }
+    }
+
     pub fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
         let dot = Vector::from(".").evict(env);
-
         let car = env.read_stream(stream, false, Tag::nil(), true)?;
 
         if EOL.eq_(&car) {
@@ -234,6 +272,38 @@ impl Cons {
                     let cdr = Self::read(env, stream)?;
 
                     Ok(Cons::cons(env, car, cdr))
+                }
+            }
+        }
+    }
+
+    pub fn read_image(env: &Env, stream: Tag) -> exception::Result<Tag> {
+        let dot = Vector::from(".").evict(env);
+        let car = env.read_stream(stream, false, Tag::nil(), true)?;
+
+        if EOL.eq_(&car) {
+            Ok(Tag::nil())
+        } else {
+            match car.type_of() {
+                Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
+                    let cdr = env.read_stream(stream, false, Tag::nil(), true)?;
+
+                    if EOL.eq_(&cdr) {
+                        Ok(Tag::nil())
+                    } else {
+                        let eol = env.read_stream(stream, false, Tag::nil(), true)?;
+
+                        if EOL.eq_(&eol) {
+                            Ok(cdr)
+                        } else {
+                            Err(Exception::new(env, Condition::Eof, "mu:read", stream))
+                        }
+                    }
+                }
+                _ => {
+                    let cdr = Self::read(env, stream)?;
+
+                    Ok(Cons::cons_image(env, car, cdr))
                 }
             }
         }
@@ -266,16 +336,6 @@ impl Cons {
         }
 
         env.write_string(")", stream)
-    }
-
-    pub fn list(env: &Env, vec: &[Tag]) -> Tag {
-        let mut list = Tag::nil();
-
-        vec.iter()
-            .rev()
-            .for_each(|tag| list = Self::cons(env, *tag, list));
-
-        list
     }
 
     pub fn append(env: &Env, vec: &[Tag], cdr: Tag) -> Tag {

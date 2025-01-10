@@ -44,6 +44,7 @@ impl Gc {
 
     pub fn mark_image(&mut self, tag: Tag) -> Option<bool> {
         match tag {
+            Tag::Image(_) => panic!(),
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => {
                 let marked = self.lock.get_image_mark(indirect.image_id() as usize);

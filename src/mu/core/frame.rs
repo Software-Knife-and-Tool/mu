@@ -10,6 +10,7 @@
 use crate::{
     core::{
         apply::Apply as _,
+        dynamic::Dynamic,
         env::Env,
         exception::{self, Condition, Exception},
         namespace::Namespace,
@@ -170,7 +171,7 @@ impl Frame {
                         let mut value = Tag::nil();
                         let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
 
-                        env.dynamic_push(self.func, offset);
+                        Dynamic::dynamic_push(env, self.func, offset);
                         self.frame_stack_push(env);
 
                         for cons in Cons::iter(env, form) {
@@ -178,7 +179,7 @@ impl Frame {
                         }
 
                         Self::frame_stack_pop(env, func);
-                        env.dynamic_pop();
+                        Dynamic::dynamic_pop(env);
 
                         Ok(value)
                     }
@@ -191,13 +192,39 @@ impl Frame {
 }
 
 pub trait CoreFunction {
-    fn mu_fr_pop(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_fr_push(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_fr_ref(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_frame_pop(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_frame_push(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_frame_ref(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_frames(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Frame {
-    fn mu_fr_pop(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_frames(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let frames_ref = block_on(env.dynamic.dynamic.read());
+        let mut frames = Vec::new();
+
+        frames.extend(frames_ref.iter().map(|(func, offset)| {
+            let mut argv = vec![];
+
+            Frame::frame_stack_ref(env, (&func.to_le_bytes()).into(), *offset, &mut argv);
+
+            let vec: Vec<Tag> = argv
+                .into_iter()
+                .map(|f| (&f.to_le_bytes()).into())
+                .collect();
+
+            Cons::cons(
+                env,
+                (&func.to_le_bytes()).into(),
+                Vector::from(vec).evict(env),
+            )
+        }));
+
+        fp.value = Cons::list(env, &frames);
+        Ok(())
+    }
+
+    fn mu_frame_pop(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = fp.argv[0];
 
         env.fp_argv_check("mu:frame-pop", &[Type::Function], fp)?;
@@ -207,7 +234,7 @@ impl CoreFunction for Frame {
         Ok(())
     }
 
-    fn mu_fr_push(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_frame_push(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.fp_argv_check("mu:frame-push", &[Type::Cons], fp)?;
 
         let func = Cons::car(env, fp.argv[0]);
@@ -229,7 +256,7 @@ impl CoreFunction for Frame {
         Ok(())
     }
 
-    fn mu_fr_ref(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_frame_ref(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 

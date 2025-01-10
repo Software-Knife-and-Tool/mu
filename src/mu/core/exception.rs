@@ -171,7 +171,7 @@ impl CoreFunction for Exception {
 
         env.fp_argv_check("mu:with-exception", &[Type::Function, Type::Function], fp)?;
 
-        let dynamic_ref = block_on(env.dynamic.read());
+        let dynamic_ref = block_on(env.dynamic.dynamic.read());
 
         let frame_stack_len = dynamic_ref.len();
 
@@ -183,7 +183,7 @@ impl CoreFunction for Exception {
                 let args = vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
 
                 let value = env.apply_(handler, args)?;
-                let mut dynamic_ref = block_on(env.dynamic.write());
+                let mut dynamic_ref = block_on(env.dynamic.dynamic.write());
 
                 dynamic_ref.resize(frame_stack_len, (0, 0));
 

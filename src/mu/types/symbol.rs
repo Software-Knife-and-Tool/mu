@@ -95,6 +95,7 @@ impl GC for Symbol {
 
     fn mark(gc: &mut Gc, env: &Env, symbol: Tag) {
         match symbol {
+            Tag::Image(_) => panic!(),
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
                 let mark = gc.mark_image(symbol).unwrap();

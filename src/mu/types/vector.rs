@@ -52,6 +52,7 @@ impl Vector {
 
     pub fn type_of(env: &Env, vector: Tag) -> Type {
         match vector {
+            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => match direct.dtype() {
                 DirectType::String => Type::Char,
                 DirectType::ByteVec => Type::Byte,
@@ -74,6 +75,7 @@ impl Vector {
 
     pub fn length(env: &Env, vector: Tag) -> usize {
         match vector {
+            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
                 let image = Self::to_image(env, vector);
@@ -97,6 +99,7 @@ impl Vector {
     pub fn as_string(env: &Env, tag: Tag) -> String {
         match tag.type_of() {
             Type::Vector => match tag {
+                Tag::Image(_) => panic!(),
                 Tag::Direct(dir) => match dir.dtype() {
                     DirectType::String => str::from_utf8(&dir.data().to_le_bytes()).unwrap()
                         [..dir.ext() as usize]
@@ -131,6 +134,7 @@ impl Vector {
     pub fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         match vector.type_of() {
             Type::Vector => match vector {
+                Tag::Image(_) => panic!(),
                 Tag::Direct(direct) => match direct.dtype() {
                     DirectType::String => {
                         let ch: char = vector.data(env).to_le_bytes()[index].into();
@@ -173,6 +177,7 @@ impl Vector {
 
     pub fn heap_size(env: &Env, vector: Tag) -> usize {
         match vector {
+            Tag::Image(_) => panic!(),
             Tag::Direct(_) => std::mem::size_of::<DirectTag>(),
             Tag::Indirect(_) => {
                 let len = Self::length(env, vector);

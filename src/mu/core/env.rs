@@ -7,10 +7,11 @@ use {
         core::{
             config::Config,
             core::{Core, CORE},
+            dynamic::Dynamic,
             frame::Frame,
+            functions::CORE_FUNCTIONS,
             heap::HeapAllocator,
             namespace::Namespace,
-            symbols::MU_FUNCTIONS,
             types::Tag,
         },
         vectors::cache::VecCacheMap,
@@ -31,7 +32,7 @@ pub struct Env {
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
     // dynamic state
-    pub dynamic: RwLock<Vec<(u64, usize)>>,
+    pub dynamic: Dynamic,
 
     // namespaces
     pub ns_map: RwLock<Vec<(Tag, String, Namespace)>>,
@@ -54,7 +55,7 @@ impl Env {
     pub fn new(config: &Config, _image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
         let mut env = Env {
             config: config.clone(),
-            dynamic: RwLock::new(Vec::new()),
+            dynamic: Dynamic::new(),
             env_key: RwLock::new(Tag::nil()),
             heap: RwLock::new(HeapAllocator::new(config)),
             keyword_ns: Tag::nil(),
@@ -76,7 +77,7 @@ impl Env {
         };
 
         env.mu_ns =
-            match Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(&MU_FUNCTIONS)) {
+            match Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(&CORE_FUNCTIONS)) {
                 Ok(ns) => ns,
                 Err(_) => panic!(),
             };

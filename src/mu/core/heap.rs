@@ -136,7 +136,7 @@ impl HeapAllocator {
     }
 
     // allocate
-    pub fn alloc(&mut self, image: &[[u8; 8]], vdata: Option<&[u8]>, id: u8) -> Option<usize> {
+    pub fn alloc(&mut self, image: &[[u8; 8]], vdata: Option<&[u8]>, type_id: u8) -> Option<usize> {
         let image_len = image.len();
         let base = self.write_barrier;
 
@@ -149,7 +149,7 @@ impl HeapAllocator {
             return None;
         }
 
-        if let Some(index) = self.alloc_free(id, (image_len * Self::SIZEOF_U64) + vdata_size) {
+        if let Some(index) = self.alloc_free(type_id, (image_len * Self::SIZEOF_U64) + vdata_size) {
             let data = &mut self.mmap;
             let mut off = index * Self::SIZEOF_U64;
 
@@ -171,7 +171,7 @@ impl HeapAllocator {
                 .with_reloc(0)
                 .with_len((((image_len + 1) * Self::SIZEOF_U64) + vdata_size) as u16)
                 .with_mark(false)
-                .with_image_type(id)
+                .with_image_type(type_id)
                 .into_bytes();
 
             let data = &mut self.mmap;
@@ -193,7 +193,7 @@ impl HeapAllocator {
                 self.write_barrier += vdata_size;
             }
 
-            let alloc_type = &mut self.alloc_map[id as usize];
+            let alloc_type = &mut self.alloc_map[type_id as usize];
 
             alloc_type.size += (image_len * Self::SIZEOF_U64) + vdata_size;
             alloc_type.total += 1;
@@ -203,16 +203,16 @@ impl HeapAllocator {
     }
 
     // try first fit
-    fn alloc_free(&mut self, id: u8, size: usize) -> Option<usize> {
-        for (index, off) in self.free_map[id as usize].iter().enumerate() {
+    fn alloc_free(&mut self, type_id: u8, size: usize) -> Option<usize> {
+        for (index, off) in self.free_map[type_id as usize].iter().enumerate() {
             match self.image_info(*off) {
                 Some(info) => {
                     if info.len() >= size as u16 {
-                        let mut alloc_type = self.alloc_map[id as usize];
+                        let mut alloc_type = self.alloc_map[type_id as usize];
 
                         alloc_type.free -= 1;
 
-                        return Some(self.free_map[id as usize].remove(index));
+                        return Some(self.free_map[type_id as usize].remove(index));
                     }
                 }
                 None => panic!(),
@@ -355,11 +355,11 @@ impl GC for HeapAllocator {
             .collect::<Vec<(HeapImageInfo, usize)>>();
 
         for (info, index) in free_list {
-            let id = info.image_type() as usize;
-            let mut alloc_type = self.alloc_map[id];
+            let type_id = info.image_type() as usize;
+            let mut alloc_type = self.alloc_map[type_id];
 
             alloc_type.free += 1;
-            self.free_map[id].push(index);
+            self.free_map[type_id].push(index);
         }
     }
 
@@ -390,9 +390,9 @@ impl Iterator for HeapAllocatorIter<'_> {
     fn next(&mut self) -> Option<Self::Item> {
         match self.heap.image_info(self.index) {
             Some(info) => {
-                let id = self.index;
+                let type_id = self.index;
                 self.index += (info.len() as usize) / std::mem::size_of::<u64>();
-                Some((info, id))
+                Some((info, type_id))
             }
             None => None,
         }

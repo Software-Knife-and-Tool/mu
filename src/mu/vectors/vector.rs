@@ -51,6 +51,7 @@ impl GC for Vector {
     fn gc_ref(gc: &mut Gc, env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         match vector.type_of() {
             Type::Vector => match vector {
+                Tag::Image(_) => panic!(),
                 Tag::Direct(_direct) => {
                     let ch: char = vector.data(env).to_le_bytes()[index].into();
 
@@ -64,6 +65,7 @@ impl GC for Vector {
 
     fn ref_type_of(gc: &mut Gc, vector: Tag) -> Type {
         match vector {
+            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => match direct.dtype() {
                 DirectType::String => Type::Char,
                 DirectType::ByteVec => Type::Byte,
@@ -86,6 +88,7 @@ impl GC for Vector {
 
     fn ref_length(gc: &mut Gc, vector: Tag) -> usize {
         match vector {
+            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
                 let image = Self::gc_ref_image(&mut gc.lock, vector);
@@ -96,6 +99,7 @@ impl GC for Vector {
 
     fn mark(gc: &mut Gc, env: &Env, vector: Tag) {
         match vector {
+            Tag::Image(_) => panic!(),
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
                 let marked = gc.mark_image(vector).unwrap();
