@@ -28,21 +28,8 @@ use futures::executor::block_on;
 #[derive(Copy, Clone)]
 pub enum Tag {
     Direct(DirectTag),
+    Image(DirectTag),
     Indirect(IndirectTag),
-}
-
-#[derive(Clone)]
-pub enum TypeImage {
-    Char(DirectTag),
-    Cons(Cons),
-    Fixnum(DirectTag),
-    Float(DirectTag),
-    Function(Function),
-    Keyword(DirectTag),
-    Namespace(DirectTag),
-    Struct(Struct),
-    Symbol(Symbol),
-    Vector(Vector),
 }
 
 // types
@@ -111,6 +98,7 @@ impl fmt::Display for Tag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:x}: ", self.as_u64()).unwrap();
         match self {
+            Tag::Image(_image) => write!(f, "image: index"),
             Tag::Direct(direct) => write!(f, "direct: type {:?}", direct.dtype() as u8),
             Tag::Indirect(indirect) => write!(f, "indirect: type {:?}", indirect.tag()),
         }
@@ -128,6 +116,7 @@ impl Tag {
 
     pub fn data(&self, env: &Env) -> u64 {
         match self {
+            Tag::Image(_) => panic!(),
             Tag::Direct(tag) => tag.data(),
             Tag::Indirect(heap) => {
                 let heap_ref = block_on(env.heap.read());
@@ -145,6 +134,7 @@ impl Tag {
 
     pub fn as_slice(&self) -> [u8; 8] {
         match self {
+            Tag::Image(_) => panic!(),
             Tag::Direct(tag) => tag.into_bytes(),
             Tag::Indirect(tag) => tag.into_bytes(),
         }
@@ -187,6 +177,7 @@ impl Tag {
             Type::Null
         } else {
             match self {
+                Tag::Image(_) => panic!(),
                 Tag::Direct(direct) => match direct.dtype() {
                     DirectType::ByteVec => Type::Vector,
                     DirectType::String => Type::Vector,

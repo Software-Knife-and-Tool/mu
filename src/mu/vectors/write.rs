@@ -22,6 +22,7 @@ pub trait Write {
 impl Write for Vector {
     fn write(env: &Env, vector: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         match vector {
+            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => match direct.dtype() {
                 DirectType::String => match str::from_utf8(&vector.data(env).to_le_bytes()) {
                     Ok(s) => {

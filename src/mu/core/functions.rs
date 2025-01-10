@@ -7,7 +7,6 @@ use crate::{
         apply::CoreFunction as _,
         compile::CoreFunction as _,
         core::CoreFnDef,
-        dynamic::CoreFunction as _,
         env::Env,
         exception::{CoreFunction as _, Exception},
         frame::{CoreFunction as _, Frame},
@@ -31,7 +30,7 @@ use crate::{
 };
 
 lazy_static! {
-    pub static ref MU_FUNCTIONS: Vec<CoreFnDef> = vec![
+    pub static ref CORE_FUNCTIONS: Vec<CoreFnDef> = vec![
         // types
         ( "eq",     2, Tag::mu_eq ),
         ( "type-of", 1, Tag::mu_typeof ),
@@ -53,7 +52,6 @@ lazy_static! {
         // env
         ( "apply",        2, Env::mu_apply ),
         ( "eval",         1, Env::mu_eval ),
-        ( "%frame-stack", 0, Env::mu_frames ),
         ( "fix",          2, Env::mu_fix ),
         // futures
         ( "defer",  2, Future::mu_future_defer ),
@@ -64,9 +62,10 @@ lazy_static! {
         ( "with-exception", 2, Exception::mu_with_exception ),
         ( "raise",          2, Exception::mu_raise ),
         // frames
-        ( "%frame-pop", 1, Frame::mu_fr_pop ),
-        ( "%frame-push", 1, Frame::mu_fr_push ),
-        ( "%frame-ref", 2, Frame::mu_fr_ref ),
+        ( "%frame-stack", 0, Frame::mu_frames ),
+        ( "%frame-pop", 1, Frame::mu_frame_pop ),
+        ( "%frame-push", 1, Frame::mu_frame_push ),
+        ( "%frame-ref", 2, Frame::mu_frame_ref ),
         // fixnums
         ( "ash",        2, Fixnum::mu_ash ),
         ( "add",        2, Fixnum::mu_fxadd ),

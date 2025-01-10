@@ -7,69 +7,71 @@
 //!    frame_push
 //!    frame_pop
 //!    frame_ref
-use crate::{
-    core::{
-        env::Env,
-        exception::{self},
-        frame::Frame,
-        types::Tag,
-    },
-    types::{cons::Cons, vector::Vector},
-};
+use crate::core::{env::Env, type_image::TypeImage, types::Tag};
 
-use futures::executor::block_on;
+use {futures::executor::block_on, futures_locks::RwLock};
 
-impl Env {
-    pub fn dynamic_push(&self, func: Tag, offset: usize) {
-        let mut dynamic_ref = block_on(self.dynamic.write());
+pub struct Dynamic {
+    pub dynamic: RwLock<Vec<(u64, usize)>>,
+    pub images: RwLock<Vec<TypeImage>>,
+}
+
+impl Default for Dynamic {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Dynamic {
+    pub fn new() -> Self {
+        Self {
+            dynamic: RwLock::new(Vec::<(u64, usize)>::new()),
+            images: RwLock::new(Vec::<TypeImage>::new()),
+        }
+    }
+
+    pub fn dynamic_push(env: &Env, func: Tag, offset: usize) {
+        let mut dynamic_ref = block_on(env.dynamic.dynamic.write());
 
         dynamic_ref.push((func.as_u64(), offset));
     }
 
-    pub fn dynamic_pop(&self) {
-        let mut dynamic_ref = block_on(self.dynamic.write());
+    pub fn dynamic_pop(env: &Env) {
+        let mut dynamic_ref = block_on(env.dynamic.dynamic.write());
 
         dynamic_ref.pop();
     }
 
     #[allow(dead_code)]
-    pub fn dynamic_ref(&self, index: usize) -> (Tag, usize) {
-        let dynamic_ref = block_on(self.dynamic.read());
+    pub fn dynamic_ref(env: &Env, index: usize) -> (Tag, usize) {
+        let dynamic_ref = block_on(env.dynamic.dynamic.read());
 
         let (func, offset) = dynamic_ref[index];
 
         ((&func.to_le_bytes()).into(), offset)
     }
-}
 
-pub trait CoreFunction {
-    fn mu_frames(_: &Env, _: &mut Frame) -> exception::Result<()>;
-}
+    pub fn images_push(env: &Env, image: TypeImage) -> usize {
+        let mut images_ref = block_on(env.dynamic.images.write());
 
-impl CoreFunction for Env {
-    fn mu_frames(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let frames_ref = block_on(env.dynamic.read());
-        let mut frames = Vec::new();
+        let offset = images_ref.len();
 
-        frames.extend(frames_ref.iter().map(|(func, offset)| {
-            let mut argv = vec![];
+        images_ref.push(image);
 
-            Frame::frame_stack_ref(env, (&func.to_le_bytes()).into(), *offset, &mut argv);
+        offset
+    }
 
-            let vec: Vec<Tag> = argv
-                .into_iter()
-                .map(|f| (&f.to_le_bytes()).into())
-                .collect();
+    pub fn images_pop(env: &Env) {
+        let mut images_ref = block_on(env.dynamic.images.write());
 
-            Cons::cons(
-                env,
-                (&func.to_le_bytes()).into(),
-                Vector::from(vec).evict(env),
-            )
-        }));
+        images_ref.pop();
+    }
 
-        fp.value = Cons::list(env, &frames);
-        Ok(())
+    #[allow(dead_code)]
+    pub fn images_ref(env: &Env, index: usize) -> TypeImage {
+        let images_ref = block_on(env.dynamic.images.read());
+
+        images_ref[index].clone()
     }
 }
 

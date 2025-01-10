@@ -9,9 +9,9 @@ use {
             env::Env,
             exception,
             frame::Frame,
+            functions::CORE_FUNCTIONS,
             future::{Future, FuturePool},
             namespace::Namespace,
-            symbols::MU_FUNCTIONS,
             types::Tag,
         },
         features::feature::Feature,
@@ -125,7 +125,7 @@ impl Core {
 
         Namespace::intern_static(env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
 
-        for (index, desc) in MU_FUNCTIONS.iter().enumerate() {
+        for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
             let (name, nreqs, _fn) = desc;
 
             let vec = vec![env.mu_ns, Fixnum::with_or_panic(index)];

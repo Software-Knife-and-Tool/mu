@@ -9,6 +9,7 @@ use crate::{
         gc::{Gc, HeapGcRef},
         indirect::IndirectTag,
         namespace::Namespace,
+        type_image::TypeImage,
         types::{Tag, TagType, Type},
     },
     streams::write::Write as _,
@@ -65,18 +66,6 @@ impl Function {
         Function { arity, form }
     }
 
-    pub fn evict(&self, env: &Env) -> Tag {
-        let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
-
-        let mut heap_ref = block_on(env.heap.write());
-        let ind = IndirectTag::new()
-            .with_image_id(heap_ref.alloc(image, None, Type::Function as u8).unwrap() as u64)
-            .with_heap_id(1)
-            .with_tag(TagType::Function);
-
-        Tag::Indirect(ind)
-    }
-
     pub fn to_image(env: &Env, tag: Tag) -> Self {
         let heap_ref = block_on(env.heap.read());
 
@@ -92,6 +81,24 @@ impl Function {
             },
             _ => panic!(),
         }
+    }
+
+    pub fn to_image_tag(self, env: &Env) -> Tag {
+        let image = TypeImage::Function(self);
+
+        TypeImage::to_tag(&image, env, Type::Function as u8)
+    }
+
+    pub fn evict(&self, env: &Env) -> Tag {
+        let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
+
+        let mut heap_ref = block_on(env.heap.write());
+        let ind = IndirectTag::new()
+            .with_image_id(heap_ref.alloc(image, None, Type::Function as u8).unwrap() as u64)
+            .with_heap_id(1)
+            .with_tag(TagType::Function);
+
+        Tag::Indirect(ind)
     }
 
     pub fn update(env: &Env, image: &Function, func: Tag) {
