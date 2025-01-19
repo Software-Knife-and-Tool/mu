@@ -45,7 +45,6 @@ test: deltemp
 summary:
 	@python3 ./test-ns.py mu namespaces > $(TMPF);
 	@python3 summarize-ns.py $(TMPF);
-
 	@-for module in $(MODULES); do					\
 	    python3 ./test-module.py $$module namespaces > $(TMPF);	\
 	    python3 summarize-module.py $(TMPF);			\
@@ -54,4 +53,4 @@ summary:
 	@rm -f $(TMPF)
 
 clean: deltemp
-	@rm -f *.diff *.out
+	@rm -f *.diff *.out *.fasl

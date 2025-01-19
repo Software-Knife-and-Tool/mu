@@ -8,6 +8,6 @@
  "common/describe"
  '((:version . "0.0.1")
    (:ns      . "common")
-   (:lang    . :mu)
-   (:require . ("common"))
+   (:lang    . :core)
+   (:require . ())
    (:load    . ("describe.l"))))

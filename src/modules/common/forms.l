@@ -9,7 +9,6 @@
    (:lambda (obj)
      obj))
 
-
 (defun vector (&rest elements)
   (list-sv :t elements))
 

@@ -2,15 +2,11 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; core namespace
-;;;
-(mu:intern mu:%null-ns% "core" (mu:make-namespace "core"))
-
-;;;
 ;;; core namespaces
 ;;;
 (mu:intern core "%char-macro-ns%" (mu:make-namespace "%char-macros%"))
 (mu:intern core "%macro-ns%" (mu:make-namespace "%macros%"))
+(mu:intern core "%modules-ns%" (mu:make-namespace "%modules%"))
 (mu:intern core "%symbol-macro-ns%" (mu:make-namespace "%symbol-macros%"))
 (mu:intern core "%types-ns%" (mu:make-namespace "%core-types%"))
 
@@ -66,11 +62,20 @@
 ;;;
 ;;; eval
 ;;;
+#|
 (mu:intern core "eval"
    (:lambda (form)
      (:if (core:%and (core:consp form) (core:%closurep (mu:car form)))
           (core:apply (core:compile (mu:car form)) (mu:cdr form))
           (mu:eval form))))
+|#
+
+(mu:intern core "eval"
+   (:lambda (form-str)
+     (mu:eval
+      (core:compile
+       (core:read
+        (mu:open :string :input form-str :t) :t ())))))
 
 ;;;
 ;;; syntactic sugar

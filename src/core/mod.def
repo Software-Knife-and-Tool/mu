@@ -1,0 +1,36 @@
+;;;  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-License-Identifier: MIT
+
+;;;
+;;; core module
+;;;
+(fasl:%provide
+ "core"
+ '((:version . "0.0.7")
+   (:ns      . "core")
+   (:lang    . :mu)
+   (:load    . (
+                "core.l"
+                "compile.l"
+                "string.l"
+                "format.l"
+                "funcall.l"
+                "load.l"
+                "list.l"
+                "map.l"
+                "module.l"
+                "stream.l"
+                "read.l"
+                "quasi.l"
+                "parse.l"
+                "read-macro.l"
+                "symbol.l"
+                "symbol-macro.l"
+                "deftype.l"
+                "typespec.l"
+                "exception.l"
+                "macro.l"
+                "closure.l"
+                "vector.l"
+                "common.l"
+                ))))

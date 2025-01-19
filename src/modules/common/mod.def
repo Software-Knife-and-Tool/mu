@@ -4,16 +4,15 @@
 ;;;
 ;;; module
 ;;;
-(image:%provide
+(core:provide
  "common"
  '((:version . "0.0.1")
-   (:lang    . :mu)
-   (:ns      . "core")
-   (:require . ("core"))
+   (:lang    . :core)
+   (:ns      . "common")
+   (:require . ())
    (:load    . (
                 "common.l"
                 "boole.l"
-	        "defun.l"
 	        "predicates.l"
 	        "string.l"
 	        "fixnum.l"
