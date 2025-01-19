@@ -24,7 +24,7 @@
 (%defmacro defmacro (name lambda &rest body)
    `(%defmacro name ,lambda ,@body))
 
-(defmacro defun (name lambda &rest body)
+(%defmacro defun (name lambda &rest body)
    `(mu:intern mu:%null-ns% ,(mu:symbol-name name) (%lambda ,lambda ,@body)))
 
 (defmacro progn (&rest body)
@@ -203,16 +203,7 @@
       (list* 'lambda () (append body (list (list 'close symbol)))))))
 |#
 
-(mu:intern mu:%null-ns% "identity"
-   (:lambda (arg) arg))
-
-(mu:intern mu:%null-ns% "vector"
-   (:lambda (elements)
-     (mu:make-vector :t elements)))
-
-#|
 (defun identity (obj) obj)
 
 (defun vector (&rest elements)
-(mu:make-vector :t elements))
-|#
+  (mu:make-vector :t elements))
