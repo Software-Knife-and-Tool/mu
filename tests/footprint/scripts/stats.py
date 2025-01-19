@@ -18,9 +18,7 @@ def times():
         '-f',
         format,
         mu_cmd,
-        '-l', '../../dist/image.l',
-        '-l', '../../dist/test-image.l',
-        '-q', '(image:%test-require "' + "core" + '" \"../../src/modules\")', 
+        '-l', '../../dist/core.fasl',
     ],\
     stdout=subprocess.PIPE,\
     stderr=subprocess.PIPE)
@@ -35,9 +33,7 @@ def times():
 def storage():
     proc = subprocess.Popen([
         mu_cmd,
-        '-l', '../../dist/image.l',
-        '-l', '../../dist/test-image.l',
-        '-q', '(image:%test-require "' + "core" + '" \"../../src/modules\")', 
+        '-l', '../../dist/core.fasl',
         '-e', '(env:heap-stat)'
     ],\
     stdout=subprocess.PIPE,\

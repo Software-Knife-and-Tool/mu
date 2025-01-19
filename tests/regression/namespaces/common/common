@@ -1,0 +1,12 @@
+(mu:type-of (core:macro-function 'defun ()))	:struct
+(mu:type-of (core:macro-function 'defmacro ()))	:struct
+(mu:type-of (core:macro-function 'progn ()))	:struct
+(mu:type-of (core:macro-function 'when ()))	:struct
+(mu:type-of (core:macro-function 'unless ()))	:struct
+(mu:type-of (core:macro-function 'let ()))	:struct
+(mu:type-of (core:macro-function 'let* ()))	:struct
+(mu:type-of (core:macro-function 'cond ()))	:struct
+(mu:type-of (core:macro-function 'and ()))	:struct
+(mu:type-of (core:macro-function 'or ()))	:struct
+(mu:type-of identity)	:func
+(mu:type-of vector)	:func

@@ -7,7 +7,7 @@
 (core:provide
  "common/metrics"
  '((:version . "0.0.1")
-   (:lang    . :mu)
+   (:lang    . :core)
    (:ns      . "common")
-   (:require . ("common"))
+   (:require . ())
    (:load    . ("room.l" "time.l"))))

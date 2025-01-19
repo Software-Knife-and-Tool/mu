@@ -9,9 +9,21 @@ test = sys.argv[3]
 with open("namespaces/" + base + '/' + ns + '/' + test) as f: test_source = f.readlines()
 
 def runtest(line, test, expected):
-    proc = subprocess.Popen(['../../dist/mu-sys','-e' + test],\
-                            stdout=subprocess.PIPE,\
-                            stderr=subprocess.PIPE)
+    if ns == 'core':
+        proc = subprocess.Popen(['../../dist/mu-sys',
+                                 '-l../../dist/core.fasl',
+                                 '-e' + test],             \
+                                stdout=subprocess.PIPE,    \
+                                stderr=subprocess.PIPE)
+
+    if ns == 'common':
+        proc = subprocess.Popen(['../../dist/mu-sys',
+                                 '-l../../dist/core.fasl',
+                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-e (core:eval "{}")'.format(test),    \
+                                 ],                                     \
+                                stdout=subprocess.PIPE,                 \
+                                stderr=subprocess.PIPE)
 
     obtained = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf-8')

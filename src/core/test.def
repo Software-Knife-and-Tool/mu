@@ -4,7 +4,7 @@
 ;;;
 ;;; core module
 ;;;
-(image:%provide
+(test:provide
  "core"
  '((:version . "0.0.7")
    (:ns      . "core")

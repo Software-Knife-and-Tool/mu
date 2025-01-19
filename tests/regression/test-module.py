@@ -8,14 +8,21 @@ base = sys.argv[2]
 with open(base + '/' + module + '/tests') as f: group_list = f.readlines()
 
 def runtest(line, group, test, expected):
-    proc = subprocess.Popen(['../../dist/mu-sys',
-                             '-l../../dist/image.l',
-                             '-l../../dist/test-image.l',
-                             '-q (image:%test-require "' + module + '" \"../../src/modules\")',
-                             '-l./module.l',
-                             '-e' + test],\
-                            stdout=subprocess.PIPE,\
-                            stderr=subprocess.PIPE)
+    if module == 'core':
+        proc = subprocess.Popen(['../../dist/mu-sys',
+                                 '-l../../dist/core.fasl',
+                                 '-e' + test],             \
+                                stdout=subprocess.PIPE,    \
+                                stderr=subprocess.PIPE)
+
+    if module == 'common':
+        proc = subprocess.Popen(['../../dist/mu-sys',
+                                 '-l../../dist/core.fasl',
+                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-e (core:eval "{}")'.format(test),    \
+                                 ],                                     \
+                                stdout=subprocess.PIPE,                 \
+                                stderr=subprocess.PIPE)
 
     obtained = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf-8')

@@ -11,10 +11,8 @@ DOCS = ../doc
 LIB = ../lib
 SRC = ../src
 TOOLS = ../tools
+
 MODULES = 		\
-	core 		\
-	core/fasl	\
-	core/image	\
 	common		\
 	common/describe	\
 	common/metrics	\
@@ -22,9 +20,6 @@ MODULES = 		\
 	prelude/repl
 
 dist:
-	@chmod 755 $(DIST)/mu-sys
-	@chmod 755 $(DIST)/mu-sh
-
 	@install -d $(BASE)
 	@install -d $(BASE)/bin
 	@install -d $(BASE)/doc
@@ -48,17 +43,27 @@ dist:
 
 	@install -m 644 $(SRC)/dist/mu.l $(BASE)/lib
 	@install -m 644 -D -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
-	@install -m 644 $(SRC)/image/image.l $(BASE)/lib
+	@install -m 644 $(SRC)/dist/image.l $(BASE)/lib
+
+	@install -D -m 644 -t $(BASE)/lib/core $(SRC)/core/*.l
+	@install -m 644 -t $(BASE)/lib/core $(SRC)/core/*.def
+
+	@install -D -m 644 -t $(BASE)/lib/core/fasl $(SRC)/core/fasl/*.l
+	@install -m 644 -t $(BASE)/lib/core/fasl $(SRC)/core/fasl/*.def
+
+	@install -D -m 644 -t $(BASE)/lib/core/image $(SRC)/core/image/*.l
+	@install -m 644 -t $(BASE)/lib/core/image $(SRC)/core/image/*.def
 
 	@for module in $(MODULES); do	\
-	    install -D -t $(BASE)/modules/$$module $(SRC)/modules/$$module/*.l;		\
-	    install -D -t $(BASE)/modules/$$module $(SRC)/modules/$$module/mod.def;	\
+	    install -D -m 644 -t $(BASE)/modules/$$module $(SRC)/modules/$$module/*.l;		\
+	    install -D -m 644 -t $(BASE)/modules/$$module $(SRC)/modules/$$module/mod.def;	\
 	done
 
-	@make -f dist.mk dist
+	@./mu-sys -l ../src/dist/fasl.l -q '(fasl:require "../src/" "core")'
+	@install -m 644 ./core.fasl $(BASE)/lib
 
 	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
-	@rm -rf $(BASE)
+	@rm -rf $(BASE) mu-exec mu-ld mu-exec mu-server mu-sh mux sysgen
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) core.l prelude.l mu-exec mu-ld mu-exec mu-server mu-sh mu-sys sysgen
+	@rm -rf $(BASE)-*.tgz $(BASE) core.fasl mu-exec mu-ld mu-exec mu-server mu-sh mu-sys mux sysgen

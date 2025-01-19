@@ -6,7 +6,7 @@
 ;;;
 (mu:intern mu:%null-ns% "image" (mu:make-namespace "image"))
 
-(mu:intern image "+version+" "0.0.1")
+(mu:intern image "+version+" "0.0.2")
 (mu:intern image "%modules%" (mu:make-namespace "%modules%"))
 (mu:intern image "%eof%" (mu:make-symbol "eof"))
 
@@ -39,47 +39,28 @@
                 ()))
         alist))))
 
-;;;
-;;; replace this with a path builder
-;;;
-(mu:intern image "%fmt-op"
-   (:lambda (dir dest arg-list)
-     ((:lambda (fn)
-        (mu:apply fn `(,(mu:car arg-list))))
-     (mu:cdr
-      (image:%assq
-       dir
-       `(,(mu:cons #\A (:lambda (arg) (mu:write arg () dest) (mu:cdr arg-list)))
-         ,(mu:cons #\S (:lambda (arg) (mu:write arg :t dest) (mu:cdr arg-list)))
-         ,(mu:cons #\T (:lambda (arg) (mu:write-char #\tab dest) arg-list))
-         ,(mu:cons #\~ (:lambda (arg) (mu:write-char #\~ dest) arg-list))
-         ,(mu:cons #\% (:lambda (arg) (mu:write-char #\linefeed arg dest) arg-list))))))))
 
-(mu:intern image "%fmt-loop"
-   (:lambda (dest fmt arg-list)
-    (mu:fix
-     (:lambda (loop)
-       ((:lambda (nth argl)
-          (:if (mu:eq nth (mu:vector-length fmt))
-               loop
-               ((:lambda (ch)
-                  (:if (mu:eq ch #\~)
-                       (mu:cons (mu:add 2 nth) (image:%fmt-op (mu:svref fmt (mu:add 1 nth)) dest argl))
-                       ((:lambda ()
-                           (mu:write-char ch dest)
-                           (mu:cons (mu:add 1 nth) argl)))))
-                (mu:svref fmt nth))))
-        (mu:car loop)
-        (mu:cdr loop)))
-     (mu:cons 0 arg-list))
-    (mu:get-string dest)))
-
-(mu:intern image "%fmt"
-   (:lambda (format-string arg-list)
-     (image:%fmt-loop
-      (mu:open :string :output "" :t)
-      format-string
-      arg-list)))
+(mu:intern image "%concat-strings"
+   (:lambda (strings)
+     ((:lambda (concat)
+        (mu:fix
+         (:lambda (list)
+           (:if list
+                ((:lambda (string)
+                   (mu:fix
+                    (:lambda (index)
+                      (:if (mu:less-than index (mu:vector-length string))
+                           ((:lambda ()
+                              (mu:write-char (mu:svref string index) concat)
+                              (mu:add index 1)))
+                           index))
+                    0)
+                   (mu:cdr list))
+                 (mu:car list))
+                list))
+         strings)
+        (mu:get-string concat))
+        (mu:open :string :output "" :t))))
 
 ;;;
 ;;; modules
@@ -142,7 +123,7 @@
                      (image:%mapc
                       (:lambda (file-name)
                         (image:%load-module-file
-                         (image:%fmt "/opt/mu/modules/~A/~A" `(,module ,file-name))
+                         (image:%concat-strings `("/opt/mu/modules/" ,module "/" ,file-name))
                          (mu:cdr (image:%assq :lang module-def))))
                       files)
                      :t)
@@ -150,5 +131,5 @@
                    (mu:cdr (image:%assq :load module-def)))
                   (mu:raise module :open)))
            (image:%load-module-def
-            (image:%fmt "/opt/mu/modules/~A/mod.def" `(,module))
+            (image:%concat-strings `("/opt/mu/modules/" ,module "/mod.def"))
             module)))))
