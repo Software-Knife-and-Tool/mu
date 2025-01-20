@@ -9,4 +9,5 @@
  '((:version . "0.0.1")
    (:lang    . :mu)
    (:ns      . "prelude")
+   (:require . ())
    (:load    . ("prelude.l" "list.l" "loader.l"))))

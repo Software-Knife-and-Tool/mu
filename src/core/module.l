@@ -39,14 +39,14 @@
                ((:lambda (stream)
                   (mu:fix
                    (:lambda (loop)
-                     (:if (mu:eq loop core:%eof%)
+                     (:if (mu:eq core:%eof% loop)
                           core:%eof%
                           ((:lambda (form)
-                             (:if (mu:eq form core:%eof%)
+                             (:if (mu:eq core:%eof% form)
                                   core:%eof%
-                                  (:lambda ()
+                                  ((:lambda ()
                                     (mu:eval (mu:compile form))
-                                    (core:null loop))))
+                                    (core:null loop)))))
                            (mu:read stream () core:%eof%))))
                    ()))
                 (mu:open :file :input path :t)))
@@ -97,7 +97,9 @@
                            (:lambda (module)
                              (core:require module))
                            requires)
-                          (mu:make-namespace ns)
+                          (:if (core:%findl-if (:lambda (el) (mu:eq el ns)) (mu:namespace-map))
+                               ()
+                               (mu:make-namespace ns))
                           (core:%mapc
                            (:lambda (file-name)
                              (core:%load-module-file
@@ -126,7 +128,9 @@
                            (:lambda (module)
                              (core:require module))
                            requires)
-                          (mu:make-namespace ns)
+                          (:if (core:%findl-if (:lambda (el) (mu:eq el ns)) (mu:namespace-map))
+                               ()
+                               (mu:make-namespace ns))
                           (core:%mapc
                            (:lambda (file-name)
                              (core:%load-module-file
