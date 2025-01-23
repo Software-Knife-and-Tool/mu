@@ -4,17 +4,15 @@
 ;;;
 ;;; fixnum functions
 ;;;
-(mu:intern common "1+"
-   (:lambda (n)
-     (:if (core:fixnump n)
-          (mu:add n 1)
-          (core:raise n 'common:1+ "not a fixnum"))))
+(defun 1+ (n)
+  (:if (core:fixnump n)
+       (mu:add n 1)
+       (core:raise n 'common:1+ "not a fixnum")))
 
-(mu:intern common "1-"
-   (:lambda (n)
-     (:if (core:fixnump n)
-          (mu:sub n 1)
-          (core:raise n 'common:1- "not a fixnum"))))
+(defun 1- (n)
+  (:if (core:fixnump n)
+       (mu:sub n 1)
+       (core:raise n 'common:1- "not a fixnum")))
 
 ;;; round to negative infinity
 (mu:intern common "truncate"

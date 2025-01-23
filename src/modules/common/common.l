@@ -6,98 +6,42 @@
 ;;;
 (mu:intern mu:%null-ns% "common" (mu:find-namespace "common"))
 (mu:intern mu:%null-ns% "t" :t)
-(mu:intern mu:%null-ns% "nil" :nil)
+(mu:intern mu:%null-ns% "nil" ())
+
+;;;
+;;; exports
+;;;
+(mu:intern mu:%null-ns% "append" core:append)
+(mu:intern mu:%null-ns% "list" core:list)
+(mu:intern mu:%null-ns% "list*" core:list*)
+(mu:intern mu:%null-ns% "vector" core:vector)
+(mu:intern mu:%null-ns% "format" core:format)
+(mu:intern mu:%null-ns% "funcall" core:funcall)
+(mu:intern mu:%null-ns% "not" core:null)
 
 ;;;
 ;;; defun/defmacro
 ;;;
-#|
-(mu:eval (core:compile
-  '(%defmacro defun (name lambda &rest body)
-     `(mu:intern mu:%null-ns% ,(mu:symbol-name name) (%lambda ,lambda ,@body)))))
-
-(mu:eval (core:compile
-  '(%defmacro defmacro (name lambda &rest body)
-     `(%defmacro ,(mu:symbol-name name) ,lambda ,@body))))
-|#
-
 (%defmacro defmacro (name lambda &rest body)
-   `(%defmacro name ,lambda ,@body))
+  `(%defmacro ,name ,lambda ,@body))
 
-(%defmacro defun (name lambda &rest body)
-   `(mu:intern mu:%null-ns% ,(mu:symbol-name name) (%lambda ,lambda ,@body)))
+(defmacro defun (name lambda &rest body)
+  `(mu:intern mu:%null-ns% ,(mu:symbol-name name) (%lambda ,lambda ,@body)))
 
-(defmacro progn (&rest body)
-  `((%lambda () ,@body)))
-
-(defmacro when (test &rest body)
-  `(if ,test (progn ,@body)))
-
-(defmacro unless (test &rest body)
-  `(if (core:null ,test) (progn ,@body)))
-
-(defmacro let (binds &rest body)
-   `((%lambda ,(core:%mapcar mu:car binds) ,@body)
-     ,@(core:%mapcar (:lambda (bind) (mu:nth 1 bind)) binds)))
-
-(defmacro let* (binds &rest body)
-   (:if binds
-       `(let (,(mu:car binds)) (let* ,(mu:cdr binds) ,@body))
-       `(let () ,@body)))
-
-(defmacro cond (&rest clauses)
-   (core:%foldr
-    (:lambda (clause cond-form)
-      ((:lambda (test body)
-         `(if ,test (progn ,@body) ,cond-form))
-       (mu:car clause)
-       (mu:cdr clause)))
-      ()
-      clauses))
-
-(defmacro and (&rest terms)
-   (:if terms
-        (:if (mu:eq 1 (mu:length terms))
-             (mu:car terms)
-             (core:%foldl
-      (:lambda (term acc)
-        `(if ,acc ,term))
-      `(if ,(mu:nth 0 terms) ,(mu:nth 1 terms))
-      (mu:nthcdr 2 terms)))
-        :t))
-
-(defmacro or (&rest terms)
-  (:if terms
-       (:if (mu:eq 1 (mu:length terms))
-            (mu:car terms)
-            (core:%foldl
-             (:lambda (term acc)
-               ((:lambda (g)
-                  `(,acc (let ((,g ,term)) ,g)))
-                (core:gensym)))
-             ((:lambda (g1 g2)
-                `(let ((,g1 ,(mu:nth 0 terms)))
-                   ,g1
-                   (let ((,g2 ,(mu:nth 1 terms)))
-                     ,g2)))
-              (core:gensym)
-              (core:gensym))
-             (mu:nthcdr 2 terms)))
-       ()))
-
-#|
+;;;
+;;; progs
+;;;
 (defmacro prog1 (form-1 &rest forms)
-  ((:lambda (g)
-  `(let (g (mu:eval form-1)))
-     ,@(core:append forms (cons:list g))))
-   (core:gensym))
+  (let ((g (core:gensym)))
+     `(let ((,g ,form-1))
+        ,@forms
+        ,g)))
 
 (defmacro prog2 (form-1 form-2 &rest forms)
-  ((:lambda (g)
-  `(let (g (mu:eval form-2)))
-     ,@(core:append forms (core:list form-1 g)))
-(core:gensym)))
-|#
+  (let ((g (core:gensym)))
+     `(let ((,g (progn ,form-1 ,form-2)))
+        ,@forms
+        ,g)))
 
 #|
 ;;;
@@ -116,7 +60,7 @@
         (limit-gsym (gensym)))
     (errorp-unless symbolp count-var "dotimes: not a symbol")
     (list (list 'lambda (list limit-gsym)
-                (list 'if (list 'fixnum< limit-gsym 0)
+                list 'if (list 'fixnum< limit-gsym 0)
                       ()
                       (list 'core::fix
                             (list 'lambda (list count-var)
@@ -202,8 +146,3 @@
         (list 'close symbol))
       (list* 'lambda () (append body (list (list 'close symbol)))))))
 |#
-
-(defun identity (obj) obj)
-
-(defun vector (&rest elements)
-  (mu:make-vector :t elements))

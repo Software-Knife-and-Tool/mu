@@ -35,7 +35,7 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.14";
+const VERSION: &str = "0.0.15";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
@@ -57,7 +57,8 @@ pub fn usage() {
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    clean                              ; clean all artifacts");
     println!("    commit                             ; fmt and clippy, pre-commit checking");
-    println!("    repl      mu | core | prelude      ; repl: mu, core, and prelude repls");
+    println!("    repl      mu | core | common | prelude");
+    println!("                                       ; repl: mu, core, common with prelude, and prelude repls");
     println!("    test                               ; regression test suite");
     println!("    bench     base | current | footprint [--ntests=number]");
     println!("    profile   --config=path            ; create profile");

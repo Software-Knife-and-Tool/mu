@@ -28,6 +28,7 @@ pub enum Opt {
 pub enum Mode {
     Base,
     Build,
+    Common,
     Core,
     Crossref,
     Current,
@@ -129,6 +130,7 @@ impl Options {
                 "base" => Mode::Base,
                 "build" => Mode::Build,
                 "core" => Mode::Core,
+                "common" => Mode::Common,
                 "crossref" => Mode::Crossref,
                 "current" => Mode::Current,
                 "debug" => Mode::Debug,
