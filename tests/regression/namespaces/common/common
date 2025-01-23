@@ -1,12 +1,13 @@
-(mu:type-of (core:macro-function 'defun ()))	:struct
-(mu:type-of (core:macro-function 'defmacro ()))	:struct
-(mu:type-of (core:macro-function 'progn ()))	:struct
-(mu:type-of (core:macro-function 'when ()))	:struct
-(mu:type-of (core:macro-function 'unless ()))	:struct
-(mu:type-of (core:macro-function 'let ()))	:struct
-(mu:type-of (core:macro-function 'let* ()))	:struct
-(mu:type-of (core:macro-function 'cond ()))	:struct
-(mu:type-of (core:macro-function 'and ()))	:struct
-(mu:type-of (core:macro-function 'or ()))	:struct
-(mu:type-of identity)	:struct
+(mu:boundp 't)	t
+(mu:boundp 'nil)	nil
+(mu:type-of append)	:struct
+(mu:type-of list)	:struct
+(mu:type-of list*)	:struct
 (mu:type-of vector)	:struct
+(mu:type-of format)	:struct
+(mu:type-of funcall)	:struct
+(mu:type-of not)	:func
+(mu:type-of (core:macro-function 'defmacro ()))	:struct
+(mu:type-of (core:macro-function 'defun ()))	:struct
+(mu:type-of (core:macro-function 'prog1 ()))	:struct
+(mu:type-of (core:macro-function 'prog2 ()))	:struct

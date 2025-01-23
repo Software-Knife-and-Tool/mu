@@ -4,7 +4,7 @@
 ;;;
 ;;;  symbol predicates
 ;;;
-(mu:intern common "boundp" mu:boundp)
+(defun boundp (x) (mu:boundp x))
 
 (mu:intern common "fboundp"
   (:lambda (symbol)

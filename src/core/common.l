@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; common forms
+;;; forms common across lisp families
 ;;;
 (mu:intern core "identity"
    (:lambda (obj)
@@ -67,7 +67,9 @@
 ;;;
 (core:compile
  '(%defmacro progn (&rest body)
-   `((%lambda () ,@body))))
+     (:if (mu:less-than (mu:length body) 2)
+       (mu:car body)
+       `((%lambda () ,@body)))))
 
 (core:compile
  '(%defmacro when (test &rest body)

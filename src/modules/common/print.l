@@ -4,13 +4,15 @@
 ;;;
 ;;; common printing
 ;;;
-(mu:intern common "prin1"
-   (:lambda (form stream)
-     (core:write form stream :t)))
+(defun prin1 (form &rest stream-opt)
+  (cond
+    ((mu:eq 1 (mu:length stream-opt)) (core:write form (mu:car stream) :t))
+    (t (core:write form mu:*standard-output* :t))))
 
-(mu:intern common "princ"
-   (:lambda (form stream)
-     (core:write form stream ())))
+(defun princ (form &rest stream-opt)
+  (cond
+    ((mu:eq 1 (mu:length stream-opt)) (core:write form (mu:car stream) ()))
+    (t (core:write form mu:*standard-output* ()))))
 
 #|
 (defun pprint (form stream)

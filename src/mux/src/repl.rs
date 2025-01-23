@@ -9,7 +9,7 @@ pub struct Repl {}
 
 impl Repl {
     pub fn repl(argv: &Vec<String>, _home: &str) {
-        match Options::parse_options(argv, &["mu", "core", "prelude"], &["verbose"]) {
+        match Options::parse_options(argv, &["mu", "common", "core", "prelude"], &["verbose"]) {
             None => (),
             Some(options) => {
                 if options.modes.len() != 1 {
@@ -26,6 +26,13 @@ impl Repl {
 
                 let mut child = match ns {
                     Mode::Mu => Command::new("mu-sh").spawn().unwrap(),
+                    Mode::Common => Command::new("mu-sys")
+                        .args(["-l", "/opt/mu/lib/core.fasl"])
+                        .args(["-q", "(core:require \"common\")"])
+                        .args(["-q", "(core:require \"prelude/repl\")"])
+                        .args(["-e", "(prelude:repl)"])
+                        .spawn()
+                        .unwrap(),
                     Mode::Core => Command::new("mu-sh")
                         .args(["-l", "/opt/mu/lib/core.fasl"])
                         .spawn()
