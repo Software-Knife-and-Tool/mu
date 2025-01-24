@@ -1,5 +1,7 @@
 (mu:boundp 'mu:foo)	:nil
 (mu:boundp 'mu:*standard-input*)	mu:*standard-input*
+(mu:boundp :foo)	:t
+(mu:boundp ())	:t
 (mu:symbol-name 'mu:*standard-input*)	"*standard-input*"
 (mu:symbol-namespace 'mu:*standard-input*)	#<:ns "mu">
 (mu:symbol-namespace 'std-in)	#<:ns "">
