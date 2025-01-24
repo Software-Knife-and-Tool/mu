@@ -441,12 +441,12 @@ impl CoreFunction for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
-            Type::Keyword => symbol,
+            Type::Keyword | Type::Null => Self::keyword("t"),
             Type::Symbol => {
-                if !Self::is_bound(env, symbol) {
-                    Tag::nil()
-                } else {
+                if Self::is_bound(env, symbol) {
                     symbol
+                } else {
+                    Tag::nil()
                 }
             }
             _ => return Err(Exception::new(env, Condition::Type, "mu:boundp", symbol)),
