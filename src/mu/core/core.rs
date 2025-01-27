@@ -24,7 +24,7 @@ use {
 };
 use {futures::executor::block_on, futures_locks::RwLock};
 
-pub const VERSION: &str = "0.2.0";
+pub const VERSION: &str = "0.2.1";
 pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
 pub type CoreFnDef = (&'static str, u16, CoreFn);
 
