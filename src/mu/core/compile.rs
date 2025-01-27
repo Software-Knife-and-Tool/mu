@@ -53,10 +53,7 @@ impl Compile for Env {
 
         let if_vec = vec![
             Namespace::intern(self, self.mu_ns, "%if".into(), Tag::nil()).unwrap(),
-            Cons::list(
-                self,
-                &[lambda, Tag::nil(), Cons::nth(self, 0, args).unwrap()],
-            ),
+            Cons::nth(self, 0, args).unwrap(),
             Cons::list(
                 self,
                 &[lambda, Tag::nil(), Cons::nth(self, 1, args).unwrap()],
@@ -246,11 +243,7 @@ impl CoreFunction for Env {
         env.fp_argv_check("mu:%if", &[Type::T, Type::Function, Type::Function], fp)?;
 
         fp.value = env.apply(
-            if env.apply(test, Tag::nil())?.null_() {
-                false_fn
-            } else {
-                true_fn
-            },
+            if Tag::null_(&test) { false_fn } else { true_fn },
             Tag::nil(),
         )?;
 
