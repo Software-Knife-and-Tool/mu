@@ -148,13 +148,9 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 
 ------
 
-versions 0.1.69 - 0.1.73 are built with rustc 1.79.0.
-
- versions 0.1.74 - 0.1.79 are built with rustc 1.81.0.
-
-version 0.1.8{123} are built with rustc 1.82.0.
-
 version 0.1.8{456}, 0.2.0 are built with rustc 1.83.0
+
+version 0.2.1 is built with rustc 1.84.0 
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
@@ -224,7 +220,7 @@ The  *mux* binary is part of a release, found at `/opt/mu/bin/mux`.
 The *mux* tool provides these utilities:
 
 ```
-Usage: mux 0.0.13 command [option...]
+Usage: mux 0.0.15 command [option...]
   command:
     help                               ; this message
     version                            ; mux version
@@ -233,12 +229,19 @@ Usage: mux 0.0.13 command [option...]
     env                                ; print development environment
     build     release | profile | debug
                                        ; build mu system, release is default
+    image     build --out=path | 
+              [--image=path | -config=config]
+              *[--load=path | --eval=sexpr]] | view --image=path
+                                       ; manage heap images
+    symbols   reference [--module=name] |
+              crossref [--module=name]  |
+              metrics [--module=name]
+                                       ; symbol reports, default to mu
     install                            ; (sudo) install mu system-wide
     clean                              ; clean all artifacts
     commit                             ; fmt and clippy, pre-commit checking
-    repl      mu | core | prelude      ; repl: mu, core, and prelude namespaces
-    symbols   reference | crossref | metrics [--module=name | --namespace=name]
-                                       ; symbol reports, defaults to mu
+    repl      mu | core | common | prelude
+                                       ; repl: mu, core, common with prelude, and prelude repls
     test                               ; regression test suite
     bench     base | current | footprint [--ntests=number]
     profile   --config=path            ; create profile

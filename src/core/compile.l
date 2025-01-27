@@ -35,15 +35,20 @@
 ;;;
 ;;; if can take two or three arguments
 ;;;
+(mu:intern core "%nilf"
+   (:lambda ()))
+
 (mu:intern core "%special-if"
    (:lambda (form env)
      ((:lambda (length)
-        (:if (core:%or (mu:eq length 3) (mu:eq length 4))
+        (:if (core:%or (mu:eq 3 length) (mu:eq 4 length))
              ((:lambda (test t-arm f-arm)
-                `(:if ,test ,t-arm ,f-arm))
+                `(mu:%if ,test ,t-arm ,f-arm))
               (core:%compile (mu:nth 1 form) env)
-              (core:%compile `(core:apply (%lambda () ,(mu:nth 2 form)) ()) env)
-              (core:%compile `(core:apply (%lambda () ,(mu:nth 3 form)) ()) env))
+              (mu:compile `(:lambda () ,(core:%compile (mu:nth 2 form) env)))
+              (:if (mu:eq 3 length)
+                   core:%nilf
+                   (mu:compile `(:lambda () ,(core:%compile (mu:nth 3 form) env)))))
         (core:raise form 'core:%special-if "takes two or three arguments")))
       (mu:length form))))
 
