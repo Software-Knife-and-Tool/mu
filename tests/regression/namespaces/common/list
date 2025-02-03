@@ -1,0 +1,20 @@
+(common:mapc (:lambda (a b) (mu:cons a b)) '(a b c) '(1 2 3))	(a b c)
+(common:mapcar (:lambda (a b) (mu:cons a b)) '(a b c) '(1 2 4))	((a . 1) (b . 2) (c . 4))
+(common:mapl mu:cons '(1 2 3 4) '(1 2))	(1 2 3 4)
+(common:maplist mu:cons '(1 2 3 4) '(1 2))	(((1 2 3 4) 1 2) ((2 3 4) 2))
+(car '(a))	a
+(cdr '(a))	:nil
+(cdr '(a b c))	(b c)
+(first '(1 2 3 4 5 6 7 8 9 10))	1
+(rest '(1 2 3 4 5 6 7 8 9 10))	(2 3 4 5 6 7 8 9 10)
+(second '(1 2 3 4 5 6 7 8 9 10))	2
+(third '(1 2 3 4 5 6 7 8 9 10))	3
+(fourth '(1 2 3 4 5 6 7 8 9 10))	4
+(fifth '(1 2 3 4 5 6 7 8 9 10))	5
+(sixth '(1 2 3 4 5 6 7 8 9 10))	6
+(seventh '(1 2 3 4 5 6 7 8 9 10))	7
+(eighth '(1 2 3 4 5 6 7 8 9 10))	8
+(ninth '(1 2 3 4 5 6 7 8 9 10))	9
+(tenth '(1 2 3 4 5 6 7 8 9 10))	10
+(cons 'a 'b)	(a . b)
+(cdr (cons 'a 'b))	b

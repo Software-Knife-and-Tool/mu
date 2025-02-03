@@ -14,6 +14,41 @@
        (mu:sub n 1)
        (core:raise n 'common:1- "not a fixnum")))
 
+#|
+    max &rest reals+ => max-real
+    min &rest reals+ => min-real
+|#
+
+(mu:intern common "min"
+   (core:compile
+    '(%lambda (&rest reals)
+      (:if reals       
+       (core:%foldl
+        (:lambda (el acc)
+          (:if (core:numberp el)
+               (:if (mu:less-than el acc)
+                    el
+                    acc)
+               (core:raise () 'common:min "invalid argument")))
+        (mu:car reals)
+        (mu:cdr reals))
+       (core:raise () 'common:min "invalid argument")))))
+
+(mu:intern common "max"
+   (core:compile
+    '(%lambda (&rest reals)
+      (:if reals       
+       (core:%foldl
+        (:lambda (el acc)
+          (:if (core:numberp el)
+               (:if (mu:less-than acc el)
+                    el
+                    acc)
+               (core:raise () 'common:max "invalid argument")))
+        (mu:car reals)
+        (mu:cdr reals))
+       (core:raise () 'common:max "invalid argument")))))
+
 ;;; round to negative infinity
 (mu:intern common "truncate"
    (:lambda (n m)

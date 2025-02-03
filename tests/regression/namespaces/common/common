@@ -7,6 +7,7 @@
 (mu:type-of format)	:struct
 (mu:type-of funcall)	:struct
 (mu:type-of not)	:func
+(mu:type-of (core:macro-function 'defconstant ()))	:struct
 (mu:type-of (core:macro-function 'defmacro ()))	:struct
 (mu:type-of (core:macro-function 'defun ()))	:struct
 (mu:type-of (core:macro-function 'prog1 ()))	:struct

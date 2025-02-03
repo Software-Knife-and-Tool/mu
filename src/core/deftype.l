@@ -79,6 +79,8 @@
 ;;;
 ;;; types
 ;;;
+(mu:intern core "%quote%" (mu:open :string :bidir "" :t))
+
 (mu:intern core "type-of"
    (:lambda (value)
       ((:lambda (type)
@@ -88,5 +90,12 @@
                     (mu:struct-type value))
                (:if (core:stringp value)
                     'string
-                    (mu:intern mu:%null-ns% (mu:symbol-name type) ()))))
+                    ((:lambda (symbol)
+                       (:if symbol
+                            symbol
+                            ((:lambda ()
+                               (mu:write #\~ () core:%quote%)
+                               (mu:write (mu:symbol-name type) () core:%quote%)
+                               (mu:read core:%quote% :t ())))))
+                     (mu:find mu:%null-ns% (mu:symbol-name type))))))
        (mu:type-of value))))
