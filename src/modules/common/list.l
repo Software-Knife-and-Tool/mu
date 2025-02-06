@@ -4,122 +4,18 @@
 ;;;
 ;;; lists
 ;;;
-
-;;;
-;;; maps
-;;;
-(mu:intern common "%nths"
-   (:lambda (nth lists)
-     (core:%foldl
-      (:lambda (el acc)
-        (core:%append `(,acc ,(mu:cons (mu:nth nth el) ()))))
-      ()
-      lists)))
-
-(mu:intern common "%nthcdrs"
-   (:lambda (nth lists)
-     (core:%foldl
-      (:lambda (el acc)
-        (core:%append `(,acc ,(mu:cons (mu:nthcdr nth el) ()))))
-      ()
-      lists)))
-
-(mu:intern common "mapc"
-   (core:compile
-    '(%lambda (function &rest lists)
-      (:if lists
-       ((:lambda (min-length)
-          (mu:fix
-           (:lambda (nth)
-             (:if (mu:less-than nth min-length)
-                  ((:lambda ()
-                   (core:apply function (common:%nths nth lists))
-                   (mu:add 1 nth)))
-                  nth))
-           0)
-          (mu:car lists))
-        (core:apply common:min (core:%mapcar (:lambda (list) (mu:length list)) lists)))
-       (core:raise () 'common:mapc "invalid argument")))))
-
-(mu:intern common "mapcar"
-   (core:compile
-    '(%lambda (function &rest lists)
-      (:if lists
-       ((:lambda (min-length lists function)
-          (mu:cdr (mu:nthcdr 2
-                   (mu:fix
-                    (:lambda (loop)
-                      ((:lambda (nth args)
-                         (:if (mu:less-than nth min-length)
-                              (mu:cons (mu:add 1 nth)
-                                       (core:%append `(,args ,(mu:cons (core:apply function (common:%nths nth lists)) ()))))
-                              loop))
-                       (mu:car loop)
-                       (mu:cdr loop)))
-                    `(0 .())))))
-        (core:apply common:min (core:%mapcar (:lambda (list) (mu:length list)) lists))
-        lists
-        function)
-       (core:raise () 'common:mapcar "invalid argument")))))
-
-(mu:intern common "mapl"
-   (core:compile
-    '(%lambda (function &rest lists)
-      (:if lists
-       ((:lambda (min-length)
-          (mu:fix
-           (:lambda (nth)
-             (:if (mu:less-than nth min-length)
-                  ((:lambda ()
-                   (core:apply function (common:%nthcdrs nth lists))
-                   (mu:add 1 nth)))
-                  nth))
-           0)
-          (mu:car lists))
-        (core:apply common:min (core:%mapcar (:lambda (list) (mu:length list)) lists)))
-       (core:raise () 'common:mapc "invalid argument")))))
-
-(mu:intern common "maplist"
-   (core:compile
-    '(%lambda (function &rest lists)
-      (:if lists
-       ((:lambda (min-length lists function)
-          (mu:cdr (mu:nthcdr 2
-                   (mu:fix
-                    (:lambda (loop)
-                      ((:lambda (nth args)
-                         (:if (mu:less-than nth min-length)
-                              (mu:cons (mu:add 1 nth)
-                                       (core:%append `(,args ,(mu:cons (core:apply function (common:%nthcdrs nth lists)) ()))))
-                              loop))
-                       (mu:car loop)
-                       (mu:cdr loop)))
-                    `(0 .())))))
-        (core:apply common:min (core:%mapcar (:lambda (list) (mu:length list)) lists))
-        lists
-        function)
-       (core:raise () 'common:mapcar "invalid argument")))))
-
-(mu:intern common "last"
+(mu:intern common "%last"
    (:lambda (list)
-      (:if (core:listp list)
-           (mu:fix
-            (:lambda (loop)
-               (:if (core:null list)
-                    loop
-                    ((:lambda (cdr)
-                        (:if (core:consp cdr)
-                             cdr
-                             loop))
-                     (mu:cdr loop))))
-            list)
-           (core:raise list 'common:last "not a list"))))
-
-(mu:intern common "copy-list"
-   (:lambda (list)
-     (:if (core:listp list)
-          (core:%mapcar core:identity list)             
-          (core:raise list 'common:copy-list "not a list"))))
+     (mu:fix
+      (:lambda (loop)
+        (:if (core:null list)
+             loop
+             ((:lambda (cdr)
+                (:if (core:consp cdr)
+                     cdr
+                     loop))
+              (mu:cdr loop))))
+      list)))
 
 ;;;
 ;;; cxxxxr

@@ -62,14 +62,6 @@
 ;;;
 ;;; eval
 ;;;
-#|
-(mu:intern core "eval"
-   (:lambda (form)
-     (:if (core:%and (core:consp form) (core:%closurep (mu:car form)))
-          (core:apply (core:compile (mu:car form)) (mu:cdr form))
-          (mu:eval form))))
-|#
-
 (mu:intern core "eval"
    (:lambda (form-str)
      (mu:eval
