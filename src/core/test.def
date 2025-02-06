@@ -14,7 +14,7 @@
                 "compile.l"
                 "string.l"
                 "format.l"
-                "funcall.l"
+                "apply.l"
                 "load.l"
                 "list.l"
                 "map.l"

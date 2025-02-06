@@ -1,0 +1,4 @@
+(common:%mapc mu:cons '(a b c) '(1 2 3))	(a b c)
+(common:%mapcar mu:cons '(a b c) '(1 2 4))	((a . 1) (b . 2) (c . 4))
+(common:%mapl mu:cons '(1 2 3 4) '(1 2))	(1 2 3 4)
+(common:%maplist mu:cons '(1 2 3 4) '(1 2))	(((1 2 3 4) 1 2) ((2 3 4) 2))

@@ -17,6 +17,7 @@
 	        "string.l"
 	        "fixnum.l"
 	        "list.l"
+                "map.l"
                 "package.l"
                 "print.l"
 	        "sequence.l"
