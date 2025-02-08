@@ -37,12 +37,18 @@ def report(info_list):
         b = ' '
         if bytes != then_bytes:
             nsize += 1
-            b = '*'
+            if bytes < then_bytes:
+                b = '-'
+            else:
+                b = '+'
 
         t = ' '
         if time_ratio > 1 + .15 or time_ratio < 1 - .15:
             ntimes += 1
-            t = "*"
+            if time < then_time:
+                t = '-'
+            else:
+                t = '+'
 
         if test_in == test_name:
             nth_test += 1
@@ -50,11 +56,10 @@ def report(info_list):
             nth_test = 1
             test_in = test_name
 
-        if b == '*' or t == '*':
+        if b != ' ' or t != ' ':
             time_diff = time - then_time 
             delta_bytes += bytes - then_bytes
             delta_times += time_diff
-
             print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes - then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time_diff:.2f}, {time_ratio:.2f})')
 
 print(f'Performance Report {date:<10}')

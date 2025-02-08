@@ -13,14 +13,14 @@
 ;;;  (:require . :listp)      closure required arg symbols
 ;;;  (:rest    . :symbolp)    closure rest arg symbol
 ;;;  (:env     . :listp)      closure captured environment
-;;;  (:form    . :listp)      frame lambda
+;;;  (:mu      . :func)       closure implementation function
 ;;;  (:arity   . :fixnum)     frame lambda number of required args
 ;;;
 (core:def-type "%closure"
     '((:require . :listp)
       (:rest    . :symbolp)
       (:arity   . :fixnum)
-      (:form    . :listp)
+      (:mu      . :func)
       (:env     . :listp)))
 
 (mu:intern core "%closure-prop"
@@ -32,7 +32,7 @@
      (core:%make-core-type "%closure"
        `(,(mu:cons :require   requires)
           ,(mu:cons :rest     rest-sym)
-          ,(mu:cons :form     form)
+          ,(mu:cons :mu       (mu:compile form))
           ,(mu:cons :arity    (mu:sub (mu:length requires) (:if rest-sym 1 0)))
           ,(mu:cons :env      env)))))
 

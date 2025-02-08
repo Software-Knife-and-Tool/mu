@@ -96,7 +96,7 @@
                        (:if (core:%closurep function)
                             `(,core:%apply
                               ,function
-                              ,(core:%closure-prop :form function)
+                              ,(core:%closure-prop :mu function)
                               ,(core:%compile-lambda-arg-list function arg-list env))
                             `(,mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                   `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
@@ -108,7 +108,7 @@
                        (:if (core:%closurep function)
                             `(,core:%apply
                               ,function
-                              ,(core:%closure-prop :form function)
+                              ,(core:%closure-prop :mu function)
                               ,(core:%compile-lambda-arg-list function arg-list env))
                             `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                        (core:raise function 'core:%compile-funcall "not a function designator")))
@@ -118,19 +118,19 @@
 ;;;
 ;;; apply 
 ;;;
-(mu:intern core "%apply"
-   (:lambda (closure frame arg-list-form)
-     ((:lambda (env)
-        (mu:apply frame arg-list-form))
-     (core:%closure-prop :env closure))))
-
 (mu:intern core "apply"
    (:lambda (function arg-list)
      (:if (core:functionp function)
           (:if (core:%closurep function)
                (core:%apply
                 function
-                (core:compile (core:%closure-prop :form function))
+                (core:%closure-prop :mu function)
                 (mu:eval (core:%compile-lambda-arg-list function arg-list ())))
                (mu:apply function arg-list))
           (core:raise function 'core:apply "not a function designator"))))
+
+(mu:intern core "%apply"
+   (:lambda (closure frame arg-list-form)
+     ((:lambda (env)
+        (mu:apply frame arg-list-form))
+      (core:%closure-prop :env closure))))

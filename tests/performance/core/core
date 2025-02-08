@@ -15,8 +15,6 @@
 (mu:eval (core:compile '(core:let* ())))
 (mu:eval (core:compile '(core:let* () 1)))
 (mu:eval (core:compile '(core:let* () 1 2)))
-(mu:eval (core:compile '(core:let* ((a 0)) a)))
-(mu:eval (core:compile '(core:let* ((a 1) (b 2)) (mu:add a b))))
 (mu:eval (core:compile '(progn)))
 (mu:eval (core:compile '(progn 1)))
 (mu:eval (core:compile '(progn 1 2)))

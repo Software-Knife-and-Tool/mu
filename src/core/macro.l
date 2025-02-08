@@ -30,7 +30,7 @@
                      (:if macro-function
                           (:if (core:%closurep macro-function)
                                (mu:apply
-                                (mu:compile (core:%compile (core:%closure-prop :form macro-function) env))
+                                (core:%closure-prop :mu macro-function)
                                 (mu:eval (core:%compile-quoted-lambda-arg-list macro-function arg-list env)))
                                (mu:apply macro-function arg-list))
                           form))
