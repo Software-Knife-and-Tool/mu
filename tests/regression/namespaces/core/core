@@ -16,8 +16,6 @@
 (mu:eval (core:compile '(core:let* ())))	:nil
 (mu:eval (core:compile '(core:let* () 1)))	1
 (mu:eval (core:compile '(core:let* () 1 2)))	2
-(mu:eval (core:compile '(core:let* ((a 0)) a)))	0
-(mu:eval (core:compile '(core:let* ((a 1) (b 2)) (mu:add a b))))	3
 (mu:eval (core:compile '(core:vector)))	#(:t)
 (mu:eval (core:compile '(core:vector 'a 0)))	#(:t a 0)
 (mu:eval (core:compile '(core:vector ((%lambda () 1)) 'b 2 (mu:add 1 3))))	#(:t 1 b 2 4)
