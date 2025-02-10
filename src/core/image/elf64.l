@@ -129,7 +129,7 @@
   (errorp-unless stringp path "elf64-dump: not a pathname")
   (with-open-file elf64 path :input
      (let ((magic (read-byte elf64 () ())))
-       (if (or (null magic) (eofp elf64) (not (eq #x7f magic)))
+       (%if (or (null magic) (eofp elf64) (not (eq #x7f magic)))
            (core:%format t "~A: not a elf64 file, magic #x~X~%" path magic)            
            (progn
              (core:%format t "~A: elf64 file (magic #x~X ~A~A~A)~%" path magic

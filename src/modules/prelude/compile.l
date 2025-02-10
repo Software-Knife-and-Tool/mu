@@ -4,7 +4,7 @@
 (defun compile-form (form)
   (format t "compile-file: ~A~%" form)
   (flet ((parse (form)
-                (if (consp form)
+                (%if (consp form)
                     (mapcar core:compile-form form)
                     form))
          (const (form)

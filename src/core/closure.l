@@ -62,9 +62,7 @@
              ((:lambda (body)
                 (:if (core:%or (core:fixnump desc) (core:null body))
                      (core:%make-closure lambda () `(:lambda ,lambda ,@body) ())
-                     ((:lambda ()
-                        ;;; (core:warn `(:lambda ,(mu:car desc) ,@(mu:cdr desc)) "compile-closure")
-                        (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) ())))))
+                     (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) ())))
               (core:%mapcar (:lambda (form) (core:%compile form env)) body)))
            (core:%foldl
             (:lambda (el acc)

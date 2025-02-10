@@ -62,10 +62,15 @@
 ;;;
 ;;; core compiler
 ;;;
+(mu:intern core "%resolve-symbol"
+   (:lambda (symbol env)
+;;;     (core:warn `(,symbol ,env) "compiling symbol")
+     symbol))
+
 (mu:intern core "%compile"
    (:lambda (form env)
      (:if (core:symbolp form)
-          form
+          (core:%resolve-symbol form env)
           (:if (core:consp form)
                ((:lambda (function-form arg-list)
                   (:if (core:keywordp function-form)
@@ -83,9 +88,9 @@
                               (core:%assq
                                function-form
                                '((%defmacro . core:%special-macro)
-                                 (if        . core:%special-if)
+                                 (%if       . core:%special-if)
                                  (%quasi%   . core:%special-quasi)
-                                 (%lambda    . core:%special-lambda)))))
+                                 (%lambda   . core:%special-lambda)))))
                             (:if (core:consp function-form)
                                  (core:%compile-funcall function-form arg-list env)
                                  (core:raise form 'core:%compile "malformed lambda expression")))))

@@ -33,7 +33,7 @@
               (errorp-unless fixnump n "")
               (errorp-unless streamp stream "")
               (flet ((loop (loop n)
-                      (if (zerop n)
+                      (%if (zerop n)
                           ()
                           ((lambda ()
                              (write " " stream ())
@@ -46,7 +46,7 @@
                 (cond
                   ((symbolp (car form))
                    (let ((indent-desc (cdr (assoc (car form) pprint-indents))))
-                     (if indent-desc
+                     (%if indent-desc
                          (cond
                            ((eq (nth 0 indent-desc) 1) 
                             (format stream "(~A ~A~%" (nth 0 form) (nth 1 form))
