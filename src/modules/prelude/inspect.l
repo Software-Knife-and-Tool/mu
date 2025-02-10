@@ -102,10 +102,10 @@
       (lambda (loop stack)
         (format t "inspect> ")
         (let ((cmd (read ifs t)))
-          (if (eofp ifs)
+          (%if (eofp ifs)
               ()
               (progn
-                (if (keywordp cmd)
+                (%if (keywordp cmd)
                     (cond
                       ((eq cmd :h) (format t "inspector:~%")
                                    (format t "  :v - view~%")

@@ -23,11 +23,11 @@
      value)))
 
 (defmacro dolist (init-list &rest body)
-  (if (core:consp init-list)
+  (%if (core:consp init-list)
       (let ((init (mu:nth 1 init-list))
             (sym (mu:car init-list)))
-        (if (core:symbolp sym)
-            (if (core:listp init)
+        (%if (core:symbolp sym)
+            (%if (core:listp init)
                 (core:list
                  (core:list 'lambda ()
                             (core:list
@@ -117,9 +117,9 @@
   (let ((self-gensym (gensym))
         (exit-gensym (gensym))
         (return-gensym (gensym))
-        (var-list (mapcar (lambda (phrase) (if (symbolp phrase) phrase (nth 0 phrase))) bind-form))
-        (init-list (mapcar (lambda (phrase) (if (symbolp phrase) () (nth 1 phrase))) bind-form))
-        (step-list (mapcar (lambda (phrase) (if (symbolp phrase) () (nth 2 phrase))) bind-form)))
+        (var-list (mapcar (lambda (phrase) (%if (symbolp phrase) phrase (nth 0 phrase))) bind-form))
+        (init-list (mapcar (lambda (phrase) (%if (symbolp phrase) () (nth 1 phrase))) bind-form))
+        (step-list (mapcar (lambda (phrase) (%if (symbolp phrase) () (nth 2 phrase))) bind-form)))
     (list 'fix*
           (list 'lambda (list* self-gensym exit-gensym return-gensym var-list)
                 (list 'if (nth 0 end-form)
@@ -208,11 +208,11 @@
 (defmacro letf* (binds &rest body)
   (errorp-unless listp binds "letf*: not a list")
   ((lambda (fn)
-     (if binds
+     (%if binds
        (fn fn binds)
        (list* 'progn body)))
    (lambda (fn binds)
-     (if (cdr binds)
+     (%if (cdr binds)
          (list 'letf (list (car binds)) (core::funcall fn (list fn (cdr binds))))
          (list* 'letf (list (car binds)) body)))))
 
@@ -229,11 +229,11 @@
 (defmacro flet* (binds &rest body)
   (errorp-unless listp binds "flet*: not a list")
   ((lambda (fn)
-     (if binds
+     (%if binds
        (fn fn binds)
        (list* 'progn body)))
    (lambda (fn binds)
-     (if (cdr binds)
+     (%if (cdr binds)
          (list 'flet (list (car binds)) (core::funcall fn (list fn (cdr binds))))
          (list* 'flet (list (car binds)) body)))))
 

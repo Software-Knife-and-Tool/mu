@@ -163,7 +163,7 @@
            (format t "is a keyword: ~A~%" (keywordp symbol))
            (format t "        name: ~A~%" (symbol-name symbol))
            (format t "          ns: ~A~%" (symbol-ns symbol))
-           (if (boundp symbol)
+           (%if (boundp symbol)
                (format t "  value: ~A~%" (symbol-value symbol))
                (format t "  value: is unbound~%"))
            symbol)

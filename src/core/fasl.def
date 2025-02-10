@@ -6,7 +6,7 @@
 ;;;
 (fasl:provide
  "core"
- '((:version . "0.0.7")
+ '((:version . "0.0.9")
    (:ns      . "core")
    (:lang    . :mu)
    (:load    . (

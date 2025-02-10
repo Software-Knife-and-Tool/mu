@@ -73,11 +73,11 @@
 
 (core:compile
  '(%defmacro when (test &rest body)
-   `(if ,test (progn ,@body))))
+   `(%if ,test (progn ,@body))))
 
 (core:compile
  '(%defmacro unless (test &rest body)
-   `(if (core:null ,test) (progn ,@body))))
+   `(%if (core:null ,test) (progn ,@body))))
 
 (core:compile
  '(%defmacro let (binds &rest body)
@@ -95,7 +95,7 @@
    (core:%foldr
     (:lambda (clause cond-form)
       ((:lambda (test body)
-         `(if ,test (progn ,@body) ,cond-form))
+         `(%if ,test (progn ,@body) ,cond-form))
        (mu:car clause)
        (mu:cdr clause)))
       ()
@@ -108,8 +108,8 @@
      (mu:car terms)
      (core:%foldl
       (:lambda (term acc)
-        `(if ,acc ,term))
-      `(if ,(mu:nth 0 terms) ,(mu:nth 1 terms))
+        `(%if ,acc ,term))
+      `(%if ,(mu:nth 0 terms) ,(mu:nth 1 terms))
       (mu:nthcdr 2 terms)))
     :t)))
 

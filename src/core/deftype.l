@@ -94,7 +94,6 @@
                        (:if symbol
                             symbol
                             ((:lambda ()
-                               (mu:write #\~ () core:%quote%)
                                (mu:write (mu:symbol-name type) () core:%quote%)
                                (mu:read core:%quote% :t ())))))
                      (mu:find mu:%null-ns% (mu:symbol-name type))))))
