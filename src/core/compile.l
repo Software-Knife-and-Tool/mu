@@ -62,15 +62,47 @@
 ;;;
 ;;; core compiler
 ;;;
-(mu:intern core "%resolve-symbol"
-   (:lambda (symbol env)
-;;;     (core:warn `(,symbol ,env) "compiling symbol")
-     symbol))
+(mu:intern core "%frame-map" (mu:open :string :bidir "" :t))
+
+(mu:intern core "%add-frame"
+   (:lambda (name func)
+     (mu:write #\space () core:%frame-map)
+     (mu:write (mu:cons name (mu:repr :vector func)) () core:%frame-map)))
+
+(mu:intern core "%frame-ref"
+   (:lambda (binding index offset)
+     ((:lambda (name)
+        ((:lambda (frames)
+           (mu:%frame-ref frames offset))
+         (mu:symbol-value (mu:intern core:%closure-ns% name ()))))
+        (mu:symbol-name (core:%env-prop :name binding)))))
+
+(mu:intern core "%resolve-lexical"
+   (:lambda (symbol env)          
+     (:if (mu:eq mu:%null-ns% (mu:symbol-namespace symbol))
+          ((:lambda (binding)
+             (:if (core:null binding)
+                  symbol
+                  ((:lambda (tag index)
+                     `(core:%frame-ref ,binding ,tag ,index))
+                   (core:%env-prop :frame binding)
+                   (core:%positionl-if
+                    (:lambda (sym)
+                      (mu:eq sym symbol))
+                    (core:%env-prop :symbols binding)))))
+           (core:%findl-if
+            (:lambda (binding)
+              (core:%findl-if
+               (:lambda (sym)
+                 (mu:eq sym symbol))
+               (core:%env-prop :symbols binding)))
+            env))
+          symbol)))
 
 (mu:intern core "%compile"
    (:lambda (form env)
-     (:if (core:symbolp form)
-          (core:%resolve-symbol form env)
+     (:if (mu:eq :symbol (mu:type-of form))
+          (core:%resolve-lexical form env)
           (:if (core:consp form)
                ((:lambda (function-form arg-list)
                   (:if (core:keywordp function-form)
@@ -100,6 +132,19 @@
 
 (mu:intern core "compile"
    (:lambda (form)
+     (mu:write #\( () core:%frame-map)
      ((:lambda (mu-form)
         (mu:compile mu-form))
-      (core:%compile form ()))))
+      ((:lambda (form)
+         (mu:write #\) () core:%frame-map)
+         ((:lambda (frame-map)
+            (core:%mapc
+             (:lambda (frame-ref)
+               (mu:intern
+                core:%closure-ns%
+                (mu:symbol-name (mu:car frame-ref))
+                (mu:repr :t (mu:cdr frame-ref))))
+             frame-map)
+            form)
+          (mu:read core:%frame-map () ())))
+       (core:%compile form ())))))

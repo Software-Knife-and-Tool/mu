@@ -36,15 +36,47 @@
           ,(mu:cons :arity    (mu:sub (mu:length requires) (:if rest-sym 1 0)))
           ,(mu:cons :env      env)))))
 
-;;;
-;;; predicates
-;;;
 (mu:intern core "%closurep"
    (:lambda (function)
      (:if (core:%core-type-p function)
           (mu:eq '%closure (core:type-of function))
           ())))
 
+
+;;;
+;;; env deftype
+;;;
+
+;;;
+;;;  (:frame   . :fixnum)     frame function id
+;;;  (:symbols . :listp)      lexical symbols
+;;;  (:name    . :symbol)     closure symbol
+;;;
+(core:def-type "%env"
+    '((:frame   . :fixnum)
+      (:symbols . :listp)
+      (:name    . :symbol)))
+
+(mu:intern core "%env-prop"
+   (:lambda (prop env)
+     (mu:cdr (core:%type-ref prop env))))
+
+(mu:intern core "%make-env"
+   (:lambda (frame symbols name)
+     (core:%make-core-type "%closure"
+       `(,(mu:cons :frame     frame)
+          ,(mu:cons :symbols  symbols)
+          ,(mu:cons :name     name)))))
+
+(mu:intern core "%envp"
+   (:lambda (function)
+     (:if (core:%core-type-p function)
+          (mu:eq '%env (core:type-of function))
+          ())))
+
+;;;
+;;; predicates
+;;;
 (mu:intern core "functionp"
    (:lambda (function)
      (:if (mu:eq :func (mu:type-of function))
@@ -59,11 +91,21 @@
      (:if (core:%findl-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
           (core:raise lambda 'core:%compile-closure "malformed lambda expression")
           ((:lambda (desc)
-             ((:lambda (body)
-                (:if (core:%or (core:fixnump desc) (core:null body))
-                     (core:%make-closure lambda () `(:lambda ,lambda ,@body) ())
-                     (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) ())))
-              (core:%mapcar (:lambda (form) (core:%compile form env)) body)))
+             ((:lambda (env)
+                ((:lambda (body)
+                   ((:lambda (closure)
+                      (core:%add-frame (core:%env-prop :name (mu:car env)) (core:%closure-prop :mu closure))
+                      closure)
+                    (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) ())))                   
+                 (core:%mapcar
+                  (:lambda (form)
+                    (core:%compile form env))
+                  body)))
+              (mu:cons (core:%make-env (mu:length env) (mu:car desc) (core:gensym)) env)))
+          ((:lambda (desc)
+             (:if (core:%or (core:fixnump desc) (core:null body))
+                  (core:%list lambda)
+                  desc))
            (core:%foldl
             (:lambda (el acc)
               (:if (core:numberp acc)
@@ -76,7 +118,7 @@
                         (mu:add 1 acc))
                    acc))
             0
-            lambda)))))
+            lambda))))))
 
 #|
 ;;;
