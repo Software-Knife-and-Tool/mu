@@ -3,3 +3,4 @@
 (core:compile '(%lambda (&rest c)))
 (core:compile '(%lambda (a b) (mu:add a b)))
 (core:compile '(%lambda (a b &rest c) (mu:add a b) c))
+(mu:eval (core:compile '((%lambda (a) (%if a a)) 1)))

@@ -9,6 +9,7 @@
 (mu:intern core "%modules-ns%" (mu:make-namespace "%modules%"))
 (mu:intern core "%symbol-macro-ns%" (mu:make-namespace "%symbol-macros%"))
 (mu:intern core "%types-ns%" (mu:make-namespace "%core-types%"))
+(mu:intern core "%closure-ns%" (mu:make-namespace "%closure-ns%"))
 
 ;;;
 ;;; predicates

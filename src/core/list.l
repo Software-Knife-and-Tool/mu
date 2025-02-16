@@ -42,7 +42,7 @@
                                 (mu:cons loop  ())
                                 (mu:add loop 1)))))
                0)))
-           (mu:length list))
+           (mu:sub (mu:length list) 1))
           ())))
    
 ;;;

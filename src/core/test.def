@@ -11,6 +11,7 @@
    (:lang    . :mu)
    (:load    . (
                 "core.l"
+                "deftype.l"
                 "compile.l"
                 "string.l"
                 "format.l"
@@ -26,7 +27,6 @@
                 "read-macro.l"
                 "symbol.l"
                 "symbol-macro.l"
-                "deftype.l"
                 "typespec.l"
                 "exception.l"
                 "macro.l"
