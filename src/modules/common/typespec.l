@@ -4,7 +4,7 @@
 ;;;
 ;;; typep
 ;;;
-(mu:intern core "%typespec-map%"
+(mu:intern common "%typespec-map%"
    `((asyncid :asyncid)
      (bit-vector (satisfies core:bit-vector-p))
      (char (satisfies core:charp))
@@ -18,7 +18,7 @@
      (struct (satisifes core:structp))
      (symbol (or (satisfies core:symbolp) (satisfies core:keywordp)))))
 
-(mu:intern core "%compound-typespec-map%"
+(mu:intern common "%compound-typespec-map%"
    `(,(mu:cons 'satisfies
          (:lambda (value spec-list)
             (:if (mu:eq 1 (mu:length spec-list))
@@ -26,20 +26,20 @@
                     (:if (core:symbolp predicate-symbol)
                          (:if (mu:boundp predicate-symbol)
                               (core:apply (mu:symbol-value predicate-symbol) (mu:cons value ()))
-                              (core:raise predicate 'core:typep "satisfies typespec symbol"))
-                         (core:raise predicate 'core:typep "satisfies typespec symbol")))
+                              (core:raise predicate 'common:typep "satisfies typespec symbol"))
+                         (core:raise predicate 'common:typep "satisfies typespec symbol")))
                   (mu:car spec-list))
-                 (core:raise spec-list 'core:typep "satisfies typespec format"))))
+                 (core:raise spec-list 'common:typep "satisfies typespec format"))))
      ,(mu:cons 'not (:lambda (value spec-list)
                        (:if (mu:eq 1 (mu:length spec-list))
-                            (core:%not (core:typep value (mu:car spec-list)))
-                            (core:raise spec-list 'core:typep "missing typespec format"))))
+                            (core:%not (common:typep value (mu:car spec-list)))
+                            (core:raise spec-list 'common:typep "missing typespec format"))))
      ,(mu:cons 'and (:lambda (value spec-list)
                        (:if (core:null spec-list)
                             :t
                             (core:%foldl
                              (:lambda (elt acc)
-                                (core:%and acc (core:typep value elt)))
+                                (core:%and acc (common:typep value elt)))
                              :t
                              spec-list))))
      ,(mu:cons 'or (:lambda (value spec-list)
@@ -47,11 +47,11 @@
                           ()
                           (core:%foldl
                            (:lambda (elt acc)
-                             (core:%or acc (core:typep value elt)))
+                             (core:%or acc (common:typep value elt)))
                            :t
                            spec-list))))))
 
-(mu:intern core "typep"
+(mu:intern common "typep"
    (:lambda (value typespec)
      (:if (core:keywordp typespec)
           (mu:eq typespec (mu:type-of value))
@@ -60,16 +60,16 @@
                (:if (core:symbolp typespec)
                     ((:lambda (spec-phrase)
                        (:if (core:null spec-phrase)
-                            (core:raise typespec 'core:typep "typespec format")
-                            (core:typep value (mu:car (mu:cdr spec-phrase)))))
-                     (core:%assq typespec core:%typespec-map%))
+                            (core:raise typespec 'common:typep "typespec format")
+                            (common:typep value (mu:car (mu:cdr spec-phrase)))))
+                     (core:%assq typespec common:%typespec-map%))
                     (:if (core:consp typespec)
                          ((:lambda (spec spec-list)
                             ((:lambda (spec-phrase)
                                (:if (core:null spec-phrase)
-                                    (core:raise typespec 'core:typep "typespec not found")
+                                    (core:raise typespec 'common:typep "typespec not found")
                                     (mu:apply (mu:cdr spec-phrase) (core:%list2 value spec-list))))
-                             (core:%assq spec core:%compound-typespec-map%)))
+                             (core:%assq spec common:%compound-typespec-map%)))
                           (mu:car typespec)
                           (mu:cdr typespec))
-                         (core:raise typespec 'core:typep "typespec format")))))))
+                         (core:raise typespec 'common:typep "typespec format")))))))

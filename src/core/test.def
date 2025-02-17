@@ -6,7 +6,7 @@
 ;;;
 (test:provide
  "core"
- '((:version . "0.0.9")
+ '((:version . "0.0.10")
    (:ns      . "core")
    (:lang    . :mu)
    (:load    . (
@@ -27,7 +27,6 @@
                 "read-macro.l"
                 "symbol.l"
                 "symbol-macro.l"
-                "typespec.l"
                 "exception.l"
                 "macro.l"
                 "closure.l"
