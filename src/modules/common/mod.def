@@ -24,4 +24,5 @@
 	        "stream.l"
 	        "symbol.l"
                 "time.l"
-                ))))            
+                "typespec.l"
+               ))))

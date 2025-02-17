@@ -66,7 +66,7 @@
 
 (mu:intern core "vector-slice"
    (:lambda (vector start length)
-     (:if (core:typep vector :vector)
+     (:if (core:vectorp vector)
           (:if (core:fixnump start)
                (:if (core:%or (core:minusp start) (mu:less-than (core:vector-length vector) start))
                     (core:raise start 'core:vector-slice "illegal start")
@@ -83,7 +83,7 @@
      (:if (core:vectorp vector)
           (:if (core:bit-vector-p vector)
                (mu:car (core:%vector-prop :bitvec vector))
-               (:if (core:typep vector :vector)
+               (:if (mu:eq :vector (mu:type-of vector))
                     (mu:vector-length vector)
                     (mu:cdr (core:%vector-prop :disp vector))))
           (core:raise vector 'core:vector-length "not a vector"))))
@@ -93,7 +93,7 @@
      (:if (core:vectorp vector)
           (:if (core:bit-vector-p vector)
                'bit
-               (:if (core:typep vector :vector)
+               (:if (mu:eq :vector (mu:type-of vector))
                     (mu:vector-type vector)
                     (mu:vector-type (core:%vector-prop :base vector))))
           (core:raise vector 'core:vector-type "not a vector"))))
@@ -113,7 +113,7 @@
                                (core:vector-ref (core:%vector-prop :base vector) nth-byte)))
                           (mu:div nth 8)
                           (mu:sub nth (mu:mul 8 (mu:div nth 8))))
-                         (:if (core:typep vector :vector)
+                         (:if (mu:eq :vector (mu:type-of vector))
                               (mu:svref vector nth)
                               ((:lambda (base start)
                                  (mu:svref base (mu:add start nth)))
@@ -127,7 +127,7 @@
 ;;;
 (mu:intern core "%vector-write"
    (:lambda (vector escape stream)
-       (:if (core:typep vector :vector)
+       (:if (core:vectorp vector)
            (mu:write vector escape stream)
            ((:lambda (length)
                (core:%format stream "#(" ())
