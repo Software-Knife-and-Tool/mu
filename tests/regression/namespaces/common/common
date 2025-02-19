@@ -12,3 +12,11 @@
 (mu:type-of (core:macro-function 'defun ()))	:struct
 (mu:type-of (core:macro-function 'prog1 ()))	:struct
 (mu:type-of (core:macro-function 'prog2 ()))	:struct
+(if t t)	:t
+(if () t)	:nil
+(if 1 t)	:t
+(if (mu:eq 1 1) t)	:t
+(if (mu:eq (mu:add 1 1) 2) 2)	2
+(if (mu:eq (mu:add 1 1) 2) 5)	5
+(if (mu:eq (mu:add 1 1) 2) (mu:add 1 2) 5)	3
+(if (mu:eq (mu:add 1 2) 2) (mu:add 1 2) 5)	5

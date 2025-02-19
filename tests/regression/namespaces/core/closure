@@ -1,2 +1,3 @@
 (mu:type-of core:apply)	:func
 (mu:eval (core:compile '((%lambda (a) (%if a a)) 1)))	1
+(mu:eval (core:compile '((%lambda (a) (%if a ((%lambda (b) (mu:add a b)) 5))) 1)))	6

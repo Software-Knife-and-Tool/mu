@@ -9,21 +9,6 @@
      obj))
 
 ;;;
-;;; char functions
-;;;
-(mu:intern core "char-int"
-   (:lambda (char)
-     (:if (core:charp char)
-          (mu:svref (mu:repr :vector char) 1)
-          (core:raise char 'core:char-int "is not a char"))))
-
-(mu:intern core "int-char"
-   (:lambda (int)
-     (:if (core:fixnump int)
-          (mu:repr :t (mu:make-vector :byte `(32 ,int 0 0 0 0 0 0)))
-          (core:raise char 'core:int-char "is not a fixnum"))))
-
-;;;
 ;;; rest functions
 ;;;
 (mu:intern core "append"
