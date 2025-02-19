@@ -12,7 +12,7 @@ ntests = sys.argv[3]
 
 mu_sys = '../../dist/mu-sys'
 
-with open(os.path.join(ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
+with open(os.path.join('namespaces', ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
 
 def storage(ns, group, line, test):
     if ns == 'mu':
@@ -36,7 +36,16 @@ def storage(ns, group, line, test):
                                  '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
-    
+
+    if ns == 'common':
+        proc = subprocess.Popen([mu_sys,
+                                 '-l../../dist/core.fasl',
+                                 '-l./perf.l',
+                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-e (perf:storage-delta (:lambda () (core:eval "{}")'.format(test) + ') :nil)'],    \
+                                stdout=subprocess.PIPE,                 \
+                                stderr=subprocess.PIPE)
+
     storage_ = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf8')
 
@@ -69,6 +78,15 @@ def timing(ns, test):
                                  '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
+
+    if ns == 'common':
+        proc = subprocess.Popen([mu_sys,
+                                 '-l../../dist/core.fasl',
+                                 '-l./perf.l',
+                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-e (perf:time-delta (:lambda () (core:eval "{}")'.format(test) + ') :nil)'],    \
+                                stdout=subprocess.PIPE,                 \
+                                stderr=subprocess.PIPE)
     
     time = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf8')
@@ -79,7 +97,7 @@ def timing(ns, test):
 
 ns_results = []
 for group in perf_groups:
-    with open(os.path.join(ns_path, ns, group[:-1])) as f: group_source = f.readlines()
+    with open(os.path.join('namespaces', ns_path, ns, group[:-1])) as f: group_source = f.readlines()
 
     storage_ = None
     results = []

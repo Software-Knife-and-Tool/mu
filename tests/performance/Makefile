@@ -1,7 +1,7 @@
 #
 # perf makefile
 #
-.PHONY: help base clean commit mu current diff frequent summary metrics core
+.PHONY: help base clean commit mu current diff namespaces frequent summary metrics core
 
 NTESTS ?= 10
 TMPF:=$(shell mktemp)
@@ -10,6 +10,7 @@ BIN = ./scripts
 NAMESPACES=\
 	mu	 \
 	frequent \
+	common	 \
 	core
 
 help: deltemp
@@ -60,6 +61,9 @@ frequent: deltemp
 
 core: deltemp
 	@python3 $(BIN)/perf-ns.py core . $(NTESTS)
+
+common: deltemp
+	@python3 $(BIN)/perf-ns.py common . $(NTESTS)
 
 namespaces: deltemp
 	@echo $(NAMESPACES)

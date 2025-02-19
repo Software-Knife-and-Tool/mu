@@ -12,12 +12,28 @@
 ;;; exports
 ;;;
 (mu:intern mu:%null-ns% "append" core:append)
-(mu:intern mu:%null-ns% "list" core:list)
-(mu:intern mu:%null-ns% "list*" core:list*)
-(mu:intern mu:%null-ns% "vector" core:vector)
 (mu:intern mu:%null-ns% "format" core:format)
 (mu:intern mu:%null-ns% "funcall" core:funcall)
+(mu:intern mu:%null-ns% "identity" core:identity)
+(mu:intern mu:%null-ns% "list" core:list)
+(mu:intern mu:%null-ns% "list*" core:list*)
 (mu:intern mu:%null-ns% "not" core:null)
+(mu:intern mu:%null-ns% "vector" core:vector)
+
+;;;
+;;; char functions
+;;;
+(mu:intern mu:%null-ns% "char-int"
+   (:lambda (char)
+     (:if (core:charp char)
+          (mu:svref (mu:repr :vector char) 1)
+          (core:raise char 'core:char-int "is not a char"))))
+
+(mu:intern mu:%null-ns% "int-char"
+   (:lambda (int)
+     (:if (core:fixnump int)
+          (mu:repr :t (mu:make-vector :byte `(32 ,int 0 0 0 0 0 0)))
+          (core:raise char 'core:int-char "is not a fixnum"))))
 
 ;;;
 ;;; defun/defmacro
@@ -30,6 +46,16 @@
 
 (defmacro defconstant (name value)
   `(mu:intern mu:%null-ns% ,(mu:symbol-name name) ,value))
+
+;;;
+;;; if
+;;;
+(defmacro if (test t-arm &rest f-arm)
+  (:if (core:null f-arm)
+       `(%if ,test ,t-arm)
+       (:if (mu:eq 1 (mu:length f-arm))
+            `(%if ,test ,t-arm ,(mu:car f-arm))
+            (core:raise f-arm 'if "extra arguments"))))
 
 ;;;
 ;;; progs
@@ -45,3 +71,18 @@
      `(let ((,g (progn ,form-1 ,form-2)))
         ,@forms
         ,g)))
+
+;;;
+;;; block/return
+;;;
+(defmacro block (tag &rest body)
+  `(core:with-exception
+        (%lambda (exception)
+          (let ((condition (core:%exception-prop :return exception)))
+            (if (mu:eq ,tag condition)
+                (core:%exception-prop :value exception)
+                (core:warn exception 'block "not handling exception"))))
+        (%lambda () (progn ,body))))
+
+(defmacro return-from (tag value)
+  `(core:raise (:quote tag) 'return ""))

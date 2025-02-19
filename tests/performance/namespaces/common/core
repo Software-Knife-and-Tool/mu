@@ -1,0 +1,8 @@
+(if t t)
+(if () t)
+(if 1 t)
+(if (mu:eq 1 1) t)
+(if (mu:eq (mu:add 1 1) 2) 2)
+(if (mu:eq (mu:add 1 1) 2) 5)
+(if (mu:eq (mu:add 1 1) 2) (mu:add 1 2) 5)
+(if (mu:eq (mu:add 1 2) 2) (mu:add 1 2) 5)
