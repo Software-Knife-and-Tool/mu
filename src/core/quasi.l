@@ -4,7 +4,7 @@
 ;;;
 ;;; quasiquote
 ;;;
-(mu:intern mu:%null-ns% "%quasi%" ())
+(mu:intern mu:*mu/null* "%quasi%" ())
 
 (mu:intern core "%read-quasi"
    (:lambda (char stream)

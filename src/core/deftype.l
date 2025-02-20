@@ -86,7 +86,7 @@
       ((:lambda (type)
           (:if (mu:eq type :struct)
                (:if (mu:eq :<core> (mu:struct-type value))
-                    (mu:intern mu:%null-ns% (mu:svref (mu:struct-vec value) 0) ())
+                    (mu:intern mu:*mu/null* (mu:svref (mu:struct-vec value) 0) ())
                     (mu:struct-type value))
                (:if (core:stringp value)
                     'string
@@ -96,5 +96,5 @@
                             ((:lambda ()
                                (mu:write (mu:symbol-name type) () core:%quote%)
                                (mu:read core:%quote% :t ())))))
-                     (mu:find mu:%null-ns% (mu:symbol-name type))))))
+                     (mu:find mu:*mu/null* (mu:symbol-name type))))))
        (mu:type-of value))))
