@@ -42,7 +42,7 @@ def storage(ns, group, line, test):
                                  '-l../../dist/core.fasl',
                                  '-l./perf.l',
                                  '-q (core:%require "{}" "../../src/modules")'.format('common'),
-                                 '-e (perf:storage-delta (:lambda () (core:eval "{}")'.format(test) + ') :nil)'],    \
+                                 '-e (perf:storage-delta (:lambda () (core:eval "{}")'.format(test) + ') :nil)'],\
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
 
