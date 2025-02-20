@@ -1,4 +1,4 @@
-(mu:intern mu:%null-ns% "core-perf"
+(mu:intern mu:*mu/null* "core-perf"
    (:lambda ()
      (core:compile '(%lambda))
      (core:compile '(%lambda (a) a))

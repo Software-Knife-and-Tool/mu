@@ -4,32 +4,32 @@
 ;;;
 ;;; common namespace
 ;;;
-(mu:intern mu:%null-ns% "common" (mu:find-namespace "common"))
-(mu:intern mu:%null-ns% "t" :t)
-(mu:intern mu:%null-ns% "nil" ())
+(mu:intern mu:*mu/null* "common" (mu:find-namespace "common"))
+(mu:intern mu:*mu/null* "t" :t)
+(mu:intern mu:*mu/null* "nil" ())
 
 ;;;
 ;;; exports
 ;;;
-(mu:intern mu:%null-ns% "append" core:append)
-(mu:intern mu:%null-ns% "format" core:format)
-(mu:intern mu:%null-ns% "funcall" core:funcall)
-(mu:intern mu:%null-ns% "identity" core:identity)
-(mu:intern mu:%null-ns% "list" core:list)
-(mu:intern mu:%null-ns% "list*" core:list*)
-(mu:intern mu:%null-ns% "not" core:null)
-(mu:intern mu:%null-ns% "vector" core:vector)
+(mu:intern mu:*mu/null* "append" core:append)
+(mu:intern mu:*mu/null* "format" core:format)
+(mu:intern mu:*mu/null* "funcall" core:funcall)
+(mu:intern mu:*mu/null* "identity" core:identity)
+(mu:intern mu:*mu/null* "list" core:list)
+(mu:intern mu:*mu/null* "list*" core:list*)
+(mu:intern mu:*mu/null* "not" core:null)
+(mu:intern mu:*mu/null* "vector" core:vector)
 
 ;;;
 ;;; char functions
 ;;;
-(mu:intern mu:%null-ns% "char-int"
+(mu:intern mu:*mu/null* "char-int"
    (:lambda (char)
      (:if (core:charp char)
           (mu:svref (mu:repr :vector char) 1)
           (core:raise char 'core:char-int "is not a char"))))
 
-(mu:intern mu:%null-ns% "int-char"
+(mu:intern mu:*mu/null* "int-char"
    (:lambda (int)
      (:if (core:fixnump int)
           (mu:repr :t (mu:make-vector :byte `(32 ,int 0 0 0 0 0 0)))
@@ -42,10 +42,10 @@
   `(%defmacro ,name ,lambda ,@body))
 
 (defmacro defun (name lambda &rest body)
-  `(mu:intern mu:%null-ns% ,(mu:symbol-name name) (%lambda ,lambda ,@body)))
+  `(mu:intern mu:*mu/null* ,(mu:symbol-name name) (%lambda ,lambda ,@body)))
 
 (defmacro defconstant (name value)
-  `(mu:intern mu:%null-ns% ,(mu:symbol-name name) ,value))
+  `(mu:intern mu:*mu/null* ,(mu:symbol-name name) ,value))
 
 ;;;
 ;;; if

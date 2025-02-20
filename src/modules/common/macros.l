@@ -7,7 +7,7 @@
 (%defmacro defun (name lambda &rest body)
    (core:%quote
     (mu:intern
-     mu:%null-ns%
+     mu:*mu/null*
      (mu:symbol-name name)
      (core:compile `(%lambda ,lambda ,@body)))))
 
@@ -18,7 +18,7 @@
 (%defmacro defconstant (name value)
    (core:%quote
     (mu:intern
-     mu:%null-ns%
+     mu:*mu/null*
      (mu:symbol-name name)
      value)))
 

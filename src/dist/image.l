@@ -4,7 +4,7 @@
 ;;;
 ;;; image namespace
 ;;;
-(mu:intern mu:%null-ns% "image" (mu:make-namespace "image"))
+(mu:intern mu:*mu/null* "image" (mu:make-namespace "image"))
 
 (mu:intern image "+version+" "0.0.2")
 (mu:intern image "%modules%" (mu:make-namespace "%modules%"))

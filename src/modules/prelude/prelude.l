@@ -4,7 +4,7 @@
 ;;;
 ;;; prelude namespace
 ;;;
-(mu:intern mu:%null-ns% "prelude" (mu:find-namespace "prelude"))
+(mu:intern mu:*mu/null* "prelude" (mu:find-namespace "prelude"))
 
 #| https://www.lispworks.com/documentation/HyperSpec/Issues/iss172_w.htm
 (defun compose (&rest fns)
