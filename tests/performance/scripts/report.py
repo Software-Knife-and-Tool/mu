@@ -37,13 +37,18 @@ def report(info_list):
         b = ' '
         if bytes != then_bytes:
             nsize += 1
-            if bytes < then_bytes:
+            if bytes < 0:
+                b = '*'
+            elif bytes < then_bytes:
                 b = '-'
             else:
                 b = '+'
 
         t = ' '
-        if time_ratio > 1 + .15 or time_ratio < 1 - .15:
+        if time < 0.0:
+            t = '*'
+            ntimes += 1
+        elif time_ratio > 1 + .15 or time_ratio < 1 - .15:
             ntimes += 1
             if time < then_time:
                 t = '-'

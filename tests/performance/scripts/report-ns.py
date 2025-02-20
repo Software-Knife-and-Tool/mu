@@ -24,11 +24,11 @@ def time_average(times):
 results = []
 for group in test_results['results']:
     for test in group['results']:
-        if test['storage'] == '':
+        if test['storage'] == '' or test['times'][0] == '':
             results.append({ 'test': ns + '/' + group['group'],
                              'line': test['line'],
-                             'storage': 0,
-                             'times': 0.0 })
+                             'storage': -1,
+                             'times': -1.0 })
         else:
             results.append({ 'test': ns + '/' + group['group'],
                              'line': test['line'],
