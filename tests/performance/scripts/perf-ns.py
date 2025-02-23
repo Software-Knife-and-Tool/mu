@@ -33,7 +33,7 @@ def storage(ns, group, line, test):
         proc = subprocess.Popen([mu_sys,
                                  '-l../../dist/core.fasl', 
                                  '-l./perf.l',
-                                 '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:storage-delta (:lambda () {})'.format(test) + ' :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
@@ -42,7 +42,7 @@ def storage(ns, group, line, test):
                                  '-l../../dist/core.fasl',
                                  '-l./perf.l',
                                  '-q (core:%require "{}" "../../src/modules")'.format('common'),
-                                 '-e (perf:storage-delta (:lambda () (core:eval "{}")'.format(test) + ') :nil)'],\
+                                 '-e (perf:storage-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
 
@@ -60,14 +60,14 @@ def timing(ns, test):
     if ns == 'mu':
         proc = subprocess.Popen([mu_sys,
                                  '-l./perf.l',
-                                 '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:time-delta (:lambda () ' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
     if ns == 'frequent':
         proc = subprocess.Popen([mu_sys,
                                  '-l./perf.l',
-                                 '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:time-delta (:lambda () ' + test + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
@@ -75,7 +75,7 @@ def timing(ns, test):
         proc = subprocess.Popen([mu_sys,
                                  '-l../../dist/core.fasl',
                                  '-l./perf.l',
-                                 '-e (perf:time-delta (:lambda ()' + test + ') :nil)'],\
+                                 '-e (perf:time-delta (:lambda () {})'.format(test) + ' :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
@@ -84,8 +84,8 @@ def timing(ns, test):
                                  '-l../../dist/core.fasl',
                                  '-l./perf.l',
                                  '-q (core:%require "{}" "../../src/modules")'.format('common'),
-                                 '-e (perf:time-delta (:lambda () (core:eval "{}")'.format(test) + ') :nil)'],    \
-                                stdout=subprocess.PIPE,                 \
+                                 '-e (perf:time-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
+                                stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
     
     time = proc.stdout.read()[:-1].decode('utf8')
