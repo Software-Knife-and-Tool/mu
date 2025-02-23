@@ -19,7 +19,7 @@ def runtest(line, group, test, expected):
         proc = subprocess.Popen(['../../dist/mu-sys',
                                  '-l../../dist/core.fasl',
                                  '-q (core:%require "{}" "../../src/modules")'.format('common'),
-                                 '-e (core:eval "{}")'.format(test),    \
+                                 '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
