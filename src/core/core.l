@@ -64,11 +64,8 @@
 ;;; eval
 ;;;
 (mu:intern core "eval"
-   (:lambda (form-str)
-     (mu:eval
-      (core:compile
-       (core:read
-        (mu:open :string :input form-str :t) :t ())))))
+   (:lambda (form)
+     (mu:eval (core:compile form))))
 
 ;;;
 ;;; syntactic sugar

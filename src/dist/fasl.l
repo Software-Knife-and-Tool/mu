@@ -7,7 +7,7 @@
 (mu:intern mu:*mu/null* "fasl" (mu:make-namespace "fasl"))
 
 (mu:intern fasl "+version+" "0.0.3")
-(mu:intern fasl "%modules%" (mu:make-namespace "%modules%"))
+(mu:intern fasl "*fasl/modules*" (mu:make-namespace "fasl/modules"))
 (mu:intern fasl "%eof%" (mu:make-symbol "eof"))
 
 (mu:intern fasl "debug"
@@ -70,15 +70,19 @@
 ;;; parser
 ;;;
 (mu:intern fasl "%fasl-parse"
-   (:lambda (stream)
+   (:lambda (stream lang)
      ((:lambda (form)
         form)
-      (mu:read stream () fasl:%eof%))))
+      (:if (mu:eq :core lang)
+           ((:lambda (reader)
+              (mu:apply (mu:symbol-value reader) `(,stream () ,fasl:%eof%)))
+            (mu:find (mu:find-namespace "core") "read"))
+           (mu:read stream () fasl:%eof%)))))
 
 ;;;
 ;;; modules
 ;;;
-(mu:intern fasl "%fasl-module-file"
+(mu:intern fasl "%load-module-file"
    (:lambda (path output-stream lang)
      ((:lambda (input-stream)
         (mu:fix
@@ -91,7 +95,7 @@
                         ((:lambda ()
                            (mu:write form :t output-stream)
                            (mu:eq () loop)))))
-                 (fasl:%fasl-parse input-stream))))
+                 (fasl:%fasl-parse input-stream lang))))
          ()))
       (mu:open :file :input path :t))
      :t))
@@ -113,22 +117,22 @@
                  (mu:read stream () fasl:%eof%))))
          ()))
       (mu:open :file :input path :t))
-     (mu:symbol-value (mu:find fasl:%modules% module))))
+     (mu:symbol-value (mu:find fasl:*fasl/modules* module))))
 
 ;;;
 ;;; provide/require
 ;;;
 (mu:intern fasl "provide"
    (:lambda (module property-list)
-     (mu:intern fasl:%modules% module property-list)))
+     (mu:intern fasl:*fasl/modules* module property-list)))
 
 (mu:intern fasl "require"
    (:lambda (base module)
-     (:if (mu:find fasl:%modules% module)
+     (:if (mu:find fasl:*fasl/modules* module)
           ()
           ((:lambda (module-def output-stream)
              (:if module-def
-                  ((:lambda (requires files ns)
+                  ((:lambda (requires files ns lang)
                      (fasl:%mapc
                       (:lambda (module)
                         (fasl:require module))
@@ -148,16 +152,17 @@
                      (mu:make-namespace ns)
                      (fasl:%mapc
                       (:lambda (file-name)
-                        (fasl:%fasl-module-file
+                        (fasl:%load-module-file
                          (fasl:%concat-strings `(,base ,module "/" ,file-name))
                          output-stream
-                         (mu:cdr (fasl:%assq :lang module-def))))
+                         lang))
                       files)
                      (mu:close output-stream)
                      :t)
                    (mu:cdr (fasl:%assq :require module-def))
                    (mu:cdr (fasl:%assq :load module-def))
-                   (mu:cdr (fasl:%assq :ns module-def)))
+                   (mu:cdr (fasl:%assq :ns module-def))
+                   (mu:cdr (fasl:%assq :lang module-def)))
                   (mu:raise module :open)))
            (fasl:%load-module-def
             (fasl:%concat-strings `(,base ,module "/fasl.def"))
