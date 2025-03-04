@@ -18,7 +18,7 @@ use crate::features::nix::Nix;
 #[cfg(feature = "prof")]
 use crate::features::prof::Prof;
 #[cfg(feature = "semispace")]
-use crate::features::semispace_heap::SemiSpace;
+use crate::features::semispace::SemiSpace;
 #[cfg(feature = "std")]
 use crate::features::std::Std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
