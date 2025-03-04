@@ -40,7 +40,6 @@ inherits = "release"
 async-std = "1.13"
 bincode = "1.3"
 cpu-time = "1.0"
-ctrlc = "3.4"
 futures = { version = "0.3", features = [ "executor", "thread-pool" ]}
 futures-locks = "0.7"
 lazy_static = "1.5"

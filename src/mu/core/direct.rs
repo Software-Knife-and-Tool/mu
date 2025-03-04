@@ -101,7 +101,7 @@ impl DirectTag {
         let mask_32: u64 = 0xffffffff;
         let up_32: u64 = u64_ >> 28;
         let bot_28: u32 = (u64_ & mask_28).try_into().unwrap();
-        let msb: u64 = u64_ >> 27 & 1;
+        let msb: u64 = (u64_ >> 27) & 1;
 
         match msb {
             0 if up_32 == 0 && msb == 0 => Some(bot_28),
@@ -115,7 +115,7 @@ impl DirectTag {
 
         Self::sext_from_tag(cdr).map(|cdr_| {
             Self::to_tag(
-                (car_ as u64) << 28 | cdr_ as u64,
+                ((car_ as u64) << 28) | cdr_ as u64,
                 DirectExt::ExtType(ExtType::Cons),
                 DirectType::Ext,
             )
