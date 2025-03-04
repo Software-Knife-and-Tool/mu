@@ -14,7 +14,7 @@ pub mod nix;
 #[cfg(feature = "prof")]
 pub mod prof;
 #[cfg(feature = "semispace")]
-pub mod semispace_heap;
+pub mod semispace;
 #[cfg(feature = "std")]
 pub mod std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]

@@ -121,15 +121,6 @@ impl Exception {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn signal_exception() {
-        ctrlc::set_handler(|| {
-            let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
-            *signal_ref = true
-        })
-        .expect("Error setting Ctrl-C handler");
-    }
-
     pub fn on_signal(env: &Env) -> Result<()> {
         let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
 
