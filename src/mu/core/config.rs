@@ -81,17 +81,19 @@ impl Config {
 
         Cons::list(
             env,
-            &[Cons::new(Symbol::keyword("gcmode"), gcmode).evict(env),
-              Cons::new(
-                  Symbol::keyword("npages"),
-                  Fixnum::with_or_panic(env.config.npages),
-              )
-              .evict(env),
-              Cons::new(
-                  Symbol::keyword("pagesz"),
-                  Fixnum::with_or_panic(env.config.page_size),
-              )
-              .evict(env)],
+            &[
+                Cons::new(Symbol::keyword("gcmode"), gcmode).evict(env),
+                Cons::new(
+                    Symbol::keyword("npages"),
+                    Fixnum::with_or_panic(env.config.npages),
+                )
+                .evict(env),
+                Cons::new(
+                    Symbol::keyword("pagesz"),
+                    Fixnum::with_or_panic(env.config.page_size),
+                )
+                .evict(env),
+            ],
         )
     }
 }

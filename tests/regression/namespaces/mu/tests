@@ -2,7 +2,6 @@ backquote
 compile
 core
 exception
-future
 list
 namespace
 number
