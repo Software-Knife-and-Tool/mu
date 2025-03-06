@@ -1,6 +1,6 @@
 [package]
 name = "mu"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
@@ -15,9 +15,9 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "std", "env", "cpu_time", "sysinfo", "nix", "ffi" ]
+default = [ "std", "image", "cpu_time", "sysinfo", "nix", "ffi" ]
 cpu_time = []     # needed for testing
-env = []          # needed for testing, common
+image = []        # needed for testing, common
 ffi = []
 nix = []
 prof = []         # profiling

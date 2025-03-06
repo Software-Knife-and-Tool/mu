@@ -2,18 +2,22 @@
 //  SPDX-License-Identifier: MIT
 
 //! env config
-use crate::core::core;
-use page_size;
+use {
+    crate::{
+        core::{env::Env, exception, frame::Frame, types::Tag},
+        types::{cons::Cons, fixnum::Fixnum, symbol::Symbol},
+    },
+    page_size,
+};
 
 #[derive(Debug, Clone)]
 pub struct Config {
     pub gcmode: GcMode,
     pub npages: usize,
     pub page_size: usize,
-    pub version: String,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum GcMode {
     None,
     Auto,
@@ -23,7 +27,6 @@ pub enum GcMode {
 impl Config {
     pub fn new(conf_option: Option<String>) -> Option<Config> {
         let mut config = Config {
-            version: core::VERSION.to_string(),
             npages: 1024,
             gcmode: GcMode::Auto,
             page_size: page_size::get(),
@@ -63,6 +66,45 @@ impl Config {
                 Some(config)
             }
         }
+    }
+
+    pub fn as_list(&self, env: &Env) -> Tag {
+        let gcmode = if self.gcmode == GcMode::None {
+            Symbol::keyword("none")
+        } else if self.gcmode == GcMode::Auto {
+            Symbol::keyword("auto")
+        } else if self.gcmode == GcMode::Demand {
+            Symbol::keyword("demand")
+        } else {
+            panic!()
+        };
+
+        Cons::list(
+            env,
+            &[Cons::new(Symbol::keyword("gcmode"), gcmode).evict(env),
+              Cons::new(
+                  Symbol::keyword("npages"),
+                  Fixnum::with_or_panic(env.config.npages),
+              )
+              .evict(env),
+              Cons::new(
+                  Symbol::keyword("pagesz"),
+                  Fixnum::with_or_panic(env.config.page_size),
+              )
+              .evict(env)],
+        )
+    }
+}
+
+pub trait CoreFunction {
+    fn mu_config(_: &Env, _: &mut Frame) -> exception::Result<()>;
+}
+
+impl CoreFunction for Env {
+    fn mu_config(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = env.config.as_list(env);
+
+        Ok(())
     }
 }
 
