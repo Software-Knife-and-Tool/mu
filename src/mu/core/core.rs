@@ -12,7 +12,6 @@ use {
             env::Env,
             exception::{self, CoreFunction as _, Exception},
             frame::{CoreFunction as _, Frame},
-            future::{CoreFunction as _, Future, FuturePool},
             gc::{CoreFunction as _, Gc},
             namespace::Namespace,
             types::{CoreFunction as _, Tag},
@@ -71,11 +70,6 @@ lazy_static! {
         ( "apply",   2, Env::mu_apply ),
         ( "eval",    1, Env::mu_eval ),
         ( "fix",     2, Env::mu_fix ),
-        // futures
-        ( "defer",   2, Future::mu_future_defer ),
-        ( "detach",  2, Future::mu_future_detach ),
-        ( "poll",    1, Future::mu_future_poll ),
-        ( "force",   1, Future::mu_future_force ),
         // exceptions
         ( "with-exception",
                      2, Exception::mu_with_exception ),
@@ -150,12 +144,9 @@ lazy_static! {
 pub struct Core {
     pub env_map: RwLock<HashMap<u64, Env>>,
     pub features: RwLock<Vec<Feature>>,
-    pub future_id: RwLock<u64>,
-    pub futures: RwLock<HashMap<u64, Future>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<Vec<RwLock<Stream>>>,
     pub symbols: RwLock<HashMap<String, Tag>>,
-    pub threads: FuturePool,
 }
 
 impl Default for Core {
@@ -169,9 +160,6 @@ impl Core {
         Core {
             env_map: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
-            future_id: RwLock::new(0),
-            futures: RwLock::new(HashMap::new()),
-            threads: FuturePool::new(),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(Vec::new()),
             symbols: RwLock::new(HashMap::new()),

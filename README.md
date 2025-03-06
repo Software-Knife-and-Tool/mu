@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.2.2
+###### version 0.2.3
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -27,6 +27,10 @@ Subsequent layers based on the runtime offer advanced features.
 ------
 
 - Improved testing coverage
+
+- remove futures
+
+- image feature
 
   
 
@@ -146,11 +150,13 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 
 ------
 
-version 0.2.0 are built with rustc 1.83.0
+version 0.2.0 is built with rustc 1.83.0
 
 version 0.2.1 is built with rustc 1.84.0
 
-version 0.2.2 is built with rustc 1.84.1 
+version 0.2.2 is built with rustc 1.84.1
+
+versio 0.2.3 is built with rustc 1.85.0
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
@@ -193,10 +199,10 @@ As of 0.0.40, the *mu* runtime supports conditional compilation of a variety of 
 Currently supported features by namespace:
 
 ```
- default = [ "cpu-time", std", "sysinfo", "prof", "nix" ]
+ default = [ "cpu-time", "image", "std", "sysinfo", "prof", "nix" ]
  
  cpu-time:	process-time
- env:       	state heap-info heap-stat heap-size
+ image:     core env heap-stat heap-size
  nix:     	uname
  prof:    	prof-control
  std:     	command exit
@@ -315,9 +321,13 @@ regression test makefile -----------------
 
 ------
 
-Metrics include the average amount of time (in microsconds) taken for an individual test and the number of objects allocated by that test. Differences between runs in the same installation can be in the 10% range. Any changes in storage consumption or a large (10% or greater) increase in test timing warrant examination.
+Metrics include the average amount of time (in microsconds) taken for an individual test and the number of objects allocated by that test. Differences between runs in the same installation can be in the 10% range. Any changes in storage consumption or a large (10% or greater) increase in test timing warrant examination. Note: As of 0.2.0, the performance runs can take up to half an hour. It would be best to limit performance testing to `NTESTS=1` or 
 
-The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
+```
+mux bench current --ntests=1
+```
+
+ The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
 
 On a modern Core I7 CPU at 3+ GHz, the default performance tests take around 15 minutes of elapsed time. See the *mux* usage section for the equivalent *mux*  `bench` command.
 
