@@ -34,7 +34,7 @@ def storage():
     proc = subprocess.Popen([
         mu_cmd,
         '-l', '../../dist/core.fasl',
-        '-e', '(env:heap-stat)'
+        '-e', '(image:heap-stat)'
     ],\
     stdout=subprocess.PIPE,\
     stderr=subprocess.PIPE)

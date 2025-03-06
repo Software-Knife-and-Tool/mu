@@ -6,10 +6,9 @@ use {
     crate::{
         core::{
             config::Config,
-            core::{Core, CORE},
+            core::{Core, CORE, CORE_FUNCTIONS},
             dynamic::Dynamic,
             frame::Frame,
-            functions::CORE_FUNCTIONS,
             heap::HeapAllocator,
             namespace::Namespace,
             types::Tag,
