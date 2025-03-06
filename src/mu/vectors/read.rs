@@ -167,7 +167,7 @@ impl Read for Vector {
                                         let fx = Cons::car(env, cons);
                                         if fx.type_of() == Type::Fixnum {
                                             let byte = Fixnum::as_i64(fx);
-                                            if !(0..255).contains(&byte) {
+                                            if !(0..=255).contains(&byte) {
                                                 Err(Exception::new(
                                                     env,
                                                     Condition::Range,
