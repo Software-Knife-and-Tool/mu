@@ -31,7 +31,7 @@
 (mu:view mu:eq)	#(:t 2 #(:t mu 0))
 (mu:view mu:*standard-input*)	#(:t 0 :input :nil)
 (mu:with-exception (:lambda (cond obj) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:div 1 1)))	1
-(mu:repr :t (mu:repr :vector :t))	:t
+(mu:unrepr (mu:repr :t))	:t
 (mu:type-of mu:find)	:func
 (mu:type-of mu:find-namespace)	:func
 (mu:type-of mu:intern)	:func

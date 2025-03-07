@@ -49,7 +49,8 @@ lazy_static! {
         // types
         ( "eq",      2, Tag::mu_eq ),
         ( "type-of", 1, Tag::mu_typeof ),
-        ( "repr",    2, Tag::mu_repr ),
+        ( "repr",    1, Tag::mu_repr ),
+        ( "unrepr",  1, Tag::mu_unrepr ),
         ( "view",    1, Tag::mu_view ),
         // conses and lists
         ( "append",  1, Cons::mu_append ),
