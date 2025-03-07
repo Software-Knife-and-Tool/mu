@@ -26,11 +26,13 @@ Subsequent layers based on the runtime offer advanced features.
 
 ------
 
-- Improved testing coverage
+- Improved test infrastructure
 
 - remove futures
 
 - image feature
+
+- undocument unimplemented features
 
   
 
@@ -150,13 +152,12 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 
 ------
 
+```
 version 0.2.0 is built with rustc 1.83.0
-
 version 0.2.1 is built with rustc 1.84.0
-
 version 0.2.2 is built with rustc 1.84.1
-
-versio 0.2.3 is built with rustc 1.85.0
+version 0.2.3 is built with rustc 1.85.0
+```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
 
@@ -262,7 +263,7 @@ Usage: mux 0.0.15 command [option...]
 Before making any changes, you will want to establish a performance baseline.
 
 ```
- mux bench base --ntests=20
+ mux bench base --ntests=1
 ```
 
 As you make changes, you can verify correctness and note any performance regressions. Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
@@ -270,7 +271,7 @@ As you make changes, you can verify correctness and note any performance regress
 ```
  mux build release			# build the mu release version 
  mux test				# run the regression tests
- mux bench current --ntests=20	# benchmark the current build and print results
+ mux bench current --ntests=1	# benchmark the current build and print results
 ```
 
 `mux` provides an interactive listener for the `mu`, `core`, and `prelude` namespaces. `mu` and `core` use the `mu-sh` listener, `prelude` uses its own REPL.
@@ -329,7 +330,7 @@ mux bench current --ntests=1
 
  The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
 
-On a modern Core I7 CPU at 3+ GHz, the default performance tests take around 15 minutes of elapsed time. See the *mux* usage section for the equivalent *mux*  `bench` command.
+On a modern Core I7 CPU at 3+ GHz, the performance tests take around 30 minutes of elapsed time. See the *mux* usage section for the equivalent *mux*  `bench` command.
 
 ```
 % make -C tests/performance base
