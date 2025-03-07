@@ -12,7 +12,7 @@
    (:lambda (sexpr)
      (mu:cdr
       (core:%assq
-       (mu:logand 7 (mu:svref (mu:repr :vector sexpr) 0))
+       (mu:logand 7 (mu:svref (mu:repr sexpr) 0))
        '((0  . :direct)
          (1  . :cons)
          (2  . :func)
@@ -63,7 +63,7 @@
      (core:%map-vector
       (:lambda (byte)
         (core:%format stream " ~A" `(,byte)))
-      (mu:repr :vector tag))
+      (mu:repr tag))
      (core:%format stream "~%" `())))
              
 (mu:intern core "%fasl-string-compiler"
@@ -89,7 +89,7 @@
         (core:%format
          stream
          " ~A"
-         `(,(mu:svref (mu:repr :vector char) 1))))
+         `(,(mu:svref (mu:repr char) 1))))
       (mu:symbol-name symbol))
      (core:%format stream "~%" ())))
 

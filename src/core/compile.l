@@ -67,7 +67,7 @@
 (mu:intern core "%add-frame"
    (:lambda (name func)
      (mu:write #\space () core:%frame-map)
-     (mu:write (mu:cons name (mu:repr :vector func)) () core:%frame-map)))
+     (mu:write (mu:cons name (mu:repr func)) () core:%frame-map)))
 
 (mu:intern core "%frame-ref"
    (:lambda (binding index offset)
@@ -143,7 +143,7 @@
                (mu:intern
                 core:%closure-ns%
                 (mu:symbol-name (mu:car frame-ref))
-                (mu:repr :t (mu:cdr frame-ref))))
+                (mu:unrepr (mu:cdr frame-ref))))
              frame-map)
             form)
           (mu:read core:%frame-map () ())))

@@ -10,7 +10,7 @@
 ;;;
 (mu:intern core "%fasl-direct-object"
    (:lambda (id bytes)
-     (mu:repr :t (core:%fasl-slice-to-byte-vector bytes))))
+     (mu:unrepr (core:%fasl-slice-to-byte-vector bytes))))
 
 (mu:intern core "%fasl-symbol-object"
    (:lambda (id bytes)

@@ -6,7 +6,6 @@
 use {
     crate::{
         core::{
-            apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
@@ -225,37 +224,37 @@ pub trait CoreFunction {
     fn mu_eq(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_typeof(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_repr(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_unrepr(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_view(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Tag {
     fn mu_repr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let type_ = fp.argv[0];
-        let arg = fp.argv[1];
+        let arg = fp.argv[0];
+        let slice = arg.as_slice().to_vec();
 
-        env.fp_argv_check("mu:repr", &[Type::Keyword, Type::T], fp)?;
-        fp.value = if type_.eq_(&Symbol::keyword("vector")) {
-            let slice = arg.as_slice().to_vec();
+        fp.value = Vector::from(slice).evict(env);
 
-            Vector::from(slice).evict(env)
-        } else if type_.eq_(&Symbol::keyword("t")) {
-            if Vector::type_of(env, arg) == Type::Byte && Vector::length(env, arg) == 8 {
-                let mut u64_: u64 = 0;
+        Ok(())
+    }
 
-                for index in (0..8).rev() {
-                    u64_ <<= 8;
-                    u64_ |= match Vector::ref_(env, arg, index as usize) {
-                        Some(byte) => Fixnum::as_i64(byte) as u64,
-                        None => panic!(),
-                    }
+    fn mu_unrepr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let arg = fp.argv[0];
+
+        if Vector::type_of(env, arg) == Type::Byte && Vector::length(env, arg) == 8 {
+            let mut u64_: u64 = 0;
+
+            for index in (0..8).rev() {
+                u64_ <<= 8;
+                u64_ |= match Vector::ref_(env, arg, index as usize) {
+                    Some(byte) => Fixnum::as_i64(byte) as u64,
+                    None => panic!(),
                 }
-
-                (&u64_.to_le_bytes()).into()
-            } else {
-                return Err(Exception::new(env, Condition::Type, "mu:repr", arg));
             }
+
+            fp.value = (&u64_.to_le_bytes()).into();
         } else {
-            return Err(Exception::new(env, Condition::Type, "mu:repr", type_));
+            return Err(Exception::new(env, Condition::Type, "mu:unrepr", arg));
         };
 
         Ok(())

@@ -26,13 +26,13 @@
 (mu:intern mu:*mu/null* "char-int"
    (:lambda (char)
      (:if (core:charp char)
-          (mu:svref (mu:repr :vector char) 1)
+          (mu:svref (mu:repr char) 1)
           (core:raise char 'core:char-int "is not a char"))))
 
 (mu:intern mu:*mu/null* "int-char"
    (:lambda (int)
      (:if (core:fixnump int)
-          (mu:repr :t (mu:make-vector :byte `(32 ,int 0 0 0 0 0 0)))
+          (mu:unrepr (mu:make-vector :byte `(32 ,int 0 0 0 0 0 0)))
           (core:raise char 'core:int-char "is not a fixnum"))))
 
 ;;;
