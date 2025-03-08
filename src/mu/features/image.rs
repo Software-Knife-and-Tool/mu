@@ -80,8 +80,10 @@ impl Image for Feature {
 
     fn heap_type(env: &Env_, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
+        let alloc_ref = block_on(heap_ref.alloc_map.read());
+        let type_ref = block_on(alloc_ref[type_ as usize].read());
 
-        heap_ref.alloc_map[type_ as usize]
+        *type_ref
     }
 
     fn heap_stat(env: &Env_) -> Tag {

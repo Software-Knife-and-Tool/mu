@@ -94,11 +94,6 @@ impl Env {
     /// version
     pub const VERSION: &'static str = VERSION;
 
-    /// turn on ^C exception signalling
-    pub fn signal_exception() {
-        // Exception::signal_exception()
-    }
-
     /// environment configuration
     pub fn config(config: Option<String>) -> Option<Config> {
         Config::new(config)

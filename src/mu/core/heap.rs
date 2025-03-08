@@ -22,7 +22,7 @@ use {
     },
 };
 
-use futures::executor::block_on;
+use {futures::executor::block_on, futures_locks::RwLock};
 
 #[bitfield]
 #[repr(align(8))]
@@ -64,7 +64,7 @@ pub struct HeapTypeInfo {
 #[derive(Debug)]
 pub struct HeapAllocator {
     pub mmap: Box<memmap::MmapMut>,
-    pub alloc_map: Vec<HeapTypeInfo>,
+    pub alloc_map: RwLock<Vec<RwLock<HeapTypeInfo>>>,
     pub free_map: Vec<Vec<usize>>,
     pub page_size: usize,
     pub npages: usize,
@@ -103,13 +103,17 @@ impl HeapAllocator {
         };
 
         HeapAllocator {
-            alloc_map: (0..Tag::NTYPES)
-                .map(|_| HeapTypeInfo {
-                    size: 0,
-                    total: 0,
-                    free: 0,
-                })
-                .collect::<Vec<HeapTypeInfo>>(),
+            alloc_map: RwLock::new(
+                (0..Tag::NTYPES)
+                    .map(|_| {
+                        RwLock::new(HeapTypeInfo {
+                            size: 0,
+                            total: 0,
+                            free: 0,
+                        })
+                    })
+                    .collect::<Vec<RwLock<HeapTypeInfo>>>(),
+            ),
             free_map: (0..Tag::NTYPES)
                 .map(|_| Vec::<usize>::new())
                 .collect::<Vec<Vec<usize>>>(),
@@ -193,7 +197,8 @@ impl HeapAllocator {
                 self.write_barrier += vdata_size;
             }
 
-            let alloc_type = &mut self.alloc_map[type_id as usize];
+            let alloc_ref = block_on(self.alloc_map.write());
+            let mut alloc_type = block_on(alloc_ref[type_id as usize].write());
 
             alloc_type.size += (image_len * Self::SIZEOF_U64) + vdata_size;
             alloc_type.total += 1;
@@ -208,7 +213,8 @@ impl HeapAllocator {
             match self.image_info(*off) {
                 Some(info) => {
                     if info.len() >= size as u16 {
-                        let mut alloc_type = self.alloc_map[type_id as usize];
+                        let alloc_ref = block_on(self.alloc_map.write());
+                        let mut alloc_type = block_on(alloc_ref[type_id as usize].write());
 
                         alloc_type.free -= 1;
 
@@ -317,8 +323,10 @@ impl HeapAllocator {
 
     pub fn heap_type(env: &Env, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
+        let alloc_ref = block_on(heap_ref.alloc_map.read());
+        let type_ref = block_on(alloc_ref[type_ as usize].read());
 
-        heap_ref.alloc_map[type_ as usize]
+        *type_ref
     }
 }
 
@@ -339,8 +347,11 @@ impl GC for HeapAllocator {
             index += (info.len() as usize) / Self::SIZEOF_U64
         }
 
-        for type_map in self.alloc_map.iter_mut() {
-            type_map.free = 0
+        let alloc_ref = block_on(self.alloc_map.write());
+        for type_map in (*alloc_ref).iter() {
+            let mut alloc_type = block_on(type_map.write());
+
+            alloc_type.free = 0
         }
 
         for free_map in self.free_map.iter_mut() {
@@ -356,7 +367,8 @@ impl GC for HeapAllocator {
 
         for (info, index) in free_list {
             let type_id = info.image_type() as usize;
-            let mut alloc_type = self.alloc_map[type_id];
+            let alloc_ref = block_on(self.alloc_map.read());
+            let mut alloc_type = block_on(alloc_ref[type_id].write());
 
             alloc_type.free += 1;
             self.free_map[type_id].push(index);

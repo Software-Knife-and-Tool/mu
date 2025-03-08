@@ -319,11 +319,13 @@ impl SemiSpaceAllocator {
         (heap_ref.page_size, heap_ref.npages)
     }
 
+    /*
     pub fn heap_type(env: &Env, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
 
         heap_ref.alloc_map[type_ as usize]
-    }
+}
+    */
 }
 
 pub trait GC {
