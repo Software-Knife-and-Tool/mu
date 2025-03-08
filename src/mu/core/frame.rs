@@ -120,8 +120,6 @@ impl Frame {
 
     // apply
     pub fn apply(mut self, env: &Env, func: Tag) -> exception::Result<Tag> {
-        Exception::on_signal(env)?;
-
         #[cfg(feature = "prof")]
         <Feature as Prof>::prof_event(env, func).unwrap();
 

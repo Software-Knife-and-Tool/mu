@@ -163,9 +163,6 @@ pub fn main() {
         }
     }
 
-    // enable signal exceptions
-    Env::signal_exception();
-
     let env = match Env::config(_config) {
         Some(config) => Env::new(config, None),
         None => {
