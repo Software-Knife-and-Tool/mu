@@ -5,6 +5,7 @@
 //!    Condition
 //!    Exception
 //!    `Result<Exception>`
+use futures::executor::block_on;
 use {
     crate::{
         core::{
@@ -17,7 +18,6 @@ use {
     },
     std::fmt,
 };
-use {futures::executor::block_on, futures_locks::RwLock};
 
 pub type Result<T> = std::result::Result<T, Exception>;
 
@@ -54,7 +54,6 @@ pub enum Condition {
 }
 
 lazy_static! {
-    static ref SIGNAL_EXCEPTION: RwLock<bool> = RwLock::new(false);
     static ref CONDMAP: Vec<(Tag, Condition)> = vec![
         (Symbol::keyword("arity"), Condition::Arity),
         (Symbol::keyword("div0"), Condition::ZeroDivide),
@@ -118,23 +117,6 @@ impl Exception {
         match condmap {
             Some(entry) => Ok(entry.0),
             _ => panic!(),
-        }
-    }
-
-    pub fn on_signal(env: &Env) -> Result<()> {
-        let mut signal_ref = block_on(SIGNAL_EXCEPTION.write());
-
-        if *signal_ref {
-            *signal_ref = false;
-
-            Err(Exception::new(
-                env,
-                Condition::SigInt,
-                "mu:raise",
-                Tag::nil(),
-            ))
-        } else {
-            Ok(())
         }
     }
 }

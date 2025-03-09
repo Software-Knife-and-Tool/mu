@@ -2,6 +2,7 @@
 name = "mu"
 version = "0.2.3"
 edition = "2021"
+license = "MIT" 
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
 [workspace]
@@ -15,7 +16,7 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "std", "image", "cpu_time", "sysinfo", "nix", "ffi" ]
+default = [ "cpu_time", "image", "nix", "std", "sysinfo" ]
 cpu_time = []     # needed for testing
 image = []        # needed for testing, common
 ffi = []
@@ -38,7 +39,6 @@ inherits = "release"
 
 [dependencies]
 async-std = "1.13"
-bincode = "1.3"
 cpu-time = "1.0"
 futures = { version = "0.3", features = [ "executor", "thread-pool" ]}
 futures-locks = "0.7"
