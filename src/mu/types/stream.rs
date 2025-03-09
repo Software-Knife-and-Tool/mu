@@ -21,7 +21,7 @@ use futures::executor::block_on;
 // stream struct
 pub struct Stream {
     pub system: SystemStream, // system stream
-    pub index: usize,         // stream table index
+    pub id: u64,              // stream table index
     pub open: bool,           // stream open
     pub direction: Tag,       // :input | :output | :bidir (keyword)
     pub unch: Tag,            // pushbask for input streams
@@ -30,7 +30,7 @@ pub struct Stream {
 impl From<Stream> for Tag {
     fn from(stream: Stream) -> Tag {
         DirectTag::to_tag(
-            stream.index as u64,
+            stream.id,
             DirectExt::ExtType(ExtType::Stream),
             DirectType::Ext,
         )
@@ -43,14 +43,14 @@ impl Stream {
             Type::Stream => {
                 let streams_ref = block_on(CORE.streams.read());
 
-                match streams_ref.get(Stream::stream_index(tag).unwrap()) {
+                match streams_ref.get(&Stream::stream_id(tag).unwrap()) {
                     Some(stream_ref) => {
                         let stream = block_on(stream_ref.read());
 
                         env.write_string(
                             format!(
                                 "#<stream: {} {} {} {}>",
-                                stream.index,
+                                stream.id,
                                 match stream.system {
                                     SystemStream::Reader(_) | SystemStream::Writer(_) => ":file",
                                     SystemStream::String(_) => ":string",
@@ -84,11 +84,11 @@ impl Stream {
         }
     }
 
-    pub fn stream_index(tag: Tag) -> exception::Result<usize> {
+    pub fn stream_id(tag: Tag) -> exception::Result<u64> {
         match tag {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.ext().try_into() {
-                    Ok(ExtType::Stream) => Ok(dtag.data() as usize),
+                    Ok(ExtType::Stream) => Ok(dtag.data()),
                     _ => panic!(),
                 },
                 _ => panic!(),
@@ -100,11 +100,11 @@ impl Stream {
     pub fn view(env: &Env, tag: Tag) -> Tag {
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Self::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Self::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
                 let vec = vec![
-                    Fixnum::with_or_panic(stream.index),
+                    Fixnum::with_or_panic(stream.id as usize),
                     stream.direction,
                     stream.unch,
                 ];
@@ -118,7 +118,7 @@ impl Stream {
     pub fn is_open(tag: Tag) -> bool {
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Self::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Self::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -131,7 +131,7 @@ impl Stream {
     pub fn close(tag: Tag) {
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Self::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Self::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -148,7 +148,7 @@ impl Stream {
 
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Self::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Self::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -173,7 +173,7 @@ impl Read for Env {
 
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Stream::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Stream::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
@@ -206,7 +206,7 @@ impl Read for Env {
 
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Stream::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Stream::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
@@ -241,7 +241,7 @@ impl Read for Env {
 
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Stream::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Stream::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
@@ -285,7 +285,7 @@ impl Write for Env {
 
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Stream::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Stream::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -309,7 +309,7 @@ impl Write for Env {
 
         let streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(Stream::stream_index(tag).unwrap()) {
+        match streams_ref.get(&Stream::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -425,7 +425,7 @@ impl CoreFunction for Stream {
 
         let streams_ref = block_on(CORE.streams.read());
 
-        fp.value = match streams_ref.get(Stream::stream_index(tag)?) {
+        fp.value = match streams_ref.get(&Stream::stream_id(tag)?) {
             Some(stream_ref) => {
                 if Stream::is_open(tag) {
                     let stream = block_on(stream_ref.read());

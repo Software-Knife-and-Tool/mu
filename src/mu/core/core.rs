@@ -146,7 +146,8 @@ pub struct Core {
     pub env_map: RwLock<HashMap<u64, Env>>,
     pub features: RwLock<Vec<Feature>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
-    pub streams: RwLock<Vec<RwLock<Stream>>>,
+    pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
+    pub stream_id: RwLock<u64>,
     pub symbols: RwLock<HashMap<String, Tag>>,
 }
 
@@ -162,7 +163,8 @@ impl Core {
             env_map: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
-            streams: RwLock::new(Vec::new()),
+            streams: RwLock::new(HashMap::new()),
+            stream_id: RwLock::new(0),
             symbols: RwLock::new(HashMap::new()),
         }
     }

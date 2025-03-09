@@ -94,18 +94,24 @@ impl SystemStream {
             None => Err(Exception::new(env, Condition::Open, "mu:open", Tag::nil())),
             Some(_) => {
                 let mut streams_ref = block_on(CORE.streams.write());
-                let index = streams_ref.len();
+                let mut id = block_on(CORE.stream_id.write());
+                let stream_id = *id;
 
-                streams_ref.push(RwLock::new(Stream {
-                    index,
-                    system: system_stream.unwrap(),
-                    open: true,
-                    direction: Symbol::keyword(if is_input { "input" } else { "output" }),
-                    unch: Tag::nil(),
-                }));
+                *id += 1;
+
+                streams_ref.insert(
+                    stream_id,
+                    RwLock::new(Stream {
+                        id: stream_id,
+                        system: system_stream.unwrap(),
+                        open: true,
+                        direction: Symbol::keyword(if is_input { "input" } else { "output" }),
+                        unch: Tag::nil(),
+                    }),
+                );
 
                 Ok(DirectTag::to_tag(
-                    index as u64,
+                    stream_id,
                     DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,
                 ))
@@ -141,22 +147,28 @@ impl SystemStream {
             None => Err(Exception::new(env, Condition::Open, "env:open", Tag::nil())),
             Some(_) => {
                 let mut streams_ref = block_on(CORE.streams.write());
-                let index = streams_ref.len();
+                let mut id = block_on(CORE.stream_id.write());
+                let stream_id = *id;
 
-                streams_ref.push(RwLock::new(Stream {
-                    index,
-                    open: true,
-                    system: system_stream.unwrap(),
-                    direction: match dir {
-                        StringDirection::Input => Symbol::keyword("input"),
-                        StringDirection::Output => Symbol::keyword("output"),
-                        StringDirection::Bidir => Symbol::keyword("bidir"),
-                    },
-                    unch: Tag::nil(),
-                }));
+                *id += 1;
+
+                streams_ref.insert(
+                    stream_id,
+                    RwLock::new(Stream {
+                        id: stream_id,
+                        open: true,
+                        system: system_stream.unwrap(),
+                        direction: match dir {
+                            StringDirection::Input => Symbol::keyword("input"),
+                            StringDirection::Output => Symbol::keyword("output"),
+                            StringDirection::Bidir => Symbol::keyword("bidir"),
+                        },
+                        unch: Tag::nil(),
+                    }),
+                );
 
                 Ok(DirectTag::to_tag(
-                    index as u64,
+                    stream_id,
                     DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,
                 ))
@@ -180,24 +192,30 @@ impl SystemStream {
         match std_stream {
             SystemStream::StdInput | SystemStream::StdOutput | SystemStream::StdError => {
                 let mut streams_ref = block_on(core.streams.write());
-                let index = streams_ref.len();
+                let mut id = block_on(core.stream_id.write());
+                let stream_id = *id;
 
-                streams_ref.push(RwLock::new(Stream {
-                    index,
-                    open: true,
-                    direction: match &std_stream {
-                        SystemStream::StdInput => Symbol::keyword("input"),
-                        SystemStream::StdOutput | SystemStream::StdError => {
-                            Symbol::keyword("output")
-                        }
-                        _ => panic!(),
-                    },
-                    system: std_stream,
-                    unch: Tag::nil(),
-                }));
+                *id += 1;
+
+                streams_ref.insert(
+                    stream_id,
+                    RwLock::new(Stream {
+                        id: stream_id,
+                        open: true,
+                        direction: match &std_stream {
+                            SystemStream::StdInput => Symbol::keyword("input"),
+                            SystemStream::StdOutput | SystemStream::StdError => {
+                                Symbol::keyword("output")
+                            }
+                            _ => panic!(),
+                        },
+                        system: std_stream,
+                        unch: Tag::nil(),
+                    }),
+                );
 
                 Ok(DirectTag::to_tag(
-                    index as u64,
+                    stream_id,
                     DirectExt::ExtType(ExtType::Stream),
                     DirectType::Ext,
                 ))
