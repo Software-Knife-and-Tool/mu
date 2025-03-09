@@ -320,12 +320,12 @@ impl SemiSpaceAllocator {
     }
 
     /*
-    pub fn heap_type(env: &Env, type_: Type) -> HeapTypeInfo {
-        let heap_ref = block_on(env.heap.read());
+        pub fn heap_type(env: &Env, type_: Type) -> HeapTypeInfo {
+            let heap_ref = block_on(env.heap.read());
 
-        heap_ref.alloc_map[type_ as usize]
-}
-    */
+            heap_ref.alloc_map[type_ as usize]
+    }
+        */
 }
 
 pub trait GC {
