@@ -26,13 +26,11 @@ Subsequent layers based on the runtime offer advanced features.
 
 ------
 
-- Improved test infrastructure
+- Improved performance testing
 
-- remove futures
+- procinfo feature
 
-- image feature
-
-- undocument unimplemented features
+- improved stream management
 
   
 
@@ -200,15 +198,14 @@ As of 0.0.40, the *mu* runtime supports conditional compilation of a variety of 
 Currently supported features by namespace:
 
 ```
- default = [ "cpu-time", "image", "std", "sysinfo", "prof", "nix" ]
+ default = [ "env", "std", "sysinfo", "procinfo", "prof", "nix" ]
  
- cpu-time:	process-time
- image:     core env heap-stat heap-size
+ env:       core env heap-stat heap-size
  nix:     	uname
+ procinfo:  process-mem process-time time-units-per-sec
  prof:    	prof-control
  std:     	command exit
  sysinfo: 	sysinfo
- ffi:
  semispace:
 ```
 

@@ -16,11 +16,11 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "cpu_time", "image", "nix", "std", "sysinfo" ]
-cpu_time = []     # needed for testing
-image = []        # needed for testing, common
+default = [ "env", "procinfo", "nix", "std", "sysinfo" ]
+env = []        # needed for testing, common
 ffi = []
 nix = []
+procinfo = []
 prof = []         # profiling
 semispace = []
 std = []
@@ -39,7 +39,6 @@ inherits = "release"
 
 [dependencies]
 async-std = "1.13"
-cpu-time = "1.0"
 futures = { version = "0.3", features = [ "executor", "thread-pool" ]}
 futures-locks = "0.7"
 lazy_static = "1.5"
@@ -48,6 +47,7 @@ modular-bitfield = "0.11"
 nix = {version = "0.29", features = [ "feature" ]}
 num_enum = "0.7"
 page_size = "0.6"
+perf_monitor = "0.2"
 
 [target.'cfg(not(target_os = "macos"))'.dependencies]
 sysinfo_dot_h = "0.2"
