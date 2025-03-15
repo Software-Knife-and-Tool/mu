@@ -28,13 +28,15 @@ for group in test_results['results']:
             results.append({ 'test': ns + '/' + group['group'],
                              'line': test['line'],
                              'storage': -1,
-                             'times': -1.0 })
+                             'times': -1.0,
+                             'mem_virt': -1})
         else:
             results.append({ 'test': ns + '/' + group['group'],
                              'line': test['line'],
                              'storage': storage_bytes(test['storage']),
-                             'times': time_average(test['times']) })
+                             'times': time_average(test['times']),
+                             'mem_virt': test['mem_virt']})
 
 for test in results:
-    test_name, line, storage, times = test.values()
-    print(f'{line:>02d} {test_name:<18} {storage:>6} {times:8.2f}')
+    test_name, line, storage, times, mem_virt = test.values()
+    print(f'{line:>02d} {test_name:<18} {storage:>6} {times:8.2f} {mem_virt}')

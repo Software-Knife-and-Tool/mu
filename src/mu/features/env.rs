@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! image interface
+//! env interface
 use {
     crate::{
         core::{
@@ -26,12 +26,12 @@ use {
 };
 
 lazy_static! {
-    pub static ref IMAGE_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref IMAGE_FUNCTIONS: Vec<CoreFnDef> = vec![
-        ("heap-size", 1, Feature::image_hp_size),
-        ("heap-stat", 0, Feature::image_hp_stat),
-        ("core", 0, Feature::image_core),
-        ("env", 0, Feature::image_env),
+    pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    pub static ref ENV_FUNCTIONS: Vec<CoreFnDef> = vec![
+        ("heap-size", 1, Feature::env_hp_size),
+        ("heap-stat", 0, Feature::env_hp_stat),
+        ("core", 0, Feature::env_core),
+        ("env", 0, Feature::env_env),
     ];
     static ref INFOTYPE: Vec<Tag> = vec![
         Symbol::keyword("cons"),
@@ -43,7 +43,7 @@ lazy_static! {
     ];
 }
 
-pub trait Image {
+pub trait Env {
     fn feature() -> Feature;
     fn heap_size(_: &Env_, tag: Tag) -> usize;
     fn heap_info(_: &Env_) -> (usize, usize);
@@ -52,12 +52,12 @@ pub trait Image {
     fn ns_map(_: &Env_) -> Tag;
 }
 
-impl Image for Feature {
+impl Env for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: Some(&IMAGE_SYMBOLS),
-            functions: Some(&IMAGE_FUNCTIONS),
-            namespace: "image".into(),
+            symbols: Some(&ENV_SYMBOLS),
+            functions: Some(&ENV_FUNCTIONS),
+            namespace: "env".into(),
         }
     }
 
@@ -87,7 +87,7 @@ impl Image for Feature {
     }
 
     fn heap_stat(env: &Env_) -> Tag {
-        let (pagesz, npages) = <Feature as Image>::heap_info(env);
+        let (pagesz, npages) = <Feature as Env>::heap_info(env);
 
         let mut vec = vec![
             Symbol::keyword("heap"),
@@ -98,7 +98,7 @@ impl Image for Feature {
 
         for htype in INFOTYPE.iter() {
             let type_map =
-                <Feature as Image>::heap_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
+                <Feature as Env>::heap_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
 
             vec.extend(vec![
                 *htype,
@@ -123,15 +123,15 @@ impl Image for Feature {
 }
 
 pub trait CoreFunction {
-    fn image_core(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn image_hp_size(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn image_hp_stat(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn image_env(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_core(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_size(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_stat(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_env(_: &Env_, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Feature {
-    fn image_hp_stat(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        let (pagesz, npages) = <Feature as Image>::heap_info(env);
+    fn env_hp_stat(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+        let (pagesz, npages) = <Feature as Env>::heap_info(env);
 
         let mut vec = vec![
             Symbol::keyword("heap"),
@@ -142,7 +142,7 @@ impl CoreFunction for Feature {
 
         for htype in INFOTYPE.iter() {
             let type_map =
-                <Feature as Image>::heap_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
+                <Feature as Env>::heap_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
 
             vec.extend(vec![
                 *htype,
@@ -157,14 +157,14 @@ impl CoreFunction for Feature {
         Ok(())
     }
 
-    fn image_hp_size(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::with_or_panic(<Feature as Image>::heap_size(env, fp.argv[0]));
+    fn env_hp_size(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = Fixnum::with_or_panic(<Feature as Env>::heap_size(env, fp.argv[0]));
 
         Ok(())
     }
 
-    fn image_env(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        let (page_size, npages) = <Feature as Image>::heap_info(env);
+    fn env_env(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+        let (page_size, npages) = <Feature as Env>::heap_info(env);
 
         let heap_info = vec![
             Symbol::keyword("bump"),
@@ -205,7 +205,7 @@ impl CoreFunction for Feature {
         Ok(())
     }
 
-    fn image_core(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+    fn env_core(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
         let alist = vec![
             Cons::cons(
                 env,

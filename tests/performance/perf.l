@@ -7,14 +7,19 @@
 ;;;
 (mu:intern (mu:find-namespace "") "perf" (mu:make-namespace "perf"))
 
+(mu:intern perf "mem-delta"
+  (:lambda (fn args)
+    (mu:apply fn args)
+    (procinfo:process-mem-virt)))
+
 (mu:intern perf "time-delta"
   (:lambda (fn args)
     ((:lambda (start stop)
        (mu:sub stop start))
-       (cpu-time:process-time)
+       (procinfo:process-time)
        ((:lambda ()
           (mu:apply fn args)
-          (cpu-time:process-time))))))
+          (procinfo:process-time))))))
 
 ;;;
 ;;; return an vector of storage consumed
@@ -43,7 +48,7 @@
                  (mu:car loop)
                  (mu:cdr loop))))
          (mu:cons () 1)))
-     (image:heap-stat)
+     (env:heap-stat)
      ((:lambda ()
          (mu:apply fn args)
-         (image:heap-stat))))))
+         (env:heap-stat))))))

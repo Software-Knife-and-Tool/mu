@@ -12,6 +12,7 @@ ntimes = 0
 test_in = ""
 delta_bytes = 0
 delta_times = 0.0
+delta_mem  = 0
 
 def report(info_list):
     global nsize
@@ -20,26 +21,33 @@ def report(info_list):
     global test_in
     global delta_bytes
     global delta_times
+    global delta_mem
 
-    if len(info_list) == 5:
+    if len(info_list) == 7:        
         test_name = info_list[0]
-        then_bytes = int(info_list[1])
-        then_time = float(info_list[2])
-        bytes = int(info_list[3])
-        time = float(info_list[4])
+        base_bytes = int(info_list[1])
+        base_time = float(info_list[2])
+        base_mem = int(info_list[3])
+        bytes = int(info_list[4])
+        time = float(info_list[5])
+        mem = int(info_list[6])
 
-        if then_bytes == 0:
+        if base_bytes == 0:
             return
 
-        bytes_ratio = float(bytes) / float(then_bytes)
-        time_ratio = time / then_time
+        base_pages = int((base_mem + 4095) / 4096)
+        mem_pages = int((mem + 4095) / 4096)
+
+        mem_ratio =  float(mem_pages) / float(base_pages)
+        bytes_ratio = float(bytes) / float(base_bytes)
+        time_ratio = time / base_time
 
         b = ' '
-        if bytes != then_bytes:
+        if bytes != base_bytes:
             nsize += 1
             if bytes < 0:
                 b = '*'
-            elif bytes < then_bytes:
+            elif bytes < base_bytes:
                 b = '-'
             else:
                 b = '+'
@@ -50,10 +58,17 @@ def report(info_list):
             ntimes += 1
         elif time_ratio > 1 + .15 or time_ratio < 1 - .15:
             ntimes += 1
-            if time < then_time:
+            if time < base_time:
                 t = '-'
             else:
                 t = '+'
+
+        m = ' '
+        if mem != base_mem:
+            if mem < base_mem:
+                m = '-'
+            else:
+                mu = '+'
 
         if test_in == test_name:
             nth_test += 1
@@ -62,10 +77,11 @@ def report(info_list):
             test_in = test_name
 
         if b != ' ' or t != ' ':
-            time_diff = time - then_time 
-            delta_bytes += bytes - then_bytes
+            time_diff = time - base_time 
+            delta_bytes += bytes - base_bytes
             delta_times += time_diff
-            print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes - then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time_diff:.2f}, {time_ratio:.2f})')
+            delta_mem += mem - base_mem
+            print(f'[{b:<1}{m:<1}{t:<1}] {nth_test:>02d} {test_name:<16} heap: ({base_bytes}/{bytes}, {bytes - base_bytes}, {bytes_ratio:.2f}) \t pages: ({base_pages}/{mem_pages}, {mem_pages - base_pages}, {mem_ratio:.2f}) \ttimes: ({base_time:.2f}/{time:.2f}, {time_diff:.2f}, {time_ratio:.2f})')
 
 print(f'Performance Report {date:<10}')
 print('------------------------------')
@@ -76,4 +92,4 @@ for test in test_results[1:]:
 
 print('------------------------------')
 print(f'ntests: {ntests:<4} size: {nsize:>6}  times: {ntimes:>5}')
-print(f'deltas:      bytes: {delta_bytes:>5}  times: {delta_times:5.2f}')
+print(f'deltas:      bytes: {delta_bytes:>5}  mem_virt: {delta_mem:>5}  times: {delta_times:5.2f}')
