@@ -79,7 +79,7 @@
 
 (mu:intern core "%resolve-lexical"
    (:lambda (symbol env)          
-     (:if (mu:eq mu:*mu/null* (mu:symbol-namespace symbol))
+     (:if (mu:eq mu:*null/* (mu:symbol-namespace symbol))
           ((:lambda (binding)
              (:if (core:null binding)
                   symbol

@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.2.3
+###### version 0.2.4
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -435,11 +435,12 @@ alias ,mu-repl='rlwrap mu --eval='\''(prelude:repl)'\'''
 
 ------
 
-The *mu* runtimes can be configured to use a variable number of system resources, currently the number of pages of memory allocated to the heap at startup. The behavior of the garbage collector can also be specified, though garbage collection is still mostly unimplemented. The *-c* option to the various runtimes is a string of named attribute values:
+The *mu* runtimes can be configured to use a variable number of system resources, currently the number of pages of memory allocated to the heap at startup. The behavior of the garbage collector can also be specified, though garbage collection control is still mostly unimplemented. The *-c* option to the various runtimes is a string of named attribute values:
 
 ```
-npages			number of pages of virtual memory for the heap
-gcmode			{ none, auto, demand } how the garbage collector operates
+npages			number					pages of virtual memory for the heap
+gcmode			{ none, auto, demand }	how the garbage collector operates
+heap			{ semispace, bump }		heap type, defaults to bump
 ```
 
 Usage: (*mu-server*, *mu-ld*, and *mu-exec* have similar options)
@@ -448,6 +449,6 @@ Usage: (*mu-server*, *mu-ld*, and *mu-exec* have similar options)
 mu-sys -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
 mu-sys -c "npages:1024,gcmode:auto"	default configuration
 
-mu --config="npages:4096,gcmode:demand"
-					4096 pages, garbage collection runs on demand 
+mu --config="npages:4096,gcmode:demand,heap_type:bump"
+					4096 pages, garbage collection runs on demand, bump allocator 
 ```

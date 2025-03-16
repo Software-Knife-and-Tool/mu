@@ -15,6 +15,7 @@ pub struct Config {
     pub gcmode: GcMode,
     pub npages: usize,
     pub page_size: usize,
+    pub heap_type: HeapType,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -24,11 +25,18 @@ pub enum GcMode {
     Demand,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum HeapType {
+    Bump,
+    Semispace,
+}
+
 impl Config {
     pub fn new(conf_option: Option<String>) -> Option<Config> {
         let mut config = Config {
             npages: 1024,
             gcmode: GcMode::Auto,
+            heap_type: HeapType::Bump,
             page_size: page_size::get(),
         };
 
@@ -55,6 +63,13 @@ impl Config {
                                     "auto" => GcMode::Auto,
                                     "none" => GcMode::None,
                                     "demand" => GcMode::Demand,
+                                    _ => return None,
+                                }
+                            }
+                            "heap" => {
+                                config.heap_type = match arg {
+                                    "semispace" => HeapType::Semispace,
+                                    "bump" => HeapType::Bump,
                                     _ => return None,
                                 }
                             }

@@ -4,7 +4,7 @@
 ;;;
 ;;; fasl namespace
 ;;;
-(mu:intern mu:*mu/null* "fasl" (mu:make-namespace "fasl"))
+(mu:intern mu:*null/* "fasl" (mu:make-namespace "fasl"))
 
 (mu:intern fasl "+version+" "0.0.3")
 (mu:intern fasl "*fasl/modules*" (mu:make-namespace "fasl/modules"))
@@ -139,7 +139,7 @@
                       requires)
                      (mu:write
                       (fasl:%concat-strings
-                       `("(mu:intern mu:*mu/null* "
+                       `("(mu:intern mu:*null/* "
                          "\""
                          ,module
                          "\" "
