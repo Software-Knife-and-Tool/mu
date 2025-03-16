@@ -31,7 +31,7 @@ impl Profile {
                                       (:lambda (fn-count)                     \
                                       (core:%format :t \"~A~T~A~%\" `(,(mu:car fn-count) ,(mu:cdr fn-count)))) \
                                       (prof:prof-control :get)))              \
-                                      (mu:intern mu:*mu/null* (mu:nth 1 config) ()))) \
+                                      (mu:intern mu:*null/* (mu:nth 1 config) ()))) \
                                       '{})", config);
 
                         Command::new("mu-sys")
