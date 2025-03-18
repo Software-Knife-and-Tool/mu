@@ -315,6 +315,10 @@ impl HeapAllocator {
         }
     }
 
+    pub fn heap_free(_env: &Env) -> usize {
+        0
+    }
+
     pub fn heap_info(env: &Env) -> (usize, usize) {
         let heap_ref = block_on(env.heap.read());
 

@@ -34,7 +34,7 @@ def storage():
     proc = subprocess.Popen([
         mu_cmd,
         '-l', '../../dist/core.fasl',
-        '-e', '(env:heap-stat)'
+        '-e', '(env:heap-room)'
     ],\
     stdout=subprocess.PIPE,\
     stderr=subprocess.PIPE)
@@ -47,12 +47,12 @@ def storage():
     heap_vec = heap.replace(')', '').split()
     heaps = []
 
+    heaps.append(heap_vec[1:5])
     heaps.append(heap_vec[5:9])
     heaps.append(heap_vec[9:13])
     heaps.append(heap_vec[13:17])
     heaps.append(heap_vec[17:21])
     heaps.append(heap_vec[21:25])
-    heaps.append(heap_vec[25:29])
 
     return heaps if proc.poll() == 0 else err
 
@@ -60,4 +60,4 @@ stats_vec = []
 for n in range(int(ntests)):
     stats_vec.append(times()[1:])
 
-print(json.dumps({ 'room': storage()[1:], 'stats': stats_vec }))
+print(json.dumps({ 'room': storage(), 'stats': stats_vec }))

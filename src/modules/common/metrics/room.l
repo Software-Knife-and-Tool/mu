@@ -27,10 +27,10 @@
                  (mu:car loop)
                  (mu:cdr loop))))
          (mu:cons () 1)))
-     (env:heap-stat)
+     (env:heap-room)
      ((:lambda ()
         (mu:apply fn args)
-        (env:heap-stat))))))
+        (env:heap-room))))))
 
 (mu:intern common "room"
    (:lambda (verbosity)
@@ -86,7 +86,7 @@
                                           ())))
                               0))
                            (env:heap-info)))))
-              (env:heap-stat))
+              (env:heap-room))
              (core:raise verbosity 'common:room "not a room detail level")))
      (:if (core:null verbosity)
           :null
