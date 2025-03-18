@@ -9,7 +9,8 @@ use {
             config::Config,
             direct::DirectTag,
             env::Env,
-            types::{Tag, Type},
+            indirect::IndirectTag,
+            types::{Tag, TagType, Type},
         },
         types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
     },
@@ -315,8 +316,69 @@ impl HeapAllocator {
         }
     }
 
-    pub fn heap_free(_env: &Env) -> usize {
-        0
+    pub fn heap_free(env: &Env) -> usize {
+        let heap_ref = block_on(env.heap.read());
+        let mut heap_free = heap_ref.size - heap_ref.write_barrier;
+
+        println!("heap_free: barrier {}", heap_ref.write_barrier);
+        for type_id in 0..Tag::NTYPES {
+            match Type::try_from(type_id).unwrap() {
+                Type::Cons => {
+                    for image_id in &heap_ref.free_map[type_id as usize] {
+                        let ind = IndirectTag::new()
+                            .with_image_id(*image_id as u64)
+                            .with_heap_id(1)
+                            .with_tag(TagType::Cons);
+
+                        heap_free += Cons::heap_size(env, Tag::Indirect(ind)) + 8;
+                    }
+                }
+                Type::Function => {
+                    for image_id in &heap_ref.free_map[type_id as usize] {
+                        let ind = IndirectTag::new()
+                            .with_image_id(*image_id as u64)
+                            .with_heap_id(1)
+                            .with_tag(TagType::Function);
+
+                        heap_free += Function::heap_size(env, Tag::Indirect(ind)) + 8;
+                    }
+                }
+                Type::Struct => {
+                    for image_id in &heap_ref.free_map[type_id as usize] {
+                        let ind = IndirectTag::new()
+                            .with_image_id(*image_id as u64)
+                            .with_heap_id(1)
+                            .with_tag(TagType::Struct);
+
+                        heap_free += Struct::heap_size(env, Tag::Indirect(ind)) + 8;
+                    }
+                }
+                Type::Symbol => {
+                    for image_id in &heap_ref.free_map[type_id as usize] {
+                        let ind = IndirectTag::new()
+                            .with_image_id(*image_id as u64)
+                            .with_heap_id(1)
+                            .with_tag(TagType::Symbol);
+
+                        heap_free += Symbol::heap_size(env, Tag::Indirect(ind)) + 8;
+                    }
+                }
+                Type::Vector => {
+                    for image_id in &heap_ref.free_map[type_id as usize] {
+                        let ind = IndirectTag::new()
+                            .with_image_id(*image_id as u64)
+                            .with_heap_id(1)
+                            .with_tag(TagType::Vector);
+
+                        heap_free += Vector::heap_size(env, Tag::Indirect(ind)) + 8;
+                    }
+                }
+
+                _ => (),
+            };
+        }
+
+        heap_free
     }
 
     pub fn heap_info(env: &Env) -> (usize, usize) {

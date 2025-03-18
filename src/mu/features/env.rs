@@ -10,7 +10,7 @@ use {
             env::Env as Env_,
             exception::{self},
             frame::Frame,
-            heap::HeapTypeInfo,
+            heap::{HeapAllocator, HeapTypeInfo},
             indirect::IndirectTag,
             types::{Tag, Type},
         },
@@ -81,8 +81,8 @@ impl Env for Feature {
         ("bump", heap_ref.page_size, heap_ref.npages)
     }
 
-    fn heap_free(_: &Env_) -> usize {
-        0
+    fn heap_free(env: &Env_) -> usize {
+        HeapAllocator::heap_free(env)
     }
 
     fn heap_type(env: &Env_, type_: Type) -> HeapTypeInfo {
