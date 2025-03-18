@@ -28,10 +28,12 @@ use {
 lazy_static! {
     pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
     pub static ref ENV_FUNCTIONS: Vec<CoreFnDef> = vec![
-        ("heap-size", 1, Feature::env_hp_size),
-        ("heap-stat", 0, Feature::env_hp_stat),
         ("core", 0, Feature::env_core),
         ("env", 0, Feature::env_env),
+        ("heap-free", 0, Feature::env_hp_free),
+        ("heap-info", 0, Feature::env_hp_info),
+        ("heap-room", 0, Feature::env_hp_room),
+        ("heap-size", 1, Feature::env_hp_size),
     ];
     static ref INFOTYPE: Vec<Tag> = vec![
         Symbol::keyword("cons"),
@@ -45,10 +47,11 @@ lazy_static! {
 
 pub trait Env {
     fn feature() -> Feature;
+    fn heap_free(_: &Env_) -> usize;
+    fn heap_info(_: &Env_) -> (&str, usize, usize);
     fn heap_size(_: &Env_, tag: Tag) -> usize;
-    fn heap_info(_: &Env_) -> (usize, usize);
-    fn heap_type(_: &Env_, type_: Type) -> HeapTypeInfo;
     fn heap_stat(_: &Env_) -> Tag;
+    fn heap_type(_: &Env_, type_: Type) -> HeapTypeInfo;
     fn ns_map(_: &Env_) -> Tag;
 }
 
@@ -72,10 +75,14 @@ impl Env for Feature {
         }
     }
 
-    fn heap_info(env: &Env_) -> (usize, usize) {
+    fn heap_info(env: &Env_) -> (&str, usize, usize) {
         let heap_ref = block_on(env.heap.read());
 
-        (heap_ref.page_size, heap_ref.npages)
+        ("bump", heap_ref.page_size, heap_ref.npages)
+    }
+
+    fn heap_free(_: &Env_) -> usize {
+        0
     }
 
     fn heap_type(env: &Env_, type_: Type) -> HeapTypeInfo {
@@ -87,7 +94,7 @@ impl Env for Feature {
     }
 
     fn heap_stat(env: &Env_) -> Tag {
-        let (pagesz, npages) = <Feature as Env>::heap_info(env);
+        let (_heap_type, pagesz, npages) = <Feature as Env>::heap_info(env);
 
         let mut vec = vec![
             Symbol::keyword("heap"),
@@ -124,21 +131,36 @@ impl Env for Feature {
 
 pub trait CoreFunction {
     fn env_core(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn env_hp_size(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn env_hp_stat(_: &Env_, _: &mut Frame) -> exception::Result<()>;
     fn env_env(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_free(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_info(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_room(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_size(_: &Env_, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Feature {
-    fn env_hp_stat(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        let (pagesz, npages) = <Feature as Env>::heap_info(env);
+    fn env_hp_free(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = Fixnum::with_or_panic(<Feature as Env>::heap_free(env));
 
-        let mut vec = vec![
-            Symbol::keyword("heap"),
-            Fixnum::with_or_panic(pagesz * npages),
+        Ok(())
+    }
+
+    fn env_hp_info(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+        let (heap_type, pagesz, npages) = <Feature as Env>::heap_info(env);
+
+        let vec = vec![
+            Vector::from(heap_type).evict(env),
+            Fixnum::with_or_panic(pagesz),
             Fixnum::with_or_panic(npages),
-            Fixnum::with_or_panic(0),
         ];
+
+        fp.value = Cons::list(env, &vec);
+
+        Ok(())
+    }
+
+    fn env_hp_room(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+        let mut vec = vec![];
 
         for htype in INFOTYPE.iter() {
             let type_map =
@@ -164,14 +186,6 @@ impl CoreFunction for Feature {
     }
 
     fn env_env(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        let (page_size, npages) = <Feature as Env>::heap_info(env);
-
-        let heap_info = vec![
-            Symbol::keyword("bump"),
-            Fixnum::with_or_panic(page_size),
-            Fixnum::with_or_panic(npages),
-        ];
-
         let alist = vec![
             Cons::cons(
                 env,
@@ -187,11 +201,6 @@ impl CoreFunction for Feature {
                 env,
                 Vector::from("namespaces").evict(env),
                 Self::ns_map(env),
-            ),
-            Cons::cons(
-                env,
-                Vector::from("heap-info").evict(env),
-                Cons::list(env, &heap_info),
             ),
             Cons::cons(
                 env,
