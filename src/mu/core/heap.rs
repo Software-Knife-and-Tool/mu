@@ -67,6 +67,7 @@ pub struct HeapAllocator {
     pub mmap: Box<memmap::MmapMut>,
     pub alloc_map: RwLock<Vec<RwLock<HeapTypeInfo>>>,
     pub free_map: Vec<Vec<usize>>,
+    pub guard_page: usize,
     pub page_size: usize,
     pub npages: usize,
     pub size: usize,
@@ -122,6 +123,7 @@ impl HeapAllocator {
             npages,
             page_size,
             size: npages * page_size,
+            guard_page: (npages - 1) * page_size,
             write_barrier: 0,
         }
     }
@@ -141,9 +143,15 @@ impl HeapAllocator {
     }
 
     // allocate
-    pub fn alloc(&mut self, image: &[[u8; 8]], vdata: Option<&[u8]>, type_id: u8) -> Option<usize> {
+    pub fn alloc(
+        &mut self,
+        image: &[[u8; 8]],
+        vdata: Option<&[u8]>,
+        type_id: u8,
+    ) -> Option<(bool, usize)> {
         let image_len = image.len();
         let base = self.write_barrier;
+        let guard_page = self.guard_page;
 
         let vdata_size: usize = match vdata {
             None => 0,
@@ -153,6 +161,8 @@ impl HeapAllocator {
         if base + ((image_len + 1) * Self::SIZEOF_U64 + vdata_size) > self.size {
             return None;
         }
+
+        let high_water: bool = base >= guard_page;
 
         if let Some(index) = self.alloc_free(type_id, (image_len * Self::SIZEOF_U64) + vdata_size) {
             let data = &mut self.mmap;
@@ -170,7 +180,7 @@ impl HeapAllocator {
                 _ => (),
             }
 
-            Some(index)
+            Some((false, index))
         } else {
             let hinfo = HeapImageInfo::new()
                 .with_reloc(0)
@@ -204,7 +214,7 @@ impl HeapAllocator {
             alloc_type.size += (image_len * Self::SIZEOF_U64) + vdata_size;
             alloc_type.total += 1;
 
-            Some(index)
+            Some((high_water, index))
         }
     }
 
@@ -320,7 +330,6 @@ impl HeapAllocator {
         let heap_ref = block_on(env.heap.read());
         let mut heap_free = heap_ref.size - heap_ref.write_barrier;
 
-        println!("heap_free: barrier {}", heap_ref.write_barrier);
         for type_id in 0..Tag::NTYPES {
             match Type::try_from(type_id).unwrap() {
                 Type::Cons => {
@@ -373,7 +382,6 @@ impl HeapAllocator {
                         heap_free += Vector::heap_size(env, Tag::Indirect(ind)) + 8;
                     }
                 }
-
                 _ => (),
             };
         }
