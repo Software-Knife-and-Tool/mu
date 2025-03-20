@@ -168,12 +168,21 @@ impl Struct {
         let image: &[[u8; 8]] = &[self.stype.as_slice(), self.vector.as_slice()];
         let mut heap_ref = block_on(env.heap.write());
 
-        Tag::Indirect(
-            IndirectTag::new()
-                .with_image_id(heap_ref.alloc(image, None, Type::Struct as u8).unwrap() as u64)
-                .with_heap_id(1)
-                .with_tag(TagType::Struct),
-        )
+        match heap_ref.alloc(image, None, Type::Struct as u8) {
+            Some((high_water, image_id)) => {
+                let ind = IndirectTag::new()
+                    .with_image_id(image_id as u64)
+                    .with_heap_id(1)
+                    .with_tag(TagType::Struct);
+
+                if high_water {
+                    Gc::gc_lock(env, heap_ref).unwrap();
+                }
+
+                Tag::Indirect(ind)
+            }
+            None => panic!(),
+        }
     }
 }
 

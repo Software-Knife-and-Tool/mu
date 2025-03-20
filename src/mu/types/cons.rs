@@ -228,12 +228,23 @@ impl Cons {
                 let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
                 let mut heap_ref = block_on(env.heap.write());
 
-                let ind = IndirectTag::new()
-                    .with_image_id(heap_ref.alloc(image, None, Type::Cons as u8).unwrap() as u64)
-                    .with_heap_id(1)
-                    .with_tag(TagType::Cons);
+                match heap_ref.alloc(image, None, Type::Cons as u8) {
+                    Some((high_water, image_id)) => {
+                        let ind = IndirectTag::new()
+                            .with_image_id(image_id as u64)
+                            .with_heap_id(1)
+                            .with_tag(TagType::Cons);
 
-                Tag::Indirect(ind)
+                        if high_water {
+                            Gc::gc_lock(env, heap_ref).unwrap();
+                        }
+
+                        Tag::Indirect(ind)
+                    }
+                    None => {
+                        panic!()
+                    }
+                }
             }
         }
     }

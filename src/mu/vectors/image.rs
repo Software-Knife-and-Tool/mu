@@ -187,7 +187,8 @@ impl VecImage for VecImageType<'_> {
 
                 heap_ref
                     .alloc(&Self::image(image), Some(data), Type::Vector as u8)
-                    .unwrap() as u64
+                    .unwrap()
+                    .1 as u64
             }
             VecImageType::Bit(image, ivec) => {
                 let data = match ivec {
@@ -197,7 +198,8 @@ impl VecImage for VecImageType<'_> {
 
                 heap_ref
                     .alloc(&Self::image(image), Some(data), Type::Vector as u8)
-                    .unwrap() as u64
+                    .unwrap()
+                    .1 as u64
             }
             VecImageType::Char(image, ivec) => {
                 let data = match ivec {
@@ -207,7 +209,8 @@ impl VecImage for VecImageType<'_> {
 
                 heap_ref
                     .alloc(&Self::image(image), Some(data), Type::Vector as u8)
-                    .unwrap() as u64
+                    .unwrap()
+                    .1 as u64
             }
             VecImageType::T(image, ivec) => {
                 let mut slices = Self::image(image);
@@ -219,7 +222,7 @@ impl VecImage for VecImageType<'_> {
                     _ => panic!(),
                 }
 
-                heap_ref.alloc(&slices, None, Type::Vector as u8).unwrap() as u64
+                heap_ref.alloc(&slices, None, Type::Vector as u8).unwrap().1 as u64
             }
             VecImageType::Fixnum(image, ivec) => {
                 let mut slices = Self::image(image);
@@ -231,7 +234,7 @@ impl VecImage for VecImageType<'_> {
                     _ => panic!(),
                 }
 
-                heap_ref.alloc(&slices, None, Type::Vector as u8).unwrap() as u64
+                heap_ref.alloc(&slices, None, Type::Vector as u8).unwrap().1 as u64
             }
             VecImageType::Float(image, ivec) => {
                 let data = match ivec {
@@ -249,7 +252,8 @@ impl VecImage for VecImageType<'_> {
 
                 heap_ref
                     .alloc(&Self::image(image), Some(&data), Type::Vector as u8)
-                    .unwrap() as u64
+                    .unwrap()
+                    .1 as u64
             }
         };
 

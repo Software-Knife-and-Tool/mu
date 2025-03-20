@@ -93,12 +93,22 @@ impl Function {
         let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
 
         let mut heap_ref = block_on(env.heap.write());
-        let ind = IndirectTag::new()
-            .with_image_id(heap_ref.alloc(image, None, Type::Function as u8).unwrap() as u64)
-            .with_heap_id(1)
-            .with_tag(TagType::Function);
 
-        Tag::Indirect(ind)
+        match heap_ref.alloc(image, None, Type::Function as u8) {
+            Some((high_water, image_id)) => {
+                let ind = IndirectTag::new()
+                    .with_image_id(image_id as u64)
+                    .with_heap_id(1)
+                    .with_tag(TagType::Function);
+
+                if high_water {
+                    Gc::gc_lock(env, heap_ref).unwrap();
+                }
+
+                Tag::Indirect(ind)
+            }
+            None => panic!(),
+        }
     }
 
     pub fn evict_image(tag: Tag, env: &Env) -> Tag {

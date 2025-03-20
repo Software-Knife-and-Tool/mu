@@ -99,6 +99,17 @@ impl Gc {
         }
     }
 
+    pub fn gc_lock(env: &Env, lock: HeapGcRef) -> exception::Result<bool> {
+        let mut gc = Gc { lock };
+
+        gc.lock.clear_marks();
+        gc.namespaces(env);
+        gc.lexicals(env);
+        gc.lock.sweep();
+
+        Ok(true)
+    }
+
     pub fn gc(env: &Env) -> exception::Result<bool> {
         let mut gc = Gc {
             lock: block_on(env.heap.write()),
