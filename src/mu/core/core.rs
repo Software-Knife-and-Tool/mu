@@ -12,7 +12,7 @@ use {
             env::Env,
             exception::{self, CoreFunction as _, Exception},
             frame::{CoreFunction as _, Frame},
-            gc::{CoreFunction as _, Gc},
+            gc_context::{CoreFunction as _, GcContext},
             namespace::Namespace,
             types::{CoreFunction as _, Tag},
         },
@@ -64,7 +64,7 @@ lazy_static! {
         ( "compile", 1, Env::mu_compile ),
         ( "%if",     3, Env::mu_if),
         // gc
-        ( "gc",      0, Gc::mu_gc ),
+        ( "gc",      0, GcContext::mu_gc ),
         // config
         ( "config",  0, Env::mu_config ),
         // env

@@ -6,7 +6,8 @@ use crate::{
     core::{
         env::Env,
         exception,
-        gc::{Gc, HeapGcRef},
+        gc_context::{Gc as _, GcContext},
+        heap::HeapRequest,
         indirect::IndirectTag,
         namespace::Namespace,
         type_image::TypeImage,
@@ -24,28 +25,30 @@ pub struct Function {
     pub form: Tag,  // list or vector
 }
 
-pub trait GC {
-    fn ref_form(_: &mut Gc, _: Tag) -> Tag;
-    fn mark(_: &mut Gc, _: &Env, _: Tag);
-    fn gc_ref_image(_: &mut HeapGcRef, _: Tag) -> Self;
+pub trait Gc {
+    fn ref_form(_: &mut GcContext, _: Tag) -> Tag;
+    fn mark(_: &mut GcContext, _: &Env, _: Tag);
+    fn gc_ref_image(_: &mut GcContext, _: Tag) -> Self;
 }
 
-impl GC for Function {
-    fn ref_form(gc: &mut Gc, func: Tag) -> Tag {
-        Self::gc_ref_image(&mut gc.lock, func).form
+impl Gc for Function {
+    fn ref_form(context: &mut GcContext, func: Tag) -> Tag {
+        Self::gc_ref_image(context, func).form
     }
 
-    fn mark(gc: &mut Gc, env: &Env, function: Tag) {
-        let mark = gc.mark_image(function).unwrap();
+    fn mark(context: &mut GcContext, env: &Env, function: Tag) {
+        let mark = context.mark_image(function).unwrap();
 
         if !mark {
-            let form = Self::ref_form(gc, function);
+            let form = Self::ref_form(context, function);
 
-            gc.mark(env, form)
+            context.mark(env, form)
         }
     }
 
-    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
+    fn gc_ref_image(context: &mut GcContext, tag: Tag) -> Self {
+        let heap_ref = &context.heap_ref;
+
         match tag.type_of() {
             Type::Function => match tag {
                 Tag::Indirect(fn_) => Function {
@@ -91,19 +94,20 @@ impl Function {
 
     pub fn evict(&self, env: &Env) -> Tag {
         let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
-
         let mut heap_ref = block_on(env.heap.write());
+        let ha = HeapRequest {
+            env,
+            image,
+            vdata: None,
+            type_id: Type::Function as u8,
+        };
 
-        match heap_ref.alloc(image, None, Type::Function as u8) {
-            Some((high_water, image_id)) => {
+        match heap_ref.alloc(&ha) {
+            Some(image_id) => {
                 let ind = IndirectTag::new()
                     .with_image_id(image_id as u64)
                     .with_heap_id(1)
                     .with_tag(TagType::Function);
-
-                if high_water {
-                    Gc::gc_lock(env, heap_ref).unwrap();
-                }
 
                 Tag::Indirect(ind)
             }

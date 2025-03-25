@@ -3,27 +3,28 @@
 
 //! env heap interface
 //!    Env
+#![allow(unused_imports)]
 use {
     crate::{
         core::{
             config::Config,
             direct::DirectTag,
             env::Env,
-            indirect::IndirectTag,
-            types::{Tag, TagType, Type},
+            gc_context::{Gc as _, GcContext},
+            types::{Tag, Type},
         },
         types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
     },
+    futures::executor::block_on,
     memmap,
     modular_bitfield::specifiers::{B11, B4},
     std::{
         fmt,
         fs::{remove_file, OpenOptions},
         io::{Seek, SeekFrom, Write},
+        mem::size_of,
     },
 };
-
-use {futures::executor::block_on, futures_locks::RwLock};
 
 #[bitfield]
 #[repr(align(8))]
@@ -64,19 +65,26 @@ pub struct HeapTypeInfo {
 
 #[derive(Debug)]
 pub struct HeapAllocator {
-    pub mmap: Box<memmap::MmapMut>,
-    pub alloc_map: RwLock<Vec<RwLock<HeapTypeInfo>>>,
-    pub free_map: Vec<Vec<usize>>,
-    pub guard_page: usize,
-    pub page_size: usize,
-    pub npages: usize,
-    pub size: usize,
-    pub write_barrier: usize, // byte offset
+    pub mmap: Box<memmap::MmapMut>,   // heap base
+    pub page_size: usize,             // size of logical page
+    pub npages: usize,                // total size of heap in pages
+    pub size: usize,                  // total size of heap in bytes
+    pub alloc_map: Vec<HeapTypeInfo>, // map of allocated objects
+    pub alloc_barrier: usize,         // unallocated space barrier
+    pub free_map: Vec<Vec<usize>>,    // map of free objects
+    pub free_space: usize,            // number of aggregate free bytes
+    pub gc_threshold: usize,          // how often to gc
+    pub gc_allocated: usize,          // bytes allocated since last gc
+}
+
+pub struct HeapRequest<'a> {
+    pub env: &'a Env,
+    pub image: &'a [[u8; 8]],
+    pub type_id: u8,
+    pub vdata: Option<&'a [u8]>,
 }
 
 impl HeapAllocator {
-    const SIZEOF_U64: usize = std::mem::size_of::<u64>();
-
     pub fn new(config: &Config) -> Self {
         let path = &format!("/var/tmp/mu.{}.heap", std::process::id());
 
@@ -105,26 +113,24 @@ impl HeapAllocator {
         };
 
         HeapAllocator {
-            alloc_map: RwLock::new(
-                (0..Tag::NTYPES)
-                    .map(|_| {
-                        RwLock::new(HeapTypeInfo {
-                            size: 0,
-                            total: 0,
-                            free: 0,
-                        })
-                    })
-                    .collect::<Vec<RwLock<HeapTypeInfo>>>(),
-            ),
-            free_map: (0..Tag::NTYPES)
-                .map(|_| Vec::<usize>::new())
-                .collect::<Vec<Vec<usize>>>(),
             mmap: Box::new(data),
             npages,
             page_size,
             size: npages * page_size,
-            guard_page: (npages - 1) * page_size,
-            write_barrier: 0,
+            alloc_map: (0..Tag::NTYPES)
+                .map(|_| HeapTypeInfo {
+                    size: 0,
+                    total: 0,
+                    free: 0,
+                })
+                .collect::<Vec<HeapTypeInfo>>(),
+            alloc_barrier: 0,
+            free_map: (0..Tag::NTYPES)
+                .map(|_| Vec::<usize>::new())
+                .collect::<Vec<Vec<usize>>>(),
+            free_space: npages * page_size,
+            gc_allocated: 0,
+            gc_threshold: 10 * page_size, // get this from config
         }
     }
 
@@ -143,79 +149,81 @@ impl HeapAllocator {
     }
 
     // allocate
-    pub fn alloc(
-        &mut self,
-        image: &[[u8; 8]],
-        vdata: Option<&[u8]>,
-        type_id: u8,
-    ) -> Option<(bool, usize)> {
-        let image_len = image.len();
-        let base = self.write_barrier;
-        let guard_page = self.guard_page;
+    pub fn alloc(&mut self, req: &HeapRequest) -> Option<usize> {
+        let image_len = req.image.len();
 
-        let vdata_size: usize = match vdata {
+        let _vdata = req.vdata;
+        let vdata_size: usize = match req.vdata {
             None => 0,
-            Some(vdata) => (vdata.len() + Self::SIZEOF_U64 - 1) & !(Self::SIZEOF_U64 - 1),
+            Some(vdata) => (vdata.len() + size_of::<u64>() - 1) & !(size_of::<u64>() - 1),
         };
 
-        if base + ((image_len + 1) * Self::SIZEOF_U64 + vdata_size) > self.size {
-            return None;
-        }
+        let image_size = ((image_len + 1) * size_of::<u64>()) + vdata_size;
 
-        let high_water: bool = base >= guard_page;
+        self.free_space -= image_size + size_of::<HeapImageInfo>();
 
-        if let Some(index) = self.alloc_free(type_id, (image_len * Self::SIZEOF_U64) + vdata_size) {
-            let data = &mut self.mmap;
-            let mut off = index * Self::SIZEOF_U64;
+        let index = match self.alloc_free(req.type_id, (image_len * size_of::<u64>()) + vdata_size)
+        {
+            Some(index) => {
+                let data = &mut self.mmap;
+                let mut off = index * size_of::<u64>();
 
-            for image_slice in image {
-                data[off..(off + Self::SIZEOF_U64)].copy_from_slice(image_slice);
-                off += Self::SIZEOF_U64;
-            }
-
-            match vdata {
-                Some(vdata) if vdata_size != 0 => {
-                    data[off..(off + vdata.len())].copy_from_slice(vdata);
+                for image_slice in req.image {
+                    data[off..(off + size_of::<u64>())].copy_from_slice(image_slice);
+                    off += size_of::<u64>();
                 }
-                _ => (),
+
+                match req.vdata {
+                    Some(vdata) if vdata_size != 0 => {
+                        data[off..(off + vdata.len())].copy_from_slice(vdata);
+                    }
+                    _ => (),
+                }
+
+                index
             }
+            None => {
+                if self.alloc_barrier + image_size > self.size {
+                    return None;
+                }
 
-            Some((false, index))
-        } else {
-            let hinfo = HeapImageInfo::new()
-                .with_reloc(0)
-                .with_len((((image_len + 1) * Self::SIZEOF_U64) + vdata_size) as u16)
-                .with_mark(false)
-                .with_image_type(type_id)
-                .into_bytes();
+                self.gc_allocated += image_size;
 
-            let data = &mut self.mmap;
+                let hinfo = HeapImageInfo::new()
+                    .with_reloc(0)
+                    .with_len(image_size as u16)
+                    .with_mark(false)
+                    .with_image_type(req.type_id)
+                    .into_bytes();
 
-            data[self.write_barrier..(self.write_barrier + 8)].copy_from_slice(&hinfo);
-            self.write_barrier += Self::SIZEOF_U64;
+                let data = &mut self.mmap;
 
-            let index = self.write_barrier / Self::SIZEOF_U64;
+                data[self.alloc_barrier..(self.alloc_barrier + 8)].copy_from_slice(&hinfo);
+                self.alloc_barrier += size_of::<HeapImageInfo>();
 
-            for image_slice in image {
-                data[self.write_barrier..(self.write_barrier + Self::SIZEOF_U64)]
-                    .copy_from_slice(image_slice);
-                self.write_barrier += Self::SIZEOF_U64;
+                let index = self.alloc_barrier / size_of::<u64>();
+
+                for image_slice in req.image {
+                    data[self.alloc_barrier..(self.alloc_barrier + size_of::<u64>())]
+                        .copy_from_slice(image_slice);
+                    self.alloc_barrier += size_of::<u64>();
+                }
+
+                if vdata_size != 0 {
+                    data[self.alloc_barrier..(self.alloc_barrier + req.vdata.unwrap().len())]
+                        .copy_from_slice(req.vdata.unwrap());
+                    self.alloc_barrier += vdata_size;
+                }
+
+                self.alloc_map[req.type_id as usize].size +=
+                    (image_len * size_of::<u64>()) + vdata_size;
+                self.alloc_map[req.type_id as usize].total += 1;
+
+                index
             }
+        };
 
-            if vdata_size != 0 {
-                data[self.write_barrier..(self.write_barrier + vdata.unwrap().len())]
-                    .copy_from_slice(vdata.unwrap());
-                self.write_barrier += vdata_size;
-            }
-
-            let alloc_ref = block_on(self.alloc_map.write());
-            let mut alloc_type = block_on(alloc_ref[type_id as usize].write());
-
-            alloc_type.size += (image_len * Self::SIZEOF_U64) + vdata_size;
-            alloc_type.total += 1;
-
-            Some((high_water, index))
-        }
+        Some(index)
     }
 
     // try first fit
@@ -224,10 +232,7 @@ impl HeapAllocator {
             match self.image_info(*off) {
                 Some(info) => {
                     if info.len() >= size as u16 {
-                        let alloc_ref = block_on(self.alloc_map.write());
-                        let mut alloc_type = block_on(alloc_ref[type_id as usize].write());
-
-                        alloc_type.free -= 1;
+                        self.alloc_map[type_id as usize].total += 1;
 
                         return Some(self.free_map[type_id as usize].remove(index));
                     }
@@ -241,16 +246,16 @@ impl HeapAllocator {
 
     // rewrite info header
     pub fn write_info(&mut self, info: HeapImageInfo, index: usize) {
-        let off = index * Self::SIZEOF_U64;
+        let off = index * size_of::<u64>();
 
         self.mmap[(off - 8)..off].copy_from_slice(&(info.into_bytes()))
     }
 
     // info header from heap tag
     pub fn image_info(&self, index: usize) -> Option<HeapImageInfo> {
-        let off = index * Self::SIZEOF_U64;
+        let off = index * size_of::<u64>();
 
-        if off == 0 || off > self.write_barrier {
+        if off == 0 || off > self.alloc_barrier {
             None
         } else {
             let data = &self.mmap;
@@ -279,7 +284,7 @@ impl HeapAllocator {
 
     // read and write image data
     pub fn write_image(&mut self, image: &[[u8; 8]], index: usize) {
-        let mut off = index * Self::SIZEOF_U64;
+        let mut off = index * size_of::<u64>();
 
         for image_slice in image {
             self.mmap[off..(off + 8)].copy_from_slice(image_slice);
@@ -288,9 +293,9 @@ impl HeapAllocator {
     }
 
     pub fn image_data_slice(&self, index: usize, offset: usize, len: usize) -> Option<&[u8]> {
-        let off = (index * Self::SIZEOF_U64) + offset;
+        let off = (index * size_of::<u64>()) + offset;
 
-        if off == 0 || off > self.write_barrier {
+        if off == 0 || off > self.alloc_barrier {
             None
         } else {
             let data = &self.mmap;
@@ -299,9 +304,9 @@ impl HeapAllocator {
     }
 
     pub fn image_slice(&self, index: usize) -> Option<&[u8]> {
-        let off = index * Self::SIZEOF_U64;
+        let off = index * size_of::<u64>();
 
-        if off == 0 || off > self.write_barrier {
+        if off == 0 || off > self.alloc_barrier {
             None
         } else {
             let data = &self.mmap;
@@ -322,71 +327,14 @@ impl HeapAllocator {
             Type::Struct => Struct::heap_size(env, tag),
             Type::Symbol => Symbol::heap_size(env, tag),
             Type::Vector => Vector::heap_size(env, tag),
-            _ => std::mem::size_of::<DirectTag>(),
+            _ => size_of::<DirectTag>(),
         }
     }
 
     pub fn heap_free(env: &Env) -> usize {
         let heap_ref = block_on(env.heap.read());
-        let mut heap_free = heap_ref.size - heap_ref.write_barrier;
 
-        for type_id in 0..Tag::NTYPES {
-            match Type::try_from(type_id).unwrap() {
-                Type::Cons => {
-                    for image_id in &heap_ref.free_map[type_id as usize] {
-                        let ind = IndirectTag::new()
-                            .with_image_id(*image_id as u64)
-                            .with_heap_id(1)
-                            .with_tag(TagType::Cons);
-
-                        heap_free += Cons::heap_size(env, Tag::Indirect(ind)) + 8;
-                    }
-                }
-                Type::Function => {
-                    for image_id in &heap_ref.free_map[type_id as usize] {
-                        let ind = IndirectTag::new()
-                            .with_image_id(*image_id as u64)
-                            .with_heap_id(1)
-                            .with_tag(TagType::Function);
-
-                        heap_free += Function::heap_size(env, Tag::Indirect(ind)) + 8;
-                    }
-                }
-                Type::Struct => {
-                    for image_id in &heap_ref.free_map[type_id as usize] {
-                        let ind = IndirectTag::new()
-                            .with_image_id(*image_id as u64)
-                            .with_heap_id(1)
-                            .with_tag(TagType::Struct);
-
-                        heap_free += Struct::heap_size(env, Tag::Indirect(ind)) + 8;
-                    }
-                }
-                Type::Symbol => {
-                    for image_id in &heap_ref.free_map[type_id as usize] {
-                        let ind = IndirectTag::new()
-                            .with_image_id(*image_id as u64)
-                            .with_heap_id(1)
-                            .with_tag(TagType::Symbol);
-
-                        heap_free += Symbol::heap_size(env, Tag::Indirect(ind)) + 8;
-                    }
-                }
-                Type::Vector => {
-                    for image_id in &heap_ref.free_map[type_id as usize] {
-                        let ind = IndirectTag::new()
-                            .with_image_id(*image_id as u64)
-                            .with_heap_id(1)
-                            .with_tag(TagType::Vector);
-
-                        heap_free += Vector::heap_size(env, Tag::Indirect(ind)) + 8;
-                    }
-                }
-                _ => (),
-            };
-        }
-
-        heap_free
+        heap_ref.free_space
     }
 
     pub fn heap_info(env: &Env) -> (usize, usize) {
@@ -397,35 +345,30 @@ impl HeapAllocator {
 
     pub fn heap_type(env: &Env, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
-        let alloc_ref = block_on(heap_ref.alloc_map.read());
-        let type_ref = block_on(alloc_ref[type_ as usize].read());
 
-        *type_ref
+        heap_ref.alloc_map[type_ as usize]
     }
 }
 
-pub trait GC {
+pub trait Gc {
     fn clear_marks(&mut self);
     fn sweep(&mut self);
     fn set_image_mark(&mut self, _: usize);
     fn get_image_mark(&self, _: usize) -> Option<bool>;
 }
 
-impl GC for HeapAllocator {
+impl Gc for HeapAllocator {
     fn clear_marks(&mut self) {
         let mut index: usize = 1;
 
         while let Some(mut info) = self.image_info(index) {
             info.set_mark(false);
             self.write_info(info, index);
-            index += (info.len() as usize) / Self::SIZEOF_U64
+            index += (info.len() as usize) / size_of::<u64>()
         }
 
-        let alloc_ref = block_on(self.alloc_map.write());
-        for type_map in (*alloc_ref).iter() {
-            let mut alloc_type = block_on(type_map.write());
-
-            alloc_type.free = 0
+        for type_map in self.alloc_map.iter_mut() {
+            type_map.free = 0
         }
 
         for free_map in self.free_map.iter_mut() {
@@ -441,10 +384,8 @@ impl GC for HeapAllocator {
 
         for (info, index) in free_list {
             let type_id = info.image_type() as usize;
-            let alloc_ref = block_on(self.alloc_map.read());
-            let mut alloc_type = block_on(alloc_ref[type_id].write());
 
-            alloc_type.free += 1;
+            self.alloc_map[type_id].free += 1;
             self.free_map[type_id].push(index);
         }
     }
@@ -477,7 +418,7 @@ impl Iterator for HeapAllocatorIter<'_> {
         match self.heap.image_info(self.index) {
             Some(info) => {
                 let type_id = self.index;
-                self.index += (info.len() as usize) / std::mem::size_of::<u64>();
+                self.index += (info.len() as usize) / size_of::<u64>();
                 Some((info, type_id))
             }
             None => None,

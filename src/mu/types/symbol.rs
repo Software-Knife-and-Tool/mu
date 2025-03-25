@@ -10,8 +10,8 @@ use {
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc::{Gc, HeapGcRef},
-            heap::HeapAllocator,
+            gc_context::{Gc as _, GcContext},
+            heap::{HeapAllocator, HeapRequest},
             indirect::IndirectTag,
             namespace::Namespace,
             readtable::{map_char_syntax, SyntaxType},
@@ -43,26 +43,35 @@ pub struct SymbolImage {
     pub value: Tag,
 }
 
-pub trait GC {
-    fn gc_ref_image(_: &mut HeapGcRef, _: Tag) -> SymbolImage;
-    fn ref_name(_: &mut Gc, _: Tag) -> Tag;
-    fn ref_value(_: &mut Gc, _: Tag) -> Tag;
-    fn mark(_: &mut Gc, _: &Env, _: Tag);
+pub trait Gc {
+    fn gc_ref_image(_: &mut GcContext, tag: Tag) -> SymbolImage;
+    fn ref_name(_: &mut GcContext, symbol: Tag) -> Tag;
+    fn ref_value(_: &mut GcContext, symbol: Tag) -> Tag;
+    fn mark(_: &mut GcContext, env: &Env, symbol: Tag);
 }
 
-impl GC for Symbol {
-    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> SymbolImage {
+impl Gc for Symbol {
+    fn gc_ref_image(context: &mut GcContext, tag: Tag) -> SymbolImage {
         match tag.type_of() {
             Type::Symbol => match tag {
                 Tag::Indirect(main) => SymbolImage {
                     namespace: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize).unwrap(),
+                        context
+                            .heap_ref
+                            .image_slice(main.image_id() as usize)
+                            .unwrap(),
                     ),
                     name: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                        context
+                            .heap_ref
+                            .image_slice(main.image_id() as usize + 1)
+                            .unwrap(),
                     ),
                     value: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
+                        context
+                            .heap_ref
+                            .image_slice(main.image_id() as usize + 2)
+                            .unwrap(),
                     ),
                 },
                 _ => panic!(),
@@ -71,7 +80,7 @@ impl GC for Symbol {
         }
     }
 
-    fn ref_name(gc: &mut Gc, symbol: Tag) -> Tag {
+    fn ref_name(context: &mut GcContext, symbol: Tag) -> Tag {
         match symbol.type_of() {
             Type::Null | Type::Keyword => match symbol {
                 Tag::Direct(dir) => DirectTag::to_tag(
@@ -81,32 +90,32 @@ impl GC for Symbol {
                 ),
                 _ => panic!(),
             },
-            Type::Symbol => Self::gc_ref_image(&mut gc.lock, symbol).name,
+            Type::Symbol => Self::gc_ref_image(context, symbol).name,
             _ => panic!(),
         }
     }
 
-    fn ref_value(gc: &mut Gc, symbol: Tag) -> Tag {
+    fn ref_value(context: &mut GcContext, symbol: Tag) -> Tag {
         match symbol.type_of() {
             Type::Null | Type::Keyword => symbol,
-            Type::Symbol => Self::gc_ref_image(&mut gc.lock, symbol).value,
+            Type::Symbol => Self::gc_ref_image(context, symbol).value,
             _ => panic!(),
         }
     }
 
-    fn mark(gc: &mut Gc, env: &Env, symbol: Tag) {
+    fn mark(context: &mut GcContext, env: &Env, symbol: Tag) {
         match symbol {
             Tag::Image(_) => panic!(),
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
-                let mark = gc.mark_image(symbol).unwrap();
+                let mark = context.mark_image(symbol).unwrap();
 
                 if !mark {
-                    let name = Self::ref_name(gc, symbol);
-                    let value = Self::ref_value(gc, symbol);
+                    let name = Self::ref_name(context, symbol);
+                    let value = Self::ref_value(context, symbol);
 
-                    gc.mark(env, name);
-                    gc.mark(env, value);
+                    context.mark(env, name);
+                    context.mark(env, value);
                 }
             }
         }
@@ -233,17 +242,19 @@ impl Symbol {
                 ];
 
                 let mut heap_ref = block_on(env.heap.write());
+                let ha = HeapRequest {
+                    env,
+                    image: slices,
+                    vdata: None,
+                    type_id: Type::Symbol as u8,
+                };
 
-                match heap_ref.alloc(slices, None, Type::Symbol as u8) {
-                    Some((high_water, image_id)) => {
+                match heap_ref.alloc(&ha) {
+                    Some(image_id) => {
                         let ind = IndirectTag::new()
                             .with_image_id(image_id as u64)
                             .with_heap_id(1)
                             .with_tag(TagType::Symbol);
-
-                        if high_water {
-                            Gc::gc_lock(env, heap_ref).unwrap();
-                        }
 
                         Tag::Indirect(ind)
                     }

@@ -48,8 +48,8 @@ lazy_static! {
 pub trait Env {
     fn feature() -> Feature;
     fn heap_free(_: &Env_) -> usize;
-    fn heap_info(_: &Env_) -> (&str, usize, usize);
     fn heap_size(_: &Env_, tag: Tag) -> usize;
+    fn heap_info(_: &Env_) -> (&str, usize, usize);
     fn heap_stat(_: &Env_) -> Tag;
     fn heap_type(_: &Env_, type_: Type) -> HeapTypeInfo;
     fn ns_map(_: &Env_) -> Tag;
@@ -87,10 +87,8 @@ impl Env for Feature {
 
     fn heap_type(env: &Env_, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
-        let alloc_ref = block_on(heap_ref.alloc_map.read());
-        let type_ref = block_on(alloc_ref[type_ as usize].read());
 
-        *type_ref
+        heap_ref.alloc_map[type_ as usize]
     }
 
     fn heap_stat(env: &Env_) -> Tag {
@@ -146,15 +144,17 @@ impl CoreFunction for Feature {
     }
 
     fn env_hp_info(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        let (heap_type, pagesz, npages) = <Feature as Env>::heap_info(env);
+        let heap_ref = block_on(env.heap.read());
+        println!("type           :bump");
+        println!("page-size      {}", heap_ref.page_size);
+        println!("npages         {}", heap_ref.npages);
+        println!("size           {}", heap_ref.size);
+        println!("alloc-barrier  {}", heap_ref.alloc_barrier);
+        println!("free-space     {}", heap_ref.free_space);
+        println!("gc-threshold   {}", heap_ref.gc_threshold);
+        println!("gc-allocated   {}", heap_ref.gc_allocated);
 
-        let vec = vec![
-            Vector::from(heap_type).evict(env),
-            Fixnum::with_or_panic(pagesz),
-            Fixnum::with_or_panic(npages),
-        ];
-
-        fp.value = Cons::list(env, &vec);
+        fp.value = Tag::nil();
 
         Ok(())
     }

@@ -2,17 +2,19 @@
 //  SPDX-License-Identifier: MIT
 
 //! typed vectors
+#![allow(unused_imports)]
 use {
     crate::{
         core::{
             direct::{DirectExt, DirectTag, DirectType},
             env::Env,
-            gc::Gc,
+            gc_context::{Gc, GcContext},
+            heap::HeapRequest,
             indirect::IndirectTag,
             types::{Tag, TagType, Type},
         },
         types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
-        vectors::vector::GC as _,
+        vectors::vector::Gc as _,
     },
     std::str,
 };
@@ -165,7 +167,7 @@ pub trait VecImage {
     fn image(_: &VectorImage) -> Vec<[u8; 8]>;
     fn evict(&self, _: &Env) -> Tag;
     fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
-    fn gc_ref(_: &mut Gc, _: Tag, _: usize) -> Option<Tag>;
+    fn gc_ref(_: &mut GcContext, _: Tag, _: usize) -> Option<Tag>;
 }
 
 impl VecImage for VecImageType<'_> {
@@ -184,33 +186,50 @@ impl VecImage for VecImageType<'_> {
                     VectorImageType::Byte(vec_u8) => &vec_u8[..],
                     _ => panic!(),
                 };
+                let ha = HeapRequest {
+                    env,
+                    image: &Self::image(image),
+                    vdata: Some(data),
+                    type_id: Type::Vector as u8,
+                };
 
-                heap_ref
-                    .alloc(&Self::image(image), Some(data), Type::Vector as u8)
-                    .unwrap()
-                    .1 as u64
+                match heap_ref.alloc(&ha) {
+                    Some(image_id) => image_id as u64,
+                    None => panic!(),
+                }
             }
             VecImageType::Bit(image, ivec) => {
                 let data = match ivec {
                     VectorImageType::Bit(vec_u8) => &vec_u8[..],
                     _ => panic!(),
                 };
+                let ha = HeapRequest {
+                    env,
+                    image: &Self::image(image),
+                    vdata: Some(data),
+                    type_id: Type::Vector as u8,
+                };
 
-                heap_ref
-                    .alloc(&Self::image(image), Some(data), Type::Vector as u8)
-                    .unwrap()
-                    .1 as u64
+                match heap_ref.alloc(&ha) {
+                    Some(image_id) => image_id as u64,
+                    None => panic!(),
+                }
             }
             VecImageType::Char(image, ivec) => {
                 let data = match ivec {
                     VectorImageType::Char(string) => string.as_bytes(),
                     _ => panic!(),
                 };
-
-                heap_ref
-                    .alloc(&Self::image(image), Some(data), Type::Vector as u8)
-                    .unwrap()
-                    .1 as u64
+                let ha = HeapRequest {
+                    env,
+                    image: &Self::image(image),
+                    vdata: Some(data),
+                    type_id: Type::Vector as u8,
+                };
+                match heap_ref.alloc(&ha) {
+                    Some(image_id) => image_id as u64,
+                    None => panic!(),
+                }
             }
             VecImageType::T(image, ivec) => {
                 let mut slices = Self::image(image);
@@ -221,8 +240,17 @@ impl VecImage for VecImageType<'_> {
                     }
                     _ => panic!(),
                 }
+                let ha = HeapRequest {
+                    env,
+                    image: &slices,
+                    vdata: None,
+                    type_id: Type::Vector as u8,
+                };
 
-                heap_ref.alloc(&slices, None, Type::Vector as u8).unwrap().1 as u64
+                match heap_ref.alloc(&ha) {
+                    Some(image_id) => image_id as u64,
+                    None => panic!(),
+                }
             }
             VecImageType::Fixnum(image, ivec) => {
                 let mut slices = Self::image(image);
@@ -234,7 +262,17 @@ impl VecImage for VecImageType<'_> {
                     _ => panic!(),
                 }
 
-                heap_ref.alloc(&slices, None, Type::Vector as u8).unwrap().1 as u64
+                let ha = HeapRequest {
+                    env,
+                    image: &slices,
+                    vdata: None,
+                    type_id: Type::Vector as u8,
+                };
+
+                match heap_ref.alloc(&ha) {
+                    Some(image_id) => image_id as u64,
+                    None => panic!(),
+                }
             }
             VecImageType::Float(image, ivec) => {
                 let data = match ivec {
@@ -250,10 +288,17 @@ impl VecImage for VecImageType<'_> {
                     _ => panic!(),
                 };
 
-                heap_ref
-                    .alloc(&Self::image(image), Some(&data), Type::Vector as u8)
-                    .unwrap()
-                    .1 as u64
+                let ha = HeapRequest {
+                    env,
+                    image: &Self::image(image),
+                    vdata: Some(&data),
+                    type_id: Type::Vector as u8,
+                };
+
+                match heap_ref.alloc(&ha) {
+                    Some(image_id) => image_id as u64,
+                    None => panic!(),
+                }
             }
         };
 
@@ -265,8 +310,8 @@ impl VecImage for VecImageType<'_> {
         )
     }
 
-    fn gc_ref(gc: &mut Gc, vector: Tag, index: usize) -> Option<Tag> {
-        let image = Vector::gc_ref_image(&mut gc.lock, vector);
+    fn gc_ref(context: &mut GcContext, vector: Tag, index: usize) -> Option<Tag> {
+        let image = Vector::gc_ref_image(context, vector);
 
         if index >= Fixnum::as_i64(image.length) as usize {
             return None;
@@ -279,16 +324,16 @@ impl VecImage for VecImageType<'_> {
 
         match Vector::to_type(image.type_).unwrap() {
             Type::Byte => {
-                let slice = gc
-                    .lock
+                let slice = context
+                    .heap_ref
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
                     .unwrap();
 
                 Some(slice[0].into())
             }
             Type::Char => {
-                let slice = gc
-                    .lock
+                let slice = context
+                    .heap_ref
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
                     .unwrap();
 
@@ -297,13 +342,14 @@ impl VecImage for VecImageType<'_> {
                 Some(ch.into())
             }
             Type::T => Some(Tag::from_slice(
-                gc.lock
+                context
+                    .heap_ref
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
                     .unwrap(),
             )),
             Type::Fixnum => {
-                let slice = gc
-                    .lock
+                let slice = context
+                    .heap_ref
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
                     .unwrap();
 
@@ -312,8 +358,8 @@ impl VecImage for VecImageType<'_> {
                 )))
             }
             Type::Float => {
-                let slice = gc
-                    .lock
+                let slice = context
+                    .heap_ref
                     .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 4, 4)
                     .unwrap();
 
