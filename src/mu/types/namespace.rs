@@ -9,28 +9,28 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc::Gc,
+        gc_context::GcContext,
         namespace::Namespace,
         types::{Tag, Type},
     },
     streams::write::Write as _,
     types::{
         cons::Cons,
-        symbol::{Symbol, GC as _},
+        symbol::{Gc as _, Symbol},
         vector::Vector,
     },
 };
 
 use futures::executor::block_on;
 
-pub trait GC {
+pub trait Gc {
     #[allow(dead_code)]
-    fn gc(&mut self, gc: &mut Gc, env: &Env);
+    fn gc(&mut self, _: &mut GcContext, _: &Env);
 }
 
-impl GC for Namespace {
+impl Gc for Namespace {
     #[allow(dead_code)]
-    fn gc(&mut self, gc: &mut Gc, env: &Env) {
+    fn gc(&mut self, gc: &mut GcContext, env: &Env) {
         let hash_ref = block_on(match self {
             Namespace::Static(static_) => match static_.hash {
                 Some(hash) => hash.read(),

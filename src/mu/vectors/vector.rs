@@ -9,7 +9,7 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc::{Gc, HeapGcRef},
+        gc_context::{Gc as _, GcContext},
         types::{Tag, Type},
     },
     types::{
@@ -22,16 +22,18 @@ use crate::{
     vectors::image::{VecImage, VecImageType, VectorImage},
 };
 
-pub trait GC {
-    fn gc_ref_image(_: &mut HeapGcRef, _: Tag) -> VectorImage;
-    fn gc_ref(_: &mut Gc, _: &Env, _: Tag, _: usize) -> Option<Tag>;
-    fn ref_type_of(_: &mut Gc, _: Tag) -> Type;
-    fn ref_length(_: &mut Gc, _: Tag) -> usize;
-    fn mark(_: &mut Gc, _: &Env, _: Tag);
+pub trait Gc {
+    fn gc_ref_image(_: &mut GcContext, _: Tag) -> VectorImage;
+    fn gc_ref(_: &mut GcContext, _: &Env, _: Tag, _: usize) -> Option<Tag>;
+    fn ref_type_of(_: &mut GcContext, _: Tag) -> Type;
+    fn ref_length(_: &mut GcContext, _: Tag) -> usize;
+    fn mark(_: &mut GcContext, _: &Env, _: Tag);
 }
 
-impl GC for Vector {
-    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> VectorImage {
+impl Gc for Vector {
+    fn gc_ref_image(context: &mut GcContext, tag: Tag) -> VectorImage {
+        let heap_ref = &context.heap_ref;
+
         match tag.type_of() {
             Type::Vector => match tag {
                 Tag::Indirect(image) => VectorImage {
@@ -48,7 +50,7 @@ impl GC for Vector {
         }
     }
 
-    fn gc_ref(gc: &mut Gc, env: &Env, vector: Tag, index: usize) -> Option<Tag> {
+    fn gc_ref(context: &mut GcContext, env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         match vector.type_of() {
             Type::Vector => match vector {
                 Tag::Image(_) => panic!(),
@@ -57,13 +59,13 @@ impl GC for Vector {
 
                     Some(ch.into())
                 }
-                Tag::Indirect(_) => VecImageType::gc_ref(gc, vector, index),
+                Tag::Indirect(_) => VecImageType::gc_ref(context, vector, index),
             },
             _ => panic!(),
         }
     }
 
-    fn ref_type_of(gc: &mut Gc, vector: Tag) -> Type {
+    fn ref_type_of(context: &mut GcContext, vector: Tag) -> Type {
         match vector {
             Tag::Image(_) => panic!(),
             Tag::Direct(direct) => match direct.dtype() {
@@ -72,7 +74,7 @@ impl GC for Vector {
                 _ => panic!(),
             },
             Tag::Indirect(_) => {
-                let image = Self::gc_ref_image(&mut gc.lock, vector);
+                let image = Self::gc_ref_image(context, vector);
 
                 match VTYPEMAP
                     .iter()
@@ -86,29 +88,29 @@ impl GC for Vector {
         }
     }
 
-    fn ref_length(gc: &mut Gc, vector: Tag) -> usize {
+    fn ref_length(context: &mut GcContext, vector: Tag) -> usize {
         match vector {
             Tag::Image(_) => panic!(),
             Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
-                let image = Self::gc_ref_image(&mut gc.lock, vector);
+                let image = Self::gc_ref_image(context, vector);
                 Fixnum::as_i64(image.length) as usize
             }
         }
     }
 
-    fn mark(gc: &mut Gc, env: &Env, vector: Tag) {
+    fn mark(context: &mut GcContext, env: &Env, vector: Tag) {
         match vector {
             Tag::Image(_) => panic!(),
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
-                let marked = gc.mark_image(vector).unwrap();
+                let marked = context.mark_image(vector).unwrap();
 
-                if !marked && Self::ref_type_of(gc, vector) == Type::T {
-                    for index in 0..Self::ref_length(gc, vector) {
-                        let value = Self::gc_ref(gc, env, vector, index).unwrap();
+                if !marked && Self::ref_type_of(context, vector) == Type::T {
+                    for index in 0..Self::ref_length(context, vector) {
+                        let value = Self::gc_ref(context, env, vector, index).unwrap();
 
-                        gc.mark(env, value)
+                        context.mark(env, value)
                     }
                 }
             }

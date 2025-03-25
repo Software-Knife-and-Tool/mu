@@ -2,36 +2,43 @@
 //  SPDX-License-Identifier: MIT
 
 //! env gc
-//!    Env
+#![allow(dead_code)]
 use crate::{
     core::{
         env::Env,
         exception,
         frame::Frame,
-        heap::{HeapAllocator, GC},
+        heap::{Gc as _, HeapAllocator},
         namespace::Namespace,
         types::{Tag, Type},
     },
     types::{
-        cons::{Cons, GC as _},
-        function::{Function, GC as _},
-        struct_::{Struct, GC as _},
-        symbol::{Symbol, GC as _},
+        cons::{Cons, Gc as _},
+        function::{Function, Gc as _},
+        struct_::{Gc as _, Struct},
+        symbol::{Gc as _, Symbol},
         vector::Vector,
     },
-    vectors::vector::GC as _,
+    vectors::vector::Gc as _,
 };
 
 use futures::executor::block_on;
 
-pub type HeapGcRef = futures_locks::RwLockWriteGuard<HeapAllocator>;
-
-pub struct Gc {
-    pub lock: HeapGcRef,
+pub struct GcContext<'a> {
+    pub heap_ref: &'a mut futures_locks::RwLockWriteGuard<HeapAllocator>,
 }
 
-impl Gc {
-    pub fn mark(&mut self, env: &Env, tag: Tag) {
+pub trait Gc {
+    fn gc(_: &Env) -> exception::Result<bool>;
+//    fn gc_with_context(&mut self, _: &Env) -> exception::Result<bool>;
+    fn lexicals(&mut self, _: &Env);
+    fn mark(&mut self, _: &Env, tag: Tag);
+    fn mark_image(&mut self, _: Tag) -> Option<bool>;
+    fn namespaces(&mut self, _: &Env);
+}
+
+impl Gc for GcContext<'_> {
+    fn mark(&mut self, env: &Env, tag: Tag) {
         match tag.type_of() {
             Type::Cons => Cons::mark(self, env, tag),
             Type::Function => Function::mark(self, env, tag),
@@ -42,18 +49,18 @@ impl Gc {
         }
     }
 
-    pub fn mark_image(&mut self, tag: Tag) -> Option<bool> {
+    fn mark_image(&mut self, tag: Tag) -> Option<bool> {
         match tag {
             Tag::Image(_) => panic!(),
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => {
-                let marked = self.lock.get_image_mark(indirect.image_id() as usize);
+                let marked = self.heap_ref.get_image_mark(indirect.image_id() as usize);
 
                 match marked {
                     None => (),
                     Some(mark) => {
                         if !mark {
-                            self.lock.set_image_mark(indirect.image_id() as usize)
+                            self.heap_ref.set_image_mark(indirect.image_id() as usize)
                         }
                     }
                 }
@@ -99,26 +106,26 @@ impl Gc {
         }
     }
 
-    pub fn gc_lock(env: &Env, lock: HeapGcRef) -> exception::Result<bool> {
-        let mut gc = Gc { lock };
-
-        gc.lock.clear_marks();
-        gc.namespaces(env);
-        gc.lexicals(env);
-        gc.lock.sweep();
+    /*
+    fn gc_with_context(&mut self, env: &Env) -> exception::Result<bool> {
+        self.heap_ref.clear_marks();
+        self.namespaces(env);
+        self.lexicals(env);
+        self.heap_ref.sweep();
 
         Ok(true)
-    }
+}
+    */
 
-    pub fn gc(env: &Env) -> exception::Result<bool> {
-        let mut gc = Gc {
-            lock: block_on(env.heap.write()),
+    fn gc(env: &Env) -> exception::Result<bool> {
+        let mut gc_context = GcContext {
+            heap_ref: &mut block_on(env.heap.write()),
         };
 
-        gc.lock.clear_marks();
-        gc.namespaces(env);
-        gc.lexicals(env);
-        gc.lock.sweep();
+        gc_context.heap_ref.clear_marks();
+        gc_context.namespaces(env);
+        gc_context.lexicals(env);
+        gc_context.heap_ref.sweep();
 
         Ok(true)
     }
@@ -128,7 +135,7 @@ pub trait CoreFunction {
     fn mu_gc(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Gc {
+impl CoreFunction for GcContext<'_> {
     fn mu_gc(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         Self::gc(env)?;
 

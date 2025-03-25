@@ -10,7 +10,8 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc::{Gc, HeapGcRef},
+        gc_context::{Gc as _, GcContext},
+        heap::HeapRequest,
         indirect::IndirectTag,
         reader::EOL,
         type_image::TypeImage,
@@ -28,15 +29,17 @@ pub struct Cons {
     cdr: Tag,
 }
 
-pub trait GC {
-    fn gc_ref_image(_: &mut HeapGcRef, _: Tag) -> Self;
-    fn ref_car(_: &mut Gc, _: Tag) -> Tag;
-    fn ref_cdr(_: &mut Gc, _: Tag) -> Tag;
-    fn mark(_: &mut Gc, _: &Env, _: Tag);
+pub trait Gc {
+    fn gc_ref_image(_: &GcContext, tag: Tag) -> Self;
+    fn ref_car(_: &GcContext, _: Tag) -> Tag;
+    fn ref_cdr(_: &GcContext, _: Tag) -> Tag;
+    fn mark(_: &mut GcContext, _: &Env, _: Tag);
 }
 
-impl GC for Cons {
-    fn gc_ref_image(heap_ref: &mut HeapGcRef, tag: Tag) -> Self {
+impl Gc for Cons {
+    fn gc_ref_image(context: &GcContext, tag: Tag) -> Self {
+        let heap_ref = &context.heap_ref;
+
         match tag.type_of() {
             Type::Cons => match tag {
                 Tag::Indirect(main) => Cons {
@@ -51,48 +54,48 @@ impl GC for Cons {
         }
     }
 
-    fn ref_car(gc: &mut Gc, cons: Tag) -> Tag {
+    fn ref_car(context: &GcContext, cons: Tag) -> Tag {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Image(_) => panic!(),
                 Tag::Direct(_) => DirectTag::car(cons),
-                Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).car,
+                Tag::Indirect(_) => Self::gc_ref_image(context, cons).car,
             },
             _ => panic!(),
         }
     }
 
-    fn ref_cdr(gc: &mut Gc, cons: Tag) -> Tag {
+    fn ref_cdr(context: &GcContext, cons: Tag) -> Tag {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Image(_) => panic!(),
-                Tag::Indirect(_) => Self::gc_ref_image(&mut gc.lock, cons).cdr,
+                Tag::Indirect(_) => Self::gc_ref_image(context, cons).cdr,
                 Tag::Direct(_) => DirectTag::cdr(cons),
             },
             _ => panic!(),
         }
     }
 
-    fn mark(gc: &mut Gc, env: &Env, cons: Tag) {
+    fn mark(context: &mut GcContext, env: &Env, cons: Tag) {
         match cons {
             Tag::Image(_) => panic!(),
             Tag::Direct(_) => {
-                let car = Self::ref_car(gc, cons);
-                let cdr = Self::ref_cdr(gc, cons);
+                let car = Self::ref_car(context, cons);
+                let cdr = Self::ref_cdr(context, cons);
 
-                gc.mark(env, car);
-                gc.mark(env, cdr)
+                context.mark(env, car);
+                context.mark(env, cdr)
             }
             Tag::Indirect(_) => {
-                let mark = gc.mark_image(cons).unwrap();
+                let mark = context.mark_image(cons).unwrap();
                 if !mark {
-                    let car = Self::ref_car(gc, cons);
-                    let cdr = Self::ref_cdr(gc, cons);
+                    let car = Self::ref_car(context, cons);
+                    let cdr = Self::ref_cdr(context, cons);
 
-                    gc.mark(env, car);
-                    gc.mark(env, cdr)
+                    context.mark(env, car);
+                    context.mark(env, cdr)
                 }
             }
         }
@@ -226,18 +229,20 @@ impl Cons {
             Some(tag) => tag,
             None => {
                 let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
-                let mut heap_ref = block_on(env.heap.write());
-
-                match heap_ref.alloc(image, None, Type::Cons as u8) {
-                    Some((high_water, image_id)) => {
+                let ha = HeapRequest {
+                    env,
+                    image,
+                    vdata: None,
+                    type_id: Type::Cons as u8,
+                };
+                let heap_ref = &mut block_on(env.heap.write());
+                
+                match heap_ref.alloc(&ha) {
+                    Some(image_id) => {
                         let ind = IndirectTag::new()
                             .with_image_id(image_id as u64)
                             .with_heap_id(1)
                             .with_tag(TagType::Cons);
-
-                        if high_water {
-                            Gc::gc_lock(env, heap_ref).unwrap();
-                        }
 
                         Tag::Indirect(ind)
                     }
