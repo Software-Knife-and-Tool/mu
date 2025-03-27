@@ -236,7 +236,7 @@ impl Cons {
                     type_id: Type::Cons as u8,
                 };
                 let heap_ref = &mut block_on(env.heap.write());
-                
+
                 match heap_ref.alloc(&ha) {
                     Some(image_id) => {
                         let ind = IndirectTag::new()
