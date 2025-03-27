@@ -49,7 +49,6 @@ pub trait Env {
     fn feature() -> Feature;
     fn heap_free(_: &Env_) -> usize;
     fn heap_size(_: &Env_, tag: Tag) -> usize;
-    fn heap_info(_: &Env_) -> (&str, usize, usize);
     fn heap_stat(_: &Env_) -> Tag;
     fn heap_type(_: &Env_, type_: Type) -> HeapTypeInfo;
     fn ns_map(_: &Env_) -> Tag;
@@ -75,12 +74,6 @@ impl Env for Feature {
         }
     }
 
-    fn heap_info(env: &Env_) -> (&str, usize, usize) {
-        let heap_ref = block_on(env.heap.read());
-
-        ("bump", heap_ref.page_size, heap_ref.npages)
-    }
-
     fn heap_free(env: &Env_) -> usize {
         HeapAllocator::heap_free(env)
     }
@@ -92,14 +85,7 @@ impl Env for Feature {
     }
 
     fn heap_stat(env: &Env_) -> Tag {
-        let (_heap_type, pagesz, npages) = <Feature as Env>::heap_info(env);
-
-        let mut vec = vec![
-            Symbol::keyword("heap"),
-            Fixnum::with_or_panic(pagesz * npages),
-            Fixnum::with_or_panic(npages),
-            Fixnum::with_or_panic(0),
-        ];
+        let mut vec = vec![Symbol::keyword("heap")];
 
         for htype in INFOTYPE.iter() {
             let type_map =
@@ -204,7 +190,7 @@ impl CoreFunction for Feature {
             ),
             Cons::cons(
                 env,
-                Vector::from("heap-stat").evict(env),
+                Vector::from("heap-room").evict(env),
                 Self::heap_stat(env),
             ),
         ];

@@ -30,7 +30,7 @@ pub struct GcContext<'a> {
 
 pub trait Gc {
     fn gc(_: &Env) -> exception::Result<bool>;
-//    fn gc_with_context(&mut self, _: &Env) -> exception::Result<bool>;
+    //    fn gc_with_context(&mut self, _: &Env) -> exception::Result<bool>;
     fn lexicals(&mut self, _: &Env);
     fn mark(&mut self, _: &Env, tag: Tag);
     fn mark_image(&mut self, _: Tag) -> Option<bool>;
@@ -107,15 +107,15 @@ impl Gc for GcContext<'_> {
     }
 
     /*
-    fn gc_with_context(&mut self, env: &Env) -> exception::Result<bool> {
-        self.heap_ref.clear_marks();
-        self.namespaces(env);
-        self.lexicals(env);
-        self.heap_ref.sweep();
+        fn gc_with_context(&mut self, env: &Env) -> exception::Result<bool> {
+            self.heap_ref.clear_marks();
+            self.namespaces(env);
+            self.lexicals(env);
+            self.heap_ref.sweep();
 
-        Ok(true)
-}
-    */
+            Ok(true)
+    }
+        */
 
     fn gc(env: &Env) -> exception::Result<bool> {
         let mut gc_context = GcContext {
