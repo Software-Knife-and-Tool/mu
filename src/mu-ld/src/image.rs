@@ -5,7 +5,7 @@
 use {
     crate::{reader::Reader, writer::Writer},
     json::{self, object},
-    mu::Env,
+    mu_runtime::Env,
 };
 
 #[allow(dead_code)]
