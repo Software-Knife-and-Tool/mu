@@ -6,12 +6,12 @@ license = "MIT"
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
 [workspace]
-members = [ "src/mu-*", "src/mux", "src/sysgen" ]
+members = [ "src/mu-exec", "src/mu-ld", "src/mu-server", "src/mu-sh", "src/mu-sys", "src/mux", "src/sysgen" ]
 resolver = "2"
 
 [lib]
-name = "mu"
-path = "src/mu/lib.rs"
+name = "mu_runtime"
+path = "src/mu_runtime/lib.rs"
 crate-type = ["lib"]
 bench = false
 

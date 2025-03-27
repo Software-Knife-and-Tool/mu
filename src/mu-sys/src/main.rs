@@ -12,7 +12,7 @@ static GLOBAL: Jemalloc = Jemalloc;
 #[allow(unused_imports)]
 use {
     getopt::Opt,
-    mu::{Condition, Env, Result, Tag},
+    mu_runtime::{Condition, Env, Result, Tag},
     std::{fs, io::Write},
 };
 

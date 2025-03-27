@@ -155,6 +155,7 @@ version 0.2.0 is built with rustc 1.83.0
 version 0.2.1 is built with rustc 1.84.0
 version 0.2.2 is built with rustc 1.84.1
 version 0.2.3 is built with rustc 1.85.0
+version 0.2.4 is built with rustc 1.85.1
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
@@ -438,9 +439,10 @@ alias ,mu-repl='rlwrap mu --eval='\''(prelude:repl)'\'''
 The *mu* runtimes can be configured to use a variable number of system resources, currently the number of pages of memory allocated to the heap at startup. The behavior of the garbage collector can also be specified, though garbage collection control is still mostly unimplemented. The *-c* option to the various runtimes is a string of named attribute values:
 
 ```
-npages			number					pages of virtual memory for the heap
-gcmode			{ none, auto, demand }	how the garbage collector operates
-heap			{ semispace, bump }		heap type, defaults to bump
+npages			number									pages of virtual memory for the heap
+page-size		number									number of bytes in a page
+gc-mode			{ none, auto, demand }	how the garbage collector operates
+heap-type		{ semispace, bump }			heap type, defaults to bump
 ```
 
 Usage: (*mu-server*, *mu-ld*, and *mu-exec* have similar options)
@@ -449,6 +451,6 @@ Usage: (*mu-server*, *mu-ld*, and *mu-exec* have similar options)
 mu-sys -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
 mu-sys -c "npages:1024,gcmode:auto"	default configuration
 
-mu --config="npages:4096,gcmode:demand,heap_type:bump"
+mu --config="npages:4096, gc-mode:demand, heap_type:bump"
 					4096 pages, garbage collection runs on demand, bump allocator 
 ```

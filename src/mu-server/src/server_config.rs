@@ -5,7 +5,7 @@
 use {
     futures::executor::block_on,
     getopt::Opt,
-    mu::Env,
+    mu_runtime::Env,
     std::net::{SocketAddr, ToSocketAddrs},
 };
 

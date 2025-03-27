@@ -17,7 +17,7 @@ mod writer;
 use {
     crate::image::Image,
     getopt::Opt,
-    mu::{Condition, Env, Result, Tag},
+    mu_runtime::{Condition, Env, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 
