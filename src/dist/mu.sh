@@ -69,4 +69,4 @@ done
 
 for (( i=${OPTIND}; i<="${#@}"; i++ )); do SOURCES+=" \"${!i}\"" ; done
 
-eval $BASE/bin/mu-sh -l $BASE/dist/core.l $OPTIONS # $BASE/dist/mu.l ${SOURCES[@]}
+eval $BASE/bin/mu-sh -l $BASE/dist/core.fasl $OPTIONS # $BASE/dist/mu.l ${SOURCES[@]}

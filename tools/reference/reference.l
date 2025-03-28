@@ -14,7 +14,7 @@
                                 `(,(mu:symbol-name symbol)
                                    ,(core:type-of (mu:symbol-value symbol))
                                    ,(mu:symbol-value symbol)
-                                   ,(mu:repr :vector symbol)))
+                                   ,(mu:repr symbol)))
                    (core:%format stream "unbound~Tunbound~T~A~Tunbound~%" `(,(mu:symbol-name symbol)))))
            (mu:namespace-symbols (mu:find-namespace ns)))
          (mu:close stream))
