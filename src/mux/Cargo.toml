@@ -10,7 +10,7 @@ json = "0.12"
 getopts = "0.2"
 git2 = "0.19"
 lazy_static = "1.4"
-mu = { git = "https://github.com/Software-Knife-and-Tool/mu.git" }
+mu = { path = "../.." }
 public-api = "0.35"
 rust-fsm = "0.7"
 rustdoc-json = "0.9"

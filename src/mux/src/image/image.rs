@@ -6,7 +6,7 @@ use {
         image::{heap_info::HeapInfoBuilder, reader::Reader, writer::Writer},
         options::{Mode, Opt, Options},
     },
-    mu::{Condition, Env, Result, Tag},
+    mu_runtime::{Condition, Env, Result, Tag},
     object::{Object, ObjectSection},
     std::{error::Error, fs},
 };
