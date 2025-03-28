@@ -8,7 +8,7 @@ help:
 
 core:
 	@/opt/mu/bin/mu-sys -l ../../dist/core.fasl -l ./symbols.l -q '(symbols "core" "symbols.out")'
-	@python3 symbols.py ../../dist/core.l symbols.out
+	@python3 symbols.py ../../dist/core.fasl symbols.out
 	@rm -f symbols.out
 
 prelude:

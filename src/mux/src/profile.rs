@@ -35,7 +35,7 @@ impl Profile {
                                       '{})", config);
 
                         Command::new("mu-sys")
-                            .args(["-l", "/opt/mu/dist/core.l"])
+                            .args(["-l", "/opt/mu/dist/core.fasl"])
                             .args(["-q", "(core:require-lib \"common\")"])
                             .args(["-q", "(core:require-lib \"prelude\")"])
                             .args(["-e", profile_expr])
