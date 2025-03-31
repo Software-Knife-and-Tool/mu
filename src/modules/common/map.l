@@ -59,7 +59,7 @@
                               loop))
                        (mu:car loop)
                        (mu:cdr loop)))
-                    `(0 .())))))
+                    (mu:cons 0 ())))))
         (core:apply common:min (core:%mapcar (:lambda (list) (mu:length list)) lists))
         lists
         function))))
@@ -93,7 +93,7 @@
                               loop))
                        (mu:car loop)
                        (mu:cdr loop)))
-                    `(0 .())))))
+                    (mu:cons 0 ())))))
         (core:apply common:min (core:%mapcar (:lambda (list) (mu:length list)) lists))
         lists
         function))))

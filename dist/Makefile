@@ -62,6 +62,9 @@ dist:
 	@./mu-sys -l ../src/dist/fasl.l -q '(fasl:require "../src/" "core")'
 	@install -m 644 ./core.fasl $(BASE)/lib
 
+	@./mu-sys -l ../src/dist/fasl.l -l ./core.fasl -q '(fasl:require "../src/modules/" "common")'
+	@install -m 644 ./common.fasl $(BASE)/lib
+
 	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
 	@rm -rf $(BASE) mu-exec mu-ld mu-exec mu-server mu-sh mux sysgen
 

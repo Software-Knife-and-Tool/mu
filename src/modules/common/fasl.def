@@ -14,7 +14,9 @@
                 "common.l"
                 "boole.l"
 	        "predicates.l"
-	        "string.l"
+                "deftype.l"
+                "char.l"
+                "string.l"
 	        "fixnum.l"
 	        "list.l"
                 "map.l"
@@ -24,5 +26,4 @@
 	        "stream.l"
 	        "symbol.l"
                 "time.l"
-                "typespec.l"
                ))))
