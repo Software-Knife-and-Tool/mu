@@ -4,7 +4,15 @@
 ;;;
 ;;; common namespace
 ;;;
-(mu:intern mu:*null/* "common" (mu:find-namespace "common"))
+((:lambda (ns)
+   (:if ns
+        (mu:intern mu:*null/* "common" ns)
+        (mu:intern mu:*null/* "common" (mu:make-namespace "common"))))
+ (mu:find-namespace "common"))
+
+;;;
+;;; symbols
+;;;
 (mu:intern mu:*null/* "t" :t)
 (mu:intern mu:*null/* "nil" ())
 
@@ -19,21 +27,6 @@
 (mu:intern mu:*null/* "list*" core:list*)
 (mu:intern mu:*null/* "not" core:null)
 (mu:intern mu:*null/* "vector" core:vector)
-
-;;;
-;;; char functions
-;;;
-(mu:intern mu:*null/* "char-int"
-   (:lambda (char)
-     (:if (core:charp char)
-          (mu:svref (mu:repr char) 1)
-          (core:raise char 'core:char-int "is not a char"))))
-
-(mu:intern mu:*null/* "int-char"
-   (:lambda (int)
-     (:if (core:fixnump int)
-          (mu:unrepr (mu:make-vector :byte `(32 ,int 0 0 0 0 0 0)))
-          (core:raise char 'core:int-char "is not a fixnum"))))
 
 ;;;
 ;;; defun/defmacro

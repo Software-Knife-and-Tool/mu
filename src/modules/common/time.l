@@ -37,7 +37,7 @@
                           (mu:mul n 4)))
                       (mu:car loop)
                       (mu:cdr loop))))
-             '(() . 1))))
+             (mu:cons () 1))))
         (env:heap-room)
       ((:lambda (start)
            ((:lambda (value)

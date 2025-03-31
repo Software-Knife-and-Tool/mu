@@ -2,11 +2,45 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
+;;; deftype deftype
+;;;
+
+;;;
+;;;  (:name   . :symbolp)    name symbol
+;;;  (:spec   . :t)          typespec form
+;;;
+(core:def-type "%deftype"
+    '((:name . :symbolp)
+      (:spec . :t)))
+
+(mu:intern common "%deftype-prop"
+   (:lambda (prop deftype)
+     (mu:cdr (core:%type-ref deftype))))
+
+(mu:intern common "%make-deftype"
+   (:lambda (name spec)
+     (core:%make-core-type "%deftype"
+        `(,(mu:cons :name name)
+          ,(mu:cons :spec spec)))))
+
+(mu:intern common "%deftypep"
+   (:lambda (type)
+     (:if (core:%core-type-p type)
+          (mu:eq '%deftype (core:type-of type))
+          ())))
+
+(defmacro deftype (name lambda &rest body)
+  (mu:intern
+   (mu:symbol-namespace)
+   (mu:symbol-name)
+   (common:%make-deftype name `(mu:apply (:lambda () ,@body) ())))
+  `(:quote ,@name))
+
+;;;
 ;;; typep
 ;;;
 (mu:intern common "%typespec-map%"
-   `((asyncid :asyncid)
-     (bit-vector (satisfies core:bit-vector-p))
+   `((bit-vector (satisfies core:bit-vector-p))
      (char (satisfies core:charp))
      (function (satisfies core:functionp))
      (map :map)
@@ -55,8 +89,8 @@
    (:lambda (value typespec)
      (:if (core:keywordp typespec)
           (mu:eq typespec (mu:type-of value))
-          (:if (core:keywordp typespec)
-               (mu:eq typespec (core:type-of value))
+          (:if (common:%deftypep typespec)
+               (common:typep value (common:%deftype-prop :spec typespec))
                (:if (core:symbolp typespec)
                     ((:lambda (spec-phrase)
                        (:if (core:null spec-phrase)
@@ -73,3 +107,4 @@
                           (mu:car typespec)
                           (mu:cdr typespec))
                          (core:raise typespec 'common:typep "typespec format")))))))
+   
