@@ -39,8 +39,7 @@
    (core:compile
     '(%lambda (function &rest lists)
        ((:lambda (min-length lists function)
-          (mu:cdr (mu:nthcdr
-                   2
+          (mu:cdr (mu:cdr
                    (mu:fix
                     (:lambda (loop)
                       ((:lambda (nth args)
@@ -59,7 +58,7 @@
                               loop))
                        (mu:car loop)
                        (mu:cdr loop)))
-                    (mu:cons 0 ())))))
+                    '(0 ())))))
         (core:apply common:min (core:%mapcar (:lambda (list) (mu:length list)) lists))
         lists
         function))))
@@ -83,7 +82,7 @@
    (core:compile
     '(%lambda (function &rest lists)
        ((:lambda (min-length lists function)
-          (mu:cdr (mu:nthcdr 2
+          (mu:cdr (mu:cdr
                    (mu:fix
                     (:lambda (loop)
                       ((:lambda (nth args)
@@ -93,7 +92,7 @@
                               loop))
                        (mu:car loop)
                        (mu:cdr loop)))
-                    (mu:cons 0 ())))))
+                    '(0 ())))))
         (core:apply common:min (core:%mapcar (:lambda (list) (mu:length list)) lists))
         lists
         function))))
