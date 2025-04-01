@@ -57,6 +57,21 @@
          (93 . :fixnum)
          (94 . :float))))))
 
+(mu:intern core "%direct-to-hex"
+   (:lambda (direct)
+     ((:lambda (repr)
+        (mu:cdr
+           (mu:fix
+            (:lambda (loop)
+              ((:lambda (index str)
+                 (:if (mu:less-than index 8)
+                      (mu:cons (mu:add index 1) (core:%format () "~A~X" `(,str ,(mu:svref repr index))))
+                      loop))
+               (mu:car loop)
+               (mu:cdr loop)))
+           '(0 . ""))))
+      (mu:repr direct))))
+           
 (mu:intern core "%fasl-direct-compiler"
    (:lambda (tag stream)
      (core:%format stream "0 8" `())

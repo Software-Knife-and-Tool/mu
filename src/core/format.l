@@ -36,7 +36,7 @@
      ((:lambda (fx)
        (:if (core:fixnump fx)
             (:if (mu:eq 0 fx)
-                 (core:write "0" () dest)
+                 (core:write "00" () dest)
                  ((:lambda (str-stream)
                      (mu:fix
                       (:lambda (n)
