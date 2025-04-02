@@ -299,23 +299,25 @@ impl Reader for Env {
                         ch.into(),
                     )),
                 },
-                '!' => {
-                    let hexstr = (0..=15)
-                        .map(|_| match self.read_char(stream).unwrap() {
-                            Some(ch) => ch,
-                            None => panic!(),
-                        })
-                        .collect::<String>();
-                    match u64::from_str_radix(&hexstr, 16) {
-                        Ok(tag_bits) => Ok(Some((&tag_bits.to_be_bytes()).into())),
-                        Err(_) => Err(Exception::new(
-                            self,
-                            Condition::Syntax,
-                            "mu:read",
-                            ch.into(),
-                        )),
-                    }
+                /*
+                    '!' => {
+                        let hexstr = (0..=15)
+                            .map(|_| match self.read_char(stream).unwrap() {
+                                Some(ch) => ch,
+                                None => panic!(),
+                            })
+                            .collect::<String>();
+                        match u64::from_str_radix(&hexstr, 16) {
+                            Ok(tag_bits) => Ok(Some((&tag_bits.to_be_bytes()).into())),
+                            Err(_) => Err(Exception::new(
+                                self,
+                                Condition::Syntax,
+                                "mu:read",
+                                ch.into(),
+                            )),
+                        }
                 }
+                    */
                 _ => Err(Exception::new(self, Condition::Type, "mu:read", ch.into())),
             },
             None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
