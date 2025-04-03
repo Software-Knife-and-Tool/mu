@@ -1,6 +1,6 @@
-(mu:type-of core:def-type)	:func
+(mu:type-of core:%deftype)	:func
 (mu:type-of core:%core-type-p)	:func
 (mu:type-of core:type-of)	:func
-(mu:type-of (mu:eval (core:compile '((:lambda () (core:def-type "test" '((:v . :t))) (core:%make-core-type "test" '((:v . 2))))))))	:struct
-(core:type-of (mu:eval (core:compile '((:lambda () (core:def-type "test" '((:v . :t))) (core:%make-core-type "test" '((:v . 2))))))))	test
-((:lambda () (core:def-type "test" '((:v . :t))) (core:%type-ref :v (core:%make-core-type "test" '((:v . 2))))))	(:v . 2)
+(mu:type-of (mu:eval (core:compile '((:lambda () (core:%deftype "test" '((:v . :t))) (core:%make-core-type "test" '((:v . 2))))))))	:struct
+(core:type-of (mu:eval (core:compile '((:lambda () (core:%deftype "test" '((:v . :t))) (core:%make-core-type "test" '((:v . 2))))))))	test
+((:lambda () (core:%deftype "test" '((:v . :t))) (core:%type-ref :v (core:%make-core-type "test" '((:v . 2))))))	(:v . 2)

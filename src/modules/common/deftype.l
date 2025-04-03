@@ -9,7 +9,7 @@
 ;;;  (:name   . :symbolp)    name symbol
 ;;;  (:spec   . :t)          typespec form
 ;;;
-(core:def-type "%deftype"
+(core:%deftype "%deftype"
     '((:name . :symbolp)
       (:spec . :t)))
 
