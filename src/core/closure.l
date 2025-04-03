@@ -16,7 +16,7 @@
 ;;;  (:mu      . :func)       closure implementation function
 ;;;  (:arity   . :fixnum)     frame lambda number of required args
 ;;;
-(core:def-type "%closure"
+(core:%deftype "%closure"
     '((:require . :listp)
       (:rest    . :symbolp)
       (:arity   . :fixnum)
@@ -52,7 +52,7 @@
 ;;;  (:symbols . :listp)      lexical symbols
 ;;;  (:name    . :symbol)     closure symbol
 ;;;
-(core:def-type "%env"
+(core:%deftype "%env"
     '((:frame   . :fixnum)
       (:symbols . :listp)
       (:name    . :symbol)))

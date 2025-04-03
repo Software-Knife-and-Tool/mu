@@ -4,7 +4,7 @@
 ;;;
 ;;; package deftype
 ;;;
-(core:def-type "%package"
+(core:%deftype "%package"
     '((:name    . :string)
       (:intern  . :keyword)
       (:extern  . :keyword)

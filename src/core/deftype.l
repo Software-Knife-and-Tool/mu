@@ -15,15 +15,15 @@
 ;;;
 ;;; where the property-alist is ((:property . accessor) ...)
 ;;;
-(mu:intern core "def-type"
+(mu:intern core "%deftype"
    (:lambda (name properties)
      (:if (core:listp properties)
           ((:lambda (symbol)
              (:if (core:null symbol)
                   (mu:intern core:%types-ns% name (mu:make-struct :<core> (core:%list2 name properties)))
-                  (core:raise symbol 'core:def-type "type symbol bound")))
+                  (core:raise symbol 'core:%deftype "type symbol bound")))
            (mu:find core:%types-ns% name))
-          (core:raise properties 'core:def-type "not a property list"))))
+          (core:raise properties 'core:%deftype "not a property list"))))
 
 (mu:intern core "%type-predicate-map%"
    `(,(mu:cons :char core:charp)

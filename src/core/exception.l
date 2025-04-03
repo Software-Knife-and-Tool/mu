@@ -12,7 +12,7 @@
 ;;; reason: extended condition, usually a string
 ;;; env:    dynamic environment, list of frames
 ;;;
-(core:def-type "%exception"
+(core:%deftype "%exception"
     '((:cond   . :symbolp)
       (:value  . :t)
       (:source . :symbolp)
