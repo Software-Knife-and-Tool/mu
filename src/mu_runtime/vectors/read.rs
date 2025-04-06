@@ -105,7 +105,7 @@ impl Read for Vector {
                     }
                 }
 
-                let mut vec = vec![0; (digits.len() + 7) / 8];
+                let mut vec = vec![0; digits.len().div_ceil(8)];
                 let bvec = &mut vec;
 
                 for (i, ch) in digits.chars().enumerate() {
