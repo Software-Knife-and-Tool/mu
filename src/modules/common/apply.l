@@ -5,9 +5,10 @@
 ;;; eval/apply
 ;;;
 (defun apply (function &rest args)
-  (:if (core:charp char)
-       (mu:svref (mu:repr char) 1)
-       (core:raise char 'core:char-int "is not a char")))
+  (cond
+    ((core:functionp function) (core:apply function args))
+    ((common:genericp function) (common:%apply-generic function args))
+    (:t (core:error function "apply: not a function~%" ()))))
 
 (defun eval (int)
   (:if (core:fixnump int)

@@ -7,31 +7,58 @@
 
 ;;;
 ;;;  (:name   . :symbolp)    name symbol
-;;;  (:spec   . :t)          typespec form
+;;;  (:impls  . :listp)      implementation alist
+;;;     '((typespec . function) ...)
 ;;;
 (core:%deftype "%generic"
-    '((:name . :symbolp)
-      (:spec . :t)))
+    '((:name  . :symbolp)
+      (:impls . :listp)))
 
 (mu:intern common "%generic-prop"
-   (:lambda (prop deftype)
-     (mu:cdr (core:%type-ref generic))))
+   (:lambda (prop generic)
+      (:if (core:%findl-if
+            (:lambda (generic-prop)
+               (mu:eq prop generic-prop))
+            '(:name :impls))
+           (core:%type-ref prop generic)
+           (core:raise prop 'core:%generic-prop "not a generic property"))))
 
 (mu:intern common "%make-generic"
-   (:lambda (name spec)
+   (:lambda (name impls)
      (core:%make-core-type "%generic"
         `(,(mu:cons :name name)
-          ,(mu:cons :spec spec)))))
+          ,(mu:cons :impls impls)))))
 
-(mu:intern common "%deftypep"
+(mu:intern common "%genericp"
    (:lambda (type)
      (:if (core:%core-type-p type)
           (mu:eq '%generic (core:type-of type))
           ())))
 
-(defmacro defgeneric (name lambda &rest body)
+(defmacro %defgeneric (symbol &rest body)
   (mu:intern
-   (mu:symbol-namespace)
-   (mu:symbol-name)
-   (common:%make-generic name `(mu:apply (:lambda () ,@body) ())))
-  `(:quote ,@name))
+   (mu:symbol-namespace symbol)
+   (mu:symbol-name symbol)
+   (common:%make-generic
+    symbol
+    (core:%mapcar
+     (:lambda (impl)
+       ((:lambda (typespec lambda)
+          (mu:cons typespec (mu:compile lambda)))
+        (mu:car impl)
+        (mu:cdr impl)))
+       body)))
+  `(:quote ,@symbol))
+
+(mu:intern common "%apply-generic"
+   (:lambda (generic args)
+     (:if (common:%genericp generic)
+          ((:lambda (object impls)
+             ((:lambda (type-function)
+                (:if type-function
+                     (core:apply type-function args)
+                     (core:raise type-function 'common:%apply-generic "not a type function")))
+              (mu:cdr (core:%findl-if (:lambda (impl) (core:warn impl "impl") (common:typep object (mu:car impl))) impls))))
+           (mu:car args)
+           (mu:cdr (common:%generic-prop :impls generic)))
+          (core:raise generic 'common:%apply-generic "invalid argument"))))

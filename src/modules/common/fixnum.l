@@ -4,21 +4,16 @@
 ;;;
 ;;; fixnum functions
 ;;;
-(defun 1+ (n)
-  (:if (core:fixnump n)
-       (mu:add n 1)
-       (core:raise n 'common:1+ "not a fixnum")))
 
-(defun 1- (n)
-  (:if (core:fixnump n)
-       (mu:sub n 1)
-       (core:raise n 'common:1- "not a fixnum")))
+;;;
+;;; generics
+;;;
+(%defgeneric 1+ (:fixnum . (:lambda (n) (mu:add 1 n))) (:float . (:lambda (f) (mu:fadd 1.0 f))))
+(%defgeneric 1- (:fixnum . (:lambda (n) (mu:sub 1 n))) (:float . (:lambda (f) (mu:fsub 1.0 f))))
 
-#|
-    max &rest reals+ => max-real
-    min &rest reals+ => min-real
-|#
-
+;;;
+;;; min &rest reals+ => min-real
+;;;
 (mu:intern common "min"
    (core:compile
     '(%lambda (&rest reals)
@@ -29,11 +24,14 @@
                (:if (mu:less-than el acc)
                     el
                     acc)
-               (core:raise () 'common:min "invalid argument")))
+               (core:raise el 'common:min "invalid argument")))
         (mu:car reals)
         (mu:cdr reals))
        (core:raise () 'common:min "invalid argument")))))
 
+;;;
+;;;  max &rest reals+ => max-real
+;;;
 (mu:intern common "max"
    (core:compile
     '(%lambda (&rest reals)
@@ -44,7 +42,7 @@
                (:if (mu:less-than acc el)
                     el
                     acc)
-               (core:raise () 'common:max "invalid argument")))
+               (core:raise el 'common:max "invalid argument")))
         (mu:car reals)
         (mu:cdr reals))
        (core:raise () 'common:max "invalid argument")))))

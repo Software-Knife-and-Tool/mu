@@ -165,7 +165,7 @@ impl CoreFunction for Vector {
                     Vector::from(vec?).evict(env)
                 }
                 Type::Bit => {
-                    let mut vec = vec![0; (Cons::length(env, list).unwrap() + 7) / 8];
+                    let mut vec = vec![0; Cons::length(env, list).unwrap().div_ceil(8)];
                     let bvec = &mut vec;
 
                     for (i, cons) in Cons::iter(env, list).enumerate() {
