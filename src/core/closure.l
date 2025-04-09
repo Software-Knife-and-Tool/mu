@@ -25,11 +25,11 @@
 
 (mu:intern core "%closure-prop"
    (:lambda (prop function)
-     (mu:cdr (core:%type-ref prop function))))
+     (mu:cdr (core:%type-prop prop function))))
 
 (mu:intern core "%make-closure"
    (:lambda (requires rest-sym form env)
-     (core:%make-core-type "%closure"
+     (core:%make-type "%closure"
        `(,(mu:cons :require   requires)
           ,(mu:cons :rest     rest-sym)
           ,(mu:cons :mu       (mu:compile form))
@@ -38,7 +38,7 @@
 
 (mu:intern core "%closurep"
    (:lambda (function)
-     (:if (core:%core-type-p function)
+     (:if (core:%typep function)
           (mu:eq '%closure (core:type-of function))
           ())))
 
@@ -59,18 +59,18 @@
 
 (mu:intern core "%env-prop"
    (:lambda (prop env)
-     (mu:cdr (core:%type-ref prop env))))
+     (mu:cdr (core:%type-prop prop env))))
 
 (mu:intern core "%make-env"
    (:lambda (frame symbols name)
-     (core:%make-core-type "%closure"
+     (core:%make-type "%closure"
        `(,(mu:cons :frame     frame)
           ,(mu:cons :symbols  symbols)
           ,(mu:cons :name     name)))))
 
 (mu:intern core "%envp"
    (:lambda (function)
-     (:if (core:%core-type-p function)
+     (:if (core:%typep function)
           (mu:eq '%env (core:type-of function))
           ())))
 
@@ -148,12 +148,12 @@
                                         (:lambda (lambda)
                                            (core:%findl-if
                                             (:lambda (symbol) (mu:eq symbol form))
-                                            (core:%type-ref :require lambda)))
+                                            (core:%type-prop :require lambda)))
                                         env))))
                                  (core:%findl-if (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
                              acc)
                         acc)))
            ()
            body))
-       (core:%type-ref :require lambda))))
+       (core:%type-prop :require lambda))))
 |#

@@ -21,11 +21,11 @@
 
 (mu:intern core "%exception-prop"
    (:lambda (prop exception)
-     (core:%type-ref prop exception)))
+     (core:%type-prop prop exception)))
 
 (mu:intern core "%make-exception"
    (:lambda (cond value source reason env)
-      (core:%make-core-type "%exception"
+      (core:%make-type "%exception"
         `(,(mu:cons :cond   cond)
           ,(mu:cons :value  value)
           ,(mu:cons :source source)
@@ -38,7 +38,7 @@
 (mu:intern core "exceptionp"
     (:lambda (ex)
       (core:%and
-       (core:%core-type-p ex)
+       (core:%typep ex)
        (mu:eq '%exception (core:type-of ex)))))
 
 ;;;

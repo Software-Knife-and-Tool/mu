@@ -28,6 +28,18 @@ Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
           :t
           (core:vectorp t))))
 
+#|
+(%defgeneric
+ length
+ (:vector . (:lambda (v) (mu:vector-length v)))
+ (:list   . (:lambda (l) (mu:length l))))
+
+(%defgeneric
+ elt
+ (:vector . (:lambda (v nth) (mu:vector-ref v nth)))
+ (:list   . (:lambda (l nth) (mu:nth nth l))))
+|#
+
 (mu:intern common "length"
    (:lambda (seq)
       (:if (common:sequencep seq)

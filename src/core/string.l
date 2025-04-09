@@ -8,7 +8,7 @@
    (:lambda (string)
       (:if (mu:eq (mu:type-of string) :vector)
            (mu:eq :char (mu:vector-type string))
-           (:if (core:%core-type-p string)
+           (:if (core:%typep string)
                 (:if (mu:eq "vector" (mu:svref (mu:struct-vec string) 0))
                      (mu:eq :char (mu:vector-type (core:%vector-prop :base string)))
                      ())

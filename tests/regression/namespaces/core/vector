@@ -10,7 +10,7 @@
 (core:make-vector '(#\a #\b #\c))	"abc"
 (core:make-vector '(1.0 1.0 1.0))	#(:float 1.0000 1.0000 1.0000)
 (core:make-vector '(1.0 #\a ()))	#(:t 1.0000 a :nil)
-(core:%core-type-p (core:make-vector '(1 2 3)))	:nil
+(core:%typep (core:make-vector '(1 2 3)))	:nil
 (core:vector-type #(:t 1 2 3))	:t
 (core:vector-type (core:read (mu:open :string :input "#*11101" :t) () ()))	bit
 (core:vector-type (core:vector-slice #(:fixnum 1 2 3) 1 2))	:fixnum

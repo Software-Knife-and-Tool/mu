@@ -13,11 +13,9 @@
    (:load    . (
                 "common.l"
                 "boole.l"
-                "predicates.l"
+                "predicate.l"
                 "apply.l"
-                "deftype.l"
                 "char.l"
-                "generic.l"
                 "string.l"
 	        "fixnum.l"
 	        "list.l"

@@ -34,6 +34,21 @@
 (%defmacro defmacro (name lambda &rest body)
   `(%defmacro ,name ,lambda ,@body))
 
+(defmacro %defgeneric (symbol &rest body)
+  (mu:intern
+   (mu:symbol-namespace symbol)
+   (mu:symbol-name symbol)
+   (core:%make-generic
+    symbol
+    (core:%mapcar
+     (:lambda (impl)
+       ((:lambda (typespec lambda)
+          (mu:cons typespec (mu:compile lambda)))
+        (mu:car impl)
+        (mu:cdr impl)))
+       body)))
+  `(:quote ,@symbol))
+
 (defmacro defun (name lambda &rest body)
   `(mu:intern mu:*null/* ,(mu:symbol-name name) (%lambda ,lambda ,@body)))
 
