@@ -1,5 +1,5 @@
 (core:make-vector '(1 2 3))
-(core:%core-type-p (core:make-vector '(1 2 3)))
+(core:%typep (core:make-vector '(1 2 3)))
 (core:vector-slice (core:make-vector '(1 2 3)) 1 2)
 (core:vector-length (core:make-vector '(1 2 3)))
 (core:vector-ref (core:make-vector '(1 2 3)) 1)
