@@ -34,7 +34,7 @@
 (mu:intern core "write"
    (:lambda (object escape stream)
      (:if (core:streamp stream)
-          (:if (core:%and (core:vectorp object) (core:%core-type-p object))
+          (:if (core:%and (core:vectorp object) (core:%typep object))
                (core:%vector-write object escape stream)
                (mu:write object escape stream))
           (core:raise stream 'core:write "not a stream"))))

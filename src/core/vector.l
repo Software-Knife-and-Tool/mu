@@ -15,7 +15,7 @@
 
 (mu:intern core "%vector-prop"
    (:lambda (prop vector)
-     (mu:cdr (core:%type-ref prop vector))))
+     (mu:cdr (core:%type-prop prop vector))))
 
 (mu:intern core "vector-prop"
    (:lambda (prop vector)
@@ -25,7 +25,7 @@
 
 (mu:intern core "%make-vector"
    (:lambda (vector displace bitvec)
-     (core:%make-core-type "%vector"
+     (core:%make-type "%vector"
        `(,(mu:cons :base   vector)
          ,(mu:cons :disp   displace)
          ,(mu:cons :bitvec bitvec)))))
@@ -41,7 +41,7 @@
 
 (mu:intern core "bit-vector-p"
    (:lambda (vector)
-     (:if (core:%core-type-p vector)
+     (:if (core:%typep vector)
           (:if (mu:eq '%vector (core:type-of vector))
                (core:%not (core:null (core:%vector-prop :bitvec vector)))
                ())
@@ -49,7 +49,7 @@
 
 (mu:intern core "vector-displaced-p"
    (:lambda (vector)
-     (:if (core:%core-type-p vector)
+     (:if (core:%typep vector)
           (:if (mu:eq '%vector (core:type-of vector))
                (core:%vector-prop :disp vector)
                ())

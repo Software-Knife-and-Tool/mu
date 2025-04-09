@@ -11,7 +11,9 @@
    (:lang    . :mu)
    (:load    . (
                 "core.l"
+                "type.l"
                 "deftype.l"
+                "generic.l"
                 "compile.l"
                 "string.l"
                 "format.l"
