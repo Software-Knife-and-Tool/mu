@@ -2,279 +2,442 @@
 ;;;  SPDX-License-Identifier: MIT
 
 #|
-System Class SEQUENCE 
-Accessor SUBSEQ
-Function CONCATENATE
-Function FILL
-Function MAKE-SEQUENCE
-Function MAP
-Function MAP-INTO
-Function MERGE
-Function MISMATCH
-Function REDUCE
-Function REMOVE-DUPLICATES
-Function REPLACE
-Function SEARCH
-Function SORT, STABLE-SORT
-Function SUBSTITUTE, SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
+CONCATENATE
+COPY-SEQ [x]
+COUNT, COUNT-IF [x]
+ELT [x]
+FIND, FIND-IF [x]
+LENGTH [x]
+MAKE-SEQUENCE
+MAP
+MISMATCH
+POSITION, POSITION-IF [x]
+REDUCE
+REMOVE, REMOVE-IF [x]
+REMOVE-DUPLICATES
+REVERSE [x]
+SEARCH
+SUBSEQ
+SUBSTITUTE, SUBSTITUTE-IF [x]
 |#
 
 ;;;
 ;;; sequences
 ;;;
-(mu:intern common "sequencep"
-   (:lambda (t)
-     (:if (core:listp t)
-          :t
-          (core:vectorp t))))
-
 #|
+(mu:intern mu:*null/* "map"
+   (core:compile
+    '(%lambda (result-type function &rest sequences)
+       ((:lambda (min-length lists function)
+          (mu:cdr (mu:cdr
+                   (mu:fix
+                    (:lambda (loop)
+                      ((:lambda (nth args)
+                         (:if (mu:less-than nth min-length)
+                              (:if (mu:eq :func (mu:type-of function))
+                                   (mu:cons (mu:add 1 nth)
+                                            (core:%append
+                                             `(,args
+                                               ,(mu:cons (mu:apply function (common:%nths nth lists))
+                                                         ()))))                             
+                                   (mu:cons (mu:add 1 nth)
+                                            (core:%append
+                                             `(,args
+                                               ,(mu:cons (core:%apply function (common:%nths nth lists))
+                                                         ())))))
+                              loop))
+                       (mu:car loop)
+                       (mu:cdr loop)))
+                    '(0 ())))))
+        (core:apply common:min (core:%mapcar length sequences))
+        lists
+        function))))
+
+(mu:intern common "%make-sequence"
+   (:lambda (result-type size init)
+      ((:lambda (list)
+         (:if (mu:eq :vector result-type)
+              (mu:make-vector :t list)
+              (:if (core:null :list)
+                   list
+                   (core:raise result-type 'common:%make-sequence "unimplemented result type"))))
+       (mu:cdr
+        (mu:fix
+         (:lambda (loop)
+           ((:lambda (nth list)
+              (:if (mu:eq 0 nth)
+                   loop
+                   (mu:cons (mu:sub nth 1) (mu:cons init list))))
+            (mu:car loop)
+            (mu:cdr loop))
+           (mu:cons size ())))))))
+|#
+
+;;;
+;;; generic primitives
+;;;
 (%defgeneric
  length
- (:vector . (:lambda (v) (mu:vector-length v)))
- (:list   . (:lambda (l) (mu:length l))))
+ (:vector . mu:vector-length)
+ (:cons   . mu:length)
+ (:null   . (:lambda (seq) 0)))
 
 (%defgeneric
  elt
- (:vector . (:lambda (v nth) (mu:vector-ref v nth)))
- (:list   . (:lambda (l nth) (mu:nth nth l))))
-|#
+ (:vector . mu:svref)
+ (:cons   . (:lambda (seq nth)
+              (:if (mu:less-than nth (mu:length seq))
+                   (mu:nth nth seq)
+                   (core:raise nth 'elt "invalid index")))))
 
-(mu:intern common "length"
-   (:lambda (seq)
-      (:if (common:sequencep seq)
-           (:if (core:listp seq)
-                (mu:length seq)
-                (mu:vector-length seq))
-           (core:raise seq 'common:length "not a sequence"))))
+(%defgeneric
+ copy-seq
+ (:vector . (:lambda (seq)
+              (mu:make-vector
+               (mu:vector-type seq)
+               (mu:car
+                (mu:fix
+                 (:lambda (loop)
+                   ((:lambda (copy nth)
+                      (:if (mu:less-than nth 0)
+                           loop
+                           (mu:cons (mu:cons (mu:svref seq nth) copy) nth)))
+                    (mu:car loop)
+                    (mu:sub (mu:cdr loop) 1)))
+                 (mu:cons () (mu:vector-length seq)))))))
+ (:cons   . (:lambda (seq) (core:%mapcar core:identity seq)))
+ (:null   . (:lambda (seq) ())))
 
-(mu:intern common "elt"
-   (:lambda (seq nth)
-      (:if (common:sequencep seq)
-           (:if (core:fixnump nth)
-                (:if (core:listp seq)
-                     (mu:nth nth seq)
-                     (mu:svref seq nth))
-                (core:raise seq 'common:elt "not a sequence"))
-           (core:raise nth 'common:elt "not a fixnum"))))
+(%defgeneric
+ %find
+ (:vector . (:lambda (seq item)
+              (mu:cdr
+               (mu:fix
+                (:lambda (loop)
+                  ((:lambda (done nth)
+                     (:if (core:null done)
+                          (:if (mu:eq nth 0)
+                               (mu:cons :t ())
+                               (:if (mu:eq item (mu:svref seq (mu:sub nth 1)))
+                                    (mu:cons :t item)
+                                    (mu:cons () (mu:sub nth 1))))
+                          loop))
+                   (mu:car loop)
+                   (mu:cdr loop)))
+                (mu:cons () (mu:vector-length seq))))))
+ (:cons   . (:lambda (seq item) (core:%findl-if (:lambda (elt) (mu:eq elt item)) seq)))
+ (:null   . (:lambda (seq item) ())))
 
-;;;
-;;; finds
-;;;
-(mu:intern common "%findl"
-   (:lambda (predicate seq)
-     (mu:car
-      ((:lambda (length)
-         (mu:fix
-          (:lambda (nth)
-            (:if (core:listp nth)
-                 nth
-                 (:if (mu:eq nth length)
-                      ()
-                      ((:lambda (elt)
-                         (:if (core:%apply predicate `(,elt))
-                              `(,elt)
-                              (common:1+ nth)))
-                       (common:elt seq nth)))))
-          0))
-       (common:length seq)))))
+(%defgeneric
+ %find-if
+ (:vector . (:lambda (seq fn)
+              (mu:cdr
+               (mu:fix
+                (:lambda (loop)
+                  ((:lambda (done nth)
+                     (:if (core:null done)
+                          (:if (mu:eq nth 0)
+                               (mu:cons :t ())
+                               ((:lambda (item)
+                                  (:if (core:apply fn `(,item))
+                                       (mu:cons :t item)
+                                       (mu:cons () (mu:sub nth 1))))
+                                (mu:svref seq (mu:sub nth 1))))
+                          loop))
+                   (mu:car loop)
+                   (mu:cdr loop)))
+                (mu:cons () (mu:vector-length seq))))))
+ (:cons   . (:lambda (seq fn) (core:%findl-if fn seq)))
+ (:null   . (:lambda (seq fn) ())))
 
-(mu:intern common "findl-if"
-   (:lambda (predicate seq)
-     (:if (core:functionp predicate)
-          (:if (common:sequencep seq)
-               (common:%findl predicate seq)
-               (core:raise seq 'common:findl-if "not a sequence"))
-          (core:raise predicate 'common:findl-if "not a predicate"))))
+(%defgeneric
+ %count
+ (:vector . (:lambda (seq item)
+              (mu:car
+               (mu:fix
+                (:lambda (loop)
+                  ((:lambda (count nth)
+                     (:if (mu:less-than nth 0)
+                          loop
+                          (:if (mu:eq item (mu:svref seq nth))
+                               (mu:cons (mu:add 1 count) nth)
+                               (mu:cons count nth))))
+                  (mu:car loop)
+                  (mu:sub (mu:cdr loop) 1)))
+                (mu:cons 0 (mu:vector-length seq))))))
+ (:cons   . (:lambda (seq item)
+              (mu:car
+               (mu:fix
+                (:lambda (loop)
+                  ((:lambda (count cons)
+                     (:if (core:null cons)
+                          loop
+                          (:if (mu:eq item (mu:car cons))
+                               (mu:cons (mu:add 1 count) (mu:cdr cons))
+                               (mu:cons count (mu:cdr cons)))))
+                  (mu:car loop)
+                  (mu:cdr loop)))
+                (mu:cons 0 seq)))))
+ (:null   . (:lambda (seq item) 0)))
 
-(mu:intern common "%findr"
-   (:lambda (predicate seq)
-     (mu:car
-      (mu:fix
-       (:lambda (nth)
-         (:if (core:listp nth)
-              nth
-              (:if (mu:eq nth 0)
-                   ()
-                   ((:lambda (elt)
-                      (:if (core:%apply predicate `(,elt))
-                           `(,elt)
-                           (core:1- nth)))
-                    (common:elt seq (core:1- nth))))))
-       (common:length seq)))))
+(%defgeneric
+ %count-if
+ (:vector . (:lambda (seq fn)
+              (mu:car
+               (mu:fix
+                (:lambda (loop)
+                  ((:lambda (count nth)
+                     (:if (mu:less-than nth 0)
+                          loop
+                          (:if (core:apply fn `(,(mu:svref seq nth)))
+                                  (mu:cons (mu:add 1 count) nth)
+                                  (mu:cons count nth))))
+                  (mu:car loop)
+                  (mu:sub (mu:cdr loop) 1)))
+               (mu:cons 0 (mu:vector-length seq))))))
+ (:cons . (:lambda (seq fn)
+              (mu:car
+               (mu:fix
+                (:lambda (loop)
+                  ((:lambda (count cons)
+                     (:if (core:null cons)
+                          loop
+                          (:if (core:apply fn `(,(mu:car cons)))
+                               (mu:cons (mu:add 1 count) (mu:cdr cons))
+                               (mu:cons count (mu:cdr cons)))))
+                  (mu:car loop)
+                  (mu:cdr loop)))
+                (mu:cons 0 seq)))))
+ (:null   . (:lambda (seq fn) 0)))
 
-(mu:intern common "findr-if"
-   (:lambda (predicate seq)
-     (:if (core:functionp predicate)
-          (:if (common:sequencep seq)
-               (common:%findr predicate seq)
-               (core:raise seq 'common:findr-if "not a sequence"))
-          (core:raise predicate 'common:findr-if "not a predicate"))))
+(%defgeneric
+ %position
+ (:vector . (:lambda (seq item)
+              ((:lambda (length)
+                 (mu:fix
+                  (:lambda (nth)
+                    (:if (core:null nth)
+                         ()
+                         (:if (mu:eq nth length)
+                           ()
+                           (:if (mu:eq (mu:svref seq nth) item)
+                                nth
+                                (mu:add 1 nth)))))
+                  0))
+               (mu:vector-length seq))))
+ (:cons    . (:lambda (seq item)
+              ((:lambda (length)
+                 (mu:fix
+                  (:lambda (nth)
+                    (:if (core:null nth)
+                         ()
+                         (:if (mu:eq nth length)
+                              ()
+                              (:if (mu:eq (mu:nth nth seq) item)
+                                   nth
+                                   (mu:add 1 nth)))))
+                  0))
+               (mu:length seq))))
+ (:null   . (:lambda (seq item) ())))
 
-;;;
-;;; positions
-;;;
-(mu:intern common "%positionl"
-   (:lambda (predicate seq)
-     (mu:car
-      ((:lambda (length)
-         (mu:fix
-          (:lambda (nth)
-            (:if (core:listp nth)
-                 nth
-                 (:if (mu:eq nth length)
-                      ()
-                      ((:lambda (elt)
-                         (:if (core:%apply predicate `(,elt))
-                              `(,nth)
-                              (common:1+ nth)))
-                       (common:elt seq nth)))))
-          0))
-       (common:length seq)))))
+(%defgeneric
+ %position-if
+ (:vector . (:lambda (seq fn)
+              ((:lambda (length)
+                 (mu:fix
+                  (:lambda (nth)
+                    (:if (core:null nth)
+                         ()
+                         (:if (mu:eq nth length)
+                           ()
+                           (:if (core:apply fn `(,(mu:svref seq nth)))
+                                nth
+                                (mu:add 1 nth)))))
+                  0))
+               (mu:vector-length seq))))
+ (:cons   . (:lambda (seq fn)
+              ((:lambda (length)
+                 (mu:fix
+                  (:lambda (nth)
+                    (:if (core:null nth)
+                         ()
+                         (:if (mu:eq nth length)
+                           ()
+                           (:if (core:apply fn `(,(mu:nth nth seq)))
+                                nth
+                                (mu:add 1 nth)))))
+                  0))
+               (mu:length seq))))
+ (:null   . (:lambda (seq item) ())))
 
-(mu:intern common "positionl-if"
-   (:lambda (predicate seq)
-     (:if (core:functionp predicate)
-          (:if (common:sequencep seq)
-               (common:%positionl predicate seq)
-               (core:raise list 'common:positionl-if "not a sequence"))
-          (core:raise predicate 'common:positionl-if "not a function"))))
+(%defgeneric
+ %remove
+ (:vector . (:lambda (seq item)
+              ((:lambda (length)
+                 (mu:make-vector
+                  (mu:vector-type seq)
+                  (mu:cdr
+                   (mu:fix
+                    (:lambda (loop)
+                      ((:lambda (nth list)
+                         (:if (mu:eq nth length)
+                              loop
+                              ((:lambda (elt)
+                                 (:if (mu:eq item elt)
+                                      (mu:cons (mu:add 1 nth) list)
+                                      (mu:cons (mu:add 1 nth) (mu:cons elt list))))
+                               (mu:svref seq nth))))
+                       (mu:car loop)
+                       (mu:cdr loop)))
+                    (mu:cons 0 ())))))
+                 (mu:vector-length seq))))
+ (:cons   . (:lambda (seq item)
+              ((:lambda (length)
+                 (mu:cdr
+                  (mu:fix
+                   (:lambda (loop)
+                     ((:lambda (nth list)
+                        (:if (mu:eq nth (mu:length seq))
+                             loop
+                             ((:lambda (elt)
+                                (:if (mu:eq item elt)
+                                     (mu:cons (mu:add 1 nth) list)
+                                     (mu:cons (mu:add 1 nth) (mu:cons elt list))))
+                              (mu:nth nth seq))))
+                      (mu:car loop)
+                      (mu:cdr loop)))
+                   (mu:cons 0 ()))))
+               (mu:length seq))))
+ (:null   . (:lambda (seq item) ())))
 
-(mu:intern common "%positionr"
-   (:lambda (predicate seq)
-     (mu:car
-      (mu:fix
-       (:lambda (nth)
-         (:if (core:listp nth)
-              nth
-              (:if (mu:eq nth 0)
-                   ()
-                   ((:lambda (elt)
-                      (:if (core:%apply predicate `(,elt))
-                           `(,(core:1- nth))
-                           (core:1- nth)))
-                    (common:elt seq (core:1- nth))))))
-       (common:length seq)))))
+(%defgeneric
+ %remove-if
+ (:vector . (:lambda (seq predicate)
+              ((:lambda (length)
+                 (mu:make-vector
+                  (mu:vector-type seq)
+                  (mu:cdr
+                   (mu:fix
+                    (:lambda (loop)
+                      ((:lambda (nth list)
+                         (:if (mu:eq nth length)
+                           loop
+                           ((:lambda (elt)
+                              (:if (core:apply predicate `(,elt))
+                                   (mu:cons (mu:add 1 nth) list)
+                                   (mu:cons (mu:add 1 nth) (mu:cons elt list))))
+                            (mu:svref seq nth))))
+                    (mu:car loop)
+                    (mu:cdr loop)))
+                    (mu:cons 0 ())))))
+               (mu:vector-length seq))))
+ (:cons   . (:lambda (seq predicate)
+              ((:lambda (length)
+                 (mu:cdr
+                  (mu:fix
+                   (:lambda (loop)
+                     ((:lambda (nth list)
+                        (:if (mu:eq nth (mu:length seq))
+                             loop
+                             ((:lambda (elt)
+                                (:if (core:apply predicate `(,elt))
+                                     (mu:cons (mu:add 1 nth) list)
+                                     (mu:cons (mu:add 1 nth) (mu:cons elt list))))
+                              (mu:nth nth seq))))
+                      (mu:car loop)
+                      (mu:cdr loop)))
+                   (mu:cons 0 ()))))
+               (mu:length seq))))
+ (:null   . (:lambda (seq item) ())))
 
-(mu:intern common "positionr-if"
-   (:lambda (predicate seq)
-      (:if (core:functionp predicate)
-           (:if (common:sequencep seq)
-                (common:%positionr predicate seq) 
-                (core:raise seq 'common:positionr "not a sequence"))
-           (core:raise predicate 'common:positionr "not a function"))))
+(%defgeneric
+ %substitute
+ (:vector . (:lambda (seq new old)
+              (mu:make-vector
+               (mu:vector-type seq)
+               (mu:cdr
+                (mu:fix
+                 (:lambda (loop)
+                   ((:lambda (nth list)
+                      (:if (mu:less-than nth 0)
+                           loop
+                           ((:lambda (elt)
+                              (:if (mu:eq old elt)
+                                   (mu:cons nth (mu:cons new list))
+                                   (mu:cons nth (mu:cons elt list))))
+                            (mu:svref seq nth))))
+                    (mu:sub (mu:car loop) 1)
+                    (mu:cdr loop)))
+                 (mu:cons (mu:vector-length seq) ()))))))
+ (:cons   . (:lambda (seq new old)
+              (mu:cdr
+               (mu:fix
+                (:lambda (loop)
+                  ((:lambda (nth list)
+                     (:if (mu:less-than nth 0)
+                          loop
+                          ((:lambda (elt)
+                             (:if (mu:eq old elt)
+                                  (mu:cons nth (mu:cons new list))
+                                  (mu:cons nth (mu:cons elt list))))
+                           (mu:nth nth seq))))
+                   (mu:sub (mu:car loop) 1)
+                   (mu:cdr loop)))
+                   (mu:cons (mu:length seq) ())))))
+ (:null   . (:lambda (seq new old) ())))
 
-;;;
-;;; counts
-;;;
-(mu:intern common "%count"
-   (:lambda (predicate seq)
-      ((:lambda (length)
-         (mu:cdr
-          (mu:fix
-           (:lambda (loop)
-             ((:lambda (nth count)
-                (:if (mu:eq nth length)
-                     loop
-                     ((:lambda (elt)
-                         (:if (core:%apply predicate `(,elt))
-                              (mu:cons (common:1+ nth) (core:1+ count))
-                              (mu:cons (common:1+ nth) count)))
-                        (common:elt seq nth))))
-              (mu:car loop)
-              (mu:cdr loop)))
-             (mu:cons 0 0))))
-       (common:length seq))))
+(%defgeneric
+ %substitute-if
+ (:vector . (:lambda (seq new predicate)
+              (mu:make-vector
+               (mu:vector-type seq)
+               (mu:cdr
+                (mu:fix
+                 (:lambda (loop)
+                   ((:lambda (nth list)
+                      (:if (mu:less-than nth 0)
+                           loop
+                           ((:lambda (elt)
+                              (:if (core:apply predicate `(,elt))
+                                   (mu:cons nth (mu:cons new list))
+                                   (mu:cons nth (mu:cons elt list))))
+                            (mu:svref seq nth))))
+                    (mu:sub (mu:car loop) 1)
+                    (mu:cdr loop)))
+                 (mu:cons (mu:vector-length seq) ()))))))
+ (:cons   . (:lambda (seq new predicate)
+                 (mu:cdr
+                  (mu:fix
+                   (:lambda (loop)
+                     ((:lambda (nth list)
+                        (:if (mu:less-than nth 0)
+                             loop
+                             ((:lambda (elt)
+                                (:if (core:apply predicate `(,elt))
+                                     (mu:cons nth (mu:cons new list))
+                                     (mu:cons nth (mu:cons elt list))))
+                              (mu:nth nth seq))))
+                      (mu:sub (mu:car loop) 1)
+                      (mu:cdr loop)))
+                   (mu:cons (mu:length seq) ())))))
+ (:null   . (:lambda (seq new old) ())))
 
-(mu:intern common "count-if"
-   (:lambda (predicate seq)
-      (:if (core:functionp predicate)
-           (:if (common:sequencep seq)
-                (common:%count predicate seq) 
-                (core:raise seq 'common:count-if "not a sequence"))
-           (core:raise predicate 'common:count-if "not a function"))))
-
-;;;
-;;; remove
-;;;
-(mu:intern common "%remove"
-   (:lambda (predicate seq)
-      ((:lambda (length)
-         (mu:cdr
-          (mu:fix
-           (:lambda (loop)
-             ((:lambda (nth list)
-                (:if (mu:eq nth length)
-                     loop
-                     ((:lambda (elt)
-                         (:if (core:%apply predicate `(,elt))
-                              (mu:cons (common:1+ nth) list)
-                              (mu:cons (common:1+ nth) (mu:cons elt list))))
-                        (common:elt seq nth))))
-              (mu:car loop)
-              (mu:cdr loop)))
-             (mu:cons 0 ()))))
-       (common:length seq))))
-
-(mu:intern common "remove-if"
-   (:lambda (predicate seq)
-     (:if (core:functionp predicate)
-          (:if (common:sequencep seq)
-               (common:%remove predicate seq)
-               (core:raise seq 'common:remove-if "not a sequence"))
-          (core:raise predicate 'common:remove "not a function"))))
-
-;;;
-;;; copy, reverse
-;;;
-(mu:intern common "copy-seq"
-   (:lambda (list)
-     (:if (core:listp list)
-          (core:%mapcar core:identity list)             
-          (core:raise list 'common:copy-list "not a list"))))
-
-(mu:intern common "%reverse"
-   (:lambda (seq)
-     ((:lambda (list)
-        (:if (core:listp seq)
-             list
-             (mu:make-vector :t list)))
-      ((:lambda (length)
-         (mu:cdr
-          (mu:fix
-           (:lambda (loop)
-             ((:lambda (nth list)
-                (:if (mu:eq nth length)
-                     loop
-                     ((:lambda (elt)
-                        (mu:cons (common:1+ nth) (mu:cons elt list)))
-                     (common:elt seq nth))))
-              (mu:car loop)
-              (mu:cdr loop)))
-             (mu:cons 0 ()))))
-       (common:length seq)))))
-
-(mu:intern common "reverse"
-   (:lambda (seq)
-     (:if (core:listp list)
-          (core:%reverse list)
-          (core:raise seq 'common:reverse "not a sequence"))))
-
-;;; utilities
-(mu:intern common "%coerce-seq"
-   (:lambda (seq type)
-     ((:lambda (seq-type)
-        (:if (mu:eq seq-type 'cons)
-             (:if (mu:eq type 'cons)
-                  seq
-                  (mu:make-vector :t seq))
-             (mu:fix
-              (:lambda (loop)
-                ((:lambda (nth list)
-                   (:if (mu:eq nth (common:length seq))
-                        loop
-                        (mu:cons (common:1+ nth) (mu:cons (common:elt seq nth) list))))
-                 (mu:car loop)
-                 (mu:cdr loop)))
-              (mu:cons 0 ()))))
-      (core:type-of seq))))
+(%defgeneric
+ reverse
+ (:vector . (:lambda (seq)
+              (mu:make-vector
+               (mu:vector-type seq)
+                (mu:cdr
+                 (mu:fix
+                  (:lambda (loop)
+                    ((:lambda (nth list)
+                       (:if (mu:less-than nth 0)
+                            loop
+                            ((:lambda (elt)
+                               (mu:cons nth (mu:cons elt list)))
+                             (mu:svref seq nth))))
+                     (mu:sub (mu:car loop) 1)
+                     (mu:cdr loop)))
+                  (mu:cons (mu:vector-length seq) ()))))))
+ (:cons   . core:reverse)
+ (:null   . (:lambda (seq) ())))
