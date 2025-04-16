@@ -178,7 +178,7 @@
       (mu:cdr list)))))
 
 (mu:intern core "%map-vector"
-  (:lambda (fn vector)
+   (:lambda (fn vector)
     (mu:fix
      (:lambda (nth)
        (:if nth
@@ -189,6 +189,23 @@
                   (mu:add 1 nth)))
             ()))
      0)))
+
+#|
+(mu:intern core "%mapvec"
+   (:lambda (fn vector)
+     (mu:make-vector
+      :t
+      (mu:car
+       (mu:fix
+        (:lambda (loop)
+          ((:lambda (result nth)
+             (:if (mu:less-than nth 0)
+                  loop
+                  (mu:cons (mu:cons (core:apply fn `(,(mu:svref vector nth))) result) nth)))
+           (mu:car loop)
+           (mu:sub (mu:cdr loop) 1)))
+        (mu:cons () (mu:vector-length vector)))))))
+|#
 
 (mu:intern core "%vector-to-list"
    (:lambda (vector)
@@ -205,4 +222,4 @@
                      loop))
                (mu:car loop)
                (mu:cdr loop)))
-           (mu:cons 0 ()))))))
+            (mu:cons 0 ()))))))
