@@ -167,7 +167,11 @@ impl Function {
                 let form = Function::form(env, func);
 
                 let desc = match form.type_of() {
-                    Type::Cons | Type::Null => ("lambda".into(), format!("{:x}", form.as_u64())),
+                    Type::Cons | Type::Null => (
+                        "null".to_string(),
+                        ":lambda".to_string(),
+                        format!("{:x}", form.as_u64()),
+                    ),
                     Type::Vector => {
                         let ns = Vector::ref_(env, form, 0).unwrap();
                         let offset = Vector::ref_(env, form, 1).unwrap();
@@ -178,20 +182,24 @@ impl Function {
                         let fn_name = match namespace {
                             Namespace::Static(static_) => match static_.functions {
                                 Some(functions) => {
-                                    functions[Fixnum::as_i64(offset) as usize].1.to_string()
+                                    functions[Fixnum::as_i64(offset) as usize].0.to_string()
                                 }
-                                None => "<no functions>".to_string(),
+                                None => "<undef>".to_string(),
                             },
                             _ => panic!(),
                         };
 
-                        (Namespace::name(env, ns).unwrap(), fn_name)
+                        (Namespace::name(env, ns).unwrap(), ":native".into(), fn_name)
                     }
                     _ => panic!(),
                 };
 
                 env.write_string(
-                    format!("#<:function :{} [req:{nreq}, form:{}]>", desc.0, desc.1).as_str(),
+                    format!(
+                        "#<:function :{} [{}, req:{nreq}, form:{}]>",
+                        desc.0, desc.1, desc.2
+                    )
+                    .as_str(),
                     stream,
                 )
             }
