@@ -425,19 +425,21 @@ SUBSTITUTE, SUBSTITUTE-IF [x]
 (%defgeneric
  reverse
  (:vector . (:lambda (seq)
-              (mu:make-vector
-               (mu:vector-type seq)
-                (mu:cdr
-                 (mu:fix
-                  (:lambda (loop)
-                    ((:lambda (nth list)
-                       (:if (mu:less-than nth 0)
-                            loop
-                            ((:lambda (elt)
-                               (mu:cons nth (mu:cons elt list)))
-                             (mu:svref seq nth))))
-                     (mu:sub (mu:car loop) 1)
+              ((:lambda (length)
+                 (mu:make-vector
+                  (mu:vector-type seq)
+                  (mu:cdr
+                   (mu:fix
+                    (:lambda (loop)
+                      ((:lambda (nth list)
+                         (:if (mu:eq nth length)
+                              loop
+                              ((:lambda (elt)
+                                 (mu:cons (mu:add 1 nth) (mu:cons elt list)))
+                               (mu:svref seq nth))))
+                     (mu:car loop)
                      (mu:cdr loop)))
-                  (mu:cons (mu:vector-length seq) ()))))))
+                    (mu:cons 0 ())))))
+               (mu:vector-length seq))))
  (:cons   . core:reverse)
  (:null   . (:lambda (seq) ())))
