@@ -28,8 +28,8 @@ use crate::features::{feature::Feature, prof::Prof};
 use {futures::executor::block_on, futures_locks::RwLock};
 
 pub struct Frame {
-    pub func: Tag,
     pub argv: Vec<Tag>,
+    pub func: Tag,
     pub value: Tag,
 }
 
@@ -57,8 +57,8 @@ impl Frame {
                         }
 
                         Frame {
-                            func,
                             argv: Vector::iter(env, frame).skip(1).collect::<Vec<Tag>>(),
+                            func,
                             value: Tag::nil(),
                         }
                     }
@@ -140,48 +140,50 @@ impl Frame {
             }
             Type::Function => {
                 let form = Function::form(env, func);
+                let offset = Cons::cdr(env, form);
 
                 match form.type_of() {
                     Type::Null => Ok(Tag::nil()),
-                    Type::Vector => {
-                        let ns = Vector::ref_(env, form, 0).unwrap();
-                        let offset = Vector::ref_(env, form, 1).unwrap();
+                    Type::Cons => match offset.type_of() {
+                        Type::Fixnum => {
+                            let ns = Cons::car(env, form);
+                            let ns_ref = block_on(env.ns_map.read());
+                            let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
 
-                        let ns_ref = block_on(env.ns_map.read());
-                        let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
+                            match namespace {
+                                Namespace::Static(static_) => {
+                                    let func = match static_.functions {
+                                        Some(functab) => functab[Fixnum::as_i64(offset) as usize].2,
+                                        None => panic!(),
+                                    };
 
-                        match namespace {
-                            Namespace::Static(static_) => {
-                                let func = match static_.functions {
-                                    Some(functab) => functab[Fixnum::as_i64(offset) as usize].2,
-                                    None => panic!(),
-                                };
-
-                                drop(ns_ref);
-                                func(env, &mut self)?
+                                    drop(ns_ref);
+                                    func(env, &mut self)?
+                                }
+                                _ => panic!(),
                             }
-                            _ => panic!(),
-                        };
 
-                        Ok(self.value)
-                    }
-                    Type::Cons => {
-                        let mut value = Tag::nil();
-                        let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
-
-                        Dynamic::dynamic_push(env, self.func, offset);
-                        self.frame_stack_push(env);
-
-                        for cons in Cons::iter(env, form) {
-                            value = env.eval(Cons::car(env, cons))?;
+                            Ok(self.value)
                         }
+                        Type::Null | Type::Cons => {
+                            let mut value = Tag::nil();
+                            let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
 
-                        Self::frame_stack_pop(env, func);
-                        Dynamic::dynamic_pop(env);
+                            Dynamic::dynamic_push(env, self.func, offset);
+                            self.frame_stack_push(env);
 
-                        Ok(value)
-                    }
-                    _ => Err(Exception::new(env, Condition::Type, "mu:apply", func)),
+                            for cons in Cons::iter(env, form) {
+                                value = env.eval(Cons::car(env, cons))?;
+                            }
+
+                            Self::frame_stack_pop(env, func);
+                            Dynamic::dynamic_pop(env);
+
+                            Ok(value)
+                        }
+                        _ => panic!(),
+                    },
+                    _ => panic!(),
                 }
             }
             _ => Err(Exception::new(env, Condition::Type, "mu:apply", func)),
