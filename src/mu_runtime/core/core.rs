@@ -9,6 +9,7 @@ use {
             apply::CoreFunction as _,
             compile::CoreFunction as _,
             config::CoreFunction as _,
+            direct::DirectTag,
             env::Env,
             exception::{self, CoreFunction as _, Exception},
             frame::{CoreFunction as _, Frame},
@@ -234,10 +235,8 @@ impl Core {
         for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
             let (name, nreqs, _fn) = desc;
 
-            let vec = vec![env.mu_ns, Fixnum::with_or_panic(index)];
-
-            let fn_vec = Vector::from(vec).evict(env);
-            let func = Function::new((*nreqs).into(), fn_vec).evict(env);
+            let fn_ = DirectTag::cons(env.mu_ns, Fixnum::with_or_panic(index)).unwrap();
+            let func = Function::new((*nreqs).into(), fn_).evict(env);
 
             Namespace::intern_static(env, env.mu_ns, (*name).into(), func).unwrap();
         }
@@ -255,9 +254,8 @@ impl Core {
                     if let Some(functions) = feature.functions {
                         for (index, desc) in functions.iter().enumerate() {
                             let (name, nreqs, _fn) = *desc;
-                            let vec = vec![ns, Fixnum::with_or_panic(index)];
-                            let fn_vec = Vector::from(vec).evict(env);
-                            let func = Function::new((nreqs).into(), fn_vec).evict(env);
+                            let fn_ = DirectTag::cons(ns, Fixnum::with_or_panic(index)).unwrap();
+                            let func = Function::new((nreqs).into(), fn_).evict(env);
 
                             Namespace::intern_static(env, ns, (*name).into(), func).unwrap();
                         }
