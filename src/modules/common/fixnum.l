@@ -16,25 +16,25 @@
 ;;;
 (mu:intern common "min"
    (core:compile
-    '(%lambda (&rest reals)
-      (:if reals       
+    '(%lambda (real &rest reals)
+      (:if reals
        (core:%foldl
         (:lambda (el acc)
           (:if (core:numberp el)
                (:if (mu:less-than el acc)
                     el
                     acc)
-               (core:raise el 'common:min "invalid argument")))
+               (core:error "min: invalid argument, ~A~%" `(el))))
         (mu:car reals)
         (mu:cdr reals))
-       (core:raise () 'common:min "invalid argument")))))
+       real))))
 
 ;;;
 ;;;  max &rest reals+ => max-real
 ;;;
 (mu:intern common "max"
    (core:compile
-    '(%lambda (&rest reals)
+    '(%lambda (real &rest reals)
       (:if reals       
        (core:%foldl
         (:lambda (el acc)
@@ -42,10 +42,12 @@
                (:if (mu:less-than acc el)
                     el
                     acc)
-               (core:raise el 'common:max "invalid argument")))
+               (core:error "max: invalid argument, ~A~%" `(,el))))
         (mu:car reals)
         (mu:cdr reals))
-       (core:raise () 'common:max "invalid argument")))))
+       real))))
+
+
 
 ;;; round to negative infinity
 (mu:intern common "truncate"
@@ -53,8 +55,9 @@
      (:if (core:fixnump n)
           (:if (core:fixnump m)
                `(,(mu:div n m) ,@(mu:sub n (mu:mul m (mu:div n m))))
-               (core:raise m 'common:truncate "not a fixnum"))
-          (core:raise n 'common:truncate "not a fixnum"))))
+               (core:error "truncate: not a fixnum, ~A~%" `(,m)))
+          (core:error "truncate: not a fixnum, ~A~%" `(,n)))))
+
 
 ;;; round to negative infinity
 (mu:intern common "floor"
@@ -62,8 +65,9 @@
      (:if (core:fixnump n)
           (:if (core:fixnump m)
                `(,(mu:div n m) ,@(mu:sub n (mu:mul m (mu:div n m))))
-               (core:raise m 'common:rem "not a fixnum"))
-          (core:raise n 'common:floor "not a fixnum"))))
+               (core:error "floor: not a fixnum, ~A~%" `(,m)))
+          (core:error "floor: not a fixnum, ~A~%" `(n)))))
+
 
 ;;; round to positive infinity
 (mu:intern common "ceiling"
@@ -71,8 +75,10 @@
      (:if (core:fixnump n)
           (:if (core:fixnump m)
                `(,(mu:div n m) ,@(mu:sub n (mu:mul m (mu:div n m))))
-               (core:raise m 'common:ceiling "not a fixnum"))
-          (core:raise n 'common:ceiling "not a fixnum"))))
+               (core:error "ceiling: not a fixnum, ~A~%" `(,m)))
+          (core:error "ceiling: not a fixnum" `(,n)))))
+
+
 
 ;;; round to nearest
 (mu:intern common "round"
@@ -80,21 +86,23 @@
      (:if (core:fixnump n)
           (:if (core:fixnump m)
                (mu:sub (mu:div n m) (mu:sub n (mu:mul m (mu:div n m))))
-               (core:raise m 'common:round "not a fixnum"))
-          (core:raise n 'common:round "not a fixnum"))))
+               (core:error "round: not a fixnum, ~A~%" `(,m)))
+          (core:error "round: not a fixnum, ~A~%" `(,n)))))
 
+#|
 (mu:intern common "mod"
    (:lambda (n m)
      (:if (core:fixnump n)
           (:if (core:fixnump m)
                (mu:cdr (common:floor m n))
-               (core:raise m 'common:mod "not a fixnum"))
-          (core:raise n 'common:mod "not a fixnum"))))
+               (core:error "mod: not a fixnum, ~A~%" `(,m)))
+          (core:error "mod: not a fixnum, ~A~%", `(,n)))))
+|#
 
 (mu:intern common "rem"
    (:lambda (n m)
      (:if (core:fixnump n)
           (:if (core:fixnump m)
                (mu:cdr (common:truncate m n))
-               (core:raise m 'common:rem "not a fixnum"))
-          (core:raise n 'common:rem "not a fixnum"))))
+               (core:error "rem: not a fixnum, ~A~%" `(,m)))
+          (core:error "rem: not a fixnum, ~A~%" `(,n)))))

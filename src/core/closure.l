@@ -88,8 +88,8 @@
 ;;;
 (mu:intern core "%compile-closure"
    (:lambda (lambda body env)
-     (:if (core:%findl-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-          (core:raise lambda 'core:%compile-closure "malformed lambda expression")
+     (:if (core:%find-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
+          (core:%raise lambda 'core:%compile-closure "malformed lambda expression")
           ((:lambda (desc)
              ((:lambda (env)
                 ((:lambda (body)
@@ -114,11 +114,40 @@
                              (mu:cons
                               `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
                               (mu:nth (mu:sub (mu:length lambda) 1) lambda))
-                             (core:raise lambda 'core:%compile-closure "rest botch"))
+                             (core:%raise lambda 'core:%compile-closure "rest botch"))
                         (mu:add 1 acc))
                    acc))
             0
             lambda))))))
+
+;;;
+;;; eval
+;;;
+(mu:intern core "eval"
+   (:lambda (form)
+     (mu:eval (core:compile form))))
+
+;;;
+;;; apply 
+;;;
+(mu:intern core "apply"
+   (:lambda (function arg-list)
+     (:if (core:%genericp function)
+          (core:%apply-generic function arg-list)
+          (:if (core:functionp function)
+               (:if (core:%closurep function)
+                    (core:%apply
+                     function
+                     (core:%closure-prop :mu function)
+                     (mu:eval (core:%compile-lambda-arg-list function arg-list ())))
+                    (mu:apply function arg-list))
+               (core:%raise function 'core:apply "not a function designator")))))
+
+(mu:intern core "%apply"
+   (:lambda (closure frame arg-list-form)
+     ((:lambda (env)
+        (mu:apply frame arg-list-form))
+      (core:%closure-prop :env closure))))
 
 #|
 ;;;
@@ -144,13 +173,13 @@
                                           (:if binding-lambda
                                                 (mu:cons (mu:cons form binding-lambda) acc)
                                                 acc))
-                                       (core:%findl-if
+                                       (core:%find-if
                                         (:lambda (lambda)
-                                           (core:%findl-if
+                                           (core:%find-if
                                             (:lambda (symbol) (mu:eq symbol form))
                                             (core:%type-prop :require lambda)))
                                         env))))
-                                 (core:%findl-if (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
+                                 (core:%find-if (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
                              acc)
                         acc)))
            ()

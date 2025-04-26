@@ -35,9 +35,9 @@
                              (core:list* 'lambda (core:list sym) body)
                              (core:list 'mu:eval init))
                             ()))
-                (core:raise init 'dolist "not a list"))
-            (core:raise sym 'dolist "not a symbol")))
-      (core:raise init-list 'dolist "not a list")))
+                (core:error "dolist: not a list, ~A~%" `(,list)))
+            (core:error "dolist: not a symbol, ~A~%" `(,sym))))
+      (core:error "dolist: not a list ~A~%" `(,init-list))))
 
 #|
 (defun eql (x y)

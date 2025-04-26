@@ -53,7 +53,7 @@
                                    (mu:cons (mu:add 1 nth)
                                             (core:%append
                                              `(,args
-                                               ,(mu:cons (core:%apply function (common:%nths nth lists))
+                                               ,(mu:cons (core:apply function (common:%nths nth lists))
                                                          ())))))
                               loop))
                        (mu:car loop)
@@ -88,7 +88,12 @@
                       ((:lambda (nth args)
                          (:if (mu:less-than nth min-length)
                               (mu:cons (mu:add 1 nth)
-                                       (core:%append `(,args ,(mu:cons (core:apply function (common:%nthcdrs nth lists)) ()))))
+                                       (core:%append
+                                        `(,args
+                                          ,(mu:cons
+                                            (core:apply
+                                             function
+                                             (common:%nthcdrs nth lists)) ()))))
                               loop))
                        (mu:car loop)
                        (mu:cdr loop)))

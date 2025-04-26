@@ -4,12 +4,12 @@
 ;;;
 ;;; core namespaces
 ;;;
-(mu:intern core "%char-macro-ns%" (mu:make-namespace "%char-macros%"))
-(mu:intern core "%macro-ns%" (mu:make-namespace "%macros%"))
-(mu:intern core "%modules-ns%" (mu:make-namespace "%modules%"))
-(mu:intern core "%symbol-macro-ns%" (mu:make-namespace "%symbol-macros%"))
-(mu:intern core "%types-ns%" (mu:make-namespace "%core-types%"))
-(mu:intern core "%closure-ns%" (mu:make-namespace "%closure-ns%"))
+(mu:intern core "*char-macros/*" (mu:make-namespace "*char-macros*"))
+(mu:intern core "*closures/*" (mu:make-namespace "*closures*"))
+(mu:intern core "*macros/*" (mu:make-namespace "*macros*"))
+(mu:intern core "*modules/*" (mu:make-namespace "*modules*"))
+(mu:intern core "*symbol-macros/*" (mu:make-namespace "*symbol-macros*"))
+(mu:intern core "*types/*" (mu:make-namespace "*core-types*"))
 
 ;;;
 ;;; predicates
@@ -29,25 +29,8 @@
            (:if (core:floatp n)
                 (mu:fless-than n 0.0)
                 (mu:less-than n 0))
-           (core:raise n 'core:minusp "not a number"))))
+           (core:%raise n 'core:minusp "not a number"))))
 
-(mu:intern core "eql"
-   (:lambda (x y)
-     (:if (mu:eq x y)
-          :t
-          (:if (mu:eq (mu:type-of x) (mu:type-of y))
-               (:if (core:%and (core:stringp x) (core:stringp y))
-                    (core:%string= x y)
-                    (:if (core:%and (core:vectorp x) (core:vectorp y))
-                         (core:%and
-                          (core:%and (core:vector-type x) (core:vector-type y))
-                          (core:eql (core:%vector-to-list x) (core:%vector-to-list y)))
-                         (:if (core:consp x)
-                              (core:%and
-                               (core:eql (mu:car x) (mu:car y))
-                               (core:eql (mu:cdr x) (mu:cdr y)))
-                              ())))
-               ()))))
 ;;;
 ;;; mu system classes
 ;;;
@@ -61,21 +44,12 @@
 (mu:intern core "keywordp" (:lambda (t) (mu:eq (core:type-of t) 'keyword)))
 
 ;;;
-;;; eval
-;;;
-(mu:intern core "eval"
-   (:lambda (form)
-     (mu:eval (core:compile form))))
-
-;;;
 ;;; syntactic sugar
 ;;;
 (mu:intern core "%quote"
    (:lambda (form)
      (mu:cons :quote form)))
                
-(mu:intern core "%not" core:null)
-
 (mu:intern core "%or"
    (:lambda (arg arg1)
      (:if arg arg arg1)))

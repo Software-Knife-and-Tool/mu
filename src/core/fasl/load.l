@@ -64,7 +64,7 @@
           ((:lambda (stream)
              ((:lambda (header)
                 (:if (mu:eq core:%eof% header)
-                     (core:raise path 'core:fasl-load "can't read fasl header")
+                     (core:%raise path 'core:fasl-load "can't read fasl header")
                      ((:lambda (version bytes)
                         (mu:fix
                          (:lambda (index)
@@ -86,5 +86,5 @@
                       (mu:cdr (core:%assq :bytes header)))))
               (core:%read-fasl-header stream)))
              (mu:open :file :input path :t))
-          (core:raise path 'core:fasl-load "not a file path"))
+          (core:%raise path 'core:fasl-load "not a file path"))
      ()))

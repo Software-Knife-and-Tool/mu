@@ -14,12 +14,12 @@
 
 (mu:intern core "%package-prop"
    (:lambda (prop package)
-      (:if (core:%findl-if
+      (:if (core:%find-if
             (:lambda (lambda-prop)
                (mu:eq prop lambda-prop))
             '(:name :intern :extern :ch-mac :sy-mac :uses))
            (core:%type-ref prop package)
-           (core:raise prop 'core:%package-prop "not a package property"))))
+           (core:error "%package-prop: not a package property, ~A~%" `(,prop)))))
 
 (mu:intern core "%make-package"
    (:lambda (name uses)

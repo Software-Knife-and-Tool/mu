@@ -43,7 +43,7 @@ SUBSTITUTE, SUBSTITUTE-IF [x]
                                    (mu:cons (mu:add 1 nth)
                                             (core:%append
                                              `(,args
-                                               ,(mu:cons (core:%apply function (common:%nths nth lists))
+                                               ,(mu:cons (core:apply function (common:%nths nth lists))
                                                          ())))))
                               loop))
                        (mu:car loop)
@@ -60,7 +60,7 @@ SUBSTITUTE, SUBSTITUTE-IF [x]
               (mu:make-vector :t list)
               (:if (core:null :list)
                    list
-                   (core:raise result-type 'common:%make-sequence "unimplemented result type"))))
+                   (core:error "%make-sequence: unimplemented result type, ~A~%" `(,result-type)))))
        (mu:cdr
         (mu:fix
          (:lambda (loop)
@@ -88,7 +88,7 @@ SUBSTITUTE, SUBSTITUTE-IF [x]
  (:cons   . (:lambda (seq nth)
               (:if (mu:less-than nth (mu:length seq))
                    (mu:nth nth seq)
-                   (core:raise nth 'elt "invalid index")))))
+                   (core:error "elt: invalid index, ~A~%" `(,nth))))))
 
 (%defgeneric
  copy-seq
@@ -125,7 +125,7 @@ SUBSTITUTE, SUBSTITUTE-IF [x]
                    (mu:car loop)
                    (mu:cdr loop)))
                 (mu:cons () (mu:vector-length seq))))))
- (:cons   . (:lambda (seq item) (core:%findl-if (:lambda (elt) (mu:eq elt item)) seq)))
+ (:cons   . (:lambda (seq item) (core:%find-if (:lambda (elt) (mu:eq elt item)) seq)))
  (:null   . (:lambda (seq item) ())))
 
 (%defgeneric
@@ -147,7 +147,7 @@ SUBSTITUTE, SUBSTITUTE-IF [x]
                    (mu:car loop)
                    (mu:cdr loop)))
                 (mu:cons () (mu:vector-length seq))))))
- (:cons   . (:lambda (seq fn) (core:%findl-if fn seq)))
+ (:cons   . (:lambda (seq fn) (core:%find-if fn seq)))
  (:null   . (:lambda (seq fn) ())))
 
 (%defgeneric
@@ -441,5 +441,5 @@ SUBSTITUTE, SUBSTITUTE-IF [x]
                      (mu:cdr loop)))
                     (mu:cons 0 ())))))
                (mu:vector-length seq))))
- (:cons   . core:reverse)
+ (:cons   . core:%reverse)
  (:null   . (:lambda (seq) ())))

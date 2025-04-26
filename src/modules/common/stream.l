@@ -35,7 +35,7 @@
                           (mu:open :string :output init :t)
                           (:if (mu:eq dir :bidir)
                                (mu:open :string :bidir init :t)
-                               (core:raise dir 'common:make-string-stream "not a direction keyword"))))
+                               (core:error "make-string-stream: not a direction keyword, ~A~%" `(,dir)))))
                 (common:raise dir 'common:make-string-stream "not a direction keyword"))
            (common:raise init 'common:make-string-stream "not a string initializer"))))
 
@@ -47,9 +47,9 @@
                     (mu:open :file :input path :t)
                     (:if (mu:eq dir :output)
                          (mu:open :file :output path :t)
-                         (core:raise dir 'common:open "not a direction keyword")))
-               (core:raise path 'common:open "not a path string"))
-          (core:raise dir 'common:open "not a direction keyword"))))
+                         (core:error "open: not a direction keyword, ~A~%" `(,dir))))
+               (core:error "open: not a path string, ~A~%" `(,path)))
+          (core:error "open: not a direction keyword ~A~%" `(,dir)))))
 
 ;;;
 ;;; functions
@@ -58,7 +58,7 @@
    (:lambda (stream)
       (:if (core:streamp stream)
            (mu:close stream)
-           (core:raise stream 'common:close "not a stream"))))
+           (core:error "close: not a stream, ~A~%" `(,stream)))))
 
 (mu:intern common "with-open-file"
    (:lambda (type dir specifier fn)
@@ -71,12 +71,12 @@
                          ((:lambda (stream)
                              (mu:with-exception
                               (:lambda (ex) (mu:close stream) ex)
-                              (:lambda () (common:%apply fn `(,stream)))))
+                              (:lambda () (core:apply fn `(,stream)))))
                           (mu:open type dir specifier :t))
-                         (core:raise dir 'common:with-open-file "not a direction keyword"))
-                    (core:raise type 'common:with-open-file "not a type keyword"))
-               (core:raise path 'common:with-open-file "not a stream specifier"))
-          (core:raise dir 'common:with-open-file "not a function"))))
+                         (core:error "with-open-file: not a direction keyword, ~A~%" `(,dir)))
+                    (core:error "with-open-file: not a type keyword, ~A~%" `(,type)))
+               (core:error "with-open-file: not a stream specifier, ~A~%" `(,specifier)))
+          (core:error "with-open-file: not a function ~A~%" `(,dir)))))
 
 (mu:intern common "load-file"
    (:lambda (path)
@@ -98,7 +98,7 @@
      ((:lambda (stream)
         (:if (core:streamp stream)
              (mu:write-char ch stream)
-             (core:raise stream 'common:write-char "not a stream designator")))
+             (core:error "write-char: not a stream designator" `(,stream))))
       (common:%write-stream-designator designator))))
 
 (mu:intern common "write-byte"
@@ -106,7 +106,7 @@
      ((:lambda (stream)
         (:if (core:streamp stream)
              (mu:write-byte ch stream)
-             (core:raise stream 'common:write-byte "not a stream designator")))
+             (core:error "write-byte: not a stream designator" `(,stream))))
       (common:%write-stream-designator designator))))
 
 (mu:intern common "read-char"
@@ -114,7 +114,7 @@
     ((:lambda (stream)
        (:if (core:streamp stream)
             (mu:read-char stream error-eofp eof-value)
-            (core:raise stream 'common:read-char "not a stream designator")))
+            (core:error "read-char: not a stream designator" `(,stream))))
      (common:%read-stream-designator designator))))
 
 (mu:intern common "read-byte"
@@ -122,7 +122,7 @@
     ((:lambda (stream)
        (:if (core:streamp stream)
             (mu:read-byte stream error-eofp eof-value)
-            (core:raise stream 'common:read-byte "not a stream designator")))
+            (core:error "read-byte: not a stream designator" `(,stream))))
      (common:%read-stream-designator designator))))
 
 (mu:intern common "peek-char"
@@ -132,7 +132,7 @@
             (mu:unread-char
              (common:read-char stream error-eofp eof-value)
              stream)
-            (core:raise stream 'common:peek-char "not a stream designator")))            
+            (core:error "peek-char: not a stream designator" `(,stream))))
      (common:%read-stream-designator designator))))
 
 (mu:intern common "unread-char"
@@ -141,7 +141,7 @@
           ((:lambda (stream)
              (mu:unread-char ch stream))
            (common:%write-stream-designator designator))
-          (core:raise ch 'common:unread-char "not a char"))))
+          (core:error "unread-char: not a char, ~A~%" `(,ch)))))
 
 (mu:intern common "read-line"
    (:lambda (designator eof-error-p eof-value)

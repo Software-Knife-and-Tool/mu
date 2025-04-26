@@ -8,6 +8,24 @@
    (:lambda (obj)
      obj))
 
+(mu:intern core "eql"
+   (:lambda (x y)
+     (:if (mu:eq x y)
+          :t
+          (:if (mu:eq (mu:type-of x) (mu:type-of y))
+               (:if (core:%and (core:stringp x) (core:stringp y))
+                    (core:%string= x y)
+                    (:if (core:%and (core:vectorp x) (core:vectorp y))
+                         (core:%and
+                          (core:%and (core:vector-type x) (core:vector-type y))
+                          (core:eql (core:%vector-to-list x) (core:%vector-to-list y)))
+                         (:if (core:consp x)
+                              (core:%and
+                               (core:eql (mu:car x) (mu:car y))
+                               (core:eql (mu:cdr x) (mu:cdr y)))
+                              ())))
+               ()))))
+
 ;;;
 ;;; rest functions
 ;;;

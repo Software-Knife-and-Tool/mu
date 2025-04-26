@@ -5,20 +5,20 @@
 ;;; reader
 ;;;
 (mu:intern core "%eof%" (mu:make-symbol "eof"))
-(mu:intern core "%reader-stream%" (mu:open :string :output "" :t))
-(mu:intern core "%reader-current-ns%" (mu:open :string :bidir "core" :t))
+(mu:intern core "*reader-stream*" (mu:open :string :output "" :t))
+(mu:intern core "*reader-current-ns*" (mu:open :string :bidir "core" :t))
 
 (mu:intern core "%reader-get-ns"
    (:lambda ()
      ((:lambda (ns)
-        (mu:write ns () core:%reader-current-ns%)
+        (mu:write ns () core:*reader-current-ns*)
         (mu:find-namespace ns))
-      (mu:get-string core:%reader-current-ns%))))
+      (mu:get-string core:*reader-current-ns*))))
 
 (mu:intern core "%reader-set-ns"
    (:lambda (ns)
-      (mu:get-string core:%reader-current-ns%)
-      (mu:write ns () core:%reader-current-ns%)))
+      (mu:get-string core:*reader-current-ns*)
+      (mu:write ns () core:*reader-current-ns*)))
 
 ;;;
 ;;; readtable
@@ -53,6 +53,58 @@
         (#\v . :const)  (#\w . :const)  (#\x . :const)  (#\y . :const)
         (#\z . :const)))))
 
+;;;
+;;; number readers
+;;;
+(mu:intern core "%parse-integer"
+  (:lambda (digits base)
+    (:if (mu:eq 0 (mu:vector-length digits))
+         ()
+         ((:lambda (sign)
+            ((:lambda (integer)
+               (:if (core:fixnump integer)
+                    (:if (core:null sign)
+                         integer
+                         (mu:mul sign integer))
+                    ()))
+             (mu:cdr
+              (mu:fix
+               (:lambda (loop)
+                 (:if (core:null loop)
+                      ()
+                      ((:lambda (index acc)
+                         (:if (mu:less-than (mu:sub (mu:vector-length digits) 1) index)
+                              loop
+                              ((:lambda (n)
+                                 (:if (core:null n)
+                                      ()
+                                      (:if (mu:less-than (mu:sub base 1) n)
+                                           ()
+                                           ( mu:cons (mu:add 1 index) (mu:add n (mu:mul acc base))))))
+                               (core:%string-position (mu:svref digits index) "0123456789abcdef"))))
+                       (mu:car loop)
+                       (mu:cdr loop))))
+               (:if (core:fixnump sign)
+                    '(1 . 0)
+                    '(0 . 0))))))
+          ((:lambda (digit)
+             (:if (mu:eq #\- digit)
+                  -1
+                  (:if (mu:eq #\+ digit)
+                       1
+                       ())))
+           (mu:svref digits 0))))))
+    
+(mu:intern core "%parse-float"
+  (:lambda (str)
+    ((:lambda (stream)
+       ((:lambda (float)
+          (:if (core:floatp float)
+               float
+               ()))
+          (mu:read stream () ())))
+       (mu:open :string :input str :t))))
+
 (mu:intern core "%read-number"
   (:lambda (atom)
     ((:lambda (fx)
@@ -70,7 +122,7 @@
 ;;;
 (mu:intern core "%read-atom"
   (:lambda (ch stream)
-    (mu:write-char ch core:%reader-stream%)
+    (mu:write-char ch core:*reader-stream*)
     (mu:fix
      (:lambda (loop)
        (:if (core:consp loop)
@@ -80,7 +132,7 @@
                     loop
                     (:if (mu:eq :const (core:%read-char-syntax ch))
                          (core:%prog2
-                            (mu:write-char ch core:%reader-stream%)
+                            (mu:write-char ch core:*reader-stream*)
                             (core:null loop))
                          (core:%prog2
                             (mu:unread-char ch stream)
@@ -93,7 +145,7 @@
                number
                (core:%symbol-macro-expand (core:%read-symbol token))))
         (core:%read-number token)))
-     (mu:get-string core:%reader-stream%))))
+     (mu:get-string core:*reader-stream*))))
 
 ;;;
 ;;; parser

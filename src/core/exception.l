@@ -33,6 +33,39 @@
           ,(mu:cons :env    env)))))
 
 ;;;
+;;; accessors
+;;;
+(mu:intern core "exception-cond"
+   (:lambda (exception)
+     (:if (core:exceptionp exception)
+          (core:%exception-prop :cond exception)
+          (core:%raise exception 'core:exception-code "is not an exception"))))
+
+(mu:intern core "exception-value"
+   (:lambda (exception)
+     (:if (core:exceptionp exception)
+          (core:%exception-prop :value exception)
+          (core:%raise exception 'core:exception-value "is not an exception"))))
+
+(mu:intern core "exception-source"
+   (:lambda (exception)
+     (:if (core:exceptionp exception)
+          (core:%exception-prop :source exception)
+          (core:%raise exception 'core:exception-sopurce "is not an exception"))))
+
+(mu:intern core "exception-reason"
+   (:lambda (exception)
+     (:if (core:exceptionp exception)
+          (core:%exception-prop :reason exception)
+          (core:%raise exception 'core:exception-reason "is not an exception"))))
+
+(mu:intern core "exception-env"
+   (:lambda (exception)
+     (:if (core:exceptionp exception)
+          (core:%exception-prop :env exception)
+          (core:%raise exception 'core:exception-env "is not an exception"))))
+
+;;;
 ;;; predicate
 ;;;
 (mu:intern core "exceptionp"
@@ -74,47 +107,46 @@
          (:if (mu:eq condition :except)
               (core:apply handler (mu:cons value ()))
               (core:apply handler `(,(core:%make-exception
-                                           condition
-                                           value
-                                           source
-                                           "mu:raise"
-                                           (mu:%frame-stack))))))
+                                      condition
+                                      value
+                                      source
+                                      "mu:raise"
+                                      (mu:%frame-stack))))))
       (:lambda () (core:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
 ;;;
+(mu:intern core "raise-exception"
+   (:lambda (exception)
+      (mu:raise exception :except)))
+     
 (mu:intern core "error"
-   (:lambda (value format-string arg-list)
+   (:lambda (format-string arg-list)
       (core:%format mu:*error-output* format-string arg-list)
       (mu:raise
-       (core:%make-exception :error value :error "" ())
+       (core:%make-exception :error arg-list :error "" ())
        :except)))
 
-(mu:intern core "raise"
+(mu:intern core "warn"
+   (:lambda (format-string arg-list)
+     (mu:write "WARNING: " () mu:*error-output*)
+     (core:%format mu:*error-output* format-string arg-list)
+     ()))
+
+(mu:intern core "%warn"
+   (:lambda (value message)
+     (core:%format mu:*error-output* "WARNING: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
+     value))
+
+(mu:intern core "%raise"
    (:lambda (value source reason)
      (mu:raise
       (core:%make-exception :error value source reason ())
       :except)))
 
-(mu:intern core "raise-env"
+(mu:intern core "%raise-env"
    (:lambda (value source reason)
      (mu:raise
       (core:%make-exception :error value source reason (mu:%frame-stack))
       :except)))
-
-#|
-(mu:intern core "debug"
-   (:lambda (value message)
-     (mu:write ";;; debug: " () mu:*error-output*)          
-     (mu:write value () mu:*error-output*)
-     (mu:write " " () mu:*error-output*)
-     (mu:write message () mu:*error-output*)
-     (mu:write-char #\linefeed mu:*error-output*)
-     value))
-|#
-
-(mu:intern core "warn"
-   (:lambda (value message)
-     (core:%format mu:*error-output* ";;; warn: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
-    value))
