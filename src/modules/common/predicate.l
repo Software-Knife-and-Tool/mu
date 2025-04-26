@@ -27,7 +27,7 @@
           (:if (mu:eq 0 n)
                :t
                (mu:eq 0.0 n))
-          (core:raise n 'common:zerop "not a number"))))
+          (core:error "zerop: not a number, ~A~%" `(,n)))))
 
 (mu:intern common "minusp"
    (:lambda (n)
@@ -35,7 +35,7 @@
            (:if (core:floatp n)
                 (mu:fless-than n 0.0)
                 (mu:less-than n 0))
-           (core:raise n 'common:minusp "not a number"))))
+           (core:error "minusp: not a number, ~A~%" `(,n)))))
 
 (mu:intern common "plusp"
    (:lambda (n)
@@ -43,7 +43,7 @@
            (:if (core:floatp n)
                 (mu:fless-than 0.0 n)
                 (mu:less-than 0 n))
-           (core:raise n 'common:plusp "not a number"))))
+           (core:error "plusp: not a number" `(,n)))))
 
 (mu:intern common "packagep" (:lambda (t) (mu:eq (core:type-of t) 'package)))
 

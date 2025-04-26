@@ -19,11 +19,11 @@
 
 (mu:intern common "time-apply"
    (:lambda (fn args)
-      (:if (core:functionp fn)
-           (:if (core:listp args)
-                ()
-                (core:raise args 'common:time "is not a list"))
-           (core:raise fn 'common:time "is not a function"))
+     (:if (core:functionp fn)
+          (:if (core:listp args)
+               ()
+               (core:error "time: is not a list, ~A~%" `(,args)))
+          (core:error "time: is not a function, ~A~%" `(,fn)))
      ((:lambda (start-vec time-value stop-vec)
          ((:lambda (time-delta value type-diffs)
              (core:%format :t "Evaluation consumed ~A usec runtime~%" `(,time-delta))

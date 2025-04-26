@@ -35,7 +35,7 @@
 (mu:intern common "room"
    (:lambda (verbosity)
      ((:lambda (level-key)
-        (:if (core:%findl-if (:lambda (level) (mu:eq level level-key)) '(:t :null :default))
+        (:if (core:%find-if (:lambda (level) (mu:eq level level-key)) '(:t :null :default))
              ((:lambda (stats)
                 (:if (mu:eq :t level-key)
                      ((:lambda (heap-info)
@@ -64,7 +64,9 @@
                          0))
                       (env:heap-info))
                      (:if (mu:eq :null level-key)
-                          (core:%prog2 (core:%format :t "~A~%" `(,stats)) ())
+                          ((:lambda ()
+                             (core:%format :t "~A~%" `(,stats))
+                             ()))
                           ((:lambda (heap-info)
                              (mu:fix
                               (:lambda (index)
@@ -87,7 +89,7 @@
                               0))
                            (env:heap-info)))))
               (env:heap-room))
-             (core:raise verbosity 'common:room "not a room detail level")))
+             (core:error "room: not a room detail level, ~A~%" `(verbosity))))
      (:if (core:null verbosity)
           :null
           verbosity))))

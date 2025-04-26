@@ -63,7 +63,7 @@
        `(%if ,test ,t-arm)
        (:if (mu:eq 1 (mu:length f-arm))
             `(%if ,test ,t-arm ,(mu:car f-arm))
-            (core:raise f-arm 'if "extra arguments"))))
+            (core:error "if: extra arguments, ~A~%" `(f-arm)))))
 
 ;;;
 ;;; progs
@@ -80,17 +80,22 @@
         ,@forms
         ,g)))
 
+#|
 ;;;
 ;;; block/return
 ;;;
 (defmacro block (tag &rest body)
   `(core:with-exception
         (%lambda (exception)
-          (let ((condition (core:%exception-prop :return exception)))
-            (if (mu:eq ,tag condition)
-                (core:%exception-prop :value exception)
-                (core:warn exception 'block "not handling exception"))))
+           (let ((condition (core:exception-cond exception))
+                 (source (core:exception-cond exception))
+                 (value (core:exception-value exception))))
+             (if (mu:eq :return condition)
+                 (if (mu:eq ,tag source)
+                     value
+                     (core:%warn "block: not handling exception, ~A~%" (mu:cons exception ())))))
         (%lambda () (progn ,body))))
 
 (defmacro return-from (tag value)
-  `(core:raise (:quote tag) 'return ""))
+  `(core:error "return: ~A~%" ,(mu:cons ,tag ())))
+|#

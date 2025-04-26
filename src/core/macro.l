@@ -8,8 +8,8 @@
    (:lambda (symbol macro-function)
       ((:lambda (symbol-ns symbol-name)
          (:if (mu:eq symbol-ns mu:*null/*)
-              (mu:intern core:%macro-ns% symbol-name macro-function)
-              (core:raise symbol-ns 'core:%defmacro "illegal symbol"))
+              (mu:intern core:*macros/* symbol-name macro-function)
+              (core:%raise symbol-ns 'core:%defmacro "illegal symbol"))
          symbol)
        (mu:symbol-namespace symbol)
        (mu:symbol-name symbol))))
@@ -54,5 +54,5 @@
              (:if macro
                   (mu:symbol-value macro)
                   ()))
-           (mu:find core:%macro-ns% (mu:symbol-name symbol)))
-          (core:raise symbol 'core:macro-function "not a symbol"))))
+           (mu:find core:*macros/* (mu:symbol-name symbol)))
+          (core:%raise symbol 'core:macro-function "not a symbol"))))

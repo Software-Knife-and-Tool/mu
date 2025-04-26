@@ -6,9 +6,135 @@
 ;;;
 
 ;;;
+;;; folds
+;;;
+(mu:intern core "%foldl"
+  (:lambda (function init list)
+     (mu:cdr
+      (mu:fix
+       (:lambda (arg)
+          ((:lambda (list acc)
+             (:if list
+                  (mu:cons
+                   (mu:cdr list)
+                   (core:apply function (mu:cons (mu:car list) (mu:cons acc ()))))
+                  arg))
+           (mu:car arg)
+           (mu:cdr arg)))
+       (mu:cons list init)))))
+
+(mu:intern core "%foldr"
+   (:lambda (function init list)
+     (mu:cdr
+      (mu:fix
+       (:lambda (arg)
+          ((:lambda (nth acc)
+             (:if (mu:less-than nth 0)
+                  arg
+                  (mu:cons
+                   nth
+                   (core:apply function (mu:cons (mu:nth nth list) (mu:cons acc ()))))))
+           (mu:sub (mu:car arg) 1)
+           (mu:cdr arg)))
+       (mu:cons (mu:length list) init)))))
+
+#|
+(mu:intern core "%foldr"
+   (:lambda (function init list)
+(core:%foldl function init (core:%reverse list))))
+|#
+
+;;;
+;;; maps
+;;;
+(mu:intern core "%mapc"
+   (:lambda (function list)
+     (mu:fix
+      (:lambda (list-cdr)
+        (:if list-cdr
+             (core:%prog2
+                 (core:apply function (mu:cons (mu:car list-cdr) ()))
+                 (mu:cdr list-cdr))
+             ()))
+      list)
+     list))
+
+(mu:intern core "%mapcar"
+   (:lambda (function list)
+      (core:%foldl
+       (:lambda (elt acc)
+          `(,@acc ,(core:apply function `(,elt))))
+       ()
+       list)))
+
+(mu:intern core "%mapl"
+   (:lambda (function list)
+     (mu:fix
+      (:lambda (list)
+        (:if list
+             (core:%prog2
+                (core:apply function (mu:cons list ()))
+                (mu:cdr list))
+             ()))
+      list)
+     list))
+
+(mu:intern core "%maplist"
+   (:lambda (function list)
+     (mu:car
+      (mu:fix
+       (:lambda (loop)
+         ((:lambda (acc list)
+            (:if list
+                 (mu:cons
+                  `(,@acc ,(core:apply function `(,list)))
+                  (mu:cdr list))
+                 loop))
+          (mu:car loop)
+          (mu:cdr loop)))
+       (mu:cons () list)))))
+
+;;;
+;;; association lists
+;;;
+(mu:intern core "%assq"
+   (:lambda (item alist)
+      (mu:car
+       (mu:fix
+        (:lambda (list)
+           (:if list
+                ((:lambda (entry cdr)
+                    (:if entry
+                         (:if (mu:eq item (mu:car entry))
+                              list
+                              cdr)
+                         cdr))
+                 (mu:car list)
+                 (mu:cdr list))
+                ()))
+        alist))))
+
+(mu:intern core "%rassq"
+   (:lambda (item alist)
+      (mu:car
+       (mu:fix
+        (:lambda (list)
+           (:if list
+                ((:lambda (entry cdr)
+                    (:if entry
+                         (:if (mu:eq item (mu:cdr entry))
+                              list
+                              cdr)
+                         cdr))
+                 (mu:car list)
+                 (mu:cdr list))
+                ()))
+        alist))))
+
+;;;
 ;;; finds
 ;;;
-(mu:intern core "%findl-if"
+(mu:intern core "%find-if"
    (:lambda (predicate list)
      (mu:cdr
       (mu:fix
@@ -27,7 +153,7 @@
 ;;;
 ;;; positions
 ;;;
-(mu:intern core "%positionl-if"
+(mu:intern core "%position-if"
    (:lambda (function list)
      (:if list
           ((:lambda (length)
@@ -57,12 +183,6 @@
              el))
       ()
       list)))
-
-(mu:intern core "reverse"
-   (:lambda (list)
-     (:if (core:listp list)
-          (core:%foldl mu:cons () list)
-          (core:raise stream 'core:reverse "not a list"))))
 
 (mu:intern core "%reverse"
    (:lambda (list)

@@ -6,7 +6,7 @@
 ;;;
 (mu:intern core "modules"
    (:lambda ()
-     (core:%mapcar mu:symbol-name (mu:namespace-symbols core:%modules-ns%))))
+     (core:%mapcar mu:symbol-name (mu:namespace-symbols core:*modules/*))))
 
 (mu:intern core "module-version"
    (:lambda (module)
@@ -14,9 +14,9 @@
           ((:lambda (module-def)
              (:if module-def
                (mu:cdr (core:%assq :version module-def))
-               (core:raise module 'core:module-version "no such module")))
-           (mu:symbol-value (mu:find core:%modules-ns% module)))
-     (core:raise module 'core:module-version "not a module name"))))
+               (core:%raise module 'core:module-version "no such module")))
+           (mu:symbol-value (mu:find core:*modules/* module)))
+     (core:%raise module 'core:module-version "not a module name"))))
 
 (mu:intern core "module-namespace"
    (:lambda (module)
@@ -24,9 +24,9 @@
           ((:lambda (module-def)
              (:if module-def
                   (mu:cdr (core:%assq :ns module-def))
-                  (core:raise module 'core:module-namespace "no such module")))
-           (mu:symbol-value (mu:find core:%modules-ns% module)))
-     (core:raise module 'core:module-namespace "not a module name"))))
+                  (core:%raise module 'core:module-namespace "no such module")))
+           (mu:symbol-value (mu:find core:*modules/* module)))
+     (core:%raise module 'core:module-namespace "not a module name"))))
 
 ;;;
 ;;; utilities
@@ -50,7 +50,7 @@
                            (mu:read stream () core:%eof%))))
                    ()))
                 (mu:open :file :input path :t)))
-          (core:raise path 'core:%load-module-file "not a file path"))
+          (core:%raise path 'core:%load-module-file "not a file path"))
      :t))
 
 (mu:intern core "%load-module-def"
@@ -71,8 +71,8 @@
                       (mu:read stream () core:%eof%))))
               ()))
            (mu:open :file :input path :t))
-          (core:raise path 'core:%load-module-def "not a file path"))
-     (mu:symbol-value (mu:find core:%modules-ns% module))))
+          (core:%raise path 'core:%load-module-def "not a file path"))
+     (mu:symbol-value (mu:find core:*modules/* module))))
 
 ;;;
 ;;; provide/require
@@ -81,14 +81,14 @@
    (:lambda (module property-list)
      (:if (core:stringp module)
           (:if (core:listp property-list)
-              (mu:intern core:%modules-ns% module property-list)
-              (core:raise property-list 'core:provide "is not a property list"))
-          (core:raise module 'core:provide "is not a module name"))))
+              (mu:intern core:*modules/* module property-list)
+              (core:%raise property-list 'core:provide "is not a property list"))
+          (core:%raise module 'core:provide "is not a module name"))))
 
 (mu:intern core "require"
    (:lambda (module)
      (:if (core:stringp module)
-          (:if (mu:find core:%modules-ns% module)
+          (:if (mu:find core:*modules/* module)
                ()
                ((:lambda (module-def)
                   (:if module-def
@@ -97,29 +97,29 @@
                            (:lambda (module)
                              (core:require module))
                            requires)
-                          (:if (core:%findl-if (:lambda (el) (mu:eq el ns)) (mu:namespace-map))
+                          (:if (core:%find-if (:lambda (el) (mu:eq el ns)) (mu:namespace-map))
                                ()
                                (mu:make-namespace ns))
                           (core:%mapc
                            (:lambda (file-name)
                              (core:%load-module-file
-                              (core:%concat-strings `("/opt/mu/modules/" ,module "/" ,file-name))
+                              (core:%string-concat `("/opt/mu/modules/" ,module "/" ,file-name))
                               (mu:cdr (core:%assq :lang module-def))))
                            files)
                           :t)
                         (mu:cdr (core:%assq :require module-def))
                         (mu:cdr (core:%assq :load module-def))
                         (mu:cdr (core:%assq :ns module-def)))
-                       (core:raise module 'core:require "cannot open module-def")))
+                       (core:%raise module 'core:require "cannot open module-def")))
                   (core:%load-module-def
-                   (core:%concat-strings `("/opt/mu/modules/" ,module "/mod.def"))
+                   (core:%string-concat `("/opt/mu/modules/" ,module "/mod.def"))
                    module)))
-          (core:raise module 'core:require "is not a module name"))))
+          (core:%raise module 'core:require "is not a module name"))))
 
 (mu:intern core "%require"
    (:lambda (module base)
      (:if (core:stringp module)
-          (:if (mu:find core:%modules-ns% module)
+          (:if (mu:find core:*modules/* module)
                ()
                ((:lambda (module-def)
                   (:if module-def
@@ -128,21 +128,21 @@
                            (:lambda (module)
                              (core:require module))
                            requires)
-                          (:if (core:%findl-if (:lambda (el) (mu:eq el ns)) (mu:namespace-map))
+                          (:if (core:%find-if (:lambda (el) (mu:eq el ns)) (mu:namespace-map))
                                ()
                                (mu:make-namespace ns))
                           (core:%mapc
                            (:lambda (file-name)
                              (core:%load-module-file
-                              (core:%concat-strings `(,base  "/" ,module "/" ,file-name))
+                              (core:%string-concat `(,base  "/" ,module "/" ,file-name))
                               (mu:cdr (core:%assq :lang module-def))))
                            files)
                           :t)
                         (mu:cdr (core:%assq :require module-def))
                         (mu:cdr (core:%assq :load module-def))
                         (mu:cdr (core:%assq :ns module-def)))
-                       (core:raise module 'core:require "cannot open module-def")))
+                       (core:%raise module 'core:require "cannot open module-def")))
                   (core:%load-module-def
-                   (core:%concat-strings `(,base "/" ,module "/mod.def"))
+                   (core:%string-concat `(,base "/" ,module "/mod.def"))
                    module)))
-          (core:raise module 'core:%require "is not a module name"))))
+          (core:%raise module 'core:%require "is not a module name"))))

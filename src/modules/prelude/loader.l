@@ -44,6 +44,6 @@
                                                 (mu:eval (core:compile form)))))
                                        (mu:read ifs () core:%eof%))))))
                        ()))))
-                  (core:raise ifs 'prelude:load "cannot open input file")))
+                  (core:error "load:  cannot open input file, ~A~%" `(,ifs))))
             (mu:open :file :input path :t))
-          (core:raise path 'prelude:load "not a file designator"))))
+          (core:error "load: not a file designator, ~A~%" `(,path)))))
