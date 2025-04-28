@@ -39,7 +39,7 @@
    (:lambda (exception)
      (:if (core:exceptionp exception)
           (core:%exception-prop :cond exception)
-          (core:%raise exception 'core:exception-code "is not an exception"))))
+          (core:%raise exception 'core:exception-cond "is not an exception"))))
 
 (mu:intern core "exception-value"
    (:lambda (exception)
@@ -51,7 +51,7 @@
    (:lambda (exception)
      (:if (core:exceptionp exception)
           (core:%exception-prop :source exception)
-          (core:%raise exception 'core:exception-sopurce "is not an exception"))))
+          (core:%raise exception 'core:exception-source "is not an exception"))))
 
 (mu:intern core "exception-reason"
    (:lambda (exception)

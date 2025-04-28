@@ -44,8 +44,7 @@ for symbol in xref:
 
     if name != 'unbound' and type == 'func':
         tag = value[:-2].split()
-        a, b, r, t = tag
-        addr = t[4:].rjust(16, ' ')
+        addr = tag[4].split(':')[1].rjust(16, ' ')
 
         scope = 'extern'
         if name[0] == ':':

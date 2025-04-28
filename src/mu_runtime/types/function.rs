@@ -204,7 +204,7 @@ impl Function {
 
                 env.write_string(
                     format!(
-                        "#<:function :{} [type:{}, req:{nreq}, form:{}]>",
+                        "#<:function :{} [type{}, req:{nreq}, form:{}]>",
                         desc.0, desc.1, desc.2
                     )
                     .as_str(),
