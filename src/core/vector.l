@@ -200,7 +200,7 @@
               ((:lambda (nth list)
                  (:if (core:fixnump nth)
                      (:if (mu:less-than nth (mu:vector-length vector))
-                          (mu:cons (mu:add 1 nth) (mu:append `(,list ,(mu:cons (mu:svref vector nth) ()))))
+                          (mu:cons (mu:add 1 nth) (core:%append `(,list ,(mu:cons (mu:svref vector nth) ()))))
                           (mu:cons () list))
                      loop))
                (mu:car loop)
@@ -280,9 +280,9 @@
                    (mu:fix
                     (:lambda (index)
                       (:if (mu:less-than index (mu:vector-length string))
-                           ((:lambda ()
+                           (core:%prog2
                               (mu:write-char (mu:svref string index) concat)
-                              (mu:add index 1)))
+                              (mu:add index 1))
                            index))
                     0)
                    (mu:cdr list))

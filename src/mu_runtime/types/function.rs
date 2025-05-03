@@ -175,7 +175,7 @@ impl Function {
                     Type::Cons => match Cons::cdr(env, form).type_of() {
                         Type::Null | Type::Cons => (
                             "null".to_string(),
-                            ":lambda".to_string(),
+                            "lambda".to_string(),
                             format!("{:x}", form.as_u64()),
                         ),
                         Type::Fixnum => {
@@ -204,7 +204,7 @@ impl Function {
 
                 env.write_string(
                     format!(
-                        "#<:function :{} [type{}, req:{nreq}, form:{}]>",
+                        "#<:function :{} [type:{}, req:{nreq}, form:{}]>",
                         desc.0, desc.1, desc.2
                     )
                     .as_str(),

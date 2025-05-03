@@ -30,17 +30,3 @@
           (mu:write (mu:add counter 1) () core:%gensym-counter%)
           (mu:make-symbol (core:%format () "g~X" (mu:cons counter ()))))
        (mu:read core:%gensym-counter% () ()))))
-
-#|
-(mu:intern core "%genkey"
-   (:lambda (prefix)
-      (:if (core:%or (core:null prefix) (core:charp prefix))
-           ((:lambda (counter)
-              (mu:write (mu:add counter 1) () core:%gensym-counter%)
-              (core:%make-keyword
-               (:if (core:charp prefix)
-                    (core:%format () "~A~X" (core:%list2 prefix counter))
-                    (core:%format () "<~X>" (mu:cons counter ())))))
-            (mu:read core:%gensym-counter% () ()))
-(core:%raise name 'core:%genkey "not a legal prefix"))))
-|#

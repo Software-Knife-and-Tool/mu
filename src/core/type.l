@@ -216,8 +216,8 @@
                     ((:lambda (symbol)
                        (:if symbol
                             symbol
-                            ((:lambda ()
+                            (core:%prog2
                                (mu:write (mu:symbol-name type) () core:%quote%)
-                               (mu:read core:%quote% :t ())))))
+                               (mu:read core:%quote% :t ()))))
                      (mu:find mu:*null/* (mu:symbol-name type))))))
        (mu:type-of value))))

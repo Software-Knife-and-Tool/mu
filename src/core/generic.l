@@ -26,8 +26,9 @@
 (mu:intern core "%make-generic"
    (:lambda (name impls)
      (core:%make-type "%generic"
-        `(,(mu:cons :name name)
-          ,(mu:cons :impls impls)))))
+          (core:%list2
+           (mu:cons :name name)
+           (mu:cons :impls impls)))))
 
 (mu:intern core "%genericp"
    (:lambda (type)

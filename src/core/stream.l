@@ -6,9 +6,9 @@
 ;;;
 
 ;;;
-;;; load-file
+;;; load
 ;;;
-(mu:intern core "load-file"
+(mu:intern core "load"
    (:lambda (path)
      (:if (core:stringp path)
           ((:lambda (stream)
@@ -19,13 +19,13 @@
                      ((:lambda (form)
                         (:if (mu:eq form core:%eof%)
                              core:%eof%
-                             ((:lambda ()
+                             (core:%prog2
                                 (mu:eval (core:compile form))
-                                (core:null loop)))))
+                                (core:null loop))))
                       (core:read stream () core:%eof%))))
               ()))
            (mu:open :file :input path :t))
-          (core:%raise path 'core:load-file "not a file path"))
+          (core:%raise path 'core:load "not a file path"))
      :t))
 
 ;;;

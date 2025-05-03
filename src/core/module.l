@@ -35,7 +35,7 @@
    (:lambda (path lang)
      (:if (core:stringp path)
           (:if (mu:eq :core lang)
-               (core:load-file path)
+               (core:load path)
                ((:lambda (stream)
                   (mu:fix
                    (:lambda (loop)
@@ -44,9 +44,9 @@
                           ((:lambda (form)
                              (:if (mu:eq core:%eof% form)
                                   core:%eof%
-                                  ((:lambda ()
+                                  (core:%prog2
                                     (mu:eval (mu:compile form))
-                                    (core:null loop)))))
+                                    (core:null loop))))
                            (mu:read stream () core:%eof%))))
                    ()))
                 (mu:open :file :input path :t)))

@@ -198,7 +198,7 @@
                                    ,function
                                    ,(core:%closure-prop :mu function)
                                    ,(core:%compile-lambda-arg-list function arg-list env))
-                                 `(,mu:apply ,function ,(core:%compile-arg-list arg-list env)))
+                                 `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                             `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                        (core:%raise function 'core:%compile-funcall "not a function designator")))
                 (core:%compile function-form env))
@@ -208,14 +208,14 @@
                             `(core:%apply-generic ,function ,(core:%compile-arg-list arg-list env))
                             (:if (core:functionp function)
                                  (:if (core:%closurep function)
-                                      `(,core:%apply
+                                      `(core:%apply
                                         ,function
                                         ,(core:%closure-prop :mu function)
                                         ,(core:%compile-lambda-arg-list function arg-list env))
                                       `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                                  (core:%raise function 'core:%compile-funcall "not a function designator"))))
                      (mu:symbol-value function-form))
-                    `(,core:apply ,function-form ,(core:%compile-arg-list arg-list env)))))))
+                    `(core:apply ,function-form ,(core:%compile-arg-list arg-list env)))))))
 
 (mu:intern core "%compile"
    (:lambda (form env)

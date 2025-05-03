@@ -84,7 +84,7 @@
                          (core:%make-vector
                           (mu:make-vector :byte (core:%reverse (mu:cons byte loop)))
                           ()
-                          `(,(mu:add length (mu:mul 8 (mu:length loop))))))
+                          (core:%list (mu:add length (mu:mul 8 (mu:length loop))))))
                        (mu:car byte-descriptor)
                        (mu:cdr byte-descriptor))
                       (mu:cons byte-descriptor loop)))

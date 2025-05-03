@@ -17,7 +17,7 @@
              (:if list
                   (mu:cons
                    (mu:cdr list)
-                   (core:apply function (mu:cons (mu:car list) (mu:cons acc ()))))
+                   (core:apply function (core:%list2 (mu:car list) acc)))
                   arg))
            (mu:car arg)
            (mu:cdr arg)))
@@ -33,16 +33,10 @@
                   arg
                   (mu:cons
                    nth
-                   (core:apply function (mu:cons (mu:nth nth list) (mu:cons acc ()))))))
+                   (core:apply function (core:%list2 (mu:nth nth list) acc)))))
            (mu:sub (mu:car arg) 1)
            (mu:cdr arg)))
        (mu:cons (mu:length list) init)))))
-
-#|
-(mu:intern core "%foldr"
-   (:lambda (function init list)
-(core:%foldl function init (core:%reverse list))))
-|#
 
 ;;;
 ;;; maps

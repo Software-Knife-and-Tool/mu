@@ -66,7 +66,7 @@
    (:lambda (expr recur)
      ((:lambda (syntax-map)
         ((:lambda (type-function)
-            (mu:apply type-function `(,(mu:cdr expr))))
+            (mu:apply type-function (core:%list (mu:cdr expr))))
          (core:%quasi-map-func (mu:car expr) syntax-map)))
      `(,(mu:cons :basic (:lambda (form) (core:%quote (core:%list form))))
         ,(mu:cons :comma (:lambda (form) `(mu:cons ,form ())))
