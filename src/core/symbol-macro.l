@@ -12,16 +12,6 @@
   (:lambda (name)
       (mu:eq #\: (mu:svref name 0))))
 
-(mu:intern core "%read-symbol-scope"
-  (:lambda (name)
-     ((:lambda (colon)
-        (:if (core:null colon)
-             :extern
-             (:if (mu:eq #\: (mu:svref name (mu:add 1 colon)))
-                  :intern
-                  :extern)))
-        (core:%string-position #\: name))))
-
 (mu:intern core "%read-symbol-ns"
   (:lambda (name)
     ((:lambda (colon)
@@ -90,5 +80,5 @@
            (mu:intern core:*symbol-macros/* (mu:symbol-name symbol) form)
            (core:%raise symbol 'core:define-symbol-macro "not a symbol"))))
 
-;;; (core:define-symbol-macro 't :t)
-;;; (core:define-symbol-macro 'nil :nil)
+(core:define-symbol-macro 't :t)
+(core:define-symbol-macro 'nil :nil)

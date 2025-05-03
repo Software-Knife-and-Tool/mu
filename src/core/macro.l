@@ -16,7 +16,7 @@
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
-     (core:%compile (core:macroexpand `(,macro-symbol ,@arg-list) ()) env)))
+     (core:%compile (core:macroexpand (mu:cons macro-symbol arg-list) ()) env)))
 
 ;;;
 ;;; functions
