@@ -4,7 +4,7 @@
 //! image management
 #![allow(dead_code)]
 use crate::core::env::Env;
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 pub struct Image {
     image: Vec<u8>,

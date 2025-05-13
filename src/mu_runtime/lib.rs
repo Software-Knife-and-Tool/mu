@@ -53,7 +53,7 @@ mod streams;
 mod types;
 mod vectors;
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 use {
     crate::{
         core::{

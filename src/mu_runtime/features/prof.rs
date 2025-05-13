@@ -15,7 +15,7 @@ use crate::{
     types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 use std::collections::HashMap;
-use {futures::executor::block_on, futures_locks::RwLock};
+use {futures_lite::future::block_on, futures_locks::RwLock};
 
 pub trait Prof {
     fn feature() -> Feature;

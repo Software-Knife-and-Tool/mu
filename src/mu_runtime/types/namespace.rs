@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 pub trait Gc {
     #[allow(dead_code)]

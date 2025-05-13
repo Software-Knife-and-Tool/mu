@@ -22,7 +22,7 @@ use crate::{
     vectors::vector::Gc as _,
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 pub struct GcContext<'a> {
     pub heap_ref: &'a mut futures_locks::RwLockWriteGuard<HeapAllocator>,

@@ -25,7 +25,7 @@ use crate::{
 #[cfg(feature = "prof")]
 use crate::features::{feature::Feature, prof::Prof};
 
-use {futures::executor::block_on, futures_locks::RwLock};
+use {futures_lite::future::block_on, futures_locks::RwLock};
 
 pub struct Frame {
     pub argv: Vec<Tag>,

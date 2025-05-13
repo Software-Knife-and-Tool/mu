@@ -19,7 +19,7 @@ use {
     std::str,
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 #[derive(Clone)]
 pub struct VectorImage {

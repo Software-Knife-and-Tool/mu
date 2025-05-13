@@ -23,7 +23,7 @@ use {
     },
 };
 
-use {futures::executor::block_on, futures_locks::RwLock};
+use {futures_lite::future::block_on, futures_locks::RwLock};
 
 pub trait SemiSpace {
     fn feature() -> Feature;

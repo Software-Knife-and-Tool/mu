@@ -17,7 +17,7 @@ use crate::{
     types::{cons::Cons, stream::Read, symbol::Symbol, vector::Vector},
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 // a struct is a vector with an arbitrary type keyword
 #[derive(Copy, Clone)]

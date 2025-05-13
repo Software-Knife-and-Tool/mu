@@ -19,7 +19,7 @@ use {
             write::Write,
         },
     },
-    futures::executor::block_on,
+    futures_lite::future::block_on,
     std::str,
 };
 

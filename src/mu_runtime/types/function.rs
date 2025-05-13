@@ -17,7 +17,7 @@ use crate::{
     types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 #[derive(Copy, Clone)]
 pub struct Function {

@@ -21,7 +21,7 @@ use {
     std::{convert::From, fmt},
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 // tag storage classes
 #[derive(Copy, Clone)]

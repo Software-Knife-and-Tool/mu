@@ -20,7 +20,7 @@ use {
             vector::Vector,
         },
     },
-    futures::executor::block_on,
+    futures_lite::future::block_on,
     futures_locks::RwLock,
     std::collections::HashMap,
 };

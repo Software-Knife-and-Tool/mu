@@ -14,11 +14,10 @@ use {
         streams::system::{StringDirection, SystemStream, SystemStreamBuilder},
         types::{stream::Stream, symbol::Symbol},
     },
-    async_std::{io::WriteExt, task},
     std::{io::Write, str},
 };
 
-use futures::executor::block_on;
+use futures_lite::{future::block_on, AsyncWriteExt};
 use futures_locks::RwLock;
 
 impl SystemStream {
@@ -56,7 +55,7 @@ impl SystemStream {
             Self::Reader(file) => drop(block_on(file.read())),
             Self::Writer(file) => {
                 let mut file = block_on(file.write());
-                let _unused = task::block_on(async { file.flush().await });
+                let _unused = block_on(async { file.flush().await });
 
                 drop(file)
             }
