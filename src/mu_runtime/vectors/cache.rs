@@ -11,7 +11,7 @@ use {
         types::{fixnum::Fixnum, float::Float, vector::Vector},
         vectors::image::{VecImageType, VectorImageType},
     },
-    futures::executor::block_on,
+    futures_lite::future::block_on,
     futures_locks::RwLock,
     std::collections::HashMap,
 };

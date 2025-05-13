@@ -9,7 +9,7 @@
 //!    frame_ref
 use crate::core::{env::Env, type_image::TypeImage, types::Tag};
 
-use {futures::executor::block_on, futures_locks::RwLock};
+use {futures_lite::future::block_on, futures_locks::RwLock};
 
 pub struct Dynamic {
     pub dynamic: RwLock<Vec<(u64, usize)>>,

@@ -17,7 +17,7 @@ use {
     std::fmt,
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 #[bitfield]
 #[repr(align(8))]

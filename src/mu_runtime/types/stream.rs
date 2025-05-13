@@ -16,7 +16,7 @@ use crate::{
     types::{char::Char, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 // stream struct
 pub struct Stream {

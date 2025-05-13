@@ -4,7 +4,7 @@
 //! env heap
 #![allow(dead_code)]
 use crate::heaps::allocator::{AllocTypeInfo, AllocatorImageInfo};
-use {futures::executor::block_on, futures_locks::RwLock};
+use {futures_lite::future::block_on, futures_locks::RwLock};
 
 #[derive(Debug)]
 pub struct StackAllocator {

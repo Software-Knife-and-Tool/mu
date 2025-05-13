@@ -5,7 +5,7 @@
 //!    Condition
 //!    Exception
 //!    `Result<Exception>`
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 use {
     crate::{
         core::{

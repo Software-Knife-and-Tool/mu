@@ -2,20 +2,24 @@
 //  SPDX-License-Identifier: MIT
 
 //! system streams
+use futures_lite::AsyncReadExt;
+use futures_lite::AsyncWriteExt;
 use {
     crate::core::{
         env::Env,
         exception::{self, Condition, Exception},
         types::Tag,
     },
-    async_std::{
+    smol::{
         fs,
-        io::{self, BufReader, BufWriter, ReadExt, WriteExt},
-        task,
+        io::{BufReader, BufWriter},
     },
     std::collections::VecDeque,
+    std::io,
+    std::io::Read,
+    std::io::Write,
 };
-use {futures::executor::block_on, futures_locks::RwLock};
+use {futures_lite::future::block_on, futures_locks::RwLock};
 
 // stream builder
 pub struct SystemStreamBuilder {
@@ -66,7 +70,7 @@ impl SystemStreamBuilder {
         match &self.file {
             Some(path) => match self.input {
                 Some(_) => {
-                    let task: Option<SystemStream> = task::block_on(async {
+                    let task: Option<SystemStream> = block_on(async {
                         match fs::File::open(path).await {
                             Ok(file) => {
                                 Some(SystemStream::Reader(RwLock::new(BufReader::new(file))))
@@ -79,7 +83,7 @@ impl SystemStreamBuilder {
                 }
                 None => match self.output {
                     Some(_) => {
-                        let task: Option<SystemStream> = task::block_on(async {
+                        let task: Option<SystemStream> = block_on(async {
                             match fs::File::create(path).await {
                                 Ok(file) => {
                                     Some(SystemStream::Writer(RwLock::new(BufWriter::new(file))))
@@ -123,8 +127,7 @@ impl SystemStream {
 
         match self {
             Self::StdInput => {
-                let task: io::Result<usize> =
-                    task::block_on(async { io::stdin().read(&mut buf).await });
+                let task: io::Result<usize> = block_on(async { io::stdin().read(&mut buf) });
 
                 match task {
                     Ok(nread) => {
@@ -144,8 +147,7 @@ impl SystemStream {
             }
             Self::Reader(file) => {
                 let mut file_ref = block_on(file.write());
-                let task: io::Result<usize> =
-                    task::block_on(async { file_ref.read(&mut buf).await });
+                let task: io::Result<usize> = block_on(file_ref.read(&mut buf));
 
                 match task {
                     Ok(nread) => {
@@ -181,8 +183,7 @@ impl SystemStream {
 
         match self {
             Self::StdOutput => {
-                let task: io::Result<usize> =
-                    task::block_on(async { io::stdout().write(&buf).await });
+                let task: io::Result<usize> = block_on(async { io::stdout().write(&buf) });
 
                 match task {
                     Ok(_) => Ok(None),
@@ -195,8 +196,7 @@ impl SystemStream {
                 }
             }
             Self::StdError => {
-                let task: io::Result<usize> =
-                    task::block_on(async { io::stderr().write(&buf).await });
+                let task: io::Result<usize> = block_on(async { io::stderr().write(&buf) });
 
                 match task {
                     Ok(_) => Ok(None),
@@ -210,7 +210,7 @@ impl SystemStream {
             }
             SystemStream::Writer(file) => {
                 let mut file_ref = block_on(file.write());
-                let task: io::Result<()> = task::block_on(async { file_ref.write_all(&buf).await });
+                let task: io::Result<()> = block_on(file_ref.write_all(&buf));
 
                 match task {
                     Ok(_) => Ok(None),

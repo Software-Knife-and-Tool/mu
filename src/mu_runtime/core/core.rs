@@ -37,9 +37,9 @@ use {
     std::collections::HashMap,
 };
 
-use {futures::executor::block_on, futures_locks::RwLock};
+use {futures_lite::future::block_on, futures_locks::RwLock};
 
-pub const VERSION: &str = "0.2.5";
+pub const VERSION: &str = "0.2.6";
 
 pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
 pub type CoreFnDef = (&'static str, u16, CoreFn);

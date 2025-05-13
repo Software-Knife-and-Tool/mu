@@ -24,7 +24,7 @@ use {
     std::str,
 };
 
-use futures::executor::block_on;
+use futures_lite::future::block_on;
 
 lazy_static! {
     pub static ref UNBOUND: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);

@@ -16,7 +16,7 @@ use {
     std::{collections::HashMap, str},
 };
 
-use {futures::executor::block_on, futures_locks::RwLock};
+use {futures_lite::future::block_on, futures_locks::RwLock};
 
 #[derive(Clone)]
 pub struct Static {

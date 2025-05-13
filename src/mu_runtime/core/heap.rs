@@ -15,7 +15,7 @@ use {
         },
         types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
     },
-    futures::executor::block_on,
+    futures_lite::future::block_on,
     memmap,
     modular_bitfield::specifiers::{B11, B4},
     std::{
