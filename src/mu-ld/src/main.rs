@@ -17,7 +17,7 @@ mod writer;
 use {
     crate::image::Image,
     getopt::Opt,
-    mu_runtime::{Condition, Env, Result, Tag},
+    mu_runtime::{Condition, Env, Mu, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 
@@ -31,7 +31,7 @@ enum LoadOpt {
 }
 
 fn usage() {
-    println!("env-ld: {}: [-h?vdcelqwi] [file...]", Env::VERSION);
+    println!("env-ld: {}: [-h?vdcelqwi] [file...]", Mu::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value,...]");
@@ -64,7 +64,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<LoadOpt>> {
                 Some(opt) => match opt {
                     Opt('h', None) | Opt('?', None) => usage(),
                     Opt('v', None) => {
-                        print!("env-ld: {} ", Env::VERSION);
+                        print!("env-ld: {} ", Mu::VERSION);
                         return None;
                     }
                     Opt('e', Some(expr)) => {
@@ -116,8 +116,8 @@ pub fn main() {
         }
     }
 
-    let env = match Env::config(_config) {
-        Some(config) => Env::new(config, None),
+    let env = match Mu::config(_config) {
+        Some(config) => Mu::make_env(config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)
@@ -128,20 +128,20 @@ pub fn main() {
         Some(opts) => {
             for opt in opts {
                 match opt {
-                    LoadOpt::Eval(expr) => match env.eval_str(&expr) {
+                    LoadOpt::Eval(expr) => match Mu::eval_str(&env, &expr) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("env-ld: error {}, {}", expr, env.exception_string(e));
+                            eprintln!("env-ld: error {}, {}", expr, Mu::exception_string(&env, e));
                             std::process::exit(-1);
                         }
                     },
-                    LoadOpt::Load(path) => match env.load(&path) {
+                    LoadOpt::Load(path) => match Mu::load(&env, &path) {
                         Ok(_) => (),
                         Err(e) => {
                             eprintln!(
                                 "env-ld: failed to load {}, {}",
                                 &path,
-                                env.exception_string(e)
+                                Mu::exception_string(&env, e)
                             );
                             std::process::exit(-1);
                         }

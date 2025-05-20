@@ -3,7 +3,7 @@
 #
 .PHONY: dist clean release
 
-VERSION != grep VERSION: ../src/mu_runtime/core/core.rs | sed 's/.* "//' | sed 's/".*//'
+VERSION != grep VERSION: ../src/mu_runtime/mu/core.rs | sed 's/.* "//' | sed 's/".*//'
 
 BASE = ./mu
 DIST = ../dist

@@ -3,7 +3,7 @@
 
 //! image management
 #![allow(dead_code)]
-use crate::core::env::Env;
+use crate::mu::env::Env;
 use futures_lite::future::block_on;
 
 pub struct Image {

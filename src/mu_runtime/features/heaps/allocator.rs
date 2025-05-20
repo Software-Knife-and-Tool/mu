@@ -6,7 +6,7 @@
 #![allow(dead_code)]
 use {
     crate::{
-        core::{
+        mu::{
             env::Env,
             heap::Heap,
             types::{Tag, Type},

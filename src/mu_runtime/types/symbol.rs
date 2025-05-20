@@ -4,7 +4,7 @@
 //! env symbol type
 use {
     crate::{
-        core::{
+        mu::{
             apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType},
             env::Env,

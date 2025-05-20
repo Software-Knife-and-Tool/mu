@@ -4,7 +4,7 @@
 //! vector cache
 use {
     crate::{
-        core::{
+        mu::{
             env::Env,
             types::{Tag, Type},
         },

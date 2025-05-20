@@ -3,14 +3,14 @@
 
 //! sysinfo interface
 use crate::{
-    core::{
+    features::feature::Feature,
+    mu::{
         core::CoreFnDef,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         types::Tag,
     },
-    features::feature::Feature,
     types::{cons::Cons, fixnum::Fixnum, vector::Vector},
 };
 

@@ -3,7 +3,7 @@
 
 //! env namespaces
 use crate::{
-    core::{
+    mu::{
         apply::Apply as _,
         direct::DirectTag,
         env::Env,

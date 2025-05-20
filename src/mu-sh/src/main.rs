@@ -12,7 +12,7 @@ static GLOBAL: Jemalloc = Jemalloc;
 #[allow(unused_imports)]
 use {
     getopt::Opt,
-    mu_runtime::{Condition, Env, Result, Tag},
+    mu_runtime::{Condition, Env, Mu, Result, Tag},
     std::{fs, io::Write},
 };
 
@@ -44,7 +44,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
                 Some(opt) => match opt {
                     Opt('h', None) | Opt('?', None) => usage(),
                     Opt('v', None) => {
-                        print!("{} ", Env::VERSION);
+                        print!("{} ", Mu::VERSION);
                         std::process::exit(0);
                     }
                     Opt('e', Some(expr)) => {
@@ -74,7 +74,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
 }
 
 fn usage() {
-    println!("mu-sh: {}: [-h?vcelq] [file...]", Env::VERSION);
+    println!("mu-sh: {}: [-h?vcelq] [file...]", Mu::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value, ...]");
@@ -87,42 +87,42 @@ fn usage() {
 }
 
 fn listener(env: &Env) {
-    let eof_value = env.eval_str("(mu:make-symbol \"eof\")").unwrap();
+    let eof_value = Mu::eval_str(env, "(mu:make-symbol \"eof\")").unwrap();
 
     loop {
         print!("mu> ");
         let _ = std::io::Stdout::flush(&mut std::io::stdout());
 
-        match env.read(env.std_in(), false, eof_value) {
+        match Mu::read(env, Mu::std_in(), false, eof_value) {
             Ok(expr) => {
-                if env.eq(expr, eof_value) {
+                if Mu::eq(expr, eof_value) {
                     break;
                 }
 
                 #[allow(clippy::single_match)]
-                match env.compile(expr) {
-                    Ok(form) => match env.eval(form) {
+                match Mu::compile(env, expr) {
+                    Ok(form) => match Mu::eval(env, form) {
                         Ok(eval) => {
-                            env.write(eval, true, env.std_out()).unwrap();
+                            Mu::write(env, eval, true, Mu::std_out()).unwrap();
                             println!()
                         }
                         Err(e) => {
                             eprint!(
                                 "eval exception raised by {}, {:?} condition on ",
-                                env.write_to_string(e.source, true),
+                                Mu::write_to_string(env, e.source, true),
                                 e.condition
                             );
-                            env.write(e.object, true, env.err_out()).unwrap();
+                            Mu::write(env, e.object, true, Mu::err_out()).unwrap();
                             eprintln!()
                         }
                     },
                     Err(e) => {
                         eprint!(
                             "compile exception raised by {}, {:?} condition on ",
-                            env.write_to_string(e.source, true),
+                            Mu::write_to_string(env, e.source, true),
                             e.condition
                         );
-                        env.write(e.object, true, env.err_out()).unwrap();
+                        Mu::write(env, e.object, true, Mu::err_out()).unwrap();
                         eprintln!()
                     }
                 }
@@ -133,10 +133,10 @@ fn listener(env: &Env) {
                 } else {
                     eprint!(
                         "reader exception raised by {}, {:?} condition on ",
-                        env.write_to_string(e.source, true),
+                        Mu::write_to_string(env, e.source, true),
                         e.condition
                     );
-                    env.write(e.object, true, env.err_out()).unwrap();
+                    Mu::write(env, e.object, true, Mu::err_out()).unwrap();
                     eprintln!()
                 }
             }
@@ -163,8 +163,8 @@ pub fn main() {
         }
     }
 
-    let env = match Env::config(_config) {
-        Some(config) => Env::new(config, None),
+    let env = match Mu::config(_config) {
+        Some(config) => Mu::make_env(config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)
@@ -175,28 +175,28 @@ pub fn main() {
         Some(opts) => {
             for opt in opts {
                 match opt {
-                    ShellOpt::Eval(expr) => match env.eval_str(&expr) {
-                        Ok(eval) => println!("{}", env.write_to_string(eval, true)),
+                    ShellOpt::Eval(expr) => match Mu::eval_str(&env, &expr) {
+                        Ok(eval) => println!("{}", Mu::write_to_string(&env, eval, true)),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, env.exception_string(e));
+                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(&env, e));
                             std::process::exit(-1);
                         }
                     },
-                    ShellOpt::Load(path) => match env.load(&path) {
+                    ShellOpt::Load(path) => match Mu::load(&env, &path) {
                         Ok(_) => (),
                         Err(e) => {
                             eprintln!(
                                 "runtime: failed to load {}, {}",
                                 &path,
-                                env.exception_string(e)
+                                Mu::exception_string(&env, e)
                             );
                             std::process::exit(-1);
                         }
                     },
-                    ShellOpt::Quiet(expr) => match env.eval_str(&expr) {
+                    ShellOpt::Quiet(expr) => match Mu::eval_str(&env, &expr) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, env.exception_string(e));
+                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(&env, e));
                             std::process::exit(-1);
                         }
                     },

@@ -3,7 +3,7 @@
 
 //! env function type
 use crate::{
-    core::{
+    mu::{
         env::Env,
         exception,
         gc_context::{Gc as _, GcContext},

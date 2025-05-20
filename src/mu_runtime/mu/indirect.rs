@@ -5,8 +5,8 @@
 #![allow(clippy::identity_op)]
 #![allow(unused_braces)]
 use crate::{
-    core::types::{Tag, TagType, Type},
     modular_bitfield::specifiers::{B2, B59},
+    mu::types::{Tag, TagType, Type},
     types::symbol::Symbol,
 };
 

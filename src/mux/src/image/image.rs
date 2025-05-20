@@ -6,7 +6,7 @@ use {
         image::{heap_info::HeapInfoBuilder, reader::Reader, writer::Writer},
         options::{Mode, Opt, Options},
     },
-    mu_runtime::{Condition, Env, Result, Tag},
+    mu_runtime::{Condition, Env, Mu, Result, Tag},
     object::{Object, ObjectSection},
     std::{error::Error, fs},
 };
@@ -108,8 +108,8 @@ impl Image {
                         None => None,
                     };
 
-                    let env = match Env::config(config) {
-                        Some(config) => Env::new(config, None),
+                    let env = match Mu::config(config) {
+                        Some(config) => Mu::make_env(config),
                         None => {
                             eprintln!("build: configuration problem");
                             std::process::exit(-1)
@@ -118,24 +118,24 @@ impl Image {
 
                     for opt in options.options.iter() {
                         match opt {
-                            Opt::Load(path) => match env.load(&path) {
+                            Opt::Load(path) => match Mu::load(&env, &path) {
                                 Ok(_) => (),
                                 Err(e) => {
                                     eprintln!(
                                         "build load: failed to load {}, {}",
                                         &path,
-                                        env.exception_string(e)
+                                        Mu::exception_string(&env, e)
                                     );
                                     std::process::exit(-1);
                                 }
                             },
-                            Opt::Eval(expr) => match env.eval_str(&expr) {
+                            Opt::Eval(expr) => match Mu::eval_str(&env, &expr) {
                                 Ok(_) => (),
                                 Err(e) => {
                                     eprintln!(
                                         "build eval: error {}, {}",
                                         expr,
-                                        env.exception_string(e)
+                                        Mu::exception_string(&env, e)
                                     );
                                     std::process::exit(-1);
                                 }

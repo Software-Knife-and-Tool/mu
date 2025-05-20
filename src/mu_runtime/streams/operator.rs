@@ -4,7 +4,7 @@
 //! stream operators
 use {
     crate::{
-        core::{
+        mu::{
             core::{Core, CORE},
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,

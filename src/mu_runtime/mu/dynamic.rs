@@ -7,7 +7,7 @@
 //!    frame_push
 //!    frame_pop
 //!    frame_ref
-use crate::core::{env::Env, type_image::TypeImage, types::Tag};
+use crate::mu::{env::Env, type_image::TypeImage, types::Tag};
 
 use {futures_lite::future::block_on, futures_locks::RwLock};
 

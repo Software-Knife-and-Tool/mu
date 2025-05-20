@@ -5,7 +5,7 @@
 use {
     futures::executor::block_on,
     getopt::Opt,
-    mu_runtime::Env,
+    mu_runtime::Mu,
     std::net::{SocketAddr, ToSocketAddrs},
 };
 
@@ -35,7 +35,7 @@ enum OptType {
 
 impl ServerConfig {
     fn usage() {
-        println!("env-server: {}: [-h?psvcel] [file...]", Env::VERSION);
+        println!("env-server: {}: [-h?psvcel] [file...]", Mu::VERSION);
         println!("h: usage message");
         println!("?: usage message");
         println!("c: [name:value,...]");
@@ -66,7 +66,7 @@ impl ServerConfig {
                     Some(opt) => match opt {
                         Opt('h', None) | Opt('?', None) => Self::usage(),
                         Opt('v', None) => {
-                            print!("runtime: {} ", Env::VERSION);
+                            print!("runtime: {} ", Mu::VERSION);
                             return None;
                         }
                         Opt('p', None) => {
@@ -118,8 +118,8 @@ impl ServerConfig {
                     }
                 }
 
-                let env = match Env::config(Some(config)) {
-                    Some(config) => Env::new(config, None),
+                let env = match Mu::config(Some(config)) {
+                    Some(config) => Mu::make_env(config),
                     None => {
                         eprintln!("option: configuration error");
                         std::process::exit(-1)
@@ -131,20 +131,24 @@ impl ServerConfig {
                         OptType::Config => (),
                         OptType::Ping => ping = true,
                         OptType::Socket => socket = opt.1.to_string(),
-                        OptType::Eval => match env.eval_str(&opt.1) {
+                        OptType::Eval => match Mu::eval_str(&env, &opt.1) {
                             Ok(_) => (),
                             Err(e) => {
-                                eprintln!("runtime: error {}, {}", opt.1, env.exception_string(e));
+                                eprintln!(
+                                    "runtime: error {}, {}",
+                                    opt.1,
+                                    Mu::exception_string(&env, e)
+                                );
                                 std::process::exit(-1);
                             }
                         },
-                        OptType::Load => match env.load(&opt.1) {
+                        OptType::Load => match Mu::load(&env, &opt.1) {
                             Ok(_) => (),
                             Err(e) => {
                                 eprintln!(
                                     "runtime: failed to load {}, {}",
                                     &opt.1,
-                                    env.exception_string(e)
+                                    Mu::exception_string(&env, e)
                                 );
                                 std::process::exit(-1);
                             }

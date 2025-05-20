@@ -3,7 +3,7 @@
 
 //! stream write functions
 use crate::{
-    core::{
+    mu::{
         apply::Apply as _,
         env::Env,
         exception::{self},
