@@ -4,7 +4,7 @@
 //! env character class
 #![allow(dead_code)]
 use crate::{
-    core::{
+    mu::{
         direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,
         exception,
@@ -66,7 +66,7 @@ impl Char {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::types::Tag;
+    use crate::mu::types::Tag;
 
     #[test]
     fn as_tag() {

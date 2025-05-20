@@ -18,7 +18,7 @@ use {
         ElfBytes,
     },
     getopt::Opt,
-    mu_runtime::{Condition, Env, Result, Tag},
+    mu_runtime::{Condition, Env, Mu, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 
@@ -51,7 +51,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ExecOpt>> {
                     Opt('c', None) => optv.push(ExecOpt::Check),
                     Opt('t', None) => optv.push(ExecOpt::Toc),
                     Opt('v', None) => {
-                        print!("env-exec: {} ", Env::VERSION);
+                        print!("env-exec: {} ", Mu::VERSION);
                         return None;
                     }
                     _ => panic!(),
@@ -69,7 +69,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ExecOpt>> {
 }
 
 fn usage() {
-    println!("env-exec: {}: [-h?vd] file", Env::VERSION);
+    println!("env-exec: {}: [-h?vd] file", Mu::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("dump: load path");
@@ -84,8 +84,8 @@ pub fn main() {
     let mut _toc = false;
     let mut _path = String::new();
 
-    let _env = match Env::config(None) {
-        Some(config) => Env::new(config, None),
+    let _env = match Mu::config(None) {
+        Some(config) => Mu::make_env(config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)

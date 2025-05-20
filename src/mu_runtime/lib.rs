@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //!
-//! The core library is the implementation surface for the [`mu programming environment`] and
+//! The mu library is the implementation surface for the [`mu programming environment`] and
 //! implements the *mu* and *features* namespaces.
 //!
 //! As much as is practible, *mu's* functions and data types resemble Common Lisp in order to be
@@ -47,20 +47,19 @@ extern crate lazy_static;
 #[macro_use]
 extern crate modular_bitfield;
 
-mod core;
 mod features;
+mod mu;
 mod streams;
 mod types;
 mod vectors;
 
-use futures_lite::future::block_on;
 use {
     crate::{
-        core::{
+        mu::{
             apply::Apply as _,
             compile::Compile,
             config::Config,
-            core::{Core, CORE, VERSION},
+            core::{CORE, VERSION},
             exception,
             heap::HeapAllocator,
         },
@@ -70,27 +69,30 @@ use {
     std::fs,
 };
 
-/// The core API
+/// The library API
 ///
-/// The core API exposes these types:
+/// The library API exposes these types:
 /// - Condition, enumeration of exceptional conditions
+/// - Env, execution environment
 /// - Exception, exception state
-/// - Lib, environment and API namespace
+/// - Mu, environment and API namespace
 /// - Result, specialized result for API functions that can fail
 /// - Tag, tagged data representation
 ///   tagged data representation
-pub type Tag = core::types::Tag;
+pub type Tag = mu::types::Tag;
+/// environment
+pub type Env = mu::env::Env;
 /// API function Result
-pub type Result = core::exception::Result<Tag>;
+pub type Result = mu::exception::Result<Tag>;
 /// condition enumeration
-pub type Condition = core::exception::Condition;
+pub type Condition = mu::exception::Condition;
 /// Exception representation
-pub type Exception = core::exception::Exception;
+pub type Exception = mu::exception::Exception;
 
-/// the Env struct abstracts the library struct
-pub struct Env(Tag);
+/// environment and API namespace
+pub struct Mu;
 
-impl Env {
+impl Mu {
     /// version
     pub const VERSION: &'static str = VERSION;
 
@@ -99,53 +101,43 @@ impl Env {
         Config::new(config)
     }
 
-    /// constructor
-    pub fn new(config: Config, image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
-        Env(Core::add_env(core::env::Env::new(&config, image)))
+    /// env constructor
+    pub fn make_env(config: Config) -> Env {
+        mu::env::Env::new(&config, None)
     }
 
     /// apply a function to a list of arguments
-    pub fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn apply(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
         env.apply(func, args)
     }
 
     /// test tagged s-expressions for strict equality
-    pub fn eq(&self, tag: Tag, tag1: Tag) -> bool {
+    pub fn eq(tag: Tag, tag1: Tag) -> bool {
         tag.eq_(&tag1)
     }
 
     /// evaluate an s-expression
-    pub fn eval(&self, expr: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn eval(env: &Env, expr: Tag) -> exception::Result<Tag> {
         env.eval(expr)
     }
 
     /// compile an s-expression
-    pub fn compile(&self, expr: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn compile(env: &Env, expr: Tag) -> exception::Result<Tag> {
         env.compile(expr, &mut vec![])
     }
 
     /// read an s-expression from a core stream
-    pub fn read(&self, stream: Tag, eof_error_p: bool, eof_value: Tag) -> exception::Result<Tag> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn read(
+        env: &Env,
+        stream: Tag,
+        eof_error_p: bool,
+        eof_value: Tag,
+    ) -> exception::Result<Tag> {
         env.read_stream(stream, eof_error_p, eof_value, false)
     }
 
     /// convert a &str to a tagged s-expression
-    pub fn read_str(&self, str: &str) -> exception::Result<Tag> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn read_str(env: &Env, str: &str) -> exception::Result<Tag> {
         let stream = StreamBuilder::new()
             .string(str.into())
             .input()
@@ -155,26 +147,17 @@ impl Env {
     }
 
     /// write an s-expression to a core stream
-    pub fn write(&self, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn write(env: &Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         env.write_stream(expr, escape, stream)
     }
 
     /// write an &str to a core stream
-    pub fn write_str(&self, str: &str, stream: Tag) -> exception::Result<()> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn write_str(env: &Env, str: &str, stream: Tag) -> exception::Result<()> {
         env.write_string(str, stream)
     }
 
     /// write an s-expression to a String
-    pub fn write_to_string(&self, expr: Tag, esc: bool) -> String {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn write_to_string(env: &Env, expr: Tag, esc: bool) -> String {
         let str_stream = match StreamBuilder::new()
             .string("".into())
             .output()
@@ -183,7 +166,7 @@ impl Env {
             Ok(stream) => {
                 let str_tag = stream;
 
-                self.write(expr, esc, str_tag).unwrap();
+                Self::write(env, expr, esc, str_tag).unwrap();
                 str_tag
             }
             Err(_) => panic!(),
@@ -193,76 +176,65 @@ impl Env {
     }
 
     /// return the standard-input core stream
-    pub fn std_in(&self) -> Tag {
+    pub fn std_in() -> Tag {
         CORE.stdin()
     }
 
     /// return the standard-output core stream
-    pub fn std_out(&self) -> Tag {
+    pub fn std_out() -> Tag {
         CORE.stdout()
     }
 
     /// return the error-output core stream
-    pub fn err_out(&self) -> Tag {
+    pub fn err_out() -> Tag {
         CORE.errout()
     }
 
     /// eval &str
-    pub fn eval_str(&self, expr: &str) -> exception::Result<Tag> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
-        env.eval(self.compile(self.read_str(expr)?)?)
+    pub fn eval_str(env: &Env, expr: &str) -> exception::Result<Tag> {
+        env.eval(Self::compile(env, Self::read_str(env, expr)?)?)
     }
 
     /// format exception
-    pub fn exception_string(&self, ex: Exception) -> String {
+    pub fn exception_string(env: &Env, ex: Exception) -> String {
         format!(
             "error: condition {:?} on {} raised by {}",
             ex.condition,
-            self.write_to_string(ex.object, true),
-            self.write_to_string(ex.source, true),
+            Self::write_to_string(env, ex.object, true),
+            Self::write_to_string(env, ex.source, true),
         )
     }
 
     /// load source file
-    pub fn load(&self, file_path: &str) -> exception::Result<bool> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn load(env: &Env, file_path: &str) -> exception::Result<bool> {
         if fs::metadata(file_path).is_ok() {
             let load_form = format!("(mu:open :file :input \"{}\" :t)", file_path);
-            let istream = env.eval(self.read_str(&load_form)?)?;
-            let eof_value = self.read_str(":eof")?; // need make_symbol here
-
-            drop(env_ref);
+            let istream = env.eval(Self::read_str(env, &load_form)?)?;
+            let eof_value = Self::read_str(env, ":eof")?; // need make_symbol here
 
             loop {
-                let form = self.read(istream, false, eof_value)?;
+                let form = Self::read(env, istream, false, eof_value)?;
 
-                if self.eq(form, eof_value) {
+                if Self::eq(form, eof_value) {
                     break Ok(true);
                 }
 
-                let compiled_form = self.compile(form)?;
+                let compiled_form = Self::compile(env, form)?;
 
-                self.eval(compiled_form)?;
+                env.eval(compiled_form)?;
             }
         } else {
             Err(Exception::new(
                 env,
                 Condition::Open,
                 "load",
-                self.read_str(&format!("\"{}\"", file_path))?,
+                Self::read_str(env, &format!("\"{}\"", file_path))?,
             ))
         }
     }
 
     /// get environment image
-    pub fn image(&self) -> exception::Result<(Vec<u8>, Vec<u8>)> {
-        let env_ref = block_on(CORE.env_map.read());
-        let env = env_ref.get(&self.0.as_u64()).unwrap();
-
+    pub fn image(env: &Env) -> exception::Result<(Vec<u8>, Vec<u8>)> {
         Ok(HeapAllocator::image(env))
     }
 }

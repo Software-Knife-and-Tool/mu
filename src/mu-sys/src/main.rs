@@ -12,7 +12,7 @@ static GLOBAL: Jemalloc = Jemalloc;
 #[allow(unused_imports)]
 use {
     getopt::Opt,
-    mu_runtime::{Condition, Env, Result, Tag},
+    mu_runtime::{Condition, Env, Mu, Result, Tag},
     std::{fs, io::Write},
 };
 
@@ -83,8 +83,8 @@ pub fn main() {
         }
     }
 
-    let env = match Env::config(_config) {
-        Some(config) => Env::new(config, None),
+    let env = match Mu::config(_config) {
+        Some(config) => Mu::make_env(config),
         None => {
             eprintln!("option: configuration error");
             std::process::exit(-1)
@@ -95,28 +95,28 @@ pub fn main() {
         Some(opts) => {
             for opt in opts {
                 match opt {
-                    ShellOpt::Eval(expr) => match env.eval_str(&expr) {
-                        Ok(eval) => println!("{}", env.write_to_string(eval, true)),
+                    ShellOpt::Eval(expr) => match Mu::eval_str(&env, &expr) {
+                        Ok(eval) => println!("{}", Mu::write_to_string(&env, eval, true)),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, env.exception_string(e));
+                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(&env, e));
                             std::process::exit(-1);
                         }
                     },
-                    ShellOpt::Load(path) => match env.load(&path) {
+                    ShellOpt::Load(path) => match Mu::load(&env, &path) {
                         Ok(_) => (),
                         Err(e) => {
                             eprintln!(
                                 "runtime: failed to load {}, {}",
                                 &path,
-                                env.exception_string(e)
+                                Mu::exception_string(&env, e)
                             );
                             std::process::exit(-1);
                         }
                     },
-                    ShellOpt::Quiet(expr) => match env.eval_str(&expr) {
+                    ShellOpt::Quiet(expr) => match Mu::eval_str(&env, &expr) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, env.exception_string(e));
+                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(&env, e));
                             std::process::exit(-1);
                         }
                     },

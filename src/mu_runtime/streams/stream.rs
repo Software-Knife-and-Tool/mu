@@ -3,7 +3,7 @@
 
 //! env stream type
 use crate::{
-    core::{
+    mu::{
         core::Core,
         env::Env,
         exception::{self, Condition, Exception},

@@ -5,7 +5,8 @@
 #![allow(dead_code)]
 use {
     crate::{
-        core::{
+        features::feature::Feature,
+        mu::{
             apply::CoreFunction as _,
             compile::CoreFunction as _,
             config::CoreFunction as _,
@@ -17,7 +18,6 @@ use {
             namespace::Namespace,
             types::{CoreFunction as _, Tag},
         },
-        features::feature::Feature,
         streams::{
             read::CoreFunction as _, stream::StreamBuilder, write::CoreFunction as _, write::Write,
         },
@@ -39,7 +39,7 @@ use {
 
 use {futures_lite::future::block_on, futures_locks::RwLock};
 
-pub const VERSION: &str = "0.2.6";
+pub const VERSION: &str = "0.2.7";
 
 pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
 pub type CoreFnDef = (&'static str, u16, CoreFn);

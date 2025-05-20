@@ -4,7 +4,7 @@
 //! env config
 use {
     crate::{
-        core::{env::Env, exception, frame::Frame, types::Tag},
+        mu::{env::Env, exception, frame::Frame, types::Tag},
         types::{cons::Cons, fixnum::Fixnum, vector::Vector},
     },
     page_size,

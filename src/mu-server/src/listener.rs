@@ -2,42 +2,40 @@
 //  SPDX-License-Identifier: MIT
 
 //! runtime loader/listener
-use mu_runtime::{Condition, Env};
+use mu_runtime::{Condition, Env, Mu};
 
 pub fn _listener(env: &Env, _config: &str) {
-    let eval_string = env
-        .eval_str(&"(mu:open :string :output \"\")".to_string())
-        .unwrap();
+    let eval_string = Mu::eval_str(env, &"(mu:open :string :output \"\")".to_string()).unwrap();
 
-    let eof_value = env.eval_str(&"(env:symbol \"eof\")".to_string()).unwrap();
+    let eof_value = Mu::eval_str(env, &"(env:symbol \"eof\")".to_string()).unwrap();
 
     loop {
-        match env.read(env.std_in(), true, eof_value) {
+        match Mu::read(env, Mu::std_in(), true, eof_value) {
             Ok(expr) => {
-                if env.eq(expr, eof_value) {
+                if Mu::eq(expr, eof_value) {
                     break;
                 }
 
                 #[allow(clippy::single_match)]
-                match env.compile(expr) {
-                    Ok(form) => match env.eval(form) {
+                match Mu::compile(env, expr) {
+                    Ok(form) => match Mu::eval(env, form) {
                         Ok(eval) => {
-                            env.write(eval, true, eval_string).unwrap();
+                            Mu::write(env, eval, true, eval_string).unwrap();
                             println!(
                                 "{}",
-                                env.eval_str(&"(mu:get-string eval-string)".to_string())
+                                Mu::eval_str(env, &"(mu:get-string eval-string)".to_string())
                                     .unwrap()
                             )
                         }
                         Err(e) => {
-                            env.write(e.object, true, eval_string).unwrap();
-                            let object = env
-                                .eval_str(&"(mu:get-string eval-string)".to_string())
-                                .unwrap();
-                            env.write(e.source, true, eval_string).unwrap();
-                            let source = env
-                                .eval_str(&"(mu:get-string eval-string)".to_string())
-                                .unwrap();
+                            Mu::write(env, e.object, true, eval_string).unwrap();
+                            let object =
+                                Mu::eval_str(env, &"(mu:get-string eval-string)".to_string())
+                                    .unwrap();
+                            Mu::write(env, e.source, true, eval_string).unwrap();
+                            let source =
+                                Mu::eval_str(env, &"(mu:get-string eval-string)".to_string())
+                                    .unwrap();
 
                             eprintln!(
                                 "eval exception raised by {}, {:?} condition on {}",
@@ -46,14 +44,12 @@ pub fn _listener(env: &Env, _config: &str) {
                         }
                     },
                     Err(e) => {
-                        env.write(e.object, true, eval_string).unwrap();
-                        let object = env
-                            .eval_str(&"(mu:get-string eval-string)".to_string())
-                            .unwrap();
-                        env.write(e.source, true, eval_string).unwrap();
-                        let source = env
-                            .eval_str(&"(mu:get-string eval-string)".to_string())
-                            .unwrap();
+                        Mu::write(env, e.object, true, eval_string).unwrap();
+                        let object =
+                            Mu::eval_str(env, &"(mu:get-string eval-string)".to_string()).unwrap();
+                        Mu::write(env, e.source, true, eval_string).unwrap();
+                        let source =
+                            Mu::eval_str(env, &"(mu:get-string eval-string)".to_string()).unwrap();
 
                         eprintln!(
                             "eval exception raised by {}, {:?} condition on {}",
@@ -66,14 +62,12 @@ pub fn _listener(env: &Env, _config: &str) {
                 if let Condition::Eof = e.condition {
                     std::process::exit(0);
                 } else {
-                    env.write(e.object, true, eval_string).unwrap();
-                    let object = env
-                        .eval_str(&"(mu:get-string eval-string)".to_string())
-                        .unwrap();
-                    env.write(e.source, true, eval_string).unwrap();
-                    let source = env
-                        .eval_str(&"(mu:get-string eval-string)".to_string())
-                        .unwrap();
+                    Mu::write(env, e.object, true, eval_string).unwrap();
+                    let object =
+                        Mu::eval_str(env, &"(mu:get-string eval-string)".to_string()).unwrap();
+                    Mu::write(env, e.source, true, eval_string).unwrap();
+                    let source =
+                        Mu::eval_str(env, &"(mu:get-string eval-string)".to_string()).unwrap();
 
                     eprintln!(
                         "eval exception raised by {}, {:?} condition on {}",

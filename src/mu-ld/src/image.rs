@@ -5,7 +5,7 @@
 use {
     crate::{reader::Reader, writer::Writer},
     json::{self, object},
-    mu_runtime::Env,
+    mu_runtime::{Env, Mu},
 };
 
 #[allow(dead_code)]
@@ -32,11 +32,11 @@ impl Image {
                 println!("  magic:      {}", ident["magic"]);
                 print!("  version:    {}", ident["version"]);
 
-                if ident["version"] != Env::VERSION {
+                if ident["version"] != Mu::VERSION {
                     println!(
                         "    ! warning: version mismatch, {} expected {}",
                         ident["version"],
-                        Env::VERSION
+                        Mu::VERSION
                     )
                 } else {
                     println!()
@@ -71,13 +71,13 @@ impl Image {
     pub fn write_image(env: &Env, path: &str) {
         let ident_json = object! {
             magic: Self::IMAGE_MAGIC.to_string(),
-            version: Env::VERSION.to_string(),
+            version: Mu::VERSION.to_string(),
         };
 
         let writer = Writer::with(
             path,
             ident_json.dump().as_bytes().to_vec(),
-            env.image().unwrap(),
+            Mu::image(env).unwrap(),
         )
         .unwrap();
 

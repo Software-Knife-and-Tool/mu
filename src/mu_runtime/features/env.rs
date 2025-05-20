@@ -4,7 +4,8 @@
 //! env interface
 use {
     crate::{
-        core::{
+        features::feature::Feature,
+        mu::{
             core::{Core, CoreFnDef, VERSION},
             direct::DirectTag,
             env::Env as Env_,
@@ -14,7 +15,6 @@ use {
             indirect::IndirectTag,
             types::{Tag, Type},
         },
-        features::feature::Feature,
         types::{
             cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
             vector::Vector,

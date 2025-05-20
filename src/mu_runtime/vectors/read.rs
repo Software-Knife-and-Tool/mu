@@ -3,7 +3,7 @@
 
 //! vector read function
 use crate::{
-    core::{
+    mu::{
         env::Env,
         exception::{self, Condition, Exception},
         readtable::{map_char_syntax, SyntaxType},

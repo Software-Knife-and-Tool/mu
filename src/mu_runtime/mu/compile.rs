@@ -5,7 +5,7 @@
 //!     function calls
 //!     special forms
 use crate::{
-    core::{
+    mu::{
         apply::Apply as _,
         env::Env,
         exception::{self, Condition, Exception},
@@ -262,7 +262,7 @@ impl CoreFunction for Env {
 #[cfg(test)]
 mod tests {
     /*
-        use crate::core::{
+        use crate::mu::{
             compile::Compile,
             config::Config,
             env::Env,

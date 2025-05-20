@@ -3,7 +3,7 @@
 
 //! typed vectors
 use crate::{
-    core::{
+    mu::{
         apply::Apply,
         direct::DirectType,
         env::Env,

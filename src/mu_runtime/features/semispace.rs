@@ -4,14 +4,14 @@
 //! semispace allocator interface
 #![allow(dead_code)]
 use crate::{
-    core::{
+    features::feature::Feature,
+    mu::{
         config::Config,
         direct::DirectTag,
         env::Env,
         heap::{HeapImageInfo, HeapTypeInfo},
         types::{Tag, Type},
     },
-    features::feature::Feature,
     types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
 };
 

@@ -4,7 +4,7 @@
 //! environment bindings
 use {
     crate::{
-        core::{
+        mu::{
             config::Config,
             core::{Core, CORE, CORE_FUNCTIONS},
             dynamic::Dynamic,
