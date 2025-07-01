@@ -12,6 +12,9 @@ dist/prelude
 dist/sysgen
 dist/devop
 doc/rustdoc
+tools/valgrind/*.report
+tools/profiling/core/*.report
+tools/profiling/core/prof.data*
 tests/*/*.report
 tests/*/json
 tests/performance/*.summary
