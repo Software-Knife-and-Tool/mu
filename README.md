@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.2.7
+###### version 0.2.8
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 

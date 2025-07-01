@@ -319,14 +319,14 @@ impl Debug for Env {
     fn eprint(&self, label: &str, verbose: bool, tag: Tag) {
         let stdio = block_on(CORE.stdio.write());
 
-        eprint!("{}: ", label);
+        eprint!("{label}: ");
         self.write_stream(tag, verbose, stdio.2).unwrap();
     }
 
     fn eprintln(&self, label: &str, verbose: bool, tag: Tag) {
         let stdio = block_on(CORE.stdio.write());
 
-        eprint!("{}: ", label);
+        eprint!("{label}: ");
         self.write_stream(tag, verbose, stdio.2).unwrap();
         eprintln!();
     }
@@ -334,14 +334,14 @@ impl Debug for Env {
     fn print(&self, label: &str, verbose: bool, tag: Tag) {
         let stdio = block_on(CORE.stdio.write());
 
-        print!("{}: ", label);
+        print!("{label}: ");
         self.write_stream(tag, verbose, stdio.1).unwrap();
     }
 
     fn println(&self, label: &str, verbose: bool, tag: Tag) {
         let stdio = block_on(CORE.stdio.write());
 
-        print!("{}: ", label);
+        print!("{label}: ");
         self.write_stream(tag, verbose, stdio.1).unwrap();
         println!();
     }

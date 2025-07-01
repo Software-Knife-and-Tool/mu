@@ -208,7 +208,7 @@ impl Mu {
     /// load source file
     pub fn load(env: &Env, file_path: &str) -> exception::Result<bool> {
         if fs::metadata(file_path).is_ok() {
-            let load_form = format!("(mu:open :file :input \"{}\" :t)", file_path);
+            let load_form = format!("(mu:open :file :input \"{file_path}\" :t)");
             let istream = env.eval(Self::read_str(env, &load_form)?)?;
             let eof_value = Self::read_str(env, ":eof")?; // need make_symbol here
 
@@ -228,7 +228,7 @@ impl Mu {
                 env,
                 Condition::Open,
                 "load",
-                Self::read_str(env, &format!("\"{}\"", file_path))?,
+                Self::read_str(env, &format!("\"{file_path}\""))?,
             ))
         }
     }

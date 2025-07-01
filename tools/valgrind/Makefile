@@ -18,6 +18,7 @@ help:
 all: valgrind null
 valgrind: memcheck callgrind cachegrind
 null: nullcheck nullcall nullcache
+
 memcheck:
 	@valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=10 \
 		--leak-resolution=med --show-leak-kinds=definite	\
