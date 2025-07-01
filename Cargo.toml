@@ -1,6 +1,6 @@
 [package]
 name = "mu"
-version = "0.2.7"
+version = "0.2.8"
 edition = "2021"
 license = "MIT" 
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
@@ -10,8 +10,8 @@ members = [ "src/mu-exec", "src/mu-ld", "src/mu-server", "src/mu-sh", "src/mu-sy
 resolver = "2"
 
 [lib]
-name = "mu_runtime"
-path = "src/mu_runtime/lib.rs"
+name = "mu"
+path = "src/mu/lib.rs"
 crate-type = ["lib"]
 bench = false
 
@@ -38,6 +38,7 @@ codegen-units = 1
 inherits = "release"
 
 [dependencies]
+async-net = "2.0"
 futures-lite = "2.6"
 futures-locks = "0.7"
 lazy_static = "1.5"

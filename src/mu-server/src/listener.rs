@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! runtime loader/listener
-use mu_runtime::{Condition, Env, Mu};
+use mu::{Condition, Env, Mu};
 
 pub fn _listener(env: &Env, _config: &str) {
     let eval_string = Mu::eval_str(env, &"(mu:open :string :output \"\")".to_string()).unwrap();

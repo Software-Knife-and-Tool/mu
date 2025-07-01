@@ -39,7 +39,7 @@ use {
 
 use {futures_lite::future::block_on, futures_locks::RwLock};
 
-pub const VERSION: &str = "0.2.7";
+pub const VERSION: &str = "0.2.8";
 
 pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
 pub type CoreFnDef = (&'static str, u16, CoreFn);

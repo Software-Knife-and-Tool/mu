@@ -18,7 +18,7 @@ use {
         ElfBytes,
     },
     getopt::Opt,
-    mu_runtime::{Condition, Env, Mu, Result, Tag},
+    mu::{Condition, Env, Mu, Result, Tag},
     std::{error::Error, fs, io::Write},
 };
 

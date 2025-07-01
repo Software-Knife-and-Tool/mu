@@ -155,6 +155,7 @@ version 0.2.4 is built with rustc 1.85.1
 version 0.2.5 is built with rustc 1.86.0
 version 0.2.6 is built with rustc 1.86.0
 version 0.2.7 is built with rustc 1.87.0
+version 0.2.8 is built with rustc 1.88.0
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` compiler, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
