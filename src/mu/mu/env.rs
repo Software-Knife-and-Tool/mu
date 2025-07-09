@@ -45,17 +45,13 @@ pub struct Env {
     pub prof: RwLock<Vec<(Tag, u64)>>,
     #[cfg(feature = "prof")]
     pub prof_on: RwLock<bool>,
-
-    // env map
-    pub env_key: RwLock<Tag>,
 }
 
 impl Env {
-    pub fn new(config: &Config, _image: Option<(Vec<u8>, Vec<u8>)>) -> Self {
+    pub fn new(config: &Config) -> Self {
         let mut env = Env {
             config: config.clone(),
             dynamic: Dynamic::new(),
-            env_key: RwLock::new(Tag::nil()),
             heap: RwLock::new(HeapAllocator::new(config)),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),

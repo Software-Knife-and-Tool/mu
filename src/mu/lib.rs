@@ -61,7 +61,6 @@ use {
             config::Config,
             core::{CORE, VERSION},
             exception,
-            heap::HeapAllocator,
         },
         streams::{read::Read as _, stream::StreamBuilder, write::Write as _},
         types::stream::Stream,
@@ -73,6 +72,7 @@ use {
 ///
 /// The library API exposes these types:
 /// - Condition, enumeration of exceptional conditions
+/// - Core, CORE runtime state
 /// - Env, execution environment
 /// - Exception, exception state
 /// - Mu, environment and API namespace
@@ -88,6 +88,8 @@ pub type Result = mu::exception::Result<Tag>;
 pub type Condition = mu::exception::Condition;
 /// Exception representation
 pub type Exception = mu::exception::Exception;
+/// Core representation
+pub type Core = mu::core::Core;
 
 /// environment and API namespace
 pub struct Mu;
@@ -96,14 +98,19 @@ impl Mu {
     /// version
     pub const VERSION: &'static str = VERSION;
 
+    /// core image
+    pub fn core() -> &'static Core {
+        &CORE
+    }
+
     /// environment configuration
     pub fn config(config: Option<String>) -> Option<Config> {
         Config::new(config)
     }
 
     /// env constructor
-    pub fn make_env(config: Config) -> Env {
-        mu::env::Env::new(&config, None)
+    pub fn make_env(config: &Config) -> Env {
+        mu::env::Env::new(config)
     }
 
     /// apply a function to a list of arguments
@@ -231,10 +238,5 @@ impl Mu {
                 Self::read_str(env, &format!("\"{file_path}\""))?,
             ))
         }
-    }
-
-    /// get environment image
-    pub fn image(env: &Env) -> exception::Result<(Vec<u8>, Vec<u8>)> {
-        Ok(HeapAllocator::image(env))
     }
 }
