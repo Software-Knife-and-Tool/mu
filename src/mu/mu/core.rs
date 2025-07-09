@@ -144,7 +144,6 @@ lazy_static! {
 }
 
 pub struct Core {
-    pub env_map: RwLock<HashMap<u64, Env>>,
     pub features: RwLock<Vec<Feature>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
@@ -161,7 +160,6 @@ impl Default for Core {
 impl Core {
     pub fn new() -> Self {
         Core {
-            env_map: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(HashMap::new()),
@@ -264,31 +262,6 @@ impl Core {
                 Err(_) => panic!(),
             };
         }
-    }
-
-    pub fn add_env(env: Env) -> Tag {
-        let mut env_map_ref = block_on(CORE.env_map.write());
-        let mut tag_ref = block_on(env.env_key.write());
-
-        let key = Symbol::keyword(&format!("{:07x}", env_map_ref.len()));
-
-        *tag_ref = key;
-        env_map_ref.insert(key.as_u64(), env);
-
-        key
-    }
-
-    pub fn envs_as_list(env: &Env) -> Tag {
-        let env_map_ref = block_on(CORE.env_map.read());
-        let envs = env_map_ref
-            .values()
-            .map(|env| {
-                let env_key_ref = block_on(env.env_key.read());
-                *env_key_ref
-            })
-            .collect::<Vec<Tag>>();
-
-        Cons::list(env, &envs)
     }
 
     pub fn features_as_list(env: &Env) -> Tag {

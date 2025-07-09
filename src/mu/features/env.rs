@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env interface
+//! env implementation
 use {
     crate::{
         features::feature::Feature,
@@ -175,11 +175,6 @@ impl CoreFunction for Feature {
         let alist = vec![
             Cons::cons(
                 env,
-                Vector::from("env-key").evict(env),
-                *block_on(env.env_key.read()),
-            ),
-            Cons::cons(
-                env,
                 Vector::from("config").evict(env),
                 env.config.as_list(env),
             ),
@@ -211,11 +206,6 @@ impl CoreFunction for Feature {
                 env,
                 Vector::from("features").evict(env),
                 Core::features_as_list(env),
-            ),
-            Cons::cons(
-                env,
-                Vector::from("envs").evict(env),
-                Core::envs_as_list(env),
             ),
             Cons::cons(env, Vector::from("streams").evict(env), Core::nstreams()),
         ];

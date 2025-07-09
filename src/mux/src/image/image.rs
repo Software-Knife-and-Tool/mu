@@ -109,7 +109,7 @@ impl Image {
                     };
 
                     let env = match Mu::config(config) {
-                        Some(config) => Mu::make_env(config),
+                        Some(config) => Mu::make_env(&config),
                         None => {
                             eprintln!("build: configuration problem");
                             std::process::exit(-1)
