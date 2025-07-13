@@ -13,9 +13,9 @@ pub mod nix;
 pub mod procinfo;
 #[cfg(feature = "prof")]
 pub mod prof;
-#[cfg(feature = "semispace")]
-pub mod semispace;
 #[cfg(feature = "std")]
 pub mod std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
 pub mod sysinfo;
+#[cfg(feature = "timer")]
+pub mod timer;

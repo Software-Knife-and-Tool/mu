@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! types
+pub mod async_;
 pub mod char;
 pub mod cons;
 pub mod fixnum;

@@ -12,6 +12,7 @@ use crate::{
         types::{Tag, Type},
     },
     types::{
+        async_::Async,
         char::Char,
         cons::Cons,
         fixnum::Fixnum,
@@ -36,6 +37,7 @@ impl Write for Env {
         }
 
         match tag.type_of() {
+            Type::Async => Async::write(self, tag, escape, stream),
             Type::Char => Char::write(self, tag, escape, stream),
             Type::Cons => Cons::write(self, tag, escape, stream),
             Type::Fixnum => Fixnum::write(self, tag, escape, stream),

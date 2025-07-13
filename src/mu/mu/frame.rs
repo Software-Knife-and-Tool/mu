@@ -17,8 +17,8 @@ use crate::{
         types::{Tag, Type},
     },
     types::{
-        cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
-        vector::Vector,
+        async_::Async, cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct,
+        symbol::Symbol, vector::Vector,
     },
 };
 
@@ -136,6 +136,34 @@ impl Frame {
                     self.apply(env, Symbol::value(env, func))
                 } else {
                     Err(Exception::new(env, Condition::Unbound, "mu:apply", func))
+                }
+            }
+            Type::Async => {
+                let form = Async::form(env, func);
+                let offset = Cons::cdr(env, form);
+
+                match form.type_of() {
+                    Type::Null => Ok(Tag::nil()),
+                    Type::Cons => match offset.type_of() {
+                        Type::Null | Type::Cons => {
+                            let mut value = Tag::nil();
+                            let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
+
+                            Dynamic::dynamic_push(env, self.func, offset);
+                            self.frame_stack_push(env);
+
+                            for cons in Cons::iter(env, form) {
+                                value = env.eval(Cons::car(env, cons))?;
+                            }
+
+                            Self::frame_stack_pop(env, func);
+                            Dynamic::dynamic_pop(env);
+
+                            Ok(value)
+                        }
+                        _ => panic!(),
+                    },
+                    _ => panic!(),
                 }
             }
             Type::Function => {
