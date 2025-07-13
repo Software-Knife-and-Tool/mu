@@ -17,12 +17,12 @@ use crate::features::nix::Nix;
 use crate::features::procinfo::ProcInfo;
 #[cfg(feature = "prof")]
 use crate::features::prof::Prof;
-#[cfg(feature = "semispace")]
-use crate::features::semispace::SemiSpace;
 #[cfg(feature = "std")]
 use crate::features::std::Std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
 use crate::features::sysinfo::Sysinfo;
+#[cfg(feature = "timer")]
+use crate::features::timer::Timer;
 
 #[derive(Clone)]
 pub struct Feature {
@@ -46,8 +46,8 @@ impl Feature {
             <Feature as ProcInfo>::feature(),
             #[cfg(feature = "prof")]
             <Feature as Prof>::feature(),
-            #[cfg(feature = "semispace")]
-            <Feature as SemiSpace>::feature(),
+            #[cfg(feature = "timer")]
+            <Feature as Timer>::feature(),
             #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
             <Feature as Sysinfo>::feature(),
         ];

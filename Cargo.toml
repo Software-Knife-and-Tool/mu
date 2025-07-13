@@ -16,7 +16,7 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "env", "procinfo", "nix", "std", "sysinfo" ]
+default = [ "env", "procinfo", "nix", "std", "sysinfo", "timer" ]
 env = []           # needed for testing, common
 ffi = []
 nix = []
@@ -25,6 +25,7 @@ prof = []
 semispace = []
 std = []
 sysinfo = []       # not for macos
+timer = []
 
 [profile.dev]
 opt-level = 0
@@ -39,6 +40,7 @@ inherits = "release"
 
 [dependencies]
 async-net = "2.0"
+chrono = "0.4"
 futures-lite = "2.6"
 futures-locks = "0.7"
 lazy_static = "1.5"
@@ -49,6 +51,7 @@ num_enum = "0.7"
 page_size = "0.6"
 perf_monitor = "0.2"
 smol = "2.0"
+timer = "0.2"
 
 [target.'cfg(not(target_os = "macos"))'.dependencies]
 sysinfo_dot_h = "0.2"

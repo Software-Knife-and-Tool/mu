@@ -10,7 +10,10 @@ use crate::{
         env::Env,
         types::{Tag, Type},
     },
-    types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
+    types::{
+        async_::Async, cons::Cons, function::Function, struct_::Struct, symbol::Symbol,
+        vector::Vector,
+    },
     vectors::image::VectorImageType,
 };
 
@@ -18,6 +21,7 @@ use crate::{
 pub enum TypeImage {
     Cons(Cons),
     Function(Function),
+    Async(Async),
     Struct(Struct),
     Symbol(Symbol),
     Vector((Vector, VectorImageType)),
@@ -33,6 +37,7 @@ impl TypeImage {
 
     pub fn type_of(&self) -> Type {
         match self {
+            TypeImage::Async(_) => Type::Async,
             TypeImage::Cons(_) => Type::Cons,
             TypeImage::Function(_) => Type::Function,
             TypeImage::Struct(_) => Type::Struct,

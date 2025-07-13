@@ -13,6 +13,7 @@ use crate::{
         types::{Tag, Type},
     },
     types::{
+        async_::{Async, Gc as _},
         cons::{Cons, Gc as _},
         function::{Function, Gc as _},
         struct_::{Gc as _, Struct},
@@ -40,6 +41,7 @@ pub trait Gc {
 impl Gc for GcContext<'_> {
     fn mark(&mut self, env: &Env, tag: Tag) {
         match tag.type_of() {
+            Type::Async => Async::mark(self, env, tag),
             Type::Cons => Cons::mark(self, env, tag),
             Type::Function => Function::mark(self, env, tag),
             Type::Struct => Struct::mark(self, env, tag),

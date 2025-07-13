@@ -13,7 +13,7 @@ use crate::{
         namespace::Namespace,
         types::{Tag, Type},
     },
-    types::{cons::Cons, fixnum::Fixnum, function::Function, symbol::Symbol},
+    types::{async_::Async, cons::Cons, fixnum::Fixnum, function::Function, symbol::Symbol},
 };
 
 // special forms
@@ -21,6 +21,7 @@ type SpecFn = fn(&Env, Tag, &mut Vec<(Tag, Vec<Tag>)>) -> exception::Result<Tag>
 
 lazy_static! {
     static ref SPECMAP: Vec<(Tag, SpecFn)> = vec![
+        (Symbol::keyword("alambda"), Env::alambda),
         (Symbol::keyword("if"), Env::if_),
         (Symbol::keyword("lambda"), Env::lambda),
         (Symbol::keyword("quote"), Env::quote_),
@@ -34,7 +35,9 @@ pub trait Compile {
     fn compile(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn if_(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn is_quoted(&self, _: &Tag) -> bool;
+    fn parse_lambda(&self, _: Tag) -> exception::Result<(Tag, Tag, Vec<Tag>)>;
     fn lambda(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
+    fn alambda(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn lexical(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn list(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn quote(&self, _: &Tag) -> Tag;
@@ -67,17 +70,17 @@ impl Compile for Env {
         self.compile(Cons::list(self, &if_vec), env)
     }
 
-    fn lambda(&self, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
-        fn compile_frame_symbols(env: &Env, lambda: Tag) -> exception::Result<Vec<Tag>> {
+    fn parse_lambda(&self, args: Tag) -> exception::Result<(Tag, Tag, Vec<Tag>)> {
+        let compile_frame_symbols = |lambda: Tag| -> exception::Result<Vec<Tag>> {
             let mut symvec = Vec::new();
 
-            for cons in Cons::iter(env, lambda) {
-                let symbol = Cons::car(env, cons);
+            for cons in Cons::iter(self, lambda) {
+                let symbol = Cons::car(self, cons);
                 if symbol.type_of() == Type::Symbol {
                     match symvec.iter().rev().position(|lex| symbol.eq_(lex)) {
                         Some(_) => {
                             return Err(Exception::new(
-                                env,
+                                self,
                                 Condition::Syntax,
                                 "mu:compile",
                                 symbol,
@@ -86,12 +89,12 @@ impl Compile for Env {
                         _ => symvec.push(symbol),
                     }
                 } else {
-                    return Err(Exception::new(env, Condition::Type, "mu:compile", symbol));
+                    return Err(Exception::new(self, Condition::Type, "mu:compile", symbol));
                 }
             }
 
             Ok(symvec)
-        }
+        };
 
         let (lambda, body) = match args.type_of() {
             Type::Cons => {
@@ -105,13 +108,19 @@ impl Compile for Env {
             _ => return Err(Exception::new(self, Condition::Syntax, "mu:compile", args)),
         };
 
+        Ok((lambda, body, compile_frame_symbols(lambda)?))
+    }
+
+    fn lambda(&self, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
+        let (lambda, body, symbols) = self.parse_lambda(args)?;
+
         let func = Function::new(
             Fixnum::with_or_panic(Cons::length(self, lambda).unwrap()),
             Tag::nil(),
         )
         .evict(self);
 
-        env.push((func, compile_frame_symbols(self, lambda)?));
+        env.push((func, symbols));
 
         let form = self.list(body, env)?;
         let mut function = Function::to_image(self, func);
@@ -122,6 +131,28 @@ impl Compile for Env {
         env.pop();
 
         Ok(func)
+    }
+
+    fn alambda(&self, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
+        let (lambda, body, symbols) = self.parse_lambda(args)?;
+
+        let afunc = Async::new(
+            Fixnum::with_or_panic(Cons::length(self, lambda).unwrap()),
+            Tag::nil(),
+        )
+        .evict(self);
+
+        env.push((afunc, symbols));
+
+        let form = self.list(body, env)?;
+        let mut async_ = Async::to_image(self, afunc);
+
+        async_.form = form;
+        Async::update(self, &async_, afunc);
+
+        env.pop();
+
+        Ok(afunc)
     }
 
     fn quote_(&self, list: Tag, _: &mut LexEnv) -> exception::Result<Tag> {

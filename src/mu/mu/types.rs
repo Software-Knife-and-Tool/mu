@@ -35,6 +35,7 @@ pub enum Tag {
 #[derive(PartialEq, Hash, Eq, Copy, Clone, Debug, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Type {
+    Async,
     Bit,
     Byte,
     Char,
@@ -65,7 +66,7 @@ pub enum TagType {
     Struct = 4,   // struct heap tags
     Symbol = 5,   // symbol heap tag
     Vector = 6,   // vector heap tag
-                  // and room for a pony
+    Async = 7,    // async heap tag
 }
 
 lazy_static! {
@@ -75,6 +76,7 @@ lazy_static! {
         DirectType::Keyword
     );
     pub static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
+        (Type::Async, Symbol::keyword("async")),
         (Type::Bit, Symbol::keyword("bit")),
         (Type::Byte, Symbol::keyword("byte")),
         (Type::Char, Symbol::keyword("char")),
@@ -192,6 +194,7 @@ impl Tag {
                     },
                 },
                 Tag::Indirect(indirect) => match indirect.tag() {
+                    TagType::Async => Type::Async,
                     TagType::Cons => Type::Cons,
                     TagType::Function => Type::Function,
                     TagType::Struct => Type::Struct,
