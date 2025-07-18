@@ -3,7 +3,7 @@
 
 //! vector write function
 use crate::{
-    mu::{
+    core::{
         direct::{DirectTag, DirectType},
         env::Env,
         exception,

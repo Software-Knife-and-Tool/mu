@@ -4,14 +4,14 @@
 //! procinfo interface
 #![allow(unused_imports)]
 use crate::{
-    features::feature::Feature,
-    mu::{
+    core::{
         core::CoreFnDef,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
         types::Tag,
     },
+    features::feature::Feature,
     types::{cons::Cons, fixnum::Fixnum, struct_::Struct, symbol::Symbol, vector::Vector},
 };
 use futures_locks::RwLock;

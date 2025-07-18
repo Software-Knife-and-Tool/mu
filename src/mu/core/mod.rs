@@ -15,6 +15,7 @@ pub mod frame;
 pub mod gc_context;
 pub mod heap;
 pub mod indirect;
+pub mod mu;
 pub mod namespace;
 pub mod quasi;
 pub mod reader;

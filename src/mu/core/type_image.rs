@@ -4,7 +4,7 @@
 //! env tagged types
 #![allow(dead_code)]
 use crate::{
-    mu::{
+    core::{
         direct::{DirectExt, DirectTag, DirectType, ExtType},
         dynamic::Dynamic,
         env::Env,

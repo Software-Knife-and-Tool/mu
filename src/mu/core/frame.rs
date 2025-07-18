@@ -8,7 +8,7 @@
 //!    frame_pop
 //!    frame_ref
 use crate::{
-    mu::{
+    core::{
         apply::Apply as _,
         dynamic::Dynamic,
         env::Env,

@@ -5,8 +5,7 @@
 #![allow(dead_code)]
 use {
     crate::{
-        features::feature::Feature,
-        mu::{
+        core::{
             apply::CoreFunction as _,
             compile::CoreFunction as _,
             config::CoreFunction as _,
@@ -18,6 +17,7 @@ use {
             namespace::Namespace,
             types::{CoreFunction as _, Tag},
         },
+        features::feature::Feature,
         streams::{
             read::CoreFunction as _, stream::StreamBuilder, write::CoreFunction as _, write::Write,
         },
@@ -144,10 +144,11 @@ lazy_static! {
 }
 
 pub struct Core {
+    pub envs: RwLock<Vec<Env>>,
     pub features: RwLock<Vec<Feature>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
-    pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
     pub stream_id: RwLock<u64>,
+    pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
     pub symbols: RwLock<HashMap<String, Tag>>,
 }
 
@@ -160,6 +161,7 @@ impl Default for Core {
 impl Core {
     pub fn new() -> Self {
         Core {
+            envs: RwLock::new(Vec::new()),
             features: RwLock::new(Vec::new()),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(HashMap::new()),
@@ -168,7 +170,7 @@ impl Core {
         }
     }
 
-    // builder
+    // accessors
     pub fn features(self) -> Self {
         let mut features = block_on(self.features.write());
 
@@ -200,7 +202,6 @@ impl Core {
         self
     }
 
-    // accessors
     pub fn stdin(&self) -> Tag {
         let stdio = block_on(self.stdio.read());
 
@@ -262,6 +263,15 @@ impl Core {
                 Err(_) => panic!(),
             };
         }
+    }
+
+    pub fn add_env(env: Env) -> usize {
+        let mut envs_ref = block_on(CORE.envs.write());
+        let id = envs_ref.len();
+
+        envs_ref.push(env);
+
+        id
     }
 
     pub fn features_as_list(env: &Env) -> Tag {

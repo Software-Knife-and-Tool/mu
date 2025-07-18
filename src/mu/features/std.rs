@@ -3,8 +3,7 @@
 
 //! std interface
 use crate::{
-    features::feature::Feature,
-    mu::{
+    core::{
         apply::Apply as _,
         core::CoreFnDef,
         env::Env,
@@ -12,6 +11,7 @@ use crate::{
         frame::Frame,
         types::{Tag, Type},
     },
+    features::feature::Feature,
     types::{cons::Cons, fixnum::Fixnum, float::Float, vector::Vector},
 };
 use futures_locks::RwLock;

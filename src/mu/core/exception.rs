@@ -8,7 +8,7 @@
 use futures_lite::future::block_on;
 use {
     crate::{
-        mu::{
+        core::{
             apply::Apply as _,
             env::Env,
             frame::Frame,

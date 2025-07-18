@@ -4,7 +4,7 @@
 //! env namespaces
 use {
     crate::{
-        mu::{
+        core::{
             core::CoreFnDef,
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,

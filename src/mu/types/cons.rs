@@ -3,7 +3,7 @@
 
 //! cons class
 use crate::{
-    mu::{
+    core::{
         apply::Apply as _,
         direct::{DirectTag, DirectType, ExtType},
         dynamic::Dynamic,
@@ -575,7 +575,7 @@ impl Iterator for ConsIter<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::mu::types::Tag;
+    use crate::core::types::Tag;
     use crate::types::cons::Cons;
 
     #[test]

@@ -6,7 +6,7 @@
 #![allow(unused_imports)]
 use {
     crate::{
-        mu::{
+        core::{
             config::Config,
             direct::DirectTag,
             env::Env,

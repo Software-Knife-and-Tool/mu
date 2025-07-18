@@ -3,7 +3,7 @@
 
 //! env struct type
 use crate::{
-    mu::{
+    core::{
         apply::Apply as _,
         env::Env,
         exception::{self, Condition, Exception},

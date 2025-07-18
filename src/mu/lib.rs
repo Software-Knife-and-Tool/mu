@@ -3,14 +3,11 @@
 
 //!
 //! The mu library is the implementation surface for the [`mu programming environment`] and
-//! implements the *mu* and *features* namespaces.
-//!
-//! As much as is practible, *mu's* functions and data types resemble Common Lisp in order to be
-//! familiar to the traditional Lisp programmer.
+//! implements the *mu*, null, and *features* namespaces.
 //!
 //! mu is an immutable, lexically scoped Lisp-1 kernel porting layer for an ascending tower of
 //! Lisp languages. While it is possible to do some useful application work directly in the *mu*
-//! language, *mu* defers niceties like macros, closures, and rest functions to libraries and
+//! language, *mu* defers niceties like macros, closures, and rest lambdas to libraries and
 //! compilers layered on top of it. See [`mu programming environment`] for details.
 //!
 //! library characteristics:
@@ -47,23 +44,17 @@ extern crate lazy_static;
 #[macro_use]
 extern crate modular_bitfield;
 
+mod core;
 mod features;
-mod mu;
 mod streams;
 mod types;
 mod vectors;
 
 use {
-    crate::{
-        mu::{
-            apply::Apply as _,
-            compile::Compile,
-            config::Config,
-            core::{CORE, VERSION},
-            exception,
-        },
-        streams::{read::Read as _, stream::StreamBuilder, write::Write as _},
-        types::stream::Stream,
+    crate::core::{
+        config::Config,
+        core::{CORE, VERSION},
+        exception,
     },
     std::fs,
 };
@@ -79,21 +70,21 @@ use {
 /// - Result, specialized result for API functions that can fail
 /// - Tag, tagged data representation
 ///   tagged data representation
-pub type Tag = mu::types::Tag;
+pub type Tag = core::types::Tag;
+/// Mu library API
+pub type Mu = core::mu::Mu;
+/// Core library state representation
+pub type Core = core::core::Core;
 /// environment
-pub type Env = mu::env::Env;
-/// API function Result
-pub type Result = mu::exception::Result<Tag>;
-/// condition enumeration
-pub type Condition = mu::exception::Condition;
+pub type Env = core::mu::Env;
+/// exception Condition enumeration
+pub type Condition = core::exception::Condition;
 /// Exception representation
-pub type Exception = mu::exception::Exception;
-/// Core representation
-pub type Core = mu::core::Core;
+pub type Exception = core::exception::Exception;
+/// Mu function Result
+pub type Result = core::exception::Result<Tag>;
 
-/// environment and API namespace
-pub struct Mu;
-
+/// API namespace
 impl Mu {
     /// version
     pub const VERSION: &'static str = VERSION;
@@ -110,12 +101,17 @@ impl Mu {
 
     /// env constructor
     pub fn make_env(config: &Config) -> Env {
-        mu::env::Env::new(config)
+        Self::make_env_(config)
     }
 
     /// apply a function to a list of arguments
-    pub fn apply(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
-        env.apply(func, args)
+    pub fn apply(env: Env, func: Tag, args: Tag) -> exception::Result<Tag> {
+        Self::apply_(env, func, args)
+    }
+
+    /// compile an s-expression
+    pub fn compile(env: Env, expr: Tag) -> exception::Result<Tag> {
+        Self::compile_(env, expr)
     }
 
     /// test tagged s-expressions for strict equality
@@ -124,62 +120,43 @@ impl Mu {
     }
 
     /// evaluate an s-expression
-    pub fn eval(env: &Env, expr: Tag) -> exception::Result<Tag> {
-        env.eval(expr)
+    pub fn eval(env: Env, expr: Tag) -> exception::Result<Tag> {
+        Self::eval_(env, expr)
     }
 
-    /// compile an s-expression
-    pub fn compile(env: &Env, expr: Tag) -> exception::Result<Tag> {
-        env.compile(expr, &mut vec![])
+    /// eval &str
+    pub fn eval_str(env: Env, expr: &str) -> exception::Result<Tag> {
+        Self::eval(env, Self::compile(env, Self::read_str(env, expr)?)?)
     }
 
-    /// read an s-expression from a core stream
+    /// read a mu s-expression from a core stream
     pub fn read(
-        env: &Env,
+        env: Env,
         stream: Tag,
         eof_error_p: bool,
         eof_value: Tag,
     ) -> exception::Result<Tag> {
-        env.read_stream(stream, eof_error_p, eof_value, false)
+        Self::read_(env, stream, eof_error_p, eof_value)
     }
 
-    /// convert a &str to a tagged s-expression
-    pub fn read_str(env: &Env, str: &str) -> exception::Result<Tag> {
-        let stream = StreamBuilder::new()
-            .string(str.into())
-            .input()
-            .build(env, &CORE)?;
-
-        env.read_stream(stream, true, Tag::nil(), false)
+    /// read a mu s-expression from &str
+    pub fn read_str(env: Env, str: &str) -> exception::Result<Tag> {
+        Self::read_str_(env, str)
     }
 
-    /// write an s-expression to a core stream
-    pub fn write(env: &Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        env.write_stream(expr, escape, stream)
+    /// write a mu s-expression to a core stream
+    pub fn write(env: Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+        Self::write_(env, expr, escape, stream)
     }
 
-    /// write an &str to a core stream
-    pub fn write_str(env: &Env, str: &str, stream: Tag) -> exception::Result<()> {
-        env.write_string(str, stream)
+    /// write a mu &str to a core stream
+    pub fn write_str(env: Env, str: &str, stream: Tag) -> exception::Result<()> {
+        Self::write_str_(env, str, stream)
     }
 
-    /// write an s-expression to a String
-    pub fn write_to_string(env: &Env, expr: Tag, esc: bool) -> String {
-        let str_stream = match StreamBuilder::new()
-            .string("".into())
-            .output()
-            .build(env, &CORE)
-        {
-            Ok(stream) => {
-                let str_tag = stream;
-
-                Self::write(env, expr, esc, str_tag).unwrap();
-                str_tag
-            }
-            Err(_) => panic!(),
-        };
-
-        Stream::get_string(env, str_stream).unwrap()
+    /// write a mu s-expression to a String
+    pub fn write_to_string(env: Env, expr: Tag, esc: bool) -> String {
+        Self::write_to_string_(env, expr, esc)
     }
 
     /// return the standard-input core stream
@@ -197,27 +174,17 @@ impl Mu {
         CORE.errout()
     }
 
-    /// eval &str
-    pub fn eval_str(env: &Env, expr: &str) -> exception::Result<Tag> {
-        env.eval(Self::compile(env, Self::read_str(env, expr)?)?)
-    }
-
     /// format exception
-    pub fn exception_string(env: &Env, ex: Exception) -> String {
-        format!(
-            "error: condition {:?} on {} raised by {}",
-            ex.condition,
-            Self::write_to_string(env, ex.object, true),
-            Self::write_to_string(env, ex.source, true),
-        )
+    pub fn exception_string(env: Env, ex: Exception) -> String {
+        Self::exception_string_(env, ex)
     }
 
     /// load source file
-    pub fn load(env: &Env, file_path: &str) -> exception::Result<bool> {
+    pub fn load(env: Env, file_path: &str) -> exception::Result<bool> {
         if fs::metadata(file_path).is_ok() {
             let load_form = format!("(mu:open :file :input \"{file_path}\" :t)");
-            let istream = env.eval(Self::read_str(env, &load_form)?)?;
-            let eof_value = Self::read_str(env, ":eof")?; // need make_symbol here
+            let istream = Self::eval(env, Self::read_str(env, &load_form)?)?;
+            let eof_value = Self::eval(env, Self::read_str(env, "(mu:make-symbol \"eof\")")?)?;
 
             loop {
                 let form = Self::read(env, istream, false, eof_value)?;
@@ -226,17 +193,15 @@ impl Mu {
                     break Ok(true);
                 }
 
-                let compiled_form = Self::compile(env, form)?;
-
-                env.eval(compiled_form)?;
+                Self::eval(env, Self::compile(env, form)?)?;
             }
         } else {
-            Err(Exception::new(
+            Self::err_(
                 env,
                 Condition::Open,
                 "load",
                 Self::read_str(env, &format!("\"{file_path}\""))?,
-            ))
+            )
         }
     }
 }
