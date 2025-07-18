@@ -86,7 +86,7 @@ fn usage() {
     std::process::exit(0);
 }
 
-fn listener(env: &Env) {
+fn listener(env: Env) {
     let eof_value = Mu::eval_str(env, "(mu:make-symbol \"eof\")").unwrap();
 
     loop {
@@ -175,28 +175,28 @@ pub fn main() {
         Some(opts) => {
             for opt in opts {
                 match opt {
-                    ShellOpt::Eval(expr) => match Mu::eval_str(&env, &expr) {
-                        Ok(eval) => println!("{}", Mu::write_to_string(&env, eval, true)),
+                    ShellOpt::Eval(expr) => match Mu::eval_str(env, &expr) {
+                        Ok(eval) => println!("{}", Mu::write_to_string(env, eval, true)),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(&env, e));
+                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(env, e));
                             std::process::exit(-1);
                         }
                     },
-                    ShellOpt::Load(path) => match Mu::load(&env, &path) {
+                    ShellOpt::Load(path) => match Mu::load(env, &path) {
                         Ok(_) => (),
                         Err(e) => {
                             eprintln!(
                                 "runtime: failed to load {}, {}",
                                 &path,
-                                Mu::exception_string(&env, e)
+                                Mu::exception_string(env, e)
                             );
                             std::process::exit(-1);
                         }
                     },
-                    ShellOpt::Quiet(expr) => match Mu::eval_str(&env, &expr) {
+                    ShellOpt::Quiet(expr) => match Mu::eval_str(env, &expr) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(&env, e));
+                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(env, e));
                             std::process::exit(-1);
                         }
                     },
@@ -207,5 +207,5 @@ pub fn main() {
         None => std::process::exit(0),
     };
 
-    listener(&env)
+    listener(env)
 }

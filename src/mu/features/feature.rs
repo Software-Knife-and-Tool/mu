@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! features
-use crate::mu::{core::CoreFnDef, types::Tag};
+use crate::core::{core::CoreFnDef, types::Tag};
 
 use futures_locks::RwLock;
 use std::collections::HashMap;

@@ -3,7 +3,7 @@
 
 //! env stream functions
 use crate::{
-    mu::{
+    core::{
         apply::Apply as _,
         core::CORE,
         direct::{DirectExt, DirectTag, DirectType, ExtType},

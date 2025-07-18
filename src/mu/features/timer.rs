@@ -5,8 +5,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 use crate::{
-    features::feature::Feature,
-    mu::{
+    core::{
         apply::Apply,
         config::Config,
         core::CoreFnDef,
@@ -17,6 +16,7 @@ use crate::{
         heap::{HeapImageInfo, HeapTypeInfo},
         types::{Tag, Type},
     },
+    features::feature::Feature,
     types::{
         cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
         vector::Vector,

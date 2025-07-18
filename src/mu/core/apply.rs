@@ -3,7 +3,7 @@
 
 //! env functions
 use crate::{
-    mu::{
+    core::{
         compile::Compile,
         env::Env,
         exception::{self, Condition, Exception},

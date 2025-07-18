@@ -118,24 +118,24 @@ impl Image {
 
                     for opt in options.options.iter() {
                         match opt {
-                            Opt::Load(path) => match Mu::load(&env, &path) {
+                            Opt::Load(path) => match Mu::load(env, &path) {
                                 Ok(_) => (),
                                 Err(e) => {
                                     eprintln!(
                                         "build load: failed to load {}, {}",
                                         &path,
-                                        Mu::exception_string(&env, e)
+                                        Mu::exception_string(env, e)
                                     );
                                     std::process::exit(-1);
                                 }
                             },
-                            Opt::Eval(expr) => match Mu::eval_str(&env, &expr) {
+                            Opt::Eval(expr) => match Mu::eval_str(env, &expr) {
                                 Ok(_) => (),
                                 Err(e) => {
                                     eprintln!(
                                         "build eval: error {}, {}",
                                         expr,
-                                        Mu::exception_string(&env, e)
+                                        Mu::exception_string(env, e)
                                     );
                                     std::process::exit(-1);
                                 }

@@ -3,7 +3,7 @@
 
 //! stream read functions
 use crate::{
-    mu::{
+    core::{
         apply::Apply as _,
         compile::Compile,
         env::Env,

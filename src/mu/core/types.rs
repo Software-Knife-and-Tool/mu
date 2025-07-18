@@ -5,7 +5,7 @@
 #![allow(dead_code)]
 use {
     crate::{
-        mu::{
+        core::{
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},

@@ -2,9 +2,10 @@
 //  SPDX-License-Identifier: MIT
 
 //! environment bindings
+use futures_locks::RwLock;
 use {
     crate::{
-        mu::{
+        core::{
             config::Config,
             core::{Core, CORE, CORE_FUNCTIONS},
             dynamic::Dynamic,
@@ -15,7 +16,6 @@ use {
         },
         vectors::cache::VecCacheMap,
     },
-    futures_locks::RwLock,
     std::collections::HashMap,
 };
 
@@ -48,6 +48,10 @@ pub struct Env {
 }
 
 impl Env {
+    pub fn make(config: &Config) -> usize {
+        Core::add_env(Self::new(config))
+    }
+
     pub fn new(config: &Config) -> Self {
         let mut env = Env {
             config: config.clone(),

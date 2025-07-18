@@ -4,7 +4,7 @@
 //! env vector type
 use {
     crate::{
-        mu::{
+        core::{
             direct::DirectTag,
             direct::DirectType,
             env::Env,

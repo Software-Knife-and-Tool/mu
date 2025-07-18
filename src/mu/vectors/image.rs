@@ -5,7 +5,7 @@
 #![allow(unused_imports)]
 use {
     crate::{
-        mu::{
+        core::{
             direct::{DirectExt, DirectTag, DirectType},
             env::Env,
             gc_context::{Gc, GcContext},
