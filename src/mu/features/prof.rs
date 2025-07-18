@@ -4,7 +4,7 @@
 //! profile interface
 use crate::{
     features::feature::Feature,
-    mu::{
+    core::{
         apply::Apply as _,
         core::CoreFnDef,
         env::Env,
