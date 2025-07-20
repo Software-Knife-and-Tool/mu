@@ -33,8 +33,8 @@ impl Sysinfo for Feature {
     fn feature() -> Feature {
         Feature {
             functions: Some(&SYSINFO_FUNCTIONS),
-            namespace: "sysinfo".into(),
             symbols: Some(&SYSINFO_SYMBOLS),
+            namespace: "%sysinfo".into(),
         }
     }
 }

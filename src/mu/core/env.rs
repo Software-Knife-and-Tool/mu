@@ -48,10 +48,6 @@ pub struct Env {
 }
 
 impl Env {
-    pub fn make(config: &Config) -> usize {
-        Core::add_env(Self::new(config))
-    }
-
     pub fn new(config: &Config) -> Self {
         let mut env = Env {
             config: config.clone(),

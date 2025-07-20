@@ -3,7 +3,6 @@
 
 //! profile interface
 use crate::{
-    features::feature::Feature,
     core::{
         apply::Apply as _,
         core::CoreFnDef,
@@ -12,6 +11,7 @@ use crate::{
         frame::Frame,
         types::{Tag, Type},
     },
+    features::feature::Feature,
     types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 use std::collections::HashMap;
@@ -33,7 +33,7 @@ impl Prof for Feature {
         Feature {
             functions: Some(&PROF_FUNCTIONS),
             symbols: Some(&PROF_SYMBOLS),
-            namespace: "prof".into(),
+            namespace: "%prof".into(),
         }
     }
 

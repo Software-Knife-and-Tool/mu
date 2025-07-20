@@ -16,16 +16,14 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "env", "procinfo", "nix", "std", "sysinfo", "timer" ]
+default = [ "mu", "env", "nix", "std", "sysinfo" ]
+mu = []
 env = []           # needed for testing, common
 ffi = []
 nix = []
-procinfo = []
 prof = []
-semispace = []
 std = []
 sysinfo = []       # not for macos
-timer = []
 
 [profile.dev]
 opt-level = 0

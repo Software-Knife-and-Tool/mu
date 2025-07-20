@@ -32,7 +32,7 @@ impl Nix for Feature {
         Feature {
             functions: Some(&NIX_FUNCTIONS),
             symbols: Some(&NIX_SYMBOLS),
-            namespace: "nix".into(),
+            namespace: "%nix".into(),
         }
     }
 }

@@ -91,37 +91,47 @@ lazy_static! {
         ( "sub",     2, Fixnum::mu_fxsub ),
         ( "less-than",
                      2, Fixnum::mu_fxlt ),
-        ( "mul",    2, Fixnum::mu_fxmul ),
-        ( "div",    2, Fixnum::mu_fxdiv ),
-        ( "logand", 2, Fixnum::mu_logand ),
-        ( "logor",  2, Fixnum::mu_logor ),
-        ( "lognot", 1, Fixnum::mu_lognot ),
+        ( "mul",     2, Fixnum::mu_fxmul ),
+        ( "div",     2, Fixnum::mu_fxdiv ),
+        ( "logand",  2, Fixnum::mu_logand ),
+        ( "logor",   2, Fixnum::mu_logor ),
+        ( "lognot",  1, Fixnum::mu_lognot ),
         // floats
-        ( "fadd",  2, Float::mu_fladd ),
-        ( "fsub",  2, Float::mu_flsub ),
+        ( "fadd",    2, Float::mu_fladd ),
+        ( "fsub",    2, Float::mu_flsub ),
         ( "fless-than",
-                   2, Float::mu_fllt ),
-        ( "fmul",  2, Float::mu_flmul ),
-        ( "fdiv",  2, Float::mu_fldiv ),
+                     2, Float::mu_fllt ),
+        ( "fmul",    2, Float::mu_flmul ),
+        ( "fdiv",    2, Float::mu_fldiv ),
         // namespaces
-        ( "find",            2, Namespace::mu_find ),
-        ( "find-namespace",  1, Namespace::mu_find_ns ),
-        ( "intern",   	     3, Namespace::mu_intern ),
-        ( "make-namespace",  1, Namespace::mu_make_ns ),
-        ( "namespace-map",   0, Namespace::mu_ns_map ),
-        ( "namespace-name",  1, Namespace::mu_ns_name ),
-        ( "namespace-symbols",  1, Namespace::mu_ns_symbols ),
+        ( "find",    2, Namespace::mu_find ),
+        ( "find-namespace",
+                     1, Namespace::mu_find_ns ),
+        ( "intern",  3, Namespace::mu_intern ),
+        ( "make-namespace",
+                     1, Namespace::mu_make_ns ),
+        ( "namespace-map",
+                     0, Namespace::mu_ns_map ),
+        ( "namespace-name",
+                     1, Namespace::mu_ns_name ),
+        ( "namespace-symbols",
+                     1, Namespace::mu_ns_symbols ),
         // read/write
-        ( "read",   3, Env::mu_read ),
-        ( "write",  3, Env::mu_write ),
+        ( "read",    3, Env::mu_read ),
+        ( "write",   3, Env::mu_write ),
         // symbols
-        ( "boundp",              1, Symbol::mu_boundp ),
-        ( "make-symbol",         1, Symbol::mu_symbol ),
-        ( "symbol-name",         1, Symbol::mu_name ),
-        ( "symbol-namespace",    1, Symbol::mu_ns ),
-        ( "symbol-value",        1, Symbol::mu_value ),
+        ( "boundp",  1, Symbol::mu_boundp ),
+        ( "make-symbol",
+                     1, Symbol::mu_symbol ),
+        ( "symbol-name",
+                     1, Symbol::mu_name ),
+        ( "symbol-namespace",
+                     1, Symbol::mu_ns ),
+        ( "symbol-value",
+                     1, Symbol::mu_value ),
         // simple vectors
-        ( "make-vector",  2, Vector::mu_make_vector ),
+        ( "make-vector",
+                     2, Vector::mu_make_vector ),
         ( "svref",        2, Vector::mu_svref ),
         ( "vector-length", 1, Vector::mu_length ),
         ( "vector-type",  1, Vector::mu_type ),
@@ -144,7 +154,7 @@ lazy_static! {
 }
 
 pub struct Core {
-    pub envs: RwLock<Vec<Env>>,
+    pub envs: RwLock<HashMap<u64, Env>>,
     pub features: RwLock<Vec<Feature>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub stream_id: RwLock<u64>,
@@ -161,7 +171,7 @@ impl Default for Core {
 impl Core {
     pub fn new() -> Self {
         Core {
-            envs: RwLock::new(Vec::new()),
+            envs: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(HashMap::new()),
@@ -265,13 +275,24 @@ impl Core {
         }
     }
 
-    pub fn add_env(env: Env) -> usize {
+    pub fn add_env(env: Env) -> Tag {
         let mut envs_ref = block_on(CORE.envs.write());
-        let id = envs_ref.len();
+        let envs_len = envs_ref.len();
+        let id = Symbol::keyword(&format!("{envs_len:06x}"));
 
-        envs_ref.push(env);
+        envs_ref.insert(id.as_u64(), env);
 
         id
+    }
+
+    pub fn envs_as_list(env: &Env) -> Tag {
+        let envs_ref = block_on(CORE.envs.read());
+        let envs = envs_ref
+            .keys()
+            .map(|key| Tag::from_slice(&key.to_le_bytes()))
+            .collect::<Vec<Tag>>();
+
+        Cons::list(env, &envs)
     }
 
     pub fn features_as_list(env: &Env) -> Tag {

@@ -7,15 +7,13 @@ pub mod env;
 pub mod feature;
 #[cfg(feature = "ffi")]
 pub mod ffi;
+#[cfg(feature = "mu")]
+pub mod mu;
 #[cfg(feature = "nix")]
 pub mod nix;
-#[cfg(feature = "procinfo")]
-pub mod procinfo;
 #[cfg(feature = "prof")]
 pub mod prof;
 #[cfg(feature = "std")]
 pub mod std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
 pub mod sysinfo;
-#[cfg(feature = "timer")]
-pub mod timer;
