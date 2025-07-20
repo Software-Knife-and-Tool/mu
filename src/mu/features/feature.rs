@@ -11,18 +11,16 @@ use std::collections::HashMap;
 use crate::features::env::Env;
 #[cfg(feature = "ffi")]
 use crate::features::ffi::Ffi;
+#[cfg(feature = "mu")]
+use crate::features::mu::Mu;
 #[cfg(feature = "nix")]
 use crate::features::nix::Nix;
-#[cfg(feature = "procinfo")]
-use crate::features::procinfo::ProcInfo;
 #[cfg(feature = "prof")]
 use crate::features::prof::Prof;
 #[cfg(feature = "std")]
 use crate::features::std::Std;
 #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
 use crate::features::sysinfo::Sysinfo;
-#[cfg(feature = "timer")]
-use crate::features::timer::Timer;
 
 #[derive(Clone)]
 pub struct Feature {
@@ -34,6 +32,8 @@ pub struct Feature {
 impl Feature {
     pub fn install_features() -> Vec<Feature> {
         let features = vec![
+            #[cfg(feature = "mu")]
+            <Feature as Mu>::feature(),
             #[cfg(feature = "env")]
             <Feature as Env>::feature(),
             #[cfg(feature = "nix")]
@@ -42,12 +42,8 @@ impl Feature {
             <Feature as Std>::feature(),
             #[cfg(feature = "ffi")]
             <Feature as Ffi>::feature(),
-            #[cfg(feature = "procinfo")]
-            <Feature as ProcInfo>::feature(),
             #[cfg(feature = "prof")]
             <Feature as Prof>::feature(),
-            #[cfg(feature = "timer")]
-            <Feature as Timer>::feature(),
             #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
             <Feature as Sysinfo>::feature(),
         ];

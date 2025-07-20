@@ -20,38 +20,40 @@ use {
             types::Tag,
         },
         streams::{read::Read as _, stream::StreamBuilder, write::Write as _},
-        types::stream::Stream,
+        types::{stream::Stream, struct_::Struct, symbol::Symbol},
         vectors::cache::VecCacheMap,
     },
     std::collections::HashMap,
 };
 use {futures_lite::future::block_on, futures_locks::RwLock};
 
-pub type Env = (u64,);
+pub type Env = Tag;
 pub struct Mu;
 
 impl Mu {
+    pub fn make_env_(config: &Config) -> Env {
+        let env = env::Env::new(config);
+
+        Core::add_env(env)
+    }
+
     pub fn apply_(env: Env, func: Tag, args: Tag) -> exception::Result<Tag> {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         Apply::apply(env_, func, args)
     }
 
-    pub fn make_env_(config: &Config) -> Env {
-        (env::Env::make(config) as u64,)
-    }
-
     pub fn eval_(env: Env, expr: Tag) -> exception::Result<Tag> {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         Apply::eval(env_, expr)
     }
 
     pub fn compile_(env: Env, expr: Tag) -> exception::Result<Tag> {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         Compile::compile(env_, expr, &mut vec![])
     }
@@ -63,14 +65,14 @@ impl Mu {
         eof_value: Tag,
     ) -> exception::Result<Tag> {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         env_.read_stream(stream, eof_error_p, eof_value, false)
     }
 
     pub fn read_str_(env: Env, str: &str) -> exception::Result<Tag> {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         let stream = StreamBuilder::new()
             .string(str.into())
@@ -82,21 +84,21 @@ impl Mu {
 
     pub fn write_(env: Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         env_.write_stream(expr, escape, stream)
     }
 
     pub fn write_str_(env: Env, str: &str, stream: Tag) -> exception::Result<()> {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         env_.write_string(str, stream)
     }
 
     pub fn write_to_string_(env: Env, expr: Tag, esc: bool) -> String {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         let str_stream = match StreamBuilder::new()
             .string("".into())
@@ -125,7 +127,7 @@ impl Mu {
 
     pub fn err_(env: Env, cond: Condition, reason: &str, obj: Tag) -> exception::Result<bool> {
         let envs_ref = block_on(CORE.envs.read());
-        let env_: &env::Env = &envs_ref[env.0 as usize];
+        let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         Err(Exception::new(env_, cond, reason, obj))
     }
