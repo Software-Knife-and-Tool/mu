@@ -4,7 +4,7 @@
 //! env config
 use {
     crate::{
-        core::{env::Env, exception, frame::Frame, types::Tag},
+        core::{env::Env, types::Tag},
         types::{cons::Cons, fixnum::Fixnum, vector::Vector},
     },
     page_size,
@@ -227,18 +227,6 @@ impl Config {
                 .evict(env),
             ],
         )
-    }
-}
-
-pub trait CoreFunction {
-    fn mu_config(_: &Env, _: &mut Frame) -> exception::Result<()>;
-}
-
-impl CoreFunction for Env {
-    fn mu_config(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = env.config.as_list(env);
-
-        Ok(())
     }
 }
 

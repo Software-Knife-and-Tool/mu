@@ -15,7 +15,6 @@ help:
 world:
 	@cargo build --release --workspace
 	@cp target/release/mu-exec dist
-	@cp target/release/mu-ld dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sh dist
 	@cp target/release/mu-sys dist
@@ -26,7 +25,6 @@ world:
 profile:
 	@cargo build --workspace
 	@cp target/release/mu-exec dist
-	@cp target/release/mu-ld dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sh dist
 	@cp target/release/mu-sys dist

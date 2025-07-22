@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.2.8
+###### version 0.2.9
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -26,9 +26,9 @@ Subsequent layers based on the runtime offer advanced features.
 
 ------
 
-- library API revision
-- features revision
-- async infrastructure
+- env feature
+- 
+- 
 
 
 
@@ -148,11 +148,6 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 ------
 
 ```
-version 0.2.0 is built with rustc 1.83.0
-version 0.2.1 is built with rustc 1.84.0
-version 0.2.2 is built with rustc 1.84.1
-version 0.2.3 is built with rustc 1.85.0
-version 0.2.4 is built with rustc 1.85.1
 version 0.2.5 is built with rustc 1.86.0
 version 0.2.6 is built with rustc 1.86.0
 version 0.2.7 is built with rustc 1.87.0

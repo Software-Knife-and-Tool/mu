@@ -49,17 +49,17 @@ impl Mu for Feature {
 
 pub trait CoreFunction {
     fn mu_core(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_delay(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_fds(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_mem_res(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_mem_virt(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_time(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_time_units(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_delay(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Feature {
     fn mu_delay(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        env.fp_argv_check("timer:delay", &[Type::Fixnum], fp)?;
+        env.fp_argv_check("%core:delay", &[Type::Fixnum], fp)?;
 
         let delay = Fixnum::as_i64(fp.argv[0]);
 
