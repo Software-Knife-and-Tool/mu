@@ -30,7 +30,6 @@ dist:
 	@install -m 555 $(SRC)/dist/annotate.py $(BASE)/bin/annotate.py
 
 	@install -m 755 ./mu-exec $(BASE)/bin
-	@install -m 755 ./mu-ld $(BASE)/bin
 	@install -m 755 ./mu-server $(BASE)/bin
 	@install -m 755 ./mu-sh $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
@@ -66,7 +65,7 @@ dist:
 	@install -m 644 ./common.fasl $(BASE)/lib
 
 	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
-	@rm -rf $(BASE) mu-exec mu-ld mu-exec mu-server mu-sh mux sysgen
+	@rm -rf $(BASE) mu-exec mu-server mu-sh mux sysgen
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) core.fasl mu-exec mu-ld mu-exec mu-server mu-sh mu-sys mux sysgen
+	@rm -rf $(BASE)-*.tgz $(BASE) core.fasl mu-exec mu-server mu-sh mu-sys mux sysgen

@@ -8,7 +8,6 @@ use {
         core::{
             apply::CoreFunction as _,
             compile::CoreFunction as _,
-            config::CoreFunction as _,
             direct::DirectTag,
             env::Env,
             exception::{self, CoreFunction as _, Exception},
@@ -39,7 +38,7 @@ use {
 
 use {futures_lite::future::block_on, futures_locks::RwLock};
 
-pub const VERSION: &str = "0.2.8";
+pub const VERSION: &str = "0.2.9";
 
 pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
 pub type CoreFnDef = (&'static str, u16, CoreFn);
@@ -66,8 +65,6 @@ lazy_static! {
         ( "%if",     3, Env::mu_if),
         // gc
         ( "gc",      0, GcContext::mu_gc ),
-        // config
-        ( "config",  0, Env::mu_config ),
         // env
         ( "apply",   2, Env::mu_apply ),
         ( "eval",    1, Env::mu_eval ),
