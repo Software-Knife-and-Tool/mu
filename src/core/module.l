@@ -97,7 +97,7 @@
                            (:lambda (module)
                              (core:require module))
                            requires)
-                          (:if (core:%find-if (:lambda (el) (mu:eq el ns)) (mu:namespace-map))
+                          (:if (mu:find-namespace ns)
                                ()
                                (mu:make-namespace ns))
                           (core:%mapc
@@ -128,7 +128,7 @@
                            (:lambda (module)
                              (core:require module))
                            requires)
-                          (:if (core:%find-if (:lambda (el) (mu:eq el ns)) (mu:namespace-map))
+                          (:if (mu:find-namespace ns)
                                ()
                                (mu:make-namespace ns))
                           (core:%mapc

@@ -163,7 +163,6 @@ pub trait CoreFunction {
     fn mu_find_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_intern(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_make_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn mu_ns_map(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()>;
     fn mu_ns_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
@@ -207,14 +206,7 @@ impl CoreFunction for Namespace {
         env.fp_argv_check("mu:find-namespace", &[Type::String], fp)?;
         fp.value = match Self::find(env, &Vector::as_string(env, name)) {
             Some(ns) => ns,
-            None => {
-                return Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "mu:find-namespace",
-                    name,
-                ))
-            }
+            None => Tag::nil(),
         };
 
         Ok(())
@@ -284,20 +276,6 @@ impl CoreFunction for Namespace {
             }
             None => panic!(),
         };
-
-        Ok(())
-    }
-
-    fn mu_ns_map(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        env.fp_argv_check("mu:ns-map", &[], fp)?;
-
-        let ns_ref = block_on(env.ns_map.read());
-        let vec = ns_ref
-            .iter()
-            .map(|(_, name, _)| Vector::from((*name).clone()).evict(env))
-            .collect::<Vec<Tag>>();
-
-        fp.value = Cons::list(env, &vec);
 
         Ok(())
     }

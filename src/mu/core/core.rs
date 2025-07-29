@@ -107,8 +107,6 @@ lazy_static! {
         ( "intern",  3, Namespace::mu_intern ),
         ( "make-namespace",
                      1, Namespace::mu_make_ns ),
-        ( "namespace-map",
-                     0, Namespace::mu_ns_map ),
         ( "namespace-name",
                      1, Namespace::mu_ns_name ),
         ( "namespace-symbols",
