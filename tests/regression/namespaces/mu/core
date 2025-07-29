@@ -36,5 +36,4 @@
 (mu:type-of mu:find-namespace)	:func
 (mu:type-of mu:intern)	:func
 (mu:type-of mu:make-namespace)	:func
-(mu:type-of mu:namespace-map)	:func
 (mu:type-of mu:namespace-symbols)	:func
