@@ -22,3 +22,4 @@ pub mod reader;
 pub mod readtable;
 pub mod type_image;
 pub mod types;
+pub mod writer;

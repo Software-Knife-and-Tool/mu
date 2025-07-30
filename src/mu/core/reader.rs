@@ -5,24 +5,17 @@
 use crate::{
     core::{
         apply::Apply as _,
+        compile::Compile,
         direct::{DirectExt, DirectTag, DirectType},
         env::Env,
         exception::{self, Condition, Exception},
+        quasi::QuasiReader,
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
     },
-    streams::read::Read as _,
-    types::{fixnum::Fixnum, stream::Read, struct_::Struct, symbol::Symbol, vector::Vector},
+    streams::reader::StreamReader,
+    types::{cons::Cons, fixnum::Fixnum, struct_::Struct, symbol::Symbol, vector::Vector},
 };
-
-//
-// read functions return:
-//
-//     Ok(Some(())) if the function succeeded,
-//     Ok(None) if end of file
-//     Err if stream or syntax error
-//     errors propagate out of read()
-//
 
 lazy_static! {
     pub static ref EOL: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
@@ -36,8 +29,17 @@ pub trait Reader {
     fn read_ws(&self, _: Tag) -> exception::Result<Option<()>>;
     fn sharpsign_macro(&self, _: Tag) -> exception::Result<Option<Tag>>;
     fn read_token(&self, _: Tag) -> exception::Result<Option<String>>;
+    fn read(&self, _: Tag, _: bool, _: Tag, _: bool) -> exception::Result<Tag>;
 }
 
+//
+// read functions return:
+//
+//     Ok(Some(())) if the function succeeded,
+//     Ok(None) if end of file
+//     Err if stream or syntax error
+//     errors propagate out of read()
+//
 impl Reader for Env {
     //
     // read whitespace:
@@ -49,13 +51,13 @@ impl Reader for Env {
     //
     fn read_ws(&self, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match self.read_char(stream)? {
+            match StreamReader::read_char(self, stream)? {
                 Some(ch) => {
                     if let Some(stype) = map_char_syntax(ch) {
                         match stype {
                             SyntaxType::Whitespace => (),
                             _ => {
-                                self.unread_char(stream, ch).unwrap();
+                                StreamReader::unread_char(self, stream, ch).unwrap();
                                 break;
                             }
                         }
@@ -75,7 +77,7 @@ impl Reader for Env {
     //
     fn read_comment(&self, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match self.read_char(stream)? {
+            match StreamReader::read_char(self, stream)? {
                 Some(ch) => {
                     if ch == '\n' {
                         break;
@@ -96,10 +98,10 @@ impl Reader for Env {
     //
     fn read_block_comment(&self, stream: Tag) -> exception::Result<Option<()>> {
         loop {
-            match self.read_char(stream)? {
+            match StreamReader::read_char(self, stream)? {
                 Some(ch) => {
                     if ch == '|' {
-                        match self.read_char(stream)? {
+                        match StreamReader::read_char(self, stream)? {
                             Some(ch) => {
                                 if ch == '#' {
                                     break;
@@ -126,12 +128,12 @@ impl Reader for Env {
     fn read_token(&self, stream: Tag) -> exception::Result<Option<String>> {
         let mut token = String::new();
 
-        while let Some(ch) = self.read_char(stream)? {
+        while let Some(ch) = StreamReader::read_char(self, stream)? {
             match map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => token.push(ch),
                     SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                        self.unread_char(stream, ch).unwrap();
+                        StreamReader::unread_char(self, stream, ch).unwrap();
                         break;
                     }
                     _ => return Err(Exception::new(self, Condition::Range, "mu:read", stream)),
@@ -154,12 +156,12 @@ impl Reader for Env {
 
         token.push(ch);
 
-        while let Some(ch) = self.read_char(stream)? {
+        while let Some(ch) = StreamReader::read_char(self, stream)? {
             match map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => token.push(ch),
                     SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                        self.unread_char(stream, ch).unwrap();
+                        StreamReader::unread_char(self, stream, ch).unwrap();
                         break;
                     }
                     _ => return Err(Exception::new(self, Condition::Range, "mu:read", ch.into())),
@@ -194,13 +196,13 @@ impl Reader for Env {
     //     Ok(tag) if the read succeeded,
     //
     fn read_char_literal(&self, stream: Tag) -> exception::Result<Option<Tag>> {
-        match self.read_char(stream)? {
-            Some(ch) => match self.read_char(stream)? {
+        match StreamReader::read_char(self, stream)? {
+            Some(ch) => match StreamReader::read_char(self, stream)? {
                 Some(space) => match map_char_syntax(space) {
                     Some(sp_type) => match sp_type {
                         SyntaxType::Whitespace => Ok(Some(ch.into())),
                         SyntaxType::Constituent => {
-                            self.unread_char(stream, space).unwrap();
+                            StreamReader::unread_char(self, stream, space).unwrap();
                             match Self::read_token(self, stream)? {
                                 Some(str) => {
                                     let phrase = ch.to_string() + &str;
@@ -224,7 +226,7 @@ impl Reader for Env {
                             }
                         }
                         _ => {
-                            self.unread_char(stream, space).unwrap();
+                            StreamReader::unread_char(self, stream, space).unwrap();
                             Ok(Some(ch.into()))
                         }
                     },
@@ -242,9 +244,9 @@ impl Reader for Env {
     //     Ok(tag) if the read succeeded,
     //
     fn sharpsign_macro(&self, stream: Tag) -> exception::Result<Option<Tag>> {
-        match self.read_char(stream)? {
+        match StreamReader::read_char(self, stream)? {
             Some(ch) => match ch {
-                ':' => match self.read_char(stream)? {
+                ':' => match StreamReader::read_char(self, stream)? {
                     Some(ch) => {
                         let atom = Self::read_atom(self, ch, stream)?;
 
@@ -256,7 +258,7 @@ impl Reader for Env {
                     None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
                 },
                 '.' => {
-                    let expr = self.read_stream(stream, false, Tag::nil(), false)?;
+                    let expr = self.read(stream, false, Tag::nil(), false)?;
 
                     Ok(Some(self.eval(expr)?))
                 }
@@ -321,6 +323,78 @@ impl Reader for Env {
                 _ => Err(Exception::new(self, Condition::Type, "mu:read", ch.into())),
             },
             None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
+        }
+    }
+
+    // read:
+    //
+    //  returns:
+    //     Err raise exception if I/O problem, syntax error, or end of file and !eofp
+    //     Ok(eof_value) if end of file and eofp
+    //     Ok(tag) if the read succeeded,
+    //
+    fn read(
+        &self,
+        stream: Tag,
+        eof_error_p: bool,
+        eof_value: Tag,
+        recursivep: bool,
+    ) -> exception::Result<Tag> {
+        assert_eq!(stream.type_of(), Type::Stream);
+
+        if self.read_ws(stream)?.is_none() {
+            return if eof_error_p {
+                Err(Exception::new(self, Condition::Eof, "reader", stream))
+            } else {
+                Ok(eof_value)
+            };
+        };
+
+        match StreamReader::read_char(self, stream)? {
+            None => {
+                if eof_error_p {
+                    Err(Exception::new(self, Condition::Eof, "mu:read", stream))
+                } else {
+                    Ok(eof_value)
+                }
+            }
+            Some(ch) => match map_char_syntax(ch) {
+                Some(stype) => match stype {
+                    SyntaxType::Constituent => self.read_atom(ch, stream),
+                    SyntaxType::Macro => match ch {
+                        '#' => match self.sharpsign_macro(stream)? {
+                            Some(tag) => Ok(tag),
+                            None => self.read(stream, eof_error_p, eof_value, recursivep),
+                        },
+                        _ => Err(Exception::new(self, Condition::Type, "reader", ch.into())),
+                    },
+                    SyntaxType::Tmacro => match ch {
+                        '`' => QuasiReader::read(self, false, stream, false),
+                        '\'' => {
+                            let tag = self.read(stream, false, Tag::nil(), recursivep)?;
+
+                            Ok(Compile::quote(self, &tag))
+                        }
+                        '"' => Ok(Vector::read(self, '"', stream)?),
+                        '(' => Ok(Cons::read(self, stream)?),
+                        ')' => {
+                            if recursivep {
+                                Ok(*EOL)
+                            } else {
+                                Err(Exception::new(self, Condition::Syntax, "reader", stream))
+                            }
+                        }
+                        ';' => {
+                            self.read_comment(stream)?;
+                            self.read(stream, eof_error_p, eof_value, recursivep)
+                        }
+                        ',' => Err(Exception::new(self, Condition::Range, "reader", ch.into())),
+                        _ => Err(Exception::new(self, Condition::Range, "reader", ch.into())),
+                    },
+                    _ => Err(Exception::new(self, Condition::Read, "reader", ch.into())),
+                },
+                _ => Err(Exception::new(self, Condition::Read, "reader", ch.into())),
+            },
         }
     }
 }

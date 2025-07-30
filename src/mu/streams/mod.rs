@@ -2,9 +2,9 @@
 //  SPDX-License-Identifier: MIT
 
 //! system streams
-pub mod operator;
-pub mod read;
 // pub mod socket;
+pub mod builder;
+pub mod reader;
 pub mod stream;
 pub mod system;
-pub mod write;
+pub mod writer;

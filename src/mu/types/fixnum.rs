@@ -11,7 +11,7 @@ use crate::{
         frame::Frame,
         types::{Tag, Type},
     },
-    streams::write::Write as _,
+    streams::writer::StreamWriter,
     types::{cons::Cons, symbol::Symbol, vector::Vector},
 };
 
@@ -119,7 +119,7 @@ impl Fixnum {
     }
 
     pub fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
-        env.write_string(&Self::as_i64(tag).to_string(), stream)
+        StreamWriter::write_str(env, &Self::as_i64(tag).to_string(), stream)
     }
 
     pub fn view(env: &Env, fx: Tag) -> Tag {

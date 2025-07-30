@@ -12,11 +12,11 @@ use crate::{
         heap::HeapRequest,
         indirect::IndirectTag,
         types::{Tag, TagType, Type},
+        writer::Writer,
     },
-    streams::write::Write as _,
-    types::{cons::Cons, stream::Read, symbol::Symbol, vector::Vector},
+    streams::{reader::StreamReader, writer::StreamWriter},
+    types::{cons::Cons, symbol::Symbol, vector::Vector},
 };
-
 use futures_lite::future::block_on;
 
 // a struct is a vector with an arbitrary type keyword
@@ -121,18 +121,18 @@ impl Struct {
     pub fn write(env: &Env, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match tag {
             Tag::Indirect(_) => {
-                env.write_string("#s(", stream)?;
-                env.write_stream(Self::to_image(env, tag).stype, true, stream)?;
-                env.write_string(" ", stream)?;
-                env.write_stream(Self::to_image(env, tag).vector, true, stream)?;
-                env.write_string(")", stream)
+                StreamWriter::write_str(env, "#s(", stream)?;
+                env.write(Self::to_image(env, tag).stype, true, stream)?;
+                StreamWriter::write_str(env, " ", stream)?;
+                env.write(Self::to_image(env, tag).vector, true, stream)?;
+                StreamWriter::write_str(env, ")", stream)
             }
             _ => panic!(),
         }
     }
 
     pub fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
-        match env.read_char(stream)? {
+        match StreamReader::read_char(env, stream)? {
             Some('(') => {
                 let vec_list = match Cons::read(env, stream) {
                     Ok(list) => {

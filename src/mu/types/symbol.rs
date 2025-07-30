@@ -17,9 +17,10 @@ use {
             readtable::{map_char_syntax, SyntaxType},
             type_image::TypeImage,
             types::{Tag, TagType, Type},
+            writer::Writer,
         },
-        streams::write::Write as _,
-        types::{stream::Write as _, vector::Vector},
+        streams::writer::StreamWriter,
+        types::vector::Vector,
     },
     std::str,
 };
@@ -346,9 +347,9 @@ impl Symbol {
         match symbol.type_of() {
             Type::Null | Type::Keyword => match str::from_utf8(&symbol.data(env).to_le_bytes()) {
                 Ok(s) => {
-                    env.write_char(stream, ':').unwrap();
+                    StreamWriter::write_char(env, stream, ':').unwrap();
                     for nth in 0..DirectTag::length(symbol) {
-                        env.write_char(stream, s.as_bytes()[nth] as char)?;
+                        StreamWriter::write_char(env, stream, s.as_bytes()[nth] as char)?;
                     }
 
                     Ok(())
@@ -360,16 +361,16 @@ impl Symbol {
                 let ns = Self::namespace(env, symbol);
 
                 if Tag::nil().eq_(&ns) {
-                    env.write_string("#:", stream)?
+                    StreamWriter::write_str(env, "#:", stream)?
                 } else if !env.null_ns.eq_(&ns) {
                     match Namespace::name(env, ns) {
-                        Some(str) => env.write_string(&str, stream).unwrap(),
+                        Some(str) => StreamWriter::write_str(env, &str, stream).unwrap(),
                         None => panic!(),
                     }
-                    env.write_string(":", stream)?;
+                    StreamWriter::write_str(env, ":", stream)?;
                 }
 
-                env.write_stream(name, false, stream)
+                env.write(name, false, stream)
             }
             _ => panic!(),
         }

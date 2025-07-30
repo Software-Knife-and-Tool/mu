@@ -11,8 +11,8 @@ use crate::{
         reader::Reader,
         types::Tag,
     },
-    streams::read::Read,
-    types::{cons::Cons, stream::Read as _, symbol::Symbol},
+    streams::reader::StreamReader,
+    types::{cons::Cons, symbol::Symbol},
 };
 use std::fmt;
 
@@ -90,12 +90,12 @@ impl QuasiReader {
     fn read_syntax(&self, env: &Env) -> exception::Result<Option<QuasiSyntax>> {
         env.read_ws(self.stream)?;
 
-        match env.read_char(self.stream)? {
+        match StreamReader::read_char(env, self.stream)? {
             None => Ok(None),
             Some(ch) => match ch {
                 '(' => Ok(Some(QuasiSyntax::ListStart)),
                 ')' => Ok(Some(QuasiSyntax::ListEnd)),
-                ',' => match env.read_char(self.stream)? {
+                ',' => match StreamReader::read_char(env, self.stream)? {
                     None => Err(Exception::new(
                         env,
                         Condition::Stream,
@@ -106,14 +106,14 @@ impl QuasiReader {
                         if ch == '@' {
                             Ok(Some(QuasiSyntax::CommaAt))
                         } else {
-                            env.unread_char(self.stream, ch).unwrap();
+                            StreamReader::unread_char(env, self.stream, ch).unwrap();
                             Ok(Some(QuasiSyntax::Comma))
                         }
                     }
                 },
                 '`' => Ok(Some(QuasiSyntax::Quasi)),
                 _ => {
-                    env.unread_char(self.stream, ch).unwrap();
+                    StreamReader::unread_char(env, self.stream, ch).unwrap();
                     Ok(Some(QuasiSyntax::Atom))
                 }
             },
@@ -121,7 +121,7 @@ impl QuasiReader {
     }
 
     fn read_form(&self, env: &Env) -> exception::Result<Tag> {
-        let form = env.read_stream(self.stream, false, Tag::nil(), false)?;
+        let form = env.read(self.stream, false, Tag::nil(), false)?;
 
         Ok(form)
     }

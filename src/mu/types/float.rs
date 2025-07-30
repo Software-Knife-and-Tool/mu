@@ -12,7 +12,7 @@ use {
             frame::Frame,
             types::{Tag, Type},
         },
-        streams::write::Write as _,
+        streams::writer::StreamWriter,
         types::{symbol::Symbol, vector::Vector},
     },
     std::ops::{Add, Div, Mul, Sub},
@@ -53,7 +53,11 @@ impl Float {
     }
 
     pub fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
-        env.write_string(format!("{:.4}", Self::as_f32(env, tag)).as_str(), stream)
+        StreamWriter::write_str(
+            env,
+            format!("{:.4}", Self::as_f32(env, tag)).as_str(),
+            stream,
+        )
     }
 }
 

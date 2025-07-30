@@ -9,12 +9,12 @@ use crate::{
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
     },
+    streams::reader::StreamReader,
     types::{
         char::Char,
         cons::Cons,
         fixnum::Fixnum,
         float::Float,
-        stream::Read as _,
         vector::{Vector, VTYPEMAP},
     },
 };
@@ -30,10 +30,10 @@ impl Read for Vector {
                 let mut str: String = String::new();
 
                 loop {
-                    match env.read_char(stream)? {
+                    match StreamReader::read_char(env, stream)? {
                         Some('"') => break,
                         Some(ch) => match map_char_syntax(ch).unwrap() {
-                            SyntaxType::Escape => match env.read_char(stream)? {
+                            SyntaxType::Escape => match StreamReader::read_char(env, stream)? {
                                 Some(ch) => str.push(ch),
                                 None => {
                                     return Err(Exception::new(
@@ -58,13 +58,13 @@ impl Read for Vector {
                 let mut digits: String = String::new();
 
                 loop {
-                    match env.read_char(stream)? {
+                    match StreamReader::read_char(env, stream)? {
                         Some(ch) => match map_char_syntax(ch).unwrap() {
                             SyntaxType::Whitespace | SyntaxType::Tmacro => {
-                                env.unread_char(stream, ch)?;
+                                StreamReader::unread_char(env, stream, ch)?;
                                 break;
                             }
-                            SyntaxType::Escape => match env.read_char(stream)? {
+                            SyntaxType::Escape => match StreamReader::read_char(env, stream)? {
                                 Some(ch) => {
                                     if ch == '0' || ch == '1' {
                                         digits.push(ch)

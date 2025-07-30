@@ -15,11 +15,10 @@ use {
             gc_context::{CoreFunction as _, GcContext},
             namespace::Namespace,
             types::{CoreFunction as _, Tag},
+            writer::Writer as _,
         },
         features::feature::Feature,
-        streams::{
-            read::CoreFunction as _, stream::StreamBuilder, write::CoreFunction as _, write::Write,
-        },
+        streams::builder::StreamBuilder,
         types::{
             cons::{Cons, CoreFunction as _},
             fixnum::{CoreFunction as _, Fixnum},
@@ -112,8 +111,8 @@ lazy_static! {
         ( "namespace-symbols",
                      1, Namespace::mu_ns_symbols ),
         // read/write
-        ( "read",    3, Env::mu_read ),
-        ( "write",   3, Env::mu_write ),
+        ( "read",    3, Stream::mu_read ),
+        ( "write",   3, Stream::mu_write ),
         // symbols
         ( "boundp",  1, Symbol::mu_boundp ),
         ( "make-symbol",
@@ -127,13 +126,18 @@ lazy_static! {
         // simple vectors
         ( "make-vector",
                      2, Vector::mu_make_vector ),
-        ( "svref",        2, Vector::mu_svref ),
-        ( "vector-length", 1, Vector::mu_length ),
-        ( "vector-type",  1, Vector::mu_type ),
+        ( "svref",   2, Vector::mu_svref ),
+        ( "vector-length",
+                     1, Vector::mu_length ),
+        ( "vector-type",
+                     1, Vector::mu_type ),
         // structs
-        ( "make-struct", 2, Struct::mu_make_struct ),
-        ( "struct-type", 1, Struct::mu_struct_type ),
-        ( "struct-vec", 1, Struct::mu_struct_vector ),
+        ( "make-struct",
+                     2, Struct::mu_make_struct ),
+        ( "struct-type",
+                     1, Struct::mu_struct_type ),
+        ( "struct-vec",
+                     1, Struct::mu_struct_vector ),
         // streams
         ( "close",      1, Stream::mu_close ),
         ( "flush",      1, Stream::mu_flush ),
@@ -319,14 +323,14 @@ impl Debug for Env {
         let stdio = block_on(CORE.stdio.write());
 
         eprint!("{label}: ");
-        self.write_stream(tag, verbose, stdio.2).unwrap();
+        self.write(tag, verbose, stdio.2).unwrap();
     }
 
     fn eprintln(&self, label: &str, verbose: bool, tag: Tag) {
         let stdio = block_on(CORE.stdio.write());
 
         eprint!("{label}: ");
-        self.write_stream(tag, verbose, stdio.2).unwrap();
+        self.write(tag, verbose, stdio.2).unwrap();
         eprintln!();
     }
 
@@ -334,14 +338,14 @@ impl Debug for Env {
         let stdio = block_on(CORE.stdio.write());
 
         print!("{label}: ");
-        self.write_stream(tag, verbose, stdio.1).unwrap();
+        self.write(tag, verbose, stdio.1).unwrap();
     }
 
     fn println(&self, label: &str, verbose: bool, tag: Tag) {
         let stdio = block_on(CORE.stdio.write());
 
         print!("{label}: ");
-        self.write_stream(tag, verbose, stdio.1).unwrap();
+        self.write(tag, verbose, stdio.1).unwrap();
         println!();
     }
 }
