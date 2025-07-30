@@ -13,7 +13,7 @@ use crate::{
         namespace::Namespace,
         types::{Tag, Type},
     },
-    streams::write::Write as _,
+    streams::writer::StreamWriter,
     types::{
         cons::Cons,
         symbol::{Gc as _, Symbol},
@@ -146,12 +146,13 @@ impl Namespace {
 
     pub fn write(env: &Env, ns: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         if escape {
-            env.write_string(
+            StreamWriter::write_str(
+                env,
                 &format!("#<:ns \"{}\">", Namespace::name(env, ns).unwrap()),
                 stream,
             )?
         } else {
-            env.write_string(&Namespace::name(env, ns).unwrap(), stream)?
+            StreamWriter::write_str(env, &Namespace::name(env, ns).unwrap(), stream)?
         }
 
         Ok(())

@@ -13,11 +13,12 @@ use crate::{
         gc_context::{Gc as _, GcContext},
         heap::HeapRequest,
         indirect::IndirectTag,
-        reader::EOL,
+        reader::{Reader, EOL},
         type_image::TypeImage,
         types::{Tag, TagType, Type},
+        writer::Writer,
     },
-    streams::{read::Read as _, write::Write as _},
+    streams::writer::StreamWriter,
     types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 
@@ -263,19 +264,19 @@ impl Cons {
 
     pub fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
         let dot = Vector::from(".").evict(env);
-        let car = env.read_stream(stream, false, Tag::nil(), true)?;
+        let car = env.read(stream, false, Tag::nil(), true)?;
 
         if EOL.eq_(&car) {
             Ok(Tag::nil())
         } else {
             match car.type_of() {
                 Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
-                    let cdr = env.read_stream(stream, false, Tag::nil(), true)?;
+                    let cdr = env.read(stream, false, Tag::nil(), true)?;
 
                     if EOL.eq_(&cdr) {
                         Ok(Tag::nil())
                     } else {
-                        let eol = env.read_stream(stream, false, Tag::nil(), true)?;
+                        let eol = env.read(stream, false, Tag::nil(), true)?;
 
                         if EOL.eq_(&eol) {
                             Ok(cdr)
@@ -295,19 +296,19 @@ impl Cons {
 
     pub fn read_image(env: &Env, stream: Tag) -> exception::Result<Tag> {
         let dot = Vector::from(".").evict(env);
-        let car = env.read_stream(stream, false, Tag::nil(), true)?;
+        let car = env.read(stream, false, Tag::nil(), true)?;
 
         if EOL.eq_(&car) {
             Ok(Tag::nil())
         } else {
             match car.type_of() {
                 Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
-                    let cdr = env.read_stream(stream, false, Tag::nil(), true)?;
+                    let cdr = env.read(stream, false, Tag::nil(), true)?;
 
                     if EOL.eq_(&cdr) {
                         Ok(Tag::nil())
                     } else {
-                        let eol = env.read_stream(stream, false, Tag::nil(), true)?;
+                        let eol = env.read(stream, false, Tag::nil(), true)?;
 
                         if EOL.eq_(&eol) {
                             Ok(cdr)
@@ -328,8 +329,8 @@ impl Cons {
     pub fn write(env: &Env, cons: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         let car = Self::car(env, cons);
 
-        env.write_string("(", stream).unwrap();
-        env.write_stream(car, escape, stream).unwrap();
+        StreamWriter::write_char(env, stream, '(').unwrap();
+        env.write(car, escape, stream).unwrap();
 
         let mut tail = Self::cdr(env, cons);
 
@@ -337,21 +338,20 @@ impl Cons {
         loop {
             match tail.type_of() {
                 Type::Cons => {
-                    env.write_string(" ", stream).unwrap();
-                    env.write_stream(Self::car(env, tail), escape, stream)
-                        .unwrap();
+                    StreamWriter::write_char(env, stream, ' ').unwrap();
+                    env.write(Self::car(env, tail), escape, stream).unwrap();
                     tail = Self::cdr(env, tail);
                 }
                 _ if tail.null_() => break,
                 _ => {
-                    env.write_string(" . ", stream).unwrap();
-                    env.write_stream(tail, escape, stream).unwrap();
+                    StreamWriter::write_str(env, " . ", stream).unwrap();
+                    env.write(tail, escape, stream).unwrap();
                     break;
                 }
             }
         }
 
-        env.write_string(")", stream)
+        StreamWriter::write_str(env, ")", stream)
     }
 
     pub fn append(env: &Env, vec: &[Tag], cdr: Tag) -> Tag {

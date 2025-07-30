@@ -17,10 +17,12 @@ use {
             heap::HeapAllocator,
             mu,
             namespace::Namespace,
+            reader::Reader,
             types::Tag,
+            writer::Writer,
         },
-        streams::{read::Read as _, stream::StreamBuilder, write::Write as _},
-        types::{stream::Stream, struct_::Struct, symbol::Symbol},
+        streams::{builder::StreamBuilder, reader::StreamReader, writer::StreamWriter},
+        types::{char::Char, stream::Stream, struct_::Struct, symbol::Symbol},
         vectors::cache::VecCacheMap,
     },
     std::collections::HashMap,
@@ -67,7 +69,7 @@ impl Mu {
         let envs_ref = block_on(CORE.envs.read());
         let env_: &env::Env = &envs_ref[&env.as_u64()];
 
-        env_.read_stream(stream, eof_error_p, eof_value, false)
+        env_.read(stream, eof_error_p, eof_value, false)
     }
 
     pub fn read_str_(env: Env, str: &str) -> exception::Result<Tag> {
@@ -79,21 +81,21 @@ impl Mu {
             .input()
             .build(env_, &CORE)?;
 
-        env_.read_stream(stream, true, Tag::nil(), false)
+        env_.read(stream, true, Tag::nil(), false)
     }
 
     pub fn write_(env: Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         let envs_ref = block_on(CORE.envs.read());
         let env_: &env::Env = &envs_ref[&env.as_u64()];
 
-        env_.write_stream(expr, escape, stream)
+        env_.write(expr, escape, stream)
     }
 
     pub fn write_str_(env: Env, str: &str, stream: Tag) -> exception::Result<()> {
         let envs_ref = block_on(CORE.envs.read());
         let env_: &env::Env = &envs_ref[&env.as_u64()];
 
-        env_.write_string(str, stream)
+        StreamWriter::write_str(env_, str, stream)
     }
 
     pub fn write_to_string_(env: Env, expr: Tag, esc: bool) -> String {
@@ -106,7 +108,7 @@ impl Mu {
             .build(env_, &CORE)
         {
             Ok(stream) => {
-                env_.write_stream(expr, esc, stream).unwrap();
+                env_.write(expr, esc, stream).unwrap();
 
                 stream
             }

@@ -13,7 +13,7 @@ use crate::{
         type_image::TypeImage,
         types::{Tag, TagType, Type},
     },
-    streams::write::Write as _,
+    streams::writer::StreamWriter,
     types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 
@@ -202,7 +202,8 @@ impl Async {
                     _ => panic!(),
                 };
 
-                env.write_string(
+                StreamWriter::write_str(
+                    env,
                     format!(
                         "#<:async-function :{} [type:{}, req:{nreq}, form:{}]>",
                         desc.0, desc.1, desc.2

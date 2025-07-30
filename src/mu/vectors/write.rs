@@ -8,9 +8,10 @@ use crate::{
         env::Env,
         exception,
         types::{Tag, Type},
+        writer::Writer,
     },
-    streams::write::Write as _,
-    types::{fixnum::Fixnum, stream::Write as _, vector::Vector},
+    streams::writer::StreamWriter,
+    types::{fixnum::Fixnum, vector::Vector},
 };
 
 use std::str;
@@ -27,15 +28,15 @@ impl Write for Vector {
                 DirectType::String => match str::from_utf8(&vector.data(env).to_le_bytes()) {
                     Ok(s) => {
                         if escape {
-                            env.write_string("\"", stream).unwrap()
+                            StreamWriter::write_str(env, "\"", stream).unwrap()
                         }
 
                         for nth in 0..DirectTag::length(vector) {
-                            env.write_char(stream, s.as_bytes()[nth] as char)?;
+                            StreamWriter::write_char(env, stream, s.as_bytes()[nth] as char)?;
                         }
 
                         if escape {
-                            env.write_string("\"", stream).unwrap()
+                            StreamWriter::write_str(env, "\"", stream).unwrap()
                         }
 
                         Ok(())
@@ -43,55 +44,55 @@ impl Write for Vector {
                     Err(_) => panic!(),
                 },
                 DirectType::ByteVec => {
-                    env.write_string("#(:byte", stream)?;
+                    StreamWriter::write_str(env, "#(:byte", stream)?;
 
                     for tag in Vector::iter(env, vector) {
-                        env.write_string(" ", stream)?;
-                        env.write_stream(tag, false, stream)?;
+                        StreamWriter::write_str(env, " ", stream)?;
+                        env.write(tag, false, stream)?;
                     }
 
-                    env.write_string(")", stream)
+                    StreamWriter::write_str(env, ")", stream)
                 }
                 _ => panic!(),
             },
             Tag::Indirect(_) => match Self::type_of(env, vector) {
                 Type::Char => {
                     if escape {
-                        env.write_string("\"", stream)?;
+                        StreamWriter::write_str(env, "\"", stream)?;
                     }
 
                     for ch in Vector::iter(env, vector) {
-                        env.write_stream(ch, false, stream)?;
+                        env.write(ch, false, stream)?;
                     }
 
                     if escape {
-                        env.write_string("\"", stream)?;
+                        StreamWriter::write_str(env, "\"", stream)?;
                     }
 
                     Ok(())
                 }
                 Type::Bit => {
-                    env.write_string("#*", stream)?;
+                    StreamWriter::write_str(env, "#*", stream)?;
 
                     let _len = Vector::length(env, vector);
                     for bit in Vector::iter(env, vector) {
                         let digit = Fixnum::as_i64(bit);
 
-                        env.write_string(if digit == 1 { "1" } else { "0" }, stream)?
+                        StreamWriter::write_str(env, if digit == 1 { "1" } else { "0" }, stream)?
                     }
 
                     Ok(())
                 }
                 _ => {
-                    env.write_string("#(", stream)?;
-                    env.write_stream(Self::to_image(env, vector).type_, true, stream)?;
+                    StreamWriter::write_str(env, "#(", stream)?;
+                    env.write(Self::to_image(env, vector).type_, true, stream)?;
 
                     for tag in Vector::iter(env, vector) {
-                        env.write_string(" ", stream)?;
-                        env.write_stream(tag, false, stream)?;
+                        StreamWriter::write_str(env, " ", stream)?;
+                        env.write(tag, false, stream)?;
                     }
 
-                    env.write_string(")", stream)
+                    StreamWriter::write_str(env, ")", stream)
                 }
             },
         }

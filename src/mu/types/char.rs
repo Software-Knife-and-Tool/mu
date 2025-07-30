@@ -10,8 +10,8 @@ use crate::{
         exception,
         types::Tag,
     },
-    streams::write::Write as _,
-    types::{stream::Write as _, vector::Vector},
+    streams::writer::StreamWriter,
+    types::vector::Vector,
 };
 
 #[derive(Copy, Clone)]
@@ -38,7 +38,7 @@ impl Char {
         let ch: u8 = (chr.data(env) & 0xff) as u8;
 
         if escape {
-            env.write_string("#\\", stream)?;
+            StreamWriter::write_str(env, "#\\", stream)?;
 
             let mut tmp = [0; 4];
 
@@ -51,9 +51,9 @@ impl Char {
                 _ => (ch as char).encode_utf8(&mut tmp),
             };
 
-            env.write_string(phrase, stream)?;
+            StreamWriter::write_str(env, phrase, stream)?;
         } else {
-            env.write_char(stream, ch as char)?;
+            StreamWriter::write_char(env, stream, ch as char)?;
         }
 
         Ok(())
