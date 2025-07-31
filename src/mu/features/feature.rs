@@ -7,12 +7,12 @@ use crate::core::{core::CoreFnDef, types::Tag};
 use futures_locks::RwLock;
 use std::collections::HashMap;
 
+#[cfg(feature = "core")]
+use crate::features::core::Core;
 #[cfg(feature = "env")]
 use crate::features::env::Env;
 #[cfg(feature = "ffi")]
 use crate::features::ffi::Ffi;
-#[cfg(feature = "mu")]
-use crate::features::mu::Mu;
 #[cfg(feature = "nix")]
 use crate::features::nix::Nix;
 #[cfg(feature = "prof")]
@@ -32,8 +32,8 @@ pub struct Feature {
 impl Feature {
     pub fn install_features() -> Vec<Feature> {
         let features = vec![
-            #[cfg(feature = "mu")]
-            <Feature as Mu>::feature(),
+            #[cfg(feature = "core")]
+            <Feature as Core>::feature(),
             #[cfg(feature = "env")]
             <Feature as Env>::feature(),
             #[cfg(feature = "nix")]

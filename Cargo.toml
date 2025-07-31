@@ -16,8 +16,8 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "mu", "env", "nix", "std", "sysinfo" ]
-mu = []
+default = [ "core", "env", "nix", "std", "sysinfo" ]
+core = []
 env = []           # needed for testing, common
 ffi = []
 nix = []

@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{
-            core::{Core, CoreFnDef, VERSION},
+            core::CoreFnDef,
             direct::DirectTag,
             env::Env as Env_,
             exception::{self},
@@ -28,7 +28,6 @@ use {
 lazy_static! {
     pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
     pub static ref ENV_FUNCTIONS: Vec<CoreFnDef> = vec![
-        ("core", 0, Feature::env_core),
         ("env", 0, Feature::env_env),
         ("heap-free", 0, Feature::env_hp_free),
         ("heap-info", 0, Feature::env_hp_info),
@@ -59,7 +58,7 @@ impl Env for Feature {
         Feature {
             symbols: Some(&ENV_SYMBOLS),
             functions: Some(&ENV_FUNCTIONS),
-            namespace: "%env%".into(),
+            namespace: "mu/env".into(),
         }
     }
 
@@ -114,7 +113,6 @@ impl Env for Feature {
 }
 
 pub trait CoreFunction {
-    fn env_core(_: &Env_, _: &mut Frame) -> exception::Result<()>;
     fn env_env(_: &Env_, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_free(_: &Env_, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_info(_: &Env_, _: &mut Frame) -> exception::Result<()>;
@@ -188,26 +186,6 @@ impl CoreFunction for Feature {
                 Vector::from("heap-room").evict(env),
                 Self::heap_stat(env),
             ),
-        ];
-
-        fp.value = Cons::list(env, &alist);
-
-        Ok(())
-    }
-
-    fn env_core(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        let alist = vec![
-            Cons::cons(
-                env,
-                Vector::from("version").evict(env),
-                Vector::from(VERSION).evict(env),
-            ),
-            Cons::cons(
-                env,
-                Vector::from("features").evict(env),
-                Core::features_as_list(env),
-            ),
-            Cons::cons(env, Vector::from("streams").evict(env), Core::nstreams()),
         ];
 
         fp.value = Cons::list(env, &alist);

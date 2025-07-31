@@ -2,13 +2,13 @@
 //  SPDX-License-Identifier: MIT
 
 //! features module
+#[cfg(feature = "core")]
+pub mod core;
 #[cfg(feature = "env")]
 pub mod env;
 pub mod feature;
 #[cfg(feature = "ffi")]
 pub mod ffi;
-#[cfg(feature = "mu")]
-pub mod mu;
 #[cfg(feature = "nix")]
 pub mod nix;
 #[cfg(feature = "prof")]

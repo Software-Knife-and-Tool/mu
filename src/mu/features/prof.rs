@@ -33,7 +33,7 @@ impl Prof for Feature {
         Feature {
             functions: Some(&PROF_FUNCTIONS),
             symbols: Some(&PROF_SYMBOLS),
-            namespace: "%prof%".into(),
+            namespace: "mu/prof".into(),
         }
     }
 
