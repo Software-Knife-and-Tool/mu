@@ -34,7 +34,7 @@ impl Sysinfo for Feature {
         Feature {
             functions: Some(&SYSINFO_FUNCTIONS),
             symbols: Some(&SYSINFO_SYMBOLS),
-            namespace: "%sysinfo".into(),
+            namespace: "%sysinfo%".into(),
         }
     }
 }

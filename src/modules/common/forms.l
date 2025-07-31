@@ -56,15 +56,15 @@
           (list 'lambda (list* self-gensym exit-gensym return-gensym var-list)
                 (list 'if (nth 0 end-form)
                       (list 'progn
-                            (list '%env:fp-setv (list core::fn-frame-id self-gensym) 1 0)
-                            (list '%env:fp-setv (list core::fn-frame-id self-gensym) 2 (nth 1 end-form)))
+                            (list '%env%:fp-setv (list core::fn-frame-id self-gensym) 1 0)
+                            (list '%env%:fp-setv (list core::fn-frame-id self-gensym) 2 (nth 1 end-form)))
                       (list 'progn
                             (cons 'progn body)
-                            (list '%env:fp-setv (list core::fn-frame-id self-gensym) 1 (list 'null exit-gensym))
+                            (list '%env%:fp-setv (list core::fn-frame-id self-gensym) 1 (list 'null exit-gensym))
                             (cons 'progn
                                   (maplist
                                    (lambda (step-cdr)
-                                     (list '%env:fp-setv (list core::fn-frame-id self-gensym) (fixnum+ 2 (length step-cdr)) (car step-cdr)))
+                                     (list '%env%:fp-setv (list core::fn-frame-id self-gensym) (fixnum+ 2 (length step-cdr)) (car step-cdr)))
                                    step-list)))))
           (list 'list* () () (cons 'list init-list)))))
 
@@ -74,7 +74,7 @@
   (errorp-unless functionp closure "reclose: not a function")
   (let ((closed (core::lambda-closure (core::fn-lambda-desc closure))))
     (errorp-unless (lambda (list) (fixnum< 0 (length list))) closed "reclose environment botch")
-    (%env:fnv-set (car closed) 0 closure))
+    (%env%:fnv-set (car closed) 0 closure))
   closure)
 
 (defmacro recur (name lambda &rest body)

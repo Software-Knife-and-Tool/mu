@@ -28,9 +28,6 @@ Subsequent layers based on the runtime offer advanced features.
 
 - env feature
 - 
-- 
-
-
 
 #### Rationale
 
@@ -197,12 +194,12 @@ Currently supported features by namespace:
 ```
  default = [ "env", "std", "sysinfo", "procinfo", "prof", "nix" ]
  
- %mu:        core env process-mem process-time time-units-per-sec delay
- %env:       env heap-stat heap-size 
- %nix:     	uname
- %prof:    	prof-control
- %std:     	command exit
- %sysinfo: 	sysinfo
+ %mu%:        core env process-mem process-time time-units-per-sec delay
+ %env%:       env heap-stat heap-size 
+ %nix%:     	uname
+ %prof%:    	prof-control
+ %std%:     	command exit
+ %sysinfo%: 	sysinfo
 ```
 
 The *sysinfo* feature is disabled on *macos* builds. The *semispace* feature is not yet functional.
@@ -220,11 +217,10 @@ The  *mux* binary is part of a release, found at `/opt/mu/bin/mux`.
 The *mux* tool provides these utilities:
 
 ```
-Usage: mux 0.0.15 command [option...]
+Usage: mux 0.0.16 command [option...]
   command:
     help                               ; this message
     version                            ; mux version
-
     init                               ; init
     env                                ; print development environment
     build     release | profile | debug
@@ -240,12 +236,8 @@ Usage: mux 0.0.15 command [option...]
     install                            ; (sudo) install mu system-wide
     clean                              ; clean all artifacts
     commit                             ; fmt and clippy, pre-commit checking
-    repl      mu | core | common | prelude
-                                       ; repl: mu, core, common with prelude, and prelude repls
     test                               ; regression test suite
     bench     base | current | footprint [--ntests=number]
-    profile   --config=path            ; create profile
-    annotate  --prof=path [--ref=path] ; annotate profile
 
   general options:
     --verbose                          ; verbose operation
