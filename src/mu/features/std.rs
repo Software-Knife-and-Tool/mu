@@ -36,7 +36,7 @@ impl Std for Feature {
         Feature {
             functions: Some(&STD_FUNCTIONS),
             symbols: Some(&STD_SYMBOLS),
-            namespace: "%std".into(),
+            namespace: "%std%".into(),
         }
     }
 }

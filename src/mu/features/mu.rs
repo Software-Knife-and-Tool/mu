@@ -42,7 +42,7 @@ impl Mu for Feature {
         Feature {
             symbols: Some(&MU_SYMBOLS),
             functions: Some(&MU_FUNCTIONS),
-            namespace: "%mu".into(),
+            namespace: "%mu%".into(),
         }
     }
 }

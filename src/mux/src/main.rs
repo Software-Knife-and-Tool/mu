@@ -1,6 +1,5 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-mod annotate;
 mod bench;
 mod build;
 mod clean;
@@ -10,15 +9,12 @@ mod image;
 mod init;
 mod install;
 mod options;
-mod profile;
-mod repl;
 mod symbols;
 mod test;
 
 #[rustfmt::skip]
 use {
     crate::{
-        annotate::Annotate,
         bench::Bench,
         build::Build,
         clean::Clean,
@@ -28,14 +24,12 @@ use {
         init::Init,
         install::Install,
         options::Options,
-        profile::Profile,
-        repl::Repl,
         symbols::Symbols,
         test::Test,
     },
 };
 
-const VERSION: &str = "0.0.15";
+const VERSION: &str = "0.0.16";
 
 pub fn usage() {
     println!("Usage: mux {} command [option...]", VERSION);
@@ -46,7 +40,7 @@ pub fn usage() {
     println!("    init                               ; init");
     println!("    env                                ; print development environment");
     println!("    build     release | profile | debug");
-    println!("                                       ; build mu system, release is default");
+    println!("                                       ; build mu system, release default");
     println!("    image     build --out=path | [--image=path | -config=config] *[--load=path | --eval=sexpr]] |");
     println!("              view --image=path");
     println!("                                       ; manage heap images");
@@ -57,12 +51,8 @@ pub fn usage() {
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    clean                              ; clean all artifacts");
     println!("    commit                             ; fmt and clippy, pre-commit checking");
-    println!("    repl      mu | core | common | prelude");
-    println!("                                       ; repl: mu, core, common with prelude, and prelude repls");
     println!("    test                               ; regression test suite");
     println!("    bench     base | current | footprint [--ntests=number]");
-    println!("    profile   --config=path            ; create profile");
-    println!("    annotate  --prof=path [--ref=path] ; annotate profile");
     println!();
     println!("  general options:");
     println!("    --verbose                          ; verbose operation");
@@ -104,15 +94,12 @@ pub fn main() {
                     println!();
                     usage()
                 }
-                "annotate" => Annotate::annotate(&argv, &home),
                 "bench" => Bench::bench(&argv, &home),
                 "build" => Build::build(&argv, &home),
                 "clean" => Clean::clean(&argv, &home),
                 "env" => Env::printenv(&argv, &home),
                 "image" => Image::image(&argv, &home),
                 "install" => Install::install(&argv, &home),
-                "profile" => Profile::profile(&argv, &home),
-                "repl" => Repl::repl(&argv, &home),
                 "symbols" => Symbols::symbols(&argv, &home),
                 "test" => Test::test(&argv, &home),
                 _ => {
