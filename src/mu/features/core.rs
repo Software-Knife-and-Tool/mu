@@ -7,7 +7,7 @@ use {
     crate::{
         core::{
             apply::Apply,
-            core::{Core, CoreFnDef, VERSION},
+            core::{Core as Core_, CoreFnDef, VERSION},
             env::Env,
             exception::{self},
             frame::Frame,
@@ -33,16 +33,16 @@ lazy_static! {
     ];
 }
 
-pub trait Mu {
+pub trait Core {
     fn feature() -> Feature;
 }
 
-impl Mu for Feature {
+impl Core for Feature {
     fn feature() -> Feature {
         Feature {
             symbols: Some(&MU_SYMBOLS),
             functions: Some(&MU_FUNCTIONS),
-            namespace: "%mu%".into(),
+            namespace: "mu/core".into(),
         }
     }
 }
@@ -126,14 +126,14 @@ impl CoreFunction for Feature {
             Cons::cons(
                 env,
                 Vector::from("features").evict(env),
-                Core::features_as_list(env),
+                Core_::features_as_list(env),
             ),
             Cons::cons(
                 env,
                 Vector::from("envs").evict(env),
-                Core::envs_as_list(env),
+                Core_::envs_as_list(env),
             ),
-            Cons::cons(env, Vector::from("streams").evict(env), Core::nstreams()),
+            Cons::cons(env, Vector::from("streams").evict(env), Core_::nstreams()),
         ];
 
         fp.value = Cons::list(env, &alist);

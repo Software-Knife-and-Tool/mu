@@ -13,7 +13,7 @@ impl Ffi for Feature {
         Feature {
             functions: None,
             symbols: None,
-            namespace: "%ffi%".into(),
+            namespace: "mu/ffi".into(),
         }
     }
 }

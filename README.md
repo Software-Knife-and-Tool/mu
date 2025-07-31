@@ -27,7 +27,7 @@ Subsequent layers based on the runtime offer advanced features.
 ------
 
 - env feature
-- 
+- mcl command line utility
 
 #### Rationale
 
@@ -192,14 +192,14 @@ As of 0.0.40, the *mu* runtime supports conditional compilation of a variety of 
 Currently supported features by namespace:
 
 ```
- default = [ "env", "std", "sysinfo", "procinfo", "prof", "nix" ]
+ default = [ "env", "std", "sysinfo", "core", "prof", "nix" ]
  
- %mu%:        core env process-mem process-time time-units-per-sec delay
- %env%:       env heap-stat heap-size 
- %nix%:     	uname
- %prof%:    	prof-control
- %std%:     	command exit
- %sysinfo%: 	sysinfo
+ mu/core:		core env process-mem process-time time-units-per-sec delay
+ mu/env:		env heap-stat heap-size 
+ mu/nix:     	uname
+ mu/prof:    	prof-control
+ mu/std:     	command exit
+ mu/sysinfo: 	sysinfo
 ```
 
 The *sysinfo* feature is disabled on *macos* builds. The *semispace* feature is not yet functional.
