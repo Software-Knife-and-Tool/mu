@@ -27,7 +27,7 @@ Subsequent layers based on the runtime offer advanced features.
 ------
 
 - env feature
-- mcl command line utility
+- mcore command line utility
 
 #### Rationale
 
@@ -259,16 +259,26 @@ As you make changes, you can verify correctness and note any performance regress
  mux bench current --ntests=1	# benchmark the current build and print results
 ```
 
-`mux` provides an interactive listener for the `mu`, `core`, and `prelude` namespaces. `mu` and `core` use the `mu-sh` listener, `prelude` uses its own REPL.
-
-```
- mux repl prelude
- prelude>
-```
-
 The `symbols` command prints a list of the symbols in various namespaces and their types.
 
 Profiling is nascent and will be expanded in future releases. 
+
+
+
+As of 0.2.9, the *mu* distribution includes a tool for running and interacting with the system. 
+
+The  *mcore* binary is part of a release, found at `/opt/mu/bin/mcore`.
+
+*mcore*  has no command line arguments, it is configured by a JSON file, *.mcore*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see System Configuration for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/mcore`.
+
+*mcore* will run without either of *.mcore* or an rc file.
+
+```
+{
+    "config": "npages: 2048",
+    "rc": "mcorerc"
+}
+```
 
 
 
@@ -363,6 +373,7 @@ The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory 
 mu-sys		runtime binary
 mu-sh		runtime binary, stdio listener
 mu-ld		image loader
+mcore		interactive runtime, stdio listener
 mu-exec     	image executor
 mu-server	server runtime, socket listener
 mu		shell script for loading *core*. runs *mu-sh* listener

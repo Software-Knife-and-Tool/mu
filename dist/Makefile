@@ -34,6 +34,7 @@ dist:
 	@install -m 755 ./mu-sh $(BASE)/bin
 	@install -m 755 ./mu-sys $(BASE)/bin
 	@install -m 755 ./mux $(BASE)/bin
+	@install -m 755 ./mcore $(BASE)/bin
 	@install -m 755 ./sysgen $(BASE)/bin
 
 	@install -d $(BASE)/doc/html
@@ -41,8 +42,10 @@ dist:
 	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
 
 	@install -m 644 $(SRC)/dist/mu.l $(BASE)/lib
-	@install -m 644 -D -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
 	@install -m 644 $(SRC)/dist/image.l $(BASE)/lib
+
+	@install -m 644 -D -t $(BASE)/lib/sysgen $(SRC)/sysgen/templates/*
+	@install -m 644 -D -t $(BASE)/lib/mcore $(SRC)/mcore/lib/*
 
 	@install -D -m 644 -t $(BASE)/lib/core $(SRC)/core/*.l
 	@install -m 644 -t $(BASE)/lib/core $(SRC)/core/*.def
@@ -65,7 +68,7 @@ dist:
 	@install -m 644 ./common.fasl $(BASE)/lib
 
 	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
-	@rm -rf $(BASE) mu-exec mu-server mu-sh mux sysgen
+	@rm -rf $(BASE) mu-exec mu-server mu-sh mcore mux sysgen
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) core.fasl mu-exec mu-server mu-sh mu-sys mux sysgen
+	@rm -rf $(BASE)-*.tgz $(BASE) core.fasl mcore mu-exec mu-server mu-sh mu-sys mux sysgen
