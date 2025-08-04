@@ -15,33 +15,35 @@
 ;;;  (:env     . :listp)      closure captured environment
 ;;;  (:mu      . :func)       closure implementation function
 ;;;  (:arity   . :fixnum)     frame lambda number of required args
+;;;  (:lenv    . :listp)      compiled in lexical environment (symbol . (...))
 ;;;
 (core:%deftype "%closure"
     '((:require . :listp)
       (:rest    . :symbolp)
       (:arity   . :fixnum)
       (:mu      . :func)
-      (:env     . :listp)))
+      (:env     . :listp)
+      (:lenv    . :listp)))
 
 (mu:intern core "%closure-prop"
    (:lambda (prop function)
      (mu:cdr (core:%type-prop prop function))))
 
 (mu:intern core "%make-closure"
-   (:lambda (requires rest-sym form env)
+   (:lambda (requires rest-sym form env lenv)
      (core:%make-type "%closure"
        `(,(mu:cons :require   requires)
           ,(mu:cons :rest     rest-sym)
           ,(mu:cons :mu       (mu:compile form))
           ,(mu:cons :arity    (mu:sub (mu:length requires) (:if rest-sym 1 0)))
-          ,(mu:cons :env      env)))))
+          ,(mu:cons :env      env)
+          ,(mu:cons :lenv     lenv)))))
 
 (mu:intern core "%closurep"
    (:lambda (function)
      (:if (core:%typep function)
           (mu:eq '%closure (core:type-of function))
           ())))
-
 
 ;;;
 ;;; env deftype
@@ -96,7 +98,7 @@
                    ((:lambda (closure)
                       (core:%add-frame (core:%env-prop :name (mu:car env)) (core:%closure-prop :mu closure))
                       closure)
-                    (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) ())))                   
+                    (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) () ())))
                  (core:%mapcar
                   (:lambda (form)
                     (core:%compile form env))
