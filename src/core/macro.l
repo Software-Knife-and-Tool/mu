@@ -6,7 +6,8 @@
 ;;;
 (mu:intern core "%defmacro"
    (:lambda (symbol macro-function)
-      ((:lambda (symbol-ns symbol-name)
+     ;;; (core:%warn `(,symbol ,macro-function) "%defmacro")
+     ((:lambda (symbol-ns symbol-name)
          (:if (mu:eq symbol-ns mu:*null/*)
               (mu:intern core:*macros/* symbol-name macro-function)
               (core:%raise symbol-ns 'core:%defmacro "illegal symbol"))
@@ -16,7 +17,44 @@
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
-     (core:%compile (core:macroexpand (mu:cons macro-symbol arg-list) ()) env)))
+     (core:%compile (core:macroexpand (mu:cons macro-symbol arg-list) env) env)))
+
+;;;
+;;; compile macro closure
+;;;
+(mu:intern core "%compile-macro-closure"
+   (:lambda (lambda body env)
+     (:if (core:%find-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
+          (core:%raise lambda 'core:%compile-macro-closure "malformed macro lambda expression")
+          ((:lambda (desc)
+             ((:lambda (env)
+                ((:lambda (body)
+                   ((:lambda (closure)
+                      (core:%add-frame (core:%env-prop :name (mu:car env)) (core:%closure-prop :mu closure))
+                      closure)
+                    (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) () ())))
+                 (core:%mapcar
+                  (:lambda (form)
+                    (core:%compile form env))
+                  body)))
+              (mu:cons (core:%make-env (mu:length env) (mu:car desc) (core:gensym)) env)))
+          ((:lambda (desc)
+             (:if (core:%or (core:fixnump desc) (core:null body))
+                  (core:%list lambda)
+                  desc))
+           (core:%foldl
+            (:lambda (el acc)
+              (:if (core:numberp acc)
+                   (:if (mu:eq '&rest el)
+                        (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
+                             (mu:cons
+                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
+                              (mu:nth (mu:sub (mu:length lambda) 1) lambda))
+                             (core:%raise lambda 'core:%compile-macro-closure "rest botch"))
+                        (mu:add 1 acc))
+                   acc))
+            0
+            lambda))))))
 
 ;;;
 ;;; functions

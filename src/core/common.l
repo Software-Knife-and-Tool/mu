@@ -70,7 +70,7 @@
 ;;;
 (core:compile
  '(%defmacro progn (&rest body)
-     (:if (mu:less-than (mu:length body) 2)
+     (%if (mu:less-than (mu:length body) 2)
        (mu:car body)
        `((%lambda () ,@body)))))
 
@@ -89,7 +89,7 @@
 
 (core:compile
  '(%defmacro let* (binds &rest body)
-   (:if binds
+   (%if binds
        `(let (,(mu:car binds)) (let* ,(mu:cdr binds) ,@body))
        `(let () ,@body))))
 

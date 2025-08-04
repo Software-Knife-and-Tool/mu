@@ -215,7 +215,9 @@
                                       `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                                  (core:%raise function 'core:%compile-funcall "not a function designator"))))
                      (mu:symbol-value function-form))
-                    `(core:apply ,function-form ,(core:%compile-arg-list arg-list env)))))))
+                    (core:%raise function-form 'core:%compile-funcall "function symbol not bound"))))))
+
+     ;;; `(core:apply ,function-form ,(core:%compile-arg-list arg-list env)))))))
 
 (mu:intern core "%compile"
    (:lambda (form env)
