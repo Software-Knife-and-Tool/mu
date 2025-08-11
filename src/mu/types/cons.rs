@@ -207,7 +207,7 @@ impl Cons {
         Vector::from(vec).evict(env)
     }
 
-    pub fn iter(env: &Env, cons: Tag) -> ConsIter {
+    pub fn iter(env: &Env, cons: Tag) -> ConsIter<'_> {
         ConsIter { env, cons }
     }
 
@@ -430,7 +430,7 @@ impl CoreFunction for Cons {
     fn mu_append(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let lists = fp.argv[0];
 
-        env.fp_argv_check("mu:car", &[Type::List], fp)?;
+        env.argv_check("mu:car", &[Type::List], fp)?;
 
         fp.value = Tag::nil();
         if !lists.null_() {
@@ -461,7 +461,7 @@ impl CoreFunction for Cons {
     fn mu_car(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
-        env.fp_argv_check("mu:car", &[Type::List], fp)?;
+        env.argv_check("mu:car", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => list,
             Type::Cons => Self::car(env, list),
@@ -474,7 +474,7 @@ impl CoreFunction for Cons {
     fn mu_cdr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
-        env.fp_argv_check("mu:cdr", &[Type::List], fp)?;
+        env.argv_check("mu:cdr", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => list,
             Type::Cons => Self::cdr(env, list),
@@ -493,7 +493,7 @@ impl CoreFunction for Cons {
     fn mu_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
-        env.fp_argv_check("mu:length", &[Type::List], fp)?;
+        env.argv_check("mu:length", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => Fixnum::with_or_panic(0),
             Type::Cons => match Cons::length(env, list) {
@@ -510,7 +510,7 @@ impl CoreFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        env.fp_argv_check("mu:nth", &[Type::Fixnum, Type::List], fp)?;
+        env.argv_check("mu:nth", &[Type::Fixnum, Type::List], fp)?;
 
         if Fixnum::as_i64(nth) < 0 {
             return Err(Exception::new(env, Condition::Type, "mu:nth", nth));
@@ -532,7 +532,7 @@ impl CoreFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        env.fp_argv_check("mu:nthcdr", &[Type::Fixnum, Type::List], fp)?;
+        env.argv_check("mu:nthcdr", &[Type::Fixnum, Type::List], fp)?;
 
         if Fixnum::as_i64(nth) < 0 {
             return Err(Exception::new(env, Condition::Type, "mu:nthcdr", nth));

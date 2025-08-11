@@ -64,7 +64,7 @@ impl CoreFunction for Feature {
     fn prof_control(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let cmd = fp.argv[0];
 
-        env.fp_argv_check("prof:prof_control", &[Type::Keyword], fp)?;
+        env.argv_check("prof:prof_control", &[Type::Keyword], fp)?;
 
         let profile_map_ref = block_on(env.prof.read());
         let mut prof_ref = block_on(env.prof_on.write());

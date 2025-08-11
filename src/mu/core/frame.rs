@@ -255,7 +255,7 @@ impl CoreFunction for Frame {
     fn mu_frame_pop(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = fp.argv[0];
 
-        env.fp_argv_check("mu:frame-pop", &[Type::Function], fp)?;
+        env.argv_check("mu:frame-pop", &[Type::Function], fp)?;
 
         Self::frame_stack_pop(env, fp.value);
 
@@ -263,7 +263,7 @@ impl CoreFunction for Frame {
     }
 
     fn mu_frame_push(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        env.fp_argv_check("mu:frame-push", &[Type::Cons], fp)?;
+        env.argv_check("mu:frame-push", &[Type::Cons], fp)?;
 
         let func = Cons::car(env, fp.argv[0]);
         if func.type_of() != Type::Function {
@@ -288,7 +288,7 @@ impl CoreFunction for Frame {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 
-        env.fp_argv_check("mu:%frame-ref", &[Type::Function, Type::Fixnum], fp)?;
+        env.argv_check("mu:%frame-ref", &[Type::Function, Type::Fixnum], fp)?;
 
         fp.value = match Frame::frame_ref(env, frame.as_u64(), Fixnum::as_i64(offset) as usize) {
             Some(tag) => tag,

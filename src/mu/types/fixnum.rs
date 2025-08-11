@@ -141,7 +141,7 @@ pub trait CoreFunction {
 
 impl CoreFunction for Fixnum {
     fn mu_ash(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        env.fp_argv_check("mu:ash", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.argv_check("mu:ash", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         let value = Self::as_i64(fp.argv[0]);
         let shift = Self::as_i64(fp.argv[1]);
@@ -170,7 +170,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:add", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.argv_check("mu:add", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
             Some(sum) => {
@@ -190,7 +190,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:sub", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.argv_check("mu:sub", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
             Some(diff) => {
@@ -210,7 +210,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:mul", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.argv_check("mu:mul", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
             Some(prod) => {
@@ -230,7 +230,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:div", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.argv_check("mu:div", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         if Self::as_i64(fx1) == 0 {
             return Err(Exception::new(env, Condition::ZeroDivide, "mu:fx-div", fx0));
@@ -254,7 +254,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:less-than", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.argv_check("mu:less-than", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = if Self::as_i64(fx0) < Self::as_i64(fx1) {
             Symbol::keyword("t")
@@ -269,7 +269,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:logand", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.argv_check("mu:logand", &[Type::Fixnum, Type::Fixnum], fp)?;
         fp.value = Self::with_i64_or_panic(Self::as_i64(fx0) & Self::as_i64(fx1));
 
         Ok(())
@@ -279,7 +279,7 @@ impl CoreFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.fp_argv_check("mu:logor", &[Type::Fixnum, Type::Fixnum], fp)?;
+        env.argv_check("mu:logor", &[Type::Fixnum, Type::Fixnum], fp)?;
         fp.value = Self::with_i64_or_panic(Self::as_i64(fx0) | Self::as_i64(fx1));
 
         Ok(())
@@ -288,7 +288,7 @@ impl CoreFunction for Fixnum {
     fn mu_lognot(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let fx = fp.argv[0];
 
-        env.fp_argv_check("mu:lognot", &[Type::Fixnum], fp)?;
+        env.argv_check("mu:lognot", &[Type::Fixnum], fp)?;
 
         let mut val = Self::as_i64(fx);
         for nth_bit in 0..64 {

@@ -15,7 +15,7 @@
 (mu:type-of :typeof)	:keyword
 (mu:type-of mu:*standard-input*)	:stream
 (mu:type-of "type-of")	:vector
-(mu:type-of (mu:find-namespace "mu"))	:ns
+(mu:type-of (mu:find-namespace "mu"))	:struct
 (mu:view ())	#(:t "" nil :nil)
 (mu:view :keyword)	#(:t "keyword" keyword :keyword)
 (mu:view #\a)	#(:t a)
@@ -28,7 +28,7 @@
 (mu:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
 (mu:view 'a)	#(:t "" a :UNBOUND)
 (mu:view 'mu:eq)	#(:t "mu" eq #<:function :mu [type:native, req:2, form:eq]>)
-(mu:view mu:eq)	#(:t 2 (mu . 0))
+(mu:view mu:eq)	#(:t 2 (#s(:ns #(:t 1 mu)) . 0))
 (mu:view mu:*standard-input*)	#(:t 0 :input :nil)
 (mu:with-exception (:lambda (cond obj) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:div 1 1)))	1
 (mu:unrepr (mu:repr :t))	:t

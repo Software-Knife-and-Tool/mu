@@ -73,7 +73,7 @@ impl Reader {
         Some(name_vec)
     }
 
-    fn string_table(&self) -> StringTable {
+    fn string_table(&self) -> StringTable<'_> {
         self.elf
             .section_strings(Endianness::Little, &*self.data, &self.sections)
             .unwrap()

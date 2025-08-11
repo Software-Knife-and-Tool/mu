@@ -6,8 +6,8 @@
 ;;;
 ((:lambda (ns)
    (:if ns
-        (mu:intern mu:*null/* "common" ns)
-        (mu:intern mu:*null/* "common" (mu:make-namespace "common"))))
+        (mu:intern () "common" ns)
+        (mu:intern () "common" (mu:make-namespace "common"))))
  (mu:find-namespace "common"))
 
 ;;;

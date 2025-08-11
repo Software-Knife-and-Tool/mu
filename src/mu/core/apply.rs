@@ -14,14 +14,14 @@ use crate::{
 };
 
 pub trait Apply {
-    fn fp_argv_check(&self, _: &str, _: &[Type], _: &Frame) -> exception::Result<()>;
+    fn argv_check(&self, _: &str, _: &[Type], _: &Frame) -> exception::Result<()>;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
 }
 
 impl Apply for Env {
-    fn fp_argv_check(&self, source: &str, types: &[Type], fp: &Frame) -> exception::Result<()> {
+    fn argv_check(&self, source: &str, types: &[Type], fp: &Frame) -> exception::Result<()> {
         for (index, arg_type) in types.iter().enumerate() {
             let fp_arg = fp.argv[index];
             let fp_arg_type = fp_arg.type_of();
@@ -134,7 +134,7 @@ impl CoreFunction for Env {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        env.fp_argv_check("mu:apply", &[Type::Function, Type::List], fp)?;
+        env.argv_check("mu:apply", &[Type::Function, Type::List], fp)?;
         fp.value = Frame {
             func,
             argv: Cons::iter(env, args)
@@ -151,7 +151,7 @@ impl CoreFunction for Env {
         let func = fp.argv[0];
         let mut value = fp.argv[1];
 
-        env.fp_argv_check("mu:fix", &[Type::Function, Type::T], fp)?;
+        env.argv_check("mu:fix", &[Type::Function, Type::T], fp)?;
 
         fp.value = loop {
             let last_value = value;

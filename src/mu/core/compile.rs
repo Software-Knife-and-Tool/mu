@@ -271,7 +271,7 @@ impl CoreFunction for Env {
         let true_fn = fp.argv[1];
         let false_fn = fp.argv[2];
 
-        env.fp_argv_check("mu:%if", &[Type::T, Type::Function, Type::Function], fp)?;
+        env.argv_check("mu:%if", &[Type::T, Type::Function, Type::Function], fp)?;
 
         fp.value = env.apply(
             if Tag::null_(&test) { false_fn } else { true_fn },
