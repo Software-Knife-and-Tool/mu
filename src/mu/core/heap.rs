@@ -141,7 +141,7 @@ impl HeapAllocator {
         (image.to_vec(), vec![])
     }
 
-    pub fn iter(&self) -> HeapAllocatorIter {
+    pub fn iter(&self) -> HeapAllocatorIter<'_> {
         HeapAllocatorIter {
             heap: self,
             index: 1,

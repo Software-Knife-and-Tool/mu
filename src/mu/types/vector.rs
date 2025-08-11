@@ -128,7 +128,7 @@ impl Vector {
         }
     }
 
-    pub fn iter(env: &Env, vec: Tag) -> VectorIter {
+    pub fn iter(env: &Env, vec: Tag) -> VectorIter<'_> {
         VectorIter { env, vec, index: 0 }
     }
 

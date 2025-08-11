@@ -82,8 +82,13 @@ impl Env {
             Err(_) => panic!(),
         };
 
-        // initialize core/feature namespaces
-        Core::namespaces(&env);
+        Namespace::intern_static(&env, env.mu_ns, "*null/*".into(), env.null_ns);
+        Namespace::intern_static(&env, env.mu_ns, "*standard-input*".into(), CORE.stdin()).unwrap();
+        Namespace::intern_static(&env, env.mu_ns, "*standard-output*".into(), CORE.stdout())
+            .unwrap();
+        Namespace::intern_static(&env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
+
+        Core::symbols(&env);
 
         env
     }

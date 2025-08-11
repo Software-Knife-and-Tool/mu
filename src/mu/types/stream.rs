@@ -187,7 +187,7 @@ impl CoreFunction for Stream {
         let escape = fp.argv[1];
         let stream = fp.argv[2];
 
-        env.fp_argv_check("mu:write", &[Type::T, Type::T, Type::Stream], fp)?;
+        env.argv_check("mu:write", &[Type::T, Type::T, Type::Stream], fp)?;
         env.write(fp.value, !escape.null_(), stream)?;
 
         Ok(())
@@ -198,7 +198,7 @@ impl CoreFunction for Stream {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        env.fp_argv_check("mu:read", &[Type::Stream], fp)?;
+        env.argv_check("mu:read", &[Type::Stream], fp)?;
         fp.value = env.read(stream, !eof_error_p.null_(), eof_value, false)?;
 
         Ok(())
@@ -207,7 +207,7 @@ impl CoreFunction for Stream {
     fn mu_close(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        env.fp_argv_check("mu:close", &[Type::Stream], fp)?;
+        env.argv_check("mu:close", &[Type::Stream], fp)?;
 
         fp.value = if Stream::is_open(stream) {
             Stream::close(stream);
@@ -222,7 +222,7 @@ impl CoreFunction for Stream {
     fn mu_openp(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        env.fp_argv_check("mu:openp", &[Type::Stream], fp)?;
+        env.argv_check("mu:openp", &[Type::Stream], fp)?;
         fp.value = if Stream::is_open(stream) {
             stream
         } else {
@@ -238,7 +238,7 @@ impl CoreFunction for Stream {
         let st_arg = fp.argv[2];
         let st_error_p = fp.argv[3];
 
-        env.fp_argv_check(
+        env.argv_check(
             "mu:open",
             &[Type::Keyword, Type::Keyword, Type::String, Type::T],
             fp,
@@ -284,7 +284,7 @@ impl CoreFunction for Stream {
     fn mu_flush(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let stream_tag = fp.argv[0];
 
-        env.fp_argv_check("mu:flush", &[Type::Stream], fp)?;
+        env.argv_check("mu:flush", &[Type::Stream], fp)?;
 
         let streams_ref = block_on(CORE.streams.read());
 
@@ -311,7 +311,7 @@ impl CoreFunction for Stream {
     fn mu_get_string(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        env.fp_argv_check("mu:get-string", &[Type::Stream], fp)?;
+        env.argv_check("mu:get-string", &[Type::Stream], fp)?;
 
         let string = Stream::get_string(env, stream)?;
         fp.value = Vector::from(string).evict(env);
@@ -324,7 +324,7 @@ impl CoreFunction for Stream {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        env.fp_argv_check("mu:read-char", &[Type::Stream, Type::T, Type::T], fp)?;
+        env.argv_check("mu:read-char", &[Type::Stream, Type::T, Type::T], fp)?;
         fp.value = match StreamReader::read_char(env, stream)? {
             Some(ch) => ch.into(),
             None if eof_error_p.null_() => eof_value,
@@ -339,7 +339,7 @@ impl CoreFunction for Stream {
         let eof_error_p = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        env.fp_argv_check("mu:read-byte", &[Type::Stream, Type::T, Type::T], fp)?;
+        env.argv_check("mu:read-byte", &[Type::Stream, Type::T, Type::T], fp)?;
         fp.value = match StreamReader::read_byte(env, stream)? {
             Some(byte) => byte.into(),
             None if eof_error_p.null_() => eof_value,
@@ -353,7 +353,7 @@ impl CoreFunction for Stream {
         let ch = fp.argv[0];
         let stream = fp.argv[1];
 
-        env.fp_argv_check("mu:unread-char", &[Type::Char, Type::Stream], fp)?;
+        env.argv_check("mu:unread-char", &[Type::Char, Type::Stream], fp)?;
         fp.value = match StreamReader::unread_char(env, stream, Char::as_char(env, ch))? {
             Some(_) => panic!(),
             None => ch,
@@ -366,7 +366,7 @@ impl CoreFunction for Stream {
         let ch = fp.argv[0];
         let stream = fp.argv[1];
 
-        env.fp_argv_check("mu:write-char", &[Type::Char, Type::Stream], fp)?;
+        env.argv_check("mu:write-char", &[Type::Char, Type::Stream], fp)?;
         StreamWriter::write_char(env, stream, Char::as_char(env, ch))?;
         fp.value = ch;
 
@@ -377,7 +377,7 @@ impl CoreFunction for Stream {
         let byte = fp.argv[0];
         let stream = fp.argv[1];
 
-        env.fp_argv_check("mu:write-byte", &[Type::Byte, Type::Stream], fp)?;
+        env.argv_check("mu:write-byte", &[Type::Byte, Type::Stream], fp)?;
         StreamWriter::write_byte(env, stream, Fixnum::as_i64(byte) as u8)?;
         fp.value = byte;
 

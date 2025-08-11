@@ -47,7 +47,7 @@ impl Crate {
         items_ref.push_front(item)
     }
 
-    pub fn parse_next_item(&self) -> Result<Option<(Item, PublicItem)>, Error> {
+    pub fn parse_next_item(&self) -> Result<Option<(Item<'_>, PublicItem)>, Error> {
         match self.next_item() {
             Some(public_item) => Ok(Some((
                 Item::with_public_item(self, &public_item)?,

@@ -6,7 +6,6 @@ use crate::{
     core::{
         env::Env,
         exception::{self},
-        namespace::Namespace,
         types::{Tag, Type},
     },
     types::{
@@ -31,7 +30,6 @@ impl Writer for Env {
             Type::Float => Float::write(self, tag, escape, stream),
             Type::Function => Function::write(self, tag, escape, stream),
             Type::Keyword => Symbol::write(self, tag, escape, stream),
-            Type::Namespace => Namespace::write(self, tag, escape, stream),
             Type::Null => Symbol::write(self, tag, escape, stream),
             Type::Stream => Stream::write(self, tag, escape, stream),
             Type::Struct => Struct::write(self, tag, escape, stream),

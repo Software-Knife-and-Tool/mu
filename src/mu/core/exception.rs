@@ -131,7 +131,7 @@ impl CoreFunction for Exception {
         let src = fp.argv[0];
         let condition = fp.argv[1];
 
-        env.fp_argv_check("mu:raise", &[Type::T, Type::Keyword], fp)?;
+        env.argv_check("mu:raise", &[Type::T, Type::Keyword], fp)?;
         match Self::map_condition(env, condition) {
             Ok(cond) => Err(Self::new(env, cond, "mu:raise", src)),
             Err(_) => Err(Self::new(env, Condition::Type, "mu:raise", condition)),
@@ -142,7 +142,7 @@ impl CoreFunction for Exception {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        env.fp_argv_check("mu:with-exception", &[Type::Function, Type::Function], fp)?;
+        env.argv_check("mu:with-exception", &[Type::Function, Type::Function], fp)?;
 
         let dynamic_ref = block_on(env.dynamic.dynamic.read());
 

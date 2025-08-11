@@ -477,7 +477,7 @@ impl CoreFunction for Symbol {
     fn mu_symbol(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        env.fp_argv_check("mu:make-symbol", &[Type::String], fp)?;
+        env.argv_check("mu:make-symbol", &[Type::String], fp)?;
 
         let str = Vector::as_string(env, name);
 

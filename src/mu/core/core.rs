@@ -13,7 +13,7 @@ use {
             exception::{self, CoreFunction as _, Exception},
             frame::{CoreFunction as _, Frame},
             gc_context::{CoreFunction as _, GcContext},
-            namespace::Namespace,
+            namespace::{CoreFunction, Namespace},
             types::{CoreFunction as _, Tag},
             writer::Writer as _,
         },
@@ -24,7 +24,6 @@ use {
             fixnum::{CoreFunction as _, Fixnum},
             float::{CoreFunction as _, Float},
             function::Function,
-            namespace::CoreFunction as _,
             stream::{CoreFunction as _, Stream},
             struct_::{CoreFunction as _, Struct},
             symbol::{CoreFunction as _, Symbol},
@@ -102,7 +101,7 @@ lazy_static! {
         // namespaces
         ( "find",    2, Namespace::mu_find ),
         ( "find-namespace",
-                     1, Namespace::mu_find_ns ),
+           1, Namespace::mu_find_ns ),
         ( "intern",  3, Namespace::mu_intern ),
         ( "make-namespace",
                      1, Namespace::mu_make_ns ),
@@ -230,16 +229,7 @@ impl Core {
     }
 
     // core/feature symbols
-    pub fn namespaces(env: &Env) {
-        Namespace::intern_static(env, env.mu_ns, "*null/*".into(), env.null_ns);
-
-        Namespace::intern_static(env, env.mu_ns, "*standard-input*".into(), CORE.stdin()).unwrap();
-
-        Namespace::intern_static(env, env.mu_ns, "*standard-output*".into(), CORE.stdout())
-            .unwrap();
-
-        Namespace::intern_static(env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
-
+    pub fn symbols(env: &Env) {
         for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
             let (name, nreqs, _fn) = desc;
 

@@ -59,7 +59,7 @@ pub trait CoreFunction {
 
 impl CoreFunction for Feature {
     fn mu_delay(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        env.fp_argv_check("%core:delay", &[Type::Fixnum], fp)?;
+        env.argv_check("%core:delay", &[Type::Fixnum], fp)?;
 
         let delay = Fixnum::as_i64(fp.argv[0]);
 

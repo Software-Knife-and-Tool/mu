@@ -131,7 +131,7 @@ impl CoreFunction for Vector {
         let type_sym = fp.argv[0];
         let list = fp.argv[1];
 
-        env.fp_argv_check("mu:make-vector", &[Type::Keyword, Type::List], fp)?;
+        env.argv_check("mu:make-vector", &[Type::Keyword, Type::List], fp)?;
 
         fp.value = match Self::to_type(type_sym) {
             Some(vtype) => match vtype {
@@ -262,7 +262,7 @@ impl CoreFunction for Vector {
         let vector = fp.argv[0];
         let index = fp.argv[1];
 
-        env.fp_argv_check("mu:svref", &[Type::Vector, Type::Fixnum], fp)?;
+        env.argv_check("mu:svref", &[Type::Vector, Type::Fixnum], fp)?;
 
         let nth = Fixnum::as_i64(index);
 
@@ -281,7 +281,7 @@ impl CoreFunction for Vector {
     fn mu_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        env.fp_argv_check("mu:vector-type", &[Type::Vector], fp)?;
+        env.argv_check("mu:vector-type", &[Type::Vector], fp)?;
         fp.value = match Tag::type_key(Self::type_of(env, vector)) {
             Some(key) => key,
             None => panic!(),
@@ -293,7 +293,7 @@ impl CoreFunction for Vector {
     fn mu_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        env.fp_argv_check("mu:vector-length", &[Type::Vector], fp)?;
+        env.argv_check("mu:vector-length", &[Type::Vector], fp)?;
         fp.value = Fixnum::with_or_panic(Self::length(env, vector));
 
         Ok(())

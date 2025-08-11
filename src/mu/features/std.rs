@@ -53,7 +53,7 @@ impl CoreFunction for Feature {
         let command = fp.argv[0];
         let args = fp.argv[1];
 
-        env.fp_argv_check("std:command", &[Type::String, Type::List], fp)?;
+        env.argv_check("std:command", &[Type::String, Type::List], fp)?;
 
         let mut argv = vec![];
 
@@ -84,7 +84,7 @@ impl CoreFunction for Feature {
     fn std_exit(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let rc = fp.argv[0];
 
-        env.fp_argv_check("std:exit", &[Type::Fixnum], fp)?;
+        env.argv_check("std:exit", &[Type::Fixnum], fp)?;
 
         std::process::exit(Fixnum::as_i64(rc) as i32);
     }
@@ -110,7 +110,7 @@ impl CoreFunction for Feature {
     fn std_sleep(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = fp.argv[0];
 
-        env.fp_argv_check("std:sleep", &[Type::Float], fp)?;
+        env.argv_check("std:sleep", &[Type::Float], fp)?;
 
         std::thread::sleep(std::time::Duration::from_micros(
             (1e6 * Float::as_f32(env, fp.value)) as u64,

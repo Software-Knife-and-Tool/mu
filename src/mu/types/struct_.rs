@@ -202,7 +202,7 @@ impl CoreFunction for Struct {
     fn mu_struct_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        env.fp_argv_check("mu:struct-type", &[Type::Struct], fp)?;
+        env.argv_check("mu:struct-type", &[Type::Struct], fp)?;
         fp.value = Self::to_image(env, tag).stype;
 
         Ok(())
@@ -211,7 +211,7 @@ impl CoreFunction for Struct {
     fn mu_struct_vector(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        env.fp_argv_check("mu:struct-vec", &[Type::Struct], fp)?;
+        env.argv_check("mu:struct-vec", &[Type::Struct], fp)?;
         fp.value = Self::to_image(env, tag).vector;
 
         Ok(())
@@ -221,7 +221,7 @@ impl CoreFunction for Struct {
         let type_ = fp.argv[0];
         let list = fp.argv[1];
 
-        env.fp_argv_check("mu:make-struct", &[Type::Keyword, Type::List], fp)?;
+        env.argv_check("mu:make-struct", &[Type::Keyword, Type::List], fp)?;
 
         let vec = Cons::iter(env, list)
             .map(|cons| Cons::car(env, cons))
