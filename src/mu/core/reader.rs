@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env reader
+// reader
 use crate::{
     core::{
         apply::Apply as _,
@@ -10,7 +10,7 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         quasi::QuasiReader,
-        readtable::{map_char_syntax, SyntaxType},
+        readtable::SyntaxType,
         types::{Tag, Type},
     },
     streams::reader::StreamReader,
@@ -53,7 +53,7 @@ impl Reader for Env {
         loop {
             match StreamReader::read_char(self, stream)? {
                 Some(ch) => {
-                    if let Some(stype) = map_char_syntax(ch) {
+                    if let Some(stype) = SyntaxType::map_char_syntax(ch) {
                         match stype {
                             SyntaxType::Whitespace => (),
                             _ => {
@@ -83,7 +83,7 @@ impl Reader for Env {
                         break;
                     }
                 }
-                None => return Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
+                None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
             }
         }
 
@@ -107,13 +107,11 @@ impl Reader for Env {
                                     break;
                                 }
                             }
-                            None => {
-                                return Err(Exception::new(self, Condition::Eof, "mu:read", stream))
-                            }
+                            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
                         }
                     }
                 }
-                None => return Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
+                None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
             }
         }
 
@@ -129,16 +127,16 @@ impl Reader for Env {
         let mut token = String::new();
 
         while let Some(ch) = StreamReader::read_char(self, stream)? {
-            match map_char_syntax(ch) {
+            match SyntaxType::map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => token.push(ch),
                     SyntaxType::Whitespace | SyntaxType::Tmacro => {
                         StreamReader::unread_char(self, stream, ch).unwrap();
                         break;
                     }
-                    _ => return Err(Exception::new(self, Condition::Range, "mu:read", stream)),
+                    _ => Err(Exception::new(self, Condition::Range, "mu:read", stream))?,
                 },
-                None => return Err(Exception::new(self, Condition::Range, "mu:read", stream)),
+                None => Err(Exception::new(self, Condition::Range, "mu:read", stream))?,
             }
         }
 
@@ -157,16 +155,16 @@ impl Reader for Env {
         token.push(ch);
 
         while let Some(ch) = StreamReader::read_char(self, stream)? {
-            match map_char_syntax(ch) {
+            match SyntaxType::map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => token.push(ch),
                     SyntaxType::Whitespace | SyntaxType::Tmacro => {
                         StreamReader::unread_char(self, stream, ch).unwrap();
                         break;
                     }
-                    _ => return Err(Exception::new(self, Condition::Range, "mu:read", ch.into())),
+                    _ => Err(Exception::new(self, Condition::Range, "mu:read", ch.into()))?,
                 },
-                None => return Err(Exception::new(self, Condition::Range, "mu:read", ch.into())),
+                None => Err(Exception::new(self, Condition::Range, "mu:read", ch.into()))?,
             }
         }
 
@@ -180,7 +178,7 @@ impl Reader for Env {
                         Condition::Over,
                         "mu:read",
                         Vector::from(token).evict(self),
-                    ))
+                    ))?
                 }
             }
             Err(_) => match token.parse::<f32>() {
@@ -198,7 +196,7 @@ impl Reader for Env {
     fn read_char_literal(&self, stream: Tag) -> exception::Result<Option<Tag>> {
         match StreamReader::read_char(self, stream)? {
             Some(ch) => match StreamReader::read_char(self, stream)? {
-                Some(space) => match map_char_syntax(space) {
+                Some(space) => match SyntaxType::map_char_syntax(space) {
                     Some(sp_type) => match sp_type {
                         SyntaxType::Whitespace => Ok(Some(ch.into())),
                         SyntaxType::Constituent => {
@@ -217,11 +215,11 @@ impl Reader for Env {
                                             Condition::Type,
                                             "mu:read",
                                             Vector::from(phrase).evict(self),
-                                        )),
+                                        ))?,
                                     }
                                 }
                                 None => {
-                                    Err(Exception::new(self, Condition::Eof, "mu:read", stream))
+                                    Err(Exception::new(self, Condition::Eof, "mu:read", stream))?
                                 }
                             }
                         }
@@ -230,11 +228,11 @@ impl Reader for Env {
                             Ok(Some(ch.into()))
                         }
                     },
-                    None => Err(Exception::new(self, Condition::Syntax, "mu:read", stream)),
+                    None => Err(Exception::new(self, Condition::Syntax, "mu:read", stream))?,
                 },
                 None => Ok(Some(ch.into())),
             },
-            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
+            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
         }
     }
 
@@ -252,16 +250,17 @@ impl Reader for Env {
 
                         match atom.type_of() {
                             Type::Symbol => Ok(Some(atom)),
-                            _ => Err(Exception::new(self, Condition::Type, "mu:read", stream)),
+                            _ => Err(Exception::new(self, Condition::Type, "mu:read", stream))?,
                         }
                     }
-                    None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
+                    None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
                 },
-                '.' => {
-                    let expr = self.read(stream, false, Tag::nil(), false)?;
-
-                    Ok(Some(self.eval(expr)?))
-                }
+                '.' => Ok(Some(self.eval(self.read(
+                    stream,
+                    false,
+                    Tag::nil(),
+                    false,
+                )?)?)),
                 '|' => {
                     Self::read_block_comment(self, stream)?;
 
@@ -271,8 +270,10 @@ impl Reader for Env {
                 'S' | 's' => Ok(Some(Struct::read(self, stream)?)),
                 '(' | '*' => Ok(Some(Vector::read(self, ch, stream)?)),
                 'x' => match Self::read_token(self, stream) {
-                    Ok(token) => match token {
-                        Some(hex) => match i64::from_str_radix(&hex, 16) {
+                    Ok(token) => {
+                        let hex = token.unwrap();
+
+                        match i64::from_str_radix(&hex, 16) {
                             Ok(fx) => {
                                 if Fixnum::is_i56(fx) {
                                     Ok(Some(Fixnum::with_i64_or_panic(fx)))
@@ -282,7 +283,7 @@ impl Reader for Env {
                                         Condition::Over,
                                         "mu:read",
                                         Vector::from(hex).evict(self),
-                                    ))
+                                    ))?
                                 }
                             }
                             Err(_) => Err(Exception::new(
@@ -290,39 +291,19 @@ impl Reader for Env {
                                 Condition::Syntax,
                                 "mu:read",
                                 ch.into(),
-                            )),
-                        },
-                        None => panic!(),
-                    },
+                            ))?,
+                        }
+                    }
                     Err(_) => Err(Exception::new(
                         self,
                         Condition::Syntax,
                         "mu:read",
                         ch.into(),
-                    )),
+                    ))?,
                 },
-                /*
-                    '!' => {
-                        let hexstr = (0..=15)
-                            .map(|_| match self.read_char(stream).unwrap() {
-                                Some(ch) => ch,
-                                None => panic!(),
-                            })
-                            .collect::<String>();
-                        match u64::from_str_radix(&hexstr, 16) {
-                            Ok(tag_bits) => Ok(Some((&tag_bits.to_be_bytes()).into())),
-                            Err(_) => Err(Exception::new(
-                                self,
-                                Condition::Syntax,
-                                "mu:read",
-                                ch.into(),
-                            )),
-                        }
-                }
-                    */
-                _ => Err(Exception::new(self, Condition::Type, "mu:read", ch.into())),
+                _ => Err(Exception::new(self, Condition::Type, "mu:read", ch.into()))?,
             },
-            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream)),
+            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
         }
     }
 
@@ -353,12 +334,12 @@ impl Reader for Env {
         match StreamReader::read_char(self, stream)? {
             None => {
                 if eof_error_p {
-                    Err(Exception::new(self, Condition::Eof, "mu:read", stream))
+                    Err(Exception::new(self, Condition::Eof, "mu:read", stream))?
                 } else {
                     Ok(eof_value)
                 }
             }
-            Some(ch) => match map_char_syntax(ch) {
+            Some(ch) => match SyntaxType::map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => self.read_atom(ch, stream),
                     SyntaxType::Macro => match ch {
@@ -366,34 +347,33 @@ impl Reader for Env {
                             Some(tag) => Ok(tag),
                             None => self.read(stream, eof_error_p, eof_value, recursivep),
                         },
-                        _ => Err(Exception::new(self, Condition::Type, "reader", ch.into())),
+                        _ => Err(Exception::new(self, Condition::Type, "reader", ch.into()))?,
                     },
                     SyntaxType::Tmacro => match ch {
                         '`' => QuasiReader::read(self, false, stream, false),
-                        '\'' => {
-                            let tag = self.read(stream, false, Tag::nil(), recursivep)?;
-
-                            Ok(Compile::quote(self, &tag))
-                        }
+                        '\'' => Ok(Compile::quote(
+                            self,
+                            &self.read(stream, false, Tag::nil(), recursivep)?,
+                        )),
                         '"' => Ok(Vector::read(self, '"', stream)?),
                         '(' => Ok(Cons::read(self, stream)?),
                         ')' => {
                             if recursivep {
                                 Ok(*EOL)
                             } else {
-                                Err(Exception::new(self, Condition::Syntax, "reader", stream))
+                                Err(Exception::new(self, Condition::Syntax, "reader", stream))?
                             }
                         }
                         ';' => {
                             self.read_comment(stream)?;
                             self.read(stream, eof_error_p, eof_value, recursivep)
                         }
-                        ',' => Err(Exception::new(self, Condition::Range, "reader", ch.into())),
-                        _ => Err(Exception::new(self, Condition::Range, "reader", ch.into())),
+                        ',' => Err(Exception::new(self, Condition::Range, "reader", ch.into()))?,
+                        _ => Err(Exception::new(self, Condition::Range, "reader", ch.into()))?,
                     },
-                    _ => Err(Exception::new(self, Condition::Read, "reader", ch.into())),
+                    _ => Err(Exception::new(self, Condition::Read, "reader", ch.into()))?,
                 },
-                _ => Err(Exception::new(self, Condition::Read, "reader", ch.into())),
+                _ => Err(Exception::new(self, Condition::Read, "reader", ch.into()))?,
             },
         }
     }

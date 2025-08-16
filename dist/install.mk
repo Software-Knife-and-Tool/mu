@@ -3,7 +3,8 @@
 #
 .PHONY: install release uninstall help
 
-VERSION != grep VERSION: ../src/mu/core/core.rs | sed 's/.* "//' | sed 's/".*//'
+VERSION := $(shell cargo pkgid | sed 's/.*#//')
+
 ROOT = /opt
 BASE = mu
 

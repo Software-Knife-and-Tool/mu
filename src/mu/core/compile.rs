@@ -1,9 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! compile:
-//!     function calls
-//!     special forms
+//  Compile trait
 use crate::{
     core::{
         apply::Apply as _,
@@ -42,14 +40,14 @@ pub trait Compile {
     fn list(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
     fn quote(&self, _: &Tag) -> Tag;
     fn quote_(&self, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
-    fn quoted_form(&self, _: &Tag) -> Tag;
+    fn unquote(&self, _: &Tag) -> Tag;
     fn special_form(&self, _: Tag, _: Tag, _: &mut LexEnv) -> exception::Result<Tag>;
 }
 
 impl Compile for Env {
     fn if_(&self, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
         if Cons::length(self, args) != Some(3) {
-            return Err(Exception::new(self, Condition::Syntax, "mu:%if", args));
+            Err(Exception::new(self, Condition::Syntax, "mu:%if", args))?
         }
 
         let lambda = Symbol::keyword("lambda");
@@ -78,18 +76,16 @@ impl Compile for Env {
                 let symbol = Cons::car(self, cons);
                 if symbol.type_of() == Type::Symbol {
                     match symvec.iter().rev().position(|lex| symbol.eq_(lex)) {
-                        Some(_) => {
-                            return Err(Exception::new(
-                                self,
-                                Condition::Syntax,
-                                "mu:compile",
-                                symbol,
-                            ))
-                        }
+                        Some(_) => Err(Exception::new(
+                            self,
+                            Condition::Syntax,
+                            "mu:compile",
+                            symbol,
+                        ))?,
                         _ => symvec.push(symbol),
                     }
                 } else {
-                    return Err(Exception::new(self, Condition::Type, "mu:compile", symbol));
+                    Err(Exception::new(self, Condition::Type, "mu:compile", symbol))?
                 }
             }
 
@@ -102,10 +98,10 @@ impl Compile for Env {
 
                 match lambda.type_of() {
                     Type::Null | Type::Cons => (lambda, Cons::cdr(self, args)),
-                    _ => return Err(Exception::new(self, Condition::Type, "mu:compile", args)),
+                    _ => Err(Exception::new(self, Condition::Type, "mu:compile", args))?,
                 }
             }
-            _ => return Err(Exception::new(self, Condition::Syntax, "mu:compile", args)),
+            _ => Err(Exception::new(self, Condition::Syntax, "mu:compile", args))?,
         };
 
         Ok((lambda, body, compile_frame_symbols(lambda)?))
@@ -122,10 +118,9 @@ impl Compile for Env {
 
         env.push((func, symbols));
 
-        let form = self.list(body, env)?;
         let mut function = Function::to_image(self, func);
 
-        function.form = form;
+        function.form = self.list(body, env)?;
         Function::update(self, &function, func);
 
         env.pop();
@@ -144,10 +139,9 @@ impl Compile for Env {
 
         env.push((afunc, symbols));
 
-        let form = self.list(body, env)?;
         let mut async_ = Async::to_image(self, afunc);
 
-        async_.form = form;
+        async_.form = self.list(body, env)?;
         Async::update(self, &async_, afunc);
 
         env.pop();
@@ -163,7 +157,7 @@ impl Compile for Env {
     fn special_form(&self, name: Tag, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
         match SPECMAP.iter().copied().find(|spec| name.eq_(&spec.0)) {
             Some(spec) => spec.1(self, args, env),
-            None => Err(Exception::new(self, Condition::Syntax, "mu:compile", args)),
+            None => Err(Exception::new(self, Condition::Syntax, "mu:compile", args))?,
         }
     }
 
@@ -205,12 +199,10 @@ impl Compile for Env {
         Cons::cons(self, Symbol::keyword("quote"), *form)
     }
 
-    fn quoted_form(&self, form: &Tag) -> Tag {
-        if Self::is_quoted(self, form) {
-            Cons::cdr(self, *form)
-        } else {
-            panic!()
-        }
+    fn unquote(&self, form: &Tag) -> Tag {
+        assert!(Self::is_quoted(self, form));
+
+        Cons::cdr(self, *form)
     }
 
     fn is_quoted(&self, form: &Tag) -> bool {

@@ -13,10 +13,6 @@ pub enum SyntaxType {
     Escape,
 }
 
-pub fn map_char_syntax(ch: char) -> Option<&'static SyntaxType> {
-    SYNTAX_MAP.get(&ch)
-}
-
 lazy_static! {
     static ref SYNTAX_MAP: HashMap::<char, SyntaxType> = HashMap::<char, SyntaxType>::from([
         ('0', SyntaxType::Constituent),
@@ -118,6 +114,12 @@ lazy_static! {
         ('y', SyntaxType::Constituent),
         ('z', SyntaxType::Constituent),
     ]);
+}
+
+impl SyntaxType {
+    pub fn map_char_syntax(ch: char) -> Option<&'static SyntaxType> {
+        SYNTAX_MAP.get(&ch)
+    }
 }
 
 #[cfg(test)]

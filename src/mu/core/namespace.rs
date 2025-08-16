@@ -1,17 +1,17 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env namespaces
+// namespaces
 use {
     crate::{
         core::{
             apply::Apply as _,
-            core::CoreFnDef,
+            core::CoreFunctionDef,
             direct::DirectTag,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc_context::GcContext,
+            gc::GcContext,
             types::{Tag, Type},
         },
         types::{
@@ -22,10 +22,10 @@ use {
             vector::Vector,
         },
     },
+    futures_lite::future::block_on,
+    futures_locks::RwLock,
     std::{collections::HashMap, str},
 };
-
-use {futures_lite::future::block_on, futures_locks::RwLock};
 
 pub trait Gc {
     #[allow(dead_code)]
@@ -51,7 +51,7 @@ impl Gc for Namespace {
 
 #[derive(Clone)]
 pub struct Static {
-    pub functions: Option<&'static Vec<CoreFnDef>>,
+    pub functions: Option<&'static Vec<CoreFunctionDef>>,
     pub hash: Option<&'static RwLock<HashMap<String, Tag>>>,
 }
 
@@ -62,6 +62,7 @@ pub enum Namespace {
 }
 
 impl Namespace {
+    /*
     pub fn ns_designator(env: &Env, ns: Tag) -> usize {
         match ns.type_of() {
             Type::Null => Self::ns_designator(env, env.null_ns),
@@ -71,6 +72,7 @@ impl Namespace {
             _ => panic!(),
         }
     }
+     */
 
     pub fn index_of(env: &Env, ns: Tag) -> usize {
         match ns.type_of() {
@@ -119,7 +121,7 @@ impl Namespace {
         env: &Env,
         name: &str,
         ns_map: Option<&'static RwLock<HashMap<String, Tag>>>,
-        functab: Option<&'static Vec<CoreFnDef>>,
+        functab: Option<&'static Vec<CoreFunctionDef>>,
     ) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
         let len = ns_ref.len();
@@ -359,10 +361,9 @@ impl CoreFunction for Namespace {
     }
 
     fn mu_make_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let name = fp.argv[0];
-
         env.argv_check("mu:make-namespace", &[Type::String], fp)?;
-        fp.value = Self::with(env, &Vector::as_string(env, name))?;
+
+        fp.value = Self::with(env, &Vector::as_string(env, fp.argv[0]))?;
 
         Ok(())
     }
@@ -389,10 +390,9 @@ impl CoreFunction for Namespace {
     }
 
     fn mu_find_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let name = fp.argv[0];
-
         env.argv_check("mu:find-namespace", &[Type::String], fp)?;
-        fp.value = match Self::find(env, &Vector::as_string(env, name)) {
+
+        fp.value = match Self::find(env, &Vector::as_string(env, fp.argv[0])) {
             Some(ns) => ns,
             None => Tag::nil(),
         };
@@ -414,7 +414,7 @@ impl CoreFunction for Namespace {
                     return Err(Exception::new(env, Condition::Type, "mu:intern", ns_tag));
                 }
             }
-            _ => return Err(Exception::new(env, Condition::Type, "mu:intern", ns_tag)),
+            _ => Err(Exception::new(env, Condition::Type, "mu:intern", ns_tag))?,
         }
 
         let ns_ref = block_on(env.ns_map.read());
@@ -434,7 +434,7 @@ impl CoreFunction for Namespace {
             None => {
                 drop(ns_ref);
 
-                return Err(Exception::new(env, Condition::Type, "mu:find", ns_tag));
+                Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?
             }
         };
 
@@ -449,38 +449,41 @@ impl CoreFunction for Namespace {
         }
 
         if !Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) {
-            return Err(Exception::new(env, Condition::Type, "mu:intern", ns));
+            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
         }
 
         let ns_ref = block_on(env.ns_map.read());
+        let ns_map = ns_ref
+            .iter()
+            .find_map(
+                |(tag, _, ns_map)| {
+                    if ns.eq_(tag) {
+                        Some(ns_map)
+                    } else {
+                        None
+                    }
+                },
+            )
+            .unwrap();
 
-        fp.value = match ns_ref.iter().find_map(
-            |(tag, _, ns_map)| {
-                if ns.eq_(tag) {
-                    Some(ns_map)
-                } else {
-                    None
+        let hash_ref = block_on(match ns_map {
+            Namespace::Static(static_) => match static_.hash {
+                Some(hash) => hash.read(),
+                None => {
+                    fp.value = Tag::nil();
+                    return Ok(());
                 }
             },
-        ) {
-            Some(ns_map) => {
-                let hash = block_on(match ns_map {
-                    Namespace::Static(static_) => match static_.hash {
-                        Some(hash) => hash.read(),
-                        None => {
-                            fp.value = Tag::nil();
-                            return Ok(());
-                        }
-                    },
-                    Namespace::Dynamic(hash) => hash.read(),
-                });
+            Namespace::Dynamic(hash) => hash.read(),
+        });
 
-                let vec = hash.keys().map(|key| hash[key]).collect::<Vec<Tag>>();
-
-                Cons::list(env, &vec)
-            }
-            None => panic!(),
-        };
+        fp.value = Cons::list(
+            env,
+            &hash_ref
+                .keys()
+                .map(|key| hash_ref[key])
+                .collect::<Vec<Tag>>(),
+        );
 
         Ok(())
     }
@@ -490,6 +493,6 @@ impl CoreFunction for Namespace {
 mod tests {
     #[test]
     fn namespace() {
-        assert_eq!(true, true)
+        assert!(true)
     }
 }

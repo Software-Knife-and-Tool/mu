@@ -1,17 +1,19 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! stream writer
-use crate::{
-    core::{
-        core::CORE,
-        env::Env,
-        exception::{self, Condition, Exception},
-        types::{Tag, Type},
+// stream writer
+use {
+    crate::{
+        core::{
+            core::CORE,
+            env::Env,
+            exception::{self, Condition, Exception},
+            types::{Tag, Type},
+        },
+        types::{stream::Stream, symbol::Symbol},
     },
-    types::{stream::Stream, symbol::Symbol},
+    futures_lite::future::block_on,
 };
-use futures_lite::future::block_on;
 
 pub struct StreamWriter;
 
@@ -30,12 +32,12 @@ impl StreamWriter {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            return Err(Exception::new(
+            Err(Exception::new(
                 env,
                 Condition::Open,
                 "mu:write-char",
                 stream_tag,
-            ));
+            ))?
         }
 
         let streams_ref = block_on(CORE.streams.read());
@@ -66,12 +68,12 @@ impl StreamWriter {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            return Err(Exception::new(
+            Err(Exception::new(
                 env,
                 Condition::Open,
                 "mu:write-byte",
                 stream_tag,
-            ));
+            ))?
         }
 
         let streams_ref = block_on(CORE.streams.read());
@@ -102,7 +104,7 @@ impl StreamWriter {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn test() {
+        assert!(true);
     }
 }

@@ -2,13 +2,15 @@
 //  SPDX-License-Identifier: MIT
 
 //! features
-use crate::core::{core::CoreFnDef, types::Tag};
+use crate::core::{core::CoreFunctionDef, types::Tag};
 
 use futures_locks::RwLock;
 use std::collections::HashMap;
 
 #[cfg(feature = "core")]
 use crate::features::core::Core;
+#[cfg(feature = "debug")]
+use crate::features::debug::Debug;
 #[cfg(feature = "env")]
 use crate::features::env::Env;
 #[cfg(feature = "ffi")]
@@ -24,7 +26,7 @@ use crate::features::sysinfo::Sysinfo;
 
 #[derive(Clone)]
 pub struct Feature {
-    pub functions: Option<&'static Vec<CoreFnDef>>,
+    pub functions: Option<&'static Vec<CoreFunctionDef>>,
     pub namespace: String,
     pub symbols: Option<&'static RwLock<HashMap<String, Tag>>>,
 }
@@ -36,6 +38,8 @@ impl Feature {
             <Feature as Core>::feature(),
             #[cfg(feature = "env")]
             <Feature as Env>::feature(),
+            #[cfg(feature = "debug")]
+            <Feature as Debug>::feature(),
             #[cfg(feature = "nix")]
             <Feature as Nix>::feature(),
             #[cfg(feature = "std")]

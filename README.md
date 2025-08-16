@@ -28,6 +28,7 @@ Subsequent layers based on the runtime offer advanced features.
 
 - env feature
 - mcore command line utility
+- runtime source cleanup
 
 #### Rationale
 
@@ -149,6 +150,7 @@ version 0.2.5 is built with rustc 1.86.0
 version 0.2.6 is built with rustc 1.86.0
 version 0.2.7 is built with rustc 1.87.0
 version 0.2.8 is built with rustc 1.88.0
+version 0.2.9 is built with rustc 1.89.0
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
@@ -254,8 +256,8 @@ Before making any changes, you will want to establish a performance baseline.
 As you make changes, you can verify correctness and note any performance regressions. Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
 
 ```
- mux build release			# build the mu release version 
- mux test				# run the regression tests
+ mux build release              # build the mu release version 
+ mux test                       # run the regression tests
  mux bench current --ntests=1	# benchmark the current build and print results
 ```
 
@@ -374,9 +376,9 @@ mu-sys		runtime binary
 mu-sh		runtime binary, stdio listener
 mu-ld		image loader
 mcore		interactive runtime, stdio listener
-mu-exec     	image executor
+mu-exec     image executor
 mu-server	server runtime, socket listener
-mu		shell script for loading *core*. runs *mu-sh* listener
+mu          shell script for loading *core*. runs *mu-sh* listener
 ```
 
 
@@ -436,18 +438,18 @@ alias ,mu-repl='rlwrap mu --eval='\''(prelude:repl)'\'''
 The *mu* runtimes can be configured to use a variable number of system resources, currently the number of pages of memory allocated to the heap at startup. The behavior of the garbage collector can also be specified, though garbage collection control is still mostly unimplemented. The *-c* option to the various runtimes is a string of named attribute values:
 
 ```
-npages			number									pages of virtual memory for the heap
-page-size		number									number of bytes in a page
-gc-mode			{ none, auto, demand }	how the garbage collector operates
-heap-type		{ semispace, bump }			heap type, defaults to bump
+npages			number							pages of virtual memory for the heap
+page-size		number							number of bytes in a page
+gc-mode			{ none, auto, demand }         how the garbage collector operates
+heap-type		{ bump }						heap type, defaults to bump
 ```
 
 Usage: (*mu-server*, *mu-ld*, and *mu-exec* have similar options)
 
 ```
-mu-sys -c "npages:256,gc-mode:none"	256 heap pages, garbage collection disabled
+mu-sys -c "npages:256,gc-mode:none"		256 heap pages, garbage collection disabled
 mu-sys -c "npages:1024,gc-mode:auto"	default configuration
-
 mu --config="npages:4096, gc-mode:demand, heap-type:bump"
-					4096 pages, garbage collection runs on demand, bump allocator 
+										 4096 pages, garbage collection runs on demand,
+                                        bump allocator 
 ```

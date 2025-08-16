@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! core writer
+// core writer
 use crate::{
     core::{
         env::Env,
@@ -29,11 +29,9 @@ impl Writer for Env {
             Type::Fixnum => Fixnum::write(self, tag, escape, stream),
             Type::Float => Float::write(self, tag, escape, stream),
             Type::Function => Function::write(self, tag, escape, stream),
-            Type::Keyword => Symbol::write(self, tag, escape, stream),
-            Type::Null => Symbol::write(self, tag, escape, stream),
             Type::Stream => Stream::write(self, tag, escape, stream),
             Type::Struct => Struct::write(self, tag, escape, stream),
-            Type::Symbol => Symbol::write(self, tag, escape, stream),
+            Type::Symbol | Type::Null | Type::Keyword => Symbol::write(self, tag, escape, stream),
             Type::Vector => Vector::write(self, tag, escape, stream),
             _ => panic!(),
         }
@@ -43,7 +41,7 @@ impl Writer for Env {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn writer() {
+        assert!(true);
     }
 }

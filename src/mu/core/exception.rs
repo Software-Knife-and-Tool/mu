@@ -1,11 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env exceptions:
-//!    Condition
-//!    Exception
-//!    `Result<Exception>`
-use futures_lite::future::block_on;
+//! exception
 use {
     crate::{
         core::{
@@ -16,6 +12,7 @@ use {
         },
         types::symbol::Symbol,
     },
+    futures_lite::future::block_on,
     std::fmt,
 };
 
@@ -111,13 +108,8 @@ impl Exception {
         }
     }
 
-    fn map_condkey(cond: Condition) -> Result<Tag> {
-        let condmap = CONDMAP.iter().find(|condtab| cond == condtab.1);
-
-        match condmap {
-            Some(entry) => Ok(entry.0),
-            _ => panic!(),
-        }
+    fn map_condkey(cond: Condition) -> Tag {
+        CONDMAP.iter().find(|condtab| cond == condtab.1).unwrap().0
     }
 }
 
@@ -128,24 +120,24 @@ pub trait CoreFunction {
 
 impl CoreFunction for Exception {
     fn mu_raise(env: &Env, fp: &mut Frame) -> Result<()> {
+        env.argv_check("mu:raise", &[Type::T, Type::Keyword], fp)?;
+
         let src = fp.argv[0];
         let condition = fp.argv[1];
 
-        env.argv_check("mu:raise", &[Type::T, Type::Keyword], fp)?;
         match Self::map_condition(env, condition) {
-            Ok(cond) => Err(Self::new(env, cond, "mu:raise", src)),
-            Err(_) => Err(Self::new(env, Condition::Type, "mu:raise", condition)),
+            Ok(cond) => Err(Self::new(env, cond, "mu:raise", src))?,
+            Err(_) => Err(Self::new(env, Condition::Type, "mu:raise", condition))?,
         }
     }
 
     fn mu_with_exception(env: &Env, fp: &mut Frame) -> Result<()> {
+        env.argv_check("mu:with-exception", &[Type::Function, Type::Function], fp)?;
+
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        env.argv_check("mu:with-exception", &[Type::Function, Type::Function], fp)?;
-
         let dynamic_ref = block_on(env.dynamic.dynamic.read());
-
         let frame_stack_len = dynamic_ref.len();
 
         drop(dynamic_ref);
@@ -153,8 +145,7 @@ impl CoreFunction for Exception {
         fp.value = match env.apply(thunk, Tag::nil()) {
             Ok(value) => value,
             Err(e) => {
-                let args = vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
-
+                let args = vec![e.object, Self::map_condkey(e.condition), e.source];
                 let value = env.apply_(handler, args)?;
                 let mut dynamic_ref = block_on(env.dynamic.dynamic.write());
 

@@ -1,20 +1,22 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! quasiquote reader
-use crate::{
-    core::{
-        compile::Compile,
-        env::Env,
-        exception::{self, Condition, Exception},
-        namespace::Namespace,
-        reader::Reader,
-        types::Tag,
+// quasiquote reader
+use {
+    crate::{
+        core::{
+            compile::Compile,
+            env::Env,
+            exception::{self, Condition, Exception},
+            namespace::Namespace,
+            reader::Reader,
+            types::Tag,
+        },
+        streams::reader::StreamReader,
+        types::{cons::Cons, symbol::Symbol},
     },
-    streams::reader::StreamReader,
-    types::{cons::Cons, symbol::Symbol},
+    std::fmt,
 };
-use std::fmt;
 
 pub struct QuasiReader {
     stream: Tag,
@@ -46,16 +48,8 @@ impl fmt::Display for QuasiExpr {
     }
 }
 
-/// roughly CLHS Section 2.4.6
+// roughly CLHS Section 2.4.6
 impl QuasiReader {
-    pub fn new(env: &Env, stream: Tag) -> Self {
-        Self {
-            stream,
-            cons: Namespace::intern(env, env.mu_ns, "cons".into(), Tag::nil()).unwrap(),
-            qappend: Namespace::intern(env, env.mu_ns, "append".into(), Tag::nil()).unwrap(),
-        }
-    }
-
     /*
         fn print_annotated_tag(env: &Env, preface: &str, tag: Tag) {
             print!("[{:?}] ", tag.type_of());
@@ -78,6 +72,14 @@ impl QuasiReader {
             }
     }
         */
+
+    pub fn new(env: &Env, stream: Tag) -> Self {
+        Self {
+            stream,
+            cons: Namespace::intern(env, env.mu_ns, "cons".into(), Tag::nil()).unwrap(),
+            qappend: Namespace::intern(env, env.mu_ns, "append".into(), Tag::nil()).unwrap(),
+        }
+    }
 
     pub fn read(env: &Env, _: bool, stream: Tag, _: bool) -> exception::Result<Tag> {
         let quasi = Self::new(env, stream);
@@ -175,27 +177,23 @@ impl QuasiReader {
     }
 
     fn parse_list(&self, env: &Env) -> exception::Result<QuasiExpr> {
-        let mut expansion: Vec<QuasiExpr> = vec![];
+        let mut expanded: Vec<QuasiExpr> = vec![];
 
         loop {
             match self.read_syntax(env)? {
-                None => {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Stream,
-                        "mu:read",
-                        Symbol::keyword("eof"),
-                    ))
-                }
+                None => Err(Exception::new(
+                    env,
+                    Condition::Stream,
+                    "mu:read",
+                    Symbol::keyword("eof"),
+                ))?,
                 Some(syntax) => match syntax {
-                    QuasiSyntax::Atom => expansion.push(QuasiExpr::Basic(self.read_form(env)?)),
-                    QuasiSyntax::Comma => expansion.push(QuasiExpr::Comma(self.read_form(env)?)),
-                    QuasiSyntax::CommaAt => {
-                        expansion.push(QuasiExpr::CommaAt(self.read_form(env)?))
-                    }
-                    QuasiSyntax::ListEnd => return Ok(QuasiExpr::List(expansion)),
-                    QuasiSyntax::ListStart => expansion.push(self.parse_list(env)?),
-                    QuasiSyntax::Quasi => expansion.push(self.parse(env).unwrap()),
+                    QuasiSyntax::Atom => expanded.push(QuasiExpr::Basic(self.read_form(env)?)),
+                    QuasiSyntax::Comma => expanded.push(QuasiExpr::Comma(self.read_form(env)?)),
+                    QuasiSyntax::CommaAt => expanded.push(QuasiExpr::CommaAt(self.read_form(env)?)),
+                    QuasiSyntax::ListEnd => return Ok(QuasiExpr::List(expanded)),
+                    QuasiSyntax::ListStart => expanded.push(self.parse_list(env)?),
+                    QuasiSyntax::Quasi => expanded.push(self.parse(env).unwrap()),
                 },
             }
         }
@@ -208,7 +206,7 @@ impl QuasiReader {
                 Condition::Stream,
                 "mu:read",
                 Symbol::keyword("eof"),
-            )),
+            ))?,
             Some(syntax) => match syntax {
                 QuasiSyntax::Atom => Ok(QuasiExpr::Basic(self.read_form(env)?)),
                 QuasiSyntax::Comma => Ok(QuasiExpr::Comma(self.read_form(env)?)),
@@ -217,13 +215,13 @@ impl QuasiReader {
                     Condition::Quasi,
                     "mu:read",
                     Symbol::keyword(",@"),
-                )),
+                ))?,
                 QuasiSyntax::ListEnd => Err(Exception::new(
                     env,
                     Condition::Quasi,
                     "mu:read",
                     Symbol::keyword(")"),
-                )),
+                ))?,
                 QuasiSyntax::ListStart => {
                     let expr = self.parse_list(env)?;
 

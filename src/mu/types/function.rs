@@ -1,23 +1,24 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env function type
-use crate::{
-    core::{
-        env::Env,
-        exception,
-        gc_context::{Gc as _, GcContext},
-        heap::HeapRequest,
-        indirect::IndirectTag,
-        namespace::Namespace,
-        type_image::TypeImage,
-        types::{Tag, TagType, Type},
+// function type
+use {
+    crate::{
+        core::{
+            env::Env,
+            exception,
+            gc::{Gc as _, GcContext},
+            heap::HeapRequest,
+            indirect::IndirectTag,
+            namespace::Namespace,
+            type_image::TypeImage,
+            types::{Tag, TagType, Type},
+        },
+        streams::writer::StreamWriter,
+        types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
     },
-    streams::writer::StreamWriter,
-    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
+    futures_lite::future::block_on,
 };
-
-use futures_lite::future::block_on;
 
 #[derive(Copy, Clone)]
 pub struct Function {
@@ -42,23 +43,20 @@ impl Gc for Function {
         if !mark {
             let form = Self::ref_form(context, function);
 
-            context.mark(env, form)
+            context.mark(env, form);
         }
     }
 
     fn gc_ref_image(context: &mut GcContext, tag: Tag) -> Self {
+        assert_eq!(tag.type_of(), Type::Function);
+
         let heap_ref = &context.heap_ref;
 
-        match tag.type_of() {
-            Type::Function => match tag {
-                Tag::Indirect(fn_) => Function {
-                    arity: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                    form: Tag::from_slice(
-                        heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap(),
-                    ),
-                },
-                _ => panic!(),
-            },
+        match tag {
+            Tag::Indirect(fn_) => Self::new(
+                Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
+                Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+            ),
             _ => panic!(),
         }
     }
@@ -70,18 +68,15 @@ impl Function {
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> Self {
+        assert_eq!(tag.type_of(), Type::Function);
+
         let heap_ref = block_on(env.heap.read());
 
-        match tag.type_of() {
-            Type::Function => match tag {
-                Tag::Indirect(fn_) => Function {
-                    arity: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                    form: Tag::from_slice(
-                        heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap(),
-                    ),
-                },
-                _ => panic!(),
-            },
+        match tag {
+            Tag::Indirect(fn_) => Self::new(
+                Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
+                Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+            ),
             _ => panic!(),
         }
     }
@@ -116,10 +111,7 @@ impl Function {
     }
 
     pub fn evict_image(tag: Tag, env: &Env) -> Tag {
-        match tag {
-            Tag::Image(_) => Self::to_image(env, tag).evict(env),
-            _ => panic!(),
-        }
+        Self::to_image(env, tag).evict(env)
     }
 
     pub fn update(env: &Env, image: &Function, func: Tag) {
@@ -161,59 +153,56 @@ impl Function {
     }
 
     pub fn write(env: &Env, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
-        match func.type_of() {
-            Type::Function => {
-                let nreq = Fixnum::as_i64(Function::arity(env, func));
-                let form = Function::form(env, func);
+        assert_eq!(func.type_of(), Type::Function);
 
-                let desc = match form.type_of() {
-                    Type::Null => (
-                        "null".to_string(),
-                        "lambda".to_string(),
-                        format!("{:x}", form.as_u64()),
-                    ),
-                    Type::Cons => match Cons::cdr(env, form).type_of() {
-                        Type::Null | Type::Cons => (
-                            "null".to_string(),
-                            "lambda".to_string(),
-                            format!("{:x}", form.as_u64()),
-                        ),
-                        Type::Fixnum => {
-                            let ns = Cons::car(env, form);
-                            let offset = Cons::cdr(env, form);
+        let nreq = Fixnum::as_i64(Function::arity(env, func));
+        let form = Function::form(env, func);
 
-                            let ns_ref = block_on(env.ns_map.read());
-                            let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
+        let desc = match form.type_of() {
+            Type::Null => (
+                "null".to_string(),
+                "lambda".to_string(),
+                format!("{:x}", form.as_u64()),
+            ),
+            Type::Cons => match Cons::cdr(env, form).type_of() {
+                Type::Null | Type::Cons => (
+                    "null".to_string(),
+                    "lambda".to_string(),
+                    format!("{:x}", form.as_u64()),
+                ),
+                Type::Fixnum => {
+                    let ns = Cons::car(env, form);
+                    let offset = Cons::cdr(env, form);
 
-                            let fn_name = match namespace {
-                                Namespace::Static(static_) => match static_.functions {
-                                    Some(functions) => {
-                                        functions[Fixnum::as_i64(offset) as usize].0.to_string()
-                                    }
-                                    None => "<undef>".to_string(),
-                                },
-                                _ => panic!(),
-                            };
+                    let ns_ref = block_on(env.ns_map.read());
+                    let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
 
-                            (Namespace::name(env, ns).unwrap(), "native".into(), fn_name)
-                        }
+                    let fn_name = match namespace {
+                        Namespace::Static(static_) => match static_.functions {
+                            Some(functions) => {
+                                functions[Fixnum::as_i64(offset) as usize].0.to_string()
+                            }
+                            None => "<undef>".to_string(),
+                        },
                         _ => panic!(),
-                    },
-                    _ => panic!(),
-                };
+                    };
 
-                StreamWriter::write_str(
-                    env,
-                    format!(
-                        "#<:function :{} [type:{}, req:{nreq}, form:{}]>",
-                        desc.0, desc.1, desc.2
-                    )
-                    .as_str(),
-                    stream,
-                )
-            }
+                    (Namespace::name(env, ns).unwrap(), "native".into(), fn_name)
+                }
+                _ => panic!(),
+            },
             _ => panic!(),
-        }
+        };
+
+        StreamWriter::write_str(
+            env,
+            format!(
+                "#<:function :{} [type:{}, req:{nreq}, form:{}]>",
+                desc.0, desc.1, desc.2
+            )
+            .as_str(),
+            stream,
+        )
     }
 }
 
@@ -221,6 +210,6 @@ impl Function {
 mod tests {
     #[test]
     fn as_tag() {
-        assert_eq!(true, true)
+        assert!(true)
     }
 }

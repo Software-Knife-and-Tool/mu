@@ -1,31 +1,28 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! function call frame
-//!    Frame
-//!    apply
-//!    frame_push
-//!    frame_pop
-//!    frame_ref
-use crate::{
-    core::{
-        apply::Apply as _,
-        dynamic::Dynamic,
-        env::Env,
-        exception::{self, Condition, Exception},
-        namespace::Namespace,
-        types::{Tag, Type},
+// function call frame
+use {
+    crate::{
+        core::{
+            apply::Apply as _,
+            dynamic::Dynamic,
+            env::Env,
+            exception::{self, Condition, Exception},
+            namespace::Namespace,
+            types::{Tag, Type},
+        },
+        types::{
+            async_::Async, cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct,
+            symbol::Symbol, vector::Vector,
+        },
     },
-    types::{
-        async_::Async, cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct,
-        symbol::Symbol, vector::Vector,
-    },
+    futures_lite::future::block_on,
+    futures_locks::RwLock,
 };
 
 #[cfg(feature = "prof")]
 use crate::features::{feature::Feature, prof::Prof};
-
-use {futures_lite::future::block_on, futures_locks::RwLock};
 
 pub struct Frame {
     pub argv: Vec<Tag>,
@@ -43,29 +40,19 @@ impl Frame {
 
     #[allow(dead_code)]
     fn from_tag(env: &Env, tag: Tag) -> Self {
-        match tag.type_of() {
-            Type::Struct => {
-                let stype = Struct::stype(env, tag);
-                let frame = Struct::vector(env, tag);
+        assert_eq!(tag.type_of(), Type::Struct);
 
-                let func = Vector::ref_(env, frame, 0).unwrap();
+        let stype = Struct::stype(env, tag);
+        let frame = Struct::vector(env, tag);
+        let func = Vector::ref_(env, frame, 0).unwrap();
 
-                match func.type_of() {
-                    Type::Function => {
-                        if !stype.eq_(&Symbol::keyword("frame")) {
-                            panic!()
-                        }
+        assert_eq!(func.type_of(), Type::Function);
+        assert!(stype.eq_(&Symbol::keyword("frame")));
 
-                        Frame {
-                            argv: Vector::iter(env, frame).skip(1).collect::<Vec<Tag>>(),
-                            func,
-                            value: Tag::nil(),
-                        }
-                    }
-                    _ => panic!(),
-                }
-            }
-            _ => panic!(),
+        Frame {
+            argv: Vector::iter(env, frame).skip(1).collect::<Vec<Tag>>(),
+            func,
+            value: Tag::nil(),
         }
     }
 
@@ -127,7 +114,7 @@ impl Frame {
         let nargs = self.argv.len();
 
         if nargs != nreqs {
-            return Err(Exception::new(env, Condition::Arity, "mu:apply", func));
+            Err(Exception::new(env, Condition::Arity, "mu:apply", func))?
         }
 
         match func.type_of() {
@@ -135,7 +122,7 @@ impl Frame {
                 if Symbol::is_bound(env, func) {
                     self.apply(env, Symbol::value(env, func))
                 } else {
-                    Err(Exception::new(env, Condition::Unbound, "mu:apply", func))
+                    Err(Exception::new(env, Condition::Unbound, "mu:apply", func))?
                 }
             }
             Type::Async => {
@@ -178,17 +165,14 @@ impl Frame {
                             let ns_ref = block_on(env.ns_map.read());
                             let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
 
-                            match namespace {
-                                Namespace::Static(static_) => {
-                                    let func = match static_.functions {
-                                        Some(functab) => functab[Fixnum::as_i64(offset) as usize].2,
-                                        None => panic!(),
-                                    };
+                            if let Namespace::Static(static_) = namespace {
+                                let func =
+                                    static_.functions.unwrap()[Fixnum::as_i64(offset) as usize].2;
 
-                                    drop(ns_ref);
-                                    func(env, &mut self)?
-                                }
-                                _ => panic!(),
+                                drop(ns_ref);
+                                func(env, &mut self)?
+                            } else {
+                                panic!()
                             }
 
                             Ok(self.value)
@@ -214,7 +198,7 @@ impl Frame {
                     _ => panic!(),
                 }
             }
-            _ => Err(Exception::new(env, Condition::Type, "mu:apply", func)),
+            _ => Err(Exception::new(env, Condition::Type, "mu:apply", func))?,
         }
     }
 }

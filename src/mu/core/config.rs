@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env config
+/// Config struct
 use {
     crate::{
         core::{env::Env, types::Tag},
@@ -39,7 +39,6 @@ pub enum GcMode {
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum HeapType {
     Bump,
-    Semispace,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -85,7 +84,6 @@ impl ConfigBuilder {
             .find(|(_, (key, _))| key == &"heap-type")
         {
             self.heap_type = Some(match *mode {
-                "semispace" => HeapType::Semispace,
                 "bump" => HeapType::Bump,
                 _ => panic!(),
             });
@@ -101,10 +99,7 @@ impl ConfigBuilder {
             .enumerate()
             .find(|(_, (key, _))| key == &"npages")
         {
-            match n.parse::<usize>() {
-                Ok(n) => self.npages = Some(n),
-                Err(_) => panic!(),
-            };
+            self.npages = Some(n.parse::<usize>().unwrap());
             phrases.swap_remove(index);
         }
 
@@ -117,10 +112,7 @@ impl ConfigBuilder {
             .enumerate()
             .find(|(_, (key, _))| key == &"page-size")
         {
-            match n.parse::<usize>() {
-                Ok(n) => self.page_size = Some(n),
-                Err(_) => panic!(),
-            };
+            self.page_size = Some(n.parse::<usize>().unwrap());
             phrases.swap_remove(index);
         }
 
@@ -128,9 +120,7 @@ impl ConfigBuilder {
     }
 
     pub fn build(&self, phrases: Vec<(&str, &str)>) -> Option<Config> {
-        if !phrases.is_empty() {
-            panic!("config: unknown phrase(s) {phrases:?}")
-        }
+        assert!(phrases.is_empty());
 
         let default: Config = Default::default();
         let config = Config {
@@ -170,9 +160,7 @@ impl Config {
                     .into_iter()
                     .map(|term| {
                         let term = term.split(':').collect::<Vec<&str>>();
-                        if term.len() != 2 {
-                            panic!()
-                        }
+                        assert!(term.len() == 2);
 
                         (term[0].trim(), term[1].trim())
                     })
@@ -199,7 +187,6 @@ impl Config {
 
         let heap_type = match self.heap_type {
             HeapType::Bump => "bump",
-            HeapType::Semispace => "semispace",
         };
 
         Cons::list(
@@ -234,6 +221,6 @@ impl Config {
 mod tests {
     #[test]
     fn test() {
-        assert_eq!(2 + 2, 4);
+        assert!(true);
     }
 }

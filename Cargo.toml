@@ -18,6 +18,7 @@ bench = false
 [features]
 default = [ "core", "env", "nix", "std", "sysinfo" ]
 core = []
+debug = []
 env = []           # needed for testing, common
 ffi = []
 nix = []

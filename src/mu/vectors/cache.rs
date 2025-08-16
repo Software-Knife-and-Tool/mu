@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! vector cache
+// vector cache
 use {
     crate::{
         core::{
@@ -96,7 +96,7 @@ impl Vector {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn test() {
+        assert!(true);
     }
 }

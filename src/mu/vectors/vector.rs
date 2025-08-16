@@ -9,7 +9,7 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc_context::{Gc as _, GcContext},
+        gc::{Gc as _, GcContext},
         types::{Tag, Type},
     },
     types::{
@@ -128,21 +128,19 @@ pub trait CoreFunction {
 
 impl CoreFunction for Vector {
     fn mu_make_vector(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:make-vector", &[Type::Keyword, Type::List], fp)?;
+
         let type_sym = fp.argv[0];
         let list = fp.argv[1];
 
-        env.argv_check("mu:make-vector", &[Type::Keyword, Type::List], fp)?;
-
         fp.value = match Self::to_type(type_sym) {
             Some(vtype) => match vtype {
-                Type::Null => {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Type,
-                        "mu:make-vector",
-                        type_sym,
-                    ))
-                }
+                Type::Null => Err(Exception::new(
+                    env,
+                    Condition::Type,
+                    "mu:make-vector",
+                    type_sym,
+                ))?,
                 Type::T => {
                     let vec = Cons::iter(env, list)
                         .map(|cons| Cons::car(env, cons))
@@ -157,7 +155,7 @@ impl CoreFunction for Vector {
                             if ch.type_of() == Type::Char {
                                 Ok(Char::as_char(env, ch))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", ch))
+                                Err(Exception::new(env, Condition::Type, "mu:make-vector", ch))?
                             }
                         })
                         .collect();
@@ -173,17 +171,12 @@ impl CoreFunction for Vector {
                         if fx.type_of() == Type::Fixnum {
                             let bit = Fixnum::as_i64(fx);
                             if !(0..1).contains(&bit) {
-                                return Err(Exception::new(
-                                    env,
-                                    Condition::Range,
-                                    "mu:make-vector",
-                                    fx,
-                                ));
+                                Err(Exception::new(env, Condition::Range, "mu:make-vector", fx))?
                             } else {
                                 bvec[i / 8] |= (bit as u8) << (7 - i % 8)
                             }
                         } else {
-                            return Err(Exception::new(env, Condition::Type, "mu:make-vector", fx));
+                            Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))?
                         }
                     }
 
@@ -196,7 +189,12 @@ impl CoreFunction for Vector {
                             if fx.type_of() == Type::Fixnum {
                                 let byte = Fixnum::as_i64(fx);
                                 if !(0..=255).contains(&byte) {
-                                    Err(Exception::new(env, Condition::Range, "mu:make-vector", fx))
+                                    Err(Exception::new(
+                                        env,
+                                        Condition::Range,
+                                        "mu:make-vector",
+                                        fx,
+                                    ))?
                                 } else {
                                     Ok(byte as u8)
                                 }
@@ -215,7 +213,7 @@ impl CoreFunction for Vector {
                             if fx.type_of() == Type::Fixnum {
                                 Ok(Fixnum::as_i64(fx))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))
+                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))?
                             }
                         })
                         .collect();
@@ -229,71 +227,63 @@ impl CoreFunction for Vector {
                             if fl.type_of() == Type::Float {
                                 Ok(Float::as_f32(env, fl))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fl))
+                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fl))?
                             }
                         })
                         .collect();
 
                     Vector::from(vec?).evict(env)
                 }
-                _ => {
-                    return Err(Exception::new(
-                        env,
-                        Condition::Type,
-                        "mu:make-vector",
-                        type_sym,
-                    ));
-                }
-            },
-            None => {
-                return Err(Exception::new(
+                _ => Err(Exception::new(
                     env,
                     Condition::Type,
                     "mu:make-vector",
                     type_sym,
-                ));
-            }
+                ))?,
+            },
+            None => Err(Exception::new(
+                env,
+                Condition::Type,
+                "mu:make-vector",
+                type_sym,
+            ))?,
         };
 
         Ok(())
     }
 
     fn mu_svref(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:svref", &[Type::Vector, Type::Fixnum], fp)?;
+
         let vector = fp.argv[0];
         let index = fp.argv[1];
-
-        env.argv_check("mu:svref", &[Type::Vector, Type::Fixnum], fp)?;
 
         let nth = Fixnum::as_i64(index);
 
         if nth < 0 || nth as usize >= Self::length(env, vector) {
-            return Err(Exception::new(env, Condition::Range, "mu:svref", index));
+            Err(Exception::new(env, Condition::Range, "mu:svref", index))?
         }
 
-        fp.value = match Self::ref_(env, vector, nth as usize) {
-            Some(nth) => nth,
-            None => panic!(),
-        };
+        fp.value = Self::ref_(env, vector, nth as usize).unwrap();
 
         Ok(())
     }
 
     fn mu_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:vector-type", &[Type::Vector], fp)?;
+
         let vector = fp.argv[0];
 
-        env.argv_check("mu:vector-type", &[Type::Vector], fp)?;
-        fp.value = match Tag::type_key(Self::type_of(env, vector)) {
-            Some(key) => key,
-            None => panic!(),
-        };
+        fp.value = Tag::type_key(Self::type_of(env, vector)).unwrap();
 
         Ok(())
     }
 
     fn mu_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:vector-length", &[Type::Vector], fp)?;
+
         let vector = fp.argv[0];
 
-        env.argv_check("mu:vector-length", &[Type::Vector], fp)?;
         fp.value = Fixnum::with_or_panic(Self::length(env, vector));
 
         Ok(())

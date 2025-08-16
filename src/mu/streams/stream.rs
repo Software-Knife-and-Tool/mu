@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! stream operators
+// system stream operators
 use {
     crate::{
         core::{
@@ -14,11 +14,10 @@ use {
         streams::system::{StringDirection, SystemStream, SystemStreamBuilder},
         types::{stream::Stream, symbol::Symbol},
     },
+    futures_lite::{future::block_on, AsyncWriteExt},
+    futures_locks::RwLock,
     std::{io::Write, str},
 };
-
-use futures_lite::{future::block_on, AsyncWriteExt};
-use futures_locks::RwLock;
 
 impl SystemStream {
     pub fn is_file(&self) -> Option<bool> {
@@ -143,7 +142,7 @@ impl SystemStream {
         };
 
         match system_stream {
-            None => Err(Exception::new(env, Condition::Open, "env:open", Tag::nil())),
+            None => Err(Exception::new(env, Condition::Open, "env:open", Tag::nil()))?,
             Some(_) => {
                 let mut streams_ref = block_on(CORE.streams.write());
                 let mut id = block_on(CORE.stream_id.write());
@@ -228,6 +227,6 @@ impl SystemStream {
 mod tests {
     #[test]
     fn stream() {
-        assert_eq!(true, true)
+        assert!(true)
     }
 }

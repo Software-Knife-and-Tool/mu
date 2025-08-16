@@ -1,8 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env character class
-#![allow(dead_code)]
+// character class
 use crate::{
     core::{
         direct::{DirectExt, DirectTag, DirectType, ExtType},
@@ -14,10 +13,7 @@ use crate::{
     types::vector::Vector,
 };
 
-#[derive(Copy, Clone)]
-pub enum Char {
-    Direct(u64),
-}
+pub struct Char;
 
 impl From<char> for Tag {
     fn from(ch: char) -> Tag {
@@ -71,7 +67,7 @@ mod tests {
     #[test]
     fn as_tag() {
         match <char as Into<Tag>>::into('a') {
-            _ => assert_eq!(true, true),
+            _ => assert!(true),
         }
     }
 }

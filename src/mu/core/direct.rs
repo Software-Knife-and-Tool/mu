@@ -80,13 +80,13 @@ impl DirectTag {
             DirectExt::ExtType(ext_type) => ext_type as u8,
         };
 
-        let dir = DirectTag::new()
-            .with_data(data)
-            .with_ext(ext)
-            .with_dtype(tag)
-            .with_tag(TagType::Direct);
-
-        Tag::Direct(dir)
+        Tag::Direct(
+            DirectTag::new()
+                .with_data(data)
+                .with_ext(ext)
+                .with_dtype(tag)
+                .with_tag(TagType::Direct),
+        )
     }
 
     //
@@ -175,6 +175,6 @@ impl DirectTag {
 mod tests {
     #[test]
     fn types() {
-        assert_eq!(2 + 2, 4);
+        assert!(true);
     }
 }

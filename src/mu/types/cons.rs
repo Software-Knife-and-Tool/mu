@@ -1,28 +1,29 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! cons class
-use crate::{
-    core::{
-        apply::Apply as _,
-        direct::{DirectTag, DirectType, ExtType},
-        dynamic::Dynamic,
-        env::Env,
-        exception::{self, Condition, Exception},
-        frame::Frame,
-        gc_context::{Gc as _, GcContext},
-        heap::HeapRequest,
-        indirect::IndirectTag,
-        reader::{Reader, EOL},
-        type_image::TypeImage,
-        types::{Tag, TagType, Type},
-        writer::Writer,
+//! cons type
+use {
+    crate::{
+        core::{
+            apply::Apply as _,
+            direct::{DirectTag, DirectType, ExtType},
+            dynamic::Dynamic,
+            env::Env,
+            exception::{self, Condition, Exception},
+            frame::Frame,
+            gc::{Gc as _, GcContext},
+            heap::HeapRequest,
+            indirect::IndirectTag,
+            reader::{Reader, EOL},
+            type_image::TypeImage,
+            types::{Tag, TagType, Type},
+            writer::Writer,
+        },
+        streams::writer::StreamWriter,
+        types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
     },
-    streams::writer::StreamWriter,
-    types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
+    futures_lite::future::block_on,
 };
-
-use futures_lite::future::block_on;
 
 #[derive(Copy, Clone)]
 pub struct Cons {
@@ -41,15 +42,11 @@ impl Gc for Cons {
     fn gc_ref_image(context: &GcContext, tag: Tag) -> Self {
         let heap_ref = &context.heap_ref;
 
-        match tag.type_of() {
-            Type::Cons => match tag {
-                Tag::Indirect(main) => Cons {
-                    car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
-                    cdr: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
-                    ),
-                },
-                _ => panic!(),
+        assert_eq!(tag.type_of(), Type::Cons);
+        match tag {
+            Tag::Indirect(main) => Cons {
+                car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
+                cdr: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize + 1).unwrap()),
             },
             _ => panic!(),
         }
@@ -92,11 +89,8 @@ impl Gc for Cons {
             Tag::Indirect(_) => {
                 let mark = context.mark_image(cons).unwrap();
                 if !mark {
-                    let car = Self::ref_car(context, cons);
-                    let cdr = Self::ref_cdr(context, cons);
-
-                    context.mark(env, car);
-                    context.mark(env, cdr)
+                    context.mark(env, Self::ref_car(context, cons));
+                    context.mark(env, Self::ref_cdr(context, cons));
                 }
             }
         }
@@ -117,20 +111,17 @@ impl Cons {
     pub fn to_image(env: &Env, tag: Tag) -> Self {
         let heap_ref = block_on(env.heap.read());
 
-        match tag.type_of() {
-            Type::Cons => match tag {
-                Tag::Image(image) => match Dynamic::images_ref(env, image.data() as usize) {
-                    TypeImage::Cons(cons) => cons,
-                    _ => panic!(),
-                },
-                Tag::Indirect(main) => Cons {
-                    car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
-                    cdr: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
-                    ),
-                },
+        assert_eq!(tag.type_of(), Type::Cons);
+
+        match tag {
+            Tag::Image(image) => match Dynamic::images_ref(env, image.data() as usize) {
+                TypeImage::Cons(cons) => cons,
                 _ => panic!(),
             },
+            Tag::Indirect(main) => Self::new(
+                Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
+                Tag::from_slice(heap_ref.image_slice(main.image_id() as usize + 1).unwrap()),
+            ),
             _ => panic!(),
         }
     }
@@ -140,9 +131,7 @@ impl Cons {
     }
 
     pub fn cons(env: &Env, car: Tag, cdr: Tag) -> Tag {
-        let cons = Self::new(car, cdr);
-
-        cons.evict(env)
+        Self::new(car, cdr).evict(env)
     }
 
     pub fn list(env: &Env, vec: &[Tag]) -> Tag {
@@ -267,30 +256,26 @@ impl Cons {
         let car = env.read(stream, false, Tag::nil(), true)?;
 
         if EOL.eq_(&car) {
-            Ok(Tag::nil())
-        } else {
-            match car.type_of() {
-                Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
-                    let cdr = env.read(stream, false, Tag::nil(), true)?;
+            return Ok(Tag::nil());
+        }
 
-                    if EOL.eq_(&cdr) {
-                        Ok(Tag::nil())
+        match car.type_of() {
+            Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
+                let cdr = env.read(stream, false, Tag::nil(), true)?;
+
+                if EOL.eq_(&cdr) {
+                    Ok(Tag::nil())
+                } else {
+                    let eol = env.read(stream, false, Tag::nil(), true)?;
+
+                    if EOL.eq_(&eol) {
+                        Ok(cdr)
                     } else {
-                        let eol = env.read(stream, false, Tag::nil(), true)?;
-
-                        if EOL.eq_(&eol) {
-                            Ok(cdr)
-                        } else {
-                            Err(Exception::new(env, Condition::Eof, "mu:read", stream))
-                        }
+                        Err(Exception::new(env, Condition::Eof, "mu:read", stream))?
                     }
                 }
-                _ => {
-                    let cdr = Self::read(env, stream)?;
-
-                    Ok(Cons::cons(env, car, cdr))
-                }
             }
+            _ => Ok(Cons::cons(env, car, Self::read(env, stream)?)),
         }
     }
 
@@ -299,30 +284,22 @@ impl Cons {
         let car = env.read(stream, false, Tag::nil(), true)?;
 
         if EOL.eq_(&car) {
-            Ok(Tag::nil())
-        } else {
-            match car.type_of() {
-                Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
-                    let cdr = env.read(stream, false, Tag::nil(), true)?;
+            return Ok(Tag::nil());
+        }
 
-                    if EOL.eq_(&cdr) {
-                        Ok(Tag::nil())
-                    } else {
-                        let eol = env.read(stream, false, Tag::nil(), true)?;
+        match car.type_of() {
+            Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
+                let cdr = env.read(stream, false, Tag::nil(), true)?;
 
-                        if EOL.eq_(&eol) {
-                            Ok(cdr)
-                        } else {
-                            Err(Exception::new(env, Condition::Eof, "mu:read", stream))
-                        }
-                    }
-                }
-                _ => {
-                    let cdr = Self::read(env, stream)?;
-
-                    Ok(Cons::cons_image(env, car, cdr))
+                if EOL.eq_(&cdr) {
+                    Ok(Tag::nil())
+                } else if EOL.eq_(&env.read(stream, false, Tag::nil(), true)?) {
+                    Ok(cdr)
+                } else {
+                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?
                 }
             }
+            _ => Ok(Cons::cons_image(env, car, Self::read(env, stream)?)),
         }
     }
 
@@ -428,9 +405,9 @@ pub trait CoreFunction {
 
 impl CoreFunction for Cons {
     fn mu_append(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let lists = fp.argv[0];
-
         env.argv_check("mu:car", &[Type::List], fp)?;
+
+        let lists = fp.argv[0];
 
         fp.value = Tag::nil();
         if !lists.null_() {
@@ -449,7 +426,7 @@ impl CoreFunction for Cons {
                                 appended.push(Self::car(env, cons))
                             }
                         }
-                        _ => return Err(Exception::new(env, Condition::Type, "mu:append", list)),
+                        _ => return Err(Exception::new(env, Condition::Type, "mu:append", list))?,
                     }
                 }
             }
@@ -459,9 +436,10 @@ impl CoreFunction for Cons {
     }
 
     fn mu_car(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:car", &[Type::List], fp)?;
+
         let list = fp.argv[0];
 
-        env.argv_check("mu:car", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => list,
             Type::Cons => Self::car(env, list),
@@ -472,9 +450,10 @@ impl CoreFunction for Cons {
     }
 
     fn mu_cdr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:cdr", &[Type::List], fp)?;
+
         let list = fp.argv[0];
 
-        env.argv_check("mu:cdr", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => list,
             Type::Cons => Self::cdr(env, list),
@@ -491,9 +470,10 @@ impl CoreFunction for Cons {
     }
 
     fn mu_length(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:length", &[Type::List], fp)?;
+
         let list = fp.argv[0];
 
-        env.argv_check("mu:length", &[Type::List], fp)?;
         fp.value = match list.type_of() {
             Type::Null => Fixnum::with_or_panic(0),
             Type::Cons => match Cons::length(env, list) {
@@ -507,20 +487,20 @@ impl CoreFunction for Cons {
     }
 
     fn mu_nth(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:nth", &[Type::Fixnum, Type::List], fp)?;
+
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        env.argv_check("mu:nth", &[Type::Fixnum, Type::List], fp)?;
-
         if Fixnum::as_i64(nth) < 0 {
-            return Err(Exception::new(env, Condition::Type, "mu:nth", nth));
+            Err(Exception::new(env, Condition::Type, "mu:nth", nth))?
         }
 
         fp.value = match list.type_of() {
             Type::Null => Tag::nil(),
             Type::Cons => match Self::nth(env, Fixnum::as_i64(nth) as usize, list) {
                 Some(tag) => tag,
-                None => return Err(Exception::new(env, Condition::Type, "mu:nth", list)),
+                None => Err(Exception::new(env, Condition::Type, "mu:nth", list))?,
             },
             _ => panic!(),
         };
@@ -529,20 +509,20 @@ impl CoreFunction for Cons {
     }
 
     fn mu_nthcdr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:nthcdr", &[Type::Fixnum, Type::List], fp)?;
+
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        env.argv_check("mu:nthcdr", &[Type::Fixnum, Type::List], fp)?;
-
         if Fixnum::as_i64(nth) < 0 {
-            return Err(Exception::new(env, Condition::Type, "mu:nthcdr", nth));
+            return Err(Exception::new(env, Condition::Type, "mu:nthcdr", nth))?;
         }
 
         fp.value = match list.type_of() {
             Type::Null => Tag::nil(),
             Type::Cons => match Self::nthcdr(env, Fixnum::as_i64(nth) as usize, list) {
                 Some(tag) => tag,
-                None => return Err(Exception::new(env, Condition::Type, "mu:nthcdr", list)),
+                None => Err(Exception::new(env, Condition::Type, "mu:nthcdr", list))?,
             },
             _ => panic!(),
         };
@@ -575,13 +555,12 @@ impl Iterator for ConsIter<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::types::Tag;
-    use crate::types::cons::Cons;
+    use crate::{core::types::Tag, types::cons::Cons};
 
     #[test]
     fn cons() {
         match Cons::new(Tag::nil(), Tag::nil()) {
-            _ => assert_eq!(true, true),
+            _ => assert!(true),
         }
     }
 }

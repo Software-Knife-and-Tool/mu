@@ -2,26 +2,27 @@
 //  SPDX-License-Identifier: MIT
 
 //! sysinfo interface
-use crate::{
-    core::{
-        core::CoreFnDef,
-        env::Env,
-        exception::{self, Condition, Exception},
-        frame::Frame,
-        types::Tag,
+use {
+    crate::{
+        core::{
+            core::CoreFunctionDef,
+            env::Env,
+            exception::{self, Condition, Exception},
+            frame::Frame,
+            types::Tag,
+        },
+        features::feature::Feature,
+        types::{cons::Cons, fixnum::Fixnum, vector::Vector},
     },
-    features::feature::Feature,
-    types::{cons::Cons, fixnum::Fixnum, vector::Vector},
+    futures_locks::RwLock,
+    std::collections::HashMap,
 };
-
-use futures_locks::RwLock;
-use std::collections::HashMap;
 
 use sysinfo_dot_h::{self};
 
 lazy_static! {
     pub static ref SYSINFO_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref SYSINFO_FUNCTIONS: Vec<CoreFnDef> =
+    pub static ref SYSINFO_FUNCTIONS: Vec<CoreFunctionDef> =
         vec![("sysinfo", 0, Feature::sysinfo_sysinfo),];
 }
 
@@ -46,14 +47,12 @@ pub trait CoreFunction {
 impl CoreFunction for Feature {
     fn sysinfo_sysinfo(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match sysinfo_dot_h::try_collect() {
-            Err(_) => {
-                return Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "sysinfo:sysinfo",
-                    Tag::nil(),
-                ))
-            }
+            Err(_) => Err(Exception::new(
+                env,
+                Condition::Type,
+                "mu/sysinfo:sysinfo",
+                Tag::nil(),
+            ))?,
             Ok(sysinfo) => {
                 let sysinfo = vec![Cons::list(
                     env,

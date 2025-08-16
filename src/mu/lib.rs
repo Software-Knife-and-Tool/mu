@@ -51,11 +51,7 @@ mod types;
 mod vectors;
 
 use {
-    crate::core::{
-        config::Config,
-        core::{CORE, VERSION},
-        exception,
-    },
+    crate::core::{config::Config, core::CORE, exception},
     std::fs,
 };
 
@@ -63,6 +59,7 @@ use {
 ///
 /// The library API exposes these types:
 /// - Condition, enumeration of exceptional conditions
+/// - Config, Env configuration
 /// - Core, CORE runtime state
 /// - Env, execution environment
 /// - Exception, exception state
@@ -86,12 +83,14 @@ pub type Result = core::exception::Result<Tag>;
 
 /// API namespace
 impl Mu {
-    /// version
-    pub const VERSION: &'static str = VERSION;
-
     /// core image
     pub fn core() -> &'static Core {
         &CORE
+    }
+
+    /// version
+    pub fn version() -> &'static str {
+        env!("CARGO_PKG_VERSION")
     }
 
     /// environment configuration

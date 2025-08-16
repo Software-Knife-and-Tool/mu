@@ -1,18 +1,20 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! stream read functions
-use crate::{
-    core::{
-        core::CORE,
-        env::Env,
-        exception::{self, Condition, Exception},
-        types::{Tag, Type},
+// stream reader
+use {
+    crate::{
+        core::{
+            core::CORE,
+            env::Env,
+            exception::{self, Condition, Exception},
+            types::{Tag, Type},
+        },
+        streams::system::SystemStream,
+        types::{char::Char, stream::Stream, symbol::Symbol},
     },
-    streams::system::SystemStream,
-    types::{char::Char, stream::Stream, symbol::Symbol},
+    futures_lite::future::block_on,
 };
-use futures_lite::future::block_on;
 
 pub struct StreamReader;
 
@@ -21,12 +23,12 @@ impl StreamReader {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            return Err(Exception::new(
+            Err(Exception::new(
                 env,
                 Condition::Open,
                 "mu:read-char",
                 stream_tag,
-            ));
+            ))?
         }
 
         let streams_ref = block_on(CORE.streams.read());
@@ -38,6 +40,7 @@ impl StreamReader {
                 if stream.direction.eq_(&Symbol::keyword("output")) {
                     drop(streams_ref);
                     drop(stream);
+
                     return Err(Exception::new(
                         env,
                         Condition::Stream,
@@ -66,12 +69,12 @@ impl StreamReader {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            return Err(Exception::new(
+            Err(Exception::new(
                 env,
                 Condition::Open,
                 "mu:read-byte",
                 stream_tag,
-            ));
+            ))?
         }
 
         let streams_ref = block_on(CORE.streams.read());
@@ -113,12 +116,12 @@ impl StreamReader {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            return Err(Exception::new(
+            Err(Exception::new(
                 env,
                 Condition::Open,
                 "mu:unread-char",
                 stream_tag,
-            ));
+            ))?
         }
 
         let streams_ref = block_on(CORE.streams.read());
@@ -163,6 +166,6 @@ impl StreamReader {
 mod tests {
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
+        assert!(true);
     }
 }

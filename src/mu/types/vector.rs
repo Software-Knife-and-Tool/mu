@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env vector type
+// vector type
 use {
     crate::{
         core::{
@@ -98,33 +98,31 @@ impl Vector {
     }
 
     pub fn as_string(env: &Env, tag: Tag) -> String {
-        match tag.type_of() {
-            Type::Vector => match tag {
-                Tag::Image(_) => panic!(),
-                Tag::Direct(dir) => match dir.dtype() {
-                    DirectType::String => str::from_utf8(&dir.data().to_le_bytes()).unwrap()
-                        [..dir.ext() as usize]
-                        .into(),
-                    _ => panic!(),
-                },
-                Tag::Indirect(image) => {
-                    let heap_ref = block_on(env.heap.read());
-                    let vec: VectorImage = Self::to_image(env, tag);
-
-                    str::from_utf8(
-                        heap_ref
-                            .image_data_slice(
-                                image.image_id() as usize + Self::IMAGE_LEN,
-                                0,
-                                Fixnum::as_i64(vec.length) as usize,
-                            )
-                            .unwrap(),
-                    )
-                    .unwrap()
-                    .into()
+        assert_eq!(tag.type_of(), Type::Vector);
+        match tag {
+            Tag::Image(_) => panic!(),
+            Tag::Direct(dir) => match dir.dtype() {
+                DirectType::String => {
+                    str::from_utf8(&dir.data().to_le_bytes()).unwrap()[..dir.ext() as usize].into()
                 }
+                _ => panic!(),
             },
-            _ => panic!(),
+            Tag::Indirect(image) => {
+                let heap_ref = block_on(env.heap.read());
+                let vec: VectorImage = Self::to_image(env, tag);
+
+                str::from_utf8(
+                    heap_ref
+                        .image_data_slice(
+                            image.image_id() as usize + Self::IMAGE_LEN,
+                            0,
+                            Fixnum::as_i64(vec.length) as usize,
+                        )
+                        .unwrap(),
+                )
+                .unwrap()
+                .into()
+            }
         }
     }
 
@@ -133,44 +131,38 @@ impl Vector {
     }
 
     pub fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
-        match vector.type_of() {
-            Type::Vector => match vector {
-                Tag::Image(_) => panic!(),
-                Tag::Direct(direct) => match direct.dtype() {
-                    DirectType::String => {
-                        let ch: char = vector.data(env).to_le_bytes()[index].into();
+        assert_eq!(vector.type_of(), Type::Vector);
 
-                        Some(ch.into())
-                    }
-                    DirectType::ByteVec => {
-                        let byte: u8 = vector.data(env).to_le_bytes()[index];
+        match vector {
+            Tag::Image(_) => panic!(),
+            Tag::Direct(direct) => match direct.dtype() {
+                DirectType::String => {
+                    let ch: char = vector.data(env).to_le_bytes()[index].into();
 
-                        Some(byte.into())
-                    }
-                    _ => panic!(),
-                },
-                Tag::Indirect(_) => VecImageType::ref_(env, vector, index),
+                    Some(ch.into())
+                }
+                DirectType::ByteVec => {
+                    let byte: u8 = vector.data(env).to_le_bytes()[index];
+
+                    Some(byte.into())
+                }
+                _ => panic!(),
             },
-            _ => {
-                panic!()
-            }
+            Tag::Indirect(_) => VecImageType::ref_(env, vector, index),
         }
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> VectorImage {
+        assert_eq!(tag.type_of(), Type::Vector);
+
         let heap_ref = block_on(env.heap.read());
 
-        match tag.type_of() {
-            Type::Vector => match tag {
-                Tag::Indirect(image) => VectorImage {
-                    type_: Tag::from_slice(
-                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
-                    ),
-                    length: Tag::from_slice(
-                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
-                    ),
-                },
-                _ => panic!(),
+        match tag {
+            Tag::Indirect(image) => VectorImage {
+                type_: Tag::from_slice(heap_ref.image_slice(image.image_id() as usize).unwrap()),
+                length: Tag::from_slice(
+                    heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                ),
             },
             _ => panic!(),
         }
@@ -259,6 +251,7 @@ impl Iterator for VectorIter<'_> {
             None
         } else {
             let el = Vector::ref_(self.env, self.vec, self.index).unwrap();
+
             self.index += 1;
 
             Some(el)
@@ -269,7 +262,7 @@ impl Iterator for VectorIter<'_> {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn test() {
+        assert!(true);
     }
 }
