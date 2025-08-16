@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env stream type
+// stream builder
 use crate::{
     core::{
         core::Core,
@@ -105,7 +105,7 @@ impl StreamBuilder {
                         None => match self.bidir {
                             Some(_) => SystemStream::open_bidir_string(env, contents),
                             None => {
-                                Err(Exception::new(env, Condition::Range, "mu:open", Tag::nil()))
+                                Err(Exception::new(env, Condition::Range, "mu:open", Tag::nil()))?
                             }
                         },
                     },
@@ -117,7 +117,7 @@ impl StreamBuilder {
                         None => match self.errout {
                             Some(_) => SystemStream::open_std_stream(SystemStream::StdError, core),
                             None => {
-                                Err(Exception::new(env, Condition::Range, "mu:open", Tag::nil()))
+                                Err(Exception::new(env, Condition::Range, "mu:open", Tag::nil()))?
                             }
                         },
                     },
@@ -131,6 +131,6 @@ impl StreamBuilder {
 mod tests {
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
+        assert!(true);
     }
 }

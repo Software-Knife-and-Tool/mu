@@ -51,7 +51,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ExecOpt>> {
                     Opt('c', None) => optv.push(ExecOpt::Check),
                     Opt('t', None) => optv.push(ExecOpt::Toc),
                     Opt('v', None) => {
-                        print!("env-exec: {} ", Mu::VERSION);
+                        print!("env-exec: {} ", Mu::version());
                         return None;
                     }
                     _ => panic!(),
@@ -69,7 +69,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ExecOpt>> {
 }
 
 fn usage() {
-    println!("env-exec: {}: [-h?vd] file", Mu::VERSION);
+    println!("env-exec: {}: [-h?vd] file", Mu::version());
     println!("?: usage message");
     println!("h: usage message");
     println!("dump: load path");

@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{
-            core::CoreFnDef,
+            core::CoreFunctionDef,
             direct::DirectTag,
             env::Env as Env_,
             exception::{self},
@@ -27,7 +27,7 @@ use {
 
 lazy_static! {
     pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref ENV_FUNCTIONS: Vec<CoreFnDef> = vec![
+    pub static ref ENV_FUNCTIONS: Vec<CoreFunctionDef> = vec![
         ("env", 0, Feature::env_env),
         ("heap-free", 0, Feature::env_hp_free),
         ("heap-info", 0, Feature::env_hp_info),
@@ -129,6 +129,7 @@ impl CoreFunction for Feature {
 
     fn env_hp_info(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
         let heap_ref = block_on(env.heap.read());
+
         println!("type           :bump");
         println!("page-size      {}", heap_ref.page_size);
         println!("npages         {}", heap_ref.npages);
@@ -170,25 +171,26 @@ impl CoreFunction for Feature {
     }
 
     fn env_env(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        let alist = vec![
-            Cons::cons(
-                env,
-                Vector::from("config").evict(env),
-                env.config.as_list(env),
-            ),
-            Cons::cons(
-                env,
-                Vector::from("namespaces").evict(env),
-                Self::ns_map(env),
-            ),
-            Cons::cons(
-                env,
-                Vector::from("heap-room").evict(env),
-                Self::heap_stat(env),
-            ),
-        ];
-
-        fp.value = Cons::list(env, &alist);
+        fp.value = Cons::list(
+            env,
+            &[
+                Cons::cons(
+                    env,
+                    Vector::from("config").evict(env),
+                    env.config.as_list(env),
+                ),
+                Cons::cons(
+                    env,
+                    Vector::from("namespaces").evict(env),
+                    Self::ns_map(env),
+                ),
+                Cons::cons(
+                    env,
+                    Vector::from("heap-room").evict(env),
+                    Self::heap_stat(env),
+                ),
+            ],
+        );
 
         Ok(())
     }

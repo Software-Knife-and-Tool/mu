@@ -2,7 +2,6 @@
 //  SPDX-License-Identifier: MIT
 
 //! environment bindings
-use futures_locks::RwLock;
 use {
     crate::{
         core::{
@@ -16,6 +15,7 @@ use {
         },
         vectors::cache::VecCacheMap,
     },
+    futures_locks::RwLock,
     std::collections::HashMap,
 };
 
@@ -66,23 +66,12 @@ impl Env {
         };
 
         // establish namespaces
-        env.null_ns = match Namespace::with(&env, "") {
-            Ok(ns) => ns,
-            Err(_) => panic!(),
-        };
-
+        env.null_ns = Namespace::with(&env, "").unwrap();
         env.mu_ns =
-            match Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(&CORE_FUNCTIONS)) {
-                Ok(ns) => ns,
-                Err(_) => panic!(),
-            };
+            Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(&CORE_FUNCTIONS)).unwrap();
+        env.keyword_ns = Namespace::with_static(&env, "keyword", None, None).unwrap();
 
-        env.keyword_ns = match Namespace::with_static(&env, "keyword", None, None) {
-            Ok(ns) => ns,
-            Err(_) => panic!(),
-        };
-
-        Namespace::intern_static(&env, env.mu_ns, "*null/*".into(), env.null_ns);
+        Namespace::intern_static(&env, env.mu_ns, "*null/*".into(), env.null_ns).unwrap();
         Namespace::intern_static(&env, env.mu_ns, "*standard-input*".into(), CORE.stdin()).unwrap();
         Namespace::intern_static(&env, env.mu_ns, "*standard-output*".into(), CORE.stdout())
             .unwrap();

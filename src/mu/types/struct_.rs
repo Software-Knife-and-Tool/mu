@@ -1,25 +1,27 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env struct type
-use crate::{
-    core::{
-        apply::Apply as _,
-        env::Env,
-        exception::{self, Condition, Exception},
-        frame::Frame,
-        gc_context::{Gc as _, GcContext},
-        heap::HeapRequest,
-        indirect::IndirectTag,
-        types::{Tag, TagType, Type},
-        writer::Writer,
+//! struct type
+use {
+    crate::{
+        core::{
+            apply::Apply as _,
+            env::Env,
+            exception::{self, Condition, Exception},
+            frame::Frame,
+            gc::{Gc as _, GcContext},
+            heap::HeapRequest,
+            indirect::IndirectTag,
+            types::{Tag, TagType, Type},
+            writer::Writer,
+        },
+        streams::{reader::StreamReader, writer::StreamWriter},
+        types::{cons::Cons, symbol::Symbol, vector::Vector},
     },
-    streams::{reader::StreamReader, writer::StreamWriter},
-    types::{cons::Cons, symbol::Symbol, vector::Vector},
+    futures_lite::future::block_on,
 };
-use futures_lite::future::block_on;
 
-// a struct is a vector with an arbitrary type keyword
+// a struct is a vector and an arbitrary type keyword
 #[derive(Copy, Clone)]
 pub struct Struct {
     pub stype: Tag,
@@ -33,19 +35,16 @@ pub trait Gc {
 
 impl Gc for Struct {
     fn gc_ref_image(context: &mut GcContext, tag: Tag) -> Self {
+        assert_eq!(tag.type_of(), Type::Struct);
+
         let heap_ref = &context.heap_ref;
 
-        match tag.type_of() {
-            Type::Struct => match tag {
-                Tag::Indirect(image) => Struct {
-                    stype: Tag::from_slice(
-                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
-                    ),
-                    vector: Tag::from_slice(
-                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
-                    ),
-                },
-                _ => panic!(),
+        match tag {
+            Tag::Indirect(image) => Struct {
+                stype: Tag::from_slice(heap_ref.image_slice(image.image_id() as usize).unwrap()),
+                vector: Tag::from_slice(
+                    heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                ),
             },
             _ => panic!(),
         }
@@ -64,19 +63,16 @@ impl Gc for Struct {
 
 impl Struct {
     pub fn to_image(env: &Env, tag: Tag) -> Self {
+        assert_eq!(tag.type_of(), Type::Struct);
+
         let heap_ref = block_on(env.heap.read());
 
-        match tag.type_of() {
-            Type::Struct => match tag {
-                Tag::Indirect(image) => Struct {
-                    stype: Tag::from_slice(
-                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
-                    ),
-                    vector: Tag::from_slice(
-                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
-                    ),
-                },
-                _ => panic!(),
+        match tag {
+            Tag::Indirect(image) => Struct {
+                stype: Tag::from_slice(heap_ref.image_slice(image.image_id() as usize).unwrap()),
+                vector: Tag::from_slice(
+                    heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                ),
             },
             _ => panic!(),
         }
@@ -137,18 +133,11 @@ impl Struct {
                 let vec_list = match Cons::read(env, stream) {
                     Ok(list) => {
                         if list.null_() {
-                            return Err(Exception::new(
-                                env,
-                                Condition::Type,
-                                "mu:read",
-                                Tag::nil(),
-                            ));
+                            Err(Exception::new(env, Condition::Type, "mu:read", Tag::nil()))?
                         }
                         list
                     }
-                    Err(_) => {
-                        return Err(Exception::new(env, Condition::Syntax, "mu:read", stream));
-                    }
+                    Err(_) => Err(Exception::new(env, Condition::Syntax, "mu:read", stream))?,
                 };
 
                 let stype = Cons::car(env, vec_list);
@@ -160,10 +149,10 @@ impl Struct {
                             .map(|cons| Cons::car(env, cons))
                             .collect::<Vec<Tag>>(),
                     )),
-                    _ => Err(Exception::new(env, Condition::Type, "mu:read", stype)),
+                    _ => Err(Exception::new(env, Condition::Type, "mu:read", stype))?,
                 }
             }
-            _ => Err(Exception::new(env, Condition::Eof, "mu:read", stream)),
+            _ => Err(Exception::new(env, Condition::Eof, "mu:read", stream))?,
         }
     }
 
@@ -191,7 +180,6 @@ impl Struct {
     }
 }
 
-// env functions
 pub trait CoreFunction {
     fn mu_struct_type(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_struct_vector(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -200,28 +188,30 @@ pub trait CoreFunction {
 
 impl CoreFunction for Struct {
     fn mu_struct_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:struct-type", &[Type::Struct], fp)?;
+
         let tag = fp.argv[0];
 
-        env.argv_check("mu:struct-type", &[Type::Struct], fp)?;
         fp.value = Self::to_image(env, tag).stype;
 
         Ok(())
     }
 
     fn mu_struct_vector(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:struct-vec", &[Type::Struct], fp)?;
+
         let tag = fp.argv[0];
 
-        env.argv_check("mu:struct-vec", &[Type::Struct], fp)?;
         fp.value = Self::to_image(env, tag).vector;
 
         Ok(())
     }
 
     fn mu_make_struct(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:make-struct", &[Type::Keyword, Type::List], fp)?;
+
         let type_ = fp.argv[0];
         let list = fp.argv[1];
-
-        env.argv_check("mu:make-struct", &[Type::Keyword, Type::List], fp)?;
 
         let vec = Cons::iter(env, list)
             .map(|cons| Cons::car(env, cons))
@@ -241,6 +231,6 @@ impl CoreFunction for Struct {
 mod tests {
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
+        assert!(true);
     }
 }

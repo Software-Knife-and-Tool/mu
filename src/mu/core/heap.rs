@@ -10,7 +10,7 @@ use {
             config::Config,
             direct::DirectTag,
             env::Env,
-            gc_context::{Gc as _, GcContext},
+            gc::{Gc as _, GcContext},
             types::{Tag, Type},
         },
         types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
@@ -229,15 +229,10 @@ impl HeapAllocator {
     // try first fit
     fn alloc_free(&mut self, type_id: u8, size: usize) -> Option<usize> {
         for (index, off) in self.free_map[type_id as usize].iter().enumerate() {
-            match self.image_info(*off) {
-                Some(info) => {
-                    if info.len() >= size as u16 {
-                        self.alloc_map[type_id as usize].total += 1;
+            if self.image_info(*off).unwrap().len() >= size as u16 {
+                self.alloc_map[type_id as usize].total += 1;
 
-                        return Some(self.free_map[type_id as usize].remove(index));
-                    }
-                }
-                None => panic!(),
+                return Some(self.free_map[type_id as usize].remove(index));
             }
         }
 
@@ -429,7 +424,7 @@ impl Iterator for HeapAllocatorIter<'_> {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn env() {
-        assert_eq!(2 + 2, 4);
+    fn test() {
+        assert!(true);
     }
 }

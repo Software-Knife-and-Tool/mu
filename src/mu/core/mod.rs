@@ -12,7 +12,7 @@ pub mod dynamic;
 pub mod env;
 pub mod exception;
 pub mod frame;
-pub mod gc_context;
+pub mod gc;
 pub mod heap;
 pub mod indirect;
 pub mod mu;

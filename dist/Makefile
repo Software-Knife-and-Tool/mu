@@ -3,7 +3,7 @@
 #
 .PHONY: dist clean release
 
-VERSION != grep VERSION: ../src/mu/core/core.rs | sed 's/.* "//' | sed 's/".*//'
+VERSION := $(shell cargo pkgid | sed 's/.*#//')
 
 BASE = ./mu
 DIST = ../dist

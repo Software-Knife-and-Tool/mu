@@ -1,25 +1,22 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! system streams
-use futures_lite::AsyncReadExt;
-use futures_lite::AsyncWriteExt;
+// system streams
 use {
     crate::core::{
         env::Env,
         exception::{self, Condition, Exception},
         types::Tag,
     },
+    futures_lite::{future::block_on, AsyncReadExt, AsyncWriteExt},
+    futures_locks::RwLock,
     smol::{
         fs,
         io::{BufReader, BufWriter},
     },
     std::collections::VecDeque,
-    std::io,
-    std::io::Read,
-    std::io::Write,
+    std::io::{self, Read, Write},
 };
-use {futures_lite::future::block_on, futures_locks::RwLock};
 
 // stream builder
 pub struct SystemStreamBuilder {
@@ -192,7 +189,7 @@ impl SystemStream {
                         Condition::Write,
                         "mu:write-byte",
                         Tag::nil(),
-                    )),
+                    ))?,
                 }
             }
             Self::StdError => {
@@ -205,7 +202,7 @@ impl SystemStream {
                         Condition::Write,
                         "mu:write-byte",
                         Tag::nil(),
-                    )),
+                    ))?,
                 }
             }
             SystemStream::Writer(file) => {
@@ -219,7 +216,7 @@ impl SystemStream {
                         Condition::Write,
                         "mu:write-byte",
                         Tag::nil(),
-                    )),
+                    ))?,
                 }
             }
             SystemStream::String(string) => {
@@ -237,6 +234,6 @@ impl SystemStream {
 mod tests {
     #[test]
     fn stream() {
-        assert_eq!(true, true)
+        assert!(true)
     }
 }

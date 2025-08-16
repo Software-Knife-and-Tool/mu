@@ -5,7 +5,7 @@
 use crate::{
     core::{
         apply::Apply as _,
-        core::CoreFnDef,
+        core::CoreFunctionDef,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -24,7 +24,7 @@ pub trait Prof {
 
 lazy_static! {
     pub static ref PROF_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref PROF_FUNCTIONS: Vec<CoreFnDef> =
+    pub static ref PROF_FUNCTIONS: Vec<CoreFunctionDef> =
         vec![("prof-control", 1, Feature::prof_control)];
 }
 
@@ -62,18 +62,18 @@ pub trait CoreFunction {
 
 impl CoreFunction for Feature {
     fn prof_control(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu/prof:prof_control", &[Type::Keyword], fp)?;
+
         let cmd = fp.argv[0];
-
-        env.argv_check("prof:prof_control", &[Type::Keyword], fp)?;
-
         let profile_map_ref = block_on(env.prof.read());
         let mut prof_ref = block_on(env.prof_on.write());
 
-        fp.value = cmd;
         if cmd.eq_(&Symbol::keyword("on")) {
-            *prof_ref = true
+            *prof_ref = true;
+            fp.value = Symbolk::keyword("on");
         } else if cmd.eq_(&Symbol::keyword("off")) {
-            *prof_ref = false
+            *prof_ref = false;
+            fp.value = Symbol::keyword("off");
         } else if cmd.eq_(&Symbol::keyword("get")) {
             let prof_vec = (*profile_map_ref)
                 .iter()

@@ -1,14 +1,13 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! typed vectors
-#![allow(unused_imports)]
+// typed vectors
 use {
     crate::{
         core::{
             direct::{DirectExt, DirectTag, DirectType},
             env::Env,
-            gc_context::{Gc, GcContext},
+            gc::GcContext,
             heap::HeapRequest,
             indirect::IndirectTag,
             types::{Tag, TagType, Type},
@@ -16,10 +15,9 @@ use {
         types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
         vectors::vector::Gc as _,
     },
+    futures_lite::future::block_on,
     std::str,
 };
-
-use futures_lite::future::block_on;
 
 #[derive(Clone)]
 pub struct VectorImage {
@@ -172,9 +170,7 @@ pub trait VecImage {
 
 impl VecImage for VecImageType<'_> {
     fn image(image: &VectorImage) -> Vec<[u8; 8]> {
-        let slices = vec![image.type_.as_slice(), image.length.as_slice()];
-
-        slices
+        vec![image.type_.as_slice(), image.length.as_slice()]
     }
 
     fn evict(&self, env: &Env) -> Tag {
@@ -439,7 +435,7 @@ impl VecImage for VecImageType<'_> {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn test() {
+        assert!(true);
     }
 }

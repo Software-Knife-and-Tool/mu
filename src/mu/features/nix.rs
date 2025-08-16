@@ -2,25 +2,27 @@
 //  SPDX-License-Identifier: MIT
 
 //! nix interface
-use crate::{
-    core::{
-        core::CoreFnDef,
-        env::Env,
-        exception::{self, Condition, Exception},
-        frame::Frame,
-        types::Tag,
+use {
+    crate::{
+        core::{
+            core::CoreFunctionDef,
+            env::Env,
+            exception::{self, Condition, Exception},
+            frame::Frame,
+            types::Tag,
+        },
+        features::feature::Feature,
+        types::{cons::Cons, struct_::Struct, symbol::Symbol, vector::Vector},
     },
-    features::feature::Feature,
-    types::{cons::Cons, struct_::Struct, symbol::Symbol, vector::Vector},
+    futures_locks::RwLock,
+    std::collections::HashMap,
 };
-use futures_locks::RwLock;
-use std::collections::HashMap;
 
 use nix::{self};
 
 lazy_static! {
     pub static ref NIX_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref NIX_FUNCTIONS: Vec<CoreFnDef> = vec![("uname", 0u16, Feature::nix_uname),];
+    pub static ref NIX_FUNCTIONS: Vec<CoreFunctionDef> = vec![("uname", 0u16, Feature::nix_uname),];
 }
 
 pub trait Nix {

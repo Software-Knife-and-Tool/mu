@@ -1,8 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env tagged types
-#![allow(dead_code)]
+// tagged types
 use {
     crate::{
         core::{
@@ -17,11 +16,10 @@ use {
             stream::Stream, struct_::Struct, symbol::Symbol, vector::Vector,
         },
     },
+    futures_lite::future::block_on,
     num_enum::TryFromPrimitive,
     std::{convert::From, fmt},
 };
-
-use futures_lite::future::block_on;
 
 // tag storage classes
 #[derive(Copy, Clone)]
@@ -74,7 +72,7 @@ lazy_static! {
         DirectExt::Length(3),
         DirectType::Keyword
     );
-    pub static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
+    static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
         (Type::Async, Symbol::keyword("async")),
         (Type::Bit, Symbol::keyword("bit")),
         (Type::Byte, Symbol::keyword("byte")),
@@ -119,14 +117,9 @@ impl Tag {
             Tag::Direct(tag) => tag.data(),
             Tag::Indirect(heap) => {
                 let heap_ref = block_on(env.heap.read());
+                let info = heap_ref.image_info(heap.image_id() as usize).unwrap();
 
-                match heap_ref.image_info(heap.image_id() as usize) {
-                    Some(info) => match Type::try_from(info.image_type()) {
-                        Ok(etype) => etype as u64,
-                        Err(_) => panic!(),
-                    },
-                    None => panic!(),
-                }
+                Type::try_from(info.image_type()).unwrap() as u64
             }
         }
     }
@@ -187,7 +180,7 @@ impl Tag {
                         Ok(ExtType::Fixnum) => Type::Fixnum,
                         Ok(ExtType::Float) => Type::Float,
                         Ok(ExtType::Stream) => Type::Stream,
-                        _ => panic!("direct type botch {:x}", self.as_u64()),
+                        _ => panic!(),
                     },
                 },
                 Tag::Indirect(indirect) => match indirect.tag() {
@@ -197,7 +190,7 @@ impl Tag {
                     TagType::Struct => Type::Struct,
                     TagType::Symbol => Type::Symbol,
                     TagType::Vector => Type::Vector,
-                    _ => panic!("indirect type botch {:x}", self.as_u64()),
+                    _ => panic!(),
                 },
             }
         }
@@ -246,15 +239,12 @@ impl CoreFunction for Tag {
 
             for index in (0..8).rev() {
                 u64_ <<= 8;
-                u64_ |= match Vector::ref_(env, arg, index as usize) {
-                    Some(byte) => Fixnum::as_i64(byte) as u64,
-                    None => panic!(),
-                }
+                u64_ |= Fixnum::as_i64(Vector::ref_(env, arg, index as usize).unwrap()) as u64;
             }
 
             fp.value = (&u64_.to_le_bytes()).into();
         } else {
-            return Err(Exception::new(env, Condition::Type, "mu:unrepr", arg));
+            Err(Exception::new(env, Condition::Type, "mu:unrepr", arg))?
         };
 
         Ok(())
@@ -271,10 +261,7 @@ impl CoreFunction for Tag {
     }
 
     fn mu_typeof(_: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match Tag::type_key(fp.argv[0].type_of()) {
-            Some(type_key) => type_key,
-            None => panic!(),
-        };
+        fp.value = Tag::type_key(fp.argv[0].type_of()).unwrap();
 
         Ok(())
     }
@@ -291,7 +278,8 @@ impl CoreFunction for Tag {
             Type::Stream => Stream::view(env, tag),
             Type::Struct => Struct::view(env, tag),
             Type::Vector => Vector::view(env, tag),
-            _ => Symbol::view(env, tag),
+            Type::Symbol | Type::Null | Type::Keyword => Symbol::view(env, tag),
+            _ => Err(Exception::new(env, Condition::Type, "mu:view", tag))?,
         };
 
         Ok(())
@@ -302,6 +290,6 @@ impl CoreFunction for Tag {
 mod tests {
     #[test]
     fn types() {
-        assert_eq!(2 + 2, 4);
+        assert!(true)
     }
 }

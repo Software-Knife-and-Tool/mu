@@ -1,33 +1,25 @@
 //  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! lib bindings
-#![allow(unused_imports)]
+// crate bindings
 use {
     crate::{
         core::{
             apply::Apply,
             compile::Compile,
             config::Config,
-            core::{Core, CORE, CORE_FUNCTIONS},
-            dynamic::Dynamic,
+            core::{Core, CORE},
             env,
             exception::{self, Condition, Exception},
-            frame::Frame,
-            heap::HeapAllocator,
-            mu,
-            namespace::Namespace,
             reader::Reader,
             types::Tag,
             writer::Writer,
         },
-        streams::{builder::StreamBuilder, reader::StreamReader, writer::StreamWriter},
-        types::{char::Char, stream::Stream, struct_::Struct, symbol::Symbol},
-        vectors::cache::VecCacheMap,
+        streams::{builder::StreamBuilder, writer::StreamWriter},
+        types::stream::Stream,
     },
-    std::collections::HashMap,
+    futures_lite::future::block_on,
 };
-use {futures_lite::future::block_on, futures_locks::RwLock};
 
 pub type Env = Tag;
 pub struct Mu;
@@ -102,20 +94,14 @@ impl Mu {
         let envs_ref = block_on(CORE.envs.read());
         let env_: &env::Env = &envs_ref[&env.as_u64()];
 
-        let str_stream = match StreamBuilder::new()
+        let stream = StreamBuilder::new()
             .string("".into())
             .output()
             .build(env_, &CORE)
-        {
-            Ok(stream) => {
-                env_.write(expr, esc, stream).unwrap();
+            .unwrap();
 
-                stream
-            }
-            Err(_) => panic!(),
-        };
-
-        Stream::get_string(env_, str_stream).unwrap()
+        env_.write(expr, esc, stream).unwrap();
+        Stream::get_string(env_, stream).unwrap()
     }
 
     pub fn exception_string_(env: Env, ex: Exception) -> String {

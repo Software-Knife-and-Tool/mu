@@ -1,20 +1,21 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! vector write function
-use crate::{
-    core::{
-        direct::{DirectTag, DirectType},
-        env::Env,
-        exception,
-        types::{Tag, Type},
-        writer::Writer,
+// vector writer
+use {
+    crate::{
+        core::{
+            direct::{DirectTag, DirectType},
+            env::Env,
+            exception,
+            types::{Tag, Type},
+            writer::Writer,
+        },
+        streams::writer::StreamWriter,
+        types::{fixnum::Fixnum, vector::Vector},
     },
-    streams::writer::StreamWriter,
-    types::{fixnum::Fixnum, vector::Vector},
+    std::str,
 };
-
-use std::str;
 
 pub trait Write {
     fn write(_: &Env, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
@@ -74,7 +75,6 @@ impl Write for Vector {
                 Type::Bit => {
                     StreamWriter::write_str(env, "#*", stream)?;
 
-                    let _len = Vector::length(env, vector);
                     for bit in Vector::iter(env, vector) {
                         let digit = Fixnum::as_i64(bit);
 
@@ -102,7 +102,7 @@ impl Write for Vector {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn test() {
+        assert!(true);
     }
 }

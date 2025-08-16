@@ -35,7 +35,7 @@ enum OptType {
 
 impl ServerConfig {
     fn usage() {
-        println!("env-server: {}: [-h?psvcel] [file...]", Mu::VERSION);
+        println!("env-server: {}: [-h?psvcel] [file...]", Mu::version());
         println!("h: usage message");
         println!("?: usage message");
         println!("c: [name:value,...]");
@@ -66,7 +66,7 @@ impl ServerConfig {
                     Some(opt) => match opt {
                         Opt('h', None) | Opt('?', None) => Self::usage(),
                         Opt('v', None) => {
-                            print!("runtime: {} ", Mu::VERSION);
+                            print!("runtime: {} ", Mu::version());
                             return None;
                         }
                         Opt('p', None) => {

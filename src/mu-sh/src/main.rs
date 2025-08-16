@@ -44,7 +44,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
                 Some(opt) => match opt {
                     Opt('h', None) | Opt('?', None) => usage(),
                     Opt('v', None) => {
-                        print!("{} ", Mu::VERSION);
+                        print!("{} ", Mu::version());
                         std::process::exit(0);
                     }
                     Opt('e', Some(expr)) => {
@@ -74,7 +74,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<ShellOpt>> {
 }
 
 fn usage() {
-    println!("mu-sh: {}: [-h?vcelq] [file...]", Mu::VERSION);
+    println!("mu-sh: {}: [-h?vcelq] [file...]", Mu::version());
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value, ...]");

@@ -1,13 +1,12 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! lib implementation
-use perf_monitor::{cpu::cpu_time, fd::fd_count_cur, mem::get_process_memory_info};
+//! core feature
 use {
     crate::{
         core::{
             apply::Apply,
-            core::{Core as Core_, CoreFnDef, VERSION},
+            core::{Core as Core_, CoreFunctionDef},
             env::Env,
             exception::{self},
             frame::Frame,
@@ -17,13 +16,14 @@ use {
         types::{cons::Cons, fixnum::Fixnum, vector::Vector},
     },
     futures_locks::RwLock,
+    perf_monitor::{cpu::cpu_time, fd::fd_count_cur, mem::get_process_memory_info},
     std::{collections::HashMap, sync::mpsc::channel},
 };
 
 lazy_static! {
     pub static ref MU_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref MU_FUNCTIONS: Vec<CoreFnDef> = vec![
-        ("core", 0, Feature::mu_core),
+    pub static ref MU_FUNCTIONS: Vec<CoreFunctionDef> = vec![
+        ("core-info", 0, Feature::mu_core_info),
         ("process-fds", 0, Feature::mu_fds),
         ("process-mem-res", 0, Feature::mu_mem_res),
         ("process-mem-virt", 0, Feature::mu_mem_virt),
@@ -48,7 +48,7 @@ impl Core for Feature {
 }
 
 pub trait CoreFunction {
-    fn mu_core(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_core_info(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_delay(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_fds(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_mem_res(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -116,12 +116,13 @@ impl CoreFunction for Feature {
         Ok(())
     }
 
-    fn mu_core(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_core_info(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let version = env!("CARGO_PKG_VERSION");
         let alist = vec![
             Cons::cons(
                 env,
                 Vector::from("version").evict(env),
-                Vector::from(VERSION).evict(env),
+                Vector::from(version).evict(env),
             ),
             Cons::cons(
                 env,

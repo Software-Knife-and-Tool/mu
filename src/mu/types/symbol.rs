@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env symbol type
+// symbol type
 use {
     crate::{
         core::{
@@ -10,11 +10,11 @@ use {
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc_context::{Gc as _, GcContext},
+            gc::{Gc as _, GcContext},
             heap::{HeapAllocator, HeapRequest},
             indirect::IndirectTag,
             namespace::Namespace,
-            readtable::{map_char_syntax, SyntaxType},
+            readtable::SyntaxType,
             type_image::TypeImage,
             types::{Tag, TagType, Type},
             writer::Writer,
@@ -22,10 +22,9 @@ use {
         streams::writer::StreamWriter,
         types::vector::Vector,
     },
+    futures_lite::future::block_on,
     std::str,
 };
-
-use futures_lite::future::block_on;
 
 lazy_static! {
     pub static ref UNBOUND: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
@@ -53,29 +52,28 @@ pub trait Gc {
 
 impl Gc for Symbol {
     fn gc_ref_image(context: &mut GcContext, tag: Tag) -> SymbolImage {
-        match tag.type_of() {
-            Type::Symbol => match tag {
-                Tag::Indirect(main) => SymbolImage {
-                    namespace: Tag::from_slice(
-                        context
-                            .heap_ref
-                            .image_slice(main.image_id() as usize)
-                            .unwrap(),
-                    ),
-                    name: Tag::from_slice(
-                        context
-                            .heap_ref
-                            .image_slice(main.image_id() as usize + 1)
-                            .unwrap(),
-                    ),
-                    value: Tag::from_slice(
-                        context
-                            .heap_ref
-                            .image_slice(main.image_id() as usize + 2)
-                            .unwrap(),
-                    ),
-                },
-                _ => panic!(),
+        assert_eq!(tag.type_of(), Type::Symbol);
+
+        match tag {
+            Tag::Indirect(main) => SymbolImage {
+                namespace: Tag::from_slice(
+                    context
+                        .heap_ref
+                        .image_slice(main.image_id() as usize)
+                        .unwrap(),
+                ),
+                name: Tag::from_slice(
+                    context
+                        .heap_ref
+                        .image_slice(main.image_id() as usize + 1)
+                        .unwrap(),
+                ),
+                value: Tag::from_slice(
+                    context
+                        .heap_ref
+                        .image_slice(main.image_id() as usize + 2)
+                        .unwrap(),
+                ),
             },
             _ => panic!(),
         }
@@ -276,14 +274,13 @@ impl Symbol {
         let str = name.as_bytes();
         let len = str.len();
 
-        if len > DirectTag::DIRECT_STR_MAX || len == 0 {
-            panic!("{} {:?}", std::str::from_utf8(str).unwrap(), str)
-        }
+        assert!(len <= DirectTag::DIRECT_STR_MAX && len != 0);
 
         let mut data: [u8; 8] = 0_u64.to_le_bytes();
         for (src, dst) in str.iter().zip(data.iter_mut()) {
             *dst = *src
         }
+
         DirectTag::to_tag(
             u64::from_le_bytes(data),
             DirectExt::Length(len),
@@ -293,11 +290,9 @@ impl Symbol {
 
     pub fn parse(env: &Env, token: String) -> exception::Result<Tag> {
         for ch in token.chars() {
-            match map_char_syntax(ch) {
+            match SyntaxType::map_char_syntax(ch) {
                 Some(SyntaxType::Constituent) => (),
-                _ => {
-                    return Err(Exception::new(env, Condition::Range, "mu:read", ch.into()));
-                }
+                _ => Err(Exception::new(env, Condition::Range, "mu:read", ch.into()))?,
             }
         }
 
@@ -306,12 +301,12 @@ impl Symbol {
                 if token.starts_with(':')
                     && (token.len() > DirectTag::DIRECT_STR_MAX + 1 || token.len() == 1)
                 {
-                    return Err(Exception::new(
+                    Err(Exception::new(
                         env,
                         Condition::Syntax,
                         "mu:read",
-                        Vector::from(token).evict(env),
-                    ));
+                        Vector::from(token.clone()).evict(env),
+                    ))?
                 }
                 Ok(Symbol::new(env, Tag::nil(), &token, *UNBOUND).evict(env))
             }
@@ -321,12 +316,12 @@ impl Symbol {
                 let name = sym[1].into();
 
                 if sym.len() != 2 {
-                    return Err(Exception::new(
+                    Err(Exception::new(
                         env,
                         Condition::Syntax,
                         "mu:read",
-                        Vector::from(token).evict(env),
-                    ));
+                        Vector::from(token.clone()).evict(env),
+                    ))?
                 }
 
                 match Namespace::find(env, &ns) {
@@ -336,7 +331,7 @@ impl Symbol {
                         Condition::Namespace,
                         "mu:read",
                         Vector::from(sym[0]).evict(env),
-                    )),
+                    ))?,
                 }
             }
             None => Ok(Namespace::intern(env, env.null_ns, token, *UNBOUND).unwrap()),

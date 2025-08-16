@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env indirect
+// indirect tag
 #![allow(clippy::identity_op)]
 #![allow(unused_braces)]
 use crate::{

@@ -120,14 +120,14 @@ impl Gc for GcContext<'_> {
         */
 
     fn gc(env: &Env) -> exception::Result<bool> {
-        let mut gc_context = GcContext {
+        let mut gc = GcContext {
             heap_ref: &mut block_on(env.heap.write()),
         };
 
-        gc_context.heap_ref.clear_marks();
-        gc_context.namespaces(env);
-        gc_context.lexicals(env);
-        gc_context.heap_ref.sweep();
+        gc.heap_ref.clear_marks();
+        gc.namespaces(env);
+        gc.lexicals(env);
+        gc.heap_ref.sweep();
 
         Ok(true)
     }

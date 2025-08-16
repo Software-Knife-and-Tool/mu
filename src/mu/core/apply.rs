@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env functions
+// Apply trait
 use crate::{
     core::{
         compile::Compile,
@@ -32,27 +32,27 @@ impl Apply for Env {
                         let n = Fixnum::as_i64(fp_arg);
 
                         if !(0..=255).contains(&n) {
-                            return Err(Exception::new(self, Condition::Type, source, fp_arg));
+                            Err(Exception::new(self, Condition::Type, source, fp_arg))?
                         }
                     }
-                    _ => return Err(Exception::new(self, Condition::Type, source, fp_arg)),
+                    _ => Err(Exception::new(self, Condition::Type, source, fp_arg))?,
                 },
                 Type::List => match fp_arg_type {
                     Type::Cons | Type::Null => (),
-                    _ => return Err(Exception::new(self, Condition::Type, source, fp_arg)),
+                    _ => Err(Exception::new(self, Condition::Type, source, fp_arg))?,
                 },
                 Type::String => match fp_arg_type {
                     Type::Vector => {
                         if Vector::type_of(self, fp.argv[index]) != Type::Char {
-                            return Err(Exception::new(self, Condition::Type, source, fp_arg));
+                            Err(Exception::new(self, Condition::Type, source, fp_arg))?;
                         }
                     }
-                    _ => return Err(Exception::new(self, Condition::Type, source, fp_arg)),
+                    _ => Err(Exception::new(self, Condition::Type, source, fp_arg))?,
                 },
                 Type::T => (),
                 _ => {
                     if fp_arg_type != *arg_type {
-                        return Err(Exception::new(self, Condition::Type, source, fp_arg));
+                        Err(Exception::new(self, Condition::Type, source, fp_arg))?
                     }
                 }
             }
@@ -62,26 +62,25 @@ impl Apply for Env {
     }
 
     fn apply_(&self, func: Tag, argv: Vec<Tag>) -> exception::Result<Tag> {
-        let value = Tag::nil();
-
-        Frame { func, argv, value }.apply(self, func)
+        Frame {
+            func,
+            argv,
+            value: Tag::nil(),
+        }
+        .apply(self, func)
     }
 
     fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let value = Tag::nil();
-
         let eval_results: exception::Result<Vec<Tag>> = Cons::iter(self, args)
             .map(|cons| self.eval(Cons::car(self, cons)))
             .collect();
 
-        let argv = eval_results?;
-
-        Frame { func, argv, value }.apply(self, func)
+        self.apply_(func, eval_results?)
     }
 
     fn eval(&self, expr: Tag) -> exception::Result<Tag> {
         if self.is_quoted(&expr) {
-            return Ok(self.quoted_form(&expr));
+            return Ok(self.unquote(&expr));
         }
 
         match expr.type_of() {
@@ -95,21 +94,21 @@ impl Apply for Env {
                             let fn_ = Symbol::value(self, func);
                             match fn_.type_of() {
                                 Type::Function => self.apply(fn_, args),
-                                _ => Err(Exception::new(self, Condition::Type, "mu:eval", func)),
+                                _ => Err(Exception::new(self, Condition::Type, "mu:eval", func))?,
                             }
                         } else {
-                            Err(Exception::new(self, Condition::Unbound, "mu:eval", func))
+                            Err(Exception::new(self, Condition::Unbound, "mu:eval", func))?
                         }
                     }
                     Type::Function => self.apply(func, args),
-                    _ => Err(Exception::new(self, Condition::Type, "mu:eval", func)),
+                    _ => Err(Exception::new(self, Condition::Type, "mu:eval", func))?,
                 }
             }
             Type::Symbol => {
                 if Symbol::is_bound(self, expr) {
                     Ok(Symbol::value(self, expr))
                 } else {
-                    Err(Exception::new(self, Condition::Unbound, "mu:eval", expr))
+                    Err(Exception::new(self, Condition::Unbound, "mu:eval", expr))?
                 }
             }
             _ => Ok(expr),
@@ -131,10 +130,11 @@ impl CoreFunction for Env {
     }
 
     fn mu_apply(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:apply", &[Type::Function, Type::List], fp)?;
+
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        env.argv_check("mu:apply", &[Type::Function, Type::List], fp)?;
         fp.value = Frame {
             func,
             argv: Cons::iter(env, args)
@@ -148,10 +148,10 @@ impl CoreFunction for Env {
     }
 
     fn mu_fix(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:fix", &[Type::Function, Type::T], fp)?;
+
         let func = fp.argv[0];
         let mut value = fp.argv[1];
-
-        env.argv_check("mu:fix", &[Type::Function, Type::T], fp)?;
 
         fp.value = loop {
             let last_value = value;
@@ -171,6 +171,6 @@ impl CoreFunction for Env {
 mod tests {
     #[test]
     fn mu_functions() {
-        assert_eq!(2 + 2, 4);
+        assert!(true)
     }
 }

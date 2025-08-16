@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! socket streams
+//! socket stream
 use {
     crate::mu::{
         env::Env,
@@ -10,8 +10,6 @@ use {
     },
     async_net::{TcpStream, UdpSocket},
     std::io::{self, Read, Write},
-};
-use {
     futures_lite::{AsyncReadExt, AsyncWriteExt, future::block_on},
     futures_locks::RwLock,
 };
@@ -192,6 +190,6 @@ impl SocketStream {
 mod tests {
     #[test]
     fn stream() {
-        assert_eq!(true, true)
+        assert!(true)
     }
 }

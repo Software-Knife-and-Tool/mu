@@ -15,10 +15,8 @@ use crate::{
     types::{cons::Cons, symbol::Symbol, vector::Vector},
 };
 
-#[derive(Copy, Clone)]
-pub struct Fixnum {}
+pub struct Fixnum;
 
-// tag from u32
 impl From<u32> for Tag {
     fn from(fx: u32) -> Tag {
         DirectTag::to_tag(
@@ -29,7 +27,6 @@ impl From<u32> for Tag {
     }
 }
 
-// tag from u16
 impl From<u16> for Tag {
     fn from(fx: u16) -> Tag {
         DirectTag::to_tag(
@@ -40,7 +37,6 @@ impl From<u16> for Tag {
     }
 }
 
-// tag from u8
 impl From<u8> for Tag {
     fn from(fx: u8) -> Tag {
         DirectTag::to_tag(
@@ -62,10 +58,9 @@ impl Fixnum {
 
     // untag fixnum
     pub fn as_i64(tag: Tag) -> i64 {
-        match tag.type_of() {
-            Type::Fixnum => (tag.as_u64() as i64) >> 8,
-            _ => panic!(),
-        }
+        assert_eq!(tag.type_of(), Type::Fixnum);
+
+        (tag.as_u64() as i64) >> 8
     }
 
     pub fn with_or_panic(fx: usize) -> Tag {
@@ -155,85 +150,85 @@ impl CoreFunction for Fixnum {
         if Self::is_i56(result) {
             fp.value = Self::with_i64_or_panic(result)
         } else {
-            return Err(Exception::new(
+            Err(Exception::new(
                 env,
                 Condition::Over,
                 "mu:ash",
                 Cons::cons(env, fp.argv[0], fp.argv[1]),
-            ));
+            ))?
         }
 
         Ok(())
     }
 
     fn mu_fxadd(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:add", &[Type::Fixnum, Type::Fixnum], fp)?;
+
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
-
-        env.argv_check("mu:add", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
             Some(sum) => {
                 if Self::is_i56(sum) {
                     Self::with_i64_or_panic(sum)
                 } else {
-                    return Err(Exception::new(env, Condition::Over, "mu:add", fx0));
+                    Err(Exception::new(env, Condition::Over, "mu:add", fx0))?
                 }
             }
-            None => return Err(Exception::new(env, Condition::Over, "mu:add", fx1)),
+            None => Err(Exception::new(env, Condition::Over, "mu:add", fx1))?,
         };
 
         Ok(())
     }
 
     fn mu_fxsub(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:sub", &[Type::Fixnum, Type::Fixnum], fp)?;
+
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
-
-        env.argv_check("mu:sub", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
             Some(diff) => {
                 if Self::is_i56(diff) {
                     Self::with_i64_or_panic(diff)
                 } else {
-                    return Err(Exception::new(env, Condition::Over, "mu:sub", fx1));
+                    Err(Exception::new(env, Condition::Over, "mu:sub", fx1))?
                 }
             }
-            None => return Err(Exception::new(env, Condition::Over, "mu:sub", fx1)),
+            None => Err(Exception::new(env, Condition::Over, "mu:sub", fx1))?,
         };
 
         Ok(())
     }
 
     fn mu_fxmul(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:mul", &[Type::Fixnum, Type::Fixnum], fp)?;
+
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
-
-        env.argv_check("mu:mul", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
             Some(prod) => {
                 if Self::is_i56(prod) {
                     Self::with_i64_or_panic(prod)
                 } else {
-                    return Err(Exception::new(env, Condition::Over, "mu:mul", fx1));
+                    Err(Exception::new(env, Condition::Over, "mu:mul", fx1))?
                 }
             }
-            None => return Err(Exception::new(env, Condition::Over, "mu:mul", fx1)),
+            None => Err(Exception::new(env, Condition::Over, "mu:mul", fx1))?,
         };
 
         Ok(())
     }
 
     fn mu_fxdiv(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:div", &[Type::Fixnum, Type::Fixnum], fp)?;
+
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.argv_check("mu:div", &[Type::Fixnum, Type::Fixnum], fp)?;
-
         if Self::as_i64(fx1) == 0 {
-            return Err(Exception::new(env, Condition::ZeroDivide, "mu:fx-div", fx0));
+            Err(Exception::new(env, Condition::ZeroDivide, "mu:div", fx0))?
         }
 
         fp.value = match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
@@ -241,20 +236,20 @@ impl CoreFunction for Fixnum {
                 if Self::is_i56(div) {
                     Self::with_i64_or_panic(div)
                 } else {
-                    return Err(Exception::new(env, Condition::Over, "mu:div", fx1));
+                    Err(Exception::new(env, Condition::Over, "mu:div", fx1))?
                 }
             }
-            None => return Err(Exception::new(env, Condition::Over, "mu:div", fx1)),
+            None => Err(Exception::new(env, Condition::Over, "mu:div", fx1))?,
         };
 
         Ok(())
     }
 
     fn mu_fxlt(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:less-than", &[Type::Fixnum, Type::Fixnum], fp)?;
+
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
-
-        env.argv_check("mu:less-than", &[Type::Fixnum, Type::Fixnum], fp)?;
 
         fp.value = if Self::as_i64(fx0) < Self::as_i64(fx1) {
             Symbol::keyword("t")
@@ -266,31 +261,33 @@ impl CoreFunction for Fixnum {
     }
 
     fn mu_logand(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:logand", &[Type::Fixnum, Type::Fixnum], fp)?;
+
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.argv_check("mu:logand", &[Type::Fixnum, Type::Fixnum], fp)?;
         fp.value = Self::with_i64_or_panic(Self::as_i64(fx0) & Self::as_i64(fx1));
 
         Ok(())
     }
 
     fn mu_logor(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("mu:logor", &[Type::Fixnum, Type::Fixnum], fp)?;
+
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        env.argv_check("mu:logor", &[Type::Fixnum, Type::Fixnum], fp)?;
         fp.value = Self::with_i64_or_panic(Self::as_i64(fx0) | Self::as_i64(fx1));
 
         Ok(())
     }
 
     fn mu_lognot(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let fx = fp.argv[0];
-
         env.argv_check("mu:lognot", &[Type::Fixnum], fp)?;
 
+        let fx = fp.argv[0];
         let mut val = Self::as_i64(fx);
+
         for nth_bit in 0..64 {
             let mask = 1 << nth_bit;
 
