@@ -70,7 +70,7 @@ impl CoreFunction for Feature {
 
         if cmd.eq_(&Symbol::keyword("on")) {
             *prof_ref = true;
-            fp.value = Symbolk::keyword("on");
+            fp.value = Symbol::keyword("on");
         } else if cmd.eq_(&Symbol::keyword("off")) {
             *prof_ref = false;
             fp.value = Symbol::keyword("off");
