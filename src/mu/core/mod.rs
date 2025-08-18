@@ -15,6 +15,7 @@ pub mod frame;
 pub mod gc;
 pub mod heap;
 pub mod indirect;
+pub mod lambda;
 pub mod mu;
 pub mod namespace;
 pub mod quasi;
