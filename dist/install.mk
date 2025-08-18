@@ -3,7 +3,7 @@
 #
 .PHONY: install release uninstall help
 
-VERSION := $(shell cargo pkgid | sed 's/.*#//')
+VERSION = `cat ./VERSION`
 
 ROOT = /opt
 BASE = mu

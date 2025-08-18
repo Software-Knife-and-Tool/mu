@@ -20,7 +20,9 @@ MODULES = 		\
 	prelude/repl
 
 dist:
-	@install -d $(BASE)
+	@echo $(VERSION) > VERSION
+
+	@install -d $(BASE)	
 	@install -d $(BASE)/bin
 	@install -d $(BASE)/doc
 	@install -d $(BASE)/lib

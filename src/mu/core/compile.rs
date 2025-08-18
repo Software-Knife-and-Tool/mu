@@ -175,12 +175,16 @@ impl Compile for Env {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
                 let lex_ref = vec![
-                    Namespace::intern(self, self.mu_ns, "%frame-ref".into(), Tag::nil()).unwrap(),
+                    Symbol::value(
+                        self,
+                        Namespace::intern(self, self.mu_ns, "%frame-ref".into(), Tag::nil())
+                            .unwrap(),
+                    ),
                     *tag,
                     Fixnum::with_or_panic(nth),
                 ];
 
-                return self.compile(Cons::list(self, &lex_ref), env);
+                return Ok(Cons::list(self, &lex_ref));
             }
         }
 

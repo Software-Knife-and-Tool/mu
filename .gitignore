@@ -8,9 +8,7 @@ dist/mu*.tgz
 dist/mu-*
 dist/mux
 dist/*.l
-dist/prelude
-dist/sysgen
-dist/devop
+dist/VERSION
 doc/rustdoc
 tools/valgrind/*.report
 tools/profiling/core/*.report

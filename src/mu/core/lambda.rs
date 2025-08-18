@@ -1,22 +1,21 @@
-//  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-
+#![allow(dead_code)]
 //! lambda compiler:
 use crate::{
     core::{
-        compile::Compile,
         env::Env,
         exception::{self, Condition, Exception},
         namespace::Namespace,
         types::{Tag, Type},
     },
-    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol},
+    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 
 // lexical environment
 pub struct Lambda {
     pub function: Tag,
-    pub lambda: Vec<String>,
+    pub symbols: Vec<String>,
 }
 
 impl Lambda {
@@ -61,18 +60,21 @@ impl Lambda {
         Ok((lambda, body, compile_frame_symbols(lambda)?))
     }
 
-    fn lexical(env: &Env, symbol: Tag, lexical_env: &mut Vec<Lambda>) -> exception::Result<Tag> {
-        for frame in lexical_env.iter().rev() {
-            let Lambda { function: tag, lambda: symbols } = frame;
+    fn lexical(env: &Env, symbol: Tag, lexical_env: &mut [Lambda]) -> exception::Result<Tag> {
+        assert_eq!(symbol.type_of(), Type::Symbol);
 
-            if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
+        let name = Vector::as_string(env, Symbol::name(env, symbol));
+        for frame in lexical_env.iter().rev() {
+            let Lambda { function, symbols } = frame;
+
+            if let Some(nth) = symbols.iter().position(|lexical| *lexical == name) {
                 let lex_ref = vec![
                     Namespace::intern(env, env.mu_ns, "%frame-ref".into(), Tag::nil()).unwrap(),
-                    *tag,
+                    *function,
                     Fixnum::with_or_panic(nth),
                 ];
 
-                return Compile::compile(env, Cons::list(env, &lex_ref), lexical_env);
+                return Ok(Cons::list(env, &lex_ref));
             }
         }
 
@@ -89,5 +91,4 @@ impl Lambda {
 }
 
 #[cfg(test)]
-mod tests {
-}
+mod tests {}
