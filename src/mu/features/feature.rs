@@ -9,8 +9,6 @@ use std::collections::HashMap;
 
 #[cfg(feature = "core")]
 use crate::features::core::Core;
-#[cfg(feature = "debug")]
-use crate::features::debug::Debug;
 #[cfg(feature = "env")]
 use crate::features::env::Env;
 #[cfg(feature = "ffi")]
@@ -38,8 +36,6 @@ impl Feature {
             <Feature as Core>::feature(),
             #[cfg(feature = "env")]
             <Feature as Env>::feature(),
-            #[cfg(feature = "debug")]
-            <Feature as Debug>::feature(),
             #[cfg(feature = "nix")]
             <Feature as Nix>::feature(),
             #[cfg(feature = "std")]

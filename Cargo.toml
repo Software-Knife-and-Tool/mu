@@ -1,6 +1,6 @@
 [package]
 name = "mu"
-version = "0.2.9"
+version = "0.2.10"
 edition = "2021"
 license = "MIT" 
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
@@ -18,7 +18,6 @@ bench = false
 [features]
 default = [ "core", "env", "nix", "std", "sysinfo" ]
 core = []
-debug = []
 env = []           # needed for testing, common
 ffi = []
 nix = []

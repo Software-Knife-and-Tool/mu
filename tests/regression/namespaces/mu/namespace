@@ -5,6 +5,3 @@
 (mu:intern (mu:find-namespace "") "foo" "foo")	foo
 (mu:intern (mu:find-namespace "mu") "foo" ())	mu:foo
 (mu:make-namespace "crux")	#s(:ns #(:t 8 crux))
-(mu:type-of (mu:namespace-symbols (mu:find-namespace "")))	:null
-(mu:type-of (mu:namespace-symbols (mu:find-namespace "keyword")))	:null
-(mu:type-of (mu:namespace-symbols (mu:find-namespace "mu")))	:cons

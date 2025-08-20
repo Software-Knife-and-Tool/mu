@@ -4,8 +4,6 @@
 //! features module
 #[cfg(feature = "core")]
 pub mod core;
-#[cfg(feature = "debug")]
-pub mod debug;
 #[cfg(feature = "env")]
 pub mod env;
 pub mod feature;
