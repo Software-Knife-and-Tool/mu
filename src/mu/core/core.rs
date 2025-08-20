@@ -103,8 +103,6 @@ lazy_static! {
                      1, Namespace::mu_make_ns ),
         ( "namespace-name",
                      1, Namespace::mu_ns_name ),
-        ( "namespace-symbols",
-                     1, Namespace::mu_ns_symbols ),
         // read/write
         ( "read",    3, Stream::mu_read ),
         ( "write",   3, Stream::mu_write ),
@@ -226,6 +224,10 @@ impl Core {
         let features = block_on(CORE.features.read());
 
         for feature in &*features {
+            if feature.namespace.is_empty() {
+                continue;
+            }
+
             let ns =
                 Namespace::with_static(env, &feature.namespace, feature.symbols, feature.functions)
                     .unwrap();

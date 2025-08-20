@@ -4,10 +4,6 @@
 ;;;
 ;;; modules
 ;;;
-(mu:intern core "modules"
-   (:lambda ()
-     (core:%mapcar mu:symbol-name (mu:namespace-symbols core:*modules/*))))
-
 (mu:intern core "module-version"
    (:lambda (module)
      (:if (core:stringp module)

@@ -1,20 +1,24 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
+#![allow(dead_code)]
 
 //! core feature
 use {
     crate::{
         core::{
             apply::Apply,
-            core::{Core as Core_, CoreFunctionDef},
+            core::{Core as Core_, CoreFunctionDef, CORE},
             env::Env,
-            exception::{self},
+            exception::{self, Condition, Exception},
             frame::Frame,
+            namespace::Namespace,
             types::{Tag, Type},
+            writer::Writer,
         },
         features::feature::Feature,
-        types::{cons::Cons, fixnum::Fixnum, vector::Vector},
+        types::{cons::Cons, fixnum::Fixnum, struct_::Struct, symbol::Symbol, vector::Vector},
     },
+    futures_lite::future::block_on,
     futures_locks::RwLock,
     perf_monitor::{cpu::cpu_time, fd::fd_count_cur, mem::get_process_memory_info},
     std::{collections::HashMap, sync::mpsc::channel},
@@ -30,11 +34,16 @@ lazy_static! {
         ("process-time", 0, Feature::mu_time),
         ("time-units-per-second", 0, Feature::mu_time_units),
         ("delay", 0, Feature::mu_delay),
+        ("ns-symbols", 1, Feature::mu_ns_symbols),
     ];
 }
 
 pub trait Core {
     fn feature() -> Feature;
+    fn eprint(_: &Env, label: &str, verbose: bool, tag: Tag);
+    fn eprintln(_: &Env, label: &str, verbose: bool, tag: Tag);
+    fn print(_: &Env, label: &str, verbose: bool, tag: Tag);
+    fn println(_: &Env, label: &str, verbose: bool, tag: Tag);
 }
 
 impl Core for Feature {
@@ -44,6 +53,36 @@ impl Core for Feature {
             functions: Some(&MU_FUNCTIONS),
             namespace: "mu/core".into(),
         }
+    }
+
+    fn eprint(env: &Env, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(CORE.stdio.write());
+
+        eprint!("{label}: ");
+        env.write(tag, verbose, stdio.2).unwrap();
+    }
+
+    fn eprintln(env: &Env, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(CORE.stdio.write());
+
+        eprint!("{label}: ");
+        env.write(tag, verbose, stdio.2).unwrap();
+        eprintln!();
+    }
+
+    fn print(env: &Env, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(CORE.stdio.write());
+
+        print!("{label}: ");
+        env.write(tag, verbose, stdio.1).unwrap();
+    }
+
+    fn println(env: &Env, label: &str, verbose: bool, tag: Tag) {
+        let stdio = block_on(CORE.stdio.write());
+
+        print!("{label}: ");
+        env.write(tag, verbose, stdio.1).unwrap();
+        println!();
     }
 }
 
@@ -55,6 +94,7 @@ pub trait CoreFunction {
     fn mu_mem_virt(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_time(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_time_units(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn mu_ns_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Feature {
@@ -138,6 +178,53 @@ impl CoreFunction for Feature {
         ];
 
         fp.value = Cons::list(env, &alist);
+
+        Ok(())
+    }
+
+    fn mu_ns_symbols(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        let mut ns = fp.argv[0];
+
+        if Tag::null_(&ns) {
+            ns = env.null_ns
+        }
+
+        if !Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) {
+            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
+        }
+
+        let ns_ref = block_on(env.ns_map.read());
+        let ns_map = ns_ref
+            .iter()
+            .find_map(
+                |(tag, _, ns_map)| {
+                    if ns.eq_(tag) {
+                        Some(ns_map)
+                    } else {
+                        None
+                    }
+                },
+            )
+            .unwrap();
+
+        let hash_ref = block_on(match ns_map {
+            Namespace::Static(static_) => match static_.hash {
+                Some(hash) => hash.read(),
+                None => {
+                    fp.value = Tag::nil();
+                    return Ok(());
+                }
+            },
+            Namespace::Dynamic(hash) => hash.read(),
+        });
+
+        fp.value = Cons::list(
+            env,
+            &hash_ref
+                .keys()
+                .map(|key| hash_ref[key])
+                .collect::<Vec<Tag>>(),
+        );
 
         Ok(())
     }

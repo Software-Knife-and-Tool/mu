@@ -15,7 +15,6 @@ use {
             types::{Tag, Type},
         },
         types::{
-            cons::Cons,
             fixnum::Fixnum,
             struct_::Struct,
             symbol::{Gc as _, Symbol},
@@ -335,7 +334,6 @@ pub trait CoreFunction {
     fn mu_intern(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_make_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()>;
-    fn mu_ns_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Namespace {
@@ -437,53 +435,6 @@ impl CoreFunction for Namespace {
                 Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?
             }
         };
-
-        Ok(())
-    }
-
-    fn mu_ns_symbols(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let mut ns = fp.argv[0];
-
-        if Tag::null_(&ns) {
-            ns = env.null_ns
-        }
-
-        if !Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) {
-            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
-        }
-
-        let ns_ref = block_on(env.ns_map.read());
-        let ns_map = ns_ref
-            .iter()
-            .find_map(
-                |(tag, _, ns_map)| {
-                    if ns.eq_(tag) {
-                        Some(ns_map)
-                    } else {
-                        None
-                    }
-                },
-            )
-            .unwrap();
-
-        let hash_ref = block_on(match ns_map {
-            Namespace::Static(static_) => match static_.hash {
-                Some(hash) => hash.read(),
-                None => {
-                    fp.value = Tag::nil();
-                    return Ok(());
-                }
-            },
-            Namespace::Dynamic(hash) => hash.read(),
-        });
-
-        fp.value = Cons::list(
-            env,
-            &hash_ref
-                .keys()
-                .map(|key| hash_ref[key])
-                .collect::<Vec<Tag>>(),
-        );
 
         Ok(())
     }
