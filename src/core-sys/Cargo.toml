@@ -1,5 +1,5 @@
 [package]
-name = "mcore"
+name = "core-sys"
 version = "0.0.1"
 edition = "2021"
 
