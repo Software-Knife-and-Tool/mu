@@ -19,7 +19,7 @@ world:
 	@cp target/release/mu-sh dist
 	@cp target/release/mu-sys dist
 	@cp target/release/mux dist
-	@cp target/release/mcore dist
+	@cp target/release/core-sys dist
 	@cp target/release/sysgen dist
 	@make -C dist --no-print-directory
 
@@ -30,7 +30,7 @@ profile:
 	@cp target/release/mu-sh dist
 	@cp target/release/mu-sys dist
 	@cp target/release/mux dist
-	@cp target/release/mcore dist
+	@cp target/release/core-sys dist
 	@cp target/release/sysgen dist
 	@make -C dist --no-print-directory
 

@@ -2,18 +2,18 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; mcore namespace
+;;; core-sys namespace
 ;;;
-(mu:intern mu:*null/* "mcore" (mu:make-namespace "mcore"))
+(mu:intern mu:*null/* "core-sys" (mu:make-namespace "core-sys"))
 
-(mu:intern mcore "+version+" "0.0.3")
-(mu:intern mcore "*mcore/modules*" (mu:make-namespace "mcore/modules"))
+(mu:intern core-sys "+version+" "0.0.3")
+(mu:intern core-sys "*core-sys/modules*" (mu:make-namespace "core-sys/modules"))
 
 
 ;;;
 ;;; parser
 ;;;
-(mu:intern mcore "%mcore-parse"
+(mu:intern core-sys "%core-sys-parse"
    (:lambda (stream lang)
      ((:lambda (form)
         form)
@@ -26,60 +26,60 @@
 ;;;
 ;;; modules
 ;;;
-(mu:intern mcore "%load-module-file"
+(mu:intern core-sys "%load-module-file"
    (:lambda (path output-stream lang)
      ((:lambda (input-stream)
         (mu:fix
          (:lambda (loop)
-           (:if (mu:eq loop mcore:%eof%)
-                mcore:%eof%
+           (:if (mu:eq loop core-sys:%eof%)
+                core-sys:%eof%
                 ((:lambda (form)
-                   (:if (mu:eq form mcore:%eof%)
-                        mcore:%eof%
+                   (:if (mu:eq form core-sys:%eof%)
+                        core-sys:%eof%
                         ((:lambda ()
                            (mu:write form :t output-stream)
                            (mu:eq () loop)))))
-                 (mcore:%mcore-parse input-stream lang))))
+                 (core-sys:%core-sys-parse input-stream lang))))
          ()))
       (mu:open :file :input path :t))
      :t))
 
-(mu:intern mcore "%load-module-def"
+(mu:intern core-sys "%load-module-def"
    (:lambda (path module)
      ((:lambda (stream)
         (mu:fix
          (:lambda (loop)
-           (:if (mu:eq loop mcore:%eof%)
-                mcore:%eof%
+           (:if (mu:eq loop core-sys:%eof%)
+                core-sys:%eof%
                 ((:lambda (form)
-                   (:if (mu:eq form mcore:%eof%)
-                        mcore:%eof%
+                   (:if (mu:eq form core-sys:%eof%)
+                        core-sys:%eof%
                         ((:lambda ()
                            (mu:eval (mu:compile form))
                            (mu:close stream)
                            (mu:eq () loop)))))
-                 (mu:read stream () mcore:%eof%))))
+                 (mu:read stream () core-sys:%eof%))))
          ()))
       (mu:open :file :input path :t))
-     (mu:symbol-value (mu:find mcore:*mcore/modules* module))))
+     (mu:symbol-value (mu:find core-sys:*core-sys/modules* module))))
 
 ;;;
 ;;; provide/require
 ;;;
-(mu:intern mcore "provide"
+(mu:intern core-sys "provide"
    (:lambda (module property-list)
-     (mu:intern mcore:*mcore/modules* module property-list)))
+     (mu:intern core-sys:*core-sys/modules* module property-list)))
 
-(mu:intern mcore "require"
+(mu:intern core-sys "require"
    (:lambda (base module)
-     (:if (mu:find mcore:*mcore/modules* module)
+     (:if (mu:find core-sys:*core-sys/modules* module)
           ()
           ((:lambda (module-def output-stream)
              (:if module-def
                   ((:lambda (requires files ns lang)
                      (core:%mapc
                       (:lambda (module)
-                        (mcore:require module))
+                        (core-sys:require module))
                       requires)
 
                      (mu:write
@@ -96,8 +96,8 @@
                      (mu:make-namespace ns)
                      (core:%mapc
                       (:lambda (file-name)
-                        (mcore:%load-module-file
-                         (mcore:%concat-strings `(,base ,module "/" ,file-name))
+                        (core-sys:%load-module-file
+                         (core-sys:%concat-strings `(,base ,module "/" ,file-name))
                          output-stream
                          lang))
                       files)
@@ -108,8 +108,8 @@
                    (mu:cdr (core:%assq :ns module-def))
                    (mu:cdr (core:%assq :lang module-def)))
                   (mu:raise module :open)))
-           (mcore:%load-module-def
-            (mcore:%concat-strings `(,base ,module "/mod.def"))
+           (core-sys:%load-module-def
+            (core-sys:%concat-strings `(,base ,module "/mod.def"))
             module)
-           (mu:open :file :output (mcore:%concat-strings `(,module ".mcore")) :t)))
+           (mu:open :file :output (core-sys:%concat-strings `(,module ".core-sys")) :t)))
      :t))

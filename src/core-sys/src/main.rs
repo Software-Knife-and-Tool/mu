@@ -16,5 +16,5 @@ use crate::{config::Config, env_::Env_};
 pub fn main() {
     let env = Env_::new(Config::new());
 
-    repl::listener(&env).expect("mcore: listener error");
+    repl::listener(&env).expect("core-sys: listener error");
 }

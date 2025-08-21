@@ -12,18 +12,18 @@ pub enum Config {
 }
 
 impl Config {
-    // if we have a .mcore in the current directory, use it.
+    // if we have a .core-sys in the current directory, use it.
     // otherwise, see if there's one in the home directory
     pub fn new() -> Self {
         let mut home_path = PathBuf::new();
 
         home_path.push(std::env::home_dir().unwrap().as_path());
-        home_path.push(".mcore");
+        home_path.push(".core-sys");
 
         let mut cwd_path = PathBuf::new();
 
         cwd_path.push(std::env::current_dir().unwrap().as_path());
-        cwd_path.push(".mcore");
+        cwd_path.push(".core-sys");
 
         match fs::read_to_string(cwd_path) {
             Ok(json) => match json::parse(&json) {

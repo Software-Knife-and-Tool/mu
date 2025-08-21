@@ -26,11 +26,9 @@ Subsequent layers based on the runtime offer advanced features.
 
 ------
 
-- env feature
 
-- mcore command line utility
 
-- runtime source cleanup
+- core-sys command line utility
 
   
 
@@ -150,11 +148,6 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 ------
 
 ```
-version 0.2.5 is built with rustc 1.86.0
-version 0.2.6 is built with rustc 1.86.0
-version 0.2.7 is built with rustc 1.87.0
-version 0.2.8 is built with rustc 1.88.0
-version 0.2.9 is built with rustc 1.89.0
 version 0.2.10 is built with rustc 1.89.0
 ```
 
@@ -272,18 +265,18 @@ Profiling is nascent and will be expanded in future releases.
 
 
 
-As of 0.2.9, the *mu* distribution includes a tool for running and interacting with the system. 
+As of 0.2.10, the *mu* distribution includes a tool for running and interacting with the system. 
 
-The  *mcore* binary is part of a release, found at `/opt/mu/bin/mcore`.
+The  *core-sys* binary is part of a release, found at `/opt/mu/bin/core-sys`.
 
-*mcore*  has no command line arguments, it is configured by a JSON file, *.mcore*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see System Configuration for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/mcore`.
+*core-sys*  has no command line arguments, it is configured by a JSON file, *.core-sys*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/core-sys`.
 
-*mcore* will run without either of *.mcore* or an rc file.
+*core-sys* will run without either of *.core-sys* or an rc file.
 
 ```
 {
     "config": "npages: 2048",
-    "rc": "mcorerc"
+    "rc": "core-sys.rc"
 }
 ```
 
@@ -380,7 +373,7 @@ The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory 
 mu-sys		runtime binary
 mu-sh		runtime binary, stdio listener
 mu-ld		image loader
-mcore		interactive runtime, stdio listener
+core-sys	interactive runtime, stdio listener
 mu-exec     image executor
 mu-server	server runtime, socket listener
 mu          shell script for loading *core*. runs *mu-sh* listener
