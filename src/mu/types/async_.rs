@@ -9,9 +9,9 @@ use {
             exception,
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
+            image::Image,
             indirect::IndirectTag,
             namespace::Namespace,
-            type_image::TypeImage,
             types::{Tag, TagType, Type},
         },
         streams::writer::StreamWriter,
@@ -80,9 +80,9 @@ impl Async {
     }
 
     pub fn to_image_tag(self, env: &Env) -> Tag {
-        let image = TypeImage::Async(self);
+        let image = Image::Async(self);
 
-        TypeImage::to_tag(&image, env, Type::Async as u8)
+        Image::to_tag(&image, env, Type::Async as u8)
     }
 
     pub fn evict(&self, env: &Env) -> Tag {

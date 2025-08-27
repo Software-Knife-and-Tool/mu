@@ -13,9 +13,9 @@ use {
             frame::Frame,
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
+            image::Image,
             indirect::IndirectTag,
             reader::{Reader, EOL},
-            type_image::TypeImage,
             types::{Tag, TagType, Type},
             writer::Writer,
         },
@@ -102,28 +102,37 @@ impl Cons {
         Cons { car, cdr }
     }
 
-    pub fn to_image_tag(self, env: &Env) -> Tag {
-        let image = TypeImage::Cons(self);
-
-        TypeImage::to_tag(&image, env, Type::Cons as u8)
-    }
-
     pub fn to_image(env: &Env, tag: Tag) -> Self {
-        let heap_ref = block_on(env.heap.read());
-
         assert_eq!(tag.type_of(), Type::Cons);
 
+        let heap_ref = block_on(env.heap.read());
+
         match tag {
-            Tag::Image(image) => match Dynamic::images_ref(env, image.data() as usize) {
-                TypeImage::Cons(cons) => cons,
-                _ => panic!(),
-            },
-            Tag::Indirect(main) => Self::new(
-                Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
-                Tag::from_slice(heap_ref.image_slice(main.image_id() as usize + 1).unwrap()),
+            Tag::Indirect(cons) => Self::new(
+                Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize).unwrap()),
+                Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize + 1).unwrap()),
             ),
-            _ => panic!(),
+            Tag::Direct(_) | Tag::Image(_) => {
+                let (index, _) = Image::detag(tag);
+
+                match Dynamic::images_ref(env, index) {
+                    Image::Cons(cons) => cons,
+                    _ => panic!(),
+                }
+            }
         }
+    }
+
+    pub fn dynamic(&self, env: &Env) -> Tag {
+        let image = Image::Cons(*self);
+
+        Image::to_tag(&image, env, Type::Cons as u8)
+    }
+
+    pub fn to_image_tag(self, env: &Env) -> Tag {
+        let image = Image::Cons(self);
+
+        Image::to_tag(&image, env, Type::Cons as u8)
     }
 
     pub fn cons_image(env: &Env, car: Tag, cdr: Tag) -> Tag {

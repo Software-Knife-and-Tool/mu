@@ -9,7 +9,7 @@ use {
             direct::DirectType,
             env::Env,
             exception,
-            type_image::TypeImage,
+            image::Image,
             types::{Tag, Type},
         },
         types::{fixnum::Fixnum, symbol::Symbol},
@@ -169,9 +169,9 @@ impl Vector {
     }
 
     pub fn to_image_tag(&self, env: &Env) -> Tag {
-        let image = TypeImage::Vector((self.clone(), VectorImageType::T(vec![])));
+        let image = Image::Vector((self.clone(), VectorImageType::T(vec![])));
 
-        TypeImage::to_tag(&image, env, Type::Vector as u8)
+        Image::to_tag(&image, env, Type::Vector as u8)
     }
 
     pub fn heap_size(env: &Env, vector: Tag) -> usize {

@@ -9,7 +9,7 @@ use {
             core::{Core, CORE, CORE_FUNCTIONS},
             dynamic::Dynamic,
             frame::Frame,
-            heap::HeapAllocator,
+            heap::Heap,
             namespace::Namespace,
             types::Tag,
         },
@@ -24,7 +24,7 @@ pub struct Env {
     pub config: Config,
 
     // heap
-    pub heap: RwLock<HeapAllocator>,
+    pub heap: RwLock<Heap>,
     pub vector_map: RwLock<VecCacheMap>,
 
     // environments
@@ -52,7 +52,7 @@ impl Env {
         let mut env = Env {
             config: config.clone(),
             dynamic: Dynamic::new(),
-            heap: RwLock::new(HeapAllocator::new(config)),
+            heap: RwLock::new(Heap::new(config)),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),

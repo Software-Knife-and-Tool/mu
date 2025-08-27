@@ -113,8 +113,7 @@ impl Tag {
 
     pub fn data(&self, env: &Env) -> u64 {
         match self {
-            Tag::Image(_) => panic!(),
-            Tag::Direct(tag) => tag.data(),
+            Tag::Image(tag) | Tag::Direct(tag) => tag.data(),
             Tag::Indirect(heap) => {
                 let heap_ref = block_on(env.heap.read());
                 let info = heap_ref.image_info(heap.image_id() as usize).unwrap();
@@ -126,7 +125,7 @@ impl Tag {
 
     pub fn as_slice(&self) -> [u8; 8] {
         match self {
-            Tag::Image(_) => panic!(),
+            Tag::Image(tag) => tag.into_bytes(),
             Tag::Direct(tag) => tag.into_bytes(),
             Tag::Indirect(tag) => tag.into_bytes(),
         }
@@ -169,8 +168,7 @@ impl Tag {
             Type::Null
         } else {
             match self {
-                Tag::Image(_) => panic!(),
-                Tag::Direct(direct) => match direct.dtype() {
+                Tag::Image(direct) | Tag::Direct(direct) => match direct.dtype() {
                     DirectType::ByteVec => Type::Vector,
                     DirectType::String => Type::Vector,
                     DirectType::Keyword => Type::Keyword,
@@ -179,6 +177,7 @@ impl Tag {
                         Ok(ExtType::Cons) => Type::Cons,
                         Ok(ExtType::Fixnum) => Type::Fixnum,
                         Ok(ExtType::Float) => Type::Float,
+                        Ok(ExtType::Image) => Type::Function,
                         Ok(ExtType::Stream) => Type::Stream,
                         _ => panic!(),
                     },

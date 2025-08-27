@@ -11,11 +11,11 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::{Gc as _, GcContext},
-            heap::{HeapAllocator, HeapRequest},
+            heap::{Heap, HeapRequest},
+            image::Image,
             indirect::IndirectTag,
             namespace::Namespace,
             readtable::SyntaxType,
-            type_image::TypeImage,
             types::{Tag, TagType, Type},
             writer::Writer,
         },
@@ -166,9 +166,9 @@ impl Symbol {
     }
 
     pub fn to_image_tag(self, env: &Env) -> Tag {
-        let image = TypeImage::Symbol(self);
+        let image = Image::Symbol(self);
 
-        TypeImage::to_tag(&image, env, Type::Symbol as u8)
+        Image::to_tag(&image, env, Type::Symbol as u8)
     }
 
     pub fn namespace(env: &Env, symbol: Tag) -> Tag {
@@ -222,8 +222,8 @@ impl Symbol {
     }
 
     pub fn heap_size(env: &Env, symbol: Tag) -> usize {
-        let name_sz = HeapAllocator::heap_size(env, Self::name(env, symbol));
-        let value_sz = HeapAllocator::heap_size(env, Self::value(env, symbol));
+        let name_sz = Heap::heap_size(env, Self::name(env, symbol));
+        let value_sz = Heap::heap_size(env, Self::value(env, symbol));
 
         std::mem::size_of::<SymbolImage>()
             + if name_sz > 8 { name_sz } else { 0 }

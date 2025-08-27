@@ -46,7 +46,6 @@ pub enum ExtType {
     Cons = 3,
     Stream = 4,
     Image = 5,
-    Function = 6,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
