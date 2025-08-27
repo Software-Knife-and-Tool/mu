@@ -8,7 +8,7 @@ use crate::{
         env::Env,
         exception,
         frame::Frame,
-        heap::{Gc as _, HeapAllocator},
+        heap::{Gc as _, Heap},
         namespace::Namespace,
         types::{Tag, Type},
     },
@@ -26,7 +26,7 @@ use crate::{
 use futures_lite::future::block_on;
 
 pub struct GcContext<'a> {
-    pub heap_ref: &'a mut futures_locks::RwLockWriteGuard<HeapAllocator>,
+    pub heap_ref: &'a mut futures_locks::RwLockWriteGuard<Heap>,
 }
 
 pub trait Gc {

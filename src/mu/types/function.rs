@@ -5,13 +5,14 @@
 use {
     crate::{
         core::{
+            dynamic::Dynamic,
             env::Env,
             exception,
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
+            image::Image,
             indirect::IndirectTag,
             namespace::Namespace,
-            type_image::TypeImage,
             types::{Tag, TagType, Type},
         },
         streams::writer::StreamWriter,
@@ -77,14 +78,21 @@ impl Function {
                 Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
                 Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
             ),
-            _ => panic!(),
+            Tag::Direct(_) | Tag::Image(_) => {
+                let (index, _) = Image::detag(tag);
+
+                match Dynamic::images_ref(env, index) {
+                    Image::Function(fn_) => fn_,
+                    _ => panic!(),
+                }
+            }
         }
     }
 
     pub fn to_image_tag(self, env: &Env) -> Tag {
-        let image = TypeImage::Function(self);
+        let image = Image::Function(self);
 
-        TypeImage::to_tag(&image, env, Type::Function as u8)
+        Image::to_tag(&image, env, Type::Function as u8)
     }
 
     pub fn evict(&self, env: &Env) -> Tag {
@@ -117,14 +125,20 @@ impl Function {
     pub fn update(env: &Env, image: &Function, func: Tag) {
         let slices: &[[u8; 8]] = &[image.arity.as_slice(), image.form.as_slice()];
 
-        let offset = match func {
-            Tag::Indirect(heap) => heap.image_id(),
-            _ => panic!(),
-        } as usize;
+        match func {
+            Tag::Indirect(heap) => {
+                let mut heap_ref = block_on(env.heap.write());
 
-        let mut heap_ref = block_on(env.heap.write());
+                heap_ref.write_image(slices, heap.image_id() as usize)
+            }
+            Tag::Image(_tag) => {
+                let (index, _) = Image::detag(func);
+                let mut image_ref = block_on(env.dynamic.images.write());
 
-        heap_ref.write_image(slices, offset);
+                image_ref[index] = Image::Function(*image)
+            }
+            Tag::Direct(_tag) => panic!(),
+        }
     }
 
     pub fn arity(env: &Env, func: Tag) -> Tag {

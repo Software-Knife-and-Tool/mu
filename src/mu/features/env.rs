@@ -1,23 +1,24 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env implementation
+//! env feature
 use {
     crate::{
         core::{
             core::CoreFunctionDef,
             direct::DirectTag,
-            env::Env as Env_,
+            dynamic::{Dynamic, DynamicTypeInfo},
+            env,
             exception::{self},
             frame::Frame,
-            heap::{HeapAllocator, HeapTypeInfo},
+            heap::HeapTypeInfo,
             indirect::IndirectTag,
             types::{Tag, Type},
         },
         features::feature::Feature,
         types::{
-            cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct, symbol::Symbol,
-            vector::Vector,
+            async_::Async, cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct,
+            symbol::Symbol, vector::Vector,
         },
     },
     futures_lite::future::block_on,
@@ -28,8 +29,8 @@ use {
 lazy_static! {
     pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
     pub static ref ENV_FUNCTIONS: Vec<CoreFunctionDef> = vec![
+        ("dynamic-room", 0, Feature::env_dyn_room),
         ("env", 0, Feature::env_env),
-        ("heap-free", 0, Feature::env_hp_free),
         ("heap-info", 0, Feature::env_hp_info),
         ("heap-room", 0, Feature::env_hp_room),
         ("heap-size", 1, Feature::env_hp_size),
@@ -46,11 +47,12 @@ lazy_static! {
 
 pub trait Env {
     fn feature() -> Feature;
-    fn heap_free(_: &Env_) -> usize;
-    fn heap_size(_: &Env_, tag: Tag) -> usize;
-    fn heap_stat(_: &Env_) -> Tag;
-    fn heap_type(_: &Env_, type_: Type) -> HeapTypeInfo;
-    fn ns_map(_: &Env_) -> Tag;
+    fn dynamic_room(_: &env::Env) -> Tag;
+    fn dynamic_type(_: &env::Env, _: Type) -> DynamicTypeInfo;
+    fn heap_size(_: &env::Env, tag: Tag) -> usize;
+    fn heap_room(_: &env::Env) -> Tag;
+    fn heap_type(_: &env::Env, type_: Type) -> HeapTypeInfo;
+    fn ns_map(_: &env::Env) -> Tag;
 }
 
 impl Env for Feature {
@@ -62,8 +64,9 @@ impl Env for Feature {
         }
     }
 
-    fn heap_size(env: &Env_, tag: Tag) -> usize {
+    fn heap_size(env: &env::Env, tag: Tag) -> usize {
         match tag.type_of() {
+            Type::Async => Async::heap_size(env, tag),
             Type::Cons => Cons::heap_size(env, tag),
             Type::Function => Function::heap_size(env, tag),
             Type::Struct => Struct::heap_size(env, tag),
@@ -73,18 +76,18 @@ impl Env for Feature {
         }
     }
 
-    fn heap_free(env: &Env_) -> usize {
-        HeapAllocator::heap_free(env)
-    }
-
-    fn heap_type(env: &Env_, type_: Type) -> HeapTypeInfo {
+    fn heap_type(env: &env::Env, type_: Type) -> HeapTypeInfo {
         let heap_ref = block_on(env.heap.read());
 
         heap_ref.alloc_map[type_ as usize]
     }
 
-    fn heap_stat(env: &Env_) -> Tag {
-        let mut vec = vec![Symbol::keyword("heap")];
+    fn dynamic_type(env: &env::Env, type_: Type) -> DynamicTypeInfo {
+        Dynamic::images_type_info(env, type_)
+    }
+
+    fn heap_room(env: &env::Env) -> Tag {
+        let mut vec = Vec::new();
 
         for htype in INFOTYPE.iter() {
             let type_map =
@@ -101,7 +104,24 @@ impl Env for Feature {
         Vector::from(vec).evict(env)
     }
 
-    fn ns_map(env: &Env_) -> Tag {
+    fn dynamic_room(env: &env::Env) -> Tag {
+        let mut vec = Vec::new();
+
+        for htype in INFOTYPE.iter() {
+            let type_map =
+                <Feature as Env>::dynamic_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
+
+            vec.extend(vec![
+                *htype,
+                Fixnum::with_or_panic(type_map.size),
+                Fixnum::with_or_panic(type_map.total),
+            ])
+        }
+
+        Vector::from(vec).evict(env)
+    }
+
+    fn ns_map(env: &env::Env) -> Tag {
         let ns_ref = block_on(env.ns_map.read());
         let vec = ns_ref
             .iter()
@@ -113,21 +133,15 @@ impl Env for Feature {
 }
 
 pub trait CoreFunction {
-    fn env_env(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn env_hp_free(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn env_hp_info(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn env_hp_room(_: &Env_, _: &mut Frame) -> exception::Result<()>;
-    fn env_hp_size(_: &Env_, _: &mut Frame) -> exception::Result<()>;
+    fn env_dyn_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
+    fn env_env(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_info(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
+    fn env_hp_size(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Feature {
-    fn env_hp_free(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::with_or_panic(<Feature as Env>::heap_free(env));
-
-        Ok(())
-    }
-
-    fn env_hp_info(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+    fn env_hp_info(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
         let heap_ref = block_on(env.heap.read());
 
         println!("type           :bump");
@@ -136,7 +150,6 @@ impl CoreFunction for Feature {
         println!("size           {}", heap_ref.size);
         println!("alloc-barrier  {}", heap_ref.alloc_barrier);
         println!("free-space     {}", heap_ref.free_space);
-        println!("gc-threshold   {}", heap_ref.gc_threshold);
         println!("gc-allocated   {}", heap_ref.gc_allocated);
 
         fp.value = Tag::nil();
@@ -144,33 +157,25 @@ impl CoreFunction for Feature {
         Ok(())
     }
 
-    fn env_hp_room(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
-        let mut vec = vec![];
-
-        for htype in INFOTYPE.iter() {
-            let type_map =
-                <Feature as Env>::heap_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
-
-            vec.extend(vec![
-                *htype,
-                Fixnum::with_or_panic(type_map.size),
-                Fixnum::with_or_panic(type_map.total),
-                Fixnum::with_or_panic(type_map.free),
-            ])
-        }
-
-        fp.value = Vector::from(vec).evict(env);
+    fn env_dyn_room(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = Self::dynamic_room(env);
 
         Ok(())
     }
 
-    fn env_hp_size(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+    fn env_hp_room(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = Self::heap_room(env);
+
+        Ok(())
+    }
+
+    fn env_hp_size(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = Fixnum::with_or_panic(<Feature as Env>::heap_size(env, fp.argv[0]));
 
         Ok(())
     }
 
-    fn env_env(env: &Env_, fp: &mut Frame) -> exception::Result<()> {
+    fn env_env(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = Cons::list(
             env,
             &[
@@ -187,7 +192,7 @@ impl CoreFunction for Feature {
                 Cons::cons(
                     env,
                     Vector::from("heap-room").evict(env),
-                    Self::heap_stat(env),
+                    Self::heap_room(env),
                 ),
             ],
         );

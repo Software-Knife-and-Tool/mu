@@ -64,7 +64,7 @@ pub struct HeapTypeInfo {
 }
 
 #[derive(Debug)]
-pub struct HeapAllocator {
+pub struct Heap {
     pub mmap: Box<memmap::MmapMut>,   // heap base
     pub page_size: usize,             // size of logical page
     pub npages: usize,                // total size of heap in pages
@@ -84,7 +84,7 @@ pub struct HeapRequest<'a> {
     pub vdata: Option<&'a [u8]>,
 }
 
-impl HeapAllocator {
+impl Heap {
     pub fn new(config: &Config) -> Self {
         let path = &format!("/var/tmp/mu.{}.heap", std::process::id());
 
@@ -112,7 +112,7 @@ impl HeapAllocator {
                 .expect("Could not access data from memory mapped file")
         };
 
-        HeapAllocator {
+        Heap {
             mmap: Box::new(data),
             npages,
             page_size,
@@ -141,8 +141,8 @@ impl HeapAllocator {
         (image.to_vec(), vec![])
     }
 
-    pub fn iter(&self) -> HeapAllocatorIter<'_> {
-        HeapAllocatorIter {
+    pub fn iter(&self) -> HeapIter<'_> {
+        HeapIter {
             heap: self,
             index: 1,
         }
@@ -352,7 +352,7 @@ pub trait Gc {
     fn get_image_mark(&self, _: usize) -> Option<bool>;
 }
 
-impl Gc for HeapAllocator {
+impl Gc for Heap {
     fn clear_marks(&mut self) {
         let mut index: usize = 1;
 
@@ -401,12 +401,12 @@ impl Gc for HeapAllocator {
 }
 
 // iterator
-pub struct HeapAllocatorIter<'a> {
-    pub heap: &'a HeapAllocator,
+pub struct HeapIter<'a> {
+    pub heap: &'a Heap,
     pub index: usize,
 }
 
-impl Iterator for HeapAllocatorIter<'_> {
+impl Iterator for HeapIter<'_> {
     type Item = (HeapImageInfo, usize);
 
     fn next(&mut self) -> Option<Self::Item> {

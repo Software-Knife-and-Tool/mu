@@ -110,11 +110,12 @@ impl Compile for Env {
     fn lambda(&self, args: Tag, env: &mut LexEnv) -> exception::Result<Tag> {
         let (lambda, body, symbols) = self.parse_lambda(args)?;
 
-        let func = Function::new(
+        let function = Function::new(
             Fixnum::with_or_panic(Cons::length(self, lambda).unwrap()),
             Tag::nil(),
-        )
-        .evict(self);
+        );
+
+        let func = function.to_image_tag(self);
 
         env.push((func, symbols));
 
