@@ -2,15 +2,25 @@
 //  SPDX-License-Identifier: MIT
 
 // core writer
+#[rustfmt::skip]
 use crate::{
     core::{
         env::Env,
         exception::{self},
-        types::{Tag, Type},
+        tag::{Tag},
+        type_::{Type},
     },
     types::{
-        async_::Async, char::Char, cons::Cons, fixnum::Fixnum, float::Float, function::Function,
-        stream::Stream, struct_::Struct, symbol::Symbol, vector::Vector,
+        async_::Async,
+        char::Char,
+        cons::Cons,
+        fixnum::Fixnum,
+        float::Float,
+        function::Function,
+        stream::Stream,
+        struct_::Struct,
+        symbol::Symbol,
+        vector::Vector,
     },
 };
 

@@ -4,7 +4,7 @@
 /// Config struct
 use {
     crate::{
-        core::{env::Env, types::Tag},
+        core::{env::Env, tag::Tag},
         types::{cons::Cons, fixnum::Fixnum, vector::Vector},
     },
     page_size,

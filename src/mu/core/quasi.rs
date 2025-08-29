@@ -10,7 +10,7 @@ use {
             exception::{self, Condition, Exception},
             namespace::Namespace,
             reader::Reader,
-            types::Tag,
+            tag::Tag,
         },
         streams::reader::StreamReader,
         types::{cons::Cons, symbol::Symbol},

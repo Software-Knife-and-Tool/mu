@@ -5,7 +5,10 @@
 #![allow(clippy::identity_op)]
 #![allow(unused_braces)]
 use crate::{
-    core::types::{Tag, TagType, Type},
+    core::{
+        tag::{Tag, TagType},
+        type_::Type,
+    },
     modular_bitfield::specifiers::{B2, B59},
     types::symbol::Symbol,
 };

@@ -67,7 +67,7 @@ use {
 /// - Result, specialized result for API functions that can fail
 /// - Tag, tagged data representation
 ///   tagged data representation
-pub type Tag = core::types::Tag;
+pub type Tag = core::tag::Tag;
 /// Mu library API
 pub type Mu = core::mu::Mu;
 /// Core library state representation

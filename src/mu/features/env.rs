@@ -2,23 +2,30 @@
 //  SPDX-License-Identifier: MIT
 
 //! env feature
+#[rustfmt::skip]
 use {
     crate::{
         core::{
             core::CoreFunctionDef,
             direct::DirectTag,
-            dynamic::{Dynamic, DynamicTypeInfo},
             env,
             exception::{self},
             frame::Frame,
             heap::HeapTypeInfo,
+            image::{Image, ImageTypeInfo},
             indirect::IndirectTag,
-            types::{Tag, Type},
+            tag::{Tag},
+            type_::{Type},
         },
         features::feature::Feature,
         types::{
-            async_::Async, cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct,
-            symbol::Symbol, vector::Vector,
+            async_::Async,
+            cons::Cons,
+            fixnum::Fixnum,
+            function::Function,
+            struct_::Struct,
+            symbol::Symbol,
+            vector::Vector,
         },
     },
     futures_lite::future::block_on,
@@ -29,7 +36,7 @@ use {
 lazy_static! {
     pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
     pub static ref ENV_FUNCTIONS: Vec<CoreFunctionDef> = vec![
-        ("dynamic-room", 0, Feature::env_dyn_room),
+        ("dynamic-room", 0, Feature::env_images_room),
         ("env", 0, Feature::env_env),
         ("heap-info", 0, Feature::env_hp_info),
         ("heap-room", 0, Feature::env_hp_room),
@@ -47,11 +54,11 @@ lazy_static! {
 
 pub trait Env {
     fn feature() -> Feature;
-    fn dynamic_room(_: &env::Env) -> Tag;
-    fn dynamic_type(_: &env::Env, _: Type) -> DynamicTypeInfo;
-    fn heap_size(_: &env::Env, tag: Tag) -> usize;
     fn heap_room(_: &env::Env) -> Tag;
+    fn heap_size(_: &env::Env, tag: Tag) -> usize;
     fn heap_type(_: &env::Env, type_: Type) -> HeapTypeInfo;
+    fn images_room(_: &env::Env) -> Tag;
+    fn images_type(_: &env::Env, _: Type) -> ImageTypeInfo;
     fn ns_map(_: &env::Env) -> Tag;
 }
 
@@ -82,8 +89,8 @@ impl Env for Feature {
         heap_ref.alloc_map[type_ as usize]
     }
 
-    fn dynamic_type(env: &env::Env, type_: Type) -> DynamicTypeInfo {
-        Dynamic::images_type_info(env, type_)
+    fn images_type(env: &env::Env, type_: Type) -> ImageTypeInfo {
+        Image::type_info(env, type_)
     }
 
     fn heap_room(env: &env::Env) -> Tag {
@@ -104,12 +111,12 @@ impl Env for Feature {
         Vector::from(vec).evict(env)
     }
 
-    fn dynamic_room(env: &env::Env) -> Tag {
+    fn images_room(env: &env::Env) -> Tag {
         let mut vec = Vec::new();
 
         for htype in INFOTYPE.iter() {
             let type_map =
-                <Feature as Env>::dynamic_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
+                <Feature as Env>::images_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
 
             vec.extend(vec![
                 *htype,
@@ -133,11 +140,11 @@ impl Env for Feature {
 }
 
 pub trait CoreFunction {
-    fn env_dyn_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_env(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_info(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_size(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
+    fn env_images_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Feature {
@@ -157,8 +164,8 @@ impl CoreFunction for Feature {
         Ok(())
     }
 
-    fn env_dyn_room(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Self::dynamic_room(env);
+    fn env_images_room(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = Self::images_room(env);
 
         Ok(())
     }

@@ -7,7 +7,7 @@ use crate::{
         direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,
         exception,
-        types::Tag,
+        tag::Tag,
     },
     streams::writer::StreamWriter,
     types::vector::Vector,
@@ -62,7 +62,7 @@ impl Char {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::types::Tag;
+    use crate::core::tag::Tag;
 
     #[test]
     fn as_tag() {

@@ -9,7 +9,8 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         namespace::Namespace,
-        types::{Tag, Type},
+        tag::Tag,
+        type_::Type,
     },
     types::{async_::Async, cons::Cons, fixnum::Fixnum, function::Function, symbol::Symbol},
 };
@@ -294,7 +295,7 @@ mod tests {
             compile::Compile,
             config::Config,
             env::Env,
-            types::{Tag, Type},
+            type_::{Tag, Type},
         };
 
         #[test]

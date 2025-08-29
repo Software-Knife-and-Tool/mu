@@ -7,7 +7,8 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         readtable::SyntaxType,
-        types::{Tag, Type},
+        tag::Tag,
+        type_::Type,
     },
     streams::reader::StreamReader,
     types::{

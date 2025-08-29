@@ -4,12 +4,7 @@
 //! exception
 use {
     crate::{
-        core::{
-            apply::Apply as _,
-            env::Env,
-            frame::Frame,
-            types::{Tag, Type},
-        },
+        core::{apply::Apply as _, env::Env, frame::Frame, tag::Tag, type_::Type},
         types::symbol::Symbol,
     },
     futures_lite::future::block_on,
@@ -137,7 +132,7 @@ impl CoreFunction for Exception {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        let dynamic_ref = block_on(env.dynamic.dynamic.read());
+        let dynamic_ref = block_on(env.dynamic.read());
         let frame_stack_len = dynamic_ref.len();
 
         drop(dynamic_ref);
@@ -147,7 +142,7 @@ impl CoreFunction for Exception {
             Err(e) => {
                 let args = vec![e.object, Self::map_condkey(e.condition), e.source];
                 let value = env.apply_(handler, args)?;
-                let mut dynamic_ref = block_on(env.dynamic.dynamic.write());
+                let mut dynamic_ref = block_on(env.dynamic.write());
 
                 dynamic_ref.resize(frame_stack_len, (0, 0));
 

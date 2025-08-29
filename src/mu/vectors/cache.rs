@@ -4,10 +4,7 @@
 // vector cache
 use {
     crate::{
-        core::{
-            env::Env,
-            types::{Tag, Type},
-        },
+        core::{env::Env, tag::Tag, type_::Type},
         types::{fixnum::Fixnum, float::Float, vector::Vector},
         vectors::image::{VecImageType, VectorImageType},
     },
@@ -22,7 +19,7 @@ impl Vector {
     pub fn cache(env: &Env, vector: Tag) {
         let vtype = Self::type_of(env, vector);
         let length = Self::length(env, vector) as i32;
-        let mut cache = block_on(env.vector_map.write());
+        let mut cache = block_on(env.vector_cache.write());
 
         match (*cache).get(&(vtype, length)) {
             Some(vec_map) => {
@@ -42,7 +39,7 @@ impl Vector {
     }
 
     pub fn cached(env: &Env, indirect: &VecImageType) -> Option<Tag> {
-        let cache = block_on(env.vector_map.read());
+        let cache = block_on(env.vector_cache.read());
 
         let (vtype, length, ivec) = match indirect {
             VecImageType::Bit(image, ivec)
@@ -55,7 +52,7 @@ impl Vector {
             _ => panic!(),
         };
 
-        match (*cache).get(&(Tag::key_type(vtype).unwrap(), length)) {
+        match (*cache).get(&(vtype.key_to_type().unwrap(), length)) {
             Some(vec_map) => {
                 let tag_vec = block_on(vec_map.read());
 

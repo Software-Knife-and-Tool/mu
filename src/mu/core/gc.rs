@@ -10,7 +10,8 @@ use crate::{
         frame::Frame,
         heap::{Gc as _, Heap},
         namespace::Namespace,
-        types::{Tag, Type},
+        tag::Tag,
+        type_::Type,
     },
     types::{
         async_::{Async, Gc as _},
@@ -76,7 +77,7 @@ impl Gc for GcContext<'_> {
         let lexical_ref = block_on(env.lexical.read());
 
         for frame_vec in (*lexical_ref).values() {
-            let frame_vec_ref = block_on(frame_vec.read());
+            let frame_vec_ref = &frame_vec;
 
             for frame in frame_vec_ref.iter() {
                 self.mark(env, frame.func);

@@ -10,7 +10,8 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         gc::{Gc as _, GcContext},
-        types::{Tag, Type},
+        tag::Tag,
+        type_::Type,
     },
     types::{
         char::Char,
@@ -274,7 +275,7 @@ impl CoreFunction for Vector {
 
         let vector = fp.argv[0];
 
-        fp.value = Tag::type_key(Self::type_of(env, vector)).unwrap();
+        fp.value = Self::type_of(env, vector).to_key();
 
         Ok(())
     }

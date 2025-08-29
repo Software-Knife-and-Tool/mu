@@ -1,19 +1,25 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env heap interface
-//!    Env
-#![allow(unused_imports)]
+// heap
+
+#[rustfmt::skip]
 use {
     crate::{
         core::{
             config::Config,
             direct::DirectTag,
             env::Env,
-            gc::{Gc as _, GcContext},
-            types::{Tag, Type},
+            tag::Tag,
+            type_::{Type},
         },
-        types::{cons::Cons, function::Function, struct_::Struct, symbol::Symbol, vector::Vector},
+        types::{
+            cons::Cons,
+            function::Function,
+            struct_::Struct,
+            symbol::Symbol,
+            vector::Vector
+        },
     },
     futures_lite::future::block_on,
     memmap,
@@ -157,7 +163,6 @@ impl Heap {
             None => 0,
             Some(vdata) => (vdata.len() + size_of::<u64>() - 1) & !(size_of::<u64>() - 1),
         };
-
         let image_size = ((image_len + 1) * size_of::<u64>()) + vdata_size;
 
         self.free_space -= image_size + size_of::<HeapImageInfo>();

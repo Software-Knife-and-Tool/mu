@@ -5,12 +5,8 @@
 use {
     crate::{
         core::{
-            direct::DirectTag,
-            direct::DirectType,
-            env::Env,
-            exception,
-            image::Image,
-            types::{Tag, Type},
+            direct::DirectTag, direct::DirectType, env::Env, exception, image::Image, tag::Tag,
+            type_::Type,
         },
         types::{fixnum::Fixnum, symbol::Symbol},
         vectors::{
@@ -88,10 +84,7 @@ impl Vector {
     pub fn view(env: &Env, vector: Tag) -> Tag {
         let vec = vec![
             Fixnum::with_or_panic(Self::length(env, vector)),
-            match Tag::type_key(Self::type_of(env, vector)) {
-                Some(key) => key,
-                None => panic!(),
-            },
+            Self::type_of(env, vector).to_key(),
         ];
 
         Vector::from(vec).evict(env)

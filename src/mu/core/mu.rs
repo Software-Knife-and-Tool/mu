@@ -12,7 +12,7 @@ use {
             env,
             exception::{self, Condition, Exception},
             reader::Reader,
-            types::Tag,
+            tag::Tag,
             writer::Writer,
         },
         streams::{builder::StreamBuilder, writer::StreamWriter},

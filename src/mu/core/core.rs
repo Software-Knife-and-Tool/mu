@@ -13,7 +13,7 @@ use {
             frame::{CoreFunction as _, Frame},
             gc::{CoreFunction as _, GcContext},
             namespace::{CoreFunction as _, Namespace},
-            types::{CoreFunction as _, Tag},
+            tag::{CoreFunction as _, Tag},
         },
         features::feature::Feature,
         streams::builder::StreamBuilder,
