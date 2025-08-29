@@ -9,10 +9,10 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        types::{Tag, Type},
+        type_::{Tag, Type},
     },
     features::feature::Feature,
-    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
+    type_::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 use std::collections::HashMap;
 use {futures_lite::future::block_on, futures_locks::RwLock};

@@ -9,7 +9,7 @@ use {
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            types::Tag,
+            tag::Tag,
         },
         features::feature::Feature,
         types::{cons::Cons, fixnum::Fixnum, vector::Vector},

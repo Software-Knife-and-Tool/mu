@@ -8,7 +8,8 @@ use crate::{
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        types::{Tag, Type},
+        tag::Tag,
+        type_::Type,
     },
     types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };

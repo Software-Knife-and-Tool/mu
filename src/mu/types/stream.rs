@@ -12,7 +12,8 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             reader::Reader,
-            types::{Tag, Type},
+            tag::Tag,
+            type_::Type,
             writer::Writer,
         },
         streams::{

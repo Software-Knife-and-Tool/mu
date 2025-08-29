@@ -7,11 +7,11 @@ use {
         core::{
             config::Config,
             core::{Core, CORE, CORE_FUNCTIONS},
-            dynamic::Dynamic,
             frame::Frame,
             heap::Heap,
+            image_cache::ImageCache,
             namespace::Namespace,
-            types::Tag,
+            tag::Tag,
         },
         vectors::cache::VecCacheMap,
     },
@@ -23,15 +23,14 @@ pub struct Env {
     // configuration
     pub config: Config,
 
-    // heap
+    // heaps
     pub heap: RwLock<Heap>,
-    pub vector_map: RwLock<VecCacheMap>,
-
-    // environments
-    pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
+    pub vector_cache: RwLock<VecCacheMap>,
+    pub lexical: RwLock<HashMap<u64, Vec<Frame>>>,
+    pub image_cache: RwLock<ImageCache>,
 
     // dynamic state
-    pub dynamic: Dynamic,
+    pub dynamic: RwLock<Vec<(u64, usize)>>,
 
     // namespaces
     pub ns_map: RwLock<Vec<(Tag, String, Namespace)>>,
@@ -51,8 +50,9 @@ impl Env {
     pub fn new(config: &Config) -> Self {
         let mut env = Env {
             config: config.clone(),
-            dynamic: Dynamic::new(),
+            dynamic: RwLock::new(Vec::new()),
             heap: RwLock::new(Heap::new(config)),
+            image_cache: RwLock::new(ImageCache::new()),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),
@@ -62,7 +62,7 @@ impl Env {
             prof: RwLock::new(Vec::new()),
             #[cfg(feature = "prof")]
             prof_on: RwLock::new(false),
-            vector_map: RwLock::new(HashMap::new()),
+            vector_cache: RwLock::new(HashMap::new()),
         };
 
         // establish namespaces

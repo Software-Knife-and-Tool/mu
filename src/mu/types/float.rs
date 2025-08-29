@@ -10,7 +10,8 @@ use {
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            types::{Tag, Type},
+            tag::Tag,
+            type_::Type,
         },
         streams::writer::StreamWriter,
         types::{symbol::Symbol, vector::Vector},
@@ -153,7 +154,7 @@ impl CoreFunction for Float {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::types::Tag;
+    use crate::core::tag::Tag;
 
     #[test]
     fn as_tag() {

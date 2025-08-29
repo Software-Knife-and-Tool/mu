@@ -7,7 +7,7 @@ use crate::{
         core::Core,
         env::Env,
         exception::{self, Condition, Exception},
-        types::Tag,
+        tag::Tag,
     },
     streams::system::SystemStream,
     types::symbol::Symbol,

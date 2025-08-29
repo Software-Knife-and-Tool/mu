@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 // reader
+#[rustfmt::skip]
 use crate::{
     core::{
         apply::Apply as _,
@@ -11,10 +12,17 @@ use crate::{
         exception::{self, Condition, Exception},
         quasi::QuasiReader,
         readtable::SyntaxType,
-        types::{Tag, Type},
+        tag::{Tag},
+        type_::{Type},
     },
     streams::reader::StreamReader,
-    types::{cons::Cons, fixnum::Fixnum, struct_::Struct, symbol::Symbol, vector::Vector},
+    types::{
+        cons::Cons,
+        fixnum::Fixnum,
+        struct_::Struct,
+        symbol::Symbol,
+        vector::Vector
+    },
 };
 
 lazy_static! {

@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 // tagged types
+#[rustfmt::skip]
 use {
     crate::{
         core::{
@@ -10,14 +11,21 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             indirect::IndirectTag,
+            type_::{Type, TYPEKEYMAP},
         },
         types::{
-            char::Char, cons::Cons, fixnum::Fixnum, float::Float, function::Function,
-            stream::Stream, struct_::Struct, symbol::Symbol, vector::Vector,
+            char::Char,
+            cons::Cons,
+            fixnum::Fixnum,
+            float::Float,
+            function::Function,
+            stream::Stream,
+            struct_::Struct,
+            symbol::Symbol,
+            vector::Vector,
         },
     },
     futures_lite::future::block_on,
-    num_enum::TryFromPrimitive,
     std::{convert::From, fmt},
 };
 
@@ -27,30 +35,6 @@ pub enum Tag {
     Direct(DirectTag),
     Image(DirectTag),
     Indirect(IndirectTag),
-}
-
-// types
-#[derive(PartialEq, Hash, Eq, Copy, Clone, Debug, TryFromPrimitive)]
-#[repr(u8)]
-pub enum Type {
-    Async,
-    Bit,
-    Byte,
-    Char,
-    Cons,
-    Fixnum,
-    Float,
-    Function,
-    Keyword,
-    Null,
-    Stream,
-    Struct,
-    Symbol,
-    Vector,
-    // synthetic
-    T,
-    List,
-    String,
 }
 
 #[derive(BitfieldSpecifier, Copy, Clone, Debug, PartialEq, Eq)]
@@ -72,23 +56,6 @@ lazy_static! {
         DirectExt::Length(3),
         DirectType::Keyword
     );
-    static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
-        (Type::Async, Symbol::keyword("async")),
-        (Type::Bit, Symbol::keyword("bit")),
-        (Type::Byte, Symbol::keyword("byte")),
-        (Type::Char, Symbol::keyword("char")),
-        (Type::Cons, Symbol::keyword("cons")),
-        (Type::Fixnum, Symbol::keyword("fixnum")),
-        (Type::Float, Symbol::keyword("float")),
-        (Type::Function, Symbol::keyword("func")),
-        (Type::Keyword, Symbol::keyword("keyword")),
-        (Type::Null, Symbol::keyword("null")),
-        (Type::Stream, Symbol::keyword("stream")),
-        (Type::Struct, Symbol::keyword("struct")),
-        (Type::Symbol, Symbol::keyword("symbol")),
-        (Type::T, Symbol::keyword("t")),
-        (Type::Vector, Symbol::keyword("vector")),
-    ];
 }
 
 impl fmt::Display for Tag {
@@ -195,20 +162,16 @@ impl Tag {
         }
     }
 
-    pub fn type_key(type_: Type) -> Option<Tag> {
+    pub fn key_to_type(self) -> Option<Type> {
         TYPEKEYMAP
             .iter()
             .copied()
-            .find(|map| type_ == map.0)
-            .map(|map| map.1)
+            .find(|map| self.eq_(&map.1))
+            .map(|map| map.0)
     }
 
-    pub fn key_type(tag: Tag) -> Option<Type> {
-        TYPEKEYMAP
-            .iter()
-            .copied()
-            .find(|map| tag.eq_(&map.1))
-            .map(|map| map.0)
+    pub fn to_type_id(self) -> u8 {
+        self.type_of() as u8
     }
 }
 
@@ -260,7 +223,7 @@ impl CoreFunction for Tag {
     }
 
     fn mu_typeof(_: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Tag::type_key(fp.argv[0].type_of()).unwrap();
+        fp.value = fp.argv[0].type_of().to_key();
 
         Ok(())
     }

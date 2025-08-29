@@ -6,7 +6,7 @@ use {
     crate::mu::{
         env::Env,
         exception::{self, Condition, Exception},
-        types::Tag,
+        tag::Tag,
     },
     async_net::{TcpStream, UdpSocket},
     std::io::{self, Read, Write},

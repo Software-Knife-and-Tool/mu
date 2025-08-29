@@ -7,16 +7,17 @@ use {
         core::{
             apply::Apply as _,
             direct::{DirectTag, DirectType, ExtType},
-            dynamic::Dynamic,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
             image::Image,
+            image_cache::ImageCache,
             indirect::IndirectTag,
             reader::{Reader, EOL},
-            types::{Tag, TagType, Type},
+            tag::{Tag, TagType},
+            type_::Type,
             writer::Writer,
         },
         streams::writer::StreamWriter,
@@ -115,7 +116,7 @@ impl Cons {
             Tag::Direct(_) | Tag::Image(_) => {
                 let (index, _) = Image::detag(tag);
 
-                match Dynamic::images_ref(env, index) {
+                match ImageCache::ref_(env, index) {
                     Image::Cons(cons) => cons,
                     _ => panic!(),
                 }
@@ -564,7 +565,7 @@ impl Iterator for ConsIter<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{core::types::Tag, types::cons::Cons};
+    use crate::{core::tag::Tag, types::cons::Cons};
 
     #[test]
     fn cons() {

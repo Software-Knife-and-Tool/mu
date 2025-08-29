@@ -5,7 +5,7 @@
 #![allow(unused_braces)]
 #![allow(clippy::identity_op)]
 use {
-    crate::core::types::{Tag, TagType},
+    crate::core::tag::{Tag, TagType},
     modular_bitfield::specifiers::{B3, B56},
     num_enum::TryFromPrimitive,
 };

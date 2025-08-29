@@ -1,15 +1,23 @@
 //  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
+
+// lambda compiler
 #![allow(dead_code)]
-//! lambda compiler:
+#[rustfmt::skip]
 use crate::{
     core::{
         env::Env,
         exception::{self, Condition, Exception},
         namespace::Namespace,
-        types::{Tag, Type},
+        type_::{Type},
+        tag::{Tag},
     },
-    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
+    types::{
+        cons::Cons,
+        fixnum::Fixnum,
+        symbol::Symbol,
+        vector::Vector
+    },
 };
 
 // lexical environment

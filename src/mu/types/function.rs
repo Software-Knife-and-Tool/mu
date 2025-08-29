@@ -5,15 +5,16 @@
 use {
     crate::{
         core::{
-            dynamic::Dynamic,
             env::Env,
             exception,
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
             image::Image,
+            image_cache::ImageCache,
             indirect::IndirectTag,
             namespace::Namespace,
-            types::{Tag, TagType, Type},
+            tag::{Tag, TagType},
+            type_::Type,
         },
         streams::writer::StreamWriter,
         types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
@@ -81,7 +82,7 @@ impl Function {
             Tag::Direct(_) | Tag::Image(_) => {
                 let (index, _) = Image::detag(tag);
 
-                match Dynamic::images_ref(env, index) {
+                match ImageCache::ref_(env, index) {
                     Image::Function(fn_) => fn_,
                     _ => panic!(),
                 }
@@ -98,11 +99,13 @@ impl Function {
     pub fn evict(&self, env: &Env) -> Tag {
         let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
         let mut heap_ref = block_on(env.heap.write());
+        let type_id = Type::Function as u8;
+
         let ha = HeapRequest {
             env,
             image,
             vdata: None,
-            type_id: Type::Function as u8,
+            type_id,
         };
 
         match heap_ref.alloc(&ha) {
@@ -123,20 +126,14 @@ impl Function {
     }
 
     pub fn update(env: &Env, image: &Function, func: Tag) {
-        let slices: &[[u8; 8]] = &[image.arity.as_slice(), image.form.as_slice()];
-
         match func {
             Tag::Indirect(heap) => {
+                let slices: &[[u8; 8]] = &[image.arity.as_slice(), image.form.as_slice()];
                 let mut heap_ref = block_on(env.heap.write());
 
                 heap_ref.write_image(slices, heap.image_id() as usize)
             }
-            Tag::Image(_tag) => {
-                let (index, _) = Image::detag(func);
-                let mut image_ref = block_on(env.dynamic.images.write());
-
-                image_ref[index] = Image::Function(*image)
-            }
+            Tag::Image(_tag) => ImageCache::update(env, Image::Function(*image), func),
             Tag::Direct(_tag) => panic!(),
         }
     }

@@ -3,6 +3,7 @@
 #![allow(dead_code)]
 
 //! core feature
+#[rustfmt::skip]
 use {
     crate::{
         core::{
@@ -12,15 +13,26 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             namespace::Namespace,
-            types::{Tag, Type},
+            tag::{Tag,},
+            type_::{Type},
             writer::Writer,
         },
         features::feature::Feature,
-        types::{cons::Cons, fixnum::Fixnum, struct_::Struct, symbol::Symbol, vector::Vector},
+        types::{
+            cons::Cons,
+            fixnum::Fixnum,
+            struct_::Struct,
+            symbol::Symbol,
+            vector::Vector
+        },
     },
     futures_lite::future::block_on,
     futures_locks::RwLock,
-    perf_monitor::{cpu::cpu_time, fd::fd_count_cur, mem::get_process_memory_info},
+    perf_monitor::{
+        cpu::cpu_time,
+        fd::fd_count_cur,
+        mem::get_process_memory_info
+    },
     std::{collections::HashMap, sync::mpsc::channel},
 };
 

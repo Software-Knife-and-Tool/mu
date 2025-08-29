@@ -12,7 +12,8 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             gc::GcContext,
-            types::{Tag, Type},
+            tag::Tag,
+            type_::Type,
         },
         types::{
             fixnum::Fixnum,

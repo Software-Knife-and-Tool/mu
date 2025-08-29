@@ -10,7 +10,8 @@ use {
             env::Env,
             exception::{self, Condition, Exception},
             namespace::Namespace,
-            types::{Tag, Type},
+            tag::Tag,
+            type_::Type,
         },
         types::{
             async_::Async, cons::Cons, fixnum::Fixnum, function::Function, struct_::Struct,
@@ -18,7 +19,6 @@ use {
         },
     },
     futures_lite::future::block_on,
-    futures_locks::RwLock,
 };
 
 #[cfg(feature = "prof")]
@@ -59,50 +59,50 @@ impl Frame {
     // frame stacks
     fn frame_stack_push(self, env: &Env) {
         let id = self.func.as_u64();
+        let mut lexical_ref = block_on(env.lexical.write());
 
-        let mut stack_ref = block_on(env.lexical.write());
-
-        if let std::collections::hash_map::Entry::Vacant(e) = stack_ref.entry(id) {
-            e.insert(RwLock::new(vec![self]));
+        if let std::collections::hash_map::Entry::Vacant(e) = lexical_ref.entry(id) {
+            e.insert(vec![self]);
         } else {
-            let mut vec_ref = block_on(stack_ref[&id].write());
+            let vec_ref = lexical_ref.get_mut(&id);
 
-            vec_ref.push(self);
+            vec_ref.expect("").push(self);
         }
     }
 
     fn frame_stack_pop(env: &Env, id: Tag) {
-        let stack_ref = block_on(env.lexical.read());
-        let mut vec_ref = block_on(stack_ref[&id.as_u64()].write());
+        let mut lexical_ref = block_on(env.lexical.write());
 
-        vec_ref.pop();
+        lexical_ref.get_mut(&id.as_u64()).expect("").pop();
     }
 
     fn frame_stack_len(env: &Env, id: Tag) -> Option<usize> {
-        let stack_ref = block_on(env.lexical.read());
+        let lexical_ref = block_on(env.lexical.read());
 
-        if stack_ref.contains_key(&id.as_u64()) {
-            let vec_ref = block_on(stack_ref[&id.as_u64()].read());
-
-            Some(vec_ref.len())
+        if lexical_ref.contains_key(&id.as_u64()) {
+            Some(lexical_ref[&id.as_u64()].len())
         } else {
             None
         }
     }
 
     pub fn frame_stack_ref(env: &Env, id: Tag, offset: usize, argv: &mut Vec<u64>) {
-        let stack_ref = block_on(env.lexical.read());
-        let vec_ref = block_on(stack_ref[&id.as_u64()].read());
+        let lexical_ref = block_on(env.lexical.read());
 
-        argv.extend(vec_ref[offset].argv.iter().map(|value| value.as_u64()));
+        argv.extend(
+            lexical_ref[&id.as_u64()][offset]
+                .argv
+                .iter()
+                .map(|value| value.as_u64()),
+        );
     }
 
     // frame reference
     fn frame_ref(env: &Env, id: u64, offset: usize) -> Option<Tag> {
-        let stack_ref = block_on(env.lexical.read());
-        let vec_ref = block_on(stack_ref[&id].read());
+        let lexical_ref = block_on(env.lexical.read());
+        let frame = lexical_ref[&id].last().unwrap();
 
-        Some(vec_ref[vec_ref.len() - 1].argv[offset])
+        Some(frame.argv[offset])
     }
 
     // apply
@@ -212,7 +212,7 @@ pub trait CoreFunction {
 
 impl CoreFunction for Frame {
     fn mu_frames(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let frames_ref = block_on(env.dynamic.dynamic.read());
+        let frames_ref = block_on(env.dynamic.read());
         let mut frames = Vec::new();
 
         frames.extend(frames_ref.iter().map(|(func, offset)| {

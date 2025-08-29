@@ -9,7 +9,7 @@ use {
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
-            types::Tag,
+            tag::Tag,
         },
         streams::system::{StringDirection, SystemStream, SystemStreamBuilder},
         types::{stream::Stream, symbol::Symbol},
