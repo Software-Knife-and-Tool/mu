@@ -134,13 +134,6 @@ impl Cache {
         let images_ref = block_on(env.cache.read());
 
         Self::map_cache_id(type_).map(|cache_id| images_ref.type_info[cache_id as usize])
-
-        /*
-                match Self::map_cache_id(type_) {
-                Some(cache_id) => Some(images_ref.type_info[cache_id as usize]),
-                None => None,
-        }
-                */
     }
 }
 

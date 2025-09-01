@@ -11,7 +11,7 @@ use {
             direct::DirectTag,
             env::Env,
             tag::Tag,
-            type_::{Type},
+            type_::Type,
         },
         types::{
             cons::Cons,
@@ -71,16 +71,17 @@ pub struct HeapTypeInfo {
 
 #[derive(Debug)]
 pub struct Heap {
-    pub mmap: Box<memmap::MmapMut>,   // heap base
-    pub page_size: usize,             // size of logical page
-    pub npages: usize,                // total size of heap in pages
-    pub size: usize,                  // total size of heap in bytes
-    pub alloc_map: Vec<HeapTypeInfo>, // map of allocated objects
-    pub alloc_barrier: usize,         // unallocated space barrier
-    pub free_map: Vec<Vec<usize>>,    // map of free objects
-    pub free_space: usize,            // number of aggregate free bytes
-    pub gc_threshold: usize,          // how often to gc
-    pub gc_allocated: usize,          // bytes allocated since last gc
+    pub mmap: Box<memmap::MmapMut>, // heap base
+    pub page_size: usize,           // size of logical page
+    pub npages: usize,              // total size of heap in pages
+    pub size: usize,                // total size of heap in bytes
+    pub alloc_map: [HeapTypeInfo; Type::NTYPES],
+    // map of allocated objects
+    pub alloc_barrier: usize, // unallocated space barrier
+    pub free_map: [Vec<usize>; Type::NTYPES],
+    // map of free objects
+    pub free_space: usize,   // number of aggregate free bytes
+    pub gc_allocated: usize, // bytes allocated since last gc
 }
 
 pub struct HeapRequest<'a> {
@@ -123,20 +124,15 @@ impl Heap {
             npages,
             page_size,
             size: npages * page_size,
-            alloc_map: (0..Tag::NTYPES)
-                .map(|_| HeapTypeInfo {
-                    size: 0,
-                    total: 0,
-                    free: 0,
-                })
-                .collect::<Vec<HeapTypeInfo>>(),
+            alloc_map: [HeapTypeInfo {
+                size: 0,
+                total: 0,
+                free: 0,
+            }; Type::NTYPES],
             alloc_barrier: 0,
-            free_map: (0..Tag::NTYPES)
-                .map(|_| Vec::<usize>::new())
-                .collect::<Vec<Vec<usize>>>(),
+            free_map: [const { Vec::new() }; Type::NTYPES],
             free_space: npages * page_size,
             gc_allocated: 0,
-            gc_threshold: 10 * page_size, // get this from config
         }
     }
 
