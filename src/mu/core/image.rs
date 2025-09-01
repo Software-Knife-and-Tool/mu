@@ -8,7 +8,7 @@ use {
         core::{
             direct::{DirectTag, DirectType, ExtType},
             env::Env,
-            image_cache::ImageCache,
+            cache::Cache,
             tag::{Tag, TagType},
             type_::{Type},
         },
@@ -22,14 +22,7 @@ use {
         },
         vectors::image::VectorImageType,
     },
-    futures_lite::future::block_on,
 };
-
-#[derive(Debug, Copy, Clone)]
-pub struct ImageTypeInfo {
-    pub size: usize,
-    pub total: usize,
-}
 
 #[derive(Clone)]
 pub enum Image {
@@ -49,8 +42,8 @@ impl From<Image> for Tag {
 
 impl Image {
     pub fn to_tag(&self, env: &Env, type_id: u8) -> Tag {
-        let offset = ImageCache::push(env, self.clone());
-        let data = ((offset << 8) as u64) | ((type_id & 0xf) as u64);
+        let tag_id = Cache::add(env, self.clone());
+        let data = (tag_id << 8) | ((type_id & 0xf) as u64);
 
         Tag::Image(
             DirectTag::new()
@@ -81,30 +74,6 @@ impl Image {
             Self::Symbol(_) => Type::Symbol,
             Self::Vector(_) => Type::Vector,
         }
-    }
-
-    pub fn type_info(env: &Env, type_: Type) -> ImageTypeInfo {
-        let images_ref = block_on(env.image_cache.read());
-        let mut type_info = ImageTypeInfo { size: 0, total: 0 };
-
-        for image in images_ref.cache.iter() {
-            if type_ == image.type_of() {
-                let image_size = match type_ {
-                    Type::Async => std::mem::size_of::<Async>(),
-                    Type::Cons => std::mem::size_of::<Cons>(),
-                    Type::Function => std::mem::size_of::<Function>(),
-                    Type::Struct => std::mem::size_of::<Struct>(),
-                    Type::Symbol => std::mem::size_of::<Symbol>(),
-                    Type::Vector => std::mem::size_of::<Vector>(),
-                    _ => panic!(),
-                };
-
-                type_info.size += image_size;
-                type_info.total += 1
-            }
-        }
-
-        type_info
     }
 }
 

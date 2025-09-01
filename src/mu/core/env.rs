@@ -5,11 +5,11 @@
 use {
     crate::{
         core::{
+            cache::Cache,
             config::Config,
             core::{Core, CORE, CORE_FUNCTIONS},
             frame::Frame,
             heap::Heap,
-            image_cache::ImageCache,
             namespace::Namespace,
             tag::Tag,
         },
@@ -27,7 +27,7 @@ pub struct Env {
     pub heap: RwLock<Heap>,
     pub vector_cache: RwLock<VecCacheMap>,
     pub lexical: RwLock<HashMap<u64, Vec<Frame>>>,
-    pub image_cache: RwLock<ImageCache>,
+    pub cache: RwLock<Cache>,
 
     // dynamic state
     pub dynamic: RwLock<Vec<(u64, usize)>>,
@@ -49,10 +49,10 @@ pub struct Env {
 impl Env {
     pub fn new(config: &Config) -> Self {
         let mut env = Env {
+            cache: RwLock::new(Cache::new()),
             config: config.clone(),
             dynamic: RwLock::new(Vec::new()),
             heap: RwLock::new(Heap::new(config)),
-            image_cache: RwLock::new(ImageCache::new()),
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),

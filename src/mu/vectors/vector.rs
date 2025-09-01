@@ -275,7 +275,7 @@ impl CoreFunction for Vector {
 
         let vector = fp.argv[0];
 
-        fp.value = Self::type_of(env, vector).to_key();
+        fp.value = Self::type_of(env, vector).map_typesym();
 
         Ok(())
     }
