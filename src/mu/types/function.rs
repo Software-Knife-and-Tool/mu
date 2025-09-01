@@ -5,12 +5,12 @@
 use {
     crate::{
         core::{
+            cache::Cache,
             env::Env,
             exception,
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
             image::Image,
-            image_cache::ImageCache,
             indirect::IndirectTag,
             namespace::Namespace,
             tag::{Tag, TagType},
@@ -82,7 +82,7 @@ impl Function {
             Tag::Direct(_) | Tag::Image(_) => {
                 let (index, _) = Image::detag(tag);
 
-                match ImageCache::ref_(env, index) {
+                match Cache::ref_(env, index) {
                     Image::Function(fn_) => fn_,
                     _ => panic!(),
                 }
@@ -133,7 +133,7 @@ impl Function {
 
                 heap_ref.write_image(slices, heap.image_id() as usize)
             }
-            Tag::Image(_tag) => ImageCache::update(env, Image::Function(*image), func),
+            Tag::Image(_tag) => Cache::update(env, Image::Function(*image), func),
             Tag::Direct(_tag) => panic!(),
         }
     }

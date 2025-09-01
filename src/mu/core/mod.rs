@@ -4,6 +4,7 @@
 //! core module
 #![allow(clippy::module_inception)]
 pub mod apply;
+pub mod cache;
 pub mod compile;
 pub mod config;
 pub mod core;
@@ -15,7 +16,6 @@ pub mod frame;
 pub mod gc;
 pub mod heap;
 pub mod image;
-pub mod image_cache;
 pub mod indirect;
 pub mod lambda;
 pub mod mu;

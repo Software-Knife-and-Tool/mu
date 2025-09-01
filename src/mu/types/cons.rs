@@ -6,6 +6,7 @@ use {
     crate::{
         core::{
             apply::Apply as _,
+            cache::Cache,
             direct::{DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
@@ -13,7 +14,6 @@ use {
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
             image::Image,
-            image_cache::ImageCache,
             indirect::IndirectTag,
             reader::{Reader, EOL},
             tag::{Tag, TagType},
@@ -116,7 +116,7 @@ impl Cons {
             Tag::Direct(_) | Tag::Image(_) => {
                 let (index, _) = Image::detag(tag);
 
-                match ImageCache::ref_(env, index) {
+                match Cache::ref_(env, index) {
                     Image::Cons(cons) => cons,
                     _ => panic!(),
                 }

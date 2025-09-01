@@ -60,7 +60,7 @@ lazy_static! {
 }
 
 impl Type {
-    pub fn to_key(self) -> Tag {
+    pub fn map_typesym(self) -> Tag {
         TYPEKEYMAP
             .iter()
             .copied()
@@ -69,7 +69,7 @@ impl Type {
             .unwrap()
     }
 
-    pub fn to_type_id(self) -> u8 {
+    pub fn map_typeid(self) -> u8 {
         self as u8
     }
 }

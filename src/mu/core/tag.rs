@@ -223,7 +223,7 @@ impl CoreFunction for Tag {
     }
 
     fn mu_typeof(_: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = fp.argv[0].type_of().to_key();
+        fp.value = fp.argv[0].type_of().map_typesym();
 
         Ok(())
     }

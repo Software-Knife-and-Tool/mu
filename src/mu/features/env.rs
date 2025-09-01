@@ -6,13 +6,13 @@
 use {
     crate::{
         core::{
+            cache::Cache,
             core::CoreFunctionDef,
             direct::DirectTag,
             env,
             exception::{self},
             frame::Frame,
             heap::HeapTypeInfo,
-            image::{Image, ImageTypeInfo},
             indirect::IndirectTag,
             tag::{Tag},
             type_::{Type},
@@ -58,7 +58,6 @@ pub trait Env {
     fn heap_size(_: &env::Env, tag: Tag) -> usize;
     fn heap_type(_: &env::Env, type_: Type) -> HeapTypeInfo;
     fn images_room(_: &env::Env) -> Tag;
-    fn images_type(_: &env::Env, _: Type) -> ImageTypeInfo;
     fn ns_map(_: &env::Env) -> Tag;
 }
 
@@ -89,10 +88,6 @@ impl Env for Feature {
         heap_ref.alloc_map[type_ as usize]
     }
 
-    fn images_type(env: &env::Env, type_: Type) -> ImageTypeInfo {
-        Image::type_info(env, type_)
-    }
-
     fn heap_room(env: &env::Env) -> Tag {
         let mut vec = Vec::new();
 
@@ -115,14 +110,16 @@ impl Env for Feature {
         let mut vec = Vec::new();
 
         for htype in INFOTYPE.iter() {
-            let type_map =
-                <Feature as Env>::images_type(env, IndirectTag::to_indirect_type(*htype).unwrap());
+            let type_map = Cache::type_info(env, IndirectTag::to_indirect_type(*htype).unwrap());
 
-            vec.extend(vec![
-                *htype,
-                Fixnum::with_or_panic(type_map.size),
-                Fixnum::with_or_panic(type_map.total),
-            ])
+            match type_map {
+                None => (),
+                Some(type_map) => vec.extend(vec![
+                    *htype,
+                    Fixnum::with_or_panic(type_map.size),
+                    Fixnum::with_or_panic(type_map.total),
+                ]),
+            }
         }
 
         Vector::from(vec).evict(env)
