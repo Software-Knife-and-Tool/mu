@@ -76,8 +76,6 @@ impl From<&[u8; 8]> for Tag {
 }
 
 impl Tag {
-    pub const NTYPES: u8 = 15;
-
     pub fn data(&self, env: &Env) -> u64 {
         match self {
             Tag::Image(tag) | Tag::Direct(tag) => tag.data(),

@@ -60,6 +60,8 @@ lazy_static! {
 }
 
 impl Type {
+    pub const NTYPES: usize = 15;
+
     pub fn map_typesym(self) -> Tag {
         TYPEKEYMAP
             .iter()
