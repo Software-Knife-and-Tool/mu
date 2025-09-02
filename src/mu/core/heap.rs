@@ -24,6 +24,7 @@ use {
     futures_lite::future::block_on,
     memmap,
     modular_bitfield::specifiers::{B11, B4},
+    page_size,
     std::{
         fmt,
         fs::{remove_file, OpenOptions},
@@ -72,9 +73,9 @@ pub struct HeapTypeInfo {
 #[derive(Debug)]
 pub struct Heap {
     pub mmap: Box<memmap::MmapMut>, // heap base
-    pub page_size: usize,           // size of logical page
     pub npages: usize,              // total size of heap in pages
     pub size: usize,                // total size of heap in bytes
+    pub page_size: usize,           // system page size
     pub alloc_map: [HeapTypeInfo; Type::NTYPES],
     // map of allocated objects
     pub alloc_barrier: usize, // unallocated space barrier
@@ -95,8 +96,8 @@ impl Heap {
     pub fn new(config: &Config) -> Self {
         let path = &format!("/var/tmp/mu.{}.heap", std::process::id());
 
+        let page_size = page_size::get();
         let npages = config.npages;
-        let page_size = config.page_size;
 
         let mut f = OpenOptions::new()
             .read(true)

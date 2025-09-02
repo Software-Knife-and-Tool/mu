@@ -275,7 +275,10 @@ The  *core-sys* binary is part of a release, found at `/opt/mu/bin/core-sys`.
 
 ```
 {
-    "config": "npages: 2048",
+    "config": {
+    	"pages": 2048",
+    	"gc-mode": "auto"
+    },
     "rc": "core-sys.rc"
 }
 ```
@@ -433,21 +436,20 @@ alias ,mu-repl='rlwrap mu --eval='\''(prelude:repl)'\'''
 
 ------
 
-The *mu* runtimes can be configured to use a variable number of system resources, currently the number of pages of memory allocated to the heap at startup. The behavior of the garbage collector can also be specified, though garbage collection control is still mostly unimplemented. The *-c* option to the various runtimes is a string of named attribute values:
+The *mu* runtimes can be configured to use a variable number of system resources, currently the number of pages of memory allocated to the heap at startup. The behavior of the garbage collector can also be specified, though garbage collection control is still mostly unimplemented.
+
+ The *-c* option to the various runtimes is a JSON string of named attribute values:
 
 ```
-npages			number							pages of virtual memory for the heap
-page-size		number							number of bytes in a page
-gc-mode			{ none, auto, demand }         how the garbage collector operates
-heap-type		{ bump }						heap type, defaults to bump
+npages:	number				pages of virtual memory for the heap
+gc-mode: "none" | "auto"	how the garbage collector operates
 ```
 
 Usage: (*mu-server*, *mu-ld*, and *mu-exec* have similar options)
 
 ```
-mu-sys -c "npages:256,gc-mode:none"		256 heap pages, garbage collection disabled
-mu-sys -c "npages:1024,gc-mode:auto"	default configuration
-mu --config="npages:4096, gc-mode:demand, heap-type:bump"
-										 4096 pages, garbage collection runs on demand,
-                                        bump allocator 
+mu-sys -c '{ "pages": 256, "gc-mode": "none" }'		
+									256 heap pages, garbage collection disabled
+mu-sys -c '{ "pages": 1024, "gc-mode": "auto" }'
+									default configuration
 ```

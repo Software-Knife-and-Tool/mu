@@ -7,15 +7,13 @@ use {
         core::{env::Env, tag::Tag},
         types::{cons::Cons, fixnum::Fixnum, vector::Vector},
     },
-    page_size,
+    lite_json::{json::JsonValue, json_parser},
 };
 
 #[derive(Debug, Clone)]
 pub struct Config {
     pub gc_mode: GcMode,
     pub npages: usize,
-    pub page_size: usize,
-    pub heap_type: HeapType,
 }
 
 impl Default for Config {
@@ -23,8 +21,6 @@ impl Default for Config {
         Config {
             npages: 1024,
             gc_mode: GcMode::None,
-            heap_type: HeapType::Bump,
-            page_size: page_size::get(),
         }
     }
 }
@@ -33,118 +29,76 @@ impl Default for Config {
 pub enum GcMode {
     None,
     Auto,
-    Demand,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum HeapType {
-    Bump,
-}
-
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ConfigBuilder {
+    pub json: JsonValue,
     pub gc_mode: Option<GcMode>,
-    pub heap_type: Option<HeapType>,
     pub npages: Option<usize>,
-    pub page_size: Option<usize>,
 }
 
 impl ConfigBuilder {
-    pub fn new() -> Self {
+    pub fn new(conf: &str) -> Self {
+        let json = json_parser::parse_json(conf).expect("config: JSON parse failure");
+
         Self {
+            json,
             gc_mode: None,
-            heap_type: None,
             npages: None,
-            page_size: None,
         }
     }
 
-    pub fn gc_mode(&mut self, phrases: &mut Vec<(&str, &str)>) -> &mut Self {
-        if let Some((index, (_, mode))) = phrases
-            .iter_mut()
-            .enumerate()
-            .find(|(_, (key, _))| key == &"gc-mode")
-        {
-            self.gc_mode = Some(match *mode {
-                "auto" => GcMode::Auto,
-                "none" => GcMode::None,
-                "demand" => GcMode::Demand,
-                _ => panic!(),
-            });
-            phrases.swap_remove(index);
+    pub fn map_json(term: &str, json: &JsonValue) -> Option<JsonValue> {
+        match json {
+            JsonValue::Object(object) => object
+                .iter()
+                .find(|(cvec, _)| {
+                    let name = &*(cvec.iter().collect::<String>());
+                    term == name
+                })
+                .map(|(_, value)| value.clone()),
+            _ => None,
         }
-
-        self
     }
 
-    pub fn heap_type(&mut self, phrases: &mut Vec<(&str, &str)>) -> &mut Self {
-        if let Some((index, (_, mode))) = phrases
-            .iter_mut()
-            .enumerate()
-            .find(|(_, (key, _))| key == &"heap-type")
-        {
-            self.heap_type = Some(match *mode {
-                "bump" => HeapType::Bump,
-                _ => panic!(),
-            });
-            phrases.swap_remove(index);
-        }
+    pub fn gc_mode(&mut self) -> &mut Self {
+        let mode = Self::map_json("gc-mode", &self.json);
 
-        self
-    }
-
-    pub fn npages(&mut self, phrases: &mut Vec<(&str, &str)>) -> &mut Self {
-        if let Some((index, (_, n))) = phrases
-            .iter_mut()
-            .enumerate()
-            .find(|(_, (key, _))| key == &"npages")
-        {
-            self.npages = Some(n.parse::<usize>().unwrap());
-            phrases.swap_remove(index);
-        }
-
-        self
-    }
-
-    pub fn page_size(&mut self, phrases: &mut Vec<(&str, &str)>) -> &mut Self {
-        if let Some((index, (_, n))) = phrases
-            .iter_mut()
-            .enumerate()
-            .find(|(_, (key, _))| key == &"page-size")
-        {
-            self.page_size = Some(n.parse::<usize>().unwrap());
-            phrases.swap_remove(index);
-        }
-
-        self
-    }
-
-    pub fn build(&self, phrases: Vec<(&str, &str)>) -> Option<Config> {
-        assert!(phrases.is_empty());
-
-        let default: Config = Default::default();
-        let config = Config {
-            npages: if self.npages.is_some() {
-                self.npages.unwrap()
-            } else {
-                default.npages
+        self.gc_mode = match mode {
+            Some(JsonValue::String(mode)) => match &*(mode.iter().collect::<String>()) {
+                "auto" => Some(GcMode::Auto),
+                "none" => Some(GcMode::None),
+                _ => panic!("gc-mode: config string format"),
             },
-            gc_mode: if self.gc_mode.is_some() {
-                self.gc_mode.unwrap()
-            } else {
-                default.gc_mode
-            },
-            heap_type: if self.heap_type.is_some() {
-                self.heap_type.unwrap()
-            } else {
-                default.heap_type
-            },
-            page_size: if self.page_size.is_some() {
-                self.page_size.unwrap()
-            } else {
-                default.page_size
-            },
+            Some(_) => panic!("gc-mode: config string format"),
+            None => None,
         };
+
+        self
+    }
+
+    pub fn npages(&mut self) -> &mut Self {
+        let npages = Self::map_json("pages", &self.json);
+
+        self.npages = match npages.unwrap() {
+            JsonValue::Number(n) => Some(n.integer as usize),
+            _ => panic!("pages: config string format"),
+        };
+
+        self
+    }
+
+    pub fn build(&self) -> Option<Config> {
+        let mut config: Config = Default::default();
+
+        if self.npages.is_some() {
+            config.npages = self.npages.unwrap()
+        }
+
+        if self.gc_mode.is_some() {
+            config.gc_mode = self.gc_mode.unwrap()
+        }
 
         Some(config)
     }
@@ -154,27 +108,7 @@ impl Config {
     pub fn new(conf_option: Option<String>) -> Option<Config> {
         match conf_option {
             None => Some(Default::default()),
-            Some(conf) => {
-                let terms = conf.split(',').collect::<Vec<&str>>();
-                let mut phrases = terms
-                    .into_iter()
-                    .map(|term| {
-                        let term = term.split(':').collect::<Vec<&str>>();
-                        assert!(term.len() == 2);
-
-                        (term[0].trim(), term[1].trim())
-                    })
-                    .collect::<Vec<(&str, &str)>>();
-
-                let config = ConfigBuilder::new()
-                    .gc_mode(&mut phrases)
-                    .heap_type(&mut phrases)
-                    .npages(&mut phrases)
-                    .page_size(&mut phrases)
-                    .build(phrases);
-
-                config
-            }
+            Some(conf) => ConfigBuilder::new(&conf).gc_mode().npages().build(),
         }
     }
 
@@ -182,11 +116,6 @@ impl Config {
         let gc_mode = match self.gc_mode {
             GcMode::None => "none",
             GcMode::Auto => "auto",
-            GcMode::Demand => "demand",
-        };
-
-        let heap_type = match self.heap_type {
-            HeapType::Bump => "bump",
         };
 
         Cons::list(
@@ -198,18 +127,8 @@ impl Config {
                 )
                 .evict(env),
                 Cons::new(
-                    Vector::from("heap-type").evict(env),
-                    Vector::from(heap_type).evict(env),
-                )
-                .evict(env),
-                Cons::new(
                     Vector::from("npages").evict(env),
                     Fixnum::with_or_panic(env.config.npages),
-                )
-                .evict(env),
-                Cons::new(
-                    Vector::from("page-size").evict(env),
-                    Fixnum::with_or_panic(env.config.page_size),
                 )
                 .evict(env),
             ],
