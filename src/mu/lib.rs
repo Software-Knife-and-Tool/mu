@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //!
-//! The mu library is the implementation surface for the [`mu programming environment`] and
+//! The mu runtime library is the implementation surface for the [`mu programming environment`] and
 //! implements the *mu*, null, and *features* namespaces.
 //!
 //! mu is an immutable, lexically scoped Lisp-1 kernel porting layer for an ascending tower of
