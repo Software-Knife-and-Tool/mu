@@ -6,6 +6,7 @@ use {
     std::path::PathBuf,
 };
 
+#[derive(Debug)]
 pub enum Config {
     Json(JsonValue),
     None,
@@ -42,8 +43,9 @@ impl Config {
 
     pub fn map(&self, key: &str) -> Option<String> {
         match self {
-            Config::Json(opts) => match opts[key] {
+            Config::Json(opts) => match &opts[key] {
                 JsonValue::Short(str) => Some(str.as_str().to_string()),
+                JsonValue::Object(obj) => Some(obj.dump()),
                 _ => None,
             },
             Config::None => None,

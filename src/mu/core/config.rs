@@ -83,6 +83,11 @@ impl ConfigBuilder {
 
         self.npages = match npages.unwrap() {
             JsonValue::Number(n) => Some(n.integer as usize),
+            JsonValue::String(nstr) => Some(
+                (*(nstr.iter().collect::<String>()))
+                    .parse::<usize>()
+                    .unwrap(),
+            ),
             _ => panic!("pages: config string format"),
         };
 
