@@ -15,9 +15,10 @@ pub struct Env_ {
 impl Env_ {
     pub fn new(config: Config) -> Self {
         let env = match config.map("config") {
-            Some(config) => {
-                Mu::make_env(&Mu::config(Some(config)).expect("core-sys: unable to allocate env"))
-            }
+            Some(config) => Mu::make_env(
+                &Mu::config(Some(config))
+                    .expect("core-sys: unable to allocate env from config {config:?}"),
+            ),
             None => Mu::make_env(&Mu::config(None).expect("core-sys: unable to allocate env")),
         };
 

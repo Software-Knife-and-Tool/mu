@@ -276,7 +276,7 @@ The  *core-sys* binary is part of a release, found at `/opt/mu/bin/core-sys`.
 ```
 {
     "config": {
-    	"pages": 2048",
+    	"pages": "2048",
     	"gc-mode": "auto"
     },
     "rc": "core-sys.rc"
