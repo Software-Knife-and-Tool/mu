@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.2.10
+###### version 0.2.11
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -28,7 +28,7 @@ Subsequent layers based on the runtime offer advanced features.
 
 
 
-- core-sys command line utility
+- condensed feature set
 
   
 
@@ -56,7 +56,7 @@ Most of our core computational frameworks are built on static systems and are fr
 
 
 
-- *mu*, a small, configurable runtime library amd language
+- *mu*, a small, configurable runtime library and language
 - *mu-sys*, minimal POSIX runtime suitable for containers
 - *codegen*, a native code compiler
 - *mux* , a cargo-like development and packaging tool
@@ -149,6 +149,7 @@ where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes
 
 ```
 version 0.2.10 is built with rustc 1.89.0
+version 0.2.11 is built with rustc 1.89.0
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
@@ -192,17 +193,17 @@ As of 0.0.40, the *mu* runtime supports conditional compilation of a variety of 
 Currently supported features by namespace:
 
 ```
- default = [ "env", "std", "sysinfo", "core", "prof", "nix" ]
+ default = [ "env", "core", "system", prof" ]
  
- mu/core:		core env process-mem process-time time-units-per-sec delay
- mu/env:		env heap-stat heap-size 
- mu/nix:     	uname
+ mu/core:		core process-mem-virt process-mem-res
+ 				process-time time-units-per-sec delay
+ mu/env:		env heap-info heap-size heap-room cache-room
+ mu/system:     uname shell exit sysinfo
  mu/prof:    	prof-control
- mu/std:     	command exit
- mu/sysinfo: 	sysinfo
+
 ```
 
-The *sysinfo* feature is disabled on *macos* builds. The *semispace* feature is not yet functional.
+The *sysinfo* feature is disabled on *macOS* builds.
 
 
 

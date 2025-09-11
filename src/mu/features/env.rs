@@ -36,7 +36,7 @@ use {
 lazy_static! {
     pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
     pub static ref ENV_FUNCTIONS: Vec<CoreFunctionDef> = vec![
-        ("dynamic-room", 0, Feature::env_images_room),
+        ("cache-room", 0, Feature::env_cache_room),
         ("env", 0, Feature::env_env),
         ("heap-info", 0, Feature::env_hp_info),
         ("heap-room", 0, Feature::env_hp_room),
@@ -137,11 +137,11 @@ impl Env for Feature {
 }
 
 pub trait CoreFunction {
+    fn env_cache_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_env(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_info(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_size(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
-    fn env_images_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFunction for Feature {
@@ -161,7 +161,7 @@ impl CoreFunction for Feature {
         Ok(())
     }
 
-    fn env_images_room(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
+    fn env_cache_room(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = Self::images_room(env);
 
         Ok(())

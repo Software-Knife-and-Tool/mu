@@ -2,25 +2,20 @@
 //  SPDX-License-Identifier: MIT
 
 //! features
-use crate::core::{core::CoreFunctionDef, tag::Tag};
-
-use futures_locks::RwLock;
-use std::collections::HashMap;
+use {
+    crate::core::{core::CoreFunctionDef, tag::Tag},
+    futures_locks::RwLock,
+    std::collections::HashMap,
+};
 
 #[cfg(feature = "core")]
 use crate::features::core::Core;
 #[cfg(feature = "env")]
 use crate::features::env::Env;
-#[cfg(feature = "ffi")]
-use crate::features::ffi::Ffi;
-#[cfg(feature = "nix")]
-use crate::features::nix::Nix;
 #[cfg(feature = "prof")]
 use crate::features::prof::Prof;
-#[cfg(feature = "std")]
-use crate::features::std::Std;
-#[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
-use crate::features::sysinfo::Sysinfo;
+#[cfg(feature = "system")]
+use crate::features::system::System;
 
 #[derive(Clone)]
 pub struct Feature {
@@ -36,16 +31,10 @@ impl Feature {
             <Feature as Core>::feature(),
             #[cfg(feature = "env")]
             <Feature as Env>::feature(),
-            #[cfg(feature = "nix")]
-            <Feature as Nix>::feature(),
-            #[cfg(feature = "std")]
-            <Feature as Std>::feature(),
-            #[cfg(feature = "ffi")]
-            <Feature as Ffi>::feature(),
+            #[cfg(feature = "system")]
+            <Feature as System>::feature(),
             #[cfg(feature = "prof")]
             <Feature as Prof>::feature(),
-            #[cfg(all(feature = "sysinfo", not(target_os = "macos")))]
-            <Feature as Sysinfo>::feature(),
         ];
 
         features
