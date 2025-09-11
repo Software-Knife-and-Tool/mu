@@ -1,6 +1,6 @@
 [package]
 name = "mu"
-version = "0.2.10"
+version = "0.2.11"
 edition = "2021"
 license = "MIT" 
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
@@ -16,14 +16,11 @@ crate-type = ["lib"]
 bench = false
 
 [features]
-default = [ "core", "env", "nix", "std", "sysinfo" ]
+default = [ "core", "env", "system" ]
 core = []
 env = []           # needed for testing, common
-ffi = []
-nix = []
+system = []
 prof = []
-std = []
-sysinfo = []       # not for macos
 
 [profile.dev]
 opt-level = 0

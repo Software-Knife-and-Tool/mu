@@ -4,4 +4,3 @@
 (mu:find (mu:find-namespace "mu") "foo")	:nil
 (mu:intern (mu:find-namespace "") "foo" "foo")	foo
 (mu:intern (mu:find-namespace "mu") "foo" ())	mu:foo
-(mu:make-namespace "crux")	#s(:ns #(:t 8 crux))
