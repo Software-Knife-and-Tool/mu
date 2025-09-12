@@ -4,7 +4,7 @@
 // Apply trait
 use crate::{
     core::{
-        compile::Compile,
+        compiler::Compiler,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -80,8 +80,8 @@ impl Apply for Env {
     }
 
     fn eval(&self, expr: Tag) -> exception::Result<Tag> {
-        if self.is_quoted(&expr) {
-            return Ok(self.unquote(&expr));
+        if Compiler::is_quoted(self, &expr) {
+            return Ok(Compiler::unquote(self, &expr));
         }
 
         match expr.type_of() {

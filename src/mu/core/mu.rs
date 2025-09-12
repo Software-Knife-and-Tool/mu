@@ -6,7 +6,7 @@ use {
     crate::{
         core::{
             apply::Apply,
-            compile::Compile,
+            compiler::Compiler,
             config::Config,
             core::{Core, CORE},
             env,
@@ -49,7 +49,7 @@ impl Mu {
         let envs_ref = block_on(CORE.envs.read());
         let env_: &env::Env = &envs_ref[&env.as_u64()];
 
-        Compile::compile(env_, expr, &mut vec![])
+        Compiler::compile(env_, expr, &mut vec![])
     }
 
     pub fn read_(

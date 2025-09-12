@@ -6,7 +6,7 @@
 use crate::{
     core::{
         apply::Apply as _,
-        compile::Compile,
+        compiler::Compiler,
         direct::{DirectExt, DirectTag, DirectType},
         env::Env,
         exception::{self, Condition, Exception},
@@ -359,7 +359,7 @@ impl Reader for Env {
                     },
                     SyntaxType::Tmacro => match ch {
                         '`' => QuasiReader::read(self, false, stream, false),
-                        '\'' => Ok(Compile::quote(
+                        '\'' => Ok(Compiler::quote(
                             self,
                             &self.read(stream, false, Tag::nil(), recursivep)?,
                         )),

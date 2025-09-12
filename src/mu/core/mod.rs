@@ -5,7 +5,7 @@
 #![allow(clippy::module_inception)]
 pub mod apply;
 pub mod cache;
-pub mod compile;
+pub mod compiler;
 pub mod config;
 pub mod core;
 pub mod direct;

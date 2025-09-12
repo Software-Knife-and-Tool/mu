@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{
-            compile::Compile,
+            compiler::Compiler,
             env::Env,
             exception::{self, Condition, Exception},
             namespace::Namespace,
@@ -145,7 +145,7 @@ impl QuasiReader {
 
     fn compile(&self, env: &Env, expr: &QuasiExpr, recur: bool) -> exception::Result<Tag> {
         match expr {
-            QuasiExpr::Basic(tag) => Ok(env.quote(&Cons::cons(env, *tag, Tag::nil()))),
+            QuasiExpr::Basic(tag) => Ok(Compiler::quote(env, &Cons::cons(env, *tag, Tag::nil()))),
             QuasiExpr::Comma(tag) => Ok(Cons::list(env, &[self.cons, *tag, Tag::nil()])),
             QuasiExpr::CommaAt(tag) => Ok(*tag),
             QuasiExpr::List(ref vec) => {

@@ -6,7 +6,7 @@ use {
     crate::{
         core::{
             apply::CoreFunction as _,
-            compile::CoreFunction as _,
+            compiler::CoreFunction as _,
             direct::DirectTag,
             env::Env,
             exception::{self, CoreFunction as _, Exception},
