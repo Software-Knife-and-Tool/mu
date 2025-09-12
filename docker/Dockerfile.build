@@ -1,4 +1,0 @@
-FROM rust:1.67
-WORKDIR /usr/src/mu
-COPY ../mu /usr/src 
-RUN make world

@@ -1,4 +1,5 @@
 *.out
+*.sys
 *.fasl
 .mux
 .dir-locals.el

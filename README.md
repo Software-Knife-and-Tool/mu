@@ -139,7 +139,7 @@ If you want to install a release from the github repository
 cat mu-x.y.z.tgz | (cd $ROOT ; sudo tar --no-same-owner -xzf -)
 ```
 
-where `$ROOT` is the intended destination directory. The `mu.sh` scripts assumes `/opt`, if you want it elsewhere you will have to make some modifications. If I get a wild hair, I'll put this in  the environment at some point.
+where `$ROOT` is the intended destination directory. 
 
   
 

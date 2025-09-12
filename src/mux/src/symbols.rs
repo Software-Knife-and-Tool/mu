@@ -167,7 +167,7 @@ impl Symbols {
 
                 let output = Command::new("/opt/mu/bin/mu-sys")
                     .current_dir(format!("{home}/tools/reference"))
-                    .args(["-l", "/opt/mu/dist/core.fasl"])
+                    .args(["-l", "/opt/mu/dist/core.sys"])
                     .args(["-q", &format!("(core:require \"{module}\")")])
                     .args(["-l", "./reference.l"])
                     .args(["-q", &format!("(reference \"{ns}\" \"reference.out\")")])

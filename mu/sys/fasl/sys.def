@@ -2,11 +2,11 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; core module
+;;; core fasl module
 ;;;
-(core:provide
- "core/image"
+(system:provide
+ "core/fasl"
  '((:version . "0.0.1")
    (:lang    . :mu)
-   (:ns      . "core/image")
-   (:load    . ("image.l"))))
+   (:ns      . "core/fasl")
+   (:load    . ("compile.l" "load.l"))))

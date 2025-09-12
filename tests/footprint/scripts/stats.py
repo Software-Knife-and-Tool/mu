@@ -18,7 +18,7 @@ def times():
         '-f',
         format,
         mu_cmd,
-        '-l', '../../dist/core.fasl',
+        '-l', '../../dist/core.sys',
     ],\
     stdout=subprocess.PIPE,\
     stderr=subprocess.PIPE)
@@ -33,7 +33,7 @@ def times():
 def storage():
     proc = subprocess.Popen([
         mu_cmd,
-        '-l', '../../dist/core.fasl',
+        '-l', '../../dist/core.sys',
         '-e', '(mu/env:heap-room)'
     ],\
     stdout=subprocess.PIPE,\

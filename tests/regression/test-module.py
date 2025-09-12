@@ -10,15 +10,15 @@ with open(base + '/' + module + '/tests') as f: group_list = f.readlines()
 def runtest(line, group, test, expected):
     if module == 'core':
         proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.fasl',
+                                 '-l../../dist/core.sys',
                                  '-e' + test],             \
                                 stdout=subprocess.PIPE,    \
                                 stderr=subprocess.PIPE)
 
     if module == 'common':
         proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.fasl',
-                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-l../../dist/core.sys',
+                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
                                 stdout=subprocess.PIPE,                 \

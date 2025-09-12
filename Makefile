@@ -14,24 +14,22 @@ help:
 
 world:
 	@cargo build --release --workspace
+	@cp target/release/core-sys dist
 	@cp target/release/mu-exec dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sh dist
 	@cp target/release/mu-sys dist
 	@cp target/release/mux dist
-	@cp target/release/core-sys dist
-	@cp target/release/sysgen dist
 	@make -C dist --no-print-directory
 
 profile:
 	@cargo build --workspace
+	@cp target/release/core-sys dist
 	@cp target/release/mu-exec dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sh dist
 	@cp target/release/mu-sys dist
 	@cp target/release/mux dist
-	@cp target/release/core-sys dist
-	@cp target/release/sysgen dist
 	@make -C dist --no-print-directory
 
 install:

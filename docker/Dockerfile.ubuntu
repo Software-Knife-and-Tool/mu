@@ -1,4 +1,0 @@
-FROM ubuntu:jammy AS env
-COPY mu/dist/mu-0.0.1.tgz /tmp
-RUN (cd /opt ; tar xvfz /tmp/mu-0.0.1.tgz)
-SHELL ["/bin/bash", "--login", "-c"]
