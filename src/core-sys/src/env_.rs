@@ -22,10 +22,10 @@ impl Env_ {
             None => Mu::make_env(&Mu::config(None).expect("core-sys: unable to allocate env")),
         };
 
-        match Mu::load(env, "/opt/mu/lib/core.fasl") {
+        match Mu::load(env, "/opt/mu/lib/core.sys") {
             Ok(bool_) => {
                 if !bool_ {
-                    eprintln!("core-sys: can't load core.fasl");
+                    eprintln!("core-sys: can't load core.sys");
                     std::process::exit(-1)
                 }
             }

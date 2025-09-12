@@ -16,13 +16,13 @@ help:
 	@echo "    report - produce annotated report"
 
 null:
-	$(MU_SYS) -l../../../dist/core.fasl -l core.l -q '(core-perf)'
+	$(MU_SYS) -l../../../dist/core.sys -l core.l -q '(core-perf)'
 
 core:
-	@perf record -g -e cpu_core/cycles/P $(MU_SYS) -l../../../dist/core.fasl -l perf.l -q '(core-perf)'
+	@perf record -g -e cpu_core/cycles/P $(MU_SYS) -l../../../dist/core.sys -l perf.l -q '(core-perf)'
 
 report: core
-	@perf stat --repeat 100 $(MU_SYS) -l../../../dist/core.fasl -l perf.l -q '(core-perf)'
+	@perf stat --repeat 100 $(MU_SYS) -l../../../dist/core.sys -l perf.l -q '(core-perf)'
 	@perf report -g --stdio > perf.report
 
 clean:

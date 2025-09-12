@@ -6,9 +6,6 @@
 TMPF:=$(shell mktemp)
 
 MODULES = 		\
-	core		\
-	core/fasl	\
-	core/image	\
 	common		\
 	common/describe	\
 	common/metrics	\

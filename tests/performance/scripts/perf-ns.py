@@ -31,7 +31,7 @@ def mem_virt(ns, group, line, test):
 
     if ns == 'core':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.fasl', 
+                                 '-l../../dist/core.sys', 
                                  '-l./perf.l',
                                  '-e (perf:mem-delta (:lambda () {})'.format(test) + ' :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -39,9 +39,9 @@ def mem_virt(ns, group, line, test):
 
     if ns == 'common':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.fasl',
+                                 '-l../../dist/core.sys',
                                  '-l./perf.l',
-                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
                                  '-e (perf:mem-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
@@ -73,7 +73,7 @@ def storage(ns, group, line, test):
 
     if ns == 'core':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.fasl', 
+                                 '-l../../dist/core.sys', 
                                  '-l./perf.l',
                                  '-e (perf:storage-delta (:lambda () {})'.format(test) + ' :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -81,9 +81,9 @@ def storage(ns, group, line, test):
 
     if ns == 'common':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.fasl',
+                                 '-l../../dist/core.sys',
                                  '-l./perf.l',
-                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
                                  '-e (perf:storage-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
@@ -115,7 +115,7 @@ def timing(ns, test):
 
     if ns == 'core':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.fasl',
+                                 '-l../../dist/core.sys',
                                  '-l./perf.l',
                                  '-e (perf:time-delta (:lambda () {})'.format(test) + ' :nil)'],\
                                 stdout=subprocess.PIPE,\
@@ -123,9 +123,9 @@ def timing(ns, test):
 
     if ns == 'common':
         proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.fasl',
+                                 '-l../../dist/core.sys',
                                  '-l./perf.l',
-                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
                                  '-e (perf:time-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)

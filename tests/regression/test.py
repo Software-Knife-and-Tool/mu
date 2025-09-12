@@ -17,15 +17,15 @@ def runtest(line, test, expected):
 
     if ns == 'core':
         proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.fasl',
+                                 '-l../../dist/core.sys',
                                  '-e' + test],             \
                                 stdout=subprocess.PIPE,    \
                                 stderr=subprocess.PIPE)
 
     if ns == 'common':
         proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.fasl',
-                                 '-q (core:%require "{}" "../../src/modules")'.format('common'),
+                                 '-l../../dist/core.sys',
+                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
                                 stdout=subprocess.PIPE,                 \

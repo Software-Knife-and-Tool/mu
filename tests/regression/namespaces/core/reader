@@ -2,7 +2,7 @@
 (mu:symbol-name (core:read (mu:open :string :input "a" :t) () ()))	"a"
 (mu:symbol-name (core:read (mu:open :string :input "core:a" :t) () ()))	"a"
 (mu:symbol-namespace (core:read (mu:open :string :input "a" :t) () ()))	#s(:ns #(:t 0 ))
-(mu:symbol-namespace (core:read (mu:open :string :input "core:a" :t) () ()))	#s(:ns #(:t 8 core))
+(mu:symbol-namespace (core:read (mu:open :string :input "core:a" :t) () ()))	#s(:ns #(:t 6 core))
 (core:read (mu:open :string :input "a ;" :t) () ())	a
 (core:read (mu:open :string :input "a ; a" :t) () ())	a
 (core:read (mu:open :string :input "a" :t) () ())	a
