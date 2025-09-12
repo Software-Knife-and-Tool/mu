@@ -1,11 +1,10 @@
 [package]
-name = "core-sys"
+name = "mu-cli"
 version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-json = "0.12"
-lazy_static = "1.4"
+getopt = "1.1"
 mu = { path = "../.." }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]

@@ -66,8 +66,22 @@ impl Compiler {
         let if_vec = vec![
             Namespace::intern(env, env.mu_ns, "%if".into(), Tag::nil()).unwrap(),
             Cons::nth(env, 0, args).unwrap(),
-            Cons::list(env, &[COMPILER.lambda, Tag::nil(), Cons::nth(env, 1, args).unwrap()]),
-            Cons::list(env, &[COMPILER.lambda, Tag::nil(), Cons::nth(env, 2, args).unwrap()]),
+            Cons::list(
+                env,
+                &[
+                    COMPILER.lambda,
+                    Tag::nil(),
+                    Cons::nth(env, 1, args).unwrap(),
+                ],
+            ),
+            Cons::list(
+                env,
+                &[
+                    COMPILER.lambda,
+                    Tag::nil(),
+                    Cons::nth(env, 2, args).unwrap(),
+                ],
+            ),
         ];
 
         Self::compile(env, Cons::list(env, &if_vec), lenv)
