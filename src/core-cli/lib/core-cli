@@ -1,4 +1,4 @@
 {
     "config": "npages: 2048",
-    "rc": "core-sys.rc"
+    "rc": "core-cli.rc"
 }

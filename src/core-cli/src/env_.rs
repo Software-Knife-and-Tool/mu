@@ -17,21 +17,21 @@ impl Env_ {
         let env = match config.map("config") {
             Some(config) => Mu::make_env(
                 &Mu::config(Some(config))
-                    .expect("core-sys: unable to allocate env from config {config:?}"),
+                    .expect("core-cli: unable to allocate env from config {config:?}"),
             ),
-            None => Mu::make_env(&Mu::config(None).expect("core-sys: unable to allocate env")),
+            None => Mu::make_env(&Mu::config(None).expect("core-cli: unable to allocate env")),
         };
 
         match Mu::load(env, "/opt/mu/lib/core.sys") {
             Ok(bool_) => {
                 if !bool_ {
-                    eprintln!("core-sys: can't load core.sys");
+                    eprintln!("core-cli: can't load core.sys");
                     std::process::exit(-1)
                 }
             }
             Err(e) => {
                 eprintln!(
-                    "core-sys: can't load core.fasl: {}",
+                    "core-cli: can't load core.sys: {}",
                     Mu::exception_string(env, e)
                 );
                 std::process::exit(-1)
@@ -43,7 +43,7 @@ impl Env_ {
                 Ok(bool_) => bool_,
                 Err(e) => {
                     eprintln!(
-                        "core-sys: can't load rc file {rc}: {}",
+                        "core-cli: can't load rc file {rc}: {}",
                         Mu::exception_string(env, e)
                     );
                     std::process::exit(-1)

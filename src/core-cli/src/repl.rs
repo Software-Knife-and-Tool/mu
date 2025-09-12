@@ -35,7 +35,7 @@ pub fn listener(env_: &Env_) -> Result {
                         eprint!(
                             "exception raised by {}, {:?} condition on ",
                             Mu::write_to_string(env, e.source, true),
-                            e.condition
+                            e.condition,
                         );
                         Mu::write(env, e.object, true, Mu::err_out())?;
                         eprintln!()
