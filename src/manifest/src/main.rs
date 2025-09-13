@@ -29,13 +29,13 @@ use {
     },
 };
 
-const VERSION: &str = "0.0.16";
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn usage() {
-    println!("Usage: mux {} command [option...]", VERSION);
+    println!("Usage: manifest {VERSION} command [option...]");
     println!("  command:");
     println!("    help                               ; this message");
-    println!("    version                            ; mux version");
+    println!("    version                            ; manifest version");
     println!();
     println!("    init                               ; init");
     println!("    env                                ; print development environment");
@@ -80,7 +80,7 @@ pub fn main() {
                     let cwd = std::env::current_dir().unwrap();
 
                     eprintln!(
-                        "error: could not find `.mux` in {:?} or any parent directory",
+                        "error: could not find `.manifest` in {:?} or any parent directory",
                         cwd.to_str().unwrap()
                     );
                     std::process::exit(-1)
@@ -103,7 +103,7 @@ pub fn main() {
                 "symbols" => Symbols::symbols(&argv, &home),
                 "test" => Test::test(&argv, &home),
                 _ => {
-                    eprintln!("mux: unimplemented command {command}");
+                    eprintln!("manifest: unimplemented command {command}");
                     std::process::exit(-1)
                 }
             }

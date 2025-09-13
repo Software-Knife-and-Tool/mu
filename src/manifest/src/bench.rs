@@ -31,7 +31,7 @@ impl Bench {
                 };
 
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mux bench: {:?} --ntests {ntests} --verbose", mode),
+                    Some(_) => println!("manifest bench: {:?} --ntests {ntests} --verbose", mode),
                     None => (),
                 };
 

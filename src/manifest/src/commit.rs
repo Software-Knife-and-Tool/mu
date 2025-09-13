@@ -16,7 +16,7 @@ impl Commit {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mux commit: --verbose"),
+                    Some(_) => println!("manifest commit: --verbose"),
                     None => (),
                 };
 

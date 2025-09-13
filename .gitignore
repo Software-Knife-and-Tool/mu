@@ -1,13 +1,13 @@
 *.out
 *.sys
 *.fasl
-.mux
+.manifest
 .dir-locals.el
 TAGS
 Cargo.lock
 dist/mu*.tgz
 dist/mu-*
-dist/mux
+dist/manifest
 dist/*.l
 dist/VERSION
 doc/rustdoc

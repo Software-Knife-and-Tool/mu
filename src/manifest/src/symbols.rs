@@ -28,7 +28,7 @@ impl Symbols {
                 let mode = &options.modes[0];
 
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mux symbols: {:?}", mode),
+                    Some(_) => println!("manifest symbols: {:?}", mode),
                     None => (),
                 };
 

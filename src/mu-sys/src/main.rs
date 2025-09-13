@@ -24,6 +24,8 @@ enum ShellOpt {
     Quiet(String),
 }
 
+const _VERSION: &str = env!("CARGO_PKG_VERSION");
+
 fn options(argv: Vec<String>) -> Option<Vec<ShellOpt>> {
     let mut opts = getopt::Parser::new(&argv, "c:e:l:q:");
     let mut optv = Vec::new();

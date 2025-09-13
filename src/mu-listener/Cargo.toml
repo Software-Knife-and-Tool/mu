@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 json = "0.12"
-lazy_static = "1.4"
 mu = { path = "../.." }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]

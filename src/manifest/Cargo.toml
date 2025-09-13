@@ -1,0 +1,11 @@
+[package]
+name = "manifest"
+version = "0.0.16"
+edition = "2021"
+
+[dependencies]
+object = { version = "0.35", features = [ "build_core" ] }
+json = "0.12"
+getopts = "0.2"
+# git2 = "0.19"
+mu = { path = "../.." }

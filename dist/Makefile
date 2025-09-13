@@ -12,7 +12,7 @@ MU = ../mu
 SRC = ../src
 TOOLS = ../tools
 
-BIN = mu-exec mu-server mu-listener mux
+BIN = mu-exec mu-server mu-listener manifest
 SYS = core.sys fasl.sys image.sys
 
 MODULES = 		\
