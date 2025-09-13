@@ -66,7 +66,7 @@ impl Env for Feature {
         Feature {
             symbols: Some(&ENV_SYMBOLS),
             functions: Some(&ENV_FUNCTIONS),
-            namespace: "mu/env".into(),
+            namespace: "feature/env".into(),
         }
     }
 

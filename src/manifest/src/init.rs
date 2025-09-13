@@ -17,7 +17,9 @@ impl Init {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("manifest init {:?}: --verbose", env::current_dir().unwrap()),
+                    Some(_) => {
+                        println!("manifest init {:?}: --verbose", env::current_dir().unwrap())
+                    }
                     None => (),
                 };
 

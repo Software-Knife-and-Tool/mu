@@ -52,7 +52,7 @@ impl System for Feature {
         Feature {
             functions: Some(&SYSTEM_FUNCTIONS),
             symbols: Some(&SYSTEM_SYMBOLS),
-            namespace: "mu/system".into(),
+            namespace: "feature/system".into(),
         }
     }
 }

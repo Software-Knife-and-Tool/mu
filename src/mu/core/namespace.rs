@@ -62,18 +62,6 @@ pub enum Namespace {
 }
 
 impl Namespace {
-    /*
-    pub fn ns_designator(env: &Env, ns: Tag) -> usize {
-        match ns.type_of() {
-            Type::Null => Self::ns_designator(env, env.null_ns),
-            Type::Struct if Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) => {
-                Fixnum::as_i64(Vector::ref_(env, Struct::vector(env, ns), 0).unwrap()) as usize
-            }
-            _ => panic!(),
-        }
-    }
-     */
-
     pub fn index_of(env: &Env, ns: Tag) -> usize {
         match ns.type_of() {
             Type::Struct if Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) => {

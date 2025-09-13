@@ -63,7 +63,7 @@ impl Core for Feature {
         Feature {
             symbols: Some(&CORE_SYMBOLS),
             functions: Some(&CORE_FUNCTIONS),
-            namespace: "mu/core".into(),
+            namespace: "feature/core".into(),
         }
     }
 

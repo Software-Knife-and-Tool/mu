@@ -4,7 +4,7 @@
 .PHONY: crossref help
 
 help:
-	@echo "crossref: mu/core symbol cross reference"
+	@echo "crossref: core symbol cross reference"
 
 crossref:
 	@/opt/mu/bin/mu-sys -l ../../dist/core.sys -l ./crossref.l -q '(crossref "crossref.out")'

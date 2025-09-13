@@ -1,9 +1,14 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! features
+// features
+#[rustfmt::skip]
 use {
-    crate::core::{core::CoreFunctionDef, tag::Tag},
+    crate::core::{
+        core::CoreFunctionDef,
+//        namespace::{Namespace, Static},
+        tag::Tag
+    },
     futures_locks::RwLock,
     std::collections::HashMap,
 };
@@ -17,6 +22,10 @@ use crate::features::prof::Prof;
 #[cfg(feature = "system")]
 use crate::features::system::System;
 
+lazy_static! {
+    pub static ref FEATURES: Features = Features::new();
+}
+
 #[derive(Clone)]
 pub struct Feature {
     pub functions: Option<&'static Vec<CoreFunctionDef>>,
@@ -24,8 +33,13 @@ pub struct Feature {
     pub symbols: Option<&'static RwLock<HashMap<String, Tag>>>,
 }
 
-impl Feature {
-    pub fn install_features() -> Vec<Feature> {
+pub struct Features {
+    pub features: Vec<Feature>,
+    //    pub namespaces: Vec<Namespace>,
+}
+
+impl Features {
+    fn new() -> Self {
         let features = vec![
             #[cfg(feature = "core")]
             <Feature as Core>::feature(),
@@ -37,6 +51,23 @@ impl Feature {
             <Feature as Prof>::feature(),
         ];
 
-        features
+        /*
+        let namespaces = features
+            .iter()
+            .map(|feature| {
+                let ns = Static {
+                    functions: feature.functions,
+                    hash: RwLock::new(
+                    ;
+                Namespace::Static(ns)
+            })
+            .collect::<Vec<Namespace>>();
+
+         */
+
+        Self {
+            features,
+            //            namespaces: vec![],
+        }
     }
 }

@@ -15,7 +15,7 @@ use {
             namespace::{CoreFunction as _, Namespace},
             tag::{CoreFunction as _, Tag},
         },
-        features::feature::Feature,
+        features::feature::{Feature, FEATURES},
         streams::builder::StreamBuilder,
         types::{
             cons::{Cons, CoreFunction as _},
@@ -171,11 +171,11 @@ impl Core {
         }
     }
 
-    // accessors
+    // constructors
     pub fn features(self) -> Self {
         let mut features = block_on(self.features.write());
 
-        *features = Feature::install_features();
+        *features = FEATURES.features.clone();
 
         self
     }
@@ -198,6 +198,7 @@ impl Core {
         stdio.0
     }
 
+    // accessors
     pub fn stdout(&self) -> Tag {
         let stdio = block_on(self.stdio.read());
 

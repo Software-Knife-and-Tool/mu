@@ -34,7 +34,7 @@ def storage():
     proc = subprocess.Popen([
         mu_cmd,
         '-l', '../../dist/core.sys',
-        '-e', '(mu/env:heap-room)'
+        '-e', '(feature/env:heap-room)'
     ],\
     stdout=subprocess.PIPE,\
     stderr=subprocess.PIPE)
