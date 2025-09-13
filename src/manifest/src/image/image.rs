@@ -71,7 +71,7 @@ impl Image {
                 let mode = &options.modes[0];
 
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mux image: {:?}", mode),
+                    Some(_) => println!("manifest image: {:?}", mode),
                     None => (),
                 };
 

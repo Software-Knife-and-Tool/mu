@@ -23,7 +23,7 @@ impl Build {
                 let mode = &options.modes[0];
 
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mux build: {:?} --verbose", mode),
+                    Some(_) => println!("manifest build: {:?} --verbose", mode),
                     None => (),
                 };
 

@@ -3,28 +3,26 @@
 use {
     crate::options::{Opt, Options},
     std::{
+        env,
         io::{self, Write},
         process::Command,
     },
 };
 
-pub struct Test {}
+pub struct Init {}
 
-impl Test {
-    pub fn test(argv: &Vec<String>, home: &str) {
+impl Init {
+    pub fn init(argv: &Vec<String>) {
         match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mux repl: --verbose"),
+                    Some(_) => println!("manifest init {:?}: --verbose", env::current_dir().unwrap()),
                     None => (),
                 };
 
-                let output = Command::new("make")
-                    .current_dir(home)
-                    .args(["-C", "tests/regression"])
-                    .arg("summary")
-                    .arg("--no-print-directory")
+                let output = Command::new("touch")
+                    .arg(".manifest")
                     .output()
                     .expect("command failed to execute");
 

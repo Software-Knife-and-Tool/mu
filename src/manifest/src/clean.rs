@@ -16,7 +16,7 @@ impl Clean {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mux clean: --verbose"),
+                    Some(_) => println!("manifest clean: --verbose"),
                     None => (),
                 };
 

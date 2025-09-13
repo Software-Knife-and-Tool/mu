@@ -119,7 +119,7 @@ impl Options {
 
         for mode in &mode_args {
             if !modes.iter().any(|el| el == mode) {
-                eprintln!("mux: unknown mode {mode:?}");
+                eprintln!("manifest: unknown mode {mode:?}");
                 return None;
             }
         }
@@ -164,7 +164,7 @@ impl Options {
             };
 
             if !opt_list.iter().any(|el| el == &base) {
-                eprintln!("mux: unknown option {opt:?}");
+                eprintln!("manifest: unknown option {opt:?}");
                 return None;
             }
         }
@@ -189,7 +189,7 @@ impl Options {
                 })
                 .collect::<Vec<Opt>>(),
             Err(error) => {
-                eprintln!("mux options: {error:?}");
+                eprintln!("manifest options: {error:?}");
                 std::process::exit(-1);
             }
         };

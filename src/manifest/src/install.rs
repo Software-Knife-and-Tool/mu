@@ -3,26 +3,30 @@
 use {
     crate::options::{Opt, Options},
     std::{
-        env,
         io::{self, Write},
         process::Command,
     },
 };
 
-pub struct Init {}
+pub struct Install {}
 
-impl Init {
-    pub fn init(argv: &Vec<String>) {
+impl Install {
+    pub fn install(argv: &Vec<String>, home: &str) {
         match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mux init {:?}: --verbose", env::current_dir().unwrap()),
+                    Some(_) => println!("manifest install {home}: --verbose"),
                     None => (),
                 };
 
-                let output = Command::new("touch")
-                    .arg(".mux")
+                let dist = &format!("{home}/dist");
+
+                let output = Command::new("make")
+                    .args(["-C", dist])
+                    .args(["-f", "install.mk"])
+                    .arg("install")
+                    .arg("--no-print-directory")
                     .output()
                     .expect("command failed to execute");
 

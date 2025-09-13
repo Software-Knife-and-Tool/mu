@@ -3,7 +3,7 @@
 #
 .PHONY: world install
 
-MUX_DIR ?= /usr/local/bin
+MANIFEST_DIR ?= /usr/local/bin
 
 help:
 	@echo "mu project makefile -----------------"
@@ -18,7 +18,7 @@ world:
 	@cp target/release/mu-listener dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sys dist
-	@cp target/release/mux dist
+	@cp target/release/manifest dist
 	@make -C dist --no-print-directory
 
 profile:
@@ -27,7 +27,7 @@ profile:
 	@cp target/release/mu-listener dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sys dist
-	@cp target/release/mux dist
+	@cp target/release/manifest dist
 	@make -C dist --no-print-directory
 
 install:

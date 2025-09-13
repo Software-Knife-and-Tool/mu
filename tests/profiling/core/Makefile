@@ -13,10 +13,10 @@ help:
 	@echo "    report - produce annotated report"
 
 report:
-	@mux build --profile
-	@mux symbols --namespace core --output core.reference
-	@mux profile --config '("core-perf.l", "core-perf")' --output core.profile
-	@mux annotate --prof core.profile --ref core.reference --output core.report
+	@manifest build --profile
+	@manifest symbols --namespace core --output core.reference
+	@manifest profile --config '("core-perf.l", "core-perf")' --output core.profile
+	@manifest annotate --prof core.profile --ref core.reference --output core.report
 	@cat core.report
 
 clean:
