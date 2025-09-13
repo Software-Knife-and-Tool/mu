@@ -6,7 +6,7 @@ license = "MIT"
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
 [workspace]
-members = [ "src/core-cli", "src/mu-exec", "src/mu-server", "src/mu-cli", "src/mu-sys", "src/mux" ]
+members = [ "src/mu-listener", "src/mu-exec", "src/mu-server", "src/mu-sys", "src/mux" ]
 resolver = "2"
 
 [lib]

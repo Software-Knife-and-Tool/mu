@@ -1,0 +1,5 @@
+{
+    "config": "npages: 2048",
+    "namespace": "core",
+    "rc": "mu-listener.rc"
+}

@@ -12,7 +12,7 @@ MU = ../mu
 SRC = ../src
 TOOLS = ../tools
 
-BIN = mu-exec mu-server mu-cli core-cli mux
+BIN = mu-exec mu-server mu-listener mux
 SYS = core.sys fasl.sys image.sys
 
 MODULES = 		\
@@ -42,7 +42,7 @@ dist:
 	@install -m 644 $(MU)/dist/mu.l $(BASE)/lib
 	@install -m 644 $(MU)/dist/image.l $(BASE)/lib
 
-	@install -m 644 -D -t $(BASE)/lib/core-cli $(SRC)/core-cli/lib/*
+	@install -m 644 -D -t $(BASE)/lib/mu-listener $(SRC)/mu-listener/lib/*
 
 	@install -D -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.l
 	@install -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.def
