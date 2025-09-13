@@ -1,22 +1,31 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! profile interface
-use crate::{
-    core::{
-        apply::Apply as _,
-        core::CoreFunctionDef,
-        env::Env,
-        exception::{self, Condition, Exception},
-        frame::Frame,
-        tag::Tag,
-        type_::Type,
+// profile feature
+#[rustfmt::skip]
+use {
+    crate::{
+        core::{
+            apply::Apply as _,
+            core::CoreFunctionDef,
+            env::Env,
+            exception::{self, Condition, Exception},
+            frame::Frame,
+            tag::Tag,
+            type_::Type,
+        },
+        features::feature::Feature,
+        types::{
+            cons::Cons,
+            fixnum::Fixnum,
+            symbol::Symbol,
+            vector::Vector
+        },
     },
-    features::features::Feature,
-    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
+    std::collections::HashMap,
+    futures_lite::future::block_on,
+    futures_locks::RwLock,
 };
-use std::collections::HashMap;
-use {futures_lite::future::block_on, futures_locks::RwLock};
 
 pub trait Prof {
     fn feature() -> Feature;
