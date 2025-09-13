@@ -46,10 +46,10 @@ dist:
 
 	@install -D -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.l
 	@install -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.def
-	@install -D -m 644 -t $(BASE)/lib/core/fasl $(MU)/sys/fasl/*.l
-	@install -m 644 -t $(BASE)/lib/core/fasl $(MU)/sys/fasl/*.def
-	@install -D -m 644 -t $(BASE)/lib/core/image $(MU)/sys/image/*.l
-	@install -m 644 -t $(BASE)/lib/core/image $(MU)/sys/image/*.def
+	@install -D -m 644 -t $(BASE)/lib/fasl $(MU)/sys/fasl/*.l
+	@install -m 644 -t $(BASE)/lib/fasl $(MU)/sys/fasl/*.def
+	@install -D -m 644 -t $(BASE)/lib/image $(MU)/sys/image/*.l
+	@install -m 644 -t $(BASE)/lib/image $(MU)/sys/image/*.def
 
 	@for module in $(MODULES); do	\
 	    install -D -m 644 -t $(BASE)/modules/$$module $(MU)/modules/$$module/*.l;		\

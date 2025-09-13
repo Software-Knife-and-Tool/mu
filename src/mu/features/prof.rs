@@ -12,7 +12,7 @@ use crate::{
         tag::Tag,
         type_::Type,
     },
-    features::feature::Feature,
+    features::features::Feature,
     types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
 };
 use std::collections::HashMap;
@@ -34,7 +34,7 @@ impl Prof for Feature {
         Feature {
             functions: Some(&PROF_FUNCTIONS),
             symbols: Some(&PROF_SYMBOLS),
-            namespace: "mu/prof".into(),
+            namespace: "feature/prof".into(),
         }
     }
 

@@ -5,8 +5,8 @@
 ;;; core module
 ;;;
 (system:provide
- "core/image"
+ "sys/image"
  '((:version . "0.0.1")
    (:lang    . :mu)
-   (:ns      . "core/image")
+   (:ns      . "sys/image")
    (:load    . ("image.l"))))

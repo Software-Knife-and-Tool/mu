@@ -30,6 +30,8 @@ Subsequent layers based on the runtime offer advanced features.
 
 - condensed feature set
 
+- shared feature namespaces
+
   
 
 #### Rationale
@@ -59,7 +61,7 @@ Most of our core computational frameworks are built on static systems and are fr
 - *mu*, a small, configurable runtime library and language
 - *mu-sys*, minimal POSIX runtime suitable for containers
 - *codegen*, a native code compiler
-- *mux* , a cargo-like development and packaging tool
+- *manifest* , a cargo-like development and packaging tool
 - small and simple installation
 - add interactivity and extensibility to application implementations
 - Rust FFI system
@@ -129,9 +131,29 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 
 
 
-#### Installing a release
+#### Release
 
 ------
+
+ The release is installed in `/opt/mu`. 
+
+```
+/opt/mu
+├── bin
+├── doc
+│   └── html
+├── lib
+│   ├── core
+│   ├── fasl
+│   ├── image
+│   └── mu-listener
+└── modules
+    ├── common
+    │   ├── describe
+    │   └── metrics
+    └── prelude
+        └── repl
+```
 
 If you want to install a release from the github repository
 
@@ -172,15 +194,15 @@ Having built the distribution, install it in `/opt/mu`.
 % sudo make install
 ```
 
-Having built and installed `mu`,  establish the current directory as a `mux`  workspace. In releases prior to 0.1.82, the make `world` target does this automatically. In 0.1.82 and later releases:
+Having built and installed `mu`,  establish the current directory as a `manifest`  workspace.
 
 ```
-% mux init
+% manifest init
 ```
 
-Subsequent builds and packaging of the system are facilitated with *mux*. See the *mux* section below for usage instructions.
+Subsequent builds and packaging of the system are facilitated with *manifest*. See the *Tools* section below for usage instructions.
 
-Note: the *mux* and *makefile* installation mechanisms do not remove the installation directory before writing it and changes to directory structure and files will accumulate.
+Note: the *manifest* and *makefile* installation mechanisms do not remove the installation directory before writing it and changes to directory structure and files will accumulate.
 
 
 
@@ -188,18 +210,18 @@ Note: the *mux* and *makefile* installation mechanisms do not remove the install
 
 ------
 
-As of 0.0.40, the *mu* runtime supports conditional compilation of a variety of features. 
+The *mu* runtime supports conditional compilation of a variety of features. 
 
 Currently supported features by namespace:
 
 ```
- default = [ "env", "core", "system", prof" ]
+ default = [ "env", "core", "system" ]
  
- mu/core:		core process-mem-virt process-mem-res
- 				process-time time-units-per-sec delay
- mu/env:		env heap-info heap-size heap-room cache-room
- mu/system:     uname shell exit sysinfo
- mu/prof:    	prof-control
+ feature/core:		core process-mem-virt process-mem-res
+ 					process-time time-units-per-sec delay
+ feature/env:		env heap-info heap-size heap-room cache-room
+ feature/system:	uname shell exit sysinfo
+ feature/prof:    	prof-control
 
 ```
 
@@ -211,14 +233,12 @@ The *sysinfo* feature is disabled on *macOS* builds.
 
 ------
 
-As of 0.1.76, the *mu* distribution includes tools for configuring and development of the system. 
+The *mu* distribution includes tools for configuring and development of the system. 
 
-The  *mux* binary is part of a release, found at `/opt/mu/bin/mux`.
-
-The *mux* tool provides these utilities:
+The  *manifest* binary is part of a release, found at `/opt/mu/bin/manifest`.
 
 ```
-Usage: mux 0.0.16 command [option...]
+Usage: manifest 0.0.16 command [option...]
   command:
     help                               ; this message
     version                            ; mux version
@@ -244,20 +264,22 @@ Usage: mux 0.0.16 command [option...]
     --verbose                          ; verbose operation
 ```
 
-`mux` is styled after `cargo` and fulfills many of the same needs. While the help message should be relatively explanatory, the general development workflow is something like this. Note that in this version **=** are mandatory for options with arguments.
+`manifest` is styled after `cargo` and fulfills many of the same needs. While the help message should be relatively explanatory, the general development workflow is something like this. Note that in this version **=** are mandatory for options with arguments.
 
 Before making any changes, you will want to establish a performance baseline.
 
 ```
- mux bench base --ntests=1
+ manifest bench base --ntests=1
 ```
 
-As you make changes, you can verify correctness and note any performance regressions. Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
+As you make changes, you can verify correctness and note any performance regressions.
+
+Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
 
 ```
- mux build release              # build the mu release version 
- mux test                       # run the regression tests
- mux bench current --ntests=1	# benchmark the current build and print results
+ manifest build release				# build the release version 
+ manifest test						# run the regression tests
+ manifest bench current --ntests=1	# benchmark current build and print results
 ```
 
 The `symbols` command prints a list of the symbols in various namespaces and their types.
@@ -266,13 +288,13 @@ Profiling is nascent and will be expanded in future releases.
 
 
 
-As of 0.2.10, the *mu* distribution includes a tool for running and interacting with the system. 
+The *mu* distribution includes a tool for running and interacting with the system. 
 
-The  *core-sys* binary is part of a release, found at `/opt/mu/bin/core-sys`.
+The  *mu-listener* binary is part of a release, found at `/opt/mu/bin/mu-listener`.
 
-*core-sys*  has no command line arguments, it is configured by a JSON file, *.core-sys*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/core-sys`.
+*mu-listener*  has no command line arguments. It is configured by a JSON file, *.mu-listener*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/mu-listener`.
 
-*core-sys* will run without either of *.core-sys* or an rc file.
+*mu-listener* will run without either of *.mu-listener* or an rc file.
 
 ```
 {
@@ -280,7 +302,8 @@ The  *core-sys* binary is part of a release, found at `/opt/mu/bin/core-sys`.
     	"pages": "2048",
     	"gc-mode": "auto"
     },
-    "rc": "core-sys.rc"
+    "namespace": "mu",
+    "rc": "mu-listener.rc"
 }
 ```
 
@@ -323,7 +346,7 @@ regression test makefile -----------------
 Metrics include the average amount of time (in microsconds) taken for an individual test and the number of objects allocated by that test. Differences between runs in the same installation can be in the 10% range. Any changes in storage consumption or a large (10% or greater) increase in test timing warrant examination. Note: As of 0.2.0, the performance runs can take up to half an hour. It would be best to limit performance testing to `NTESTS=1` or 
 
 ```
-mux bench current --ntests=1
+manifest bench current --ntests=1
 ```
 
  The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
@@ -371,16 +394,15 @@ The  `performance`  makefile offers some development options.
 
 ------
 
-The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory contains the binaries and shell scripts for running the system. The library sources are included in `lib`. *mux*  has an equivalent facility in the *repl* command.
+The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory contains the binaries for running the system.
 
 ```
+manifest	development tool
 mu-sys		runtime binary
-mu-sh		runtime binary, stdio listener
+mu-listener	runtime binary, stdio listener
 mu-ld		image loader
-core-sys	interactive runtime, stdio listener
 mu-exec     image executor
 mu-server	server runtime, socket listener
-mu          shell script for loading *core*. runs *mu-sh* listener
 ```
 
 
@@ -398,38 +420,21 @@ OPTIONS:
   [file ...]           load source file(s)
 ```
 
-An interactive session for the extended *mu* system is invoked by the `mu` shell script. The *mu* repl does not display a prompt. *mu-sys* configures the library to catch SIGINT and generate a `:sigint` exception rather than abort the process.
+An interactive session for the extended *mu* system is invoked by the `mu-listener` command.
+
+*rlwrap* makes the *mu-listener* repl much more useful, with command history and line editing.
 
 ```
-% /opt/mu/bin/mu 
+% alias ,mu-listener='rlwrap mu-listener'
 ```
 
-(the *prelude* namespace is currently under development.)
-
-If you want to exercise the *prelude* repl,
-
-```
-% /opt/mu/bin/mu --eval='(prelude:repl)'
-prelude>
-```
-
-`:h` will print the currently available repl commands. Forms entered at the prompt are evaluated and the results printed. The prompt displays the current namespace. *rlwrap* makes the *mu* and *runtime* repls much more useful, with command history and line editing.
-
-```
-% alias ,mu-sys='rlwrap mu'
-```
-
-Depending on your version of *rlwrap*, *mu* may exhibit odd echoing behavior. Adding
+Depending on your version of *rlwrap*, *,mu-listener* may exhibit odd echoing behavior. Adding
 
 ```
 set enable-bracketed-paste off
 ```
 
 to your `~/.inputrc` may help. If you want to run the prelude listener as part of an interactive session:
-
-```
-alias ,mu-repl='rlwrap mu --eval='\''(prelude:repl)'\'''
-```
 
 
 

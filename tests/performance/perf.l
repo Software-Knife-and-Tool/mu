@@ -10,16 +10,16 @@
 (mu:intern perf "mem-delta"
   (:lambda (fn args)
     (mu:apply fn args)
-    (mu/core:process-mem-virt)))
+    (feature/core:process-mem-virt)))
 
 (mu:intern perf "time-delta"
   (:lambda (fn args)
     ((:lambda (start stop)
        (mu:sub stop start))
-       (mu/core:process-time)
+       (feature/core:process-time)
        ((:lambda ()
           (mu:apply fn args)
-          (mu/core:process-time))))))
+          (feature/core:process-time))))))
 
 ;;;
 ;;; return an vector of storage consumed
@@ -48,7 +48,7 @@
                  (mu:car loop)
                  (mu:cdr loop))))
          (mu:cons () 0)))
-     (mu/env:heap-room)
+     (feature/env:heap-room)
      ((:lambda ()
          (mu:apply fn args)
-         (mu/env:heap-room))))))
+         (feature/env:heap-room))))))

@@ -5,8 +5,8 @@
 ;;; core fasl module
 ;;;
 (system:provide
- "core/fasl"
+ "sys/fasl"
  '((:version . "0.0.1")
    (:lang    . :mu)
-   (:ns      . "core/fasl")
+   (:ns      . "sys/fasl")
    (:load    . ("compile.l" "load.l"))))
