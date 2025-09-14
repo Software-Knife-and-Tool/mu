@@ -6,6 +6,7 @@
 TMPF:=$(shell mktemp)
 
 MODULES = 		\
+	core		\
 	common		\
 	common/describe	\
 	common/metrics	\

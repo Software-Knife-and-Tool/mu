@@ -36,7 +36,9 @@ dist:
 	done
 
 	@install -d $(BASE)/doc/html
+
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
+	@install -m 644 $(DOCS)/refcards/*.docx $(BASE)/doc
 	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
 
 	@install -m 644 $(MU)/dist/mu.l $(BASE)/lib
