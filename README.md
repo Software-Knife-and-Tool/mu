@@ -245,7 +245,7 @@ Usage: manifest 0.0.16 command [option...]
     init                               ; init
     env                                ; print development environment
     build     release | profile | debug
-                                       ; build mu system, release is default
+                                       ; build mu system
     image     build --out=path | 
               [--image=path | -config=config]
               *[--load=path | --eval=sexpr]] | view --image=path
@@ -397,7 +397,7 @@ The  `performance`  makefile offers some development options.
 The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory contains the binaries for running the system.
 
 ```
-manifest	development tool
+manifest	development system tool
 mu-sys		runtime binary
 mu-listener	runtime binary, stdio listener
 mu-ld		image loader
