@@ -106,22 +106,19 @@ impl Read for Vector {
                     Err(_) => Err(Exception::new(env, Condition::Syntax, "mu:read", stream))?,
                 };
 
-                let vec_type = Cons::car(env, vec_list);
+                let (vec_type, vec) = Cons::destruct(env, vec_list);
 
                 match VTYPEMAP.iter().copied().find(|tab| vec_type.eq_(&tab.0)) {
                     Some(tab) => match tab.1 {
                         Type::T => {
-                            let vec = Cons::iter(env, Cons::cdr(env, vec_list))
-                                .map(|cons| Cons::car(env, cons))
-                                .collect::<Vec<Tag>>();
+                            let vec = Cons::list_iter(env, vec).collect::<Vec<Tag>>();
 
                             Ok(Vector::from(vec).evict(env))
                         }
                         Type::Char => {
                             let vec: exception::Result<String> =
-                                Cons::iter(env, Cons::cdr(env, vec_list))
-                                    .map(|cons| {
-                                        let ch = Cons::car(env, cons);
+                                Cons::list_iter(env, Cons::destruct(env, vec_list).1)
+                                    .map(|ch| {
                                         if ch.type_of() == Type::Char {
                                             Ok(Char::as_char(env, ch))
                                         } else {
@@ -139,9 +136,8 @@ impl Read for Vector {
                         }
                         Type::Byte => {
                             let vec: exception::Result<Vec<u8>> =
-                                Cons::iter(env, Cons::cdr(env, vec_list))
-                                    .map(|cons| {
-                                        let fx = Cons::car(env, cons);
+                                Cons::list_iter(env, Cons::destruct(env, vec_list).1)
+                                    .map(|fx| {
                                         if fx.type_of() == Type::Fixnum {
                                             let byte = Fixnum::as_i64(fx);
                                             if !(0..=255).contains(&byte) {
@@ -169,9 +165,8 @@ impl Read for Vector {
                         }
                         Type::Fixnum => {
                             let vec: exception::Result<Vec<i64>> =
-                                Cons::iter(env, Cons::cdr(env, vec_list))
-                                    .map(|cons| {
-                                        let fx = Cons::car(env, cons);
+                                Cons::list_iter(env, Cons::destruct(env, vec_list).1)
+                                    .map(|fx| {
                                         if fx.type_of() == Type::Fixnum {
                                             Ok(Fixnum::as_i64(fx))
                                         } else {
@@ -189,9 +184,8 @@ impl Read for Vector {
                         }
                         Type::Float => {
                             let vec: exception::Result<Vec<f32>> =
-                                Cons::iter(env, Cons::cdr(env, vec_list))
-                                    .map(|cons| {
-                                        let fl = Cons::car(env, cons);
+                                Cons::list_iter(env, Cons::destruct(env, vec_list).1)
+                                    .map(|fl| {
                                         if fl.type_of() == Type::Float {
                                             Ok(Float::as_f32(env, fl))
                                         } else {

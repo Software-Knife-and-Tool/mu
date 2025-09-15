@@ -133,14 +133,9 @@ impl QuasiReader {
             return cons;
         }
 
-        Cons::list(
-            env,
-            &[
-                self.cons,
-                Cons::car(env, cons),
-                self.append_args(env, Cons::cdr(env, cons)),
-            ],
-        )
+        let (car, cdr) = Cons::destruct(env, cons);
+
+        Cons::list(env, &[self.cons, car, self.append_args(env, cdr)])
     }
 
     fn compile(&self, env: &Env, expr: &QuasiExpr, recur: bool) -> exception::Result<Tag> {

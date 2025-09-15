@@ -173,7 +173,7 @@ impl Tag {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_eq(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_typeof(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_repr(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -181,7 +181,7 @@ pub trait CoreFunction {
     fn mu_view(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Tag {
+impl CoreFn for Tag {
     fn mu_repr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let arg = fp.argv[0];
         let slice = arg.as_slice().to_vec();

@@ -165,7 +165,7 @@ impl Stream {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_close(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_flush(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_get_string(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -180,7 +180,7 @@ pub trait CoreFunction {
     fn mu_write_char(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Stream {
+impl CoreFn for Stream {
     fn mu_write(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:write", &[Type::T, Type::T, Type::Stream], fp)?;
 

@@ -5,8 +5,7 @@
 #[rustfmt::skip]
 use {
     crate::core::{
-        core::CoreFunctionDef,
-//        namespace::{Namespace, Static},
+        core::CoreFnDef,
         tag::Tag
     },
     futures_locks::RwLock,
@@ -28,14 +27,13 @@ lazy_static! {
 
 #[derive(Clone)]
 pub struct Feature {
-    pub functions: Option<&'static Vec<CoreFunctionDef>>,
+    pub functions: Option<&'static [CoreFnDef]>,
     pub namespace: String,
     pub symbols: Option<&'static RwLock<HashMap<String, Tag>>>,
 }
 
 pub struct Features {
     pub features: Vec<Feature>,
-    //    pub namespaces: Vec<Namespace>,
 }
 
 impl Features {
@@ -65,9 +63,6 @@ impl Features {
 
          */
 
-        Self {
-            features,
-            //            namespaces: vec![],
-        }
+        Self { features }
     }
 }

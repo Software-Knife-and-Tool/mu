@@ -31,8 +31,7 @@ impl Lambda {
         let compile_frame_symbols = |lambda: Tag| -> exception::Result<Vec<Tag>> {
             let mut symvec = Vec::new();
 
-            for cons in Cons::iter(env, lambda) {
-                let symbol = Cons::car(env, cons);
+            for symbol in Cons::list_iter(env, lambda) {
                 if symbol.type_of() == Type::Symbol {
                     match symvec.iter().rev().position(|lex| symbol.eq_(lex)) {
                         Some(_) => {
@@ -46,7 +45,7 @@ impl Lambda {
                         _ => symvec.push(symbol),
                     }
                 } else {
-                    return Err(Exception::new(env, Condition::Type, "mu:compile", symbol));
+                    Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?
                 }
             }
 
@@ -55,10 +54,10 @@ impl Lambda {
 
         let (lambda, body) = match args.type_of() {
             Type::Cons => {
-                let lambda = Cons::car(env, args);
+                let cons = Cons::destruct(env, args);
 
-                match lambda.type_of() {
-                    Type::Null | Type::Cons => (lambda, Cons::cdr(env, args)),
+                match cons.0.type_of() {
+                    Type::Null | Type::Cons => cons,
                     _ => return Err(Exception::new(env, Condition::Type, "mu:compile", args)),
                 }
             }

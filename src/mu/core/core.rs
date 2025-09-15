@@ -5,41 +5,38 @@
 use {
     crate::{
         core::{
-            apply::CoreFunction as _,
-            compiler::CoreFunction as _,
+            apply::CoreFn as _,
+            compiler::CoreFn as _,
             direct::DirectTag,
             env::Env,
-            exception::{self, CoreFunction as _, Exception},
-            frame::{CoreFunction as _, Frame},
-            gc::{CoreFunction as _, GcContext},
-            namespace::{CoreFunction as _, Namespace},
-            tag::{CoreFunction as _, Tag},
+            exception::{self, CoreFn as _, Exception},
+            frame::{CoreFn as _, Frame},
+            gc::{CoreFn as _, GcContext},
+            namespace::{CoreFn as _, Namespace},
+            tag::{CoreFn as _, Tag},
         },
         features::feature::{Feature, FEATURES},
         streams::builder::StreamBuilder,
         types::{
-            cons::{Cons, CoreFunction as _},
-            fixnum::{CoreFunction as _, Fixnum},
-            float::{CoreFunction as _, Float},
+            cons::{Cons, CoreFn as _},
+            fixnum::{CoreFn as _, Fixnum},
+            float::{CoreFn as _, Float},
             function::Function,
-            stream::{CoreFunction as _, Stream},
-            struct_::{CoreFunction as _, Struct},
-            symbol::{CoreFunction as _, Symbol},
+            stream::{CoreFn as _, Stream},
+            struct_::{CoreFn as _, Struct},
+            symbol::{CoreFn as _, Symbol},
             vector::Vector,
         },
-        vectors::vector::CoreFunction as _,
+        vectors::vector::CoreFn as _,
     },
     futures_lite::future::block_on,
     futures_locks::RwLock,
     std::collections::HashMap,
 };
 
-pub type CoreFunction = fn(&Env, &mut Frame) -> exception::Result<()>;
-pub type CoreFunctionDef = (&'static str, u16, CoreFunction);
-
 lazy_static! {
     pub static ref CORE: Core = Core::new().features().stdio();
-    pub static ref CORE_FUNCTIONS: Vec<CoreFunctionDef> = vec![
+    pub static ref CORE_FUNCTIONS: &'static [CoreFnDef] = &[
         // types
         ( "eq",          2, Tag::mu_eq ),
         ( "type-of",     1, Tag::mu_typeof ),
@@ -143,6 +140,9 @@ lazy_static! {
         ( "write-char",  2, Stream::mu_write_char ),
     ];
 }
+
+pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
+pub type CoreFnDef = (&'static str, u16, CoreFn);
 
 pub struct Core {
     pub envs: RwLock<HashMap<u64, Env>>,

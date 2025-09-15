@@ -7,7 +7,7 @@ use {
     crate::{
         core::{
             apply::Apply as _,
-            core::CoreFunctionDef,
+            core::CoreFnDef,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -34,8 +34,8 @@ pub trait Prof {
 
 lazy_static! {
     pub static ref PROF_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref PROF_FUNCTIONS: Vec<CoreFunctionDef> =
-        vec![("prof-control", 1, Feature::prof_control)];
+    pub static ref PROF_FUNCTIONS: &'static [CoreFnDef] =
+        &[("prof-control", 1, Feature::prof_control)];
 }
 
 impl Prof for Feature {
@@ -66,11 +66,11 @@ impl Prof for Feature {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn prof_control(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Feature {
+impl CoreFn for Feature {
     fn prof_control(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu/prof:prof_control", &[Type::Keyword], fp)?;
 

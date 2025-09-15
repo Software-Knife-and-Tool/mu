@@ -377,7 +377,7 @@ impl Symbol {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_name(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_value(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -385,7 +385,7 @@ pub trait CoreFunction {
     fn mu_symbol(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Symbol {
+impl CoreFn for Symbol {
     fn mu_name(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 

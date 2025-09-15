@@ -186,7 +186,7 @@ impl Heap {
             }
             None => {
                 if self.alloc_barrier + image_size > self.size {
-                    return None;
+                    None?
                 }
 
                 self.gc_allocated += image_size;

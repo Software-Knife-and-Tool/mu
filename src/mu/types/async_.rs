@@ -166,15 +166,14 @@ impl Async {
                 "lambda".to_string(),
                 format!("{:x}", form.as_u64()),
             ),
-            Type::Cons => match Cons::cdr(env, form).type_of() {
+            Type::Cons => match Cons::destruct(env, form).0.type_of() {
                 Type::Null | Type::Cons => (
                     "null".to_string(),
                     "alambda".to_string(),
                     format!("{:x}", form.as_u64()),
                 ),
                 Type::Fixnum => {
-                    let ns = Cons::car(env, form);
-                    let offset = Cons::cdr(env, form);
+                    let (ns, offset) = Cons::destruct(env, form);
 
                     let ns_ref = block_on(env.ns_map.read());
                     let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];

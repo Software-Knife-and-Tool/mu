@@ -68,7 +68,7 @@ impl Env {
         // establish namespaces
         env.null_ns = Namespace::with(&env, "").unwrap();
         env.mu_ns =
-            Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(&CORE_FUNCTIONS)).unwrap();
+            Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(*CORE_FUNCTIONS)).unwrap();
         env.keyword_ns = Namespace::with_static(&env, "keyword", None, None).unwrap();
 
         Namespace::intern_static(&env, env.mu_ns, "*null/*".into(), env.null_ns).unwrap();

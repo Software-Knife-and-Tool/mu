@@ -91,8 +91,7 @@ impl Compiler {
         let compile_frame_symbols = |lambda: Tag| -> exception::Result<Vec<Tag>> {
             let mut symvec = Vec::new();
 
-            for cons in Cons::iter(env, lambda) {
-                let symbol = Cons::car(env, cons);
+            for symbol in Cons::list_iter(env, lambda) {
                 if symbol.type_of() == Type::Symbol {
                     match symvec.iter().rev().position(|lex| symbol.eq_(lex)) {
                         Some(_) => {
@@ -110,10 +109,10 @@ impl Compiler {
 
         let (lambda, body) = match form.type_of() {
             Type::Cons => {
-                let lambda = Cons::car(env, form);
+                let cons = Cons::destruct(env, form);
 
-                match lambda.type_of() {
-                    Type::Null | Type::Cons => (lambda, Cons::cdr(env, form)),
+                match cons.0.type_of() {
+                    Type::Null | Type::Cons => cons,
                     _ => Err(Exception::new(env, Condition::Type, "mu:compile", form))?,
                 }
             }
@@ -178,12 +177,12 @@ impl Compiler {
     pub fn unquote(env: &Env, form: &Tag) -> Tag {
         assert!(Self::is_quoted(env, form));
 
-        Cons::cdr(env, *form)
+        Cons::destruct(env, *form).1
     }
 
     pub fn is_quoted(env: &Env, form: &Tag) -> bool {
         match form.type_of() {
-            Type::Cons => Cons::car(env, *form).eq_(&COMPILER.quote),
+            Type::Cons => Cons::destruct(env, *form).0.eq_(&COMPILER.quote),
             _ => false,
         }
     }
@@ -207,8 +206,8 @@ impl Compiler {
     }
 
     fn compile_list(env: &Env, body: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {
-        let compile_results: exception::Result<Vec<Tag>> = Cons::iter(env, body)
-            .map(|cons| Self::compile(env, Cons::car(env, cons), lenv))
+        let compile_results: exception::Result<Vec<Tag>> = Cons::list_iter(env, body)
+            .map(|expr| Self::compile(env, expr, lenv))
             .collect();
 
         Ok(Cons::list(env, &compile_results?))
@@ -247,8 +246,7 @@ impl Compiler {
         match expr.type_of() {
             Type::Symbol => Self::compile_lexical(env, expr, lenv),
             Type::Cons => {
-                let func = Cons::car(env, expr);
-                let args = Cons::cdr(env, expr);
+                let (func, args) = Cons::destruct(env, expr);
 
                 match func.type_of() {
                     Type::Keyword => Ok(Self::special_form(env, func, args, lenv)?),
@@ -285,12 +283,12 @@ impl Compiler {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_compile(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_if(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Env {
+impl CoreFn for Env {
     fn mu_if(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check(":if", &[Type::T, Type::Function, Type::Function], fp)?;
 
