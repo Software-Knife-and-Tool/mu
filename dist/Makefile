@@ -31,12 +31,12 @@ dist:
 	@install -d $(BASE)/lib
 	@install -d $(BASE)/modules
 
+	@install -m 755 mu-sys $(BASE)/bin
 	@for bin in $(BIN); do			\
 	    install -m 755 $$bin $(BASE)/bin;	\
 	done
 
 	@install -d $(BASE)/doc/html
-
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
 	@install -m 644 $(DOCS)/refcards/*.docx $(BASE)/doc
 	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
@@ -68,4 +68,4 @@ dist:
 	@rm -rf $(BASE) $(BIN)
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) core.fasl $(BIN)
+	@rm -rf $(BASE)-*.tgz $(BASE) core.sys $(BIN)

@@ -9,12 +9,16 @@ pub fn listener(env_: &Env_) -> Result {
     let env = env_.env;
     let ns = env_.ns.clone();
 
-    let eof_value = Mu::eval_str(env, "(mu:make-symbol \"%eof%\")")?;
+    let eof_value = Mu::eval_str(env, "'%eof%")?;
     let flush_form = Mu::compile(env, Mu::read_str(env, "(mu:flush mu:*standard-output*)")?)?;
-    let read_form = Mu::read_str(
-        env,
-        "(core:compile (core:read mu:*standard-input* () core:%eof%))",
-    )?;
+
+    let read_form = match ns.as_str() {
+        "mu" => Mu::read_str(env, "(mu:compile (mu:read mu:*standard-input* () '%eof%))")?,
+        _ => Mu::read_str(
+            env,
+            "(core:compile (core:read mu:*standard-input* () '%eof%))",
+        )?,
+    };
 
     let prompt = format!("{ns}> ");
 
