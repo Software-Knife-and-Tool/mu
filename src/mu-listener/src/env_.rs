@@ -1,7 +1,6 @@
 //  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 #![allow(dead_code)]
-
 use {
     crate::config::Config,
     mu::{Env, Mu},
@@ -48,6 +47,7 @@ impl Env_ {
             None => "mu",
         };
 
+        println!("ns: {ns}");
         match config.map("rc") {
             Some(rc) => match Mu::load(env, rc.as_str()) {
                 Ok(bool_) => bool_,
