@@ -311,7 +311,7 @@ impl VecImage for VecImageType<'_> {
         let image = Vector::gc_ref_image(context, vector);
 
         if index >= Fixnum::as_i64(image.length) as usize {
-            return None;
+            None?
         }
 
         let vimage = match vector {
@@ -370,7 +370,7 @@ impl VecImage for VecImageType<'_> {
         let image = Vector::to_image(env, vector);
 
         if index >= Fixnum::as_i64(image.length) as usize {
-            return None;
+            None?
         }
 
         let heap_ref = block_on(env.heap.read());

@@ -108,12 +108,12 @@ impl Exception {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_with_exception(env: &Env, fp: &mut Frame) -> Result<()>;
     fn mu_raise(env: &Env, fp: &mut Frame) -> Result<()>;
 }
 
-impl CoreFunction for Exception {
+impl CoreFn for Exception {
     fn mu_raise(env: &Env, fp: &mut Frame) -> Result<()> {
         env.argv_check("mu:raise", &[Type::T, Type::Keyword], fp)?;
 

@@ -6,6 +6,7 @@ use {
     crate::{
         core::{
             cache::Cache,
+            direct::DirectTag,
             env::Env,
             exception,
             gc::{Gc as _, GcContext},
@@ -96,6 +97,30 @@ impl Function {
         Image::to_tag(&image, env, Type::Function as u8)
     }
 
+    pub fn destruct(env: &Env, fn_: Tag) -> (Tag, Tag) {
+        assert!(fn_.type_of() == Type::Function);
+
+        match fn_ {
+            Tag::Indirect(fn_) => {
+                let heap_ref = block_on(env.heap.read());
+
+                (
+                    Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
+                    Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+                )
+            }
+            Tag::Direct(_) => DirectTag::function_destruct(fn_),
+            Tag::Image(_) => {
+                let (index, _) = Image::detag(fn_);
+
+                match Cache::ref_(env, index) {
+                    Image::Function(fn_) => (fn_.arity, fn_.form),
+                    _ => panic!(),
+                }
+            }
+        }
+    }
+
     pub fn evict(&self, env: &Env) -> Tag {
         let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
         let mut heap_ref = block_on(env.heap.write());
@@ -175,15 +200,14 @@ impl Function {
                 "lambda".to_string(),
                 format!("{:x}", form.as_u64()),
             ),
-            Type::Cons => match Cons::cdr(env, form).type_of() {
+            Type::Cons => match Cons::destruct(env, form).1.type_of() {
                 Type::Null | Type::Cons => (
                     "null".to_string(),
                     "lambda".to_string(),
                     format!("{:x}", form.as_u64()),
                 ),
                 Type::Fixnum => {
-                    let ns = Cons::car(env, form);
-                    let offset = Cons::cdr(env, form);
+                    let (ns, offset) = Cons::destruct(env, form);
 
                     let ns_ref = block_on(env.ns_map.read());
                     let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];

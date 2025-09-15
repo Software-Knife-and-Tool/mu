@@ -72,8 +72,8 @@ impl Apply for Env {
     }
 
     fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let eval_results: exception::Result<Vec<Tag>> = Cons::iter(self, args)
-            .map(|cons| self.eval(Cons::car(self, cons)))
+        let eval_results: exception::Result<Vec<Tag>> = Cons::list_iter(self, args)
+            .map(|expr| self.eval(expr))
             .collect();
 
         self.apply_(func, eval_results?)
@@ -86,8 +86,7 @@ impl Apply for Env {
 
         match expr.type_of() {
             Type::Cons => {
-                let func = Cons::car(self, expr);
-                let args = Cons::cdr(self, expr);
+                let (func, args) = Cons::destruct(self, expr);
 
                 match func.type_of() {
                     Type::Symbol => {
@@ -117,13 +116,13 @@ impl Apply for Env {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_apply(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_eval(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_fix(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Env {
+impl CoreFn for Env {
     fn mu_eval(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = env.eval(fp.argv[0])?;
 
@@ -138,8 +137,8 @@ impl CoreFunction for Env {
 
         fp.value = Frame {
             func,
-            argv: Cons::iter(env, args)
-                .map(|cons| Cons::car(env, cons))
+            argv: Cons::cons_iter(env, args)
+                .map(|cons| Cons::destruct(env, cons).0)
                 .collect::<Vec<Tag>>(),
             value: Tag::nil(),
         }

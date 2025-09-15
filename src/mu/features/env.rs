@@ -7,7 +7,7 @@ use {
     crate::{
         core::{
             cache::Cache,
-            core::CoreFunctionDef,
+            core::CoreFnDef,
             direct::DirectTag,
             env,
             exception::{self},
@@ -35,7 +35,7 @@ use {
 
 lazy_static! {
     pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref ENV_FUNCTIONS: Vec<CoreFunctionDef> = vec![
+    pub static ref ENV_FUNCTIONS: &'static [CoreFnDef] = &[
         ("cache-room", 0, Feature::env_cache_room),
         ("env", 0, Feature::env_env),
         ("heap-info", 0, Feature::env_hp_info),
@@ -136,7 +136,7 @@ impl Env for Feature {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn env_cache_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_env(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_info(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
@@ -144,7 +144,7 @@ pub trait CoreFunction {
     fn env_hp_size(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Feature {
+impl CoreFn for Feature {
     fn env_hp_info(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
         let heap_ref = block_on(env.heap.read());
 

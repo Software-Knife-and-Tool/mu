@@ -6,7 +6,7 @@ use {
     crate::{
         core::{
             apply::Apply as _,
-            core::CoreFunctionDef,
+            core::CoreFnDef,
             direct::DirectTag,
             env::Env,
             exception::{self, Condition, Exception},
@@ -51,7 +51,7 @@ impl Gc for Namespace {
 
 #[derive(Clone)]
 pub struct Static {
-    pub functions: Option<&'static Vec<CoreFunctionDef>>,
+    pub functions: Option<&'static [CoreFnDef]>,
     pub hash: Option<&'static RwLock<HashMap<String, Tag>>>,
 }
 
@@ -109,7 +109,7 @@ impl Namespace {
         env: &Env,
         name: &str,
         ns_map: Option<&'static RwLock<HashMap<String, Tag>>>,
-        functab: Option<&'static Vec<CoreFunctionDef>>,
+        functab: Option<&'static [CoreFnDef]>,
     ) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
         let len = ns_ref.len();
@@ -163,7 +163,7 @@ impl Namespace {
                 let hash = block_on(match ns_cache {
                     Namespace::Static(static_) => match static_.hash {
                         Some(hash) => hash.read(),
-                        None => return None,
+                        None => None?,
                     },
                     Namespace::Dynamic(hash) => hash.read(),
                 });
@@ -221,7 +221,7 @@ impl Namespace {
     pub fn intern(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
         if env.keyword_ns.eq_(&ns) {
             if name.len() > DirectTag::DIRECT_STR_MAX {
-                return None;
+                None?
             }
 
             return Some(Symbol::keyword(&name));
@@ -270,14 +270,14 @@ impl Namespace {
                         let mut hash = block_on(match ns_map {
                             Namespace::Static(static_) => match static_.hash {
                                 Some(hash) => hash.write(),
-                                None => return None,
+                                None => None?,
                             },
                             Namespace::Dynamic(hash) => hash.write(),
                         });
 
                         hash.insert(name, symbol);
                     }
-                    None => return None,
+                    None => None?,
                 }
 
                 Some(symbol)
@@ -303,21 +303,21 @@ impl Namespace {
                 let mut hash = block_on(match ns_map {
                     Namespace::Static(static_) => match static_.hash {
                         Some(hash) => hash.write(),
-                        None => return None,
+                        None => None?,
                     },
-                    Namespace::Dynamic(_) => return None,
+                    Namespace::Dynamic(_) => None?,
                 });
 
                 hash.insert(name, symbol);
             }
-            None => return None,
+            None => None?,
         }
 
         Some(symbol)
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_find(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_find_ns(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_intern(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -325,7 +325,7 @@ pub trait CoreFunction {
     fn mu_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Namespace {
+impl CoreFn for Namespace {
     fn mu_intern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let mut ns = fp.argv[0];
         let name = fp.argv[1];

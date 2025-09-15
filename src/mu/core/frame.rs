@@ -127,26 +127,24 @@ impl Frame {
             }
             Type::Async => {
                 let form = Async::form(env, func);
-                let offset = Cons::cdr(env, form);
+                let offset = Cons::destruct(env, form).1;
 
                 match form.type_of() {
                     Type::Null => Ok(Tag::nil()),
                     Type::Cons => match offset.type_of() {
                         Type::Null | Type::Cons => {
-                            let mut value = Tag::nil();
                             let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
 
                             Dynamic::dynamic_push(env, self.func, offset);
                             self.frame_stack_push(env);
 
-                            for cons in Cons::iter(env, form) {
-                                value = env.eval(Cons::car(env, cons))?;
-                            }
+                            let value: exception::Result<Tag> = Cons::list_iter(env, form)
+                                .try_fold(Tag::nil(), |_, expr| env.eval(expr));
 
                             Self::frame_stack_pop(env, func);
                             Dynamic::dynamic_pop(env);
 
-                            Ok(value)
+                            value
                         }
                         _ => panic!(),
                     },
@@ -155,13 +153,12 @@ impl Frame {
             }
             Type::Function => {
                 let form = Function::form(env, func);
-                let offset = Cons::cdr(env, form);
+                let (ns, offset) = Cons::destruct(env, form);
 
                 match form.type_of() {
                     Type::Null => Ok(Tag::nil()),
                     Type::Cons => match offset.type_of() {
                         Type::Fixnum => {
-                            let ns = Cons::car(env, form);
                             let ns_ref = block_on(env.ns_map.read());
                             let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
 
@@ -178,20 +175,18 @@ impl Frame {
                             Ok(self.value)
                         }
                         Type::Null | Type::Cons => {
-                            let mut value = Tag::nil();
                             let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
 
                             Dynamic::dynamic_push(env, self.func, offset);
                             self.frame_stack_push(env);
 
-                            for cons in Cons::iter(env, form) {
-                                value = env.eval(Cons::car(env, cons))?;
-                            }
+                            let value: exception::Result<Tag> = Cons::list_iter(env, form)
+                                .try_fold(Tag::nil(), |_, expr| env.eval(expr));
 
                             Self::frame_stack_pop(env, func);
                             Dynamic::dynamic_pop(env);
 
-                            Ok(value)
+                            value
                         }
                         _ => panic!(),
                     },
@@ -203,14 +198,14 @@ impl Frame {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_frame_pop(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_frame_push(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_frame_ref(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_frames(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Frame {
+impl CoreFn for Frame {
     fn mu_frames(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let frames_ref = block_on(env.dynamic.read());
         let mut frames = Vec::new();
@@ -249,14 +244,13 @@ impl CoreFunction for Frame {
     fn mu_frame_push(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:frame-push", &[Type::Cons], fp)?;
 
-        let func = Cons::car(env, fp.argv[0]);
+        let (func, av) = Cons::destruct(env, fp.argv[0]);
         if func.type_of() != Type::Function {
-            return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", func));
+            return Err(Exception::new(env, Condition::Type, "mu:%frame-push", func));
         }
 
-        let av = Cons::cdr(env, fp.argv[0]);
         if av.type_of() != Type::Vector {
-            return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", av));
+            return Err(Exception::new(env, Condition::Type, "mu:%frame-push", av));
         }
 
         let argv = Vector::iter(env, av).collect::<Vec<Tag>>();

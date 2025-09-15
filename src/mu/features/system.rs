@@ -7,7 +7,7 @@ use {
     crate::{
         core::{
             apply::Apply as _,
-            core::CoreFunctionDef,
+            core::CoreFnDef,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -25,7 +25,9 @@ use {
         },
     },
     futures_locks::RwLock,
-    std::collections::HashMap,
+    std::{
+        collections::HashMap,
+    },
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -33,7 +35,7 @@ use sysinfo_dot_h::{self};
 
 lazy_static! {
     pub static ref SYSTEM_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref SYSTEM_FUNCTIONS: Vec<CoreFunctionDef> = vec![
+    pub static ref SYSTEM_FUNCTIONS: &'static [CoreFnDef] = &[
         ("exit", 1, Feature::system_exit),
         ("shell", 2, Feature::system_shell),
         ("sleep", 1, Feature::system_sleep),
@@ -57,7 +59,7 @@ impl System for Feature {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn system_uname(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn system_shell(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn system_exit(_: &Env, fp: &mut Frame) -> exception::Result<()>;
@@ -66,7 +68,7 @@ pub trait CoreFunction {
     fn system_sysinfo(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Feature {
+impl CoreFn for Feature {
     fn system_shell(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("system:shell", &[Type::String, Type::List], fp)?;
 
@@ -74,15 +76,13 @@ impl CoreFunction for Feature {
         let args = fp.argv[1];
         let mut argv = vec![];
 
-        for cons in Cons::iter(env, args) {
-            let string = Cons::car(env, cons);
-
-            match string.type_of() {
-                Type::Vector if Vector::type_of(env, string) == Type::Char => {
-                    let str = Vector::as_string(env, string);
-                    argv.push(str)
+        // do this with a collect?
+        for arg in Cons::list_iter(env, args) {
+            match arg.type_of() {
+                Type::Vector if Vector::type_of(env, arg) == Type::Char => {
+                    argv.push(Vector::as_string(env, arg));
                 }
-                _ => return Err(Exception::new(env, Condition::Type, "std:command", string)),
+                _ => Err(Exception::new(env, Condition::Type, "std:command", arg))?,
             }
         }
 

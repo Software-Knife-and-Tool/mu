@@ -120,14 +120,14 @@ impl Gc for Vector {
 }
 
 // env functions
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_type(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_length(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_make_vector(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_svref(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Vector {
+impl CoreFn for Vector {
     fn mu_make_vector(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:make-vector", &[Type::Keyword, Type::List], fp)?;
 
@@ -143,16 +143,13 @@ impl CoreFunction for Vector {
                     type_sym,
                 ))?,
                 Type::T => {
-                    let vec = Cons::iter(env, list)
-                        .map(|cons| Cons::car(env, cons))
-                        .collect::<Vec<Tag>>();
+                    let vec = Cons::list_iter(env, list).collect::<Vec<Tag>>();
 
                     Vector::from(vec).evict(env)
                 }
                 Type::Char => {
-                    let vec: exception::Result<String> = Cons::iter(env, list)
-                        .map(|cons| {
-                            let ch = Cons::car(env, cons);
+                    let vec: exception::Result<String> = Cons::list_iter(env, list)
+                        .map(|ch| {
                             if ch.type_of() == Type::Char {
                                 Ok(Char::as_char(env, ch))
                             } else {
@@ -167,8 +164,7 @@ impl CoreFunction for Vector {
                     let mut vec = vec![0; Cons::length(env, list).unwrap().div_ceil(8)];
                     let bvec = &mut vec;
 
-                    for (i, cons) in Cons::iter(env, list).enumerate() {
-                        let fx = Cons::car(env, cons);
+                    for (i, fx) in Cons::list_iter(env, list).enumerate() {
                         if fx.type_of() == Type::Fixnum {
                             let bit = Fixnum::as_i64(fx);
                             if !(0..1).contains(&bit) {
@@ -184,9 +180,8 @@ impl CoreFunction for Vector {
                     Vector::from(vec).evict(env)
                 }
                 Type::Byte => {
-                    let vec: exception::Result<Vec<u8>> = Cons::iter(env, list)
-                        .map(|cons| {
-                            let fx = Cons::car(env, cons);
+                    let vec: exception::Result<Vec<u8>> = Cons::list_iter(env, list)
+                        .map(|fx| {
                             if fx.type_of() == Type::Fixnum {
                                 let byte = Fixnum::as_i64(fx);
                                 if !(0..=255).contains(&byte) {
@@ -208,9 +203,8 @@ impl CoreFunction for Vector {
                     Vector::from(vec?).evict(env)
                 }
                 Type::Fixnum => {
-                    let vec: exception::Result<Vec<i64>> = Cons::iter(env, list)
-                        .map(|cons| {
-                            let fx = Cons::car(env, cons);
+                    let vec: exception::Result<Vec<i64>> = Cons::list_iter(env, list)
+                        .map(|fx| {
                             if fx.type_of() == Type::Fixnum {
                                 Ok(Fixnum::as_i64(fx))
                             } else {
@@ -222,9 +216,8 @@ impl CoreFunction for Vector {
                     Vector::from(vec?).evict(env)
                 }
                 Type::Float => {
-                    let vec: exception::Result<Vec<f32>> = Cons::iter(env, list)
-                        .map(|cons| {
-                            let fl = Cons::car(env, cons);
+                    let vec: exception::Result<Vec<f32>> = Cons::list_iter(env, list)
+                        .map(|fl| {
                             if fl.type_of() == Type::Float {
                                 Ok(Float::as_f32(env, fl))
                             } else {

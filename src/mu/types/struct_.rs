@@ -141,14 +141,12 @@ impl Struct {
                     Err(_) => Err(Exception::new(env, Condition::Syntax, "mu:read", stream))?,
                 };
 
-                let stype = Cons::car(env, vec_list);
+                let (stype, vec) = Cons::destruct(env, vec_list);
                 match stype.type_of() {
                     Type::Keyword => Ok(Self::to_tag(
                         env,
                         stype,
-                        Cons::iter(env, Cons::cdr(env, vec_list))
-                            .map(|cons| Cons::car(env, cons))
-                            .collect::<Vec<Tag>>(),
+                        Cons::list_iter(env, vec).collect::<Vec<Tag>>(),
                     )),
                     _ => Err(Exception::new(env, Condition::Type, "mu:read", stype))?,
                 }
@@ -181,13 +179,13 @@ impl Struct {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_struct_type(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_struct_vector(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_make_struct(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Struct {
+impl CoreFn for Struct {
     fn mu_struct_type(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:struct-type", &[Type::Struct], fp)?;
 
@@ -214,9 +212,7 @@ impl CoreFunction for Struct {
         let type_ = fp.argv[0];
         let list = fp.argv[1];
 
-        let vec = Cons::iter(env, list)
-            .map(|cons| Cons::car(env, cons))
-            .collect::<Vec<Tag>>();
+        let vec = Cons::list_iter(env, list).collect::<Vec<Tag>>();
 
         fp.value = Struct {
             stype: type_,

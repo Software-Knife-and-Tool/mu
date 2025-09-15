@@ -58,7 +58,7 @@ impl Float {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_fladd(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_flsub(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_flmul(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -66,7 +66,7 @@ pub trait CoreFunction {
     fn mu_fldiv(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Float {
+impl CoreFn for Float {
     fn mu_fladd(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:fl-add", &[Type::Float, Type::Float], fp)?;
 

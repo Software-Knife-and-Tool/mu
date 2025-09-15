@@ -8,7 +8,7 @@ use {
     crate::{
         core::{
             apply::Apply,
-            core::{Core as Core_, CoreFunctionDef, CORE},
+            core::{Core as Core_, CoreFnDef, CORE},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -38,7 +38,7 @@ use {
 
 lazy_static! {
     pub static ref CORE_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref CORE_FUNCTIONS: Vec<CoreFunctionDef> = vec![
+    pub static ref CORE_FUNCTIONS: &'static [CoreFnDef] = &[
         ("core-info", 0, Feature::core_core_info),
         ("process-fds", 0, Feature::core_fds),
         ("process-mem-res", 0, Feature::core_mem_res),
@@ -98,7 +98,7 @@ impl Core for Feature {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn core_core_info(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn core_delay(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn core_fds(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -109,7 +109,7 @@ pub trait CoreFunction {
     fn core_ns_symbols(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Feature {
+impl CoreFn for Feature {
     fn core_delay(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("%core:delay", &[Type::Fixnum], fp)?;
 

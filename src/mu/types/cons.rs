@@ -58,7 +58,7 @@ impl Gc for Cons {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Image(_) => panic!(),
-                Tag::Direct(_) => DirectTag::car(cons),
+                Tag::Direct(_) => DirectTag::cons_destruct(cons).0,
                 Tag::Indirect(_) => Self::gc_ref_image(context, cons).car,
             },
             _ => panic!(),
@@ -71,7 +71,7 @@ impl Gc for Cons {
             Type::Cons => match cons {
                 Tag::Image(_) => panic!(),
                 Tag::Indirect(_) => Self::gc_ref_image(context, cons).cdr,
-                Tag::Direct(_) => DirectTag::cdr(cons),
+                Tag::Direct(_) => DirectTag::cons_destruct(cons).1,
             },
             _ => panic!(),
         }
@@ -124,6 +124,30 @@ impl Cons {
         }
     }
 
+    pub fn destruct(env: &Env, cons: Tag) -> (Tag, Tag) {
+        assert!(cons.type_of() == Type::Cons || cons.type_of() == Type::Null);
+
+        match cons {
+            Tag::Indirect(cons) => {
+                let heap_ref = block_on(env.heap.read());
+
+                (
+                    Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize).unwrap()),
+                    Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize + 1).unwrap()),
+                )
+            }
+            Tag::Direct(_) => DirectTag::cons_destruct(cons),
+            Tag::Image(_) => {
+                let (index, _) = Image::detag(cons);
+
+                match Cache::ref_(env, index) {
+                    Image::Cons(cons) => (cons.car, cons.cdr),
+                    _ => panic!(),
+                }
+            }
+        }
+    }
+
     pub fn dynamic(&self, env: &Env) -> Tag {
         let image = Image::Cons(*self);
 
@@ -154,27 +178,51 @@ impl Cons {
         list
     }
 
-    pub fn car(env: &Env, cons: Tag) -> Tag {
-        match cons.type_of() {
+    pub fn cons_deref(env: &Env, cons: Tag) -> (Tag, Tag) {
+        let car = match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
-                Tag::Direct(_) => DirectTag::car(cons),
+                Tag::Direct(_) => DirectTag::cons_destruct(cons).0,
                 Tag::Image(_) | Tag::Indirect(_) => Self::to_image(env, cons).car,
             },
             _ => panic!(),
-        }
-    }
+        };
 
-    pub fn cdr(env: &Env, cons: Tag) -> Tag {
-        match cons.type_of() {
+        let cdr = match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
-                Tag::Direct(_) => DirectTag::cdr(cons),
+                Tag::Direct(_) => DirectTag::cons_destruct(cons).1,
                 Tag::Image(_) | Tag::Indirect(_) => Self::to_image(env, cons).cdr,
             },
             _ => panic!(),
-        }
+        };
+
+        (car, cdr)
     }
+
+    /*
+        pub fn car(env: &Env, cons: Tag) -> Tag {
+            match cons.type_of() {
+                Type::Null => cons,
+                Type::Cons => match cons {
+                    Tag::Direct(_) => DirectTag::cons_deref(cons).0,
+                    Tag::Image(_) | Tag::Indirect(_) => Self::to_image(env, cons).car,
+                },
+                _ => panic!(),
+            }
+        }
+
+        pub fn cdr(env: &Env, cons: Tag) -> Tag {
+            match cons.type_of() {
+                Type::Null => cons,
+                Type::Cons => match cons {
+                    Tag::Direct(_) => DirectTag::cons_deref(cons).1,
+                    Tag::Image(_) | Tag::Indirect(_) => Self::to_image(env, cons).cdr,
+                },
+                _ => panic!(),
+            }
+    }
+        */
 
     pub fn length(env: &Env, cons: Tag) -> Option<usize> {
         match cons.type_of() {
@@ -187,10 +235,10 @@ impl Cons {
                     match cp.type_of() {
                         Type::Cons => {
                             n += 1;
-                            cp = Self::cdr(env, cp)
+                            cp = Self::destruct(env, cp).1
                         }
                         Type::Null => break,
-                        _ => return None,
+                        _ => None?,
                     }
                 }
 
@@ -201,13 +249,17 @@ impl Cons {
     }
 
     pub fn view(env: &Env, cons: Tag) -> Tag {
-        let vec = vec![Self::car(env, cons), Self::cdr(env, cons)];
+        let (car, cdr) = Self::destruct(env, cons);
 
-        Vector::from(vec).evict(env)
+        Vector::from(vec![car, cdr]).evict(env)
     }
 
-    pub fn iter(env: &Env, cons: Tag) -> ConsIter<'_> {
+    pub fn cons_iter(env: &Env, cons: Tag) -> ConsIter<'_> {
         ConsIter { env, cons }
+    }
+
+    pub fn list_iter(env: &Env, list: Tag) -> ListIter<'_> {
+        ListIter { env, list }
     }
 
     pub fn heap_size(_: &Env, cons: Tag) -> usize {
@@ -314,20 +366,19 @@ impl Cons {
     }
 
     pub fn write(env: &Env, cons: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        let car = Self::car(env, cons);
+        let (car, mut tail) = Self::destruct(env, cons);
 
         StreamWriter::write_char(env, stream, '(').unwrap();
         env.write(car, escape, stream).unwrap();
-
-        let mut tail = Self::cdr(env, cons);
 
         // this is ugly, but it might be worse with a for loop
         loop {
             match tail.type_of() {
                 Type::Cons => {
+                    let (car, cdr) = Self::destruct(env, tail);
                     StreamWriter::write_char(env, stream, ' ').unwrap();
-                    env.write(Self::car(env, tail), escape, stream).unwrap();
-                    tail = Self::cdr(env, tail);
+                    env.write(car, escape, stream).unwrap();
+                    tail = cdr;
                 }
                 _ if tail.null_() => break,
                 _ => {
@@ -361,11 +412,12 @@ impl Cons {
                 match tail.type_of() {
                     _ if tail.null_() => return Some(Tag::nil()),
                     Type::Cons => {
+                        let (car, cdr) = Self::destruct(env, tail);
                         if nth == 0 {
-                            return Some(Self::car(env, tail));
+                            return Some(car);
                         }
                         nth -= 1;
-                        tail = Self::cdr(env, tail)
+                        tail = cdr
                     }
                     _ => {
                         return if nth != 0 { None } else { Some(tail) };
@@ -390,7 +442,7 @@ impl Cons {
                             return Some(tail);
                         }
                         nth -= 1;
-                        tail = Self::cdr(env, tail)
+                        tail = Self::destruct(env, tail).1
                     }
                     _ => {
                         return if nth != 0 { None } else { Some(tail) };
@@ -403,7 +455,7 @@ impl Cons {
 }
 
 /// env functions
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_append(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_car(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_cdr(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -413,7 +465,7 @@ pub trait CoreFunction {
     fn mu_nthcdr(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Cons {
+impl CoreFn for Cons {
     fn mu_append(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:car", &[Type::List], fp)?;
 
@@ -423,20 +475,20 @@ impl CoreFunction for Cons {
         if !lists.null_() {
             let mut appended = vec![];
 
-            for cons in Cons::iter(env, lists) {
-                let list = Self::car(env, cons);
+            for cons in Cons::cons_iter(env, lists) {
+                let (list, cdr) = Cons::destruct(env, cons);
 
-                if Self::cdr(env, cons).null_() {
+                if cdr.null_() {
                     fp.value = Self::append(env, &appended, list)
                 } else {
                     match list.type_of() {
                         Type::Null => (),
                         Type::Cons => {
-                            for cons in Cons::iter(env, list) {
-                                appended.push(Self::car(env, cons))
+                            for car in Cons::list_iter(env, list) {
+                                appended.push(car)
                             }
                         }
-                        _ => return Err(Exception::new(env, Condition::Type, "mu:append", list))?,
+                        _ => Err(Exception::new(env, Condition::Type, "mu:append", list))?,
                     }
                 }
             }
@@ -452,7 +504,7 @@ impl CoreFunction for Cons {
 
         fp.value = match list.type_of() {
             Type::Null => list,
-            Type::Cons => Self::car(env, list),
+            Type::Cons => Self::destruct(env, list).0,
             _ => panic!(),
         };
 
@@ -466,7 +518,7 @@ impl CoreFunction for Cons {
 
         fp.value = match list.type_of() {
             Type::Null => list,
-            Type::Cons => Self::cdr(env, list),
+            Type::Cons => Self::destruct(env, list).1,
             _ => panic!(),
         };
 
@@ -555,8 +607,32 @@ impl Iterator for ConsIter<'_> {
         match self.cons.type_of() {
             Type::Cons => {
                 let cons = self.cons;
-                self.cons = Cons::cdr(self.env, self.cons);
+
+                self.cons = Cons::destruct(self.env, self.cons).1;
                 Some(cons)
+            }
+            _ => None,
+        }
+    }
+}
+
+// iterator
+pub struct ListIter<'a> {
+    env: &'a Env,
+    pub list: Tag,
+}
+
+// proper lists only
+impl Iterator for ListIter<'_> {
+    type Item = Tag;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.list.type_of() {
+            Type::Cons => {
+                let (car, cdr) = Cons::destruct(self.env, self.list);
+
+                self.list = cdr;
+                Some(car)
             }
             _ => None,
         }

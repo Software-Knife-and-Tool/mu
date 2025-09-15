@@ -123,7 +123,7 @@ impl Fixnum {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_ash(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxadd(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxdiv(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -135,7 +135,7 @@ pub trait CoreFunction {
     fn mu_logor(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for Fixnum {
+impl CoreFn for Fixnum {
     fn mu_ash(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:ash", &[Type::Fixnum, Type::Fixnum], fp)?;
 

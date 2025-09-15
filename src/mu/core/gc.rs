@@ -134,11 +134,11 @@ impl Gc for GcContext<'_> {
     }
 }
 
-pub trait CoreFunction {
+pub trait CoreFn {
     fn mu_gc(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFunction for GcContext<'_> {
+impl CoreFn for GcContext<'_> {
     fn mu_gc(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         Self::gc(env)?;
 

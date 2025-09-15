@@ -4,10 +4,18 @@
 //! env direct tagged types
 #![allow(unused_braces)]
 #![allow(clippy::identity_op)]
+#[rustfmt::skip]
 use {
-    crate::core::tag::{Tag, TagType},
+    crate::{
+        core::{
+            tag::{Tag, TagType},
+            type_::Type,
+        },
+        types::fixnum::Fixnum,
+    },
     modular_bitfield::specifiers::{B3, B56},
     num_enum::TryFromPrimitive,
+    std::convert::TryInto,
 };
 
 // little endian direct tag format
@@ -40,12 +48,13 @@ pub enum DirectType {
 #[derive(Copy, Clone, PartialOrd, Ord, Eq, PartialEq, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ExtType {
-    Fixnum = 0,
-    Char = 1,
-    Float = 2,
-    Cons = 3,
-    Stream = 4,
+    Char = 0,
+    Cons = 1,
+    Fixnum = 2,
+    Float = 3,
+    Function = 4,
     Image = 5,
+    Stream = 6,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -58,7 +67,6 @@ impl DirectTag {
     // 56 bit fixnum:     -36028797018963967 to 36028797018963968
     // 32 bit IEEE float: -3.40282347E+38    to -1.17549435E-38,
     //                     1.17549435E-38    to  3.40282347E+38
-
     pub const DIRECT_STR_MAX: usize = 7;
 
     pub fn length(tag: Tag) -> usize {
@@ -86,6 +94,40 @@ impl DirectTag {
                 .with_dtype(tag)
                 .with_tag(TagType::Direct),
         )
+    }
+
+    //
+    // direct function
+    //
+    pub fn function(arity: usize, offset: usize) -> Option<Tag> {
+        let arity_res: Result<u16, _> = arity.try_into();
+        let offset_res: Result<u16, _> = offset.try_into();
+
+        let arity_: u16 = match arity_res {
+            Ok(u16_) => u16_,
+            Err(_) => None?,
+        };
+
+        let offset_: u16 = match offset_res {
+            Ok(u16_) => u16_,
+            Err(_) => None?,
+        };
+
+        Some(Self::to_tag(
+            ((arity_ as u64) << 16) | offset_ as u64,
+            DirectExt::ExtType(ExtType::Function),
+            DirectType::Ext,
+        ))
+    }
+
+    pub fn function_destruct(tag: Tag) -> (Tag, Tag) {
+        match tag {
+            Tag::Direct(tag) => (
+                Fixnum::with_u64_or_panic(tag.data() >> 16),
+                Fixnum::with_u64_or_panic(tag.data() & 0xffff),
+            ),
+            _ => panic!(),
+        }
     }
 
     //
@@ -121,45 +163,35 @@ impl DirectTag {
         })
     }
 
-    pub fn car(cons: Tag) -> Tag {
-        match cons {
-            Tag::Direct(dtag) => match dtag.dtype() {
-                DirectType::Ext => match dtag.ext().try_into() {
-                    Ok(ExtType::Cons) => {
-                        let mask_32: u64 = 0xffffffff;
-                        let mut u64_: u64 = dtag.data() >> 28;
-                        let sign = (u64_ >> 27) & 1;
+    pub fn cons_destruct(cons: Tag) -> (Tag, Tag) {
+        assert!(cons.type_of() == Type::Cons || cons.null_());
 
-                        if sign != 0 {
-                            u64_ |= mask_32 << 28;
-                        }
-
-                        (&u64_.to_le_bytes()).into()
-                    }
-                    _ => panic!(),
-                },
-                _ => panic!(),
-            },
-            _ => panic!(),
+        if cons.null_() {
+            return (Tag::nil(), Tag::nil());
         }
-    }
 
-    pub fn cdr(cons: Tag) -> Tag {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.ext().try_into() {
                     Ok(ExtType::Cons) => {
-                        let mask_28: u64 = 0x0fffffff;
                         let mask_32: u64 = 0xffffffff;
+                        let mask_28: u64 = 0x0fffffff;
 
-                        let mut u64_: u64 = dtag.data() & mask_28;
-                        let sign = (u64_ >> 27) & 1;
+                        let mut u64_car: u64 = dtag.data() >> 28;
+                        let mut u64_cdr: u64 = dtag.data() & mask_28;
 
-                        if sign != 0 {
-                            u64_ |= mask_32 << 28;
+                        if ((u64_car >> 27) & 1) != 0 {
+                            u64_car |= mask_32 << 28;
                         }
 
-                        (&u64_.to_le_bytes()).into()
+                        if ((u64_cdr >> 27) & 1) != 0 {
+                            u64_cdr |= mask_32 << 28;
+                        }
+
+                        (
+                            (&u64_car.to_le_bytes()).into(),
+                            (&u64_cdr.to_le_bytes()).into(),
+                        )
                     }
                     _ => panic!(),
                 },
