@@ -7,7 +7,7 @@
 
 #[rustfmt::skip]
 use crate::{
-    core::{
+    core_::{
         apply::Apply as _,
         env::Env,
         exception::{self, Condition, Exception},
@@ -25,7 +25,16 @@ use crate::{
 };
 
 lazy_static! {
-    pub static ref COMPILER: Compiler = Compiler::new();
+    static ref COMPILER: Compiler = Compiler {
+        lambda: Symbol::keyword("lambda"),
+        quote: Symbol::keyword("quote"),
+        specmap: vec![
+            (Symbol::keyword("alambda"), Compiler::alambda),
+            (Symbol::keyword("if"), Compiler::if_),
+            (Symbol::keyword("lambda"), Compiler::lambda),
+            (Symbol::keyword("quote"), Compiler::quote_),
+        ],
+    };
 }
 
 type CompilerSpecFn = fn(&Env, Tag, &mut Vec<(Tag, Vec<Tag>)>) -> exception::Result<Tag>;
@@ -37,26 +46,7 @@ pub struct Compiler {
     specmap: Vec<(Tag, CompilerSpecFn)>,
 }
 
-impl Default for Compiler {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl Compiler {
-    fn new() -> Self {
-        Self {
-            lambda: Symbol::keyword("lambda"),
-            quote: Symbol::keyword("quote"),
-            specmap: vec![
-                (Symbol::keyword("alambda"), Self::alambda),
-                (Symbol::keyword("if"), Self::if_),
-                (Symbol::keyword("lambda"), Self::lambda),
-                (Symbol::keyword("quote"), Self::quote_),
-            ],
-        }
-    }
-
     // special forms
     fn if_(env: &Env, args: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {
         if Cons::length(env, args) != Some(3) {
@@ -130,7 +120,7 @@ impl Compiler {
             Tag::nil(),
         );
 
-        let func = function.to_image_tag(env);
+        let func = function.with_heap(env);
         let mut function = Function::to_image(env, func);
 
         lenv.push((func, symbols));
@@ -152,7 +142,7 @@ impl Compiler {
             Tag::nil(),
         );
 
-        let func = function.to_image_tag(env);
+        let func = function.with_heap(env);
         let mut function = Function::to_image(env, func);
 
         lenv.push((func, symbols));
@@ -288,7 +278,7 @@ pub trait CoreFn {
     fn mu_if(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl CoreFn for Env {
+impl CoreFn for Compiler {
     fn mu_if(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check(":if", &[Type::T, Type::Function, Type::Function], fp)?;
 
@@ -305,9 +295,7 @@ impl CoreFn for Env {
     }
 
     fn mu_compile(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let mut lexical_env: CompileEnv = vec![];
-
-        fp.value = Compiler::compile(env, fp.argv[0], &mut lexical_env)?;
+        fp.value = Self::compile(env, fp.argv[0], &mut vec![])?;
 
         Ok(())
     }

@@ -4,7 +4,7 @@
 // reader
 #[rustfmt::skip]
 use crate::{
-    core::{
+    core_::{
         apply::Apply as _,
         compiler::Compiler,
         direct::{DirectExt, DirectTag, DirectType},
@@ -390,7 +390,7 @@ impl Reader for Env {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn reader_test() {
+        assert!(true);
     }
 }

@@ -4,8 +4,11 @@
 // vector type
 use {
     crate::{
-        core::{
-            direct::DirectTag, direct::DirectType, env::Env, exception, image::Image, tag::Tag,
+        core_::{
+            direct::{DirectTag, DirectType},
+            env::Env,
+            exception,
+            tag::Tag,
             type_::Type,
         },
         types::{fixnum::Fixnum, symbol::Symbol},
@@ -49,7 +52,6 @@ impl Vector {
 
     pub fn type_of(env: &Env, vector: Tag) -> Type {
         match vector {
-            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => match direct.dtype() {
                 DirectType::String => Type::Char,
                 DirectType::ByteVec => Type::Byte,
@@ -72,7 +74,6 @@ impl Vector {
 
     pub fn length(env: &Env, vector: Tag) -> usize {
         match vector {
-            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
                 let image = Self::to_image(env, vector);
@@ -93,7 +94,6 @@ impl Vector {
     pub fn as_string(env: &Env, tag: Tag) -> String {
         assert_eq!(tag.type_of(), Type::Vector);
         match tag {
-            Tag::Image(_) => panic!(),
             Tag::Direct(dir) => match dir.dtype() {
                 DirectType::String => {
                     str::from_utf8(&dir.data().to_le_bytes()).unwrap()[..dir.ext() as usize].into()
@@ -127,7 +127,6 @@ impl Vector {
         assert_eq!(vector.type_of(), Type::Vector);
 
         match vector {
-            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => match direct.dtype() {
                 DirectType::String => {
                     let ch: char = vector.data(env).to_le_bytes()[index].into();
@@ -161,15 +160,8 @@ impl Vector {
         }
     }
 
-    pub fn to_image_tag(&self, env: &Env) -> Tag {
-        let image = Image::Vector((self.clone(), VectorImageType::T(vec![])));
-
-        Image::to_tag(&image, env, Type::Vector as u8)
-    }
-
     pub fn heap_size(env: &Env, vector: Tag) -> usize {
         match vector {
-            Tag::Image(_) => panic!(),
             Tag::Direct(_) => std::mem::size_of::<DirectTag>(),
             Tag::Indirect(_) => {
                 let len = Self::length(env, vector);

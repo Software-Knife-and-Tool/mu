@@ -3,7 +3,7 @@
 
 // stream builder
 use crate::{
-    core::{
+    core_::{
         core::Core,
         env::Env,
         exception::{self, Condition, Exception},
@@ -130,7 +130,7 @@ impl StreamBuilder {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
+    fn builder_test() {
         assert!(true);
     }
 }

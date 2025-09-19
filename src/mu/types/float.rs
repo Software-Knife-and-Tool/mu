@@ -4,7 +4,7 @@
 // float type
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
@@ -154,10 +154,10 @@ impl CoreFn for Float {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::tag::Tag;
+    use crate::core_::tag::Tag;
 
     #[test]
-    fn as_tag() {
+    fn float_test() {
         match <f32 as Into<Tag>>::into(1.0_f32) {
             _ => assert_eq!(true, true),
         }

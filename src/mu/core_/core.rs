@@ -1,27 +1,26 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-// Core struct
+// core struct
 use {
     crate::{
-        core::{
+        core_::{
             apply::CoreFn as _,
-            compiler::CoreFn as _,
+            compiler::{Compiler, CoreFn as _},
             direct::DirectTag,
             env::Env,
             exception::{self, CoreFn as _, Exception},
             frame::{CoreFn as _, Frame},
-            gc::{CoreFn as _, GcContext},
             namespace::{CoreFn as _, Namespace},
             tag::{CoreFn as _, Tag},
         },
         features::feature::{Feature, FEATURES},
+        spaces::gc::{CoreFn as _, GcContext},
         streams::builder::StreamBuilder,
         types::{
             cons::{Cons, CoreFn as _},
             fixnum::{CoreFn as _, Fixnum},
             float::{CoreFn as _, Float},
-            function::Function,
             stream::{CoreFn as _, Stream},
             struct_::{CoreFn as _, Struct},
             symbol::{CoreFn as _, Symbol},
@@ -38,106 +37,103 @@ lazy_static! {
     pub static ref CORE: Core = Core::new().features().stdio();
     pub static ref CORE_FUNCTIONS: &'static [CoreFnDef] = &[
         // types
-        ( "eq",          2, Tag::mu_eq ),
-        ( "type-of",     1, Tag::mu_typeof ),
-        ( "repr",        1, Tag::mu_repr ),
-        ( "unrepr",      1, Tag::mu_unrepr ),
-        ( "view",        1, Tag::mu_view ),
+        ( "eq",         2, Tag::mu_eq ),
+        ( "type-of",    1, Tag::mu_typeof ),
+        ( "repr",       1, Tag::mu_repr ),
+        ( "unrepr",     1, Tag::mu_unrepr ),
+        ( "view",       1, Tag::mu_view ),
         // conses and lists
-        ( "append",      1, Cons::mu_append ),
-        ( "car",         1, Cons::mu_car ),
-        ( "cdr",         1, Cons::mu_cdr ),
-        ( "cons",    2, Cons::mu_cons ),
-        ( "length",  1, Cons::mu_length ),
-        ( "nth",     2, Cons::mu_nth ),
-        ( "nthcdr",  2, Cons::mu_nthcdr ),
+        ( "append",     1, Cons::mu_append ),
+        ( "car",        1, Cons::mu_car ),
+        ( "cdr",        1, Cons::mu_cdr ),
+        ( "cons",       2, Cons::mu_cons ),
+        ( "length",     1, Cons::mu_length ),
+        ( "nth",        2, Cons::mu_nth ),
+        ( "nthcdr",     2, Cons::mu_nthcdr ),
         // compiler
-        ( "compile", 1, Env::mu_compile ),
-        ( "%if",     3, Env::mu_if),
+        ( "compile",    1, Compiler::mu_compile ),
+        ( "%if",        3, Compiler::mu_if),
         // gc
-        ( "gc",      0, GcContext::mu_gc ),
+        ( "gc",         0, GcContext::mu_gc ),
         // env
-        ( "apply",   2, Env::mu_apply ),
-        ( "eval",    1, Env::mu_eval ),
-        ( "fix",     2, Env::mu_fix ),
+        ( "apply",      2, Env::mu_apply ),
+        ( "eval",       1, Env::mu_eval ),
+        ( "fix",        2, Env::mu_fix ),
         // exceptions
         ( "with-exception",
-                     2, Exception::mu_with_exception ),
-        ( "raise",   2, Exception::mu_raise ),
+                        2, Exception::mu_with_exception ),
+        ( "raise",      2, Exception::mu_raise ),
         // frames
         ( "%frame-stack",
-                     0, Frame::mu_frames ),
-        ( "%frame-pop",
-                     1, Frame::mu_frame_pop ),
+                        0, Frame::mu_frames ),
+        ( "%frame-pop", 1, Frame::mu_frame_pop ),
         ( "%frame-push",
-                     1, Frame::mu_frame_push ),
-        ( "%frame-ref",
-                     2, Frame::mu_frame_ref ),
+                        1, Frame::mu_frame_push ),
+        ( "%frame-ref", 2, Frame::mu_frame_ref ),
         // fixnums
-        ( "ash",     2, Fixnum::mu_ash ),
-        ( "add",     2, Fixnum::mu_fxadd ),
-        ( "sub",     2, Fixnum::mu_fxsub ),
-        ( "less-than",
-                     2, Fixnum::mu_fxlt ),
-        ( "mul",     2, Fixnum::mu_fxmul ),
-        ( "div",     2, Fixnum::mu_fxdiv ),
-        ( "logand",  2, Fixnum::mu_logand ),
-        ( "logor",   2, Fixnum::mu_logor ),
-        ( "lognot",  1, Fixnum::mu_lognot ),
+        ( "ash",        2, Fixnum::mu_ash ),
+        ( "add",        2, Fixnum::mu_fxadd ),
+        ( "sub",        2, Fixnum::mu_fxsub ),
+        ( "less-than",  2, Fixnum::mu_fxlt ),
+        ( "mul",        2, Fixnum::mu_fxmul ),
+        ( "div",        2, Fixnum::mu_fxdiv ),
+        ( "logand",     2, Fixnum::mu_logand ),
+        ( "logor",      2, Fixnum::mu_logor ),
+        ( "lognot",     1, Fixnum::mu_lognot ),
         // floats
-        ( "fadd",    2, Float::mu_fladd ),
-        ( "fsub",    2, Float::mu_flsub ),
-        ( "fless-than",
-                     2, Float::mu_fllt ),
-        ( "fmul",    2, Float::mu_flmul ),
-        ( "fdiv",    2, Float::mu_fldiv ),
+        ( "fadd",       2, Float::mu_fladd ),
+        ( "fsub",       2, Float::mu_flsub ),
+        ( "fless-than", 2, Float::mu_fllt ),
+        ( "fmul",       2, Float::mu_flmul ),
+        ( "fdiv",       2, Float::mu_fldiv ),
         // namespaces
-        ( "find",    2, Namespace::mu_find ),
+        ( "find",       2, Namespace::mu_find ),
         ( "find-namespace",
-           1, Namespace::mu_find_ns ),
-        ( "intern",  3, Namespace::mu_intern ),
+                        1, Namespace::mu_find_ns ),
+        ( "intern",     3, Namespace::mu_intern ),
         ( "make-namespace",
-                     1, Namespace::mu_make_ns ),
+                        1, Namespace::mu_make_ns ),
         ( "namespace-name",
-                     1, Namespace::mu_ns_name ),
+                        1, Namespace::mu_ns_name ),
         // read/write
-        ( "read",    3, Stream::mu_read ),
-        ( "write",   3, Stream::mu_write ),
+        ( "read",       3, Stream::mu_read ),
+        ( "write",      3, Stream::mu_write ),
         // symbols
-        ( "boundp",  1, Symbol::mu_boundp ),
+        ( "boundp",     1, Symbol::mu_boundp ),
         ( "make-symbol",
-                     1, Symbol::mu_symbol ),
+                        1, Symbol::mu_symbol ),
         ( "symbol-name",
-                     1, Symbol::mu_name ),
+                        1, Symbol::mu_name ),
         ( "symbol-namespace",
-                     1, Symbol::mu_ns ),
+                        1, Symbol::mu_ns ),
         ( "symbol-value",
-                     1, Symbol::mu_value ),
+                        1, Symbol::mu_value ),
         // simple vectors
         ( "make-vector",
-                     2, Vector::mu_make_vector ),
-        ( "svref",   2, Vector::mu_svref ),
+                        2, Vector::mu_make_vector ),
+        ( "svref",      2, Vector::mu_svref ),
         ( "vector-length",
-                     1, Vector::mu_length ),
+                        1, Vector::mu_length ),
         ( "vector-type",
-                         1, Vector::mu_type ),
+                        1, Vector::mu_type ),
         // structs
         ( "make-struct",
-                         2, Struct::mu_make_struct ),
+                        2, Struct::mu_make_struct ),
         ( "struct-type",
-                         1, Struct::mu_struct_type ),
-        ( "struct-vec",  1, Struct::mu_struct_vector ),
+                        1, Struct::mu_struct_type ),
+        ( "struct-vec", 1, Struct::mu_struct_vector ),
         // streams
-        ( "close",       1, Stream::mu_close ),
-        ( "flush",       1, Stream::mu_flush ),
-        ( "get-string",  1, Stream::mu_get_string ),
-        ( "open",        4, Stream::mu_open ),
-        ( "openp",       1, Stream::mu_openp ),
-        ( "read-byte",   3, Stream::mu_read_byte ),
-        ( "read-char",   3, Stream::mu_read_char ),
-        ( "unread-char", 2, Stream::mu_unread_char ),
-        ( "write-byte",  2, Stream::mu_write_byte ),
-        ( "write-char",  2, Stream::mu_write_char ),
+        ( "close",      1, Stream::mu_close ),
+        ( "flush",      1, Stream::mu_flush ),
+        ( "get-string", 1, Stream::mu_get_string ),
+        ( "open",       4, Stream::mu_open ),
+        ( "openp",      1, Stream::mu_openp ),
+        ( "read-byte",  3, Stream::mu_read_byte ),
+        ( "read-char",  3, Stream::mu_read_char ),
+        ( "unread-char",
+                        2, Stream::mu_unread_char ),
+        ( "write-byte", 2, Stream::mu_write_byte ),
+        ( "write-char", 2, Stream::mu_write_char ),
     ];
 }
 
@@ -213,13 +209,19 @@ impl Core {
 
     // core/feature symbols
     pub fn symbols(env: &Env) {
+        let mu_id: u16 =
+            Fixnum::as_i64(Vector::ref_(env, Struct::vector(env, env.mu_ns), 0).unwrap()) as u16;
+
         for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
-            let (name, nreqs, _fn) = desc;
+            let (name, _, _) = desc;
 
-            let fn_ = DirectTag::cons(env.mu_ns, Fixnum::with_or_panic(index)).unwrap();
-            let func = Function::new((*nreqs).into(), fn_).evict(env);
-
-            Namespace::intern_static(env, env.mu_ns, (*name).into(), func).unwrap();
+            Namespace::intern_static(
+                env,
+                env.mu_ns,
+                (*name).into(),
+                DirectTag::function(mu_id, index as u16),
+            )
+            .unwrap();
         }
 
         let features = block_on(CORE.features.read());
@@ -233,13 +235,20 @@ impl Core {
                 Namespace::with_static(env, &feature.namespace, feature.symbols, feature.functions)
                     .unwrap();
 
+            let ns_id: u16 =
+                Fixnum::as_i64(Vector::ref_(env, Struct::vector(env, ns), 0).unwrap()) as u16;
+
             if let Some(functions) = feature.functions {
                 for (index, desc) in functions.iter().enumerate() {
-                    let (name, nreqs, _fn) = *desc;
-                    let fn_ = DirectTag::cons(ns, Fixnum::with_or_panic(index)).unwrap();
-                    let func = Function::new((nreqs).into(), fn_).evict(env);
+                    let (name, _, _) = *desc;
 
-                    Namespace::intern_static(env, ns, (*name).into(), func).unwrap();
+                    Namespace::intern_static(
+                        env,
+                        ns,
+                        (*name).into(),
+                        DirectTag::function(ns_id, index as u16),
+                    )
+                    .unwrap();
                 }
             }
         }
@@ -285,7 +294,7 @@ impl Core {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
+    fn core_test() {
         assert!(true);
     }
 }

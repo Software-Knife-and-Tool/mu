@@ -3,16 +3,16 @@
 
 //! typed vectors
 use crate::{
-    core::{
+    core_::{
         apply::Apply,
         direct::DirectType,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        gc::{Gc as _, GcContext},
         tag::Tag,
         type_::Type,
     },
+    spaces::gc::{Gc as _, GcContext},
     types::{
         char::Char,
         cons::Cons,
@@ -54,7 +54,6 @@ impl Gc for Vector {
     fn gc_ref(context: &mut GcContext, env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         match vector.type_of() {
             Type::Vector => match vector {
-                Tag::Image(_) => panic!(),
                 Tag::Direct(_direct) => {
                     let ch: char = vector.data(env).to_le_bytes()[index].into();
 
@@ -68,7 +67,6 @@ impl Gc for Vector {
 
     fn ref_type_of(context: &mut GcContext, vector: Tag) -> Type {
         match vector {
-            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => match direct.dtype() {
                 DirectType::String => Type::Char,
                 DirectType::ByteVec => Type::Byte,
@@ -91,7 +89,6 @@ impl Gc for Vector {
 
     fn ref_length(context: &mut GcContext, vector: Tag) -> usize {
         match vector {
-            Tag::Image(_) => panic!(),
             Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
                 let image = Self::gc_ref_image(context, vector);
@@ -102,7 +99,6 @@ impl Gc for Vector {
 
     fn mark(context: &mut GcContext, env: &Env, vector: Tag) {
         match vector {
-            Tag::Image(_) => panic!(),
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
                 let marked = context.mark_image(vector).unwrap();
@@ -287,7 +283,7 @@ impl CoreFn for Vector {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn vector_test() {
+        assert!(true);
     }
 }

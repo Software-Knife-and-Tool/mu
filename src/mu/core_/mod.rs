@@ -1,10 +1,8 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! core module
-#![allow(clippy::module_inception)]
+// core module
 pub mod apply;
-pub mod cache;
 pub mod compiler;
 pub mod config;
 pub mod core;
@@ -13,9 +11,6 @@ pub mod dynamic;
 pub mod env;
 pub mod exception;
 pub mod frame;
-pub mod gc;
-pub mod heap;
-pub mod image;
 pub mod indirect;
 pub mod lambda;
 pub mod mu;

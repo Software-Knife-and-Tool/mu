@@ -4,7 +4,7 @@
 // vector cache
 use {
     crate::{
-        core::{env::Env, tag::Tag, type_::Type},
+        core_::{env::Env, tag::Tag, type_::Type},
         types::{fixnum::Fixnum, float::Float, vector::Vector},
         vectors::image::{VecImageType, VectorImageType},
     },

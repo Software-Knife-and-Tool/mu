@@ -5,7 +5,7 @@
 #![allow(clippy::identity_op)]
 #![allow(unused_braces)]
 use crate::{
-    core::{
+    core_::{
         tag::{Tag, TagType},
         type_::Type,
     },

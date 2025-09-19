@@ -4,7 +4,7 @@
 // crate bindings
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply,
             compiler::Compiler,
             config::Config,

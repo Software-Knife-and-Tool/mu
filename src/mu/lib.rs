@@ -44,14 +44,15 @@ extern crate lazy_static;
 #[macro_use]
 extern crate modular_bitfield;
 
-mod core;
+mod core_;
 mod features;
+mod spaces;
 mod streams;
 mod types;
 mod vectors;
 
 use {
-    crate::core::{config::Config, core::CORE, exception},
+    crate::core_::{config::Config, core::CORE, exception},
     std::fs,
 };
 
@@ -67,19 +68,19 @@ use {
 /// - Result, specialized result for API functions that can fail
 /// - Tag, tagged data representation
 ///   tagged data representation
-pub type Tag = core::tag::Tag;
+pub type Tag = core_::tag::Tag;
 /// Mu library API
-pub type Mu = core::mu::Mu;
+pub type Mu = core_::mu::Mu;
 /// Core library state representation
-pub type Core = core::core::Core;
+pub type Core = core_::core::Core;
 /// environment
-pub type Env = core::mu::Env;
+pub type Env = core_::mu::Env;
 /// exception Condition enumeration
-pub type Condition = core::exception::Condition;
+pub type Condition = core_::exception::Condition;
 /// Exception representation
-pub type Exception = core::exception::Exception;
+pub type Exception = core_::exception::Exception;
 /// Mu function Result
-pub type Result = core::exception::Result<Tag>;
+pub type Result = core_::exception::Result<Tag>;
 
 /// API namespace
 impl Mu {

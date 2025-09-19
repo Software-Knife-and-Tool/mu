@@ -4,21 +4,21 @@
 //! cons type
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply as _,
-            cache::Cache,
             direct::{DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc::{Gc as _, GcContext},
-            heap::HeapRequest,
-            image::Image,
             indirect::IndirectTag,
             reader::{Reader, EOL},
             tag::{Tag, TagType},
             type_::Type,
             writer::Writer,
+        },
+        spaces::{
+            gc::{Gc as _, GcContext},
+            heap::HeapRequest,
         },
         streams::writer::StreamWriter,
         types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
@@ -57,7 +57,6 @@ impl Gc for Cons {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
-                Tag::Image(_) => panic!(),
                 Tag::Direct(_) => DirectTag::cons_destruct(cons).0,
                 Tag::Indirect(_) => Self::gc_ref_image(context, cons).car,
             },
@@ -69,7 +68,6 @@ impl Gc for Cons {
         match cons.type_of() {
             Type::Null => cons,
             Type::Cons => match cons {
-                Tag::Image(_) => panic!(),
                 Tag::Indirect(_) => Self::gc_ref_image(context, cons).cdr,
                 Tag::Direct(_) => DirectTag::cons_destruct(cons).1,
             },
@@ -79,7 +77,6 @@ impl Gc for Cons {
 
     fn mark(context: &mut GcContext, env: &Env, cons: Tag) {
         match cons {
-            Tag::Image(_) => panic!(),
             Tag::Direct(_) => {
                 let car = Self::ref_car(context, cons);
                 let cdr = Self::ref_cdr(context, cons);
@@ -113,14 +110,7 @@ impl Cons {
                 Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize).unwrap()),
                 Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize + 1).unwrap()),
             ),
-            Tag::Direct(_) | Tag::Image(_) => {
-                let (index, _) = Image::detag(tag);
-
-                match Cache::ref_(env, index) {
-                    Image::Cons(cons) => cons,
-                    _ => panic!(),
-                }
-            }
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -137,31 +127,7 @@ impl Cons {
                 )
             }
             Tag::Direct(_) => DirectTag::cons_destruct(cons),
-            Tag::Image(_) => {
-                let (index, _) = Image::detag(cons);
-
-                match Cache::ref_(env, index) {
-                    Image::Cons(cons) => (cons.car, cons.cdr),
-                    _ => panic!(),
-                }
-            }
         }
-    }
-
-    pub fn dynamic(&self, env: &Env) -> Tag {
-        let image = Image::Cons(*self);
-
-        Image::to_tag(&image, env, Type::Cons as u8)
-    }
-
-    pub fn to_image_tag(self, env: &Env) -> Tag {
-        let image = Image::Cons(self);
-
-        Image::to_tag(&image, env, Type::Cons as u8)
-    }
-
-    pub fn cons_image(env: &Env, car: Tag, cdr: Tag) -> Tag {
-        Self::to_image_tag(Self::new(car, cdr), env)
     }
 
     pub fn cons(env: &Env, car: Tag, cdr: Tag) -> Tag {
@@ -183,7 +149,7 @@ impl Cons {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Direct(_) => DirectTag::cons_destruct(cons).0,
-                Tag::Image(_) | Tag::Indirect(_) => Self::to_image(env, cons).car,
+                Tag::Indirect(_) => Self::to_image(env, cons).car,
             },
             _ => panic!(),
         };
@@ -192,7 +158,7 @@ impl Cons {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Direct(_) => DirectTag::cons_destruct(cons).1,
-                Tag::Image(_) | Tag::Indirect(_) => Self::to_image(env, cons).cdr,
+                Tag::Indirect(_) => Self::to_image(env, cons).cdr,
             },
             _ => panic!(),
         };
@@ -264,7 +230,6 @@ impl Cons {
 
     pub fn heap_size(_: &Env, cons: Tag) -> usize {
         match cons {
-            Tag::Image(_) => panic!(),
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.ext().try_into() {
                     Ok(ExtType::Cons) => std::mem::size_of::<DirectTag>(),
@@ -306,13 +271,6 @@ impl Cons {
         }
     }
 
-    pub fn evict_image(tag: Tag, env: &Env) -> Tag {
-        match tag {
-            Tag::Image(_) => Self::to_image(env, tag).evict(env),
-            _ => panic!(),
-        }
-    }
-
     pub fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
         let dot = Vector::from(".").evict(env);
         let car = env.read(stream, false, Tag::nil(), true)?;
@@ -338,30 +296,6 @@ impl Cons {
                 }
             }
             _ => Ok(Cons::cons(env, car, Self::read(env, stream)?)),
-        }
-    }
-
-    pub fn read_image(env: &Env, stream: Tag) -> exception::Result<Tag> {
-        let dot = Vector::from(".").evict(env);
-        let car = env.read(stream, false, Tag::nil(), true)?;
-
-        if EOL.eq_(&car) {
-            return Ok(Tag::nil());
-        }
-
-        match car.type_of() {
-            Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
-                let cdr = env.read(stream, false, Tag::nil(), true)?;
-
-                if EOL.eq_(&cdr) {
-                    Ok(Tag::nil())
-                } else if EOL.eq_(&env.read(stream, false, Tag::nil(), true)?) {
-                    Ok(cdr)
-                } else {
-                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?
-                }
-            }
-            _ => Ok(Cons::cons_image(env, car, Self::read(env, stream)?)),
         }
     }
 
@@ -641,10 +575,10 @@ impl Iterator for ListIter<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{core::tag::Tag, types::cons::Cons};
+    use crate::{core_::tag::Tag, types::cons::Cons};
 
     #[test]
-    fn cons() {
+    fn cons_test() {
         match Cons::new(Tag::nil(), Tag::nil()) {
             _ => assert!(true),
         }

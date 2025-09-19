@@ -4,7 +4,7 @@
 // stream reader
 use {
     crate::{
-        core::{
+        core_::{
             core::CORE,
             env::Env,
             exception::{self, Condition, Exception},
@@ -166,7 +166,7 @@ impl StreamReader {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
+    fn reader_test() {
         assert!(true);
     }
 }

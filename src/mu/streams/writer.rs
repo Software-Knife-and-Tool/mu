@@ -4,7 +4,7 @@
 // stream writer
 use {
     crate::{
-        core::{
+        core_::{
             core::CORE,
             env::Env,
             exception::{self, Condition, Exception},
