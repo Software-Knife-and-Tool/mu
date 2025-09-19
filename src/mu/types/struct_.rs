@@ -4,17 +4,19 @@
 //! struct type
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply as _,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc::{Gc as _, GcContext},
-            heap::HeapRequest,
             indirect::IndirectTag,
             tag::{Tag, TagType},
             type_::Type,
             writer::Writer,
+        },
+        spaces::{
+            gc::{Gc as _, GcContext},
+            heap::HeapRequest,
         },
         streams::{reader::StreamReader, writer::StreamWriter},
         types::{cons::Cons, symbol::Symbol, vector::Vector},
@@ -227,7 +229,7 @@ impl CoreFn for Struct {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
+    fn struct_test() {
         assert!(true);
     }
 }

@@ -4,17 +4,17 @@
 // namespaces
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply as _,
             core::CoreFnDef,
             direct::DirectTag,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc::GcContext,
             tag::Tag,
             type_::Type,
         },
+        spaces::gc::GcContext,
         types::{
             fixnum::Fixnum,
             struct_::Struct,
@@ -73,7 +73,7 @@ impl Namespace {
 
     pub fn with(env: &Env, name: &str) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
-        let len = ns_ref.len();
+        let id = ns_ref.len();
 
         if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
             drop(ns_ref);
@@ -90,7 +90,7 @@ impl Namespace {
             env,
             "ns",
             vec![
-                Fixnum::with_u64_or_panic(len as u64),
+                Fixnum::with_u64_or_panic(id as u64),
                 Vector::from(name).evict(env),
             ],
         )
@@ -112,7 +112,7 @@ impl Namespace {
         functab: Option<&'static [CoreFnDef]>,
     ) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
-        let len = ns_ref.len();
+        let id = ns_ref.len();
 
         if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
             drop(ns_ref);
@@ -129,7 +129,7 @@ impl Namespace {
             env,
             "ns",
             vec![
-                Fixnum::with_u64_or_panic(len as u64),
+                Fixnum::with_u64_or_panic(id as u64),
                 Vector::from(name).evict(env),
             ],
         )

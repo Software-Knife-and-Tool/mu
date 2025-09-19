@@ -5,7 +5,7 @@
 #![allow(dead_code)]
 #[rustfmt::skip]
 use crate::{
-    core::{
+    core_::{
         env::Env,
         exception::{self, Condition, Exception},
         namespace::Namespace,

@@ -5,9 +5,9 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core::{
+        core_::{
+            direct::{DirectTag, DirectImage},
             env::Env,
-            image::Image,
             tag::Tag,
             type_::Type
         },
@@ -15,9 +15,7 @@ use {
             async_::Async,
             cons::Cons,
             function::Function,
-            struct_::Struct,
             symbol::Symbol,
-            vector::Vector,
         },
     },
     futures_lite::future::block_on,
@@ -29,16 +27,14 @@ lazy_static! {
         (Type::Async, CacheId::Async),
         (Type::Cons, CacheId::Cons),
         (Type::Function, CacheId::Function),
-        (Type::Struct, CacheId::Struct),
         (Type::Symbol, CacheId::Symbol),
-        (Type::Vector, CacheId::Vector),
     ];
 }
 
 #[derive(Clone)]
 pub struct Cache {
     pub tag_id: u64,
-    pub cache: HashMap<u64, Image>,
+    pub cache: HashMap<u64, DirectImage>,
     pub type_info: [CacheTypeInfo; Cache::NCACHETYPES],
 }
 
@@ -53,9 +49,7 @@ pub enum CacheId {
     Async,
     Cons,
     Function,
-    Struct,
     Symbol,
-    Vector,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -92,7 +86,7 @@ impl Cache {
             .map(|map| map.1)
     }
 
-    pub fn add(env: &Env, image: Image) -> u64 {
+    pub fn add(env: &Env, image: DirectImage) -> u64 {
         let mut images_ref = block_on(env.cache.write());
         let tag_id = images_ref.tag_id;
         let type_info = &mut images_ref.type_info;
@@ -102,9 +96,7 @@ impl Cache {
             Type::Async => std::mem::size_of::<Async>(),
             Type::Cons => std::mem::size_of::<Cons>(),
             Type::Function => std::mem::size_of::<Function>(),
-            Type::Struct => std::mem::size_of::<Struct>(),
             Type::Symbol => std::mem::size_of::<Symbol>(),
-            Type::Vector => std::mem::size_of::<Vector>(),
             _ => panic!(),
         };
 
@@ -117,14 +109,14 @@ impl Cache {
         tag_id
     }
 
-    pub fn update(env: &Env, image: Image, tag: Tag) {
-        let (index, _) = Image::detag(tag);
+    pub fn update(env: &Env, image: DirectImage, tag: Tag) {
+        let (index, _) = DirectTag::cache_ref(tag);
         let mut image_ref = block_on(env.cache.write());
 
         image_ref.cache.insert(index as u64, image);
     }
 
-    pub fn ref_(env: &Env, index: usize) -> Image {
+    pub fn ref_(env: &Env, index: usize) -> DirectImage {
         let images_ref = block_on(env.cache.read());
 
         images_ref.cache[&(index as u64)].clone()

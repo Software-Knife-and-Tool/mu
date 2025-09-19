@@ -5,8 +5,8 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core::{
-            direct::{DirectExt, DirectTag, DirectType, ExtType},
+        core_::{
+            direct::{DirectExt, DirectTag, DirectType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -33,7 +33,6 @@ use {
 #[derive(Copy, Clone)]
 pub enum Tag {
     Direct(DirectTag),
-    Image(DirectTag),
     Indirect(IndirectTag),
 }
 
@@ -62,7 +61,6 @@ impl fmt::Display for Tag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:x}: ", self.as_u64()).unwrap();
         match self {
-            Tag::Image(_image) => write!(f, "image: index"),
             Tag::Direct(direct) => write!(f, "direct: type {:?}", direct.dtype() as u8),
             Tag::Indirect(indirect) => write!(f, "indirect: type {:?}", indirect.tag()),
         }
@@ -78,7 +76,7 @@ impl From<&[u8; 8]> for Tag {
 impl Tag {
     pub fn data(&self, env: &Env) -> u64 {
         match self {
-            Tag::Image(tag) | Tag::Direct(tag) => tag.data(),
+            Tag::Direct(tag) => tag.data(),
             Tag::Indirect(heap) => {
                 let heap_ref = block_on(env.heap.read());
                 let info = heap_ref.image_info(heap.image_id() as usize).unwrap();
@@ -90,7 +88,6 @@ impl Tag {
 
     pub fn as_slice(&self) -> [u8; 8] {
         match self {
-            Tag::Image(tag) => tag.into_bytes(),
             Tag::Direct(tag) => tag.into_bytes(),
             Tag::Indirect(tag) => tag.into_bytes(),
         }
@@ -133,20 +130,7 @@ impl Tag {
             Type::Null
         } else {
             match self {
-                Tag::Image(direct) | Tag::Direct(direct) => match direct.dtype() {
-                    DirectType::ByteVec => Type::Vector,
-                    DirectType::String => Type::Vector,
-                    DirectType::Keyword => Type::Keyword,
-                    DirectType::Ext => match ExtType::try_from(direct.ext()) {
-                        Ok(ExtType::Char) => Type::Char,
-                        Ok(ExtType::Cons) => Type::Cons,
-                        Ok(ExtType::Fixnum) => Type::Fixnum,
-                        Ok(ExtType::Float) => Type::Float,
-                        Ok(ExtType::Image) => Type::Function,
-                        Ok(ExtType::Stream) => Type::Stream,
-                        _ => panic!(),
-                    },
-                },
+                Tag::Direct(direct) => direct.type_of(),
                 Tag::Indirect(indirect) => match indirect.tag() {
                     TagType::Async => Type::Async,
                     TagType::Cons => Type::Cons,

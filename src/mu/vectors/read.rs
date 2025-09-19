@@ -3,7 +3,7 @@
 
 // vector reader
 use crate::{
-    core::{
+    core_::{
         env::Env,
         exception::{self, Condition, Exception},
         readtable::SyntaxType,
@@ -214,7 +214,7 @@ impl Read for Vector {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn read_test() {
+        assert!(true);
     }
 }

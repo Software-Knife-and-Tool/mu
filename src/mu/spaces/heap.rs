@@ -6,7 +6,7 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core::{
+        core_::{
             config::Config,
             direct::DirectTag,
             env::Env,

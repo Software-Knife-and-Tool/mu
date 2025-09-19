@@ -4,21 +4,22 @@
 // symbol type
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            gc::{Gc as _, GcContext},
-            heap::{Heap, HeapRequest},
-            image::Image,
             indirect::IndirectTag,
             namespace::Namespace,
             readtable::SyntaxType,
             tag::{Tag, TagType},
             type_::Type,
             writer::Writer,
+        },
+        spaces::{
+            gc::{Gc as _, GcContext},
+            heap::{Heap, HeapRequest},
         },
         streams::writer::StreamWriter,
         types::vector::Vector,
@@ -105,7 +106,6 @@ impl Gc for Symbol {
 
     fn mark(context: &mut GcContext, env: &Env, symbol: Tag) {
         match symbol {
-            Tag::Image(_) => panic!(),
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
                 let mark = context.mark_image(symbol).unwrap();
@@ -164,12 +164,6 @@ impl Symbol {
             },
             _ => panic!(),
         }
-    }
-
-    pub fn to_image_tag(self, env: &Env) -> Tag {
-        let image = Image::Symbol(self);
-
-        Image::to_tag(&image, env, Type::Symbol as u8)
     }
 
     pub fn namespace(env: &Env, symbol: Tag) -> Tag {
@@ -261,13 +255,6 @@ impl Symbol {
                     None => panic!(),
                 }
             }
-        }
-    }
-
-    pub fn evict_image(tag: Tag, env: &Env) -> Tag {
-        match tag {
-            Tag::Image(_) => Symbol::Symbol(Self::to_image(env, tag)).evict(env),
-            _ => panic!(),
         }
     }
 
@@ -486,7 +473,7 @@ impl CoreFn for Symbol {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn symbol_test() {
+        assert!(true);
     }
 }

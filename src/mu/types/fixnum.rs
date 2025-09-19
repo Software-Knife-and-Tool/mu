@@ -3,7 +3,7 @@
 
 //! env fixnum type
 use crate::{
-    core::{
+    core_::{
         apply::Apply as _,
         direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,
@@ -16,7 +16,19 @@ use crate::{
     types::{cons::Cons, symbol::Symbol, vector::Vector},
 };
 
-pub struct Fixnum;
+impl From<usize> for Tag {
+    fn from(fx: usize) -> Tag {
+        if !Fixnum::is_i56(fx as i64) {
+            panic!()
+        }
+
+        DirectTag::to_tag(
+            ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+            DirectExt::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        )
+    }
+}
 
 impl From<u32> for Tag {
     fn from(fx: u32) -> Tag {
@@ -48,13 +60,54 @@ impl From<u8> for Tag {
     }
 }
 
+impl From<Tag> for i64 {
+    fn from(tag: Tag) -> i64 {
+        assert_eq!(tag.type_of(), Type::Fixnum);
+
+        (tag.as_u64() as i64) >> 8
+    }
+}
+
+impl From<Tag> for usize {
+    fn from(tag: Tag) -> usize {
+        assert_eq!(tag.type_of(), Type::Fixnum);
+
+        let data: i64 = tag.into();
+        assert!(data >= 0);
+
+        data as usize
+    }
+}
+
+impl From<Tag> for i32 {
+    fn from(tag: Tag) -> i32 {
+        assert_eq!(tag.type_of(), Type::Fixnum);
+
+        let data: i64 = tag.into();
+
+        data as i32
+    }
+}
+
+impl From<Tag> for u8 {
+    fn from(tag: Tag) -> u8 {
+        assert_eq!(tag.type_of(), Type::Fixnum);
+
+        let data: i64 = tag.into();
+
+        data as u8
+    }
+}
+
+pub struct Fixnum;
+
 impl Fixnum {
-    pub const FIXNUM_MAX: i64 = 2_i64.pow(55) - 1;
-    pub const FIXNUM_MIN: i64 = -(2_i64.pow(55));
+    const MAX: i64 = 2_i64.pow(55) - 1;
+    const MIN: i64 = -(2_i64.pow(55));
 
     // range checking
     pub fn is_i56(i56: i64) -> bool {
-        (Self::FIXNUM_MIN..=Self::FIXNUM_MAX).contains(&i56)
+        (Self::MIN..=Self::MAX).contains(&i56)
     }
 
     // untag fixnum

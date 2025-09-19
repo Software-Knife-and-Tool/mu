@@ -4,7 +4,7 @@
 // system stream operators
 use {
     crate::{
-        core::{
+        core_::{
             core::{Core, CORE},
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,

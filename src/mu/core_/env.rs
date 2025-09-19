@@ -4,15 +4,14 @@
 //! environment bindings
 use {
     crate::{
-        core::{
-            cache::Cache,
+        core_::{
             config::Config,
             core::{Core, CORE, CORE_FUNCTIONS},
             frame::Frame,
-            heap::Heap,
             namespace::Namespace,
             tag::Tag,
         },
+        spaces::{cache::Cache, heap::Heap},
         vectors::cache::VecCacheMap,
     },
     futures_locks::RwLock,

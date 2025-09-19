@@ -5,19 +5,21 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core::{
-            cache::Cache,
+        core_::{
             core::CoreFnDef,
             direct::DirectTag,
             env,
             exception::{self},
             frame::Frame,
-            heap::HeapTypeInfo,
             indirect::IndirectTag,
             tag::{Tag},
             type_::{Type},
         },
         features::feature::Feature,
+        spaces::{
+            cache::Cache,
+            heap::HeapTypeInfo,
+        },
         types::{
             async_::Async,
             cons::Cons,

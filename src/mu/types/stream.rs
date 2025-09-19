@@ -4,7 +4,7 @@
 //! stream type
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply as _,
             core::CORE,
             direct::{DirectExt, DirectTag, DirectType, ExtType},

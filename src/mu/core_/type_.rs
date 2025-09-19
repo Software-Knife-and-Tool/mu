@@ -5,7 +5,7 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core::{
+        core_::{
             tag::Tag,
         },
         types::{

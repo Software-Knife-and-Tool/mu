@@ -1,21 +1,28 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! env direct tagged types
+// direct tagged types
 #![allow(unused_braces)]
 #![allow(clippy::identity_op)]
 #[rustfmt::skip]
 use {
     crate::{
-        core::{
-            tag::{Tag, TagType},
+        core_::{
             type_::Type,
+            env::Env,
+            tag::{Tag, TagType},
         },
-        types::fixnum::Fixnum,
+        spaces::cache::Cache,
+        types::{
+            async_::Async,
+            cons::Cons,
+            function::Function,
+            symbol::Symbol,
+        },
     },
     modular_bitfield::specifiers::{B3, B56},
     num_enum::TryFromPrimitive,
-    std::convert::TryInto,
+//    std::{convert::From, fmt},
 };
 
 // little endian direct tag format
@@ -63,6 +70,38 @@ pub enum DirectExt {
     ExtType(ExtType),
 }
 
+#[derive(Clone)]
+pub enum DirectImage {
+    Async(Async),
+    Cons(Cons),
+    Function(Function),
+    Symbol(Symbol),
+}
+
+impl DirectImage {
+    pub fn type_of(&self) -> Type {
+        match self {
+            DirectImage::Async(_) => Type::Async,
+            DirectImage::Cons(_) => Type::Cons,
+            DirectImage::Function(_) => Type::Function,
+            DirectImage::Symbol(_) => Type::Symbol,
+        }
+    }
+
+    pub fn cache(&self, env: &Env, type_id: u8) -> Tag {
+        let tag_id = Cache::add(env, self.clone());
+        let data = (tag_id << 8) | ((type_id & 0xf) as u64);
+
+        Tag::Direct(
+            DirectTag::new()
+                .with_data(data)
+                .with_ext(ExtType::Image as u8)
+                .with_dtype(DirectType::Ext)
+                .with_tag(TagType::Direct),
+        )
+    }
+}
+
 impl DirectTag {
     // 56 bit fixnum:     -36028797018963967 to 36028797018963968
     // 32 bit IEEE float: -3.40282347E+38    to -1.17549435E-38,
@@ -96,36 +135,65 @@ impl DirectTag {
         )
     }
 
+    pub fn type_of(&self) -> Type {
+        match self.dtype() {
+            DirectType::ByteVec => Type::Vector,
+            DirectType::String => Type::Vector,
+            DirectType::Keyword => Type::Keyword,
+            DirectType::Ext => match ExtType::try_from(self.ext()) {
+                Ok(ExtType::Char) => Type::Char,
+                Ok(ExtType::Cons) => Type::Cons,
+                Ok(ExtType::Fixnum) => Type::Fixnum,
+                Ok(ExtType::Float) => Type::Float,
+                Ok(ExtType::Function) => Type::Function,
+                Ok(ExtType::Image) => Type::try_from(self.data() as u8).unwrap(),
+                Ok(ExtType::Stream) => Type::Stream,
+                _ => panic!(),
+            },
+        }
+    }
+
+    //
+    // image cache
+    //
+
+    pub fn is_cached(tag: Tag) -> bool {
+        match tag {
+            Tag::Direct(fn_) => matches!(ExtType::try_from(fn_.ext()).unwrap(), ExtType::Image),
+            _ => panic!(),
+        }
+    }
+
+    pub fn cache_ref(tag: Tag) -> (usize, u8) {
+        match tag {
+            Tag::Direct(fn_) => {
+                let data = fn_.data() as usize;
+
+                (data >> 8, data as u8)
+            }
+            _ => panic!(),
+        }
+    }
+
     //
     // direct function
     //
-    pub fn function(arity: usize, offset: usize) -> Option<Tag> {
-        let arity_res: Result<u16, _> = arity.try_into();
-        let offset_res: Result<u16, _> = offset.try_into();
 
-        let arity_: u16 = match arity_res {
-            Ok(u16_) => u16_,
-            Err(_) => None?,
-        };
-
-        let offset_: u16 = match offset_res {
-            Ok(u16_) => u16_,
-            Err(_) => None?,
-        };
-
-        Some(Self::to_tag(
-            ((arity_ as u64) << 16) | offset_ as u64,
+    pub fn function(ns_id: u16, index: u16) -> Tag {
+        Self::to_tag(
+            (ns_id as u64) << 16 | index as u64,
             DirectExt::ExtType(ExtType::Function),
             DirectType::Ext,
-        ))
+        )
     }
 
-    pub fn function_destruct(tag: Tag) -> (Tag, Tag) {
+    pub fn function_id(tag: Tag) -> (u16, u16) {
         match tag {
-            Tag::Direct(tag) => (
-                Fixnum::with_u64_or_panic(tag.data() >> 16),
-                Fixnum::with_u64_or_panic(tag.data() & 0xffff),
-            ),
+            Tag::Direct(tag) if tag.dtype() == DirectType::Ext && tag.ext() == 4 => {
+                let data: u64 = tag.data();
+
+                ((data >> 16) as u16, (data & 0xffff) as u16)
+            }
             _ => panic!(),
         }
     }
@@ -135,7 +203,7 @@ impl DirectTag {
     //
 
     // can tag be sign extended to 64 from 28 bits?
-    pub fn sext_from_tag(tag: Tag) -> Option<u32> {
+    fn sext_from_tag(tag: Tag) -> Option<u32> {
         let u64_ = tag.as_u64();
 
         let mask_28: u64 = 0x0fffffff;
@@ -205,7 +273,7 @@ impl DirectTag {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn types() {
+    fn direct_test() {
         assert!(true);
     }
 }

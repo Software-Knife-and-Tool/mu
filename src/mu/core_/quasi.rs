@@ -4,7 +4,7 @@
 // quasiquote reader
 use {
     crate::{
-        core::{
+        core_::{
             compiler::Compiler,
             env::Env,
             exception::{self, Condition, Exception},

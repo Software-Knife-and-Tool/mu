@@ -4,12 +4,11 @@
 // function call frame
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply as _,
             dynamic::Dynamic,
             env::Env,
             exception::{self, Condition, Exception},
-            namespace::Namespace,
             tag::Tag,
             type_::Type,
         },
@@ -110,7 +109,9 @@ impl Frame {
         #[cfg(feature = "prof")]
         <Feature as Prof>::prof_event(env, func).unwrap();
 
-        let nreqs = Fixnum::as_i64(Function::arity(env, func)) as usize;
+        let (arity, form) = Function::destruct(env, func);
+
+        let nreqs = Fixnum::as_i64(arity) as usize;
         let nargs = self.argv.len();
 
         if nargs != nreqs {
@@ -152,44 +153,28 @@ impl Frame {
                 }
             }
             Type::Function => {
-                let form = Function::form(env, func);
-                let (ns, offset) = Cons::destruct(env, form);
+                if let Tag::Direct(_) = func {
+                    Function::staticns_deref(env, func).2 .2(env, &mut self)?;
+
+                    return Ok(self.value);
+                }
 
                 match form.type_of() {
                     Type::Null => Ok(Tag::nil()),
-                    Type::Cons => match offset.type_of() {
-                        Type::Fixnum => {
-                            let ns_ref = block_on(env.ns_map.read());
-                            let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
+                    Type::Cons => {
+                        let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
 
-                            if let Namespace::Static(static_) = namespace {
-                                let func =
-                                    static_.functions.unwrap()[Fixnum::as_i64(offset) as usize].2;
+                        Dynamic::dynamic_push(env, self.func, offset);
+                        self.frame_stack_push(env);
 
-                                drop(ns_ref);
-                                func(env, &mut self)?
-                            } else {
-                                panic!()
-                            }
+                        let value: exception::Result<Tag> = Cons::list_iter(env, form)
+                            .try_fold(Tag::nil(), |_, expr| env.eval(expr));
 
-                            Ok(self.value)
-                        }
-                        Type::Null | Type::Cons => {
-                            let offset = Self::frame_stack_len(env, self.func).unwrap_or(0);
+                        Self::frame_stack_pop(env, func);
+                        Dynamic::dynamic_pop(env);
 
-                            Dynamic::dynamic_push(env, self.func, offset);
-                            self.frame_stack_push(env);
-
-                            let value: exception::Result<Tag> = Cons::list_iter(env, form)
-                                .try_fold(Tag::nil(), |_, expr| env.eval(expr));
-
-                            Self::frame_stack_pop(env, func);
-                            Dynamic::dynamic_pop(env);
-
-                            value
-                        }
-                        _ => panic!(),
-                    },
+                        value
+                    }
                     _ => panic!(),
                 }
             }

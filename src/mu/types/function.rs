@@ -2,23 +2,30 @@
 //  SPDX-License-Identifier: MIT
 
 // function type
+#[rustfmt::skip]
 use {
     crate::{
-        core::{
-            cache::Cache,
+        core_::{
+            core::CoreFnDef,
             direct::DirectTag,
             env::Env,
             exception,
-            gc::{Gc as _, GcContext},
-            heap::HeapRequest,
-            image::Image,
             indirect::IndirectTag,
             namespace::Namespace,
             tag::{Tag, TagType},
             type_::Type,
         },
+        spaces::{
+            gc::{Gc as _, GcContext},
+            heap::HeapRequest,
+        },
         streams::writer::StreamWriter,
-        types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
+        types::{
+            cons::Cons,
+            fixnum::Fixnum,
+            symbol::Symbol,
+            vector::Vector
+        },
     },
     futures_lite::future::block_on,
 };
@@ -80,27 +87,46 @@ impl Function {
                 Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
                 Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
             ),
-            Tag::Direct(_) | Tag::Image(_) => {
-                let (index, _) = Image::detag(tag);
+            Tag::Direct(_) => {
+                let (arity, form) = Self::destruct(env, tag);
 
-                match Cache::ref_(env, index) {
-                    Image::Function(fn_) => fn_,
-                    _ => panic!(),
-                }
+                Self::new(arity, form)
             }
         }
     }
 
-    pub fn to_image_tag(self, env: &Env) -> Tag {
-        let image = Image::Function(self);
+    pub fn staticns_deref(env: &Env, func: Tag) -> (String, Namespace, CoreFnDef) {
+        assert!(func.type_of() == Type::Function);
 
-        Image::to_tag(&image, env, Type::Function as u8)
+        let (ns_id, offset) = DirectTag::function_id(func);
+
+        let ns_ref = block_on(env.ns_map.read());
+        let (_, ref name, ref namespace) = ns_ref[ns_id as usize];
+
+        if let Namespace::Static(static_) = namespace {
+            (
+                name.to_string(),
+                namespace.clone(),
+                static_.functions.unwrap()[offset as usize],
+            )
+        } else {
+            panic!()
+        }
     }
 
-    pub fn destruct(env: &Env, fn_: Tag) -> (Tag, Tag) {
-        assert!(fn_.type_of() == Type::Function);
+    pub fn destruct(env: &Env, func: Tag) -> (Tag, Tag) {
+        assert!(func.type_of() == Type::Function);
 
-        match fn_ {
+        match func {
+            Tag::Direct(_) => {
+                let (_, offset) = DirectTag::function_id(func);
+                let desc = Self::staticns_deref(env, func);
+
+                let arity: Tag = desc.2 .1.into();
+                let index: Tag = offset.into();
+
+                (arity, index)
+            }
             Tag::Indirect(fn_) => {
                 let heap_ref = block_on(env.heap.read());
 
@@ -109,19 +135,10 @@ impl Function {
                     Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
                 )
             }
-            Tag::Direct(_) => DirectTag::function_destruct(fn_),
-            Tag::Image(_) => {
-                let (index, _) = Image::detag(fn_);
-
-                match Cache::ref_(env, index) {
-                    Image::Function(fn_) => (fn_.arity, fn_.form),
-                    _ => panic!(),
-                }
-            }
         }
     }
 
-    pub fn evict(&self, env: &Env) -> Tag {
+    pub fn with_heap(&self, env: &Env) -> Tag {
         let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
         let mut heap_ref = block_on(env.heap.write());
         let type_id = Type::Function as u8;
@@ -146,10 +163,6 @@ impl Function {
         }
     }
 
-    pub fn evict_image(tag: Tag, env: &Env) -> Tag {
-        Self::to_image(env, tag).evict(env)
-    }
-
     pub fn update(env: &Env, image: &Function, func: Tag) {
         match func {
             Tag::Indirect(heap) => {
@@ -158,32 +171,24 @@ impl Function {
 
                 heap_ref.write_image(slices, heap.image_id() as usize)
             }
-            Tag::Image(_tag) => Cache::update(env, Image::Function(*image), func),
             Tag::Direct(_tag) => panic!(),
         }
     }
 
-    pub fn arity(env: &Env, func: Tag) -> Tag {
-        Self::to_image(env, func).arity
-    }
-
-    pub fn form(env: &Env, func: Tag) -> Tag {
-        Self::to_image(env, func).form
-    }
-
     pub fn view(env: &Env, func: Tag) -> Tag {
-        let vec = vec![Self::arity(env, func), Self::form(env, func)];
+        let (arity, form) = Self::destruct(env, func);
+        let vec = vec![arity, form];
 
         Vector::from(vec).evict(env)
     }
 
-    pub fn heap_size(env: &Env, fn_: Tag) -> usize {
-        match Self::form(env, fn_).type_of() {
+    pub fn heap_size(env: &Env, func: Tag) -> usize {
+        let (_, form) = Self::destruct(env, func);
+
+        match form.type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
             Type::Vector => std::mem::size_of::<Function>(),
-            Type::Symbol => {
-                std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, Self::form(env, fn_))
-            }
+            Type::Symbol => std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, form),
             _ => panic!(),
         }
     }
@@ -191,8 +196,8 @@ impl Function {
     pub fn write(env: &Env, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         assert_eq!(func.type_of(), Type::Function);
 
-        let nreq = Fixnum::as_i64(Function::arity(env, func));
-        let form = Function::form(env, func);
+        let (arity, form) = Function::destruct(env, func);
+        let nreq = Fixnum::as_i64(arity);
 
         let desc = match form.type_of() {
             Type::Null => (
@@ -206,26 +211,13 @@ impl Function {
                     "lambda".to_string(),
                     format!("{:x}", form.as_u64()),
                 ),
-                Type::Fixnum => {
-                    let (ns, offset) = Cons::destruct(env, form);
-
-                    let ns_ref = block_on(env.ns_map.read());
-                    let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
-
-                    let fn_name = match namespace {
-                        Namespace::Static(static_) => match static_.functions {
-                            Some(functions) => {
-                                functions[Fixnum::as_i64(offset) as usize].0.to_string()
-                            }
-                            None => "<undef>".to_string(),
-                        },
-                        _ => panic!(),
-                    };
-
-                    (Namespace::name(env, ns).unwrap(), "native".into(), fn_name)
-                }
                 _ => panic!(),
             },
+            Type::Fixnum => {
+                let (name, _ns, core_def) = Self::staticns_deref(env, func);
+
+                (name, "core".into(), core_def.0.to_string())
+            }
             _ => panic!(),
         };
 

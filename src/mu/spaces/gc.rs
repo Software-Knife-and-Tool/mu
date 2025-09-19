@@ -4,15 +4,8 @@
 //! env gc
 #![allow(dead_code)]
 use crate::{
-    core::{
-        env::Env,
-        exception,
-        frame::Frame,
-        heap::{Gc as _, Heap},
-        namespace::Namespace,
-        tag::Tag,
-        type_::Type,
-    },
+    core_::{env::Env, exception, frame::Frame, namespace::Namespace, tag::Tag, type_::Type},
+    spaces::heap::{Gc as _, Heap},
     types::{
         async_::{Async, Gc as _},
         cons::{Cons, Gc as _},
@@ -54,7 +47,6 @@ impl Gc for GcContext<'_> {
 
     fn mark_image(&mut self, tag: Tag) -> Option<bool> {
         match tag {
-            Tag::Image(_) => panic!(),
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => {
                 let marked = self.heap_ref.get_image_mark(indirect.image_id() as usize);

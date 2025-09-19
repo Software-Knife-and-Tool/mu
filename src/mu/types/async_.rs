@@ -4,16 +4,17 @@
 // async function type
 use {
     crate::{
-        core::{
+        core_::{
             env::Env,
             exception,
-            gc::{Gc as _, GcContext},
-            heap::HeapRequest,
-            image::Image,
             indirect::IndirectTag,
             namespace::Namespace,
             tag::{Tag, TagType},
             type_::Type,
+        },
+        spaces::{
+            gc::{Gc as _, GcContext},
+            heap::HeapRequest,
         },
         streams::writer::StreamWriter,
         types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
@@ -80,12 +81,6 @@ impl Async {
         }
     }
 
-    pub fn to_image_tag(self, env: &Env) -> Tag {
-        let image = Image::Async(self);
-
-        Image::to_tag(&image, env, Type::Async as u8)
-    }
-
     pub fn evict(&self, env: &Env) -> Tag {
         let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
         let mut heap_ref = block_on(env.heap.write());
@@ -106,13 +101,6 @@ impl Async {
                 Tag::Indirect(ind)
             }
             None => panic!(),
-        }
-    }
-
-    pub fn evict_image(tag: Tag, env: &Env) -> Tag {
-        match tag {
-            Tag::Image(_) => Self::to_image(env, tag).evict(env),
-            _ => panic!(),
         }
     }
 

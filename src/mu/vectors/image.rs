@@ -4,15 +4,14 @@
 // typed vectors
 use {
     crate::{
-        core::{
+        core_::{
             direct::{DirectExt, DirectTag, DirectType},
             env::Env,
-            gc::GcContext,
-            heap::HeapRequest,
             indirect::IndirectTag,
             tag::{Tag, TagType},
             type_::Type,
         },
+        spaces::{gc::GcContext, heap::HeapRequest},
         types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
         vectors::vector::Gc as _,
     },

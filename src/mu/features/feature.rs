@@ -4,7 +4,7 @@
 // features
 #[rustfmt::skip]
 use {
-    crate::core::{
+    crate::core_::{
         core::CoreFnDef,
         tag::Tag
     },

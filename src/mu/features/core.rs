@@ -6,7 +6,7 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core::{
+        core_::{
             apply::Apply,
             core::{Core as Core_, CoreFnDef, CORE},
             env::Env,
