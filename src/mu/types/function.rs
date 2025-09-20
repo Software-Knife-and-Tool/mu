@@ -33,7 +33,7 @@ use {
 #[derive(Copy, Clone)]
 pub struct Function {
     pub arity: Tag, // fixnum # of required arguments
-    pub form: Tag,  // dotted pair or list
+    pub form: Tag,  // list
 }
 
 pub trait Gc {
@@ -183,12 +183,12 @@ impl Function {
     }
 
     pub fn heap_size(env: &Env, func: Tag) -> usize {
-        let (_, form) = Self::destruct(env, func);
-
-        match form.type_of() {
+        match Function::destruct(env, func).1.type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
             Type::Vector => std::mem::size_of::<Function>(),
-            Type::Symbol => std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, form),
+            Type::Symbol => {
+                std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, Self::destruct(env, func).1)
+            }
             _ => panic!(),
         }
     }

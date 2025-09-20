@@ -41,8 +41,7 @@ impl Frame {
     fn from_tag(env: &Env, tag: Tag) -> Self {
         assert_eq!(tag.type_of(), Type::Struct);
 
-        let stype = Struct::stype(env, tag);
-        let frame = Struct::vector(env, tag);
+        let (stype, frame) = Struct::destruct(env, tag);
         let func = Vector::ref_(env, frame, 0).unwrap();
 
         assert_eq!(func.type_of(), Type::Function);
@@ -110,7 +109,6 @@ impl Frame {
         <Feature as Prof>::prof_event(env, func).unwrap();
 
         let (arity, form) = Function::destruct(env, func);
-
         let nreqs = Fixnum::as_i64(arity) as usize;
         let nargs = self.argv.len();
 
@@ -121,13 +119,15 @@ impl Frame {
         match func.type_of() {
             Type::Symbol => {
                 if Symbol::is_bound(env, func) {
-                    self.apply(env, Symbol::value(env, func))
+                    let value = Symbol::destruct(env, func).2;
+
+                    self.apply(env, value)
                 } else {
                     Err(Exception::new(env, Condition::Unbound, "mu:apply", func))?
                 }
             }
             Type::Async => {
-                let form = Async::form(env, func);
+                let form = Async::destruct(env, func).1;
                 let offset = Cons::destruct(env, form).1;
 
                 match form.type_of() {

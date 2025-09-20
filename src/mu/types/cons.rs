@@ -280,7 +280,7 @@ impl Cons {
         }
 
         match car.type_of() {
-            Type::Symbol if dot.eq_(&Symbol::name(env, car)) => {
+            Type::Symbol if dot.eq_(&Symbol::destruct(env, car).1) => {
                 let cdr = env.read(stream, false, Tag::nil(), true)?;
 
                 if EOL.eq_(&cdr) {

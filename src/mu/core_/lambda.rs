@@ -70,7 +70,7 @@ impl Lambda {
     fn lexical(env: &Env, symbol: Tag, lexical_env: &mut [Lambda]) -> exception::Result<Tag> {
         assert_eq!(symbol.type_of(), Type::Symbol);
 
-        let name = Vector::as_string(env, Symbol::name(env, symbol));
+        let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
         for frame in lexical_env.iter().rev() {
             let Lambda { function, symbols } = frame;
 
@@ -86,7 +86,8 @@ impl Lambda {
         }
 
         if Symbol::is_bound(env, symbol) {
-            let value = Symbol::value(env, symbol);
+            let value = Symbol::destruct(env, symbol).2;
+
             match value.type_of() {
                 Type::Cons | Type::Symbol => Ok(symbol),
                 _ => Ok(value),

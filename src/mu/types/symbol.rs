@@ -166,48 +166,48 @@ impl Symbol {
         }
     }
 
-    pub fn namespace(env: &Env, symbol: Tag) -> Tag {
+    pub fn destruct(env: &Env, symbol: Tag) -> (Tag, Tag, Tag) {
         match symbol.type_of() {
-            Type::Null => env.null_ns,
-            Type::Keyword => env.keyword_ns,
-            Type::Symbol => Self::to_image(env, symbol).namespace,
-            _ => panic!(),
-        }
-    }
+            Type::Null => (
+                env.null_ns,
+                match symbol {
+                    Tag::Direct(dir) => DirectTag::to_tag(
+                        dir.data(),
+                        DirectExt::Length(dir.ext() as usize),
+                        DirectType::String,
+                    ),
+                    _ => panic!(),
+                },
+                symbol,
+            ),
+            Type::Keyword => (
+                env.keyword_ns,
+                match symbol {
+                    Tag::Direct(dir) => DirectTag::to_tag(
+                        dir.data(),
+                        DirectExt::Length(dir.ext() as usize),
+                        DirectType::String,
+                    ),
+                    _ => panic!(),
+                },
+                symbol,
+            ),
+            Type::Symbol => {
+                let image = Self::to_image(env, symbol);
 
-    pub fn name(env: &Env, symbol: Tag) -> Tag {
-        match symbol.type_of() {
-            Type::Null | Type::Keyword => match symbol {
-                Tag::Direct(dir) => DirectTag::to_tag(
-                    dir.data(),
-                    DirectExt::Length(dir.ext() as usize),
-                    DirectType::String,
-                ),
-                _ => panic!(),
-            },
-            Type::Symbol => Self::to_image(env, symbol).name,
-            _ => panic!(),
-        }
-    }
-
-    pub fn value(env: &Env, symbol: Tag) -> Tag {
-        match symbol.type_of() {
-            Type::Null | Type::Keyword => symbol,
-            Type::Symbol => Self::to_image(env, symbol).value,
+                (image.namespace, image.name, image.value)
+            }
             _ => panic!(),
         }
     }
 
     pub fn view(env: &Env, symbol: Tag) -> Tag {
+        let (ns, name, value) = Self::destruct(env, symbol);
         let vec = vec![
-            Vector::from(format!(
-                "\"{}\"",
-                Namespace::name(env, Self::namespace(env, symbol)).unwrap()
-            ))
-            .evict(env),
-            Self::name(env, symbol),
+            Vector::from(format!("\"{}\"", Namespace::name(env, ns).unwrap())).evict(env),
+            name,
             if Self::is_bound(env, symbol) {
-                Self::value(env, symbol)
+                value
             } else {
                 Symbol::keyword("UNBOUND")
             },
@@ -217,8 +217,9 @@ impl Symbol {
     }
 
     pub fn heap_size(env: &Env, symbol: Tag) -> usize {
-        let name_sz = Heap::heap_size(env, Self::name(env, symbol));
-        let value_sz = Heap::heap_size(env, Self::value(env, symbol));
+        let (_, name, value) = Self::destruct(env, symbol);
+        let name_sz = Heap::heap_size(env, name);
+        let value_sz = Heap::heap_size(env, value);
 
         std::mem::size_of::<SymbolImage>()
             + if name_sz > 8 { name_sz } else { 0 }
@@ -340,8 +341,7 @@ impl Symbol {
                 Err(_) => panic!(),
             },
             Type::Symbol => {
-                let name = Self::name(env, symbol);
-                let ns = Self::namespace(env, symbol);
+                let (ns, name, _) = Self::destruct(env, symbol);
 
                 if Tag::nil().eq_(&ns) {
                     StreamWriter::write_str(env, "#:", stream)?
@@ -360,7 +360,7 @@ impl Symbol {
     }
 
     pub fn is_bound(env: &Env, symbol: Tag) -> bool {
-        !Self::value(env, symbol).eq_(&UNBOUND)
+        !Symbol::destruct(env, symbol).2.eq_(&UNBOUND)
     }
 }
 
@@ -377,15 +377,13 @@ impl CoreFn for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
-            Type::Null | Type::Keyword | Type::Symbol => Symbol::name(env, symbol),
-            _ => {
-                return Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "mu:symbol-name",
-                    symbol,
-                ))
-            }
+            Type::Null | Type::Keyword | Type::Symbol => Symbol::destruct(env, symbol).1,
+            _ => Err(Exception::new(
+                env,
+                Condition::Type,
+                "mu:symbol-name",
+                symbol,
+            ))?,
         };
 
         Ok(())
@@ -395,15 +393,13 @@ impl CoreFn for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
-            Type::Symbol | Type::Keyword | Type::Null => Symbol::namespace(env, symbol),
-            _ => {
-                return Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "mu:symbol-namespace",
-                    symbol,
-                ))
-            }
+            Type::Symbol | Type::Keyword | Type::Null => Symbol::destruct(env, symbol).0,
+            _ => Err(Exception::new(
+                env,
+                Condition::Type,
+                "mu:symbol-namespace",
+                symbol,
+            ))?,
         };
 
         Ok(())
@@ -415,14 +411,14 @@ impl CoreFn for Symbol {
         fp.value = match symbol.type_of() {
             Type::Symbol => {
                 if Symbol::is_bound(env, symbol) {
-                    Symbol::value(env, symbol)
+                    Symbol::destruct(env, symbol).2
                 } else {
-                    return Err(Exception::new(
+                    Err(Exception::new(
                         env,
                         Condition::Type,
                         "mu:symbol-value",
                         symbol,
-                    ));
+                    ))?
                 }
             }
             Type::Keyword | Type::Null => symbol,

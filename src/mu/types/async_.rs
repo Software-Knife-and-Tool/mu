@@ -8,7 +8,6 @@ use {
             env::Env,
             exception,
             indirect::IndirectTag,
-            namespace::Namespace,
             tag::{Tag, TagType},
             type_::Type,
         },
@@ -81,7 +80,23 @@ impl Async {
         }
     }
 
-    pub fn evict(&self, env: &Env) -> Tag {
+    pub fn destruct(env: &Env, func: Tag) -> (Tag, Tag) {
+        assert!(func.type_of() == Type::Async);
+
+        match func {
+            Tag::Indirect(fn_) => {
+                let heap_ref = block_on(env.heap.read());
+
+                (
+                    Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
+                    Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+                )
+            }
+            _ => panic!(),
+        }
+    }
+
+    pub fn with_heap(&self, env: &Env) -> Tag {
         let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
         let mut heap_ref = block_on(env.heap.write());
         let ha = HeapRequest {
@@ -117,27 +132,19 @@ impl Async {
         heap_ref.write_image(slices, offset);
     }
 
-    pub fn arity(env: &Env, func: Tag) -> Tag {
-        Self::to_image(env, func).arity
-    }
-
-    pub fn form(env: &Env, func: Tag) -> Tag {
-        Self::to_image(env, func).form
-    }
-
     pub fn view(env: &Env, func: Tag) -> Tag {
-        let vec = vec![Self::arity(env, func), Self::form(env, func)];
+        let (arity, form) = Self::destruct(env, func);
+        let vec = vec![arity, form];
 
         Vector::from(vec).evict(env)
     }
 
-    pub fn heap_size(env: &Env, fn_: Tag) -> usize {
-        match Self::form(env, fn_).type_of() {
+    pub fn heap_size(env: &Env, func: Tag) -> usize {
+        let form = Self::destruct(env, func).1;
+        match form.type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Async>(),
             Type::Vector => std::mem::size_of::<Async>(),
-            Type::Symbol => {
-                std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, Self::form(env, fn_))
-            }
+            Type::Symbol => std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, form),
             _ => panic!(),
         }
     }
@@ -145,39 +152,21 @@ impl Async {
     pub fn write(env: &Env, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         assert_eq!(func.type_of(), Type::Async);
 
-        let nreq = Fixnum::as_i64(Async::arity(env, func));
-        let form = Async::form(env, func);
+        let (arity, form) = Async::destruct(env, func);
+        let nreq = Fixnum::as_i64(arity);
 
         let desc = match form.type_of() {
             Type::Null => (
                 "null".to_string(),
-                "lambda".to_string(),
+                "alambda".to_string(),
                 format!("{:x}", form.as_u64()),
             ),
-            Type::Cons => match Cons::destruct(env, form).0.type_of() {
+            Type::Cons => match Cons::destruct(env, form).1.type_of() {
                 Type::Null | Type::Cons => (
                     "null".to_string(),
                     "alambda".to_string(),
                     format!("{:x}", form.as_u64()),
                 ),
-                Type::Fixnum => {
-                    let (ns, offset) = Cons::destruct(env, form);
-
-                    let ns_ref = block_on(env.ns_map.read());
-                    let (_, _, ref namespace) = ns_ref[Namespace::index_of(env, ns)];
-
-                    let fn_name = match namespace {
-                        Namespace::Static(static_) => match static_.functions {
-                            Some(functions) => {
-                                functions[Fixnum::as_i64(offset) as usize].0.to_string()
-                            }
-                            None => "<undef>".to_string(),
-                        },
-                        _ => panic!(),
-                    };
-
-                    (Namespace::name(env, ns).unwrap(), "native".into(), fn_name)
-                }
                 _ => panic!(),
             },
             _ => panic!(),
@@ -186,7 +175,7 @@ impl Async {
         StreamWriter::write_str(
             env,
             format!(
-                "#<:async-function :{} [type:{}, req:{nreq}, form:{}]>",
+                "#<:function :{} [type:{}, req:{nreq}, form:{}]>",
                 desc.0, desc.1, desc.2
             )
             .as_str(),

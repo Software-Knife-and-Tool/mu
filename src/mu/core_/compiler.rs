@@ -4,7 +4,6 @@
 //
 //  runtime compiler
 //
-
 #[rustfmt::skip]
 use crate::{
     core_::{
@@ -37,8 +36,8 @@ lazy_static! {
     };
 }
 
-type CompilerSpecFn = fn(&Env, Tag, &mut Vec<(Tag, Vec<Tag>)>) -> exception::Result<Tag>;
 type CompileEnv = Vec<(Tag, Vec<Tag>)>;
+type CompilerSpecFn = fn(&Env, Tag, &mut CompileEnv) -> exception::Result<Tag>;
 
 pub struct Compiler {
     lambda: Tag,
@@ -79,6 +78,14 @@ impl Compiler {
 
     fn parse_lambda(env: &Env, form: Tag) -> exception::Result<(Tag, Tag, Vec<Tag>)> {
         let compile_frame_symbols = |lambda: Tag| -> exception::Result<Vec<Tag>> {
+            // 1. weed out non-symbols
+            Cons::list_iter(env, lambda).try_fold(Tag::nil(), |_, symbol| {
+                if symbol.type_of() != Type::Symbol {
+                    Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?
+                }
+                Ok(Tag::nil())
+            })?;
+
             let mut symvec = Vec::new();
 
             for symbol in Cons::list_iter(env, lambda) {
@@ -208,21 +215,22 @@ impl Compiler {
             let (tag, symbols) = frame;
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
-                let lex_ref = vec![
-                    Symbol::value(
-                        env,
-                        Namespace::intern(env, env.mu_ns, "%frame-ref".into(), Tag::nil()).unwrap(),
-                    ),
-                    *tag,
-                    Fixnum::with_or_panic(nth),
-                ];
+                let frame_ref = Symbol::destruct(
+                    env,
+                    Namespace::intern(env, env.mu_ns, "%frame-ref".into(), Tag::nil()).unwrap(),
+                )
+                .2;
 
-                return Ok(Cons::list(env, &lex_ref));
+                return Ok(Cons::list(
+                    env,
+                    &[frame_ref, *tag, Fixnum::with_or_panic(nth)],
+                ));
             }
         }
 
         if Symbol::is_bound(env, symbol) {
-            let value = Symbol::value(env, symbol);
+            let value = Symbol::destruct(env, symbol).2;
+
             match value.type_of() {
                 Type::Cons | Type::Symbol => Ok(symbol),
                 _ => Ok(value),
@@ -244,7 +252,8 @@ impl Compiler {
                         let args = Self::compile_list(env, args, lenv)?;
 
                         if Symbol::is_bound(env, func) {
-                            let fn_ = Symbol::value(env, func);
+                            let fn_ = Symbol::destruct(env, func).2;
+
                             match fn_.type_of() {
                                 Type::Function => Ok(Cons::cons(env, fn_, args)),
                                 _ => Err(Exception::new(env, Condition::Type, "mu:compile", func)),

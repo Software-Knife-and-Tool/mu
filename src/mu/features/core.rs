@@ -200,8 +200,8 @@ impl CoreFn for Feature {
         if Tag::null_(&ns) {
             ns = env.null_ns
         }
-
-        if !Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) {
+        let (stype, _) = Struct::destruct(env, ns);
+        if !stype.eq_(&Symbol::keyword("ns")) {
             Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
         }
 
