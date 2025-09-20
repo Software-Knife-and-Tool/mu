@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! struct type
+// struct type
 use {
     crate::{
         core_::{
@@ -81,12 +81,24 @@ impl Struct {
         }
     }
 
-    pub fn stype(env: &Env, tag: Tag) -> Tag {
-        Self::to_image(env, tag).stype
-    }
+    pub fn destruct(env: &Env, struct_: Tag) -> (Tag, Tag) {
+        assert!(struct_.type_of() == Type::Struct);
 
-    pub fn vector(env: &Env, tag: Tag) -> Tag {
-        Self::to_image(env, tag).vector
+        match struct_ {
+            Tag::Indirect(struct_) => {
+                let heap_ref = block_on(env.heap.read());
+
+                (
+                    Tag::from_slice(heap_ref.image_slice(struct_.image_id() as usize).unwrap()),
+                    Tag::from_slice(
+                        heap_ref
+                            .image_slice(struct_.image_id() as usize + 1)
+                            .unwrap(),
+                    ),
+                )
+            }
+            _ => panic!(),
+        }
     }
 
     pub fn to_tag(env: &Env, stype: Tag, vec: Vec<Tag>) -> Tag {
@@ -114,7 +126,9 @@ impl Struct {
     }
 
     pub fn heap_size(env: &Env, struct_: Tag) -> usize {
-        std::mem::size_of::<Struct>() + Vector::heap_size(env, Self::vector(env, struct_))
+        let (_, vector) = Struct::destruct(env, struct_);
+
+        std::mem::size_of::<Struct>() + Vector::heap_size(env, vector)
     }
 
     pub fn write(env: &Env, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {

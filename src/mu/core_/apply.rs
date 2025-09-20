@@ -91,7 +91,8 @@ impl Apply for Env {
                 match func.type_of() {
                     Type::Symbol => {
                         if Symbol::is_bound(self, func) {
-                            let fn_ = Symbol::value(self, func);
+                            let fn_ = Symbol::destruct(self, func).2;
+
                             match fn_.type_of() {
                                 Type::Function => self.apply(fn_, args),
                                 _ => Err(Exception::new(self, Condition::Type, "mu:eval", func))?,
@@ -106,7 +107,7 @@ impl Apply for Env {
             }
             Type::Symbol => {
                 if Symbol::is_bound(self, expr) {
-                    Ok(Symbol::value(self, expr))
+                    Ok(Symbol::destruct(self, expr).2)
                 } else {
                     Err(Exception::new(self, Condition::Unbound, "mu:eval", expr))?
                 }

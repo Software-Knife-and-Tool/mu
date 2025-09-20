@@ -209,8 +209,8 @@ impl Core {
 
     // core/feature symbols
     pub fn symbols(env: &Env) {
-        let mu_id: u16 =
-            Fixnum::as_i64(Vector::ref_(env, Struct::vector(env, env.mu_ns), 0).unwrap()) as u16;
+        let (_, vector) = Struct::destruct(env, env.mu_ns);
+        let mu_id: u16 = Fixnum::as_i64(Vector::ref_(env, vector, 0).unwrap()) as u16;
 
         for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
             let (name, _, _) = desc;
@@ -235,8 +235,8 @@ impl Core {
                 Namespace::with_static(env, &feature.namespace, feature.symbols, feature.functions)
                     .unwrap();
 
-            let ns_id: u16 =
-                Fixnum::as_i64(Vector::ref_(env, Struct::vector(env, ns), 0).unwrap()) as u16;
+            let (_, vector) = Struct::destruct(env, ns);
+            let ns_id: u16 = Fixnum::as_i64(Vector::ref_(env, vector, 0).unwrap()) as u16;
 
             if let Some(functions) = feature.functions {
                 for (index, desc) in functions.iter().enumerate() {

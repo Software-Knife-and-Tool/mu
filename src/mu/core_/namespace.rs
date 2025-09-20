@@ -62,15 +62,6 @@ pub enum Namespace {
 }
 
 impl Namespace {
-    pub fn index_of(env: &Env, ns: Tag) -> usize {
-        match ns.type_of() {
-            Type::Struct if Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) => {
-                Fixnum::as_i64(Vector::ref_(env, Struct::vector(env, ns), 0).unwrap()) as usize
-            }
-            _ => panic!(),
-        }
-    }
-
     pub fn with(env: &Env, name: &str) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
         let id = ns_ref.len();
@@ -145,6 +136,16 @@ impl Namespace {
         ));
 
         Ok(ns)
+    }
+
+    pub fn is_namespace(env: &Env, ns: Tag) -> bool {
+        if ns.type_of() == Type::Struct {
+            let (stype, _) = Struct::destruct(env, ns);
+
+            stype.eq_(&Symbol::keyword("ns"))
+        } else {
+            false
+        }
     }
 
     pub fn find_symbol(env: &Env, ns: Tag, name: &str) -> Option<Tag> {
@@ -266,7 +267,7 @@ impl Namespace {
                     },
                 ) {
                     Some(ns_map) => {
-                        let name = Vector::as_string(env, Symbol::name(env, symbol));
+                        let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
                         let mut hash = block_on(match ns_map {
                             Namespace::Static(static_) => match static_.hash {
                                 Some(hash) => hash.write(),
@@ -299,7 +300,7 @@ impl Namespace {
             },
         ) {
             Some(ns_map) => {
-                let name = Vector::as_string(env, Symbol::name(env, symbol));
+                let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
                 let mut hash = block_on(match ns_map {
                     Namespace::Static(static_) => match static_.hash {
                         Some(hash) => hash.write(),
@@ -335,13 +336,13 @@ impl CoreFn for Namespace {
             ns = env.null_ns
         }
 
-        if !Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) {
-            return Err(Exception::new(env, Condition::Type, "mu:intern", ns));
+        if !Self::is_namespace(env, ns) {
+            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
         }
 
         fp.value = match Self::intern(env, ns, Vector::as_string(env, name), value) {
             Some(ns) => ns,
-            None => return Err(Exception::new(env, Condition::Range, "mu:intern", name)),
+            None => Err(Exception::new(env, Condition::Range, "mu:intern", name))?,
         };
 
         Ok(())
@@ -362,13 +363,13 @@ impl CoreFn for Namespace {
             ns = env.null_ns
         }
 
-        if !Struct::stype(env, ns).eq_(&Symbol::keyword("ns")) {
-            return Err(Exception::new(
+        if !Self::is_namespace(env, ns) {
+            Err(Exception::new(
                 env,
                 Condition::Type,
                 "mu:namespace-name",
                 ns,
-            ));
+            ))?
         }
 
         fp.value = Vector::from(Self::name(env, ns).unwrap()).evict(env);
@@ -395,35 +396,38 @@ impl CoreFn for Namespace {
             ns_tag = env.null_ns
         }
 
-        match name.type_of() {
-            Type::Vector if Vector::type_of(env, name) == Type::Char => {
-                if !Struct::stype(env, ns_tag).eq_(&Symbol::keyword("ns")) {
-                    return Err(Exception::new(env, Condition::Type, "mu:intern", ns_tag));
-                }
-            }
-            _ => Err(Exception::new(env, Condition::Type, "mu:intern", ns_tag))?,
+        if !Self::is_namespace(env, ns_tag) {
+            Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?
         }
 
-        let ns_ref = block_on(env.ns_map.read());
-        fp.value = match ns_ref.iter().find_map(
-            |(tag, _, ns_map)| {
-                if ns_tag.eq_(tag) {
-                    Some(ns_map)
-                } else {
-                    None
-                }
-            },
-        ) {
-            Some(_) => match Self::find_symbol(env, ns_tag, &Vector::as_string(env, name)) {
-                Some(sym) => sym,
-                None => Tag::nil(),
-            },
-            None => {
-                drop(ns_ref);
+        match name.type_of() {
+            Type::Vector if Vector::type_of(env, name) == Type::Char => {
+                let ns_ref = block_on(env.ns_map.read());
+                fp.value =
+                    match ns_ref.iter().find_map(
+                        |(tag, _, ns_map)| {
+                            if ns_tag.eq_(tag) {
+                                Some(ns_map)
+                            } else {
+                                None
+                            }
+                        },
+                    ) {
+                        Some(_) => {
+                            match Self::find_symbol(env, ns_tag, &Vector::as_string(env, name)) {
+                                Some(sym) => sym,
+                                None => Tag::nil(),
+                            }
+                        }
+                        None => {
+                            drop(ns_ref);
 
-                Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?
+                            Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?
+                        }
+                    };
             }
-        };
+            _ => Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?,
+        }
 
         Ok(())
     }
@@ -432,7 +436,7 @@ impl CoreFn for Namespace {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn namespace() {
+    fn namespace_test() {
         assert!(true)
     }
 }
