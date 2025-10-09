@@ -4,12 +4,13 @@
 ;;;
 ;;; core namespaces
 ;;;
-(mu:intern core "*char-macros/*" (mu:make-namespace "*char-macros*"))
-(mu:intern core "*closures/*" (mu:make-namespace "*closures*"))
-(mu:intern core "*macros/*" (mu:make-namespace "*macros*"))
-(mu:intern core "*modules/*" (mu:make-namespace "*modules*"))
-(mu:intern core "*symbol-macros/*" (mu:make-namespace "*symbol-macros*"))
-(mu:intern core "*types/*" (mu:make-namespace "*core-types*"))
+(mu:intern core "reader/" (mu:make-namespace "core/reader"))
+(mu:intern core "char-macros/" (mu:make-namespace "core/char-macros"))
+(mu:intern core "closures/" (mu:make-namespace "core/closures"))
+(mu:intern core "macros/" (mu:make-namespace "core/macros"))
+(mu:intern core "modules/" (mu:make-namespace "core/modules"))
+(mu:intern core "symbol-macros/" (mu:make-namespace "core/symbol-macros"))
+(mu:intern core "types/" (mu:make-namespace "core/core-types"))
 
 ;;;
 ;;; predicates
@@ -38,10 +39,10 @@
 (mu:intern core "consp" (:lambda (t) (mu:eq :cons (mu:type-of t))))
 (mu:intern core "fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
 (mu:intern core "floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
+(mu:intern core "keywordp" (:lambda (t) (core:%or (mu:eq :keyword (mu:type-of t)) (mu:eq (core:type-of t) 'keyword))))
 (mu:intern core "namespacep" (:lambda (t) (mu:eq :ns (mu:type-of t))))
 (mu:intern core "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
 (mu:intern core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
-(mu:intern core "keywordp" (:lambda (t) (mu:eq (core:type-of t) 'keyword)))
 
 ;;;
 ;;; syntactic sugar

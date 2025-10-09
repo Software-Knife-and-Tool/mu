@@ -18,7 +18,7 @@ def runtest(line, group, test, expected):
     if module == 'common':
         proc = subprocess.Popen(['../../dist/mu-sys',
                                  '-l../../dist/core.sys',
-                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
+                                 '-l../../dist/common.fasl',
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
                                 stdout=subprocess.PIPE,                 \

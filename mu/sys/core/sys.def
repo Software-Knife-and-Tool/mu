@@ -6,9 +6,8 @@
 ;;;
 (system:provide
  "core"
- '((:version . "0.0.12")
+ '((:version . "0.0.13")
    (:ns      . "core")
-   (:lang    . :mu)
    (:load    . (
                 "core.l"
                 "type.l"
@@ -17,7 +16,7 @@
                 "list.l"
                 "module.l"
                 "stream.l"
-                "read.l"
+                "reader.l"
                 "quasi.l"
                 "read-macro.l"
                 "symbol.l"
@@ -26,5 +25,5 @@
                 "macro.l"
                 "closure.l"
                 "vector.l"
-                "common.l"
+                "lisp.l"
                 ))))

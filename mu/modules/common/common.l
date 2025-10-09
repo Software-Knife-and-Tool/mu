@@ -4,12 +4,8 @@
 ;;;
 ;;; common namespace
 ;;;
-((:lambda (ns)
-   (:if ns
-        (mu:intern () "common" ns)
-        (mu:intern () "common" (mu:make-namespace "common"))))
- (mu:find-namespace "common"))
 
+#|
 ;;;
 ;;; symbols
 ;;;
@@ -17,7 +13,7 @@
 (mu:intern mu:*null/* "nil" ())
 
 ;;;
-;;; exports
+;;; imports
 ;;;
 (mu:intern mu:*null/* "append" core:append)
 (mu:intern mu:*null/* "format" core:format)
@@ -27,6 +23,7 @@
 (mu:intern mu:*null/* "list*" core:list*)
 (mu:intern mu:*null/* "not" core:null)
 (mu:intern mu:*null/* "vector" core:vector)
+|#
 
 ;;;
 ;;; defun/defmacro

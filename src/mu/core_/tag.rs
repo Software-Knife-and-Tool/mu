@@ -36,7 +36,7 @@ pub enum Tag {
     Indirect(IndirectTag),
 }
 
-#[derive(BitfieldSpecifier, Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Specifier, Copy, Clone, Debug, PartialEq, Eq)]
 #[bits = 3]
 pub enum TagType {
     Direct = 0,   // 56 bit direct objects
@@ -170,7 +170,7 @@ impl CoreFn for Tag {
         let arg = fp.argv[0];
         let slice = arg.as_slice().to_vec();
 
-        fp.value = Vector::from(slice).evict(env);
+        fp.value = Vector::from(slice).with_heap(env);
 
         Ok(())
     }

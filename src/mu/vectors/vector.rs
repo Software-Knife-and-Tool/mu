@@ -141,7 +141,7 @@ impl CoreFn for Vector {
                 Type::T => {
                     let vec = Cons::list_iter(env, list).collect::<Vec<Tag>>();
 
-                    Vector::from(vec).evict(env)
+                    Vector::from(vec).with_heap(env)
                 }
                 Type::Char => {
                     let vec: exception::Result<String> = Cons::list_iter(env, list)
@@ -154,7 +154,7 @@ impl CoreFn for Vector {
                         })
                         .collect();
 
-                    Vector::from(vec?).evict(env)
+                    Vector::from(vec?).with_heap(env)
                 }
                 Type::Bit => {
                     let mut vec = vec![0; Cons::length(env, list).unwrap().div_ceil(8)];
@@ -173,7 +173,7 @@ impl CoreFn for Vector {
                         }
                     }
 
-                    Vector::from(vec).evict(env)
+                    Vector::from(vec).with_heap(env)
                 }
                 Type::Byte => {
                     let vec: exception::Result<Vec<u8>> = Cons::list_iter(env, list)
@@ -196,7 +196,7 @@ impl CoreFn for Vector {
                         })
                         .collect();
 
-                    Vector::from(vec?).evict(env)
+                    Vector::from(vec?).with_heap(env)
                 }
                 Type::Fixnum => {
                     let vec: exception::Result<Vec<i64>> = Cons::list_iter(env, list)
@@ -209,7 +209,7 @@ impl CoreFn for Vector {
                         })
                         .collect();
 
-                    Vector::from(vec?).evict(env)
+                    Vector::from(vec?).with_heap(env)
                 }
                 Type::Float => {
                     let vec: exception::Result<Vec<f32>> = Cons::list_iter(env, list)
@@ -222,7 +222,7 @@ impl CoreFn for Vector {
                         })
                         .collect();
 
-                    Vector::from(vec?).evict(env)
+                    Vector::from(vec?).with_heap(env)
                 }
                 _ => Err(Exception::new(
                     env,

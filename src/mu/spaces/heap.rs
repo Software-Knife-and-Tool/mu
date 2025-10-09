@@ -2,7 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 // heap
-
+#![allow(unused_parens)] // modular bitmap is a mess
 #[rustfmt::skip]
 use {
     crate::{
@@ -33,9 +33,9 @@ use {
     },
 };
 
+// #[repr(align(8))]
 #[bitfield]
-#[repr(align(8))]
-#[derive(Debug, Copy, Clone)]
+#[derive(Specifier, Debug, Copy, Clone)]
 pub struct HeapImageInfo {
     pub reloc: u32, // relocation
     #[skip]
@@ -317,13 +317,13 @@ impl Heap {
         &data[0..self.size]
     }
 
-    pub fn heap_size(env: &Env, tag: Tag) -> usize {
+    pub fn image_size(env: &Env, tag: Tag) -> usize {
         match tag.type_of() {
-            Type::Cons => Cons::heap_size(env, tag),
-            Type::Function => Function::heap_size(env, tag),
-            Type::Struct => Struct::heap_size(env, tag),
-            Type::Symbol => Symbol::heap_size(env, tag),
-            Type::Vector => Vector::heap_size(env, tag),
+            Type::Cons => Cons::image_size(env, tag),
+            Type::Function => Function::image_size(env, tag),
+            Type::Struct => Struct::image_size(env, tag),
+            Type::Symbol => Symbol::image_size(env, tag),
+            Type::Vector => Vector::image_size(env, tag),
             _ => size_of::<DirectTag>(),
         }
     }
@@ -426,7 +426,7 @@ impl Iterator for HeapIter<'_> {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test() {
+    fn heap_test() {
         assert!(true);
     }
 }

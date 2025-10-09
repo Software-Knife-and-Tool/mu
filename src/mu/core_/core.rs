@@ -278,7 +278,7 @@ impl Core {
         let features_ref = block_on(CORE.features.read());
         let features = features_ref
             .iter()
-            .map(|feature| Vector::from(feature.namespace.clone()).evict(env))
+            .map(|feature| Vector::from(feature.namespace.clone()).with_heap(env))
             .collect::<Vec<Tag>>();
 
         Cons::list(env, &features)

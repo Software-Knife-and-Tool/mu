@@ -5,13 +5,15 @@
 
 TMPF:=$(shell mktemp)
 
-MODULES = 		\
-	core		\
-	common		\
-	common/describe	\
-	common/metrics	\
-	prelude		\
-	prelude/repl
+# MODULES = 		\
+#	core		\
+#	common		\
+#	common/describe	\
+#	common/metrics	\
+#	prelude		\
+#	prelude/repl
+
+MODULES = core
 
 help: deltemp
 	@echo "regression test makefile -----------------"

@@ -159,7 +159,7 @@
                                      stream
                                      (core:%raise stream 'core:%format "not a stream designator"))))))
                 (core:%raise arg-list 'core:%format "not a list"))
-           (core:%raise fmt 'core:%format "not a format string"))))
+           (core:%raise format-string 'core:%format "not a format string"))))
 
 ;;;
 ;;; functions
@@ -188,9 +188,18 @@
           (core:%raise stream 'core:read "not a stream"))))
 
 (mu:intern core "write"
-   (:lambda (object escape stream)
+   (:lambda (form escape stream)
      (:if (core:streamp stream)
-          (:if (core:%and (core:vectorp object) (core:%typep object))
-               (core:%vector-write object escape stream)
-               (mu:write object escape stream))
+          (:if (core:%and (core:vectorp form) (core:%typep form))
+               (core:%vector-write form escape stream)
+               (:if (mu:eq :symbol (mu:type-of form))
+                    (:if (core:null escape)
+                         ((:lambda (ns name)
+                            (:if (mu:eq core:reader/ ns)
+                                 (mu:write name () stream)
+                                 (mu:write form () stream)))
+                            (mu:symbol-namespace form)
+                            (mu:symbol-name form))
+                         (mu:write form escape stream))
+               (mu:write form escape stream)))
           (core:%raise stream 'core:write "not a stream"))))

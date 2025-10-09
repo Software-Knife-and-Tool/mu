@@ -179,15 +179,15 @@ impl Function {
         let (arity, form) = Self::destruct(env, func);
         let vec = vec![arity, form];
 
-        Vector::from(vec).evict(env)
+        Vector::from(vec).with_heap(env)
     }
 
-    pub fn heap_size(env: &Env, func: Tag) -> usize {
+    pub fn image_size(env: &Env, func: Tag) -> usize {
         match Function::destruct(env, func).1.type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
             Type::Vector => std::mem::size_of::<Function>(),
             Type::Symbol => {
-                std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, Self::destruct(env, func).1)
+                std::mem::size_of::<Fixnum>() + Symbol::image_size(env, Self::destruct(env, func).1)
             }
             _ => panic!(),
         }

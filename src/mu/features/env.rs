@@ -57,7 +57,7 @@ lazy_static! {
 pub trait Env {
     fn feature() -> Feature;
     fn heap_room(_: &env::Env) -> Tag;
-    fn heap_size(_: &env::Env, tag: Tag) -> usize;
+    fn image_size(_: &env::Env, tag: Tag) -> usize;
     fn heap_type(_: &env::Env, type_: Type) -> HeapTypeInfo;
     fn images_room(_: &env::Env) -> Tag;
     fn ns_map(_: &env::Env) -> Tag;
@@ -72,14 +72,14 @@ impl Env for Feature {
         }
     }
 
-    fn heap_size(env: &env::Env, tag: Tag) -> usize {
+    fn image_size(env: &env::Env, tag: Tag) -> usize {
         match tag.type_of() {
-            Type::Async => Async::heap_size(env, tag),
-            Type::Cons => Cons::heap_size(env, tag),
-            Type::Function => Function::heap_size(env, tag),
-            Type::Struct => Struct::heap_size(env, tag),
-            Type::Symbol => Symbol::heap_size(env, tag),
-            Type::Vector => Vector::heap_size(env, tag),
+            Type::Async => Async::image_size(env, tag),
+            Type::Cons => Cons::image_size(env, tag),
+            Type::Function => Function::image_size(env, tag),
+            Type::Struct => Struct::image_size(env, tag),
+            Type::Symbol => Symbol::image_size(env, tag),
+            Type::Vector => Vector::image_size(env, tag),
             _ => std::mem::size_of::<DirectTag>(),
         }
     }
@@ -105,7 +105,7 @@ impl Env for Feature {
             ])
         }
 
-        Vector::from(vec).evict(env)
+        Vector::from(vec).with_heap(env)
     }
 
     fn images_room(env: &env::Env) -> Tag {
@@ -124,14 +124,14 @@ impl Env for Feature {
             }
         }
 
-        Vector::from(vec).evict(env)
+        Vector::from(vec).with_heap(env)
     }
 
     fn ns_map(env: &env::Env) -> Tag {
         let ns_ref = block_on(env.ns_map.read());
         let vec = ns_ref
             .iter()
-            .map(|(_, name, _)| Vector::from((*name).clone()).evict(env))
+            .map(|(_, name, _)| Vector::from((*name).clone()).with_heap(env))
             .collect::<Vec<Tag>>();
 
         Cons::list(env, &vec)
@@ -176,7 +176,7 @@ impl CoreFn for Feature {
     }
 
     fn env_hp_size(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::with_or_panic(<Feature as Env>::heap_size(env, fp.argv[0]));
+        fp.value = Fixnum::with_or_panic(<Feature as Env>::image_size(env, fp.argv[0]));
 
         Ok(())
     }
@@ -187,17 +187,17 @@ impl CoreFn for Feature {
             &[
                 Cons::cons(
                     env,
-                    Vector::from("config").evict(env),
+                    Vector::from("config").with_heap(env),
                     env.config.as_list(env),
                 ),
                 Cons::cons(
                     env,
-                    Vector::from("namespaces").evict(env),
+                    Vector::from("namespaces").with_heap(env),
                     Self::ns_map(env),
                 ),
                 Cons::cons(
                     env,
-                    Vector::from("heap-room").evict(env),
+                    Vector::from("heap-room").with_heap(env),
                     Self::heap_room(env),
                 ),
             ],

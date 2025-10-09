@@ -6,7 +6,7 @@ use {
     crate::{
         core_::{
             apply::Apply as _,
-            direct::{DirectExt, DirectTag, DirectType},
+            direct::{DirectExt, DirectImage, DirectTag, DirectType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -18,6 +18,7 @@ use {
             writer::Writer,
         },
         spaces::{
+            cache::Cache,
             gc::{Gc as _, GcContext},
             heap::{Heap, HeapRequest},
         },
@@ -129,7 +130,7 @@ impl Symbol {
         if name.is_empty() {
             Symbol::Symbol(SymbolImage {
                 namespace,
-                name: Vector::from(name).evict(env),
+                name: Vector::from(name).with_heap(env),
                 value,
             })
         } else {
@@ -137,7 +138,7 @@ impl Symbol {
                 ':' => Symbol::Keyword(Self::keyword(&name[1..])),
                 _ => Symbol::Symbol(SymbolImage {
                     namespace,
-                    name: Vector::from(name).evict(env),
+                    name: Vector::from(name).with_heap(env),
                     value,
                 }),
             }
@@ -160,7 +161,14 @@ impl Symbol {
                         heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
                     ),
                 },
-                _ => panic!(),
+                Tag::Direct(_) => {
+                    let image = Cache::ref_(env, DirectTag::cache_ref(tag).0);
+
+                    match image {
+                        DirectImage::Symbol(image) => image,
+                        _ => panic!(),
+                    }
+                }
             },
             _ => panic!(),
         }
@@ -169,7 +177,7 @@ impl Symbol {
     pub fn destruct(env: &Env, symbol: Tag) -> (Tag, Tag, Tag) {
         match symbol.type_of() {
             Type::Null => (
-                env.null_ns,
+                env.mu_ns,
                 match symbol {
                     Tag::Direct(dir) => DirectTag::to_tag(
                         dir.data(),
@@ -204,7 +212,20 @@ impl Symbol {
     pub fn view(env: &Env, symbol: Tag) -> Tag {
         let (ns, name, value) = Self::destruct(env, symbol);
         let vec = vec![
-            Vector::from(format!("\"{}\"", Namespace::name(env, ns).unwrap())).evict(env),
+            match ns.type_of() {
+                Type::Null => ns,
+                Type::Keyword => {
+                    if ns.eq_(&UNBOUND) {
+                        Self::keyword("unqual")
+                    } else {
+                        ns
+                    }
+                }
+                Type::Struct => {
+                    Vector::from(format!("\"{}\"", Namespace::name(env, ns))).with_heap(env)
+                }
+                _ => panic!(),
+            },
             name,
             if Self::is_bound(env, symbol) {
                 value
@@ -213,20 +234,29 @@ impl Symbol {
             },
         ];
 
-        Vector::from(vec).evict(env)
+        Vector::from(vec).with_heap(env)
     }
 
-    pub fn heap_size(env: &Env, symbol: Tag) -> usize {
+    pub fn image_size(env: &Env, symbol: Tag) -> usize {
         let (_, name, value) = Self::destruct(env, symbol);
-        let name_sz = Heap::heap_size(env, name);
-        let value_sz = Heap::heap_size(env, value);
+        let name_sz = Heap::image_size(env, name);
+        let value_sz = Heap::image_size(env, value);
 
         std::mem::size_of::<SymbolImage>()
             + if name_sz > 8 { name_sz } else { 0 }
             + if value_sz > 8 { value_sz } else { 0 }
     }
 
-    pub fn evict(&self, env: &Env) -> Tag {
+    pub fn with_cache(&self, env: &Env) -> Tag {
+        match self {
+            Symbol::Symbol(image) => {
+                DirectImage::Symbol(*image).with_cache(env, Type::Symbol as u8)
+            }
+            _ => panic!(),
+        }
+    }
+
+    pub fn with_heap(&self, env: &Env) -> Tag {
         match self {
             Symbol::Keyword(tag) => *tag,
             Symbol::Symbol(image) => {
@@ -287,17 +317,18 @@ impl Symbol {
 
         match token.find(':') {
             Some(0) => {
-                if token.starts_with(':')
-                    && (token.len() > DirectTag::DIRECT_STR_MAX + 1 || token.len() == 1)
-                {
+                if token.len() > DirectTag::DIRECT_STR_MAX + 1 || token.len() == 1 {
                     Err(Exception::new(
                         env,
                         Condition::Syntax,
                         "mu:read",
-                        Vector::from(token.clone()).evict(env),
+                        Vector::from(token.clone()).with_heap(env),
                     ))?
                 }
-                Ok(Symbol::new(env, Tag::nil(), &token, *UNBOUND).evict(env))
+
+                let keyword: String = token.chars().skip(1).collect();
+
+                Ok(Self::keyword(&keyword))
             }
             Some(_) => {
                 let sym: Vec<&str> = token.split(':').collect();
@@ -309,7 +340,7 @@ impl Symbol {
                         env,
                         Condition::Syntax,
                         "mu:read",
-                        Vector::from(token.clone()).evict(env),
+                        Vector::from(token.clone()).with_heap(env),
                     ))?
                 }
 
@@ -319,11 +350,11 @@ impl Symbol {
                         env,
                         Condition::Namespace,
                         "mu:read",
-                        Vector::from(sym[0]).evict(env),
+                        Vector::from(sym[0]).with_heap(env),
                     ))?,
                 }
             }
-            None => Ok(Namespace::intern(env, env.null_ns, token, *UNBOUND).unwrap()),
+            None => Ok(Self::new(env, *UNBOUND, &token, *UNBOUND).with_cache(env)),
         }
     }
 
@@ -343,14 +374,13 @@ impl Symbol {
             Type::Symbol => {
                 let (ns, name, _) = Self::destruct(env, symbol);
 
-                if Tag::nil().eq_(&ns) {
-                    StreamWriter::write_str(env, "#:", stream)?
-                } else if !env.null_ns.eq_(&ns) {
-                    match Namespace::name(env, ns) {
-                        Some(str) => StreamWriter::write_str(env, &str, stream).unwrap(),
-                        None => panic!(),
+                if !ns.eq_(&UNBOUND) {
+                    if ns.null_() {
+                        StreamWriter::write_str(env, "#:", stream)?
+                    } else {
+                        StreamWriter::write_str(env, &Namespace::name(env, ns), stream)?;
+                        StreamWriter::write_str(env, ":", stream)?
                     }
-                    StreamWriter::write_str(env, ":", stream)?;
                 }
 
                 env.write(name, false, stream)
@@ -377,7 +407,7 @@ impl CoreFn for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
-            Type::Null | Type::Keyword | Type::Symbol => Symbol::destruct(env, symbol).1,
+            Type::Null | Type::Keyword | Type::Symbol => Self::destruct(env, symbol).1,
             _ => Err(Exception::new(
                 env,
                 Condition::Type,
@@ -393,7 +423,17 @@ impl CoreFn for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match symbol.type_of() {
-            Type::Symbol | Type::Keyword | Type::Null => Symbol::destruct(env, symbol).0,
+            Type::Symbol => {
+                let ns = Self::destruct(env, symbol).0;
+
+                if ns.eq_(&UNBOUND) {
+                    Self::keyword("unqual")
+                } else {
+                    ns
+                }
+            }
+            Type::Null => env.mu_ns,
+            Type::Keyword => env.keyword_ns,
             _ => Err(Exception::new(
                 env,
                 Condition::Type,
@@ -422,14 +462,12 @@ impl CoreFn for Symbol {
                 }
             }
             Type::Keyword | Type::Null => symbol,
-            _ => {
-                return Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "mu:symbol-value",
-                    symbol,
-                ))
-            }
+            _ => Err(Exception::new(
+                env,
+                Condition::Type,
+                "mu:symbol-value",
+                symbol,
+            ))?,
         };
 
         Ok(())
@@ -447,20 +485,22 @@ impl CoreFn for Symbol {
                     Tag::nil()
                 }
             }
-            _ => return Err(Exception::new(env, Condition::Type, "mu:boundp", symbol)),
+            _ => Err(Exception::new(env, Condition::Type, "mu:boundp", symbol))?,
         };
 
         Ok(())
     }
 
     fn mu_symbol(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let name = fp.argv[0];
-
         env.argv_check("mu:make-symbol", &[Type::String], fp)?;
 
-        let str = Vector::as_string(env, name);
-
-        fp.value = Self::new(env, Tag::nil(), &str, *UNBOUND).evict(env);
+        fp.value = Self::new(
+            env,
+            Tag::nil(),
+            Vector::as_string(env, fp.argv[0]).as_str(),
+            *UNBOUND,
+        )
+        .with_heap(env);
 
         Ok(())
     }

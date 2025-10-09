@@ -88,6 +88,18 @@ impl Cache {
 
     pub fn add(env: &Env, image: DirectImage) -> u64 {
         let mut images_ref = block_on(env.cache.write());
+
+        if let DirectImage::Symbol(image) = image {
+            let hash_opt = images_ref.cache.iter().find(|(_, direct)| match direct {
+                DirectImage::Symbol(symbol) => symbol.name.eq_(&image.name),
+                _ => panic!(),
+            });
+
+            if let Some(hash) = hash_opt {
+                return *hash.0;
+            }
+        };
+
         let tag_id = images_ref.tag_id;
         let type_info = &mut images_ref.type_info;
         let cache_id = Self::map_cache_id(image.type_of()).unwrap();
@@ -119,7 +131,7 @@ impl Cache {
     pub fn ref_(env: &Env, index: usize) -> DirectImage {
         let images_ref = block_on(env.cache.read());
 
-        images_ref.cache[&(index as u64)].clone()
+        images_ref.cache[&(index as u64)]
     }
 
     pub fn type_info(env: &Env, type_: Type) -> Option<CacheTypeInfo> {
@@ -132,7 +144,7 @@ impl Cache {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test() {
+    fn cache_test() {
         assert!(true);
     }
 }

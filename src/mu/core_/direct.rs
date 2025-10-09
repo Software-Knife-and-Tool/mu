@@ -17,12 +17,11 @@ use {
             async_::Async,
             cons::Cons,
             function::Function,
-            symbol::Symbol,
+            symbol::SymbolImage,
         },
     },
     modular_bitfield::specifiers::{B3, B56},
     num_enum::TryFromPrimitive,
-//    std::{convert::From, fmt},
 };
 
 // little endian direct tag format
@@ -44,7 +43,7 @@ impl Default for DirectTag {
     }
 }
 
-#[derive(BitfieldSpecifier, Copy, Clone, Eq, PartialEq)]
+#[derive(Specifier, Copy, Clone, Eq, PartialEq)]
 pub enum DirectType {
     Ext = 0,
     ByteVec = 1,
@@ -70,16 +69,16 @@ pub enum DirectExt {
     ExtType(ExtType),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum DirectImage {
     Async(Async),
     Cons(Cons),
     Function(Function),
-    Symbol(Symbol),
+    Symbol(SymbolImage),
 }
 
 impl DirectImage {
-    pub fn type_of(&self) -> Type {
+    pub fn type_of(self) -> Type {
         match self {
             DirectImage::Async(_) => Type::Async,
             DirectImage::Cons(_) => Type::Cons,
@@ -88,13 +87,12 @@ impl DirectImage {
         }
     }
 
-    pub fn cache(&self, env: &Env, type_id: u8) -> Tag {
-        let tag_id = Cache::add(env, self.clone());
-        let data = (tag_id << 8) | ((type_id & 0xf) as u64);
+    pub fn with_cache(self, env: &Env, type_id: u8) -> Tag {
+        let tag_id = Cache::add(env, self);
 
         Tag::Direct(
             DirectTag::new()
-                .with_data(data)
+                .with_data((tag_id << 8) | ((type_id & 0xf) as u64))
                 .with_ext(ExtType::Image as u8)
                 .with_dtype(DirectType::Ext)
                 .with_tag(TagType::Direct),
@@ -175,13 +173,27 @@ impl DirectTag {
         }
     }
 
+    pub fn image_detag(tag: Tag) -> (usize, u8) {
+        match tag {
+            Tag::Direct(direct) => match direct.ext() {
+                val if val == ExtType::Image as u8 => {
+                    let data = direct.data() as usize;
+
+                    (data >> 8, data as u8)
+                }
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
+
     //
     // direct function
     //
 
-    pub fn function(ns_id: u16, index: u16) -> Tag {
+    pub fn function(ns: u16, index: u16) -> Tag {
         Self::to_tag(
-            (ns_id as u64) << 16 | index as u64,
+            (ns as u64) << 16 | index as u64,
             DirectExt::ExtType(ExtType::Function),
             DirectType::Ext,
         )

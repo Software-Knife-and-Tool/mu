@@ -104,9 +104,9 @@ impl Struct {
     pub fn to_tag(env: &Env, stype: Tag, vec: Vec<Tag>) -> Tag {
         match stype.type_of() {
             Type::Keyword => {
-                let vector = Vector::from(vec).evict(env);
+                let vector = Vector::from(vec).with_heap(env);
 
-                Struct { stype, vector }.evict(env)
+                Struct { stype, vector }.with_heap(env)
             }
             _ => panic!(),
         }
@@ -115,20 +115,20 @@ impl Struct {
     pub fn new(env: &Env, key: &str, vec: Vec<Tag>) -> Self {
         Struct {
             stype: Symbol::keyword(key),
-            vector: Vector::from(vec).evict(env),
+            vector: Vector::from(vec).with_heap(env),
         }
     }
 
     pub fn view(env: &Env, tag: Tag) -> Tag {
         let image = Self::to_image(env, tag);
 
-        Vector::from(vec![image.stype, image.vector]).evict(env)
+        Vector::from(vec![image.stype, image.vector]).with_heap(env)
     }
 
-    pub fn heap_size(env: &Env, struct_: Tag) -> usize {
+    pub fn image_size(env: &Env, struct_: Tag) -> usize {
         let (_, vector) = Struct::destruct(env, struct_);
 
-        std::mem::size_of::<Struct>() + Vector::heap_size(env, vector)
+        std::mem::size_of::<Struct>() + Vector::image_size(env, vector)
     }
 
     pub fn write(env: &Env, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
@@ -171,7 +171,7 @@ impl Struct {
         }
     }
 
-    pub fn evict(&self, env: &Env) -> Tag {
+    pub fn with_heap(&self, env: &Env) -> Tag {
         let image: &[[u8; 8]] = &[self.stype.as_slice(), self.vector.as_slice()];
         let mut heap_ref = block_on(env.heap.write());
         let ha = HeapRequest {
@@ -232,9 +232,9 @@ impl CoreFn for Struct {
 
         fp.value = Struct {
             stype: type_,
-            vector: Vector::from(vec).evict(env),
+            vector: Vector::from(vec).with_heap(env),
         }
-        .evict(env);
+        .with_heap(env);
 
         Ok(())
     }

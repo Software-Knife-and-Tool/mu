@@ -4,6 +4,12 @@
 (mu:type-of (mu:eval (core:compile '((:lambda () (core:%deftype "test" '((:v . :t))) (core:%make-type "test" '((:v . 2))))))))	:struct
 (core:type-of (mu:eval (core:compile '((:lambda () (core:%deftype "test" '((:v . :t))) (core:%make-type "test" '((:v . 2))))))))	test
 ((:lambda () (core:%deftype "test" '((:v . :t))) (core:%type-prop :v (core:%make-type "test" '((:v . 2))))))	(:v . 2)
+(core:type-of 1)	fixnum
+(core:type-of 1.0)	float
+(core:type-of mu:*standard-input*)	stream
+(core:type-of #(:t 1 2))	vector
+(core:type-of mu:add)	function
+(core:type-of (mu:make-struct :foo '()))	:foo
 (core:typep '(1 2) :cons)	:t
 (core:typep 1 :fixnum)	:t
 (core:typep (mu:make-struct :struct ()) :struct)	:t

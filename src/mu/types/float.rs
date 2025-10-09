@@ -46,7 +46,7 @@ impl Float {
     }
 
     pub fn view(env: &Env, fl: Tag) -> Tag {
-        Vector::from(vec![fl]).evict(env)
+        Vector::from(vec![fl]).with_heap(env)
     }
 
     pub fn write(env: &Env, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {

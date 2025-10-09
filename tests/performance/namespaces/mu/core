@@ -18,6 +18,7 @@
 (mu:view #(:t 1 2))
 (mu:view #s(:foo 1 2))
 (mu:view 'a)
+(mu:view '#:a)
 (mu:view 'mu:eq)
 (mu:view mu:*standard-input*)
 (mu:with-exception (:lambda (cond obj) cond) (:lambda () (mu:div 1 1)))

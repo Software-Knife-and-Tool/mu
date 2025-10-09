@@ -114,7 +114,7 @@ impl Stream {
                     stream.unch,
                 ];
 
-                Vector::from(vec).evict(env)
+                Vector::from(vec).with_heap(env)
             }
             None => panic!(),
         }
@@ -315,7 +315,7 @@ impl CoreFn for Stream {
         let stream = fp.argv[0];
         let string = Stream::get_string(env, stream)?;
 
-        fp.value = Vector::from(string).evict(env);
+        fp.value = Vector::from(string).with_heap(env);
 
         Ok(())
     }

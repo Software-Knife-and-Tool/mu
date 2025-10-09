@@ -6,19 +6,24 @@
 ;;;
 (mu:intern core "%eof%" (mu:make-symbol "eof"))
 (mu:intern core "*reader-stream*" (mu:open :string :output "" :t))
-(mu:intern core "*reader-current-ns*" (mu:open :string :bidir "core" :t))
+(mu:intern core "*reader-current-ns*" (mu:open :string :bidir "core:/reader" :t))
 
+#|
 (mu:intern core "%reader-get-ns"
    (:lambda ()
      ((:lambda (ns)
         (mu:write ns () core:*reader-current-ns*)
         (mu:find-namespace ns))
       (mu:get-string core:*reader-current-ns*))))
+|#
 
-(mu:intern core "%reader-set-ns"
-   (:lambda (ns)
+(mu:intern core "get-current-ns"
+   (:lambda () core:reader/))          
+
+(mu:intern core "set-current-ns"
+   (:lambda (ns-name)
       (mu:get-string core:*reader-current-ns*)
-      (mu:write ns () core:*reader-current-ns*)))
+      (mu:write ns-name () core:*reader-current-ns*)))
 
 ;;;
 ;;; readtable
@@ -196,13 +201,13 @@
 ;;; recursive reader
 ;;;
 (mu:intern core "%read"
-  (:lambda (stream)
-    ((:lambda (ch)
-       (:if (core:streamp ch)
-            core:%eof%
-            ((:lambda (macro)
-               (:if macro
-                    (core:apply (mu:car macro) (core:%list2 stream ch))
-                    (core:%read-dispatch ch stream)))
-             (core:get-macro-character ch))))
-     (core:%read-consume-ws stream))))
+   (:lambda (stream)
+     ((:lambda (ch)
+        (:if (core:streamp ch)
+             core:%eof%
+             ((:lambda (macro)
+                (:if macro
+                     (core:apply (mu:car macro) (core:%list2 stream ch))
+                     (core:%read-dispatch ch stream)))
+              (core:get-macro-character ch))))
+      (core:%read-consume-ws stream))))

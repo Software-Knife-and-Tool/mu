@@ -17,9 +17,11 @@ impl Env_ {
         let env = match config.map("config") {
             Some(config) => Mu::make_env(
                 &Mu::config(Some(config))
-                    .expect("mu-listener: unable to allocate env from config {config:?}"),
+                    .expect("listener: can't allocate env with config {config:?}"),
             ),
-            None => Mu::make_env(&Mu::config(None).expect("mu-listener: unable to allocate env")),
+            None => {
+                Mu::make_env(&Mu::config(None).expect("listener: can't to allocate default env"))
+            }
         };
 
         let ns = match config.map("namespace") {
@@ -40,7 +42,7 @@ impl Env_ {
                     "prelue"
                 }
                 _ => {
-                    eprintln!("mu-listener: unrecognized namespace: {ns}",);
+                    eprintln!("listener: unrecognized namespace: {ns}",);
                     std::process::exit(-1)
                 }
             },
@@ -74,13 +76,13 @@ impl Env_ {
         match Mu::load(env, sys.as_str()) {
             Ok(bool_) => {
                 if !bool_ {
-                    eprintln!("mu-listener: can't load core.sys");
+                    eprintln!("listener: can't load {name}");
                     std::process::exit(-1)
                 }
             }
             Err(e) => {
                 eprintln!(
-                    "mu-listener: can't load core.sys: {}",
+                    "listener: exception while loading {name}: {}",
                     Mu::exception_string(env, e)
                 );
                 std::process::exit(-1)

@@ -9,7 +9,7 @@
 ;;; folds
 ;;;
 (mu:intern core "%foldl"
-  (:lambda (function init list)
+  (:lambda (func init list)
      (mu:cdr
       (mu:fix
        (:lambda (arg)
@@ -17,14 +17,14 @@
              (:if list
                   (mu:cons
                    (mu:cdr list)
-                   (core:apply function (core:%list2 (mu:car list) acc)))
+                   (core:apply func (core:%list2 (mu:car list) acc)))
                   arg))
            (mu:car arg)
            (mu:cdr arg)))
        (mu:cons list init)))))
 
 (mu:intern core "%foldr"
-   (:lambda (function init list)
+   (:lambda (func init list)
      (mu:cdr
       (mu:fix
        (:lambda (arg)
@@ -33,7 +33,7 @@
                   arg
                   (mu:cons
                    nth
-                   (core:apply function (core:%list2 (mu:nth nth list) acc)))))
+                   (core:apply func (core:%list2 (mu:nth nth list) acc)))))
            (mu:sub (mu:car arg) 1)
            (mu:cdr arg)))
        (mu:cons (mu:length list) init)))))
@@ -42,46 +42,46 @@
 ;;; maps
 ;;;
 (mu:intern core "%mapc"
-   (:lambda (function list)
+   (:lambda (func list)
      (mu:fix
       (:lambda (list-cdr)
         (:if list-cdr
              (core:%prog2
-                 (core:apply function (mu:cons (mu:car list-cdr) ()))
+                 (core:apply func (mu:cons (mu:car list-cdr) ()))
                  (mu:cdr list-cdr))
              ()))
       list)
      list))
 
 (mu:intern core "%mapcar"
-   (:lambda (function list)
+   (:lambda (func list)
       (core:%foldl
        (:lambda (elt acc)
-          `(,@acc ,(core:apply function `(,elt))))
+          `(,@acc ,(core:apply func `(,elt))))
        ()
        list)))
 
 (mu:intern core "%mapl"
-   (:lambda (function list)
+   (:lambda (func list)
      (mu:fix
       (:lambda (list)
         (:if list
              (core:%prog2
-                (core:apply function (mu:cons list ()))
+                (core:apply func (mu:cons list ()))
                 (mu:cdr list))
              ()))
       list)
      list))
 
 (mu:intern core "%maplist"
-   (:lambda (function list)
+   (:lambda (func list)
      (mu:car
       (mu:fix
        (:lambda (loop)
          ((:lambda (acc list)
             (:if list
                  (mu:cons
-                  `(,@acc ,(core:apply function `(,list)))
+                  `(,@acc ,(core:apply func `(,list)))
                   (mu:cdr list))
                  loop))
           (mu:car loop)
@@ -148,7 +148,7 @@
 ;;; positions
 ;;;
 (mu:intern core "%position-if"
-   (:lambda (function list)
+   (:lambda (func list)
      (:if list
           ((:lambda (length)
              (mu:car
@@ -158,7 +158,7 @@
                       loop
                       (:if (mu:less-than length loop)
                            ()
-                           (:if (core:apply function (mu:cons (mu:nth loop list) ()))
+                           (:if (core:apply func (mu:cons (mu:nth loop list) ()))
                                 (mu:cons loop  ())
                                 (mu:add loop 1)))))
                0)))

@@ -142,32 +142,32 @@ impl CoreFn for Feature {
                         Cons::cons(
                             env,
                             Symbol::keyword("sysname"),
-                            Vector::from(info.sysname().to_str().unwrap()).evict(env),
+                            Vector::from(info.sysname().to_str().unwrap()).with_heap(env),
                         ),
                         Cons::cons(
                             env,
                             Symbol::keyword("node"),
-                            Vector::from(info.nodename().to_str().unwrap()).evict(env),
+                            Vector::from(info.nodename().to_str().unwrap()).with_heap(env),
                         ),
                         Cons::cons(
                             env,
                             Symbol::keyword("release"),
-                            Vector::from(info.release().to_str().unwrap()).evict(env),
+                            Vector::from(info.release().to_str().unwrap()).with_heap(env),
                         ),
                         Cons::cons(
                             env,
                             Symbol::keyword("version"),
-                            Vector::from(info.version().to_str().unwrap()).evict(env),
+                            Vector::from(info.version().to_str().unwrap()).with_heap(env),
                         ),
                         Cons::cons(
                             env,
                             Symbol::keyword("machine"),
-                            Vector::from(info.machine().to_str().unwrap()).evict(env),
+                            Vector::from(info.machine().to_str().unwrap()).with_heap(env),
                         ),
                     ],
                 )];
 
-                Struct::new(env, "uname", uname).evict(env)
+                Struct::new(env, "uname", uname).with_heap(env)
             }
         };
 
@@ -189,69 +189,73 @@ impl CoreFn for Feature {
                     &[
                         Cons::cons(
                             env,
-                            Vector::from("uptime").evict(env),
+                            Vector::from("uptime").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.uptime as u64)?,
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("loads").evict(env),
+                            Vector::from("loads").with_heap(env),
                             Vector::from(vec![
                                 sysinfo.loads[0] as f32,
                                 sysinfo.loads[1] as f32,
                                 sysinfo.loads[2] as f32,
                             ])
-                            .evict(env),
+                            .with_heap(env),
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("totalram").evict(env),
+                            Vector::from("totalram").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.totalram)?,
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("freeram").evict(env),
+                            Vector::from("freeram").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.freeram)?,
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("sharedram").evict(env),
+                            Vector::from("sharedram").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.sharedram)?,
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("bufferram").evict(env),
+                            Vector::from("bufferram").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.bufferram)?,
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("totalswap").evict(env),
+                            Vector::from("totalswap").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.totalswap)?,
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("freeswap").evict(env),
+                            Vector::from("freeswap").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.freeswap)?,
                         ),
-                        Cons::cons(env, Vector::from("procs").evict(env), sysinfo.procs.into()),
                         Cons::cons(
                             env,
-                            Vector::from("totalhigh").evict(env),
+                            Vector::from("procs").with_heap(env),
+                            sysinfo.procs.into(),
+                        ),
+                        Cons::cons(
+                            env,
+                            Vector::from("totalhigh").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.totalhigh)?,
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("freehigh").evict(env),
+                            Vector::from("freehigh").with_heap(env),
                             Fixnum::with_u64(env, sysinfo.freehigh)?,
                         ),
                         Cons::cons(
                             env,
-                            Vector::from("mem_unit").evict(env),
+                            Vector::from("mem_unit").with_heap(env),
                             sysinfo.mem_unit.into(),
                         ),
                     ],
                 )];
 
-                Vector::from(sysinfo).evict(env)
+                Vector::from(sysinfo).with_heap(env)
             }
         };
 

@@ -1,2 +1,0 @@
-(mu:write ";;; mu-listener 0.0.2" () mu:*standard-output*)
-(mu:write #\linefeed () mu:*standard-output*)
