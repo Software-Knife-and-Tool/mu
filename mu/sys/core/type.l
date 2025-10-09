@@ -1,4 +1,3 @@
-
 ;;;  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 ;;;  SPDX-License-Identifier: MIT
 
@@ -21,32 +20,32 @@
      (:if (core:listp properties)
           ((:lambda (symbol)
              (:if (core:null symbol)
-                  (mu:intern core:*types/* name (mu:make-struct :<core> (core:%list2 name properties)))
+                  (mu:intern core:types/ name (mu:make-struct :<core> (core:%list2 name properties)))
                   (core:%raise symbol 'core:%deftype "type symbol bound")))
-           (mu:find core:*types/* name))
+           (mu:find core:types/ name))
           (core:%raise properties 'core:%deftype "not a property list"))))
-
-(mu:intern core "%type-predicate-map%"
-   `(,(mu:cons :char core:charp)
-      ,(mu:cons :cons core:consp)
-      ,(mu:cons :fixnum core:fixnump)
-      ,(mu:cons :float core:floatp)
-      ,(mu:cons :func (:lambda (t) (core:functionp t)))
-      ,(mu:cons :listp core:listp)
-      ,(mu:cons :keyword core:keywordp)
-      ,(mu:cons :ns core:namespacep)
-      ,(mu:cons :string (:lambda (t) (core:stringp t)))
-      ,(mu:cons :struct core:structp)
-      ,(mu:cons :symbol (:lambda (t) (mu:eq :symbol (mu:type-of t))))
-      ,(mu:cons :symbolp (:lambda (t) (core:symbolp t)))
-      ,(mu:cons :t (:lambda (t) :t))
-      ,(mu:cons :vector (:lambda (t) (core:vectorp t)))))
 
 (mu:intern core "%type-predicate"
    (:lambda (type value)
       ((:lambda (predicate)
           (mu:apply predicate (mu:cons value ())))
-       (mu:cdr (core:%assq type core:%type-predicate-map%)))))
+       (mu:cdr
+        (core:%assq
+         type
+         `(,(mu:cons :char core:charp)
+            ,(mu:cons :cons core:consp)
+            ,(mu:cons :fixnum core:fixnump)
+            ,(mu:cons :float core:floatp)
+            ,(mu:cons :func (:lambda (t) (core:functionp t)))
+            ,(mu:cons :listp core:listp)
+            ,(mu:cons :keyword core:keywordp)
+            ,(mu:cons :ns core:namespacep)
+            ,(mu:cons :string (:lambda (t) (core:stringp t)))
+            ,(mu:cons :struct core:structp)
+            ,(mu:cons :symbol (:lambda (t) (mu:eq :symbol (mu:type-of t))))
+            ,(mu:cons :symbolp (:lambda (t) (core:symbolp t)))
+            ,(mu:cons :t (:lambda (t) :t))
+            ,(mu:cons :vector (:lambda (t) (core:vectorp t)))))))))
 
 (mu:intern core "%make-type"
    (:lambda (name property-values)
@@ -65,7 +64,7 @@
                         ()))
              (mu:svref (mu:struct-vec (mu:symbol-value type-symbol)) 1)))
           property-values))
-       (mu:find core:*types/* name))
+       (mu:find core:types/ name))
      (mu:make-struct :<core> (core:%list2 name property-values))))
 
 (mu:intern core "%type-prop"
@@ -128,8 +127,8 @@
                     (:if (core:symbolp predicate-symbol)
                          (:if (mu:boundp predicate-symbol)
                               (core:apply (mu:symbol-value predicate-symbol) (mu:cons value ()))
-                              (core:%raise predicate 'core:typep "satisfies typespec symbol"))
-                         (core:%raise predicate 'core:typep "satisfies typespec symbol")))
+                              (core:%raise predicate-symbol 'core:typep "satisfies typespec symbol"))
+                         (core:%raise predicate-symbol 'core:typep "satisfies typespec symbol")))
                   (mu:car spec-list))
                  (core:%raise spec-list 'core:typep "satisfies typespec format"))))
      ,(mu:cons 'not (:lambda (value spec-list)
@@ -205,19 +204,28 @@
                          (core:%raise typespec 'core:typep "typespec format")))))))   
 
 (mu:intern core "type-of"
-   (:lambda (value)
-      ((:lambda (type)
-          (:if (mu:eq type :struct)
-               (:if (mu:eq :<core> (mu:struct-type value))
-                    (mu:intern mu:*null/* (mu:svref (mu:struct-vec value) 0) ())
-                    (mu:struct-type value))
-               (:if (core:stringp value)
-                    'string
-                    ((:lambda (symbol)
-                       (:if symbol
-                            symbol
-                            (core:%prog2
-                               (mu:write (mu:symbol-name type) () core:%quote%)
-                               (mu:read core:%quote% :t ()))))
-                     (mu:find mu:*null/* (mu:symbol-name type))))))
-       (mu:type-of value))))
+   (:lambda (form)
+     ((:lambda (type)
+        (:if (mu:eq type :struct)
+             (:if (mu:eq :<core> (mu:struct-type form))
+                  (core:%prog2
+                     (mu:write (mu:svref (mu:struct-vec form) 0) () core:%quote%)
+                     (mu:read core:%quote% :t ()))
+                  (mu:struct-type form))
+             (:if (core:stringp form)
+                  'string
+                  (mu:cdr
+                   (core:%assq
+                    type
+                    '((:fixnum  . fixnum)
+                      (:float   . float)
+                      (:async   . async)
+                      (:char    . char)
+                      (:cons    . cons)
+                      (:stream  . stream)
+                      (:null    . symbol)
+                      (:keyword . symbol)
+                      (:symbol  . symbol)
+                      (:vector  . vector)
+                      (:func    . function)))))))
+      (mu:type-of form))))

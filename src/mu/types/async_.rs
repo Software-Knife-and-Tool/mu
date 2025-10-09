@@ -136,15 +136,15 @@ impl Async {
         let (arity, form) = Self::destruct(env, func);
         let vec = vec![arity, form];
 
-        Vector::from(vec).evict(env)
+        Vector::from(vec).with_heap(env)
     }
 
-    pub fn heap_size(env: &Env, func: Tag) -> usize {
+    pub fn image_size(env: &Env, func: Tag) -> usize {
         let form = Self::destruct(env, func).1;
         match form.type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Async>(),
             Type::Vector => std::mem::size_of::<Async>(),
-            Type::Symbol => std::mem::size_of::<Fixnum>() + Symbol::heap_size(env, form),
+            Type::Symbol => std::mem::size_of::<Fixnum>() + Symbol::image_size(env, form),
             _ => panic!(),
         }
     }

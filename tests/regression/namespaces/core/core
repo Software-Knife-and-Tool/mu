@@ -8,14 +8,6 @@
 (mu:eval (core:compile '(core:list*)))	:nil
 (mu:eval (core:compile '(core:list* 1)))	1
 (mu:eval (core:compile '(core:list* 1 2 3)))	(1 2 . 3)
-(mu:eval (core:compile '(core:let ())))	:nil
-(mu:eval (core:compile '(core:let () 1)))	1
-(mu:eval (core:compile '(core:let () 1 2)))	2
-(mu:eval (core:compile '(core:let ((a 0)) a)))	0
-(mu:eval (core:compile '(core:let ((a 1) (b 2)) (mu:add a b))))	3
-(mu:eval (core:compile '(core:let* ())))	:nil
-(mu:eval (core:compile '(core:let* () 1)))	1
-(mu:eval (core:compile '(core:let* () 1 2)))	2
 (mu:eval (core:compile '(core:vector)))	#(:t)
 (mu:eval (core:compile '(core:vector 'a 0)))	#(:t a 0)
 (mu:eval (core:compile '(core:vector ((%lambda () 1)) 'b 2 (mu:add 1 3))))	#(:t 1 b 2 4)
@@ -25,27 +17,3 @@
 (mu:eval (core:compile '(core:funcall mu:add 1 2)))	3
 (mu:eval (core:compile '(core:funcall (%lambda (a) a) 0)))	0
 (mu:eval (core:compile '(core:funcall (%lambda (a b c) (mu:add c (mu:add a b))) 1 ((%lambda () 2)) (mu:add 1 2))))	6
-(mu:eval (core:compile '(progn)))	:nil
-(mu:eval (core:compile '(progn 1)))	1
-(mu:eval (core:compile '(progn 1 2)))	2
-(mu:eval (core:compile '(when :t ())))	:nil
-(mu:eval (core:compile '(when :t 1)))	1
-(mu:eval (core:compile '(when :t 1 2)))	2
-(mu:eval (core:compile '(when () ())))	:nil
-(mu:eval (core:compile '(when () 1)))	:nil
-(mu:eval (core:compile '(when () 1 2)))	:nil
-(mu:eval (core:compile '(unless :t ())))	:nil
-(mu:eval (core:compile '(unless :t 1)))	:nil
-(mu:eval (core:compile '(unless :t 1 2)))	:nil
-(mu:eval (core:compile '(unless () ())))	:nil
-(mu:eval (core:compile '(unless () 1)))	1
-(mu:eval (core:compile '(unless () 1 2)))	2
-(mu:eval (core:compile '(and)))	:t
-(mu:eval (core:compile '(and 1)))	1
-(mu:eval (core:compile '(and 1 2)))	2
-(mu:eval (core:compile '(or)))	:nil
-(mu:eval (core:compile '(or 1)))	1
-(mu:eval (core:compile '(or 1 2)))	2
-(mu:eval (core:compile '(cond)))	:nil
-(mu:eval (core:compile '(cond (1 'a))))	a
-(mu:eval (core:compile '(cond (() 'a) (1 'b 'c))))	c

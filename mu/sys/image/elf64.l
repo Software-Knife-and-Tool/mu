@@ -28,7 +28,7 @@
       ((eq type :u64)
        (fixnum+ (elf64-read :word elf64) (ash (elf64-read :word elf64) 32)))
       ((eq type :tag)
-       (core::of-tag (elf64-read :u64 elf64)))
+       (core:of-tag (elf64-read :u64 elf64)))
       (t (error size "elf64-read: not a legal type")))))
 
 (mu:intern core elf64-write (type n stream)
@@ -45,7 +45,7 @@
        (elf64-write :half n stream)
        (elf64-write :half (ash n -32) stream))
       ((eq type :tag)
-       (elf64-write :u64 (core::tag-of n) stream))
+       (elf64-write :u64 (core:tag-of n) stream))
       (t (error size "el64-write: not a legal type")))))
 
 (mu:intern core elf64-write-header (out size)

@@ -90,7 +90,7 @@ impl CoreFn for Feature {
                 .map(|item| Cons::cons(env, item.0, Fixnum::with_u64(env, item.1).unwrap()))
                 .collect::<Vec<Tag>>();
 
-            fp.value = Vector::from(prof_vec).evict(env)
+            fp.value = Vector::from(prof_vec).with_heap(env)
         } else {
             return Err(Exception::new(
                 env,

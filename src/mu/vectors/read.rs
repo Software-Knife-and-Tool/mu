@@ -46,7 +46,7 @@ impl Read for Vector {
                     }
                 }
 
-                Ok(Self::from(str).evict(env))
+                Ok(Self::from(str).with_heap(env))
             }
             '*' => {
                 let mut digits: String = String::new();
@@ -93,7 +93,7 @@ impl Read for Vector {
                     }
                 }
 
-                Ok(Self::from((vec, digits.len())).evict(env))
+                Ok(Self::from((vec, digits.len())).with_heap(env))
             }
             '(' => {
                 let vec_list = match Cons::read(env, stream) {
@@ -113,7 +113,7 @@ impl Read for Vector {
                         Type::T => {
                             let vec = Cons::list_iter(env, vec).collect::<Vec<Tag>>();
 
-                            Ok(Vector::from(vec).evict(env))
+                            Ok(Vector::from(vec).with_heap(env))
                         }
                         Type::Char => {
                             let vec: exception::Result<String> =
@@ -132,7 +132,7 @@ impl Read for Vector {
                                     })
                                     .collect();
 
-                            Ok(Vector::from(vec?).evict(env))
+                            Ok(Vector::from(vec?).with_heap(env))
                         }
                         Type::Byte => {
                             let vec: exception::Result<Vec<u8>> =
@@ -161,7 +161,7 @@ impl Read for Vector {
                                     })
                                     .collect();
 
-                            Ok(Vector::from(vec?).evict(env))
+                            Ok(Vector::from(vec?).with_heap(env))
                         }
                         Type::Fixnum => {
                             let vec: exception::Result<Vec<i64>> =
@@ -180,7 +180,7 @@ impl Read for Vector {
                                     })
                                     .collect();
 
-                            Ok(Vector::from(vec?).evict(env))
+                            Ok(Vector::from(vec?).with_heap(env))
                         }
                         Type::Float => {
                             let vec: exception::Result<Vec<f32>> =
@@ -199,7 +199,7 @@ impl Read for Vector {
                                     })
                                     .collect();
 
-                            Ok(Vector::from(vec?).evict(env))
+                            Ok(Vector::from(vec?).with_heap(env))
                         }
                         _ => panic!(),
                     },

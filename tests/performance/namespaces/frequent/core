@@ -31,7 +31,6 @@
 (mu:eval ())
 (mu:eval 1)
 (mu:eval 'mu:*standard-input*)
-(mu:intern (mu:find-namespace "") "a" ())
 (mu:fix (:lambda (a) ()) ())
 (mu:fix (:lambda (a) (:if (mu:eq 0 a) 0 (mu:sub a 1))) 100)
 (mu:type-of ())

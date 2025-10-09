@@ -8,10 +8,9 @@
  "common"
  '((:version . "0.0.1")
    (:lang    . :core)
-   (:ns      . "common")
+   (:ns      . ("common"))
    (:require . ())
-   (:load    . (
-                "common.l"
+   (:load    . ("common.l"
                 "boole.l"
                 "apply.l"
                 "char.l"
@@ -25,5 +24,4 @@
 	        "sequence.l"
 	        "stream.l"
 	        "symbol.l"
-                "time.l"
-               ))))
+                "time.l"))))

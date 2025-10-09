@@ -104,7 +104,7 @@
                      (mu:make-symbol (mu:symbol-name symbol))
                      (core:%raise symbol 'core:%read-sharp-colon "not a symbol")))
               (core:%read-atom ch stream))              
-             (core:%raise () 'core:%read-sharp-colon "early eof")))
+             (core:%raise stream 'core:%read-sharp-colon "early eof")))
      (mu:read-char stream () ()))))
 
 (mu:intern core "%read-sharp-number"
@@ -251,14 +251,14 @@
               (:if macro-symbol
                    (mu:symbol-value macro-symbol)
                    ()))
-           (mu:find core:*char-macros/* (mu:make-vector :char (mu:cons char ()))))
+           (mu:find core:char-macros/ (mu:make-vector :char (mu:cons char ()))))
           (core:%raise char 'core:get-macro-character "not a character"))))
 
 (mu:intern core "set-macro-character"
-   (:lambda (char function non-terminating)
+   (:lambda (char func non-terminating)
       (:if (core:charp char)
-         (:if (core:functionp function)
-              (mu:intern core:*char-macros/* (mu:make-vector :char (mu:cons char ())) (mu:cons function non-terminating))
-              (core:%raise function 'core:set-macro-character "not a function"))
+         (:if (core:functionp func)
+              (mu:intern core:char-macros/ (mu:make-vector :char (mu:cons char ())) (mu:cons func non-terminating))
+              (core:%raise func 'core:set-macro-character "not a function"))
          (core:%raise char 'core:set-macro-character "not a character"))
       :t))

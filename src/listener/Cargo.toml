@@ -1,5 +1,5 @@
 [package]
-name = "mu-listener"
+name = "listener"
 version = "0.0.3"
 edition = "2021"
 

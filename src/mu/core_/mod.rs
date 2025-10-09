@@ -12,7 +12,6 @@ pub mod env;
 pub mod exception;
 pub mod frame;
 pub mod indirect;
-pub mod lambda;
 pub mod mu;
 pub mod namespace;
 pub mod quasi;

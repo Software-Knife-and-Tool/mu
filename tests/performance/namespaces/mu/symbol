@@ -3,3 +3,5 @@
 (mu:eq :keyword (mu:type-of 'abcd))
 (mu:eq :keyword (mu:type-of :abcd))
 (mu:symbol-value 'mu:*standard-input*)
+(mu:view 'a)	#(:t :unqual a :UNBOUND)
+(mu:view '#:a)	#(:t :nil a :UNBOUND)

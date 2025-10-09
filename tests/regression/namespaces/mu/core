@@ -16,7 +16,7 @@
 (mu:type-of mu:*standard-input*)	:stream
 (mu:type-of "type-of")	:vector
 (mu:type-of (mu:find-namespace "mu"))	:struct
-(mu:view ())	#(:t "" nil :nil)
+(mu:view ())	#(:t "mu" nil :nil)
 (mu:view :keyword)	#(:t "keyword" keyword :keyword)
 (mu:view #\a)	#(:t a)
 (mu:view "abcdefg")	#(:t 7 :char)
@@ -26,7 +26,7 @@
 (mu:view 1.0)	#(:t 1.0000)
 (mu:view #(:t 1 2))	#(:t 2 :t)
 (mu:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
-(mu:view 'a)	#(:t "" a :UNBOUND)
+(mu:view 'mu:a)	#(:t "mu" a :UNBOUND)
 (mu:view 'mu:eq)	#(:t "mu" eq #<:function :mu [type:core, req:2, form:eq]>)
 (mu:view mu:eq)	#(:t 2 0)
 (mu:view mu:*standard-input*)	#(:t 0 :input :nil)

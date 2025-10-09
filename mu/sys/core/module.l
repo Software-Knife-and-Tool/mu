@@ -1,5 +1,5 @@
-;;;  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam
-;;;  (putnamjm.design@gmail.com) SPDX-License-Identifier: MIT
+;;; SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
+;;; SPDX-License-Identifier: MIT
 
 ;;;
 ;;; modules
@@ -11,7 +11,7 @@
              (:if module-def
                (mu:cdr (core:%assq :version module-def))
                (core:%raise module 'core:module-version "no such module")))
-           (mu:symbol-value (mu:find core:*modules/* module)))
+           (mu:symbol-value (mu:find core:modules/ module)))
      (core:%raise module 'core:module-version "not a module name"))))
 
 (mu:intern core "module-namespace"
@@ -21,7 +21,7 @@
              (:if module-def
                   (mu:cdr (core:%assq :ns module-def))
                   (core:%raise module 'core:module-namespace "no such module")))
-           (mu:symbol-value (mu:find core:*modules/* module)))
+           (mu:symbol-value (mu:find core:modules/ module)))
      (core:%raise module 'core:module-namespace "not a module name"))))
 
 ;;;
@@ -68,7 +68,7 @@
               ()))
            (mu:open :file :input path :t))
           (core:%raise path 'core:%load-module-def "not a file path"))
-     (mu:symbol-value (mu:find core:*modules/* module))))
+     (mu:symbol-value (mu:find core:modules/ module))))
 
 ;;;
 ;;; provide/require
@@ -77,14 +77,14 @@
    (:lambda (module property-list)
      (:if (core:stringp module)
           (:if (core:listp property-list)
-              (mu:intern core:*modules/* module property-list)
+              (mu:intern core:modules/ module property-list)
               (core:%raise property-list 'core:provide "is not a property list"))
           (core:%raise module 'core:provide "is not a module name"))))
 
 (mu:intern core "require"
    (:lambda (module)
      (:if (core:stringp module)
-          (:if (mu:find core:*modules/* module)
+          (:if (mu:find core:modules/ module)
                ()
                ((:lambda (module-def)
                   (:if module-def
@@ -115,7 +115,7 @@
 (mu:intern core "%require"
    (:lambda (module base)
      (:if (core:stringp module)
-          (:if (mu:find core:*modules/* module)
+          (:if (mu:find core:modules/ module)
                ()
                ((:lambda (module-def)
                   (:if module-def

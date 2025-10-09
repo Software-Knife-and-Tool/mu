@@ -73,7 +73,7 @@ impl Namespace {
                 env,
                 Condition::Type,
                 "mu:make-namespace",
-                Vector::from(name).evict(env),
+                Vector::from(name).with_heap(env),
             ));
         }
 
@@ -82,10 +82,10 @@ impl Namespace {
             "ns",
             vec![
                 Fixnum::with_u64_or_panic(id as u64),
-                Vector::from(name).evict(env),
+                Vector::from(name).with_heap(env),
             ],
         )
-        .evict(env);
+        .with_heap(env);
 
         ns_ref.push((
             ns,
@@ -112,7 +112,7 @@ impl Namespace {
                 env,
                 Condition::Type,
                 "mu:make-namespace",
-                Vector::from(name).evict(env),
+                Vector::from(name).with_heap(env),
             ));
         }
 
@@ -121,10 +121,10 @@ impl Namespace {
             "ns",
             vec![
                 Fixnum::with_u64_or_panic(id as u64),
-                Vector::from(name).evict(env),
+                Vector::from(name).with_heap(env),
             ],
         )
-        .evict(env);
+        .with_heap(env);
 
         ns_ref.push((
             ns,
@@ -196,7 +196,7 @@ impl Namespace {
             .copied()
     }
 
-    pub fn name(env: &Env, ns: Tag) -> Option<String> {
+    pub fn name(env: &Env, ns: Tag) -> String {
         let ns_ref = block_on(env.ns_map.read());
 
         match ns_ref.iter().find_map(
@@ -208,14 +208,8 @@ impl Namespace {
                 }
             },
         ) {
-            Some(tag) => {
-                if tag.is_empty() {
-                    Some("".into())
-                } else {
-                    Some(tag.into())
-                }
-            }
-            None => None,
+            Some(tag) => tag.into(),
+            None => panic!(),
         }
     }
 
@@ -254,7 +248,7 @@ impl Namespace {
                 }
             }
             None => {
-                let symbol = Symbol::new(env, ns, &name, value).evict(env);
+                let symbol = Symbol::new(env, ns, &name, value).with_heap(env);
                 let ns_ref = block_on(env.ns_map.read());
 
                 match ns_ref.iter().find_map(
@@ -287,7 +281,7 @@ impl Namespace {
     }
 
     pub fn intern_static(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
-        let symbol = Symbol::new(env, ns, &name, value).evict(env);
+        let symbol = Symbol::new(env, ns, &name, value).with_heap(env);
         let ns_ref = block_on(env.ns_map.read());
 
         match ns_ref.iter().find_map(
@@ -328,13 +322,11 @@ pub trait CoreFn {
 
 impl CoreFn for Namespace {
     fn mu_intern(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let mut ns = fp.argv[0];
+        env.argv_check("mu:intern", &[Type::T, Type::String, Type::T], fp)?;
+
+        let ns = fp.argv[0];
         let name = fp.argv[1];
         let value = fp.argv[2];
-
-        if Tag::null_(&ns) {
-            ns = env.null_ns
-        }
 
         if !Self::is_namespace(env, ns) {
             Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
@@ -357,11 +349,7 @@ impl CoreFn for Namespace {
     }
 
     fn mu_ns_name(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let mut ns = fp.argv[0];
-
-        if Tag::null_(&ns) {
-            ns = env.null_ns
-        }
+        let ns = fp.argv[0];
 
         if !Self::is_namespace(env, ns) {
             Err(Exception::new(
@@ -372,7 +360,7 @@ impl CoreFn for Namespace {
             ))?
         }
 
-        fp.value = Vector::from(Self::name(env, ns).unwrap()).evict(env);
+        fp.value = Vector::from(Self::name(env, ns)).with_heap(env);
 
         Ok(())
     }
@@ -389,12 +377,10 @@ impl CoreFn for Namespace {
     }
 
     fn mu_find(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let mut ns_tag = fp.argv[0];
-        let name = fp.argv[1];
+        env.argv_check("mu:find", &[Type::T, Type::String], fp)?;
 
-        if Tag::null_(&ns_tag) {
-            ns_tag = env.null_ns
-        }
+        let ns_tag = fp.argv[0];
+        let name = fp.argv[1];
 
         if !Self::is_namespace(env, ns_tag) {
             Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?

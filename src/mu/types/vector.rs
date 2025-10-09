@@ -88,7 +88,7 @@ impl Vector {
             Self::type_of(env, vector).map_typesym(),
         ];
 
-        Vector::from(vec).evict(env)
+        Vector::from(vec).with_heap(env)
     }
 
     pub fn as_string(env: &Env, tag: Tag) -> String {
@@ -160,7 +160,7 @@ impl Vector {
         }
     }
 
-    pub fn heap_size(env: &Env, vector: Tag) -> usize {
+    pub fn image_size(env: &Env, vector: Tag) -> usize {
         match vector {
             Tag::Direct(_) => std::mem::size_of::<DirectTag>(),
             Tag::Indirect(_) => {
@@ -176,7 +176,7 @@ impl Vector {
         }
     }
 
-    pub fn evict(&self, env: &Env) -> Tag {
+    pub fn with_heap(&self, env: &Env) -> Tag {
         match self {
             Vector::Direct(tag) => *tag,
             Vector::Indirect(image, ivec) => {
@@ -190,11 +190,11 @@ impl Vector {
                 };
 
                 match ivec {
-                    VectorImageType::T(_) => indirect.evict(env),
+                    VectorImageType::T(_) => indirect.with_heap(env),
                     _ => match Self::cached(env, &indirect) {
                         Some(tag) => tag,
                         None => {
-                            let tag = indirect.evict(env);
+                            let tag = indirect.with_heap(env);
 
                             Self::cache(env, tag);
                             tag

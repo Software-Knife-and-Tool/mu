@@ -103,7 +103,7 @@
      (:if (core:vectorp vector)
           (:if (core:fixnump nth)
                (:if (core:%or (core:minusp nth) (mu:less-than (core:vector-length vector) nth))
-                    (core:%raise length 'core:vector-ref "illegal index")
+                    (core:%raise nth 'core:vector-ref "illegal index")
                     (:if (core:bit-vector-p vector)
                          ((:lambda (nth-byte offset)
                             ((:lambda (byte)
@@ -120,7 +120,7 @@
                                (core:%vector-prop :base vector)
                                (mu:car (core:%vector-prop :disp vector))))))
                     (core:%raise nth 'core:vector-ref "not a fixnum"))
-          (core:%raise prop 'core:vector-ref "not a vector"))))
+          (core:%raise vector 'core:vector-ref "not a vector"))))
 
 ;;;
 ;;; write

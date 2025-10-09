@@ -56,7 +56,7 @@ impl Char {
     }
 
     pub fn view(env: &Env, chr: Tag) -> Tag {
-        Vector::from(vec![chr]).evict(env)
+        Vector::from(vec![chr]).with_heap(env)
     }
 }
 

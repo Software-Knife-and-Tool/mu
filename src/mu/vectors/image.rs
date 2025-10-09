@@ -163,7 +163,7 @@ pub trait VecImage {
     const IMAGE_LEN: usize = 2; // heap words in image
 
     fn image(_: &VectorImage) -> Vec<[u8; 8]>;
-    fn evict(&self, _: &Env) -> Tag;
+    fn with_heap(&self, _: &Env) -> Tag;
     fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
     fn gc_ref(_: &mut GcContext, _: Tag, _: usize) -> Option<Tag>;
 }
@@ -173,7 +173,7 @@ impl VecImage for VecImageType<'_> {
         vec![image.type_.as_slice(), image.length.as_slice()]
     }
 
-    fn evict(&self, env: &Env) -> Tag {
+    fn with_heap(&self, env: &Env) -> Tag {
         let mut heap_ref = block_on(env.heap.write());
 
         let image_id = match self {

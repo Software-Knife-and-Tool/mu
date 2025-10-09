@@ -1,3 +1,7 @@
 (mu:type-of (core:%make-keyword "abcd"))	:keyword
-(core:type-of (core:%make-keyword "abcd"))	keyword
+(core:type-of (core:%make-keyword "abcd"))	symbol
 (core:type-of (core:gensym))	symbol
+(core:type-of ())	symbol
+(core:type-of :foo)	symbol
+(core:type-of 'abc)	symbol
+(core:type-of mu:add)	function

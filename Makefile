@@ -1,34 +1,37 @@
 #
 # mu project makefile
 #
-.PHONY: world install
-
-MANIFEST_DIR ?= /usr/local/bin
+.PHONY: help world install dist release debug
 
 help:
 	@echo "mu project makefile -----------------"
-	@echo "    world - compile release distrbution"
-	@echo "    profile - compile profile distrbution"
+	@echo "    world - compile for release and build distribution"
+	@echo "    release - compile for release"
+	@echo "    debug - compile for debug"
+	@echo "	   dist - build distribution (needed for testing debug builds)"
 	@echo "    install - install distribution system-wide"
 	@echo "    (may need sudo)"
 
-world:
-	@cargo build --release --workspace
-	@cp target/release/mu-exec dist
-	@cp target/release/mu-listener dist
-	@cp target/release/mu-server dist
-	@cp target/release/mu-sys dist
-	@cp target/release/manifest dist
+world: release dist
+
+dist:
 	@make -C dist --no-print-directory
 
-profile:
-	@cargo build --workspace
+release:
+	@cargo build --release --workspace
+	@cp target/release/listener dist
+	@cp target/release/manifest dist
 	@cp target/release/mu-exec dist
-	@cp target/release/mu-listener dist
 	@cp target/release/mu-server dist
 	@cp target/release/mu-sys dist
-	@cp target/release/manifest dist
-	@make -C dist --no-print-directory
+
+debug:
+	@cargo build --workspace
+	@cp target/debug/listener dist
+	@cp target/debug/manifest dist
+	@cp target/debug/mu-exec dist
+	@cp target/debug/mu-server dist
+	@cp target/debug/mu-sys dist
 
 install:
 	@make -C ./dist -f install.mk install --no-print-directory

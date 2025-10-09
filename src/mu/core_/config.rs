@@ -127,15 +127,15 @@ impl Config {
             env,
             &[
                 Cons::new(
-                    Vector::from("gc-mode").evict(env),
-                    Vector::from(gc_mode).evict(env),
+                    Vector::from("gc-mode").with_heap(env),
+                    Vector::from(gc_mode).with_heap(env),
                 )
-                .evict(env),
+                .with_heap(env),
                 Cons::new(
-                    Vector::from("npages").evict(env),
+                    Vector::from("npages").with_heap(env),
                     Fixnum::with_or_panic(env.config.npages),
                 )
-                .evict(env),
+                .with_heap(env),
             ],
         )
     }

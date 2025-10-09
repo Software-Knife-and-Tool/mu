@@ -131,7 +131,7 @@ impl Cons {
     }
 
     pub fn cons(env: &Env, car: Tag, cdr: Tag) -> Tag {
-        Self::new(car, cdr).evict(env)
+        Self::new(car, cdr).with_heap(env)
     }
 
     pub fn list(env: &Env, vec: &[Tag]) -> Tag {
@@ -217,7 +217,7 @@ impl Cons {
     pub fn view(env: &Env, cons: Tag) -> Tag {
         let (car, cdr) = Self::destruct(env, cons);
 
-        Vector::from(vec![car, cdr]).evict(env)
+        Vector::from(vec![car, cdr]).with_heap(env)
     }
 
     pub fn cons_iter(env: &Env, cons: Tag) -> ConsIter<'_> {
@@ -228,7 +228,7 @@ impl Cons {
         ListIter { env, list }
     }
 
-    pub fn heap_size(_: &Env, cons: Tag) -> usize {
+    pub fn image_size(_: &Env, cons: Tag) -> usize {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.ext().try_into() {
@@ -241,7 +241,7 @@ impl Cons {
         }
     }
 
-    pub fn evict(&self, env: &Env) -> Tag {
+    pub fn with_heap(&self, env: &Env) -> Tag {
         match DirectTag::cons(self.car, self.cdr) {
             Some(tag) => tag,
             None => {
@@ -272,7 +272,7 @@ impl Cons {
     }
 
     pub fn read(env: &Env, stream: Tag) -> exception::Result<Tag> {
-        let dot = Vector::from(".").evict(env);
+        let dot = Vector::from(".").with_heap(env);
         let car = env.read(stream, false, Tag::nil(), true)?;
 
         if EOL.eq_(&car) {

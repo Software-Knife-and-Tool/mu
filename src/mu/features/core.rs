@@ -173,20 +173,24 @@ impl CoreFn for Feature {
         let alist = vec![
             Cons::cons(
                 env,
-                Vector::from("version").evict(env),
-                Vector::from(version).evict(env),
+                Vector::from("version").with_heap(env),
+                Vector::from(version).with_heap(env),
             ),
             Cons::cons(
                 env,
-                Vector::from("features").evict(env),
+                Vector::from("features").with_heap(env),
                 Core_::features_as_list(env),
             ),
             Cons::cons(
                 env,
-                Vector::from("envs").evict(env),
+                Vector::from("envs").with_heap(env),
                 Core_::envs_as_list(env),
             ),
-            Cons::cons(env, Vector::from("streams").evict(env), Core_::nstreams()),
+            Cons::cons(
+                env,
+                Vector::from("streams").with_heap(env),
+                Core_::nstreams(),
+            ),
         ];
 
         fp.value = Cons::list(env, &alist);
@@ -195,12 +199,9 @@ impl CoreFn for Feature {
     }
 
     fn core_ns_symbols(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        let mut ns = fp.argv[0];
-
-        if Tag::null_(&ns) {
-            ns = env.null_ns
-        }
+        let ns = fp.argv[0];
         let (stype, _) = Struct::destruct(env, ns);
+
         if !stype.eq_(&Symbol::keyword("ns")) {
             Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
         }

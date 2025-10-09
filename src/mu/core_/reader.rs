@@ -20,7 +20,7 @@ use crate::{
         cons::Cons,
         fixnum::Fixnum,
         struct_::Struct,
-        symbol::Symbol,
+        symbol::{Symbol, SymbolImage},
         vector::Vector
     },
 };
@@ -185,7 +185,7 @@ impl Reader for Env {
                         self,
                         Condition::Over,
                         "mu:read",
-                        Vector::from(token).evict(self),
+                        Vector::from(token).with_heap(self),
                     ))?
                 }
             }
@@ -222,7 +222,7 @@ impl Reader for Env {
                                             self,
                                             Condition::Type,
                                             "mu:read",
-                                            Vector::from(phrase).evict(self),
+                                            Vector::from(phrase).with_heap(self),
                                         ))?,
                                     }
                                 }
@@ -257,8 +257,28 @@ impl Reader for Env {
                         let atom = Self::read_atom(self, ch, stream)?;
 
                         match atom.type_of() {
-                            Type::Symbol => Ok(Some(atom)),
-                            _ => Err(Exception::new(self, Condition::Type, "mu:read", stream))?,
+                            Type::Symbol => {
+                                let (namespace, name, value) = Symbol::destruct(self, atom);
+
+                                if namespace.null_() {
+                                    Err(Exception::new(
+                                        self,
+                                        Condition::Type,
+                                        "mu:read",
+                                        namespace,
+                                    ))?
+                                }
+
+                                let symbol = Symbol::Symbol(SymbolImage {
+                                    namespace: Tag::nil(),
+                                    name,
+                                    value,
+                                })
+                                .with_heap(self);
+
+                                Ok(Some(symbol))
+                            }
+                            _ => Err(Exception::new(self, Condition::Type, "mu:read", atom))?,
                         }
                     }
                     None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
@@ -290,7 +310,7 @@ impl Reader for Env {
                                         self,
                                         Condition::Over,
                                         "mu:read",
-                                        Vector::from(hex).evict(self),
+                                        Vector::from(hex).with_heap(self),
                                     ))?
                                 }
                             }

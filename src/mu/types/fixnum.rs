@@ -172,7 +172,7 @@ impl Fixnum {
     }
 
     pub fn view(env: &Env, fx: Tag) -> Tag {
-        Vector::from(vec![fx]).evict(env)
+        Vector::from(vec![fx]).with_heap(env)
     }
 }
 

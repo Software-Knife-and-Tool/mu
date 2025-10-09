@@ -74,30 +74,37 @@
      ((:lambda (name)
         ((:lambda (frames)
            (mu:%frame-ref frames offset))
-         (mu:symbol-value (mu:intern core:*closures/* name ()))))
+         (mu:symbol-value (mu:intern core:closures/ name ()))))
         (mu:symbol-name (core:%env-prop :name binding)))))
 
-(mu:intern core "%resolve-lexical"
-   (:lambda (symbol env)          
-     (:if (mu:eq mu:*null/* (mu:symbol-namespace symbol))
-          ((:lambda (binding)
-             (:if (core:null binding)
-                  symbol
-                  ((:lambda (tag index)
-                     `(core:%frame-ref ,binding ,tag ,index))
-                   (core:%env-prop :frame binding)
-                   (core:%position-if
-                    (:lambda (sym)
-                      (mu:eq sym symbol))
-                    (core:%env-prop :symbols binding)))))
-           (core:%find-if
-            (:lambda (binding)
-              (core:%find-if
-               (:lambda (sym)
-                 (mu:eq sym symbol))
-               (core:%env-prop :symbols binding)))
-            env))
-          symbol)))
+(mu:intern core "%resolve-symbol"
+   (:lambda (symbol env)
+     ((:lambda (ns name)
+       (:if (core:null ns)  ;;; uninterned symbol
+            symbol
+            (:if (mu:eq :keyword ns) ;;; keyword
+                 symbol
+                 (:if (mu:eq :unqual ns)  ;;; frame ref
+                      ((:lambda (binding)
+                         (:if (core:null binding)  ;;; not lexically bound
+                              (mu:intern (core:get-current-ns) name ()) ;;; symbol
+                              ((:lambda (tag index)
+                                 `(core:%frame-ref ,binding ,tag ,index))
+                               (core:%env-prop :frame binding)
+                               (core:%position-if
+                                (:lambda (sym)
+                                  (mu:eq sym symbol))
+                                (core:%env-prop :symbols binding)))))
+                         (core:%find-if
+                          (:lambda (binding)
+                             (core:%find-if
+                              (:lambda (sym)
+                                (mu:eq sym symbol))
+                              (core:%env-prop :symbols binding)))
+                           env))
+                      symbol))))
+      (mu:symbol-namespace symbol)
+      (mu:symbol-name symbol))))
 
 ;;;
 ;;; compile function applications
@@ -123,8 +130,8 @@
        arg-list)))
 
 (mu:intern core "%lambda-arg-list"
-   (:lambda (function arg-list)
-     (:if (core:%closurep function)
+   (:lambda (func arg-list)
+     (:if (core:%closurep func)
           ((:lambda (arity rest nreqs)
              (:if rest
                   (:if (mu:eq 0 arity)
@@ -136,14 +143,14 @@
                         (core:%dropr arg-list (mu:sub (mu:length arg-list) arity))
                         (core:%dropl arg-list arity)))
                   (core:%arg-list arg-list)))
-           (core:%closure-prop :arity function)
-           (core:%closure-prop :rest function)
-           (mu:length (core:%closure-prop :require function)))
+           (core:%closure-prop :arity func)
+           (core:%closure-prop :rest func)
+           (mu:length (core:%closure-prop :require func)))
           (core:%arg-list arg-list))))
 
 (mu:intern core "%quoted-lambda-arg-list"
-   (:lambda (function arg-list)
-     (:if (core:%closurep function)
+   (:lambda (func arg-list)
+     (:if (core:%closurep func)
           ((:lambda (arity rest nreqs)
               (:if rest
                    (:if (mu:eq 0 arity)
@@ -155,9 +162,9 @@
                          (core:%dropr arg-list (mu:sub (mu:length arg-list) arity))
                          (core:%dropl arg-list arity)))
                    (core:%quoted-arg-list arg-list)))
-            (core:%closure-prop :arity function)
-            (core:%closure-prop :rest function)
-            (mu:length (core:%closure-prop :require function)))
+            (core:%closure-prop :arity func)
+            (core:%closure-prop :rest func)
+            (mu:length (core:%closure-prop :require func)))
            (core:%quoted-arg-list arg-list))))
 
 ;;;
@@ -175,12 +182,12 @@
         arg-list))))
 
 (mu:intern core "%compile-lambda-arg-list"
-   (:lambda (function arg-list env)
-     (core:%lambda-arg-list function (core:%mapcar (:lambda (elt) (core:%compile elt env)) arg-list))))
+   (:lambda (func arg-list env)
+     (core:%lambda-arg-list func (core:%mapcar (:lambda (elt) (core:%compile elt env)) arg-list))))
 
 (mu:intern core "%compile-quoted-lambda-arg-list"
-   (:lambda (function arg-list env)
-     (core:%quoted-lambda-arg-list function arg-list)))
+   (:lambda (func arg-list env)
+     (core:%quoted-lambda-arg-list func arg-list)))
      
 ;;;
 ;;; compile function application to mu form
@@ -188,44 +195,42 @@
 (mu:intern core "%compile-funcall"
    (:lambda (function-form arg-list env)
      (:if (core:%genericp function-form)
-          `(core:%apply ,function ,(core:%compile-arg-list arg-list env))
+          `(core:%apply ,function-form ,(core:%compile-arg-list arg-list env))
           (:if (core:consp function-form)
-               ((:lambda (function)
-                  (:if (core:%or (core:functionp function) (core:consp function))
-                       (:if (core:functionp function)
-                            (:if (core:%closurep function)
+               ((:lambda (func)
+                  (:if (core:%or (core:functionp func) (core:consp func))
+                       (:if (core:functionp func)
+                            (:if (core:%closurep func)
                                  `(,core:%apply
-                                   ,function
-                                   ,(core:%closure-prop :mu function)
-                                   ,(core:%compile-lambda-arg-list function arg-list env))
-                                 `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
-                            `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
-                       (core:%raise function 'core:%compile-funcall "not a function designator")))
+                                   ,func
+                                   ,(core:%closure-prop :mu func)
+                                   ,(core:%compile-lambda-arg-list func arg-list env))
+                                 `(mu:apply ,func ,(core:%compile-arg-list arg-list env)))
+                            `(mu:apply ,func ,(core:%compile-arg-list arg-list env)))
+                       (core:%raise func 'core:%compile-funcall "not a function designator")))
                 (core:%compile function-form env))
                (:if (mu:boundp function-form)
-                    ((:lambda (function)
-                       (:if (core:%genericp function)
-                            `(core:%apply-generic ,function ,(core:%compile-arg-list arg-list env))
-                            (:if (core:functionp function)
-                                 (:if (core:%closurep function)
+                    ((:lambda (func)
+                       (:if (core:%genericp func)
+                            `(core:%apply-generic ,func ,(core:%compile-arg-list arg-list env))
+                            (:if (core:functionp func)
+                                 (:if (core:%closurep func)
                                       `(core:%apply
-                                        ,function
-                                        ,(core:%closure-prop :mu function)
-                                        ,(core:%compile-lambda-arg-list function arg-list env))
-                                      `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
-                                 (core:%raise function 'core:%compile-funcall "not a function designator"))))
+                                        ,func
+                                        ,(core:%closure-prop :mu func)
+                                        ,(core:%compile-lambda-arg-list func arg-list env))
+                                      `(mu:apply ,func ,(core:%compile-arg-list arg-list env)))
+                                 (core:%raise func 'core:%compile-funcall "not a function designator"))))
                      (mu:symbol-value function-form))
                     (core:%raise function-form 'core:%compile-funcall "function symbol not bound"))))))
 
-     ;;; `(core:apply ,function-form ,(core:%compile-arg-list arg-list env)))))))
-
 (mu:intern core "%compile"
    (:lambda (form env)
-     (:if (mu:eq :symbol (mu:type-of form))
-          (core:%resolve-lexical form env)
+     (:if (core:symbolp form)
+          (core:%resolve-symbol form env)
           (:if (core:consp form)
                ((:lambda (function-form arg-list)
-                  (:if (core:keywordp function-form)
+                  (:if (mu:eq :keyword (mu:type-of function-form))
                        form                                            ; mu special form (:key ...)
                        (:if (mu:eq :symbol (mu:type-of function-form)) ; special form/function/macro call
                             ((:lambda (special)
@@ -245,7 +250,7 @@
                                  (%lambda   . core:%special-lambda)))))
                             (:if (core:consp function-form)
                                  (core:%compile-funcall function-form arg-list env)
-                                 (core:%raise form 'core:%compile "malformed lambda expression")))))
+                                 (core:%raise form 'core:%compile "malformed lambda expression!")))))
                 (mu:car form)
                 (mu:cdr form))
                form))))
@@ -261,7 +266,7 @@
             (core:%mapc
              (:lambda (frame-ref)
                (mu:intern
-                core:*closures/*
+                core:closures/
                 (mu:symbol-name (mu:car frame-ref))
                 (mu:unrepr (mu:cdr frame-ref))))
              frame-map)

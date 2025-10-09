@@ -6,14 +6,13 @@
 ;;;
 (mu:intern core "%defmacro"
    (:lambda (symbol macro-function)
-     ;;; (core:%warn `(,symbol ,macro-function) "%defmacro")
      ((:lambda (symbol-ns symbol-name)
-         (:if (mu:eq symbol-ns mu:*null/*)
-              (mu:intern core:*macros/* symbol-name macro-function)
-              (core:%raise symbol-ns 'core:%defmacro "illegal symbol"))
-         symbol)
-       (mu:symbol-namespace symbol)
-       (mu:symbol-name symbol))))
+        (:if (mu:eq :unqual symbol-ns)
+             (mu:intern core:macros/ symbol-name macro-function)
+             (core:%raise symbol-ns 'core:%defmacro "illegal symbol"))
+        symbol)
+      (mu:symbol-namespace symbol)
+      (mu:symbol-name symbol))))
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
@@ -92,5 +91,5 @@
              (:if macro
                   (mu:symbol-value macro)
                   ()))
-           (mu:find core:*macros/* (mu:symbol-name symbol)))
+           (mu:find core:macros/ (mu:symbol-name symbol)))
           (core:%raise symbol 'core:macro-function "not a symbol"))))

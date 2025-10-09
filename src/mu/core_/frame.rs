@@ -34,7 +34,7 @@ impl Frame {
     fn to_tag(&self, env: &Env) -> Tag {
         let vec = self.argv.clone();
 
-        Struct::new(env, "frame", vec).evict(env)
+        Struct::new(env, "frame", vec).with_heap(env)
     }
 
     #[allow(dead_code)]
@@ -208,7 +208,7 @@ impl CoreFn for Frame {
             Cons::cons(
                 env,
                 (&func.to_le_bytes()).into(),
-                Vector::from(vec).evict(env),
+                Vector::from(vec).with_heap(env),
             )
         }));
 

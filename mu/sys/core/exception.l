@@ -69,10 +69,8 @@
 ;;; predicate
 ;;;
 (mu:intern core "exceptionp"
-    (:lambda (ex)
-      (core:%and
-       (core:%typep ex)
-       (mu:eq '%exception (core:type-of ex)))))
+   (:lambda (ex)
+     (core:%and (core:%typep ex) (mu:eq "%exception" (mu:symbol-name (core:type-of ex))))))
 
 ;;;
 ;;; functions

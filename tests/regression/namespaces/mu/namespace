@@ -1,6 +1,4 @@
-(mu:boundp (mu:intern (mu:find-namespace "") "foo" ()))	foo
 (mu:eq :func (mu:type-of mu:make-namespace))	:t
 (mu:find (mu:find-namespace "mu") "eq")	mu:eq
 (mu:find (mu:find-namespace "mu") "foo")	:nil
-(mu:intern (mu:find-namespace "") "foo" "foo")	foo
 (mu:intern (mu:find-namespace "mu") "foo" ())	mu:foo

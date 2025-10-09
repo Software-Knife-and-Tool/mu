@@ -1,14 +1,15 @@
 backquote
-core
 closure
 compile
-prelude
+core
 exception
 format
 lambda
+lisp
 list
 macro
 module
+prelude
 reader
 stream
 string

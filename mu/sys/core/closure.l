@@ -104,23 +104,23 @@
                     (core:%compile form env))
                   body)))
               (mu:cons (core:%make-env (mu:length env) (mu:car desc) (core:gensym)) env)))
-          ((:lambda (desc)
-             (:if (core:%or (core:fixnump desc) (core:null body))
-                  (core:%list lambda)
-                  desc))
-           (core:%foldl
-            (:lambda (el acc)
-              (:if (core:numberp acc)
-                   (:if (mu:eq '&rest el)
-                        (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
-                             (mu:cons
-                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
-                              (mu:nth (mu:sub (mu:length lambda) 1) lambda))
-                             (core:%raise lambda 'core:%compile-closure "rest botch"))
-                        (mu:add 1 acc))
-                   acc))
-            0
-            lambda))))))
+           ((:lambda (desc)
+              (:if (core:%or (core:fixnump desc) (core:null body))
+                   (core:%list lambda)
+                   desc))
+            (core:%foldl
+             (:lambda (el acc)
+               (:if (core:numberp acc)
+                    (:if (mu:eq '&rest el)
+                         (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
+                              (mu:cons
+                               `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
+                               (mu:nth (mu:sub (mu:length lambda) 1) lambda))
+                              (core:%raise lambda 'core:%compile-closure "rest botch"))
+                         (mu:add 1 acc))
+                    acc))
+             0
+             lambda))))))
 
 ;;;
 ;;; eval

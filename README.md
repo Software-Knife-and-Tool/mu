@@ -32,6 +32,8 @@ Subsequent layers based on the runtime offer advanced features.
 
 - shared feature namespaces
 
+- revised mu and core reader namespace handling
+
   
 
 #### Rationale
@@ -146,7 +148,7 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 │   ├── core
 │   ├── fasl
 │   ├── image
-│   └── mu-listener
+│   └── listener
 └── modules
     ├── common
     │   ├── describe
@@ -158,10 +160,10 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 If you want to install a release from the github repository
 
 ```
-cat mu-x.y.z.tgz | (cd $ROOT ; sudo tar --no-same-owner -xzf -)
+cat mu-x.y.z.tgz | (cd / ; sudo tar --no-same-owner -xzf -)
 ```
 
-where `$ROOT` is the intended destination directory. 
+The `/opt/mu` directory is hardwired into several tools and the release mechanism, changing it would require significant alteration of parts of the system. 
 
   
 
@@ -171,7 +173,7 @@ where `$ROOT` is the intended destination directory.
 
 ```
 version 0.2.10 is built with rustc 1.89.0
-version 0.2.11 is built with rustc 1.89.0
+version 0.2.11 is built with rustc 1.90.0
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
@@ -290,11 +292,11 @@ Profiling is nascent and will be expanded in future releases.
 
 The *mu* distribution includes a tool for running and interacting with the system. 
 
-The  *mu-listener* binary is part of a release, found at `/opt/mu/bin/mu-listener`.
+The  *listener* binary is part of a release, found at `/opt/mu/bin/listener`.
 
-*mu-listener*  has no command line arguments. It is configured by a JSON file, *.mu-listener*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/mu-listener`.
+*listener*  has no command line arguments. It is configured by an optional JSON file, *.listener*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/listener`.
 
-*mu-listener* will run without either of *.mu-listener* or an rc file.
+*listener* will run without either of *.listener* or an rc file.
 
 ```
 {
@@ -422,13 +424,13 @@ OPTIONS:
 
 An interactive session for the extended *mu* system is invoked by the `mu-listener` command.
 
-*rlwrap* makes the *mu-listener* repl much more useful, with command history and line editing.
+*rlwrap* makes the *listener* repl much more useful, with command history and line editing.
 
 ```
-% alias ,mu-listener='rlwrap mu-listener'
+% alias ,listener='rlwrap listener'
 ```
 
-Depending on your version of *rlwrap*, *,mu-listener* may exhibit odd echoing behavior. Adding
+Depending on your version of *rlwrap*, *,listener* may exhibit odd echoing behavior. Adding
 
 ```
 set enable-bracketed-paste off

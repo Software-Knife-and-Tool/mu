@@ -36,7 +36,6 @@ pub struct Env {
 
     pub keyword_ns: Tag,
     pub mu_ns: Tag,
-    pub null_ns: Tag,
 
     // profiling
     #[cfg(feature = "prof")]
@@ -56,7 +55,6 @@ impl Env {
             lexical: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),
             ns_map: RwLock::new(Vec::new()),
-            null_ns: Tag::nil(),
             #[cfg(feature = "prof")]
             prof: RwLock::new(Vec::new()),
             #[cfg(feature = "prof")]
@@ -65,12 +63,10 @@ impl Env {
         };
 
         // establish namespaces
-        env.null_ns = Namespace::with(&env, "").unwrap();
         env.mu_ns =
             Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(*CORE_FUNCTIONS)).unwrap();
         env.keyword_ns = Namespace::with_static(&env, "keyword", None, None).unwrap();
 
-        Namespace::intern_static(&env, env.mu_ns, "*null/*".into(), env.null_ns).unwrap();
         Namespace::intern_static(&env, env.mu_ns, "*standard-input*".into(), CORE.stdin()).unwrap();
         Namespace::intern_static(&env, env.mu_ns, "*standard-output*".into(), CORE.stdout())
             .unwrap();
