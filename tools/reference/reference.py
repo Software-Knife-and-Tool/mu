@@ -19,5 +19,5 @@ for symbol in ref:
     name, type, value, addr = fields
 
     if name != 'unbound':
-        fvalue = (value[:47] + '...') if len(value) > 50 else value
+        fvalue = (value[:47] + '...') if len(value) > 70 else value
         print(f'{name:<32} {addr_of(addr):<16} {type:<16} {fvalue:<30}')
