@@ -63,6 +63,7 @@ lazy_static! {
         ( "with-exception",
                         2, Exception::mu_with_exception ),
         ( "raise",      2, Exception::mu_raise ),
+        ( "raise-from", 3, Exception::mu_raise_from ),
         // frames
         ( "%frame-stack",
                         0, Frame::mu_frames ),
