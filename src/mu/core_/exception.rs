@@ -18,6 +18,7 @@ pub struct Exception {
     pub object: Tag,
     pub condition: Condition,
     pub source: Tag,
+    pub user: Tag,
 }
 
 #[derive(Eq, PartialEq, Clone, Debug)]
@@ -41,6 +42,7 @@ pub enum Condition {
     Type,
     Unbound,
     Under,
+    User,
     Write,
     ZeroDivide,
 }
@@ -91,6 +93,16 @@ impl Exception {
             object,
             condition,
             source,
+            user: Tag::nil(),
+        }
+    }
+
+    pub fn with(condition: Condition, source: Tag, object: Tag, user: Tag) -> Self {
+        Exception {
+            object,
+            condition,
+            source,
+            user,
         }
     }
 
@@ -111,6 +123,7 @@ impl Exception {
 pub trait CoreFn {
     fn mu_with_exception(env: &Env, fp: &mut Frame) -> Result<()>;
     fn mu_raise(env: &Env, fp: &mut Frame) -> Result<()>;
+    fn mu_raise_from(env: &Env, fp: &mut Frame) -> Result<()>;
 }
 
 impl CoreFn for Exception {
@@ -122,7 +135,20 @@ impl CoreFn for Exception {
 
         match Self::map_condition(env, condition) {
             Ok(cond) => Err(Self::new(env, cond, "mu:raise", src))?,
-            Err(_) => Err(Self::new(env, Condition::Type, "mu:raise", condition))?,
+            Err(_) => Err(Self::new(env, Condition::User, "mu:raise", condition))?,
+        }
+    }
+
+    fn mu_raise_from(env: &Env, fp: &mut Frame) -> Result<()> {
+        env.argv_check("mu:raise-from", &[Type::T, Type::Symbol, Type::Keyword], fp)?;
+
+        let src = fp.argv[0];
+        let symbol = fp.argv[1];
+        let condition = fp.argv[2];
+
+        match Self::map_condition(env, condition) {
+            Ok(cond) => Err(Self::with(cond, symbol, src, condition))?,
+            Err(_) => Err(Self::with(Condition::User, symbol, src, condition))?,
         }
     }
 
