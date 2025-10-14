@@ -1,35 +1,37 @@
-;;; SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
+;;; SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 ;;; SPDX-License-Identifier: MIT
 
 ;;;
 ;;; modules
 ;;;
-(mu:intern core "module-version"
+(mu:intern module "system/modules" (mu:make-namespace "system/modules"))
+
+(mu:intern module "module-version"
    (:lambda (module)
      (:if (core:stringp module)
           ((:lambda (module-def)
              (:if module-def
                (mu:cdr (core:%assq :version module-def))
-               (core:%raise module 'core:module-version "no such module")))
-           (mu:symbol-value (mu:find core:modules/ module)))
-     (core:%raise module 'core:module-version "not a module name"))))
+               (mu:raise-from module 'module:module-version :range)))
+           (mu:symbol-value (mu:find module:modules/ module)))
+     (mu:raise-from module 'module:module-version :type))))
 
-(mu:intern core "module-namespace"
+(mu:intern module "module-namespace"
    (:lambda (module)
      (:if (core:stringp module)
           ((:lambda (module-def)
              (:if module-def
                   (mu:cdr (core:%assq :ns module-def))
-                  (core:%raise module 'core:module-namespace "no such module")))
-           (mu:symbol-value (mu:find core:modules/ module)))
-     (core:%raise module 'core:module-namespace "not a module name"))))
+                  (mu:raise-from module 'module:module-namespace :range)))
+           (mu:symbol-value (mu:find module:modules/ module)))
+     (mu:raise-from module 'module:module-namespace :type))))
 
 ;;;
 ;;; utilities
 ;;;
-(mu:intern core "%load-module-file"
+(mu:intern module "%load-module-file"
    (:lambda (path lang)
-     (:if (core:stringp path)
+     (:if (module:stringp path)
           (:if (mu:eq :core lang)
                (core:load path)
                ((:lambda (stream)
@@ -46,10 +48,10 @@
                            (mu:read stream () core:%eof%))))
                    ()))
                 (mu:open :file :input path :t)))
-          (core:%raise path 'core:%load-module-file "not a file path"))
+          (mu:raise-from path 'module:%load-module-file :type))
      :t))
 
-(mu:intern core "%load-module-def"
+(mu:intern module "%load-module-def"
    (:lambda (path module)
      (:if (core:stringp path)
           ((:lambda (stream)
@@ -67,21 +69,21 @@
                       (mu:read stream () core:%eof%))))
               ()))
            (mu:open :file :input path :t))
-          (core:%raise path 'core:%load-module-def "not a file path"))
-     (mu:symbol-value (mu:find core:modules/ module))))
+          (mu:raise-from path 'module:%load-module-def :type))
+     (mu:symbol-value (mu:find module:modules/ module))))
 
 ;;;
 ;;; provide/require
 ;;;
-(mu:intern core "provide"
+(mu:intern module "provide"
    (:lambda (module property-list)
      (:if (core:stringp module)
           (:if (core:listp property-list)
               (mu:intern core:modules/ module property-list)
-              (core:%raise property-list 'core:provide "is not a property list"))
-          (core:%raise module 'core:provide "is not a module name"))))
+              (mu:raise-from property-list 'core:provide :type))
+          (mu:raise-from module 'module:provide :type))))
 
-(mu:intern core "require"
+(mu:intern module "require"
    (:lambda (module)
      (:if (core:stringp module)
           (:if (mu:find core:modules/ module)
@@ -98,7 +100,7 @@
                                (mu:make-namespace ns))
                           (core:%mapc
                            (:lambda (file-name)
-                             (core:%load-module-file
+                             (module:%load-module-file
                               (core:%string-concat `("/opt/mu/modules/" ,module "/" ,file-name))
                               (mu:cdr (core:%assq :lang module-def))))
                            files)
@@ -106,13 +108,13 @@
                         (mu:cdr (core:%assq :require module-def))
                         (mu:cdr (core:%assq :load module-def))
                         (mu:cdr (core:%assq :ns module-def)))
-                       (core:%raise module 'core:require "cannot open module-def")))
+                       (mu:raise-from module 'core:require :open)))
                   (core:%load-module-def
                    (core:%string-concat `("/opt/mu/modules/" ,module "/mod.def"))
                    module)))
-          (core:%raise module 'core:require "is not a module name"))))
+          (mu:raise-from module 'module:require :type))))
 
-(mu:intern core "%require"
+(mu:intern module "%require"
    (:lambda (module base)
      (:if (core:stringp module)
           (:if (mu:find core:modules/ module)
@@ -137,8 +139,8 @@
                         (mu:cdr (core:%assq :require module-def))
                         (mu:cdr (core:%assq :load module-def))
                         (mu:cdr (core:%assq :ns module-def)))
-                       (core:%raise module 'core:require "cannot open module-def")))
+                       (mu:raise-from module 'core:require :open)))
                   (core:%load-module-def
                    (core:%string-concat `(,base "/" ,module "/mod.def"))
                    module)))
-          (core:%raise module 'core:%require "is not a module name"))))
+          (mu:raise-from module 'core:%require :type))))

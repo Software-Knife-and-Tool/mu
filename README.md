@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.2.11
+###### version 0.2.12
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -28,11 +28,7 @@ Subsequent layers based on the runtime offer advanced features.
 
 
 
-- condensed feature set
-
-- shared feature namespaces
-
-- revised mu and core reader namespace handling
+- system modules reorganization
 
   
 
@@ -172,8 +168,8 @@ The `/opt/mu` directory is hardwired into several tools and the release mechanis
 ------
 
 ```
-version 0.2.10 is built with rustc 1.89.0
 version 0.2.11 is built with rustc 1.90.0
+version 0.2.12 is built with rustc 1.90.0
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.

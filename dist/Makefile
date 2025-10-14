@@ -13,7 +13,7 @@ SRC = ../src
 TOOLS = ../tools
 
 BIN = listener manifest mu-exec mu-server
-SYS = core.sys fasl.sys image.sys
+SYS = core.sys fasl.sys image.sys module.sys
 
 MODULES = 		\
 	common		\
@@ -60,8 +60,8 @@ dist:
 	@./mu-sys -l $(MU)/dist/system.l -q '(system:require "../mu/sys/" "core")'
 	@install -m 644 ./core.sys $(BASE)/lib
 
-	@./mu-sys -l ./core.sys -l $(MU)/dist/fasl.l -q '(fasl:require "../mu/modules/" "common")'
-	@install -m 644 ./common.fasl $(BASE)/lib
+	@./mu-sys -l $(MU)/dist/system.l -l ./core.sys -q '(system:require "../mu/sys/" "module")'
+	@install -m 644 ./module.sys $(BASE)/lib
 
 	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
 	@rm -rf $(BASE) $(BIN)

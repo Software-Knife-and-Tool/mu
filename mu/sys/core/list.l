@@ -2,13 +2,9 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; lists
-;;;
-
-;;;
 ;;; folds
 ;;;
-(mu:intern core "%foldl"
+(mu:intern core "foldl"
   (:lambda (func init list)
      (mu:cdr
       (mu:fix
@@ -23,7 +19,7 @@
            (mu:cdr arg)))
        (mu:cons list init)))))
 
-(mu:intern core "%foldr"
+(mu:intern core "foldr"
    (:lambda (func init list)
      (mu:cdr
       (mu:fix
@@ -41,7 +37,7 @@
 ;;;
 ;;; maps
 ;;;
-(mu:intern core "%mapc"
+(mu:intern core "mapc"
    (:lambda (func list)
      (mu:fix
       (:lambda (list-cdr)
@@ -53,15 +49,15 @@
       list)
      list))
 
-(mu:intern core "%mapcar"
+(mu:intern core "mapcar"
    (:lambda (func list)
-      (core:%foldl
+      (core:foldl
        (:lambda (elt acc)
           `(,@acc ,(core:apply func `(,elt))))
        ()
        list)))
 
-(mu:intern core "%mapl"
+(mu:intern core "mapl"
    (:lambda (func list)
      (mu:fix
       (:lambda (list)
@@ -73,7 +69,7 @@
       list)
      list))
 
-(mu:intern core "%maplist"
+(mu:intern core "maplist"
    (:lambda (func list)
      (mu:car
       (mu:fix
@@ -91,7 +87,7 @@
 ;;;
 ;;; association lists
 ;;;
-(mu:intern core "%assq"
+(mu:intern core "assq"
    (:lambda (item alist)
       (mu:car
        (mu:fix
@@ -108,7 +104,7 @@
                 ()))
         alist))))
 
-(mu:intern core "%rassq"
+(mu:intern core "rassq"
    (:lambda (item alist)
       (mu:car
        (mu:fix
@@ -128,7 +124,7 @@
 ;;;
 ;;; finds
 ;;;
-(mu:intern core "%find-if"
+(mu:intern core "find-if"
    (:lambda (predicate list)
      (mu:cdr
       (mu:fix
@@ -147,7 +143,7 @@
 ;;;
 ;;; positions
 ;;;
-(mu:intern core "%position-if"
+(mu:intern core "position-if"
    (:lambda (func list)
      (:if list
           ((:lambda (length)
@@ -170,29 +166,29 @@
 ;;;
 (mu:intern core "%append"
    (:lambda (list)
-     (core:%foldr
+     (core:foldr
       (:lambda (el acc)
         (:if (core:listp el)
-             (core:%foldr mu:cons acc el)
+             (core:foldr mu:cons acc el)
              el))
       ()
       list)))
 
-(mu:intern core "%reverse"
+(mu:intern core "reverse"
    (:lambda (list)
-     (core:%foldl mu:cons () list)))
+     (core:foldl mu:cons () list)))
 
-(mu:intern core "%dropl"
+(mu:intern core "dropl"
    (:lambda (list n)
      (mu:nthcdr n list)))
 
-(mu:intern core "%dropr"
+(mu:intern core "dropr"
    (:lambda (list n)
-     (core:%foldl
+     (core:foldl
       mu:cons
       ()
       ((:lambda (length)
-         (core:%foldl
+         (core:foldl
           (:lambda (el last)
             (:if (mu:less-than (mu:length last) (mu:sub length n))
                  (mu:cons el last)

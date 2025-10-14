@@ -14,7 +14,6 @@
                 "generic.l"
                 "compile.l"
                 "list.l"
-                "module.l"
                 "stream.l"
                 "reader.l"
                 "quasi.l"

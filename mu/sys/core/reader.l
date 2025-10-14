@@ -30,7 +30,7 @@
 ;;;
 (mu:intern core "%read-char-syntax"
    (:lambda (ch)
-     ((:lambda (read-table) (mu:cdr (core:%assq ch read-table)))
+     ((:lambda (read-table) (mu:cdr (core:assq ch read-table)))
       '((#\return . :wspace) (#\linefeed . :wspace) (#\page . :wspace)
         (#\tab . :wspace) (#\space . :wspace)
         (#\0 . :const)  (#\1 . :const)  (#\2 . :const)  (#\3 . :const)
@@ -159,7 +159,7 @@
   (:lambda (ch stream)
     ((:lambda (dispatch-table)
        (mu:apply
-        (mu:symbol-value (mu:cdr (core:%assq (core:%read-char-syntax ch) dispatch-table)))
+        (mu:symbol-value (mu:cdr (core:assq (core:%read-char-syntax ch) dispatch-table)))
         (core:%list2 ch stream)))
      '((:const   . core:%read-atom)
        (:escape  . core:%read-atom)

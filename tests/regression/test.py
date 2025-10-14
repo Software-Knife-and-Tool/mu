@@ -31,6 +31,15 @@ def runtest(line, test, expected):
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
 
+    if ns == 'module':
+        proc = subprocess.Popen(['../../dist/mu-sys',
+                                 '-l../../dist/core.sys',
+                                 '-l../../dist/module.sys',
+                                 '-e (core:eval \'{})'.format(test),    \
+                                 ],                                     \
+                                stdout=subprocess.PIPE,                 \
+                                stderr=subprocess.PIPE)
+
     obtained = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf-8')
 

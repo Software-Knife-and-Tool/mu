@@ -1,0 +1,2 @@
+(mu:type-of module:provide)	:func
+(mu:type-of module:require)	:func

@@ -90,8 +90,8 @@
 ;;;
 (mu:intern core "%compile-closure"
    (:lambda (lambda body env)
-     (:if (core:%find-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-          (core:%raise lambda 'core:%compile-closure "malformed lambda expression")
+     (:if (core:find-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
+          (mu:raise-from lambda 'core:%compile-closure :syntax)
           ((:lambda (desc)
              ((:lambda (env)
                 ((:lambda (body)
@@ -99,7 +99,7 @@
                       (core:%add-frame (core:%env-prop :name (mu:car env)) (core:%closure-prop :mu closure))
                       closure)
                     (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) () ())))
-                 (core:%mapcar
+                 (core:mapcar
                   (:lambda (form)
                     (core:%compile form env))
                   body)))
@@ -108,15 +108,15 @@
               (:if (core:%or (core:fixnump desc) (core:null body))
                    (core:%list lambda)
                    desc))
-            (core:%foldl
+            (core:foldl
              (:lambda (el acc)
                (:if (core:numberp acc)
                     (:if (mu:eq '&rest el)
                          (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
                               (mu:cons
-                               `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
+                               `(,@(core:dropr lambda 2) ,@(core:dropl lambda (mu:sub (mu:length lambda) 1)))
                                (mu:nth (mu:sub (mu:length lambda) 1) lambda))
-                              (core:%raise lambda 'core:%compile-closure "rest botch"))
+                              (mu:raise-from lambda 'core:%compile-closure :syntax))
                          (mu:add 1 acc))
                     acc))
              0
@@ -143,7 +143,7 @@
                      (core:%closure-prop :mu function)
                      (mu:eval (core:%compile-lambda-arg-list function arg-list ())))
                     (mu:apply function arg-list))
-               (core:%raise function 'core:apply "not a function designator")))))
+               (mu:raise-from function 'core:apply :type)))))
 
 (mu:intern core "%apply"
    (:lambda (closure frame arg-list-form)
@@ -158,7 +158,7 @@
 (mu:intern core "%closure-env"
    (:lambda (lambda body env)
       ((:lambda (bound-symbols)
-          (core:%foldl
+          (core:foldl
            (:lambda (elt acc)
               (:if (core:consp elt)
                    ((:lambda (function-form)
@@ -175,13 +175,13 @@
                                           (:if binding-lambda
                                                 (mu:cons (mu:cons form binding-lambda) acc)
                                                 acc))
-                                       (core:%find-if
+                                       (core:find-if
                                         (:lambda (lambda)
-                                           (core:%find-if
+                                           (core:find-if
                                             (:lambda (symbol) (mu:eq symbol form))
                                             (core:%type-prop :require lambda)))
                                         env))))
-                                 (core:%find-if (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
+                                 (core:find-if (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
                              acc)
                         acc)))
            ()

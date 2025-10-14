@@ -25,7 +25,7 @@
                       (core:read stream () core:%eof%))))
               ()))
            (mu:open :file :input path :t))
-          (core:%raise path 'core:load "not a file path"))
+          (mu:raise-from path 'core:load :type))
      :t))
 
 ;;;
@@ -56,7 +56,7 @@
           (core:%prog2
               (core:write (mu:car arg-list) () dest)
               (mu:cdr arg-list))
-          (core:%raise (mu:car arg-list) 'core:%format "argument to ~D not a fixnum"))))
+          (mu:raise-from (mu:car arg-list) 'core:%format :type))))
 
 (mu:intern core "%fmt-hex"
   (:lambda (dest arg-list)
@@ -87,7 +87,7 @@
                           (mu:vector-length hexstr)))
                       (mu:get-string str-stream)))
                   (mu:open :string :output "" :t)))
-            (core:%raise fx 'core:%format "argument to ~X not a fixnum")))
+            (mu:raise-from fx 'core:%format :type)))
       (mu:car arg-list))))
 
 (mu:intern core "%fmt-aesthetic"
@@ -108,9 +108,9 @@
     ((:lambda (fn)
        (:if fn
             (core:apply (mu:symbol-value fn) (core:%list2 dest arg-list))
-            (core:%raise dir 'core:%format "unrecognized format directive")))
+            (mu:raise-from dir 'core:%format :range)))
      (mu:cdr
-      (core:%assq
+      (core:assq
        dir
        '((#\A . core:%fmt-aesthetic)
          (#\S . core:%fmt-standard)
@@ -157,9 +157,9 @@
                                 mu:*standard-output*
                                 (:if (core:streamp stream)
                                      stream
-                                     (core:%raise stream 'core:%format "not a stream designator"))))))
-                (core:%raise arg-list 'core:%format "not a list"))
-           (core:%raise format-string 'core:%format "not a format string"))))
+                                     (mu:raise-from stream 'core:%format :type))))))
+                (mu:raise-from arg-list 'core:%format :type))
+           (mu:raise-from format-string 'core:%format :type))))
 
 ;;;
 ;;; functions
@@ -178,14 +178,14 @@
      (:if (core:streamp stream)
           ((:lambda (form)
              (:if (mu:eq form core:%read-list-eol%)
-                  (core:%raise stream 'core:read "unmatched close parenthesis")
+                  (mu:raise-from stream 'core:read :syntax)
                   (:if (mu:eq core:%eof% form)
                        (:if eof-error
-                            (core:%raise stream 'core:read "unexpected end of file")
+                            (mu:raise-from stream 'core:read :eof)
                             eof-value)
                        form)))
            (core:%read stream))
-          (core:%raise stream 'core:read "not a stream"))))
+          (mu:raise-from stream 'core:read :type))))
 
 (mu:intern core "write"
    (:lambda (form escape stream)
@@ -202,4 +202,4 @@
                             (mu:symbol-name form))
                          (mu:write form escape stream))
                (mu:write form escape stream)))
-          (core:%raise stream 'core:write "not a stream"))))
+          (mu:raise-from stream 'core:write :type))))

@@ -8,7 +8,6 @@ lambda
 lisp
 list
 macro
-module
 prelude
 reader
 stream
