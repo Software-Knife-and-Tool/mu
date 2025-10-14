@@ -441,5 +441,5 @@ SUBSTITUTE, SUBSTITUTE-IF [x]
                      (mu:cdr loop)))
                     (mu:cons 0 ())))))
                (mu:vector-length seq))))
- (:cons   . core:%reverse)
+ (:cons   . core:reverse)
  (:null   . (:lambda (seq) ())))

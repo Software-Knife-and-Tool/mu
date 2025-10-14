@@ -30,7 +30,7 @@
            (:if (core:floatp n)
                 (mu:fless-than n 0.0)
                 (mu:less-than n 0))
-           (core:%raise n 'core:minusp "not a number"))))
+           (mu:raise-from n 'core:minusp :type))))
 
 ;;;
 ;;; mu system classes

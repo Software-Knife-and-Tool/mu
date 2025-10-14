@@ -19,9 +19,9 @@
 
 (mu:intern core "vector-prop"
    (:lambda (prop vector)
-      (:if (core:%find-if (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :disp :bitvec))
+      (:if (core:find-if (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :disp :bitvec))
            (core:%vector-prop prop vector)
-           (core:%raise prop 'core:vector-prop "not a vector property"))))
+           (mu:raise-from prop 'core:vector-prop :range))))
 
 (mu:intern core "%make-vector"
    (:lambda (vector displace bitvec)
@@ -62,21 +62,21 @@
    (:lambda (list)
      (:if (core:listp list)
           (mu:make-vector (core:%specialized-vector-type list) list)
-          (core:%raise list 'core:make-vector "not a list"))))
+          (mu:raise-from list 'core:make-vector :type))))
 
 (mu:intern core "vector-slice"
    (:lambda (vector start length)
      (:if (core:vectorp vector)
           (:if (core:fixnump start)
                (:if (core:%or (core:minusp start) (mu:less-than (core:vector-length vector) start))
-                    (core:%raise start 'core:vector-slice "illegal start")
+                    (mu:raise-from start 'core:vector-slice :range)
                     (:if (core:fixnump length)
                          (:if (core:%or (core:minusp length) (mu:less-than (core:vector-length vector) length))
-                              (core:%raise length 'core:vector-slice "illegal length")
+                              (mu:raise-from length 'core:vector-slice :range)
                               (core:%make-vector vector (mu:cons start length) ()))
-                         (core:%raise start 'core:vector-slice "not a fixnum")))
-               (core:%raise length 'core:vector-slice "not a fixnum"))
-          (core:%raise vector 'core:vector-slice "not a base vector"))))
+                         (mu:raise-from start 'core:vector-slice :type)))
+               (mu:raise-from length 'core:vector-slice :type))
+          (mu:raise-from vector 'core:vector-slice :type))))
 
 (mu:intern core "vector-length"
    (:lambda (vector)
@@ -86,7 +86,7 @@
                (:if (mu:eq :vector (mu:type-of vector))
                     (mu:vector-length vector)
                     (mu:cdr (core:%vector-prop :disp vector))))
-          (core:%raise vector 'core:vector-length "not a vector"))))
+          (mu:raise-from vector 'core:vector-length :type))))
 
 (mu:intern core "vector-type"
    (:lambda (vector)
@@ -96,14 +96,14 @@
                (:if (mu:eq :vector (mu:type-of vector))
                     (mu:vector-type vector)
                     (mu:vector-type (core:%vector-prop :base vector))))
-          (core:%raise vector 'core:vector-type "not a vector"))))
+          (mu:raise-from vector 'core:vector-type :type))))
 
 (mu:intern core "vector-ref"
    (:lambda (vector nth)
      (:if (core:vectorp vector)
           (:if (core:fixnump nth)
                (:if (core:%or (core:minusp nth) (mu:less-than (core:vector-length vector) nth))
-                    (core:%raise nth 'core:vector-ref "illegal index")
+                    (mu:raise-from nth 'core:vector-ref :range)
                     (:if (core:bit-vector-p vector)
                          ((:lambda (nth-byte offset)
                             ((:lambda (byte)
@@ -119,8 +119,8 @@
                                  (mu:svref base (mu:add start nth)))
                                (core:%vector-prop :base vector)
                                (mu:car (core:%vector-prop :disp vector))))))
-                    (core:%raise nth 'core:vector-ref "not a fixnum"))
-          (core:%raise vector 'core:vector-ref "not a vector"))))
+                    (mu:raise-from nth 'core:vector-ref :type))
+          (mu:raise-from vector 'core:vector-ref :type))))
 
 ;;;
 ;;; write
@@ -152,13 +152,13 @@
 (mu:intern core "%specialized-vector-type"
    (:lambda (list)
      ((:lambda (type)
-        (:if (core:%find-if (:lambda (stype) (mu:eq type stype)) '(:t :char :fixnum :float))
+        (:if (core:find-if (:lambda (stype) (mu:eq type stype)) '(:t :char :fixnum :float))
              (:if (mu:eq type :fixnum)
                   ((:lambda (is-byte)
                      (:if is-byte
                           :byte
                           :fixnum))
-                   (core:%foldl
+                   (core:foldl
                     (:lambda (elt acc)
                       (:if (core:%and (core:null (core:minusp elt)) (mu:less-than elt 256))
                            acc
@@ -167,7 +167,7 @@
                       list))
                   type)
              :t))
-      (core:%foldl
+      (core:foldl
        (:lambda (elt acc)
           (:if (mu:eq :t acc)
                :t

@@ -1,0 +1,11 @@
+;;;  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-License-Identifier: MIT
+
+;;;
+;;; module sys module
+;;;
+(system:provide
+ "module"
+ '((:version . "0.0.1")
+   (:ns      . "module")
+   (:load    . ("module.l"))))

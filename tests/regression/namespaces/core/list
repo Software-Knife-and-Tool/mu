@@ -1,61 +1,61 @@
 (mu:type-of core:%append)	:func
-(mu:type-of core:%assq)	:func
-(mu:type-of core:%dropl)	:func
-(mu:type-of core:%dropr)	:func
-(mu:type-of core:%find-if)	:func
-(mu:type-of core:%foldl)	:func
-(mu:type-of core:%foldr)	:func
-(mu:type-of core:%mapc)	:func
-(mu:type-of core:%mapcar)	:func
-(mu:type-of core:%mapl)	:func
-(mu:type-of core:%maplist)	:func
-(mu:type-of core:%position-if)	:func
-(mu:type-of core:%reverse)	:func
-(mu:type-of core:%rassq)	:func
+(mu:type-of core:assq)	:func
+(mu:type-of core:dropl)	:func
+(mu:type-of core:dropr)	:func
+(mu:type-of core:find-if)	:func
+(mu:type-of core:foldl)	:func
+(mu:type-of core:foldr)	:func
+(mu:type-of core:mapc)	:func
+(mu:type-of core:mapcar)	:func
+(mu:type-of core:mapl)	:func
+(mu:type-of core:maplist)	:func
+(mu:type-of core:position-if)	:func
+(mu:type-of core:reverse)	:func
+(mu:type-of core:rassq)	:func
 (core:%append '(() ()))	:nil
 (core:%append '(() (1 2 3)))	(1 2 3)
 (core:%append '((1 2 3) ()))	(1 2 3)
 (core:%append '((1 2 3) (4 5 6)))	(1 2 3 4 5 6)
 (core:%append '((1 2) 3))	(1 2 . 3)
-(core:%dropl '(1 2 3) 0)	(1 2 3)
-(core:%dropl '(1 2 3) 1)	(2 3)
-(core:%dropr '(1 2 3) 0)	(1 2 3)
-(core:%dropr '(1 2 3) 1)	(1 2)
-(core:%find-if core:symbolp '(1 2 3))	:nil
-(core:%find-if core:symbolp '(a b c))	a
-(core:%foldl (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(1 2 3))	:nil
-(core:%foldl (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(a b c))	:t
-(core:%foldl (:lambda (el acc) (mu:cons el acc)) () '(1 2 3 4))	(4 3 2 1)
-(core:%foldl (:lambda (el acc) (mu:cons el acc)) () '(1))	(1)
-(core:%foldl (:lambda (el acc) (mu:cons el acc)) () ())	:nil
-(core:%foldl (:lambda (x y) (mu:add x y)) 0 '(1 2 3))	6
-(core:%foldr (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(1 2 3))	:nil
-(core:%foldr (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp` el))) :t '(a b c))	:t
-(core:%foldr (:lambda (el acc) (mu:cons el acc)) () '(1 2 3 4))	(1 2 3 4)
-(core:%foldr (:lambda (el acc) (mu:cons el acc)) () '(1))	(1)
-(core:%foldr (:lambda (el acc) (mu:cons el acc)) () ())	:nil
-(core:%foldr (:lambda (x y) (mu:add x y)) 0 '(1 2 3))	6
-(core:%mapc (:lambda (el) el) '(1 2 3))	(1 2 3)
-(core:%mapc (:lambda (el) el) '(1 2 3))	(1 2 3)
-(core:%mapc (:lambda (el) el) '(1))	(1)
-(core:%mapc (:lambda (el) el) ())	:nil
-(core:%mapcar (:lambda (el) el) '(1 2 3))	(1 2 3)
-(core:%mapcar (:lambda (el) el) '(1))	(1)
-(core:%mapcar (:lambda (el) el) ())	:nil
-(core:%mapl (:lambda (el) el) '(1 2 3))	(1 2 3)
-(core:%mapl (:lambda (el) el) '(1))	(1)
-(core:%mapl (:lambda (el) el) ())	:nil
-(core:%maplist (:lambda (el) el) '(1 2 3))	((1 2 3) (2 3) (3))
-(core:%maplist (:lambda (el) el) '(1))	((1))
-(core:%maplist (:lambda (el) el) ())	:nil
-(core:%position-if (:lambda (el) (mu:eq el 'foo)) ())	:nil
-(core:%position-if (:lambda (el) (mu:eq el 'foo)) '(1))	:nil
-(core:%position-if (:lambda (el) (mu:eq el 'foo)) '(foo))	0
-(core:%position-if (:lambda (el) (mu:eq el 'foo)) '(1 foo))	1
-(core:%reverse '(1 2 3 4))	(4 3 2 1)
-(mu:cdr (core:%assq #\a '((#\a . foo))))	foo
-(mu:cdr (core:%assq #\a '(() (#\a . foo))))	foo
-(mu:cdr (core:%assq #\a ()))	:nil
-(mu:car (core:%rassq 'foo '((#\a . foo))))	#\a
-(mu:car (core:%rassq 'foo '(() (#\a . foo))))	#\a
-(mu:cdr (core:%rassq #\a ()))	:nil
+(core:dropl '(1 2 3) 0)	(1 2 3)
+(core:dropl '(1 2 3) 1)	(2 3)
+(core:dropr '(1 2 3) 0)	(1 2 3)
+(core:dropr '(1 2 3) 1)	(1 2)
+(core:find-if core:symbolp '(1 2 3))	:nil
+(core:find-if core:symbolp '(a b c))	a
+(core:foldl (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(1 2 3))	:nil
+(core:foldl (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(a b c))	:t
+(core:foldl (:lambda (el acc) (mu:cons el acc)) () '(1 2 3 4))	(4 3 2 1)
+(core:foldl (:lambda (el acc) (mu:cons el acc)) () '(1))	(1)
+(core:foldl (:lambda (el acc) (mu:cons el acc)) () ())	:nil
+(core:foldl (:lambda (x y) (mu:add x y)) 0 '(1 2 3))	6
+(core:foldr (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(1 2 3))	:nil
+(core:foldr (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp` el))) :t '(a b c))	:t
+(core:foldr (:lambda (el acc) (mu:cons el acc)) () '(1 2 3 4))	(1 2 3 4)
+(core:foldr (:lambda (el acc) (mu:cons el acc)) () '(1))	(1)
+(core:foldr (:lambda (el acc) (mu:cons el acc)) () ())	:nil
+(core:foldr (:lambda (x y) (mu:add x y)) 0 '(1 2 3))	6
+(core:mapc (:lambda (el) el) '(1 2 3))	(1 2 3)
+(core:mapc (:lambda (el) el) '(1 2 3))	(1 2 3)
+(core:mapc (:lambda (el) el) '(1))	(1)
+(core:mapc (:lambda (el) el) ())	:nil
+(core:mapcar (:lambda (el) el) '(1 2 3))	(1 2 3)
+(core:mapcar (:lambda (el) el) '(1))	(1)
+(core:mapcar (:lambda (el) el) ())	:nil
+(core:mapl (:lambda (el) el) '(1 2 3))	(1 2 3)
+(core:mapl (:lambda (el) el) '(1))	(1)
+(core:mapl (:lambda (el) el) ())	:nil
+(core:maplist (:lambda (el) el) '(1 2 3))	((1 2 3) (2 3) (3))
+(core:maplist (:lambda (el) el) '(1))	((1))
+(core:maplist (:lambda (el) el) ())	:nil
+(core:position-if (:lambda (el) (mu:eq el 'foo)) ())	:nil
+(core:position-if (:lambda (el) (mu:eq el 'foo)) '(1))	:nil
+(core:position-if (:lambda (el) (mu:eq el 'foo)) '(foo))	0
+(core:position-if (:lambda (el) (mu:eq el 'foo)) '(1 foo))	1
+(core:reverse '(1 2 3 4))	(4 3 2 1)
+(mu:cdr (core:assq #\a '((#\a . foo))))	foo
+(mu:cdr (core:assq #\a '(() (#\a . foo))))	foo
+(mu:cdr (core:assq #\a ()))	:nil
+(mu:car (core:rassq 'foo '((#\a . foo))))	#\a
+(mu:car (core:rassq 'foo '(() (#\a . foo))))	#\a
+(mu:cdr (core:rassq #\a ()))	:nil

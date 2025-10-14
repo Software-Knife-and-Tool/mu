@@ -16,12 +16,12 @@
 
 (mu:intern core "%generic-prop"
    (:lambda (prop generic)
-      (:if (core:%find-if
+      (:if (core:find-if
             (:lambda (generic-prop)
                (mu:eq prop generic-prop))
             '(:name :impls))
            (core:%type-prop prop generic)
-           (core:%raise prop 'core:%generic-prop "not a generic property"))))
+           (mu:raise-from prop 'core:%generic-prop :range))))
 
 (mu:intern core "%make-generic"
    (:lambda (name impls)
@@ -43,8 +43,8 @@
              ((:lambda (type-function)
                 (:if type-function
                      (core:apply type-function args)
-                     (core:%raise type-function 'core:%apply-generic "not a type function")))
-              (mu:cdr (core:%find-if (:lambda (impl) (core:typep object (mu:car impl))) impls))))
+                     (mu:raise-from type-function 'core:%apply-generic :type)))
+              (mu:cdr (core:find-if (:lambda (impl) (core:typep object (mu:car impl))) impls))))
            (mu:car args)
            (mu:cdr (core:%generic-prop :impls generic)))
-          (core:%raise generic 'core:%apply-generic "invalid argument"))))
+          (mu:raise-from generic 'core:%apply-generic :type))))

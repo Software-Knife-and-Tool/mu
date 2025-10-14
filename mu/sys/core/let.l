@@ -9,8 +9,8 @@
 ;;;
 (mu:intern core "%compile-let"
    (:lambda (lambda body env)
-     (:if (core:%find-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-          (core:%raise lambda 'core:%compile-closure "malformed lambda expression")
+     (:if (core:find-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
+          (mu:raise-from lambda 'core:%compile-closure :syntax)
           ((:lambda (desc)
              ((:lambda (env)
                 ((:lambda (body)
@@ -18,7 +18,7 @@
                       (core:%add-frame (core:%env-prop :name (mu:car env)) (core:%closure-prop :mu closure))
                       closure)
                     (core:%make-closure (mu:car desc) (mu:cdr desc) `(:lambda ,(mu:car desc) ,@body) () ())))
-                 (core:%mapcar
+                 (core:mapcar
                   (:lambda (form)
                     (core:%compile form env))
                   body)))
@@ -27,15 +27,15 @@
              (:if (core:%or (core:fixnump desc) (core:null body))
                   (core:%list lambda)
                   desc))
-           (core:%foldl
+           (core:foldl
             (:lambda (el acc)
               (:if (core:numberp acc)
                    (:if (mu:eq '&rest el)
                         (:if (mu:eq (mu:length lambda) (mu:add 2 acc))
                              (mu:cons
-                              `(,@(core:%dropr lambda 2) ,@(core:%dropl lambda (mu:sub (mu:length lambda) 1)))
+                              `(,@(core:%dropr lambda 2) ,@(core:dropl lambda (mu:sub (mu:length lambda) 1)))
                               (mu:nth (mu:sub (mu:length lambda) 1) lambda))
-                             (core:%raise lambda 'core:%compile-closure "rest botch"))
+                             (mu:raise-from lambda 'core:%compile-closure :syntax))
                         (mu:add 1 acc))
                    acc))
             0
@@ -44,8 +44,8 @@
 #|
 (core:compile
  '(%defmacro let (binds &rest body)
-   `((%lambda ,(core:%mapcar mu:car binds) ,@body)
-     ,@(core:%mapcar (:lambda (bind) (mu:nth 1 bind)) binds))))
+   `((%lambda ,(core:mapcar mu:car binds) ,@body)
+     ,@(core:mapcar (:lambda (bind) (mu:nth 1 bind)) binds))))
 
 (core:compile
  '(%defmacro let* (binds &rest body)

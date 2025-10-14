@@ -12,7 +12,7 @@
 
 (mu:intern core "%quasi-map-func"
    (:lambda (key map)
-     (mu:cdr (core:%assq key map))))
+     (mu:cdr (core:assq key map))))
 
 ;;; fix this for comments
 (mu:intern core "%quasi-kill-ws"
@@ -49,7 +49,7 @@
          ,(mu:cons #\, (:lambda ()
                          ((:lambda (ch)
                             (:if (core:null ch)
-                                 (core:%raise stream 'core:%quasi-read-syntax "early end of file")
+                                 (mu:raise-from stream 'core:%quasi-read-syntax :eof)
                                  (:if (mu:eq #\@ ch)
                                       :comma@
                                       (core:%prog2 (mu:unread-char ch stream) :comma))))
@@ -78,7 +78,7 @@
                       (:if recur
                            `(mu:cons (mu:append ,(core:%quasi-append-args compiled-list)) ())
                            (core:%quasi-append-args compiled-list)))
-                    (core:%mapcar (:lambda (expr) (core:%quasi-compile expr :t)) expr))
+                    (core:mapcar (:lambda (expr) (core:%quasi-compile expr :t)) expr))
                    `(mu:cons () ()))))))))
 
 (mu:intern core "%quasi-parse-list"
@@ -87,7 +87,7 @@
       (:lambda (list)
         ((:lambda (syntax quasi-map)
            (:if (core:null syntax)
-                (core:%raise stream 'core:%quasi-parse-list "early end of file")
+                (mu:raise-from stream 'core:%quasi-parse-list :eof)
                 ((:lambda (map-function)
                    ((:lambda (el)
                       (:if (mu:eq :list- syntax)
@@ -108,17 +108,17 @@
    (:lambda (stream)
      ((:lambda (syntax syntax-map)
         (:if (core:null syntax)
-             (core:%raise stream 'core:%quasi-parse "early end of file")
+             (mu:raise-from stream 'core:%quasi-parse :eof)
              (mu:apply (core:%quasi-map-func syntax syntax-map) ())))
       (core:%quasi-read-syntax stream)
       `(,(mu:cons :atom (:lambda () (mu:cons :basic (core:read stream () ()))))
          ,(mu:cons :comma (:lambda () (mu:cons :comma (core:read stream () ()))))
-         ,(mu:cons :comma@ (:lambda () (core:%raise () 'core:%quasi-parse "`,@ at top level")))  
+         ,(mu:cons :comma@ (:lambda () (mu:raise-from () 'core:%quasi-parse :syntax)))  
          ,(mu:cons :list (:lambda ()
                            ((:lambda (form)
                               (:if form
                                    form
                                    (mu:cons :basic ())))
                             (mu:cons :list (core:%quasi-parse-list stream)))))
-         ,(mu:cons :list- (:lambda () (core:%raise () 'core:%quasi-parse "read: ) at top level~%")))
+         ,(mu:cons :list- (:lambda () (mu:raise-from () 'core:%quasi-parse :syntax)))
          ,(mu:cons :quasi (:lambda() (mu:cons :basic (core:read stream () ()))))))))

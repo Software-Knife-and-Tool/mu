@@ -39,31 +39,31 @@
    (:lambda (exception)
      (:if (core:exceptionp exception)
           (core:%exception-prop :cond exception)
-          (core:%raise exception 'core:exception-cond "is not an exception"))))
+          (mu:raise-from exception 'core:exception-cond :type))))
 
 (mu:intern core "exception-value"
    (:lambda (exception)
      (:if (core:exceptionp exception)
           (core:%exception-prop :value exception)
-          (core:%raise exception 'core:exception-value "is not an exception"))))
+          (mu:raise-from exception 'core:exception-value :type))))
 
 (mu:intern core "exception-source"
    (:lambda (exception)
      (:if (core:exceptionp exception)
           (core:%exception-prop :source exception)
-          (core:%raise exception 'core:exception-source "is not an exception"))))
+          (mu:raise-from exception 'core:exception-source :type))))
 
 (mu:intern core "exception-reason"
    (:lambda (exception)
      (:if (core:exceptionp exception)
           (core:%exception-prop :reason exception)
-          (core:%raise exception 'core:exception-reason "is not an exception"))))
+          (mu:raise-from exception 'core:exception-reason :type))))
 
 (mu:intern core "exception-env"
    (:lambda (exception)
      (:if (core:exceptionp exception)
           (core:%exception-prop :env exception)
-          (core:%raise exception 'core:exception-env "is not an exception"))))
+          (mu:raise-from exception 'core:exception-env :type))))
 
 ;;;
 ;;; predicate
@@ -84,7 +84,7 @@
          (:if (core:%and printenv env)
               (core:%prog2
                   (core:%format stream "env:~%" ())
-                  (core:%mapc
+                  (core:mapc
                    (:lambda (frame)
                       (core:%format stream "  ~A~T(~A ~A)~%"
                                    `(,(mu:car frame)

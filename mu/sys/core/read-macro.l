@@ -21,11 +21,11 @@
               loop
               ((:lambda (ch)
                  (:if (core:null ch)
-                      (core:%raise stream 'core:%read-sharp-comment "unexpected end of file")
+                      (mu:raise-from stream 'core:%read-sharp-comment :eof)
                       (:if (mu:eq ch #\|)
                            ((:lambda (ch)
                               (:if (core:null ch)
-                                   (core:%raise stream 'core:%read-sharp-comment "unexpected end of file")
+                                   (mu:raise-from stream 'core:%read-sharp-comment :eof)
                                    (:if (mu:eq ch #\#)
                                         stream
                                         (core:null loop))))
@@ -39,7 +39,7 @@
       ((:lambda (type)
           (:if (core:keywordp type)
                (mu:make-vector type (core:%read-list #\( stream))
-               (core:%raise type 'core:%read-sharp-vector "not a type keyword")))
+               (mu:raise-from type 'core:%read-sharp-vector :range)))
           (core:%read stream))))
 
 (mu:intern core "%read-byte-bits"
@@ -65,7 +65,7 @@
                                         ,@(mu:logor
                                            (:if (mu:eq #\1 ch) 1 0)
                                            (mu:mul byte 2)))
-                                      (core:%raise ch 'core:%read-sharp-bit-vector "not a bit designator"))))
+                                      (mu:raise-from ch 'core:%read-sharp-bit-vector :range))))
                           (core:%read-char-syntax ch))))
                   (mu:read-char stream () ()))))
           (mu:car loop)
@@ -82,7 +82,7 @@
                  (:if (core:consp byte-descriptor)
                       ((:lambda (length byte)
                          (core:%make-vector
-                          (mu:make-vector :byte (core:%reverse (mu:cons byte loop)))
+                          (mu:make-vector :byte (core:reverse (mu:cons byte loop)))
                           ()
                           (core:%list (mu:add length (mu:mul 8 (mu:length loop))))))
                        (mu:car byte-descriptor)
@@ -102,9 +102,9 @@
              ((:lambda (symbol)
                 (:if (mu:eq :symbol (mu:type-of symbol))
                      (mu:make-symbol (mu:symbol-name symbol))
-                     (core:%raise symbol 'core:%read-sharp-colon "not a symbol")))
+                     (mu:raise-from symbol 'core:%read-sharp-colon :type)))
               (core:%read-atom ch stream))              
-             (core:%raise stream 'core:%read-sharp-colon "early eof")))
+             (mu:raise-from stream 'core:%read-sharp-colon :eof)))
      (mu:read-char stream () ()))))
 
 (mu:intern core "%read-sharp-number"
@@ -140,7 +140,7 @@
   (:lambda (ch stream)
     ((:lambda (ch sharp-table)
        (mu:apply
-        (mu:symbol-value (mu:cdr (core:%assq ch sharp-table)))
+        (mu:symbol-value (mu:cdr (core:assq ch sharp-table)))
         (core:%list2 ch stream)))
      (mu:read-char stream () ())
      '((#\| . core:%read-sharp-comment)
@@ -176,8 +176,8 @@
                                    (core:%prog2
                                       (mu:unread-char #\) stream)
                                       dotted)
-                                   (core:%raise () 'core:%read-list "malformed dotted list")))
-                            (core:%foldr mu:cons (core:%read stream) loop))
+                                   (mu:raise-from () 'core:%read-list :syntax)))
+                            (core:foldr mu:cons (core:%read stream) loop))
                            `(,@loop ,el))
                       `(,@loop ,el))))
           (core:%read stream)))
@@ -231,7 +231,7 @@
   (:lambda (ch stream)
      ((:lambda (macro-table)
        (mu:apply
-            (mu:symbol-value (mu:cdr (core:%assq ch macro-table)))
+            (mu:symbol-value (mu:cdr (core:assq ch macro-table)))
             (core:%list2 ch stream)))
        '((#\" . core:%read-string)
          (#\# . core:%read-sharp)
@@ -252,13 +252,13 @@
                    (mu:symbol-value macro-symbol)
                    ()))
            (mu:find core:char-macros/ (mu:make-vector :char (mu:cons char ()))))
-          (core:%raise char 'core:get-macro-character "not a character"))))
+          (mu:raise-from char 'core:get-macro-character :type))))
 
 (mu:intern core "set-macro-character"
    (:lambda (char func non-terminating)
       (:if (core:charp char)
          (:if (core:functionp func)
               (mu:intern core:char-macros/ (mu:make-vector :char (mu:cons char ())) (mu:cons func non-terminating))
-              (core:%raise func 'core:set-macro-character "not a function"))
-         (core:%raise char 'core:set-macro-character "not a character"))
+              (mu:raise-from func 'core:set-macro-character :type))
+         (mu:raise-from char 'core:set-macro-character :type))
       :t))
