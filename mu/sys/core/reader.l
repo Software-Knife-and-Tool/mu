@@ -5,25 +5,7 @@
 ;;; reader
 ;;;
 (mu:intern core "%eof%" (mu:make-symbol "eof"))
-(mu:intern core "*reader-stream*" (mu:open :string :output "" :t))
-(mu:intern core "*reader-current-ns*" (mu:open :string :bidir "core:/reader" :t))
-
-#|
-(mu:intern core "%reader-get-ns"
-   (:lambda ()
-     ((:lambda (ns)
-        (mu:write ns () core:*reader-current-ns*)
-        (mu:find-namespace ns))
-      (mu:get-string core:*reader-current-ns*))))
-|#
-
-(mu:intern core "get-current-ns"
-   (:lambda () core:reader/))          
-
-(mu:intern core "set-current-ns"
-   (:lambda (ns-name)
-      (mu:get-string core:*reader-current-ns*)
-      (mu:write ns-name () core:*reader-current-ns*)))
+(mu:intern core "%reader-stream%" (mu:open :string :output "" :t))
 
 ;;;
 ;;; readtable
@@ -86,7 +68,7 @@
                                       (:if (mu:less-than (mu:sub base 1) n)
                                            ()
                                            ( mu:cons (mu:add 1 index) (mu:add n (mu:mul acc base))))))
-                               (core:%string-position (mu:svref digits index) "0123456789abcdef"))))
+                               (core:%vector-position (mu:svref digits index) "0123456789abcdef"))))
                        (mu:car loop)
                        (mu:cdr loop))))
                (:if (core:fixnump sign)
@@ -127,7 +109,7 @@
 ;;;
 (mu:intern core "%read-atom"
   (:lambda (ch stream)
-    (mu:write-char ch core:*reader-stream*)
+    (mu:write-char ch core:%reader-stream%)
     (mu:fix
      (:lambda (loop)
        (:if (core:consp loop)
@@ -137,7 +119,7 @@
                     loop
                     (:if (mu:eq :const (core:%read-char-syntax ch))
                          (core:%prog2
-                            (mu:write-char ch core:*reader-stream*)
+                            (mu:write-char ch core:%reader-stream%)
                             (core:null loop))
                          (core:%prog2
                             (mu:unread-char ch stream)
@@ -150,7 +132,7 @@
                number
                (core:%symbol-macro-expand (core:%read-symbol token))))
         (core:%read-number token)))
-     (mu:get-string core:*reader-stream*))))
+     (mu:get-string core:%reader-stream%))))
 
 ;;;
 ;;; parser
@@ -168,9 +150,9 @@
        (:mescape . core:%read-atom)))))
 
 ;;;
-;;; consume whitespace and comments
+;;; kill whitespace and comments
 ;;;
-(mu:intern core "%read-consume-ws"
+(mu:intern core "%read-kill-ws"
    (:lambda (stream)
      (mu:fix
       (:lambda (loop)
@@ -210,4 +192,4 @@
                      (core:apply (mu:car macro) (core:%list2 stream ch))
                      (core:%read-dispatch ch stream)))
               (core:get-macro-character ch))))
-      (core:%read-consume-ws stream))))
+      (core:%read-kill-ws stream))))

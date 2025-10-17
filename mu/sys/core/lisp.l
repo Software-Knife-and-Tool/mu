@@ -14,7 +14,7 @@
           :t
           (:if (mu:eq (mu:type-of x) (mu:type-of y))
                (:if (core:%and (core:stringp x) (core:stringp y))
-                    (core:%string= x y)
+                    (core:%vector= x y)
                     (:if (core:%and (core:vectorp x) (core:vectorp y))
                          (core:%and
                           (core:%and (core:vector-type x) (core:vector-type y))

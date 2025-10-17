@@ -6,6 +6,28 @@
 ;;;
 (mu:intern module "system/modules" (mu:make-namespace "system/modules"))
 
+(mu:intern module "%string-concat"
+   (:lambda (strings)
+     ((:lambda (concat)
+        (mu:fix
+         (:lambda (list)
+           (:if list
+                ((:lambda (string)
+                   (mu:fix
+                    (:lambda (index)
+                      (:if (mu:less-than index (mu:vector-length string))
+                           ((:lambda ()
+                              (mu:write-char (mu:svref string index) concat)
+                              (mu:add index 1)))
+                           index))
+                    0)
+                   (mu:cdr list))
+                 (mu:car list))
+                list))
+         strings)
+        (mu:get-string concat))
+        (mu:open :string :output "" :t))))
+
 (mu:intern module "module-version"
    (:lambda (module)
      (:if (core:stringp module)

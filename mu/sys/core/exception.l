@@ -33,39 +33,6 @@
           ,(mu:cons :env    env)))))
 
 ;;;
-;;; accessors
-;;;
-(mu:intern core "exception-cond"
-   (:lambda (exception)
-     (:if (core:exceptionp exception)
-          (core:%exception-prop :cond exception)
-          (mu:raise-from exception 'core:exception-cond :type))))
-
-(mu:intern core "exception-value"
-   (:lambda (exception)
-     (:if (core:exceptionp exception)
-          (core:%exception-prop :value exception)
-          (mu:raise-from exception 'core:exception-value :type))))
-
-(mu:intern core "exception-source"
-   (:lambda (exception)
-     (:if (core:exceptionp exception)
-          (core:%exception-prop :source exception)
-          (mu:raise-from exception 'core:exception-source :type))))
-
-(mu:intern core "exception-reason"
-   (:lambda (exception)
-     (:if (core:exceptionp exception)
-          (core:%exception-prop :reason exception)
-          (mu:raise-from exception 'core:exception-reason :type))))
-
-(mu:intern core "exception-env"
-   (:lambda (exception)
-     (:if (core:exceptionp exception)
-          (core:%exception-prop :env exception)
-          (mu:raise-from exception 'core:exception-env :type))))
-
-;;;
 ;;; predicate
 ;;;
 (mu:intern core "exceptionp"
@@ -134,7 +101,7 @@
 
 (mu:intern core "%warn"
    (:lambda (value message)
-     (core:%format mu:*error-output* "WARNING: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
+     (core:%format mu:*error-output* "warning: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
      value))
 
 (mu:intern core "%raise"

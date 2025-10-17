@@ -1,10 +1,5 @@
 (mu:type-of core:%make-exception)	:func
 (mu:type-of core:error)	:func
-(mu:type-of core:exception-cond)	:func
-(mu:type-of core:exception-value)	:func
-(mu:type-of core:exception-source)	:func
-(mu:type-of core:exception-reason)	:func
-(mu:type-of core:exception-env)	:func
 (mu:type-of core:%raise)	:func
 (mu:type-of core:%warn)	:func
 (core:structp (core:%make-exception () :error 'test "exception test" ()))	:t

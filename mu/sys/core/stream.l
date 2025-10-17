@@ -31,95 +31,68 @@
 ;;;
 ;;; format
 ;;;
-(mu:intern core "%fmt-tilde"
-  (:lambda (dest arg-list)
-    (mu:write-char #\~ dest)
-    arg-list))
+(mu:intern core "%fmt-controls"
+   `(,(mu:cons #\A (:lambda (dest arg-list)
+                     (core:write (mu:car arg-list) () dest)
+                     (mu:cdr arg-list)))
+      ,(mu:cons #\S (:lambda (dest arg-list)
+                      (core:write (mu:car arg-list) :t dest)
+                      (mu:cdr arg-list)))
+      ,(mu:cons #\X (:lambda (dest arg-list)
+                      ((:lambda (fx)
+                         (:if (core:fixnump fx)
+                              (:if (mu:eq 0 fx)
+                                   (core:write "00" () dest)
+                                   ((:lambda (str-stream)
+                                      (mu:fix
+                                       (:lambda (n)
+                                         (:if (core:%or (core:null n) (mu:eq 0 n))
+                                              ()
+                                              (core:%prog2
+                                               (mu:write (mu:svref "0123456789abcdef" (mu:logand n #xf)) () str-stream)
+                                               (mu:div n 16))))
+                                       (:if (mu:less-than fx 0) (mu:mul -1 fx) fx))
+                                      (:if (mu:less-than fx 0)
+                                           (mu:write #\- () str-stream)
+                                           ())
+                                      ((:lambda (hexstr)
+                                         (mu:fix
+                                          (:lambda (len)
+                                            (:if (mu:eq 0 len)
+                                                 0
+                                                 (core:%prog2
+                                                  (mu:write (mu:svref hexstr (mu:sub len 1)) () dest)
+                                                  (mu:sub len 1))))
+                                          (mu:vector-length hexstr)))
+                                       (mu:get-string str-stream)))
+                                    (mu:open :string :output "" :t)))
+                              (mu:raise-from fx 'core:%format :type)))
+                       (mu:car arg-list))))
+      ,(mu:cons #\D   (:lambda (dest arg-list)
+                        (:if (core:fixnump (mu:car arg-list))
+                             (core:%prog2
+                              (core:write (mu:car arg-list) () dest)
+                              (mu:cdr arg-list))
+                             (mu:raise-from (mu:car arg-list) 'core:%format :type))))
+      ,(mu:cons #\T (:lambda (dest arg-list)
+                      (mu:write-char #\tab dest)
+                      arg-list))
+      ,(mu:cons #\~ (:lambda (dest arg-list)
+                      (mu:write-char #\~ dest)
+                      arg-list))
+      ,(mu:cons #\% (:lambda (dest arg-list)
+                      (mu:write-char #\linefeed dest)
+                      arg-list))
+      ,(mu:cons #\! (:lambda (dest arg-list)
+                      (mu:cdr arg-list)))))
 
-(mu:intern core "%fmt-tab"
-  (:lambda (dest arg-list)
-    (mu:write-char #\tab dest)
-    arg-list))
-
-(mu:intern core "%fmt-percent"
-  (:lambda (dest arg-list)
-    (mu:write-char #\linefeed dest)
-    arg-list))
-
-(mu:intern core "%fmt-bang"
-  (:lambda (dest arg-list)
-    (mu:cdr arg-list)))
-
-(mu:intern core "%fmt-decimal"
-  (:lambda (dest arg-list)
-     (:if (core:fixnump (mu:car arg-list))
-          (core:%prog2
-              (core:write (mu:car arg-list) () dest)
-              (mu:cdr arg-list))
-          (mu:raise-from (mu:car arg-list) 'core:%format :type))))
-
-(mu:intern core "%fmt-hex"
-  (:lambda (dest arg-list)
-     ((:lambda (fx)
-       (:if (core:fixnump fx)
-            (:if (mu:eq 0 fx)
-                 (core:write "00" () dest)
-                 ((:lambda (str-stream)
-                     (mu:fix
-                      (:lambda (n)
-                         (:if (core:%or (core:null n) (mu:eq 0 n))
-                              ()
-                              (core:%prog2
-                                  (mu:write (mu:svref "0123456789abcdef" (mu:logand n #xf)) () str-stream)
-                                  (mu:div n 16))))
-                      (:if (mu:less-than fx 0) (mu:mul -1 fx) fx))
-                     (:if (mu:less-than fx 0)
-                          (mu:write #\- () str-stream)
-                          ())
-                     ((:lambda (hexstr)
-                         (mu:fix
-                          (:lambda (len)
-                             (:if (mu:eq 0 len)
-                                  0
-                                  (core:%prog2
-                                     (mu:write (mu:svref hexstr (mu:sub len 1)) () dest)
-                                     (mu:sub len 1))))
-                          (mu:vector-length hexstr)))
-                      (mu:get-string str-stream)))
-                  (mu:open :string :output "" :t)))
-            (mu:raise-from fx 'core:%format :type)))
-      (mu:car arg-list))))
-
-(mu:intern core "%fmt-aesthetic"
-  (:lambda (dest arg-list)
-    (core:write (mu:car arg-list) () dest)
-    (mu:cdr arg-list)))
-
-(mu:intern core "%fmt-standard"
-  (:lambda (dest arg-list)
-    (core:write (mu:car arg-list) :t dest)
-    (mu:cdr arg-list)))
-
-;;;
-;;; controls
-;;;
 (mu:intern core "%fmt-op"
   (:lambda (dir dest arg-list)
     ((:lambda (fn)
        (:if fn
-            (core:apply (mu:symbol-value fn) (core:%list2 dest arg-list))
+            (core:apply fn (core:%list2 dest arg-list))
             (mu:raise-from dir 'core:%format :range)))
-     (mu:cdr
-      (core:assq
-       dir
-       '((#\A . core:%fmt-aesthetic)
-         (#\S . core:%fmt-standard)
-         (#\X . core:%fmt-hex)
-         (#\D . core:%fmt-decimal)
-         (#\T . core:%fmt-tab)
-         (#\~ . core:%fmt-tilde)
-         (#\% . core:%fmt-percent)
-         (#\! . core:%fmt-bang)))))))
+     (mu:cdr (core:assq dir core:%fmt-controls)))))
 
 (mu:intern core "%fmt-loop"
   (:lambda (stream dest fmt arg-list)
@@ -195,7 +168,7 @@
                (:if (mu:eq :symbol (mu:type-of form))
                     (:if (core:null escape)
                          ((:lambda (ns name)
-                            (:if (mu:eq core:reader/ ns)
+                            (:if (mu:eq core:%reader/ ns)
                                  (mu:write name () stream)
                                  (mu:write form () stream)))
                             (mu:symbol-namespace form)

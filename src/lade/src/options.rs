@@ -119,7 +119,7 @@ impl Options {
 
         for mode in &mode_args {
             if !modes.iter().any(|el| el == mode) {
-                eprintln!("manifest: unknown mode {mode:?}");
+                eprintln!("lade: unknown mode {mode:?}");
                 return None;
             }
         }
@@ -164,7 +164,7 @@ impl Options {
             };
 
             if !opt_list.iter().any(|el| el == &base) {
-                eprintln!("manifest: unknown option {opt:?}");
+                eprintln!("lade: unknown option {opt:?}");
                 return None;
             }
         }
@@ -189,7 +189,7 @@ impl Options {
                 })
                 .collect::<Vec<Opt>>(),
             Err(error) => {
-                eprintln!("manifest options: {error:?}");
+                eprintln!("lade options: {error:?}");
                 std::process::exit(-1);
             }
         };

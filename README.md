@@ -59,7 +59,7 @@ Most of our core computational frameworks are built on static systems and are fr
 - *mu*, a small, configurable runtime library and language
 - *mu-sys*, minimal POSIX runtime suitable for containers
 - *codegen*, a native code compiler
-- *manifest* , a cargo-like development and packaging tool
+- *lade* , a cargo-like development and packaging tool
 - small and simple installation
 - add interactivity and extensibility to application implementations
 - Rust FFI system
@@ -192,15 +192,15 @@ Having built the distribution, install it in `/opt/mu`.
 % sudo make install
 ```
 
-Having built and installed `mu`,  establish the current directory as a `manifest`  workspace.
+Having built and installed `mu`,  establish the current directory as a `lade`  workspace.
 
 ```
-% manifest init
+% lade init
 ```
 
-Subsequent builds and packaging of the system are facilitated with *manifest*. See the *Tools* section below for usage instructions.
+Subsequent builds and packaging of the system are facilitated with *lade*. See the *Tools* section below for usage instructions.
 
-Note: the *manifest* and *makefile* installation mechanisms do not remove the installation directory before writing it and changes to directory structure and files will accumulate.
+Note: the *lade* and *makefile* installation mechanisms do not remove the installation directory before writing it and changes to directory structure and files will accumulate.
 
 
 
@@ -233,10 +233,10 @@ The *sysinfo* feature is disabled on *macOS* builds.
 
 The *mu* distribution includes tools for configuring and development of the system. 
 
-The  *manifest* binary is part of a release, found at `/opt/mu/bin/manifest`.
+The  *lade* binary is part of a release, found at `/opt/mu/bin/lade`.
 
 ```
-Usage: manifest 0.0.16 command [option...]
+Usage: lade 0.0.16 command [option...]
   command:
     help                               ; this message
     version                            ; mux version
@@ -262,12 +262,12 @@ Usage: manifest 0.0.16 command [option...]
     --verbose                          ; verbose operation
 ```
 
-`manifest` is styled after `cargo` and fulfills many of the same needs. While the help message should be relatively explanatory, the general development workflow is something like this. Note that in this version **=** are mandatory for options with arguments.
+`lade` is styled after `cargo` and fulfills many of the same needs. While the help message should be relatively explanatory, the general development workflow is something like this. Note that in this version **=** are mandatory for options with arguments.
 
 Before making any changes, you will want to establish a performance baseline.
 
 ```
- manifest bench base --ntests=1
+ lade bench base --ntests=1
 ```
 
 As you make changes, you can verify correctness and note any performance regressions.
@@ -275,9 +275,9 @@ As you make changes, you can verify correctness and note any performance regress
 Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
 
 ```
- manifest build release				# build the release version 
- manifest test						# run the regression tests
- manifest bench current --ntests=1	# benchmark current build and print results
+ lade build release				# build the release version 
+ lade test						# run the regression tests
+ lade bench current --ntests=1	# benchmark current build and print results
 ```
 
 The `symbols` command prints a list of the symbols in various namespaces and their types.
@@ -344,7 +344,7 @@ regression test makefile -----------------
 Metrics include the average amount of time (in microsconds) taken for an individual test and the number of objects allocated by that test. Differences between runs in the same installation can be in the 10% range. Any changes in storage consumption or a large (10% or greater) increase in test timing warrant examination. Note: As of 0.2.0, the performance runs can take up to half an hour. It would be best to limit performance testing to `NTESTS=1` or 
 
 ```
-manifest bench current --ntests=1
+lade bench current --ntests=1
 ```
 
  The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
@@ -395,7 +395,7 @@ The  `performance`  makefile offers some development options.
 The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory contains the binaries for running the system.
 
 ```
-manifest	development system tool
+lade	development system tool
 mu-sys		runtime binary
 mu-listener	runtime binary, stdio listener
 mu-ld		image loader

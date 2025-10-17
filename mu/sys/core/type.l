@@ -20,9 +20,9 @@
      (:if (core:listp properties)
           ((:lambda (symbol)
              (:if (core:null symbol)
-                  (mu:intern core:types/ name (mu:make-struct :<core> (core:%list2 name properties)))
+                  (mu:intern core:%types/ name (mu:make-struct :<core> (core:%list2 name properties)))
                   (mu:raise-from symbol 'core:%deftype :unbound)))
-           (mu:find core:types/ name))
+           (mu:find core:%types/ name))
           (mu:raise-from properties 'core:%deftype :type))))
 
 (mu:intern core "%type-predicate"
@@ -64,7 +64,7 @@
                         ()))
              (mu:svref (mu:struct-vec (mu:symbol-value type-symbol)) 1)))
           property-values))
-       (mu:find core:types/ name))
+       (mu:find core:%types/ name))
      (mu:make-struct :<core> (core:%list2 name property-values))))
 
 (mu:intern core "%type-prop"

@@ -19,19 +19,19 @@
                      (mu:eq #\# (mu:svref ns-designator 0)))
                     ()        
                     (mu:find-namespace ns-designator)))
-             (core:%substr name 0 (mu:sub colon-pos 1)))))
-     (core:%string-position #\: name))))
+             (core:%vector-substr name 0 (mu:sub colon-pos 1)))))
+     (core:%vector-position #\: name))))
 
 (mu:intern core "%read-symbol-name"
    (:lambda (name)
      ((:lambda (colon)
         (:if (core:null colon)
              name
-             (core:%substr
+             (core:%vector-substr
               name
               (mu:add 1 colon)
               (mu:add colon (mu:sub (mu:vector-length name) (mu:add 1 colon))))))
-      (core:%string-position #\: name))))
+      (core:%vector-position #\: name))))
 
 (mu:intern core "%read-symbol"
    (:lambda (symbol)
@@ -45,7 +45,7 @@
                           (:if (core:null lexical)
                                (core:%mktemp symbol)
                                lexical))
-                        (mu:find (core:get-current-ns) name))
+                        (mu:find core:%reader/ name))
                        ((:lambda (symbol)
                           (:if (core:null symbol)
                                (mu:intern ns name ())

@@ -13,10 +13,10 @@ help:
 	@echo "    report - produce annotated report"
 
 report:
-	@manifest build --profile
-	@manifest symbols --namespace core --output core.reference
-	@manifest profile --config '("core-perf.l", "core-perf")' --output core.profile
-	@manifest annotate --prof core.profile --ref core.reference --output core.report
+	@lade build --profile
+	@lade symbols --namespace core --output core.reference
+	@lade profile --config '("core-perf.l", "core-perf")' --output core.profile
+	@lade annotate --prof core.profile --ref core.reference --output core.report
 	@cat core.report
 
 clean:

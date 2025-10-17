@@ -1,12 +1,7 @@
-;;;  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 ;;;  SPDX-License-Identifier: MIT
 
-;;;
-;;; let compiler
-;;;
-;;;
-;;; compile closure
-;;;
+#|
 (mu:intern core "%compile-let"
    (:lambda (lambda body env)
      (:if (core:find-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
@@ -41,7 +36,6 @@
             0
             lambda))))))
 
-#|
 (core:compile
  '(%defmacro let (binds &rest body)
    `((%lambda ,(core:mapcar mu:car binds) ,@body)

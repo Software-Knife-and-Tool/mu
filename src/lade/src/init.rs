@@ -3,30 +3,28 @@
 use {
     crate::options::{Opt, Options},
     std::{
+        env,
         io::{self, Write},
         process::Command,
     },
 };
 
-pub struct Install {}
+pub struct Init {}
 
-impl Install {
-    pub fn install(argv: &Vec<String>, home: &str) {
+impl Init {
+    pub fn init(argv: &Vec<String>) {
         match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("manifest install {home}: --verbose"),
+                    Some(_) => {
+                        println!("lade init {:?}: --verbose", env::current_dir().unwrap())
+                    }
                     None => (),
                 };
 
-                let dist = &format!("{home}/dist");
-
-                let output = Command::new("make")
-                    .args(["-C", dist])
-                    .args(["-f", "install.mk"])
-                    .arg("install")
-                    .arg("--no-print-directory")
+                let output = Command::new("touch")
+                    .arg(".lade")
                     .output()
                     .expect("command failed to execute");
 
