@@ -3,28 +3,28 @@
 use {
     crate::options::{Opt, Options},
     std::{
-        env,
         io::{self, Write},
         process::Command,
     },
 };
 
-pub struct Init {}
+pub struct Test {}
 
-impl Init {
-    pub fn init(argv: &Vec<String>) {
+impl Test {
+    pub fn test(argv: &Vec<String>, home: &str) {
         match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => {
-                        println!("manifest init {:?}: --verbose", env::current_dir().unwrap())
-                    }
+                    Some(_) => println!("lade test: --verbose"),
                     None => (),
                 };
 
-                let output = Command::new("touch")
-                    .arg(".manifest")
+                let output = Command::new("make")
+                    .current_dir(home)
+                    .args(["-C", "tests/regression"])
+                    .arg("summary")
+                    .arg("--no-print-directory")
                     .output()
                     .expect("command failed to execute");
 

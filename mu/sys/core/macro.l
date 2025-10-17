@@ -8,7 +8,7 @@
    (:lambda (symbol macro-function)
      ((:lambda (symbol-ns symbol-name)
         (:if (mu:eq :unqual symbol-ns)
-             (mu:intern core:macros/ symbol-name macro-function)
+             (mu:intern core:%macros/ symbol-name macro-function)
              (mu:raise-from symbol-ns 'core:%defmacro :range))
         symbol)
       (mu:symbol-namespace symbol)
@@ -91,5 +91,5 @@
              (:if macro
                   (mu:symbol-value macro)
                   ()))
-           (mu:find core:macros/ (mu:symbol-name symbol)))
+           (mu:find core:%macros/ (mu:symbol-name symbol)))
           (mu:raise-from symbol 'core:macro-function :type))))

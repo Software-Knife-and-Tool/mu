@@ -11,7 +11,8 @@
    (:load    . (
                 "core.l"
                 "type.l"
-                "generic.l"
+                "environment.l"
+                "generic.l"     
                 "compile.l"
                 "list.l"
                 "stream.l"

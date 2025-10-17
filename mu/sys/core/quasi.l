@@ -14,7 +14,6 @@
    (:lambda (key map)
      (mu:cdr (core:assq key map))))
 
-;;; fix this for comments
 (mu:intern core "%quasi-kill-ws"
    (:lambda (stream)
      (mu:fix
@@ -28,10 +27,39 @@
                           (core:null loop)
                           (mu:unread-char ch stream))))
                  (mu:read-char stream () ()))))
+     ())))
+
+#|
+(mu:intern core "%quasi-kill-ws"
+   (:lambda (stream)
+     (mu:fix
+      (:lambda (loop)
+        (:if (core:%or (core:streamp loop) (core:charp loop))
+             loop
+             ((:lambda (ch)
+                (:if (core:null ch)
+                     stream
+                     (:if (mu:eq :wspace (core:%read-char-syntax ch))
+                          (core:null loop)
+                          (:if (mu:eq ch #\#)
+                               ((:lambda (ch)
+                                  (:if (mu:eq ch #\|)
+                                       (core:%prog2
+                                          (core:%read-sharp-comment ch stream)
+                                          (core:null loop))
+                                       ch))
+                                (core:%peek-char stream () ()))
+                               (:if (mu:eq ch #\;)
+                                    (core:%prog2
+                                       (core:%read-line-comment ch stream)
+                                       (core:null loop))
+                                    (mu:unread-char ch stream))))))
+              (mu:read-char stream () ()))))
       ())))
+|#
 
 (mu:intern core "%quasi-read-syntax"
-   (:lambda (stream)
+   (:lambda (stream)          
      (core:%quasi-kill-ws stream)
      ((:lambda (ch syntax-map)
         (:if (core:null ch)

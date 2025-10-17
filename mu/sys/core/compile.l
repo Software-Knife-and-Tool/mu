@@ -74,7 +74,7 @@
      ((:lambda (name)
         ((:lambda (frames)
            (mu:%frame-ref frames offset))
-         (mu:symbol-value (mu:intern core:closures/ name ()))))
+         (mu:symbol-value (mu:intern core:%closures/ name ()))))
         (mu:symbol-name (core:%env-prop :name binding)))))
 
 (mu:intern core "%resolve-symbol"
@@ -87,7 +87,7 @@
                  (:if (mu:eq :unqual ns)  ;;; frame ref
                       ((:lambda (binding)
                          (:if (core:null binding)  ;;; not lexically bound
-                              (mu:intern (core:get-current-ns) name ()) ;;; symbol
+                              (mu:intern core:%reader/ name ()) ;;; symbol
                               ((:lambda (tag index)
                                  `(core:%frame-ref ,binding ,tag ,index))
                                (core:%env-prop :frame binding)
@@ -266,7 +266,7 @@
             (core:mapc
              (:lambda (frame-ref)
                (mu:intern
-                core:closures/
+                core:%closures/
                 (mu:symbol-name (mu:car frame-ref))
                 (mu:unrepr (mu:cdr frame-ref))))
              frame-map)

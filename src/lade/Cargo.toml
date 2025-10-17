@@ -1,5 +1,5 @@
 [package]
-name = "manifest"
+name = "lade"
 version = "0.0.16"
 edition = "2021"
 
