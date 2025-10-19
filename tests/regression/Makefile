@@ -13,7 +13,7 @@ TMPF:=$(shell mktemp)
 #	prelude		\
 #	prelude/repl
 
-MODULES = core module
+MODULES = core module deftype
 
 help: deltemp
 	@echo "regression test makefile -----------------"

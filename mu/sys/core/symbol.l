@@ -2,7 +2,13 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; symbol readers
+;;; symbols
+;;;
+(mu:intern core "%temp%" (mu:open :string :bidir "" :t))
+(mu:intern core "%gensym-counter%" (mu:open :string :bidir "0" :t))
+
+;;;
+;;; readers
 ;;;
 (mu:intern core "%read-keywordp"
   (:lambda (name)
@@ -55,7 +61,7 @@
              (core:%read-symbol-name symbol)))))
 
 ;;;
-;;;  symbol predicates
+;;; predicates
 ;;;
 (mu:intern core "%uninternedp"
    (:lambda (sym)
@@ -76,11 +82,8 @@
 
 (mu:intern core "%mktemp"
    (:lambda (symbol)
-     (mu:write symbol () core:%quote%)
-     (mu:read core:%quote% () ())))
-
-(mu:intern core "%gensym-counter%"
-   (mu:open :string :bidir "0" :t))
+     (mu:write symbol () core:%temp%)
+     (mu:read core:%temp% () ())))
 
 (mu:intern core "gensym"
    (:lambda ()

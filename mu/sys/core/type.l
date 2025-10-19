@@ -4,14 +4,16 @@
 ;;;
 ;;; core types
 ;;;
+(mu:intern core "%type%" (mu:open :string :bidir "" :t))
+
 (mu:intern core "%typep"
    (:lambda (value)
       (:if (core:structp value)
-           (mu:eq :<core> (mu:struct-type value))
+           (mu:eq :<type> (mu:struct-type value))
            ())))
 
 ;;;
-;;; type struct: #s(:<core> #(:t name property-alist))
+;;; type struct: #s(:<type> #(:t name property-alist))
 ;;;
 ;;; where the property-alist is ((:property . accessor) ...)
 ;;;
@@ -20,7 +22,7 @@
      (:if (core:listp properties)
           ((:lambda (symbol)
              (:if (core:null symbol)
-                  (mu:intern core:%types/ name (mu:make-struct :<core> (core:%list2 name properties)))
+                  (mu:intern core:%types/ name (mu:make-struct :<type> (core:%list2 name properties)))
                   (mu:raise-from symbol 'core:%deftype :unbound)))
            (mu:find core:%types/ name))
           (mu:raise-from properties 'core:%deftype :type))))
@@ -65,7 +67,7 @@
              (mu:svref (mu:struct-vec (mu:symbol-value type-symbol)) 1)))
           property-values))
        (mu:find core:%types/ name))
-     (mu:make-struct :<core> (core:%list2 name property-values))))
+     (mu:make-struct :<type> (core:%list2 name property-values))))
 
 (mu:intern core "%type-prop"
    (:lambda (prop-name struct)
@@ -103,114 +105,14 @@
           (mu:eq '%deftype (core:type-of type))
           ())))
 
-;;;
-;;; typep
-;;;
-(mu:intern core "%typespec-map%"
-   `((bit-vector (satisfies core:bit-vector-p))
-     (char (satisfies core:charp))
-     (function (satisfies core:functionp))
-     (map :map)
-     (number (or (satisfies core:floatp) integer))
-     (integer (satisfies core:fixnump))
-     (sequence (or (satisfies core:vectorp) (satisfies core:stringp) (satisfies core:listp)))
-     (stream (satisfies core:streamp))
-     (string (satisfies core:stringp))
-     (struct (satisifes core:structp))
-     (symbol (or (satisfies core:symbolp) (satisfies core:keywordp)))))
-
-(mu:intern core "%compound-typespec-map%"
-   `(,(mu:cons 'satisfies
-         (:lambda (value spec-list)
-            (:if (mu:eq 1 (mu:length spec-list))
-                 ((:lambda (predicate-symbol)
-                    (:if (core:symbolp predicate-symbol)
-                         (:if (mu:boundp predicate-symbol)
-                              (core:apply (mu:symbol-value predicate-symbol) (mu:cons value ()))
-                              (mu:raise-from predicate-symbol 'core:typep :range))
-                         (mu:raise-from predicate-symbol 'core:typep :range)))
-                  (mu:car spec-list))
-                 (mu:raise-from spec-list 'core:typep :syntax))))
-     ,(mu:cons 'not (:lambda (value spec-list)
-                       (:if (mu:eq 1 (mu:length spec-list))
-                            (core:null (core:typep value (mu:car spec-list)))
-                            (mu:raise-from spec-list 'core:typep :syntax))))
-     ,(mu:cons 'and (:lambda (value spec-list)
-                       (:if (core:null spec-list)
-                            :t
-                            (core:foldl
-                             (:lambda (elt acc)
-                                (core:%and acc (core:typep value elt)))
-                             :t
-                             spec-list))))
-     ,(mu:cons 'or (:lambda (value spec-list)
-                     (:if (core:null spec-list)
-                          ()
-                          (core:foldl
-                           (:lambda (elt acc)
-                             (core:%or acc (core:typep value elt)))
-                           :t
-                           spec-list))))))
-
-(mu:intern core "%typep"
-   (:lambda (value typespec)
-     (:if (core:keywordp typespec)
-          (mu:eq typespec (mu:type-of value))
-          (:if (core:%deftypep typespec)
-               (core:typep value (core:%deftype-prop :spec typespec))
-               (:if (core:symbolp typespec)
-                    ((:lambda (spec-phrase)
-                       (:if (core:null spec-phrase)
-                            (mu:raise-from typespec 'core:typep :syntax)
-                            (core:typep value (mu:car (mu:cdr spec-phrase)))))
-                     (core:assq typespec core:%typespec-map%))
-                    (:if (core:consp typespec)
-                         ((:lambda (spec spec-list)
-                            ((:lambda (spec-phrase)
-                               (:if (core:null spec-phrase)
-                                    (mu:raise-from typespec 'core:typep :syntax)
-                                    (mu:apply (mu:cdr spec-phrase) (core:%list2 value spec-list))))
-                             (core:assq spec core:%compound-typespec-map%)))
-                          (mu:car typespec)
-                          (mu:cdr typespec))
-                         (mu:raise-from typespec 'core:typep :synatx)))))))   
-
-;;;
-;;; types
-;;;
-(mu:intern core "%quote%" (mu:open :string :bidir "" :t))
-
-(mu:intern core "typep"
-   (:lambda (value typespec)
-     (:if (core:keywordp typespec)
-          (mu:eq typespec (mu:type-of value))
-          (:if (core:%deftypep typespec)
-               (core:typep value (core:%deftype-prop :spec typespec))
-               (:if (core:symbolp typespec)
-                    ((:lambda (spec-phrase)
-                       (:if (core:null spec-phrase)
-                            (mu:raise-from typespec 'core:typep :syntax)
-                            (core:typep value (mu:car (mu:cdr spec-phrase)))))
-                     (core:assq typespec core:%typespec-map%))
-                    (:if (core:consp typespec)
-                         ((:lambda (spec spec-list)
-                            ((:lambda (spec-phrase)
-                               (:if (core:null spec-phrase)
-                                    (mu:raise-from typespec 'core:typep :range)
-                                    (mu:apply (mu:cdr spec-phrase) (core:%list2 value spec-list))))
-                             (core:assq spec core:%compound-typespec-map%)))
-                          (mu:car typespec)
-                          (mu:cdr typespec))
-                         (mu:raise-from typespec 'core:typep :syntax)))))))   
-
 (mu:intern core "type-of"
    (:lambda (form)
      ((:lambda (type)
         (:if (mu:eq type :struct)
-             (:if (mu:eq :<core> (mu:struct-type form))
+             (:if (mu:eq :<type> (mu:struct-type form))
                   (core:%prog2
-                     (mu:write (mu:svref (mu:struct-vec form) 0) () core:%quote%)
-                     (mu:read core:%quote% :t ()))
+                     (mu:write (mu:svref (mu:struct-vec form) 0) () core:%type%)
+                     (mu:read core:%type% :t ()))
                   (mu:struct-type form))
              (:if (core:stringp form)
                   'string

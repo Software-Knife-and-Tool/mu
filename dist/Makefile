@@ -13,7 +13,7 @@ SRC = ../src
 TOOLS = ../tools
 
 BIN = listener lade mu-exec mu-server
-SYS = core.sys fasl.sys image.sys module.sys
+SYS = core.sys fasl.sys image.sys module.sys deftype.sys
 
 MODULES = 		\
 	common		\
@@ -62,6 +62,9 @@ dist:
 
 	@./mu-sys -l $(MU)/dist/system.l -l ./core.sys -q '(system:require "../mu/sys/" "module")'
 	@install -m 644 ./module.sys $(BASE)/lib
+
+	@./mu-sys -l $(MU)/dist/system.l -l ./core.sys -q '(system:require "../mu/sys/" "deftype")'
+	@install -m 644 ./deftype.sys $(BASE)/lib
 
 	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
 	@rm -rf $(BASE) $(BIN)
