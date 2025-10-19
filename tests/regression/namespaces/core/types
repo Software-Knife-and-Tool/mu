@@ -10,39 +10,3 @@
 (core:type-of #(:t 1 2))	vector
 (core:type-of mu:add)	function
 (core:type-of (mu:make-struct :foo '()))	:foo
-(core:typep '(1 2) :cons)	:t
-(core:typep 1 :fixnum)	:t
-(core:typep (mu:make-struct :struct ()) :struct)	:t
-(core:typep "abc" :vector)	:t
-(core:typep #(:t 1 2 3) :vector)	:t
-(core:typep mu:*standard-input* :stream)	:t
-(core:typep #\a :char)	:t
-(core:typep 1.024e23 :float)	:t
-(core:typep :foo :keyword)	:t
-(core:typep 'foo :symbol)	:t
-(core:typep () :null)	:t
-(core:typep () 'symbol)	:t
-(core:typep () '(satisfies core:null))	:t
-(core:typep 1 '(satisfies core:fixnump))	:t
-(core:typep 1024e23 '(satisfies core:floatp))	:t
-(core:typep '(1 2 3) '(satisfies core:consp))	:t
-(core:typep #(:t 1 2 3) '(satisfies core:vectorp))	:t
-(core:typep #\a '(satisfies core:charp))	:t
-(core:typep () '(not symbol))	:nil
-(core:typep () '(and))	:t
-(core:typep () '(and (satisfies core:null)))	:t
-(core:typep () '(and :null (satisfies core:null)))	:t
-(core:typep () '(or))	:nil
-(core:typep () '(or (satisfies core:null)))	:t
-(core:typep () '(or :null (satisfies core:null)))	:t
-(core:typep 1234 'number)	:t
-(core:typep 1.024 'number)	:t
-(core:typep 1234 'integer)	:t
-(core:typep #(:t 1 2 3) 'sequence)	:t
-(core:typep "123" 'sequence)	:t
-(core:typep '(1 2 3) 'sequence)	:t
-(core:typep "abc" 'string)	:t
-(core:typep mu:*standard-input* 'stream)	:t
-(core:typep :sym 'symbol)	:t
-(core:typep 'sym 'symbol)	:t
-(core:typep (core:read (mu:open :string :input "#*1111" :t) () ()) 'bit-vector)	:t

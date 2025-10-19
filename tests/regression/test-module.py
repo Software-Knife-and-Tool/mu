@@ -33,6 +33,15 @@ def runtest(line, group, test, expected):
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
 
+    if module == 'deftype':
+        proc = subprocess.Popen(['../../dist/mu-sys',
+                                 '-l../../dist/core.sys',
+                                 '-l../../dist/deftype.sys',
+                                 '-e (core:eval \'{})'.format(test),    \
+                                 ],                                     \
+                                stdout=subprocess.PIPE,                 \
+                                stderr=subprocess.PIPE)
+
     obtained = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf-8')
 

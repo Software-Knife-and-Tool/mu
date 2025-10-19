@@ -1,0 +1,44 @@
+(mu:type-of deftype:%compound-typespec-map%)	:cons
+(mu:type-of deftype:%deftype)	:func
+(mu:type-of deftype:%deftype-prop)	:func
+(mu:type-of deftype:%deftypep)	:func
+(mu:type-of deftype:%make-deftype)	:func
+(mu:type-of deftype:%typep)	:func
+(mu:type-of deftype:%typespec-map%)	:cons
+(mu:type-of deftype:typep)	:func
+(deftype:typep '(1 2) :cons)	:t
+(deftype:typep 1 :fixnum)	:t
+(deftype:typep (mu:make-struct :struct ()) :struct)	:t
+(deftype:typep "abc" :vector)	:t
+(deftype:typep #(:t 1 2 3) :vector)	:t
+(deftype:typep mu:*standard-input* :stream)	:t
+(deftype:typep #\a :char)	:t
+(deftype:typep 1.024e23 :float)	:t
+(deftype:typep :foo :keyword)	:t
+(deftype:typep 'foo :symbol)	:t
+(deftype:typep () :null)	:t
+(deftype:typep () 'symbol)	:t
+(deftype:typep () '(satisfies core:null))	:t
+(deftype:typep 1 '(satisfies core:fixnump))	:t
+(deftype:typep 1024e23 '(satisfies core:floatp))	:t
+(deftype:typep '(1 2 3) '(satisfies core:consp))	:t
+(deftype:typep #(:t 1 2 3) '(satisfies core:vectorp))	:t
+(deftype:typep #\a '(satisfies core:charp))	:t
+(deftype:typep () '(not symbol))	:nil
+(deftype:typep () '(and))	:t
+(deftype:typep () '(and (satisfies core:null)))	:t
+(deftype:typep () '(and :null (satisfies core:null)))	:t
+(deftype:typep () '(or))	:nil
+(deftype:typep () '(or (satisfies core:null)))	:t
+(deftype:typep () '(or :null (satisfies core:null)))	:t
+(deftype:typep 1234 'number)	:t
+(deftype:typep 1.024 'number)	:t
+(deftype:typep 1234 'integer)	:t
+(deftype:typep #(:t 1 2 3) 'sequence)	:t
+(deftype:typep "123" 'sequence)	:t
+(deftype:typep '(1 2 3) 'sequence)	:t
+(deftype:typep "abc" 'string)	:t
+(deftype:typep mu:*standard-input* 'stream)	:t
+(deftype:typep :sym 'symbol)	:t
+(deftype:typep 'sym 'symbol)	:t
+(deftype:typep (core:read (mu:open :string :input "#*1111" :t) () ()) 'bit-vector)	:t
