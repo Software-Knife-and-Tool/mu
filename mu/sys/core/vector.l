@@ -17,12 +17,6 @@
    (:lambda (prop vector)
      (mu:cdr (core:%type-prop prop vector))))
 
-(mu:intern core "vector-prop"
-   (:lambda (prop vector)
-      (:if (core:find-if (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :disp :bitvec))
-           (core:%vector-prop prop vector)
-           (mu:raise-from prop 'core:vector-prop :range))))
-
 (mu:intern core "%make-vector"
    (:lambda (vector displace bitvec)
      (core:%make-type "%vector"
