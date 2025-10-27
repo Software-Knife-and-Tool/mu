@@ -1,13 +1,13 @@
 *.out
 *.sys
 *.fasl
-.lade
+.forge
 .dir-locals.el
 TAGS
 Cargo.lock
 dist/mu*.tgz
 dist/mu-*
-dist/lade
+dist/forge
 dist/*.l
 dist/VERSION
 doc/rustdoc
@@ -15,6 +15,6 @@ tools/valgrind/*.report
 tools/profiling/core/*.report
 tools/profiling/core/prof.data*
 tests/*/*.report
-tests/*/json
+tests/*/json/
 tests/performance/*.summary
-target
+target/

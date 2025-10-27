@@ -16,7 +16,7 @@ impl Commit {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("lade commit: --verbose"),
+                    Some(_) => println!("forge commit: --verbose"),
                     None => (),
                 };
 
