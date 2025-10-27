@@ -8,24 +8,22 @@ use {
     },
 };
 
-pub struct Install {}
+pub struct Test {}
 
-impl Install {
-    pub fn install(argv: &Vec<String>, home: &str) {
+impl Test {
+    pub fn test(argv: &Vec<String>, home: &str) {
         match Options::parse_options(argv, &[], &["verbose"]) {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("lade install {home}: --verbose"),
+                    Some(_) => println!("forge test: --verbose"),
                     None => (),
                 };
 
-                let dist = &format!("{home}/dist");
-
                 let output = Command::new("make")
-                    .args(["-C", dist])
-                    .args(["-f", "install.mk"])
-                    .arg("install")
+                    .current_dir(home)
+                    .args(["-C", "tests/regression"])
+                    .arg("summary")
                     .arg("--no-print-directory")
                     .output()
                     .expect("command failed to execute");

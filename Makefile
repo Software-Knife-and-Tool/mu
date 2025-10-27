@@ -19,7 +19,7 @@ dist:
 
 release:
 	@cargo build --release --workspace
-	@cp target/release/lade dist
+	@cp target/release/forge dist
 	@cp target/release/listener dist
 	@cp target/release/mu-exec dist
 	@cp target/release/mu-server dist
@@ -27,7 +27,7 @@ release:
 
 debug:
 	@cargo build --workspace
-	@cp target/debug/lade dist
+	@cp target/debug/forge dist
 	@cp target/debug/listener dist
 	@cp target/debug/mu-exec dist
 	@cp target/debug/mu-server dist

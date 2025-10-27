@@ -23,7 +23,7 @@ impl Build {
                 let mode = &options.modes[0];
 
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("lade build: {:?} --verbose", mode),
+                    Some(_) => println!("forge build: {:?} --verbose", mode),
                     None => (),
                 };
 

@@ -2,8 +2,8 @@
 //  SPDX-License-Identifier: MIT
 use {
     crate::{
-        env::Env,
         options::{Opt, Options},
+        workspace::Workspace,
     },
     std::process::Command,
 };
@@ -16,7 +16,7 @@ impl Clean {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("lade clean: --verbose"),
+                    Some(_) => println!("forge clean: --verbose"),
                     None => (),
                 };
 
@@ -24,7 +24,7 @@ impl Clean {
 
                 let dirs = ["dist", "tests/regression", "tests/footprint"];
 
-                let mu = match Env::mu_home() {
+                let mu = match Workspace::env() {
                     Some(path) => path,
                     None => {
                         let cwd = std::env::current_dir().unwrap();

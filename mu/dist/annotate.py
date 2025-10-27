@@ -11,7 +11,7 @@ with open(sys.argv[2]) as f: reference_map = f.readlines()
 
 def build_reference():
     proc = subprocess.Popen([
-        lade_cmd,
+        forge_cmd,
         'symbols',
         '--reference',
         '--namespace',

@@ -11,17 +11,13 @@ pub struct Options {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Opt {
-    Config(String),
-    Eval(String),
-    Image(String),
-    Load(String),
     Module(String),
     Namespace(String),
     Ntests(String),
-    Out(String),
     Prof(String),
     Ref(String),
     Verbose,
+    Recipe,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -33,14 +29,44 @@ pub enum Mode {
     Crossref,
     Current,
     Debug,
+    Env,
     Footprint,
+    Init,
     Metrics,
     Mu,
     Prelude,
     Profile,
+    Show,
     Reference,
     Release,
+    Report,
     View,
+}
+
+impl Mode {
+    pub fn name(&self) -> &str {
+        match self {
+            Mode::Base => "base",
+            Mode::Build => "build",
+            Mode::Core => "core",
+            Mode::Common => "common",
+            Mode::Crossref => "crossref",
+            Mode::Current => "current",
+            Mode::Debug => "debug",
+            Mode::Env => "env",
+            Mode::Footprint => "footprint",
+            Mode::Init => "init",
+            Mode::Metrics => "metrics",
+            Mode::Mu => "mu",
+            Mode::Prelude => "prelude",
+            Mode::Profile => "profile",
+            Mode::Reference => "reference",
+            Mode::Release => "release",
+            Mode::Report => "report",
+            Mode::View => "view",
+            _ => panic!(),
+        }
+    }
 }
 
 impl Options {
@@ -63,16 +89,9 @@ impl Options {
     pub fn opt_value(options: &Options, opt: &Opt) -> Option<String> {
         match Self::find_opt(&options, opt) {
             Some(opt) => match opt {
-                Opt::Config(str)
-                | Opt::Module(str)
-                | Opt::Image(str)
-                | Opt::Load(str)
-                | Opt::Out(str)
-                | Opt::Eval(str)
-                | Opt::Namespace(str)
-                | Opt::Prof(str)
-                | Opt::Ref(str)
-                | Opt::Ntests(str) => Some(str.to_string()),
+                Opt::Namespace(str) | Opt::Prof(str) | Opt::Ref(str) | Opt::Ntests(str) => {
+                    Some(str.to_string())
+                }
                 _ => panic!(),
             },
             None => None,
@@ -81,17 +100,13 @@ impl Options {
 
     pub fn opt_name(opt: Opt) -> String {
         match opt {
-            Opt::Config(_) => "config",
-            Opt::Eval(_) => "exec",
-            Opt::Image(_) => "image",
-            Opt::Load(_) => "load",
             Opt::Module(_) => "module",
             Opt::Namespace(_) => "namespace",
             Opt::Ntests(_) => "ntests",
-            Opt::Out(_) => "out",
             Opt::Prof(_) => "prof",
             Opt::Ref(_) => "ref",
             Opt::Verbose => "verbose",
+            Opt::Recipe => "recipe",
         }
         .to_string()
     }
@@ -100,14 +115,10 @@ impl Options {
         let mut opts = getopts::Options::new();
 
         opts.optflag("", "verbose", "");
-        opts.optopt("", "config", "", "VALUE");
-        opts.optopt("", "eval", "", "VALUE");
-        opts.optopt("", "image", "", "VALUE");
-        opts.optopt("", "load", "", "VALUE");
-        opts.optopt("", "module", "", "VALUE");
-        opts.optopt("", "namespace", "", "VALUE");
-        opts.optopt("", "ntests", "", "VALUE");
-        opts.optopt("", "out", "", "VALUE");
+        opts.optflag("", "recipe", "");
+        opts.optopt("", "module", "", "NAME");
+        opts.optopt("", "namespace", "", "NAME");
+        opts.optopt("", "ntests", "", "NUMBER");
         opts.optopt("", "prof", "", "VALUE");
         opts.optopt("", "ref", "", "VALUE");
 
@@ -119,7 +130,7 @@ impl Options {
 
         for mode in &mode_args {
             if !modes.iter().any(|el| el == mode) {
-                eprintln!("lade: unknown mode {mode:?}");
+                eprintln!("unknown mode {mode:?}");
                 return None;
             }
         }
@@ -134,13 +145,16 @@ impl Options {
                 "crossref" => Mode::Crossref,
                 "current" => Mode::Current,
                 "debug" => Mode::Debug,
+                "env" => Mode::Env,
                 "footprint" => Mode::Footprint,
+                "init" => Mode::Init,
                 "metrics" => Mode::Metrics,
                 "mu" => Mode::Mu,
                 "prelude" => Mode::Prelude,
                 "profile" => Mode::Profile,
                 "reference" => Mode::Reference,
                 "release" => Mode::Release,
+                "report" => Mode::Report,
                 "view" => Mode::View,
                 _ => panic!(),
             })
@@ -164,7 +178,7 @@ impl Options {
             };
 
             if !opt_list.iter().any(|el| el == &base) {
-                eprintln!("lade: unknown option {opt:?}");
+                eprintln!("unknown option {opt:?}");
                 return None;
             }
         }
@@ -174,22 +188,17 @@ impl Options {
                 .iter()
                 .filter(|opt| opts.opt_present(opt))
                 .map(|opt| match *opt {
-                    "config" => Opt::Config(opts.opt_str("config").unwrap()),
-                    "eval" => Opt::Eval(opts.opt_str("eval").unwrap()),
-                    "image" => Opt::Image(opts.opt_str("image").unwrap()),
-                    "load" => Opt::Load(opts.opt_str("load").unwrap()),
-                    "module" => Opt::Module(opts.opt_str("module").unwrap()),
                     "namespace" => Opt::Namespace(opts.opt_str("namespace").unwrap()),
                     "ntests" => Opt::Ntests(opts.opt_str("ntests").unwrap()),
-                    "out" => Opt::Out(opts.opt_str("out").unwrap()),
                     "prof" => Opt::Prof(opts.opt_str("prof").unwrap()),
                     "ref" => Opt::Ref(opts.opt_str("ref").unwrap()),
                     "verbose" => Opt::Verbose,
+                    "recipe" => Opt::Recipe,
                     _ => panic!(),
                 })
                 .collect::<Vec<Opt>>(),
             Err(error) => {
-                eprintln!("lade options: {error:?}");
+                eprintln!("options: {error:?}");
                 std::process::exit(-1);
             }
         };
