@@ -10,21 +10,27 @@ use {
 
 #[derive(Debug)]
 pub struct Workspace {
-    pub workspace: PathBuf, // workspace directory
-    pub forge: PathBuf,     // workspace forge directory
-    pub module: PathBuf,    // module scripts directory
+    pub forge: PathBuf,   // forge module directory
+    pub bin: PathBuf,     // workspace bin
+    pub lib: PathBuf,     // workspace lib
+    pub tests: PathBuf,   // workspace tests
+    pub modules: PathBuf, // workspace modules
 }
 
 impl Workspace {
-    pub fn new(home: &str) -> Self {
-        let workspace: PathBuf = home.into();
-        let forge: PathBuf = [home, ".forge"].iter().collect();
-        let module: PathBuf = [home, "src", "forge", "modules"].iter().collect();
+    pub fn new(path: &str) -> Self {
+        let modules: PathBuf = [path, "src", "forge", "modules"].iter().collect();
+        let bin: PathBuf = [path, "dist"].iter().collect();
+        let lib: PathBuf = [path, "dist"].iter().collect();
+        let tests: PathBuf = [path, "tests"].iter().collect();
+        let forge: PathBuf = [path, ".forge"].iter().collect();
 
         Self {
-            workspace,
+            modules,
+            bin,
+            lib,
             forge,
-            module,
+            tests,
         }
     }
 
@@ -57,9 +63,9 @@ impl Workspace {
 
     fn make_forge_dirs(forge_home: &str) -> io::Result<()> {
         let forge_paths = [
-            [forge_home, ".forge", "tests", "performance"],
-            [forge_home, ".forge", "tests", "regression"],
-            [forge_home, ".forge", "tests", "footprint"],
+            [forge_home, ".forge", "bench", "performance"],
+            [forge_home, ".forge", "bench", "footprint"],
+            [forge_home, ".forge", "test", "regression"],
         ];
 
         for path in forge_paths {

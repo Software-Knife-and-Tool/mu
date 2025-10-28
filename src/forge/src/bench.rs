@@ -17,30 +17,28 @@ use {
 #[derive(Debug)]
 pub struct Bench {
     mu_sys: PathBuf,      // mu-sys path
-    core: PathBuf,        // core.sys path
-    performance: PathBuf, // bench
-    footprint: PathBuf,   // footprint
-    module: PathBuf,      // module scripts directory
+    core_sys: PathBuf,    // core.sys path
+    performance: PathBuf, // performance directory
+    footprint: PathBuf,   // footprint directory
+    bench: PathBuf,       // module scripts directory
     tests: PathBuf,       // tests directory
 }
 
 impl Bench {
     pub fn new(ws: &Workspace) -> Self {
-        let home = ws.workspace.as_path().to_str().unwrap();
-        let tests: PathBuf = [home, "tests", "performance"].iter().collect();
-        let dist_path: PathBuf = [home, "dist"].iter().collect::<PathBuf>();
-        let test_path: PathBuf = Self::push_path(&mut ws.forge.clone(), "tests");
+        let forge = Self::push_path(&mut ws.forge.clone(), "bench");
+        let tests = Self::push_path(&mut ws.tests.clone(), "performance");
+        let core_sys = Self::push_path(&mut ws.lib.clone(), "core.sys");
+        let mu_sys = Self::push_path(&mut ws.bin.clone(), "mu-sys");
+        let bench = Self::push_path(&mut ws.modules.clone(), "bench");
 
-        let core: PathBuf = Self::push_path(&mut dist_path.clone(), "core.sys");
-        let footprint: PathBuf = Self::push_path(&mut test_path.clone(), "footprint");
-        let module: PathBuf = Self::push_path(&mut ws.module.clone(), "bench");
-        let mu_sys: PathBuf = Self::push_path(&mut dist_path.clone(), "mu-sys");
-        let performance: PathBuf = Self::push_path(&mut test_path.clone(), "performance");
+        let footprint = Self::push_path(&mut forge.clone(), "footprint");
+        let performance = Self::push_path(&mut forge.clone(), "performance");
 
         Self {
-            core,
+            bench,
+            core_sys,
             footprint,
-            module,
             mu_sys,
             performance,
             tests,
@@ -54,15 +52,15 @@ impl Bench {
     }
 
     fn run_perf(&self, script: &str, ns: &str, to: &str, ntests: usize) {
-        let script_path = Self::push_path(&mut self.module.clone(), script);
+        let script_path = Self::push_path(&mut self.bench.clone(), script);
         let json_path = Self::push_path(&mut self.performance.clone(), to);
-        let mut json_file = File::create(&json_path).unwrap();
+        let mut json_file = File::create(&json_path).expect(&format!("{json_path:?}"));
 
         let output = Command::new("python3")
             .arg(&script_path)
             .arg(&self.mu_sys)
-            .arg(&self.core)
-            .arg(&self.module)
+            .arg(&self.core_sys)
+            .arg(&self.bench)
             .arg(ns)
             .arg(&self.tests)
             .arg(ntests.to_string())
@@ -124,8 +122,8 @@ impl Bench {
     }
 
     pub fn report(&self) {
-        let json_script_path = Self::push_path(&mut self.module.clone(), "report-ns.py");
-        let report_script_path = Self::push_path(&mut self.module.clone(), "report.py");
+        let json_script_path = Self::push_path(&mut self.bench.clone(), "report-ns.py");
+        let report_script_path = Self::push_path(&mut self.bench.clone(), "report.py");
         let base_report_path = Self::push_path(&mut self.performance.clone(), "base.report");
         let mut base_report_file = File::create(&base_report_path).unwrap();
         let current_report_path = Self::push_path(&mut self.performance.clone(), "current.report");
