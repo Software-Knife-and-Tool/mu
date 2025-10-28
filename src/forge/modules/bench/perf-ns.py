@@ -165,4 +165,4 @@ for group in perf_groups:
 
     ns_results.append({'group': group[:-1], 'results': results })
 
-print(json.dumps({ 'ns': sys.argv[1], 'results': ns_results }))
+print(json.dumps({ 'ns': ns, 'results': ns_results }))
