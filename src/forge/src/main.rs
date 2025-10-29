@@ -33,12 +33,11 @@ pub fn usage() {
     println!("    help                               ; this message");
     println!("    version                            ; forge version");
     println!();
+
     println!("    workspace init | env               ; manage workspace");
     println!("    build     release | profile | debug");
     println!("                                       ; build mu system, release default");
-    println!(
-        "    bench     base | current | footprint | report [--ntests=number] [--namespace=name]"
-    );
+    println!("    bench     base | current | report | clean [--ntests=number] [--all]");
     println!("                                       ; benchmark test suite");
     println!("    test                               ; regression test suite");
     println!("    symbols   reference | crossref | metrics [--module=name]");

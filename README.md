@@ -129,7 +129,7 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 
 
 
-#### Release
+#### About the Release
 
 ------
 
@@ -234,10 +234,10 @@ The *sysinfo* feature is disabled on *macOS* builds.
 
 The *mu* distribution includes tools for configuring and development of the system. 
 
-The  *forge* binary is part of a release, found at `/opt/mu/bin/forge`.
+The  *forge* command is part of a release, found at `/opt/mu/bin/forge`.
 
 ```
-Usage: forge 0.0.17 command [option...]
+Usage: forge 0.0.18 command [option...]
   command:
     help                               ; this message
     version                            ; forge version
@@ -245,7 +245,7 @@ Usage: forge 0.0.17 command [option...]
     workspace init | env               ; manage workspace
     build     release | profile | debug
                                        ; build mu system, release default
-    bench     base | current | footprint [--ntests=number] [--namespace=name]
+    bench     base | current | report | clean [--ntests=number] [--all]
                                        ; benchmark test suite
     test                               ; regression test suite
     symbols   reference | crossref | metrics [--module=name]
@@ -338,7 +338,7 @@ regression test makefile -----------------
 
 ------
 
-Metrics include the average amount of time (in microsconds) taken for an individual test and the number of objects allocated by that test. Differences between runs in the same installation can be in the 10% range. Any changes in storage consumption or a large (10% or greater) increase in test timing warrant examination. Note: As of 0.2.0, the performance runs can take up to twenty minutes.
+Metrics include the average amount of time (in microsconds) taken for an individual test and the number of objects allocated by that test. Differences between runs in the same installation can be in the 20% range. Any changes in storage consumption or a large (20% or greater) increase in test timing warrant examination. Note: `ntests` of 50 seem to demonstrate least variation between runs of identical *mu* binaries.
 
 ```
 forge bench current
@@ -346,7 +346,7 @@ forge bench current
 
  The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
 
-On a modern Core I7 CPU at 3+ GHz, the performance tests take around 20 minutes of elapsed time. 
+On a modern Core I7 CPU at 3+ GHz, the default performance tests take around 10 minutes of elapsed time. 
 
 The *makefile* version of the performance and regression tests are included in upcoming releases, but are considered legacy and will eventually be deprecated.
 

@@ -61,17 +61,16 @@ impl Workspace {
         Path::exists(&forge_path)
     }
 
-    fn make_forge_dirs(forge_home: &str) -> io::Result<()> {
-        let forge_paths = [
-            [forge_home, ".forge", "bench", "performance"],
-            [forge_home, ".forge", "bench", "footprint"],
-            [forge_home, ".forge", "test", "regression"],
+    fn make_module_dirs(forge_home: &str) -> io::Result<()> {
+        let module_paths = [
+            [forge_home, ".forge", "bench"],
+            [forge_home, ".forge", "test"],
         ];
 
-        for path in forge_paths {
+        for path in module_paths {
             let dir: PathBuf = path.iter().collect();
 
-            fs::create_dir_all(&dir)?
+            fs::create_dir_all(&dir)?;
         }
 
         Ok(())
@@ -122,7 +121,7 @@ impl Workspace {
                             eprintln!("workspace already initted.");
                         }
 
-                        Self::make_forge_dirs("./").unwrap()
+                        Self::make_module_dirs("./").unwrap()
                     }
                     Mode::Env => println!("{}", Self::env().unwrap()),
                     _ => panic!(),
