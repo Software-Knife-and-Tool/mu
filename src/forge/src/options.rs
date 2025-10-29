@@ -11,26 +11,27 @@ pub struct Options {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Opt {
+    All,
     Module(String),
     Namespace(String),
     Ntests(String),
     Prof(String),
+    Recipe,
     Ref(String),
     Verbose,
-    Recipe,
 }
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Mode {
     Base,
     Build,
+    Clean,
     Common,
     Core,
     Crossref,
     Current,
     Debug,
     Env,
-    Footprint,
     Init,
     Metrics,
     Mu,
@@ -48,13 +49,13 @@ impl Mode {
         match self {
             Mode::Base => "base",
             Mode::Build => "build",
+            Mode::Clean => "clean",
             Mode::Core => "core",
             Mode::Common => "common",
             Mode::Crossref => "crossref",
             Mode::Current => "current",
             Mode::Debug => "debug",
             Mode::Env => "env",
-            Mode::Footprint => "footprint",
             Mode::Init => "init",
             Mode::Metrics => "metrics",
             Mode::Mu => "mu",
@@ -100,6 +101,7 @@ impl Options {
 
     pub fn opt_name(opt: Opt) -> String {
         match opt {
+            Opt::All => "all",
             Opt::Module(_) => "module",
             Opt::Namespace(_) => "namespace",
             Opt::Ntests(_) => "ntests",
@@ -114,6 +116,7 @@ impl Options {
     pub fn parse_options(argv: &Vec<String>, modes: &[&str], opt_list: &[&str]) -> Option<Options> {
         let mut opts = getopts::Options::new();
 
+        opts.optflag("", "all", "");
         opts.optflag("", "verbose", "");
         opts.optflag("", "recipe", "");
         opts.optopt("", "module", "", "NAME");
@@ -141,12 +144,12 @@ impl Options {
                 "base" => Mode::Base,
                 "build" => Mode::Build,
                 "core" => Mode::Core,
+                "clean" => Mode::Clean,
                 "common" => Mode::Common,
                 "crossref" => Mode::Crossref,
                 "current" => Mode::Current,
                 "debug" => Mode::Debug,
                 "env" => Mode::Env,
-                "footprint" => Mode::Footprint,
                 "init" => Mode::Init,
                 "metrics" => Mode::Metrics,
                 "mu" => Mode::Mu,
@@ -190,8 +193,7 @@ impl Options {
                 .map(|opt| match *opt {
                     "namespace" => Opt::Namespace(opts.opt_str("namespace").unwrap()),
                     "ntests" => Opt::Ntests(opts.opt_str("ntests").unwrap()),
-                    "prof" => Opt::Prof(opts.opt_str("prof").unwrap()),
-                    "ref" => Opt::Ref(opts.opt_str("ref").unwrap()),
+                    "all" => Opt::All,
                     "verbose" => Opt::Verbose,
                     "recipe" => Opt::Recipe,
                     _ => panic!(),

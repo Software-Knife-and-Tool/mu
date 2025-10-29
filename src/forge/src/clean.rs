@@ -22,7 +22,7 @@ impl Clean {
 
                 let _dist = &format!("{home}/dist");
 
-                let dirs = ["dist", "tests/regression", "tests/footprint"];
+                let dirs = ["dist"];
 
                 let mu = match Workspace::env() {
                     Some(path) => path,
@@ -30,7 +30,7 @@ impl Clean {
                         let cwd = std::env::current_dir().unwrap();
 
                         eprintln!(
-                            "error: could not find `.mu` in {:?} or any parent directory",
+                            "error: could not find `.forge` in {:?} or any parent directory",
                             cwd.to_str().unwrap()
                         );
                         return;

@@ -1,0 +1,65 @@
+###  SPDX-FileCopyrightText: Copyright 2023 James M. Putnam (putnamjm.design@gmail.com)
+###  SPDX-License-Identifier: MIT
+###
+import json
+import os
+import sys
+import subprocess
+
+mu_sys = sys.argv[1]
+core_sys = sys.argv[2]
+ntests = sys.argv[3]
+
+core_arg = '-l' + core_sys
+time_cmd = 'time'
+format = '"%S %U %e %M %w %Z'
+
+def times():
+    proc = subprocess.Popen([
+        time_cmd,
+        '-f',
+        format,
+        mu_sys,
+        core_arg,
+    ],\
+    stdout=subprocess.PIPE,\
+    stderr=subprocess.PIPE)
+    
+    stats = proc.stdout.read()[:-1].decode('utf8')
+    err = proc.stderr.read()[:-1].decode('utf8')
+
+    proc.communicate()
+
+    return stats if proc.poll == 0 else err
+
+def storage():
+    proc = subprocess.Popen([
+        mu_sys,
+        core_arg,
+        '-e', '(feature/env:heap-room)'
+    ],\
+    stdout=subprocess.PIPE,\
+    stderr=subprocess.PIPE)
+    
+    heap = proc.stdout.read()[:-1].decode('utf8')
+    err = proc.stderr.read()[:-1].decode('utf8')
+    
+    proc.communicate()
+
+    heap_vec = heap.replace(')', '').split()
+    heaps = []
+
+    heaps.append(heap_vec[1:5])
+    heaps.append(heap_vec[5:9])
+    heaps.append(heap_vec[9:13])
+    heaps.append(heap_vec[13:17])
+    heaps.append(heap_vec[17:21])
+    heaps.append(heap_vec[21:25])
+
+    return heaps if proc.poll() == 0 else err
+
+stats_vec = []
+for n in range(int(ntests)):
+    stats_vec.append(times()[1:])
+
+print(json.dumps({ 'room': storage(), 'stats': stats_vec }))
