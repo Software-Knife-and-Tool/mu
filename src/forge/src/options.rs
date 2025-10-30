@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 #![allow(dead_code)]
-use crate::VERSION;
+use {crate::VERSION, std::path::PathBuf};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Options {
@@ -74,6 +74,12 @@ impl Options {
     pub fn version() {
         println!("{}", VERSION);
         std::process::exit(0)
+    }
+
+    pub fn add_path(path: &mut PathBuf, component: &str) -> PathBuf {
+        path.push(component);
+
+        (&path).into()
     }
 
     pub fn find_opt(options: &Options, opt: &Opt) -> Option<Opt> {
