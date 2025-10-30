@@ -1,28 +1,22 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-mod bench;
-mod build;
-mod clean;
-mod commit;
-mod install;
+mod modules;
 mod options;
-mod symbols;
-mod test;
 mod workspace;
 
 #[rustfmt::skip]
-use {
-    crate::{
+use crate::{
+    modules::{
         bench::Bench,
         build::Build,
         clean::Clean,
         commit::Commit,
         install::Install,
-        options::Options,
+        regression::Regression,
         symbols::Symbols,
-        test::Test,
-        workspace::Workspace,
     },
+    options::Options,
+    workspace::Workspace,
 };
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -39,7 +33,7 @@ pub fn usage() {
     println!("                                       ; build mu system, release default");
     println!("    bench     base | current | report | clean [--ntests=number] [--all]");
     println!("                                       ; benchmark test suite");
-    println!("    test                               ; regression test suite");
+    println!("    regression                         ; regression test suite");
     println!("    symbols   reference | crossref | metrics [--module=name]");
     println!("                                       ; symbol reports, module default to mu");
     println!("    install                            ; (sudo) install mu system-wide");
@@ -88,12 +82,12 @@ pub fn main() {
                     println!();
                     usage()
                 }
-                "bench" => Bench::new(&ws).bench(&argv),
+                "bench" => Bench::new(&ws).bench(&argv).unwrap(),
                 "build" => Build::build(&argv, &home),
                 "clean" => Clean::clean(&argv, &home),
                 "install" => Install::install(&argv, &home),
                 "symbols" => Symbols::symbols(&argv, &home),
-                "test" => Test::test(&argv, &home),
+                "regression" => Regression::new(&ws).regression(&argv).unwrap(),
                 _ => {
                     eprintln!("unimplemented command {command}");
                     std::process::exit(-1)

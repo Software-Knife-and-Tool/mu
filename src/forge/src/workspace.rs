@@ -64,7 +64,7 @@ impl Workspace {
     fn make_module_dirs(forge_home: &str) -> io::Result<()> {
         let module_paths = [
             [forge_home, ".forge", "bench"],
-            [forge_home, ".forge", "test"],
+            [forge_home, ".forge", "regression"],
         ];
 
         for path in module_paths {

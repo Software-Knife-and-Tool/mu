@@ -25,11 +25,11 @@ pub struct Bench {
 
 impl Bench {
     pub fn new(ws: &Workspace) -> Self {
-        let bench = Self::push_path(&mut ws.modules.clone(), "bench");
-        let core_sys = Self::push_path(&mut ws.lib.clone(), "core.sys");
-        let mu_sys = Self::push_path(&mut ws.bin.clone(), "mu-sys");
-        let report = Self::push_path(&mut ws.forge.clone(), "bench");
-        let tests = Self::push_path(&mut ws.tests.clone(), "performance");
+        let bench = Options::add_path(&mut ws.modules.clone(), "bench");
+        let core_sys = Options::add_path(&mut ws.lib.clone(), "core.sys");
+        let mu_sys = Options::add_path(&mut ws.bin.clone(), "mu-sys");
+        let report = Options::add_path(&mut ws.forge.clone(), "bench");
+        let tests = Options::add_path(&mut ws.tests.clone(), "performance");
 
         Self {
             bench,
@@ -40,20 +40,12 @@ impl Bench {
         }
     }
 
-    fn push_path(path: &mut PathBuf, component: &str) -> PathBuf {
-        path.push(component);
-
-        (&path).into()
-    }
-
     fn run_perf(&self, script: &str, group: &str, to: &str, ntests: usize) {
-        let script_path = Self::push_path(&mut self.bench.clone(), script);
-        let json_path = Self::push_path(&mut self.report.clone(), to);
-
+        let json_path = Options::add_path(&mut self.report.clone(), to);
         let mut json_file = File::create(&json_path).expect(&format!("{json_path:?}"));
 
         let output = Command::new("python3")
-            .arg(&script_path)
+            .arg(&Options::add_path(&mut self.bench.clone(), script))
             .arg(&self.mu_sys)
             .arg(&self.core_sys)
             .arg(&self.bench)
@@ -68,13 +60,12 @@ impl Bench {
     }
 
     fn run_footprint(&self, script: &str, to: &str, ntests: usize) {
-        let script_path = Self::push_path(&mut self.bench.clone(), script);
-        let json_path = Self::push_path(&mut self.report.clone(), to);
+        let json_path = Options::add_path(&mut self.report.clone(), to);
 
         let mut json_file = File::create(&json_path).expect(&format!("{json_path:?}"));
 
         let output = Command::new("python3")
-            .arg(&script_path)
+            .arg(&Options::add_path(&mut self.bench.clone(), script))
             .arg(&self.mu_sys)
             .arg(&self.core_sys)
             .arg(ntests.to_string())
@@ -85,13 +76,13 @@ impl Bench {
         io::stderr().write_all(&output.stderr).unwrap();
     }
 
-    pub fn bench(&self, argv: &Vec<String>) {
+    pub fn bench(&self, argv: &Vec<String>) -> io::Result<()> {
         match Options::parse_options(
             argv,
             &["base", "current", "report", "clean"],
             &["all", "ntests", "verbose", "recipe"],
         ) {
-            None => (),
+            None => Ok(()),
             Some(options) => {
                 if options.modes.len() != 1 {
                     panic!()
@@ -104,22 +95,15 @@ impl Bench {
                     None => 20usize,
                 };
 
-                match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => {
-                        println!("[bench {:?}] --ntests {ntests} --verbose", mode)
-                    }
-                    None => (),
+                if Options::find_opt(&options, &Opt::Verbose).is_some() {
+                    println!("[bench {:?}] --ntests {ntests} --verbose", mode)
                 }
 
-                let all = match Options::find_opt(&options, &Opt::All) {
-                    Some(_) => true,
-                    None => false,
-                };
+                if Options::find_opt(&options, &Opt::Recipe).is_some() {
+                    println!("[bench {:?}] --ntests {ntests} --verbose", mode)
+                }
 
-                match Options::find_opt(&options, &Opt::Recipe) {
-                    Some(_) => println!("[bench {:?}] --ntests {ntests} --verbose", mode),
-                    None => (),
-                };
+                let all = Options::find_opt(&options, &Opt::All).is_some();
 
                 match mode {
                     Mode::Base => {
@@ -135,7 +119,7 @@ impl Bench {
                         self.run_footprint("perf-footprint.py", "current.footprint.json", ntests);
                     }
                     Mode::Report => {
-                        self.bench_report();
+                        self.bench_report()?;
                         if all {
                             self.footprint_report()
                         }
@@ -143,20 +127,20 @@ impl Bench {
                     Mode::Clean => {}
                     _ => panic!(),
                 }
+
+                Ok(())
             }
         }
     }
 
-    pub fn bench_report(&self) {
-        let json_script_path = Self::push_path(&mut self.bench.clone(), "report-group.py");
-        let report_script_path = Self::push_path(&mut self.bench.clone(), "report.py");
-        let base_report_path = Self::push_path(&mut self.report.clone(), "base.report");
+    fn bench_report(&self) -> io::Result<()> {
+        let base_report_path = Options::add_path(&mut self.report.clone(), "base.report");
         let mut base_report_file = File::create(&base_report_path).unwrap();
-        let current_report_path = Self::push_path(&mut self.report.clone(), "current.report");
+        let current_report_path = Options::add_path(&mut self.report.clone(), "current.report");
         let mut current_report_file = File::create(&current_report_path).unwrap();
 
         for group in ["mu", "frequent", "core"] {
-            let path = Self::push_path(&mut self.report.clone(), &format!("base.{group}.json"));
+            let path = Options::add_path(&mut self.report.clone(), &format!("base.{group}.json"));
 
             if !path.exists() {
                 eprintln!(
@@ -170,7 +154,10 @@ impl Bench {
             }
 
             let output = Command::new("python3")
-                .arg(&json_script_path)
+                .arg(&Options::add_path(
+                    &mut self.bench.clone(),
+                    "report-group.py",
+                ))
                 .arg(&path)
                 .output()
                 .expect("command failed to execute");
@@ -180,7 +167,8 @@ impl Bench {
         }
 
         for group in ["mu", "frequent", "core"] {
-            let path = Self::push_path(&mut self.report.clone(), &format!("current.{group}.json"));
+            let path =
+                Options::add_path(&mut self.report.clone(), &format!("current.{group}.json"));
 
             if !path.exists() {
                 eprintln!(
@@ -198,7 +186,10 @@ impl Bench {
             }
 
             let output = Command::new("python3")
-                .arg(&json_script_path)
+                .arg(Options::add_path(
+                    &mut self.bench.clone(),
+                    "report-group.py",
+                ))
                 .arg(&path)
                 .output()
                 .expect("command failed to execute");
@@ -207,12 +198,14 @@ impl Bench {
             io::stderr().write_all(&output.stderr).unwrap();
         }
 
-        let sed_child = Command::new("sed")
+        let mut sed_child = Command::new("sed")
             .args(["-e", "1,$s/^.. .[^ ]*.[ ]*//"])
             .arg(&current_report_path)
             .stdout(Stdio::piped())
             .spawn()
             .unwrap();
+
+        sed_child.wait()?;
 
         let paste_child = Command::new("paste")
             .arg(&base_report_path)
@@ -233,24 +226,27 @@ impl Bench {
         report_tmp_file.write_all(&pipe_child.stdout).unwrap();
 
         let output = Command::new("python3")
-            .arg(&report_script_path)
-            .arg(report_tmp_file.path())
+            .arg(&Options::add_path(&mut self.bench.clone(), "report.py"))
+            .arg(&report_tmp_file.path())
             .output()
             .expect("command failed to execute");
 
         io::stdout().write_all(&output.stdout).unwrap();
         io::stderr().write_all(&output.stderr).unwrap();
+
+        Ok(())
     }
 
-    pub fn footprint_report(&self) {
-        let json_script_path = Self::push_path(&mut self.bench.clone(), "report-footprint.py");
+    fn footprint_report(&self) {
+        let json_script_path = Options::add_path(&mut self.bench.clone(), "report-footprint.py");
 
-        let base_json_path = Self::push_path(&mut self.report.clone(), "base.footprint.json");
-        let current_json_path = Self::push_path(&mut self.report.clone(), "current.footprint.json");
+        let base_json_path = Options::add_path(&mut self.report.clone(), "base.footprint.json");
+        let current_json_path =
+            Options::add_path(&mut self.report.clone(), "current.footprint.json");
 
-        let base_report_path = Self::push_path(&mut self.report.clone(), "base.footprint.report");
+        let base_report_path = Options::add_path(&mut self.report.clone(), "base.footprint.report");
         let current_report_path =
-            Self::push_path(&mut self.report.clone(), "current.footprint.report");
+            Options::add_path(&mut self.report.clone(), "current.footprint.report");
 
         let mut base_report_file = File::create(&base_report_path).unwrap();
         let mut current_report_file = File::create(&current_report_path).unwrap();
