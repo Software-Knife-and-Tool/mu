@@ -65,6 +65,7 @@ impl Workspace {
         let module_paths = [
             [forge_home, ".forge", "bench"],
             [forge_home, ".forge", "regression"],
+            [forge_home, ".forge", "symbols"],
         ];
 
         for path in module_paths {
@@ -123,7 +124,10 @@ impl Workspace {
 
                         Self::make_module_dirs("./").unwrap()
                     }
-                    Mode::Env => println!("{}", Self::env().unwrap()),
+                    Mode::Env => match Self::env() {
+                        Some(env) => println!("{env}"),
+                        None => eprintln!("not in a forge workspace"),
+                    },
                     _ => panic!(),
                 }
             }
