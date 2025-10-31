@@ -34,7 +34,7 @@ pub fn usage() {
     println!("    bench     base | current | report | clean [--ntests=number] [--all]");
     println!("                                       ; benchmark test suite");
     println!("    regression                         ; regression test suite");
-    println!("    symbols   reference | crossref | metrics [--module=name]");
+    println!("    symbols   reference | crossref | metrics [--namespace=name]");
     println!("                                       ; symbol reports, module default to mu");
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    clean                              ; clean all artifacts");
@@ -86,7 +86,7 @@ pub fn main() {
                 "build" => Build::build(&argv, &home),
                 "clean" => Clean::clean(&argv, &home),
                 "install" => Install::install(&argv, &home),
-                "symbols" => Symbols::symbols(&argv, &home),
+                "symbols" => Symbols::new(&ws).symbols(&argv).unwrap(),
                 "regression" => Regression::new(&ws).regression(&argv).unwrap(),
                 _ => {
                     eprintln!("unimplemented command {command}");

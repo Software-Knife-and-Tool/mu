@@ -12,7 +12,6 @@ pub struct Options {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Opt {
     All,
-    Module(String),
     Namespace(String),
     Ntests(String),
     Prof(String),
@@ -108,7 +107,6 @@ impl Options {
     pub fn opt_name(opt: Opt) -> String {
         match opt {
             Opt::All => "all",
-            Opt::Module(_) => "module",
             Opt::Namespace(_) => "namespace",
             Opt::Ntests(_) => "ntests",
             Opt::Prof(_) => "prof",

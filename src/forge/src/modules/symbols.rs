@@ -1,202 +1,159 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 use {
-    crate::options::{Mode, Opt, Options},
+    crate::{
+        options::{Mode, Opt, Options},
+        workspace::Workspace,
+    },
     std::{
         io::{self, Write},
+        path::PathBuf,
         process::Command,
     },
+    tempfile::NamedTempFile,
 };
 
-pub struct Symbols {}
+#[derive(Debug)]
+pub struct Symbols {
+    module: PathBuf,   // module scripts directory
+    core_sys: PathBuf, // core.sys path
+    mu_sys: PathBuf,   // mu-sys path
+}
 
 impl Symbols {
-    pub fn symbols(argv: &Vec<String>, home: &str) {
+    pub fn new(ws: &Workspace) -> Self {
+        let module = Options::add_path(&mut ws.modules.clone(), "symbols");
+        let core_sys = Options::add_path(&mut ws.lib.clone(), "core.sys");
+        let mu_sys = Options::add_path(&mut ws.bin.clone(), "mu-sys");
+
+        Self {
+            module,
+            core_sys,
+            mu_sys,
+        }
+    }
+
+    pub fn symbols(&self, argv: &Vec<String>) -> io::Result<()> {
         match Options::parse_options(
             argv,
-            &["crossref", "reference", "metrics"],
-            &["module", "namespace", "verbose"],
+            &["crossref", "metrics", "reference", "clean"],
+            &["namespace", "verbose", "recipe"],
         ) {
-            None => (),
+            None => Ok(()),
             Some(options) => {
-                println!("{:?}", options.modes);
                 if options.modes.len() != 1 {
-                    eprintln!("illegal options: {argv:?}");
-                    std::process::exit(-1)
+                    panic!()
                 }
 
                 let mode = &options.modes[0];
 
-                match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("forge symbols: {:?}", mode),
-                    None => (),
+                let ns = match Options::opt_value(&options, &Opt::Namespace("".to_string())) {
+                    Some(ns) => ns,
+                    None => "mu".to_string(),
                 };
 
-                match options.modes[0] {
-                    Mode::Crossref => Self::crossref(&options, home),
-                    Mode::Metrics => Self::metrics(&options, home),
-                    Mode::Reference => Self::reference(&options, home),
+                if Options::find_opt(&options, &Opt::Verbose).is_some() {
+                    println!("[symbols {:?}] --verbose", mode)
+                }
+
+                if Options::find_opt(&options, &Opt::Recipe).is_some() {
+                    println!("[symbols {:?}] --verbose", mode)
+                }
+
+                match mode {
+                    Mode::Crossref => {
+                        let tmp_file = NamedTempFile::new().unwrap();
+
+                        let output = Command::new(&self.mu_sys)
+                            .args(["-l", &self.core_sys.to_str().unwrap()])
+                            .args([
+                                "-l",
+                                &Options::add_path(&mut self.module.clone(), "crossref.l")
+                                    .to_str()
+                                    .unwrap(),
+                            ])
+                            .args(["-q", &format!("(symbols:crossref {:?})", tmp_file.path())])
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stderr().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+
+                        let output = Command::new("python3")
+                            .arg(&Options::add_path(&mut self.module.clone(), "crossref.py"))
+                            .arg(&tmp_file.path())
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stderr().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+                    }
+                    Mode::Metrics => {
+                        let tmp_file = NamedTempFile::new().unwrap();
+
+                        let output = Command::new(&self.mu_sys)
+                            .args(["-l", &self.core_sys.to_str().unwrap()])
+                            .args([
+                                "-l",
+                                &Options::add_path(&mut self.module.clone(), "metrics.l")
+                                    .to_str()
+                                    .unwrap(),
+                            ])
+                            .args([
+                                "-q",
+                                &format!("(symbols:metrics \"core\" {:?})", tmp_file.path()),
+                            ])
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stderr().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+
+                        let output = Command::new("python3")
+                            .arg(&Options::add_path(&mut self.module.clone(), "metrics.py"))
+                            .arg(&self.core_sys)
+                            .arg(&tmp_file.path())
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stderr().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+                    }
+                    Mode::Reference => {
+                        let tmp_file = NamedTempFile::new().unwrap();
+
+                        let output = Command::new(&self.mu_sys)
+                            .args(["-l", &self.core_sys.to_str().unwrap()])
+                            .args([
+                                "-l",
+                                &Options::add_path(&mut self.module.clone(), "reference.l")
+                                    .to_str()
+                                    .unwrap(),
+                            ])
+                            .args([
+                                "-q",
+                                &format!("(symbols:reference \"{ns}\" {:?})", tmp_file.path()),
+                            ])
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stderr().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+
+                        let output = Command::new("python3")
+                            .arg(&Options::add_path(&mut self.module.clone(), "reference.py"))
+                            .arg(&tmp_file.path())
+                            .output()
+                            .expect("command failed to execute");
+
+                        io::stderr().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+                    }
+                    Mode::Clean => {}
                     _ => panic!(),
                 }
-            }
-        }
-    }
 
-    fn metrics(options: &Options, home: &str) {
-        let ns_opt = options.options.iter().find(|opt| match opt {
-            Opt::Namespace(_) => true,
-            _ => false,
-        });
-
-        let ns_str = match ns_opt {
-            None => "core",
-            Some(opt) => match opt {
-                Opt::Namespace(ns) => ns,
-                _ => panic!(),
-            },
-        };
-
-        match ns_str {
-            "core" => {
-                let output = Command::new("make")
-                    .current_dir(home)
-                    .args(["-C", "tools/metrics"])
-                    .arg("core")
-                    .arg("--no-print-directory")
-                    .output()
-                    .expect("command failed to execute");
-
-                io::stdout().write_all(&output.stdout).unwrap();
-                io::stderr().write_all(&output.stderr).unwrap();
-            }
-            "prelude" => {
-                let output = Command::new("make")
-                    .current_dir(home)
-                    .args(["-C", "tools/metrics"])
-                    .arg("prelude")
-                    .arg("--no-print-directory")
-                    .output()
-                    .expect("command failed to execute");
-
-                io::stdout().write_all(&output.stdout).unwrap();
-                io::stderr().write_all(&output.stderr).unwrap();
-            }
-            _ => panic!(),
-        }
-    }
-
-    fn crossref(_options: &Options, home: &str) {
-        let output = Command::new("make")
-            .current_dir(home)
-            .args(["-C", "tools/crossref"])
-            .arg("crossref")
-            .output()
-            .expect("command failed to execute");
-
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
-    }
-
-    fn reference(options: &Options, home: &str) {
-        let ns_opt = options.options.iter().find(|opt| match opt {
-            Opt::Namespace(_) => true,
-            _ => false,
-        });
-
-        let ns_str = match ns_opt {
-            None => "core",
-            Some(opt) => match opt {
-                Opt::Namespace(ns) => ns,
-                _ => panic!(),
-            },
-        };
-
-        match ns_str {
-            "mu" => {
-                let output = Command::new("make")
-                    .current_dir(home)
-                    .args(["-C", "tools/reference"])
-                    .arg("--no-print-directory")
-                    .arg("mu")
-                    .output()
-                    .expect("command failed to execute");
-
-                io::stdout().write_all(&output.stdout).unwrap();
-                io::stderr().write_all(&output.stderr).unwrap();
-            }
-            "core" => {
-                let output = Command::new("make")
-                    .current_dir(home)
-                    .args(["-C", "tools/reference"])
-                    .arg("--no-print-directory")
-                    .arg("core")
-                    .output()
-                    .expect("command failed to execute");
-
-                io::stdout().write_all(&output.stdout).unwrap();
-                io::stderr().write_all(&output.stderr).unwrap();
-            }
-            "prelude" => {
-                let output = Command::new("make")
-                    .current_dir(home)
-                    .args(["-C", "tools/reference"])
-                    .arg("--no-print-directory")
-                    .arg("prelude")
-                    .output()
-                    .expect("command failed to execute");
-
-                io::stdout().write_all(&output.stdout).unwrap();
-                io::stderr().write_all(&output.stderr).unwrap();
-            }
-            _ => {
-                let module = match Options::opt_value(&options, &Opt::Module("".to_string())) {
-                    Some(name) => name,
-                    None => {
-                        eprintln!("symbols reference: --module required");
-                        std::process::exit(-1)
-                    }
-                };
-
-                let ns = match Options::opt_value(&options, &Opt::Namespace("".to_string())) {
-                    Some(name) => name,
-                    None => {
-                        eprintln!("symbols reference: --namespace required");
-                        std::process::exit(-1)
-                    }
-                };
-
-                let output = Command::new("/opt/mu/bin/mu-sys")
-                    .current_dir(format!("{home}/tools/reference"))
-                    .args(["-l", "/opt/mu/dist/core.sys"])
-                    .args(["-q", &format!("(core:require \"{module}\")")])
-                    .args(["-l", "./reference.l"])
-                    .args(["-q", &format!("(reference \"{ns}\" \"reference.out\")")])
-                    .output()
-                    .expect("mu-sys command failed to execute");
-
-                io::stdout().write_all(&output.stdout).unwrap();
-                io::stderr().write_all(&output.stderr).unwrap();
-
-                let output = Command::new("python3")
-                    .current_dir(format!("{home}/tools/reference"))
-                    .arg("reference.py")
-                    .arg("reference.out")
-                    .output()
-                    .expect("command failed to execute");
-
-                io::stdout().write_all(&output.stdout).unwrap();
-                io::stderr().write_all(&output.stderr).unwrap();
-
-                /*
-                let output = Command::new("rm")
-                    .current_dir(format!("{home}/tools/reference"))
-                    .arg("reference.out")
-                    .output()
-                    .expect("command failed to execute");
-
-                io::stdout().write_all(&output.stdout).unwrap();
-                io::stderr().write_all(&output.stderr).unwrap();
-                */
+                Ok(())
             }
         }
     }

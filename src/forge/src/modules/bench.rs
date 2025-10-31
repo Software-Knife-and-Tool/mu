@@ -16,7 +16,7 @@ use {
 
 #[derive(Debug)]
 pub struct Bench {
-    bench: PathBuf,    // module scripts directory
+    module: PathBuf,   // module scripts directory
     core_sys: PathBuf, // core.sys path
     mu_sys: PathBuf,   // mu-sys path
     report: PathBuf,   // module report path
@@ -25,14 +25,14 @@ pub struct Bench {
 
 impl Bench {
     pub fn new(ws: &Workspace) -> Self {
-        let bench = Options::add_path(&mut ws.modules.clone(), "bench");
+        let module = Options::add_path(&mut ws.modules.clone(), "bench");
         let core_sys = Options::add_path(&mut ws.lib.clone(), "core.sys");
         let mu_sys = Options::add_path(&mut ws.bin.clone(), "mu-sys");
         let report = Options::add_path(&mut ws.forge.clone(), "bench");
         let tests = Options::add_path(&mut ws.tests.clone(), "performance");
 
         Self {
-            bench,
+            module,
             core_sys,
             mu_sys,
             report,
@@ -45,10 +45,10 @@ impl Bench {
         let mut json_file = File::create(&json_path).expect(&format!("{json_path:?}"));
 
         let output = Command::new("python3")
-            .arg(&Options::add_path(&mut self.bench.clone(), script))
+            .arg(&Options::add_path(&mut self.module.clone(), script))
             .arg(&self.mu_sys)
             .arg(&self.core_sys)
-            .arg(&self.bench)
+            .arg(&self.module)
             .arg(group)
             .arg(&self.tests)
             .arg(ntests.to_string())
@@ -65,7 +65,7 @@ impl Bench {
         let mut json_file = File::create(&json_path).expect(&format!("{json_path:?}"));
 
         let output = Command::new("python3")
-            .arg(&Options::add_path(&mut self.bench.clone(), script))
+            .arg(&Options::add_path(&mut self.module.clone(), script))
             .arg(&self.mu_sys)
             .arg(&self.core_sys)
             .arg(ntests.to_string())
@@ -155,7 +155,7 @@ impl Bench {
 
             let output = Command::new("python3")
                 .arg(&Options::add_path(
-                    &mut self.bench.clone(),
+                    &mut self.module.clone(),
                     "report-group.py",
                 ))
                 .arg(&path)
@@ -187,7 +187,7 @@ impl Bench {
 
             let output = Command::new("python3")
                 .arg(Options::add_path(
-                    &mut self.bench.clone(),
+                    &mut self.module.clone(),
                     "report-group.py",
                 ))
                 .arg(&path)
@@ -226,7 +226,7 @@ impl Bench {
         report_tmp_file.write_all(&pipe_child.stdout).unwrap();
 
         let output = Command::new("python3")
-            .arg(&Options::add_path(&mut self.bench.clone(), "report.py"))
+            .arg(&Options::add_path(&mut self.module.clone(), "report.py"))
             .arg(&report_tmp_file.path())
             .output()
             .expect("command failed to execute");
@@ -238,7 +238,7 @@ impl Bench {
     }
 
     fn footprint_report(&self) {
-        let json_script_path = Options::add_path(&mut self.bench.clone(), "report-footprint.py");
+        let json_script_path = Options::add_path(&mut self.module.clone(), "report-footprint.py");
 
         let base_json_path = Options::add_path(&mut self.report.clone(), "base.footprint.json");
         let current_json_path =

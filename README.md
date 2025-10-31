@@ -248,7 +248,7 @@ Usage: forge 0.0.18 command [option...]
     bench     base | current | report | clean [--ntests=number] [--all]
                                        ; benchmark test suite
     regression                         ; regression test suite
-    symbols   reference | crossref | metrics [--module=name]
+    symbols   reference | crossref | metrics [--namespace=name]
                                        ; symbol reports, module default to mu
     install                            ; (sudo) install mu system-wide
     clean                              ; clean all artifacts
