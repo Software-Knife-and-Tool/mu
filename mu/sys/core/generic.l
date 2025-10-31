@@ -44,7 +44,7 @@
                 (:if type-function
                      (core:apply type-function args)
                      (mu:raise-from type-function 'core:%apply-generic :type)))
-              (mu:cdr (core:find-if (:lambda (impl) (core:typep object (mu:car impl))) impls))))
+              (mu:cdr (core:find-if (:lambda (impl) (core:%typep object (mu:car impl))) impls))))
            (mu:car args)
            (mu:cdr (core:%generic-prop :impls generic)))
           (mu:raise-from generic 'core:%apply-generic :type))))

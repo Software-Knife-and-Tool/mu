@@ -35,7 +35,7 @@ pub fn usage() {
     println!("                                       ; benchmark test suite");
     println!("    regression                         ; regression test suite");
     println!("    symbols   reference | crossref | metrics [--namespace=name]");
-    println!("                                       ; symbol reports, module default to mu");
+    println!("                                       ; symbol reports, namespace defaults to mu");
     println!("    install                            ; (sudo) install mu system-wide");
     println!("    clean                              ; clean all artifacts");
     println!("    commit                             ; fmt and clippy, pre-commit checking");

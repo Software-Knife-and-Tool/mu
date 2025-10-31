@@ -249,7 +249,8 @@ Usage: forge 0.0.18 command [option...]
                                        ; benchmark test suite
     regression                         ; regression test suite
     symbols   reference | crossref | metrics [--namespace=name]
-                                       ; symbol reports, module default to mu
+                                       ; symbol reports, namespace 
+                                       ; defaults to mu
     install                            ; (sudo) install mu system-wide
     clean                              ; clean all artifacts
     commit                             ; fmt and clippy, pre-commit checking
