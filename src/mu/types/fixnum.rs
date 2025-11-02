@@ -3,7 +3,7 @@
 
 //! env fixnum type
 use crate::{
-    core_::{
+    core::{
         apply::Apply as _,
         direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,

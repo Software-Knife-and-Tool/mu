@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.2.12
+###### version 0.2.13
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
@@ -28,7 +28,7 @@ Subsequent layers based on the runtime offer advanced features.
 
 
 
-- system modules reorganization
+- runtime constant compilation
 
   
 
@@ -216,11 +216,11 @@ Currently supported features by namespace:
 ```
  default = [ "env", "core", "system" ]
  
- feature/core:		core process-mem-virt process-mem-res
- 					process-time time-units-per-sec delay
- feature/env:		env heap-info heap-size heap-room cache-room
- feature/system:	uname shell exit sysinfo
- feature/prof:    	prof-control
+ feature/core:			core process-mem-virt process-mem-res
+ 						process-time time-units-per-sec delay
+ feature/env:			env heap-info heap-size heap-room cache-room
+ feature/system:		uname shell exit sysinfo
+ feature/instrument:    instrument-control
 
 ```
 

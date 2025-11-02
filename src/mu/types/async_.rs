@@ -4,14 +4,14 @@
 // async function type
 use {
     crate::{
-        core_::{
+        core::{
             env::Env,
             exception,
             indirect::IndirectTag,
             tag::{Tag, TagType},
             type_::Type,
         },
-        spaces::{
+        namespaces::{
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
         },

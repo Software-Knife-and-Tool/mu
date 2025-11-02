@@ -4,8 +4,8 @@
 // system stream operators
 use {
     crate::{
-        core_::{
-            core::{Core, CORE},
+        core::{
+            core_::{Core, CORE},
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},

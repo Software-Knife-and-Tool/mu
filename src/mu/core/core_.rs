@@ -4,18 +4,20 @@
 // core struct
 use {
     crate::{
-        core_::{
+        core::{
             apply::CoreFn as _,
             compiler::{Compiler, CoreFn as _},
             direct::DirectTag,
             env::Env,
             exception::{self, CoreFn as _, Exception},
             frame::{CoreFn as _, Frame},
-            namespace::{CoreFn as _, Namespace},
             tag::{CoreFn as _, Tag},
         },
         features::feature::{Feature, FEATURES},
-        spaces::gc::{CoreFn as _, GcContext},
+        namespaces::{
+            gc::{CoreFn as _, GcContext},
+            namespace::{CoreFn as _, Namespace},
+        },
         streams::builder::StreamBuilder,
         types::{
             cons::{Cons, CoreFn as _},

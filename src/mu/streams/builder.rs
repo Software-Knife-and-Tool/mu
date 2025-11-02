@@ -3,8 +3,8 @@
 
 // stream builder
 use crate::{
-    core_::{
-        core::Core,
+    core::{
+        core_::Core,
         env::Env,
         exception::{self, Condition, Exception},
         tag::Tag,

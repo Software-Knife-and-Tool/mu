@@ -4,17 +4,16 @@
 // reader
 #[rustfmt::skip]
 use crate::{
-    core_::{
+    core::{
         apply::Apply as _,
         compiler::Compiler,
         direct::{DirectExt, DirectTag, DirectType},
         env::Env,
         exception::{self, Condition, Exception},
-        quasi::QuasiReader,
-        readtable::SyntaxType,
         tag::{Tag},
         type_::{Type},
     },
+    reader::{quasi::QuasiReader, readtable::SyntaxType},
     streams::reader::StreamReader,
     types::{
         cons::Cons,

@@ -4,7 +4,7 @@
 // struct type
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
             env::Env,
             exception::{self, Condition, Exception},
@@ -12,9 +12,8 @@ use {
             indirect::IndirectTag,
             tag::{Tag, TagType},
             type_::Type,
-            writer::Writer,
         },
-        spaces::{
+        namespaces::{
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
         },
@@ -135,9 +134,9 @@ impl Struct {
         match tag {
             Tag::Indirect(_) => {
                 StreamWriter::write_str(env, "#s(", stream)?;
-                env.write(Self::to_image(env, tag).stype, true, stream)?;
+                StreamWriter::write(env, Self::to_image(env, tag).stype, true, stream)?;
                 StreamWriter::write_str(env, " ", stream)?;
-                env.write(Self::to_image(env, tag).vector, true, stream)?;
+                StreamWriter::write(env, Self::to_image(env, tag).vector, true, stream)?;
                 StreamWriter::write_str(env, ")", stream)
             }
             _ => panic!(),

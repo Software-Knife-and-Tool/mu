@@ -4,9 +4,9 @@
 // namespaces
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
-            core::CoreFnDef,
+            core_::CoreFnDef,
             direct::DirectTag,
             env::Env,
             exception::{self, Condition, Exception},
@@ -14,7 +14,7 @@ use {
             tag::Tag,
             type_::Type,
         },
-        spaces::gc::GcContext,
+        namespaces::gc::GcContext,
         types::{
             fixnum::Fixnum,
             struct_::Struct,

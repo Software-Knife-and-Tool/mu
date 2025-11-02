@@ -4,13 +4,12 @@
 // vector writer
 use {
     crate::{
-        core_::{
+        core::{
             direct::{DirectTag, DirectType},
             env::Env,
             exception,
             tag::Tag,
             type_::Type,
-            writer::Writer,
         },
         streams::writer::StreamWriter,
         types::{fixnum::Fixnum, vector::Vector},
@@ -49,7 +48,7 @@ impl Write for Vector {
 
                     for tag in Vector::iter(env, vector) {
                         StreamWriter::write_str(env, " ", stream)?;
-                        env.write(tag, false, stream)?;
+                        StreamWriter::write(env, tag, false, stream)?;
                     }
 
                     StreamWriter::write_str(env, ")", stream)
@@ -63,7 +62,7 @@ impl Write for Vector {
                     }
 
                     for ch in Vector::iter(env, vector) {
-                        env.write(ch, false, stream)?;
+                        StreamWriter::write(env, ch, false, stream)?;
                     }
 
                     if escape {
@@ -85,11 +84,11 @@ impl Write for Vector {
                 }
                 _ => {
                     StreamWriter::write_str(env, "#(", stream)?;
-                    env.write(Self::to_image(env, vector).type_, true, stream)?;
+                    StreamWriter::write(env, Self::to_image(env, vector).type_, true, stream)?;
 
                     for tag in Vector::iter(env, vector) {
                         StreamWriter::write_str(env, " ", stream)?;
-                        env.write(tag, false, stream)?;
+                        StreamWriter::write(env, tag, false, stream)?;
                     }
 
                     StreamWriter::write_str(env, ")", stream)

@@ -4,7 +4,7 @@
 /// Config struct
 use {
     crate::{
-        core_::{env::Env, tag::Tag},
+        core::{env::Env, tag::Tag},
         types::{cons::Cons, fixnum::Fixnum, vector::Vector},
     },
     lite_json::{json::JsonValue, json_parser},

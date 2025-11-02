@@ -6,17 +6,16 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply,
-            core::{Core as Core_, CoreFnDef, CORE},
+            core_::{Core as Core_, CoreFnDef},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            namespace::Namespace,
             tag::{Tag,},
             type_::{Type},
-            writer::Writer,
         },
+        namespaces::namespace::Namespace,
         features::feature::Feature,
         types::{
             cons::Cons,
@@ -52,10 +51,6 @@ lazy_static! {
 
 pub trait Core {
     fn feature() -> Feature;
-    fn eprint(_: &Env, label: &str, verbose: bool, tag: Tag);
-    fn eprintln(_: &Env, label: &str, verbose: bool, tag: Tag);
-    fn print(_: &Env, label: &str, verbose: bool, tag: Tag);
-    fn println(_: &Env, label: &str, verbose: bool, tag: Tag);
 }
 
 impl Core for Feature {
@@ -65,36 +60,6 @@ impl Core for Feature {
             functions: Some(&CORE_FUNCTIONS),
             namespace: "feature/core".into(),
         }
-    }
-
-    fn eprint(env: &Env, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(CORE.stdio.write());
-
-        eprint!("{label}: ");
-        env.write(tag, verbose, stdio.2).unwrap();
-    }
-
-    fn eprintln(env: &Env, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(CORE.stdio.write());
-
-        eprint!("{label}: ");
-        env.write(tag, verbose, stdio.2).unwrap();
-        eprintln!();
-    }
-
-    fn print(env: &Env, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(CORE.stdio.write());
-
-        print!("{label}: ");
-        env.write(tag, verbose, stdio.1).unwrap();
-    }
-
-    fn println(env: &Env, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(CORE.stdio.write());
-
-        print!("{label}: ");
-        env.write(tag, verbose, stdio.1).unwrap();
-        println!();
     }
 }
 

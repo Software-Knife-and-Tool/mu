@@ -6,15 +6,15 @@
 //
 #[rustfmt::skip]
 use crate::{
-    core_::{
+    core::{
         apply::Apply as _,
         env::Env,
         exception::{self, Condition, Exception},
         frame::Frame,
-        namespace::Namespace,
         tag::Tag,
         type_::Type,
     },
+    namespaces::namespace::Namespace,
     types::{
         cons::Cons,
         fixnum::Fixnum,
@@ -225,9 +225,9 @@ impl Compiler {
             }
 
             Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?
+        } else {
+            Ok(symbol)
         }
-
-        Ok(symbol)
     }
 
     pub fn compile(env: &Env, expr: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {

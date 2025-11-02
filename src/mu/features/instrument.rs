@@ -1,13 +1,13 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-// profile feature
+// instrument feature
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
-            core::CoreFnDef,
+            core_::CoreFnDef,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -27,27 +27,27 @@ use {
     futures_locks::RwLock,
 };
 
-pub trait Prof {
+pub trait Instrument {
     fn feature() -> Feature;
-    fn prof_event(_: &Env, _: Tag) -> exception::Result<()>;
+    fn instrument_event(_: &Env, _: Tag) -> exception::Result<()>;
 }
 
 lazy_static! {
-    pub static ref PROF_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref PROF_FUNCTIONS: &'static [CoreFnDef] =
-        &[("prof-control", 1, Feature::prof_control)];
+    pub static ref INSTRUMENT_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    pub static ref INSTRUMENT_FUNCTIONS: &'static [CoreFnDef] =
+        &[("imstrument-control", 1, Feature::instrument_control)];
 }
 
-impl Prof for Feature {
+impl Instrument for Feature {
     fn feature() -> Feature {
         Feature {
-            functions: Some(&PROF_FUNCTIONS),
-            symbols: Some(&PROF_SYMBOLS),
-            namespace: "feature/prof".into(),
+            functions: Some(&INSTRUMENT_FUNCTIONS),
+            symbols: Some(&INSTRUMENT_SYMBOLS),
+            namespace: "feature/instrument".into(),
         }
     }
 
-    fn prof_event(env: &Env, func: Tag) -> exception::Result<()> {
+    fn instrument_event(env: &Env, func: Tag) -> exception::Result<()> {
         if !*block_on(env.prof_on.read()) {
             return Ok(());
         }
@@ -67,12 +67,16 @@ impl Prof for Feature {
 }
 
 pub trait CoreFn {
-    fn prof_control(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn instrument_control(_: &Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFn for Feature {
-    fn prof_control(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        env.argv_check("mu/prof:prof_control", &[Type::Keyword], fp)?;
+    fn instrument_control(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check(
+            "feature/innstrument:instrument_control",
+            &[Type::Keyword],
+            fp,
+        )?;
 
         let cmd = fp.argv[0];
         let profile_map_ref = block_on(env.prof.read());

@@ -5,7 +5,7 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
+        core::{
             direct::{DirectExt, DirectTag, DirectType},
             env::Env,
             exception::{self, Condition, Exception},

@@ -4,8 +4,11 @@
 //! env gc
 #![allow(dead_code)]
 use crate::{
-    core_::{env::Env, exception, frame::Frame, namespace::Namespace, tag::Tag, type_::Type},
-    spaces::heap::{Gc as _, Heap},
+    core::{env::Env, exception, frame::Frame, tag::Tag, type_::Type},
+    namespaces::{
+        heap::{Gc as _, Heap},
+        namespace::Namespace,
+    },
     types::{
         async_::{Async, Gc as _},
         cons::{Cons, Gc as _},

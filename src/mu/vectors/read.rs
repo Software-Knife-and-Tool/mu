@@ -3,13 +3,13 @@
 
 // vector reader
 use crate::{
-    core_::{
+    core::{
         env::Env,
         exception::{self, Condition, Exception},
-        readtable::SyntaxType,
         tag::Tag,
         type_::Type,
     },
+    reader::readtable::SyntaxType,
     streams::reader::StreamReader,
     types::{
         char::Char,

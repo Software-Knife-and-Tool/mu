@@ -4,14 +4,17 @@
 // stream writer
 use {
     crate::{
-        core_::{
-            core::CORE,
+        core::{
+            core_::CORE,
             env::Env,
             exception::{self, Condition, Exception},
             tag::Tag,
             type_::Type,
         },
-        types::{stream::Stream, symbol::Symbol},
+        types::{
+            async_::Async, char::Char, cons::Cons, fixnum::Fixnum, float::Float,
+            function::Function, stream::Stream, struct_::Struct, symbol::Symbol, vector::Vector,
+        },
     },
     futures_lite::future::block_on,
 };
@@ -98,6 +101,24 @@ impl StreamWriter {
                 stream.system.write_byte(env, byte)
             }
             None => panic!(),
+        }
+    }
+
+    pub fn write(env: &Env, tag: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+        assert_eq!(stream.type_of(), Type::Stream);
+
+        match tag.type_of() {
+            Type::Async => Async::write(env, tag, escape, stream),
+            Type::Char => Char::write(env, tag, escape, stream),
+            Type::Cons => Cons::write(env, tag, escape, stream),
+            Type::Fixnum => Fixnum::write(env, tag, escape, stream),
+            Type::Float => Float::write(env, tag, escape, stream),
+            Type::Function => Function::write(env, tag, escape, stream),
+            Type::Stream => Stream::write(env, tag, escape, stream),
+            Type::Struct => Struct::write(env, tag, escape, stream),
+            Type::Symbol | Type::Null | Type::Keyword => Symbol::write(env, tag, escape, stream),
+            Type::Vector => Vector::write(env, tag, escape, stream),
+            _ => panic!(),
         }
     }
 }

@@ -4,19 +4,22 @@
 //! environment bindings
 use {
     crate::{
-        core_::{
+        core::{
             config::Config,
-            core::{Core, CORE, CORE_FUNCTIONS},
+            core_::{Core, CORE, CORE_FUNCTIONS},
             frame::Frame,
-            namespace::Namespace,
             tag::Tag,
         },
-        spaces::{cache::Cache, heap::Heap},
+        namespaces::{cache::Cache, heap::Heap, namespace::Namespace},
         vectors::cache::VecCacheMap,
     },
     futures_locks::RwLock,
     std::collections::HashMap,
 };
+
+#[cfg(feature = "instrument")]
+#[allow(unused_imports)]
+use crate::core::instrument::Instrument;
 
 pub struct Env {
     // configuration
@@ -38,9 +41,9 @@ pub struct Env {
     pub mu_ns: Tag,
 
     // profiling
-    #[cfg(feature = "prof")]
+    #[cfg(feature = "instrument")]
     pub prof: RwLock<Vec<(Tag, u64)>>,
-    #[cfg(feature = "prof")]
+    #[cfg(feature = "instrument")]
     pub prof_on: RwLock<bool>,
 }
 
@@ -55,9 +58,9 @@ impl Env {
             lexical: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),
             ns_map: RwLock::new(Vec::new()),
-            #[cfg(feature = "prof")]
+            #[cfg(feature = "instrument")]
             prof: RwLock::new(Vec::new()),
-            #[cfg(feature = "prof")]
+            #[cfg(feature = "instrument")]
             prof_on: RwLock::new(false),
             vector_cache: RwLock::new(HashMap::new()),
         };
@@ -73,6 +76,9 @@ impl Env {
         Namespace::intern_static(&env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
 
         Core::symbols(&env);
+
+        #[cfg(feature = "instrument")]
+        Instrument::eprintln(&env, "env: new, mu ns", true, env.mu_ns);
 
         env
     }

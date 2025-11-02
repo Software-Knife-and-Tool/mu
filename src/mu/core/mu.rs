@@ -4,17 +4,16 @@
 // crate bindings
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply,
             compiler::Compiler,
             config::Config,
-            core::{Core, CORE},
+            core_::{Core, CORE},
             env,
             exception::{self, Condition, Exception},
-            reader::Reader,
             tag::Tag,
-            writer::Writer,
         },
+        reader::reader_::Reader,
         streams::{builder::StreamBuilder, writer::StreamWriter},
         types::stream::Stream,
     },
@@ -80,7 +79,7 @@ impl Mu {
         let envs_ref = block_on(CORE.envs.read());
         let env_: &env::Env = &envs_ref[&env.as_u64()];
 
-        env_.write(expr, escape, stream)
+        StreamWriter::write(env_, expr, escape, stream)
     }
 
     pub fn write_str_(env: Env, str: &str, stream: Tag) -> exception::Result<()> {
@@ -100,7 +99,7 @@ impl Mu {
             .build(env_, &CORE)
             .unwrap();
 
-        env_.write(expr, esc, stream).unwrap();
+        StreamWriter::write(env_, expr, esc, stream).unwrap();
         Stream::get_string(env_, stream).unwrap()
     }
 

@@ -3,7 +3,7 @@
 
 // character class
 use crate::{
-    core_::{
+    core::{
         direct::{DirectExt, DirectTag, DirectType, ExtType},
         env::Env,
         exception,
@@ -62,7 +62,7 @@ impl Char {
 
 #[cfg(test)]
 mod tests {
-    use crate::core_::tag::Tag;
+    use crate::core::tag::Tag;
 
     #[test]
     fn as_tag() {

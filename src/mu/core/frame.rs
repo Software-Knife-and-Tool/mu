@@ -4,7 +4,7 @@
 // function call frame
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
             dynamic::Dynamic,
             env::Env,
@@ -20,8 +20,8 @@ use {
     futures_lite::future::block_on,
 };
 
-#[cfg(feature = "prof")]
-use crate::features::{feature::Feature, prof::Prof};
+#[cfg(feature = "instrument")]
+use crate::features::{feature::Feature, instrument::Instrument};
 
 pub struct Frame {
     pub argv: Vec<Tag>,
@@ -105,8 +105,8 @@ impl Frame {
 
     // apply
     pub fn apply(mut self, env: &Env, func: Tag) -> exception::Result<Tag> {
-        #[cfg(feature = "prof")]
-        <Feature as Prof>::prof_event(env, func).unwrap();
+        #[cfg(feature = "instrument")]
+        <Feature as Instrument>::instrument_event(env, func).unwrap();
 
         let (arity, form) = Function::destruct(env, func);
         let nreqs = Fixnum::as_i64(arity) as usize;

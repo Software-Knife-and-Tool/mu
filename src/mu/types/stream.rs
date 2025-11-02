@@ -4,18 +4,17 @@
 //! stream type
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
-            core::CORE,
+            core_::CORE,
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
-            reader::Reader,
             tag::Tag,
             type_::Type,
-            writer::Writer,
         },
+        reader::reader_::Reader,
         streams::{
             builder::StreamBuilder, reader::StreamReader, system::SystemStream,
             writer::StreamWriter,
@@ -188,7 +187,7 @@ impl CoreFn for Stream {
         let escape = fp.argv[1];
         let stream = fp.argv[2];
 
-        env.write(fp.value, !escape.null_(), stream)?;
+        StreamWriter::write(env, fp.value, !escape.null_(), stream)?;
 
         Ok(())
     }

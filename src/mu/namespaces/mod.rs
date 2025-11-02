@@ -1,16 +1,17 @@
 //  SPDX-FileCopyrightText: Copyright 2025 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-// spaces
+// namespaces
 pub mod cache;
 pub mod gc;
 pub mod heap;
+pub mod namespace;
 
 #[rustfmt::skip]
 #[allow (unused_imports)]
 use {
     crate::{
-        core_::{
+        core::{
             direct::{DirectTag, DirectImage},
             env::Env,
             tag::Tag,
@@ -22,7 +23,7 @@ use {
             function::Function,
             symbol::Symbol,
         },
-        spaces::{heap::Heap, cache::Cache},
+        namespaces::{heap::Heap, cache::Cache},
     },
     // super::{heap::Heap, cache::Cache},
 };
