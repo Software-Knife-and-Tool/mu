@@ -3,7 +3,7 @@
 
 // Apply trait
 use crate::{
-    core_::{
+    core::{
         compiler::Compiler,
         env::Env,
         exception::{self, Condition, Exception},

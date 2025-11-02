@@ -3,7 +3,7 @@
 
 //! typed vectors
 use crate::{
-    core_::{
+    core::{
         apply::Apply,
         direct::DirectType,
         env::Env,
@@ -12,7 +12,7 @@ use crate::{
         tag::Tag,
         type_::Type,
     },
-    spaces::gc::{Gc as _, GcContext},
+    namespaces::gc::{Gc as _, GcContext},
     types::{
         char::Char,
         cons::Cons,

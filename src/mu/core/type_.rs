@@ -5,12 +5,8 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
-            tag::Tag,
-        },
-        types::{
-            symbol::Symbol,
-        },
+        core::tag::Tag,
+        types::symbol::Symbol,
     },
     num_enum::TryFromPrimitive,
 };

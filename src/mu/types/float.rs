@@ -4,7 +4,7 @@
 // float type
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
@@ -154,7 +154,7 @@ impl CoreFn for Float {
 
 #[cfg(test)]
 mod tests {
-    use crate::core_::tag::Tag;
+    use crate::core::tag::Tag;
 
     #[test]
     fn float_test() {

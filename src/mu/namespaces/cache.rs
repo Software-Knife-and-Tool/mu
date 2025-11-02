@@ -5,7 +5,7 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
+        core::{
             direct::{DirectTag, DirectImage},
             env::Env,
             tag::Tag,

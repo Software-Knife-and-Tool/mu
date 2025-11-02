@@ -4,14 +4,14 @@
 // quasiquote reader
 use {
     crate::{
-        core_::{
+        core::{
             compiler::Compiler,
             env::Env,
             exception::{self, Condition, Exception},
-            namespace::Namespace,
-            reader::Reader,
             tag::Tag,
         },
+        namespaces::namespace::Namespace,
+        reader::reader_::Reader,
         streams::reader::StreamReader,
         types::{cons::Cons, symbol::Symbol},
     },

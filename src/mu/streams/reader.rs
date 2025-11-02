@@ -4,8 +4,8 @@
 // stream reader
 use {
     crate::{
-        core_::{
-            core::CORE,
+        core::{
+            core_::CORE,
             env::Env,
             exception::{self, Condition, Exception},
             tag::Tag,

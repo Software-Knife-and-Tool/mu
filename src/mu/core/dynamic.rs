@@ -3,7 +3,7 @@
 
 // dynamic state
 use {
-    crate::core_::{env::Env, tag::Tag},
+    crate::core::{env::Env, tag::Tag},
     futures_lite::future::block_on,
 };
 

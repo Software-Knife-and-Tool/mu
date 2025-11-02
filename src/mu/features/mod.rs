@@ -7,7 +7,7 @@ pub mod core;
 #[cfg(feature = "env")]
 pub mod env;
 pub mod feature;
-#[cfg(feature = "prof")]
-pub mod prof;
+#[cfg(feature = "instrument")]
+pub mod instrument;
 #[cfg(feature = "system")]
 pub mod system;

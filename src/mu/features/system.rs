@@ -5,9 +5,9 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
-            core::CoreFnDef,
+            core_::CoreFnDef,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,

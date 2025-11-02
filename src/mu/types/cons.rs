@@ -4,22 +4,21 @@
 //! cons type
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
             direct::{DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
             indirect::IndirectTag,
-            reader::{Reader, EOL},
             tag::{Tag, TagType},
             type_::Type,
-            writer::Writer,
         },
-        spaces::{
+        namespaces::{
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
         },
+        reader::reader_::{Reader, EOL},
         streams::writer::StreamWriter,
         types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
     },
@@ -303,7 +302,7 @@ impl Cons {
         let (car, mut tail) = Self::destruct(env, cons);
 
         StreamWriter::write_char(env, stream, '(').unwrap();
-        env.write(car, escape, stream).unwrap();
+        StreamWriter::write(env, car, escape, stream).unwrap();
 
         // this is ugly, but it might be worse with a for loop
         loop {
@@ -311,13 +310,13 @@ impl Cons {
                 Type::Cons => {
                     let (car, cdr) = Self::destruct(env, tail);
                     StreamWriter::write_char(env, stream, ' ').unwrap();
-                    env.write(car, escape, stream).unwrap();
+                    StreamWriter::write(env, car, escape, stream).unwrap();
                     tail = cdr;
                 }
                 _ if tail.null_() => break,
                 _ => {
                     StreamWriter::write_str(env, " . ", stream).unwrap();
-                    env.write(tail, escape, stream).unwrap();
+                    StreamWriter::write(env, tail, escape, stream).unwrap();
                     break;
                 }
             }
@@ -575,7 +574,7 @@ impl Iterator for ListIter<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{core_::tag::Tag, types::cons::Cons};
+    use crate::{core::tag::Tag, types::cons::Cons};
 
     #[test]
     fn cons_test() {

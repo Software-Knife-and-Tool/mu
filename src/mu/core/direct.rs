@@ -7,12 +7,12 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
+        core::{
             type_::Type,
             env::Env,
             tag::{Tag, TagType},
         },
-        spaces::cache::Cache,
+        namespaces::cache::Cache,
         types::{
             async_::Async,
             cons::Cons,

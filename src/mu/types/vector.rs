@@ -4,7 +4,7 @@
 // vector type
 use {
     crate::{
-        core_::{
+        core::{
             direct::{DirectTag, DirectType},
             env::Env,
             exception,

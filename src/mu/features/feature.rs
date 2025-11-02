@@ -4,8 +4,8 @@
 // features
 #[rustfmt::skip]
 use {
-    crate::core_::{
-        core::CoreFnDef,
+    crate::core::{
+        core_::CoreFnDef,
         tag::Tag
     },
     futures_locks::RwLock,
@@ -16,8 +16,8 @@ use {
 use crate::features::core::Core;
 #[cfg(feature = "env")]
 use crate::features::env::Env;
-#[cfg(feature = "prof")]
-use crate::features::prof::Prof;
+#[cfg(feature = "instrument")]
+use crate::features::instrument::Instrument;
 #[cfg(feature = "system")]
 use crate::features::system::System;
 
@@ -45,23 +45,9 @@ impl Features {
             <Feature as Env>::feature(),
             #[cfg(feature = "system")]
             <Feature as System>::feature(),
-            #[cfg(feature = "prof")]
-            <Feature as Prof>::feature(),
+            #[cfg(feature = "instrument")]
+            <Feature as Instrument>::feature(),
         ];
-
-        /*
-        let namespaces = features
-            .iter()
-            .map(|feature| {
-                let ns = Static {
-                    functions: feature.functions,
-                    hash: RwLock::new(
-                    ;
-                Namespace::Static(ns)
-            })
-            .collect::<Vec<Namespace>>();
-
-         */
 
         Self { features }
     }

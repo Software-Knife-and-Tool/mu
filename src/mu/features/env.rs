@@ -5,8 +5,8 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
-            core::CoreFnDef,
+        core::{
+            core_::CoreFnDef,
             direct::DirectTag,
             env,
             exception::{self},
@@ -16,7 +16,7 @@ use {
             type_::{Type},
         },
         features::feature::Feature,
-        spaces::{
+        namespaces::{
             cache::Cache,
             heap::HeapTypeInfo,
         },

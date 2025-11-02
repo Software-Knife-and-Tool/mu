@@ -4,24 +4,23 @@
 // symbol type
 use {
     crate::{
-        core_::{
+        core::{
             apply::Apply as _,
             direct::{DirectExt, DirectImage, DirectTag, DirectType},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
             indirect::IndirectTag,
-            namespace::Namespace,
-            readtable::SyntaxType,
             tag::{Tag, TagType},
             type_::Type,
-            writer::Writer,
         },
-        spaces::{
+        namespaces::{
             cache::Cache,
             gc::{Gc as _, GcContext},
             heap::{Heap, HeapRequest},
+            namespace::Namespace,
         },
+        reader::readtable::SyntaxType,
         streams::writer::StreamWriter,
         types::vector::Vector,
     },
@@ -383,7 +382,7 @@ impl Symbol {
                     }
                 }
 
-                env.write(name, false, stream)
+                StreamWriter::write(env, name, false, stream)
             }
             _ => panic!(),
         }

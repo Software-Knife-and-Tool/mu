@@ -5,19 +5,19 @@
 #[rustfmt::skip]
 use {
     crate::{
-        core_::{
-            core::CoreFnDef,
+        core::{
+            core_::CoreFnDef,
             direct::DirectTag,
             env::Env,
             exception,
             indirect::IndirectTag,
-            namespace::Namespace,
             tag::{Tag, TagType},
             type_::Type,
         },
-        spaces::{
+        namespaces::{
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
+            namespace::Namespace,
         },
         streams::writer::StreamWriter,
         types::{

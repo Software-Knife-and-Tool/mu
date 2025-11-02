@@ -4,7 +4,7 @@
 //! exception
 use {
     crate::{
-        core_::{apply::Apply as _, env::Env, frame::Frame, tag::Tag, type_::Type},
+        core::{apply::Apply as _, env::Env, frame::Frame, tag::Tag, type_::Type},
         types::symbol::Symbol,
     },
     futures_lite::future::block_on,
