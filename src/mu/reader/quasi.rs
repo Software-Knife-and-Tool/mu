@@ -50,29 +50,6 @@ impl fmt::Display for QuasiExpr {
 
 // roughly CLHS Section 2.4.6
 impl QuasiReader {
-    /*
-        fn print_annotated_tag(env: &Env, preface: &str, tag: Tag) {
-            print!("[{:?}] ", tag.type_of());
-            env.eprintln(preface, true, tag);
-        }
-
-        fn print_expr(env: &Env, indent: usize, expr: &QuasiExpr) {
-            print!("{}", String::from_iter(vec![' '; indent * 2]));
-
-            match expr {
-                QuasiExpr::Basic(tag) => env.println("QuasiExpr::Basic", false, *tag),
-                QuasiExpr::Comma(tag) => env.println("QuasiExpr::Comma", false, *tag),
-                QuasiExpr::CommaAt(tag) => env.println("QuasiExpr::CommaAt", false, *tag),
-                QuasiExpr::List(vec) => {
-                    println!("QuasiExpr::List: {}", vec.len());
-                    for expr in vec {
-                        Self::print_expr(env, indent + 1, expr);
-                    }
-                }
-            }
-    }
-        */
-
     pub fn new(env: &Env, stream: Tag) -> Self {
         Self {
             stream,

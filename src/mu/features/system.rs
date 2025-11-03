@@ -74,17 +74,17 @@ impl CoreFn for Feature {
 
         let command = fp.argv[0];
         let args = fp.argv[1];
-        let mut argv = vec![];
 
-        // do this with a collect?
-        for arg in Cons::list_iter(env, args) {
-            match arg.type_of() {
-                Type::Vector if Vector::type_of(env, arg) == Type::Char => {
-                    argv.push(Vector::as_string(env, arg));
-                }
-                _ => Err(Exception::new(env, Condition::Type, "std:command", arg))?,
-            }
-        }
+        let type_check = Cons::list_iter(env, args).find(|arg| {
+            !matches!(arg.type_of(), Type::Vector if Vector::type_of(env, *arg) == Type::Char)
+        });
+
+        let argv: Vec<String> = match type_check {
+            Some(arg) => Err(Exception::new(env, Condition::Type, "system:shell", arg))?,
+            None => Cons::list_iter(env, args)
+                .map(|arg| Vector::as_string(env, arg))
+                .collect(),
+        };
 
         let status = std::process::Command::new(Vector::as_string(env, command))
             .args(argv)

@@ -30,7 +30,7 @@ pub struct Stream {
     pub id: u64,              // stream table index
     pub open: bool,           // stream open
     pub direction: Tag,       // :input | :output | :bidir (keyword)
-    pub unch: Tag,            // pushbask for input streams
+    pub unch: Tag,            // pushback for input streams
 }
 
 impl From<Stream> for Tag {

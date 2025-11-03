@@ -307,11 +307,15 @@ impl Symbol {
     }
 
     pub fn parse(env: &Env, token: String) -> exception::Result<Tag> {
-        for ch in token.chars() {
-            match SyntaxType::map_char_syntax(ch) {
-                Some(SyntaxType::Constituent) => (),
-                _ => Err(Exception::new(env, Condition::Range, "mu:read", ch.into()))?,
-            }
+        let type_check = token.chars().find(|ch| {
+            !matches!(
+                SyntaxType::map_char_syntax(*ch).unwrap(),
+                SyntaxType::Constituent
+            )
+        });
+
+        if let Some(ch) = type_check {
+            Err(Exception::new(env, Condition::Range, "mu:read", ch.into()))?
         }
 
         match token.find(':') {
