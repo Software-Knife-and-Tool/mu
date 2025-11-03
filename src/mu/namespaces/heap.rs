@@ -154,8 +154,6 @@ impl Heap {
     // allocate
     pub fn alloc(&mut self, req: &HeapRequest) -> Option<usize> {
         let image_len = req.image.len();
-
-        let _vdata = req.vdata;
         let vdata_size: usize = match req.vdata {
             None => 0,
             Some(vdata) => (vdata.len() + size_of::<u64>() - 1) & !(size_of::<u64>() - 1),
