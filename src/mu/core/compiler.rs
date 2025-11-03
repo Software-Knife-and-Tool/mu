@@ -207,24 +207,34 @@ impl Compiler {
         let ns = Symbol::destruct(env, symbol).0;
 
         if ns.eq_(&UNBOUND) {
-            for frame in lenv.iter().rev() {
-                let (tag, symbols) = frame;
+            let lex_sym = lenv.iter().rev().find_map(|frame| {
+                frame
+                    .1
+                    .iter()
+                    .position(|lex| symbol.eq_(lex))
+                    .map(|nth| (frame.0, nth))
+            });
 
-                if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
-                    let frame_ref = Symbol::destruct(
-                        env,
-                        Namespace::intern(env, env.mu_ns, "%frame-ref".into(), Tag::nil()).unwrap(),
-                    )
-                    .2;
+            match lex_sym {
+                Some(_) => {
+                    let sym_ref = match lex_sym {
+                        Some((tag, nth)) => {
+                            let frame_ref = Symbol::destruct(
+                                env,
+                                Namespace::intern(env, env.mu_ns, "%frame-ref".into(), Tag::nil())
+                                    .unwrap(),
+                            )
+                            .2;
 
-                    return Ok(Cons::list(
-                        env,
-                        &[frame_ref, *tag, Fixnum::with_or_panic(nth)],
-                    ));
+                            Cons::list(env, &[frame_ref, tag, Fixnum::with_or_panic(nth)])
+                        }
+                        None => symbol,
+                    };
+
+                    Ok(sym_ref)
                 }
+                None => Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?,
             }
-
-            Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?
         } else {
             Ok(symbol)
         }
