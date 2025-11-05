@@ -6,7 +6,7 @@
 use {
     crate::{
         core::{
-            core_::CoreFnDef,
+            core_::Core,
             direct::DirectTag,
             env::Env,
             exception,
@@ -17,7 +17,6 @@ use {
         namespaces::{
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
-            namespace::Namespace,
         },
         streams::writer::StreamWriter,
         types::{
@@ -32,7 +31,7 @@ use {
 
 #[derive(Copy, Clone)]
 pub struct Function {
-    pub arity: Tag, // fixnum # of required arguments
+    pub arity: Tag, // number of required arguments
     pub form: Tag,  // list
 }
 
@@ -95,34 +94,14 @@ impl Function {
         }
     }
 
-    pub fn staticns_deref(env: &Env, func: Tag) -> (String, Namespace, CoreFnDef) {
-        assert!(func.type_of() == Type::Function);
-
-        let (ns_id, offset) = DirectTag::function_id(func);
-
-        let ns_ref = block_on(env.ns_map.read());
-        let (_, ref name, ref namespace) = ns_ref[ns_id as usize];
-
-        if let Namespace::Static(static_) = namespace {
-            (
-                name.to_string(),
-                namespace.clone(),
-                static_.functions.unwrap()[offset as usize],
-            )
-        } else {
-            panic!()
-        }
-    }
-
     pub fn destruct(env: &Env, func: Tag) -> (Tag, Tag) {
         assert!(func.type_of() == Type::Function);
 
         match func {
             Tag::Direct(_) => {
-                let (_, offset) = DirectTag::function_id(func);
-                let desc = Self::staticns_deref(env, func);
+                let offset = DirectTag::function_destruct(func);
 
-                let arity: Tag = desc.2 .1.into();
+                let arity: Tag = (Core::map_core_function(func).1 as usize).into();
                 let index: Tag = offset.into();
 
                 (arity, index)
@@ -196,38 +175,37 @@ impl Function {
     pub fn write(env: &Env, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         assert_eq!(func.type_of(), Type::Function);
 
-        let (arity, form) = Function::destruct(env, func);
-        let nreq = Fixnum::as_i64(arity);
-
-        let desc = match form.type_of() {
-            Type::Null => (
-                "null".to_string(),
-                "lambda".to_string(),
-                format!("{:x}", form.as_u64()),
+        let desc = match func {
+            Tag::Direct(_) => (
+                "core".to_string(),
+                Core::map_core_function(func).1 as usize,
+                format!("#x{:x}", func.as_u64()),
             ),
-            Type::Cons => match Cons::destruct(env, form).1.type_of() {
-                Type::Null | Type::Cons => (
-                    "null".to_string(),
-                    "lambda".to_string(),
-                    format!("{:x}", form.as_u64()),
-                ),
-                _ => panic!(),
-            },
-            Type::Fixnum => {
-                let (name, _ns, core_def) = Self::staticns_deref(env, func);
+            Tag::Indirect(_) => {
+                let (arity, form) = Function::destruct(env, func);
 
-                (name, "core".into(), core_def.0.to_string())
+                match form.type_of() {
+                    Type::Null => (
+                        "lambda".to_string(),
+                        Fixnum::as_i64(arity) as usize,
+                        "()".to_string(),
+                    ),
+                    Type::Cons => match Cons::destruct(env, form).1.type_of() {
+                        Type::Null | Type::Cons => (
+                            "lambda".to_string(),
+                            Fixnum::as_i64(arity) as usize,
+                            format!("{:x}", form.as_u64()),
+                        ),
+                        _ => panic!(),
+                    },
+                    _ => panic!(),
+                }
             }
-            _ => panic!(),
         };
 
         StreamWriter::write_str(
             env,
-            format!(
-                "#<:function :{} [type:{}, req:{nreq}, form:{}]>",
-                desc.0, desc.1, desc.2
-            )
-            .as_str(),
+            format!("#<function :{} {} {}>", desc.0, desc.1, desc.2).as_str(),
             stream,
         )
     }

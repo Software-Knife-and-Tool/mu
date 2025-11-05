@@ -138,15 +138,14 @@ impl DirectTag {
             DirectType::ByteVec => Type::Vector,
             DirectType::String => Type::Vector,
             DirectType::Keyword => Type::Keyword,
-            DirectType::Ext => match ExtType::try_from(self.ext()) {
-                Ok(ExtType::Char) => Type::Char,
-                Ok(ExtType::Cons) => Type::Cons,
-                Ok(ExtType::Fixnum) => Type::Fixnum,
-                Ok(ExtType::Float) => Type::Float,
-                Ok(ExtType::Function) => Type::Function,
-                Ok(ExtType::Image) => Type::try_from(self.data() as u8).unwrap(),
-                Ok(ExtType::Stream) => Type::Stream,
-                _ => panic!(),
+            DirectType::Ext => match ExtType::try_from(self.ext()).unwrap() {
+                ExtType::Char => Type::Char,
+                ExtType::Cons => Type::Cons,
+                ExtType::Fixnum => Type::Fixnum,
+                ExtType::Float => Type::Float,
+                ExtType::Function => Type::Function,
+                ExtType::Image => Type::try_from(self.data() as u8).unwrap(),
+                ExtType::Stream => Type::Stream,
             },
         }
     }
@@ -154,7 +153,6 @@ impl DirectTag {
     //
     // image cache
     //
-
     pub fn is_cached(tag: Tag) -> bool {
         match tag {
             Tag::Direct(fn_) => matches!(ExtType::try_from(fn_.ext()).unwrap(), ExtType::Image),
@@ -190,21 +188,20 @@ impl DirectTag {
     //
     // direct function
     //
-
-    pub fn function(ns: u16, index: u16) -> Tag {
+    pub fn function(index: usize) -> Tag {
         Self::to_tag(
-            (ns as u64) << 16 | index as u64,
+            index as u64,
             DirectExt::ExtType(ExtType::Function),
             DirectType::Ext,
         )
     }
 
-    pub fn function_id(tag: Tag) -> (u16, u16) {
+    pub fn function_destruct(tag: Tag) -> usize {
         match tag {
             Tag::Direct(tag) if tag.dtype() == DirectType::Ext && tag.ext() == 4 => {
                 let data: u64 = tag.data();
 
-                ((data >> 16) as u16, (data & 0xffff) as u16)
+                data as usize
             }
             _ => panic!(),
         }

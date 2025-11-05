@@ -146,6 +146,7 @@ pub type CoreFnDef = (&'static str, u16, CoreFn);
 pub struct Core {
     pub envs: RwLock<HashMap<u64, Env>>,
     pub features: RwLock<Vec<Feature>>,
+    pub feature_defs: RwLock<Vec<CoreFnDef>>,
     pub stdio: RwLock<(Tag, Tag, Tag)>,
     pub stream_id: RwLock<u64>,
     pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
@@ -163,6 +164,7 @@ impl Core {
         Core {
             envs: RwLock::new(HashMap::new()),
             features: RwLock::new(Vec::new()),
+            feature_defs: RwLock::new(Vec::new()),
             stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
             streams: RwLock::new(HashMap::new()),
             stream_id: RwLock::new(0),
@@ -210,48 +212,50 @@ impl Core {
         stdio.2
     }
 
+    pub fn map_core_function(func: Tag) -> CoreFnDef {
+        let offset = DirectTag::function_destruct(func);
+
+        if offset < CORE_FUNCTIONS.len() {
+            CORE_FUNCTIONS[offset]
+        } else {
+            let defs = block_on(CORE.feature_defs.read());
+
+            defs[offset - (CORE_FUNCTIONS.len() - 1)]
+        }
+    }
+
     // core/feature symbols
     pub fn symbols(env: &Env) {
-        let (_, vector) = Struct::destruct(env, env.mu_ns);
-        let mu_id: u16 = Fixnum::as_i64(Vector::ref_(env, vector, 0).unwrap()) as u16;
-
         for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
             let (name, _, _) = desc;
 
-            Namespace::intern_static(
-                env,
-                env.mu_ns,
-                (*name).into(),
-                DirectTag::function(mu_id, index as u16),
-            )
-            .unwrap();
+            Namespace::intern_static(env, env.mu_ns, (*name).into(), DirectTag::function(index))
+                .unwrap();
         }
 
         let features = block_on(CORE.features.read());
+        let mut defs = block_on(CORE.feature_defs.write());
 
         for feature in &*features {
             if feature.namespace.is_empty() {
                 continue;
             }
 
-            let ns =
-                Namespace::with_static(env, &feature.namespace, feature.symbols, feature.functions)
-                    .unwrap();
-
-            let (_, vector) = Struct::destruct(env, ns);
-            let ns_id: u16 = Fixnum::as_i64(Vector::ref_(env, vector, 0).unwrap()) as u16;
+            let ns = Namespace::with_static(env, &feature.namespace, feature.symbols).unwrap();
 
             if let Some(functions) = feature.functions {
-                for (index, desc) in functions.iter().enumerate() {
+                for desc in functions.iter() {
                     let (name, _, _) = *desc;
 
                     Namespace::intern_static(
                         env,
                         ns,
                         (*name).into(),
-                        DirectTag::function(ns_id, index as u16),
+                        DirectTag::function((CORE_FUNCTIONS.len() - 1) + defs.len()),
                     )
                     .unwrap();
+
+                    defs.push(*desc);
                 }
             }
         }

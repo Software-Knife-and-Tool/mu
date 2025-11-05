@@ -36,8 +36,8 @@ lazy_static! {
     };
 }
 
-type CompileEnv = Vec<(Tag, Vec<Tag>)>;
-type CompilerSpecFn = fn(&Env, Tag, &mut CompileEnv) -> exception::Result<Tag>;
+type LexEnv = Vec<(Tag, Vec<Tag>)>;
+type CompilerSpecFn = fn(&Env, Tag, &mut LexEnv) -> exception::Result<Tag>;
 
 pub struct Compiler {
     lambda: Tag,
@@ -47,7 +47,7 @@ pub struct Compiler {
 
 impl Compiler {
     // special forms
-    fn compile_lambda(env: &Env, form: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {
+    fn compile_lambda(env: &Env, form: Tag, lex_env: &mut LexEnv) -> exception::Result<Tag> {
         let (lambda, body, symbols) = Self::lambda(env, form)?;
 
         let function = Function::new(
@@ -58,18 +58,18 @@ impl Compiler {
         let func = function.with_heap(env);
         let mut function = Function::to_image(env, func);
 
-        lenv.push((func, symbols));
+        lex_env.push((func, symbols));
 
-        function.form = Self::list(env, body, lenv)?;
+        function.form = Self::list(env, body, lex_env)?;
         Function::update(env, &function, func);
 
-        lenv.pop();
+        lex_env.pop();
 
         Ok(func)
     }
 
     // needs implementation
-    fn compile_alambda(env: &Env, form: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {
+    fn compile_alambda(env: &Env, form: Tag, lex_env: &mut LexEnv) -> exception::Result<Tag> {
         let (lambda, body, symbols) = Self::lambda(env, form)?;
 
         let function = Function::new(
@@ -80,17 +80,17 @@ impl Compiler {
         let func = function.with_heap(env);
         let mut function = Function::to_image(env, func);
 
-        lenv.push((func, symbols));
+        lex_env.push((func, symbols));
 
-        function.form = Self::list(env, body, lenv)?;
+        function.form = Self::list(env, body, lex_env)?;
         Function::update(env, &function, func);
 
-        lenv.pop();
+        lex_env.pop();
 
         Ok(func)
     }
 
-    fn compile_if(env: &Env, args: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {
+    fn compile_if(env: &Env, args: Tag, lex_env: &mut LexEnv) -> exception::Result<Tag> {
         if Cons::length(env, args) != Some(3) {
             Err(Exception::new(env, Condition::Syntax, ":if", args))?
         }
@@ -116,10 +116,10 @@ impl Compiler {
             ),
         ];
 
-        Self::compile(env, Cons::list(env, &if_vec), lenv)
+        Self::compile(env, Cons::list(env, &if_vec), lex_env)
     }
 
-    fn compile_quote(env: &Env, list: Tag, _: &mut CompileEnv) -> exception::Result<Tag> {
+    fn compile_quote(env: &Env, list: Tag, _: &mut LexEnv) -> exception::Result<Tag> {
         Ok(Self::quote(env, &list))
     }
 
@@ -146,7 +146,7 @@ impl Compiler {
         env: &Env,
         name: Tag,
         args: Tag,
-        lenv: &mut CompileEnv,
+        lex_env: &mut LexEnv,
     ) -> exception::Result<Tag> {
         match COMPILER
             .specmap
@@ -154,7 +154,7 @@ impl Compiler {
             .copied()
             .find(|spec| name.eq_(&spec.0))
         {
-            Some(spec) => spec.1(env, args, lenv),
+            Some(spec) => spec.1(env, args, lex_env),
             None => Err(Exception::new(env, Condition::Syntax, "mu:compile", args))?,
         }
     }
@@ -195,19 +195,19 @@ impl Compiler {
         Ok((lambda, body, frame_symbols(lambda)?))
     }
 
-    fn list(env: &Env, body: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {
+    fn list(env: &Env, body: Tag, lex_env: &mut LexEnv) -> exception::Result<Tag> {
         let compile_results: exception::Result<Vec<Tag>> = Cons::list_iter(env, body)
-            .map(|expr| Self::compile(env, expr, lenv))
+            .map(|expr| Self::compile(env, expr, lex_env))
             .collect();
 
         Ok(Cons::list(env, &compile_results?))
     }
 
-    fn symbol(env: &Env, symbol: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {
+    fn symbol(env: &Env, symbol: Tag, lex_env: &mut LexEnv) -> exception::Result<Tag> {
         let ns = Symbol::destruct(env, symbol).0;
 
         if ns.eq_(&UNBOUND) {
-            let lex_sym = lenv.iter().rev().find_map(|frame| {
+            let lex_sym = lex_env.iter().rev().find_map(|frame| {
                 frame
                     .1
                     .iter()
@@ -240,16 +240,16 @@ impl Compiler {
         }
     }
 
-    pub fn compile(env: &Env, expr: Tag, lenv: &mut CompileEnv) -> exception::Result<Tag> {
+    pub fn compile(env: &Env, expr: Tag, lex_env: &mut LexEnv) -> exception::Result<Tag> {
         match expr.type_of() {
-            Type::Symbol => Self::symbol(env, expr, lenv),
+            Type::Symbol => Self::symbol(env, expr, lex_env),
             Type::Cons => {
                 let (func, args) = Cons::destruct(env, expr);
 
                 match func.type_of() {
-                    Type::Keyword => Ok(Self::special_form(env, func, args, lenv)?),
+                    Type::Keyword => Ok(Self::special_form(env, func, args, lex_env)?),
                     Type::Symbol => {
-                        let args = Self::list(env, args, lenv)?;
+                        let args = Self::list(env, args, lex_env)?;
 
                         if Symbol::is_bound(env, func) {
                             let fn_ = Symbol::destruct(env, func).2;
@@ -262,10 +262,10 @@ impl Compiler {
                             Ok(Cons::cons(env, func, args))
                         }
                     }
-                    Type::Function => Ok(Cons::cons(env, func, Self::list(env, args, lenv)?)),
+                    Type::Function => Ok(Cons::cons(env, func, Self::list(env, args, lex_env)?)),
                     Type::Cons => {
-                        let arglist = Self::list(env, args, lenv)?;
-                        let fn_ = Self::compile(env, func, lenv)?;
+                        let arglist = Self::list(env, args, lex_env)?;
+                        let fn_ = Self::compile(env, func, lex_env)?;
 
                         match fn_.type_of() {
                             Type::Function => Ok(Cons::cons(env, fn_, arglist)),

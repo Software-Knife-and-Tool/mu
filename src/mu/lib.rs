@@ -188,7 +188,7 @@ impl Mu {
             let eof_value = Self::eval(env, Self::read_str(env, "(mu:make-symbol \"eof\")")?)?;
 
             loop {
-                let form = Self::read(env, istream, false, eof_value)?;
+                let form = Self::read_(env, istream, false, eof_value)?;
 
                 if Self::eq(form, eof_value) {
                     break Ok(true);
