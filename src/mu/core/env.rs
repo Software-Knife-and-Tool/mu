@@ -6,7 +6,7 @@ use {
     crate::{
         core::{
             config::Config,
-            core_::{Core, CORE, CORE_FUNCTIONS},
+            core_::{Core, CORE},
             frame::Frame,
             tag::Tag,
         },
@@ -66,15 +66,16 @@ impl Env {
         };
 
         // establish namespaces
-        env.mu_ns =
-            Namespace::with_static(&env, "mu", Some(&CORE.symbols), Some(*CORE_FUNCTIONS)).unwrap();
-        env.keyword_ns = Namespace::with_static(&env, "keyword", None, None).unwrap();
+        env.mu_ns = Namespace::with_static(&env, "mu", Some(&CORE.symbols)).unwrap();
+        env.keyword_ns = Namespace::with_static(&env, "keyword", None).unwrap();
 
+        // standard streams
         Namespace::intern_static(&env, env.mu_ns, "*standard-input*".into(), CORE.stdin()).unwrap();
         Namespace::intern_static(&env, env.mu_ns, "*standard-output*".into(), CORE.stdout())
             .unwrap();
         Namespace::intern_static(&env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
 
+        // core symbols
         Core::symbols(&env);
 
         #[cfg(feature = "instrument")]

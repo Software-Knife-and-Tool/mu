@@ -6,6 +6,7 @@ use {
     crate::{
         core::{
             apply::Apply as _,
+            core_::Core,
             dynamic::Dynamic,
             env::Env,
             exception::{self, Condition, Exception},
@@ -104,7 +105,7 @@ impl Frame {
     }
 
     // apply
-    pub fn apply(mut self, env: &Env, func: Tag) -> exception::Result<Tag> {
+    pub fn apply(self, env: &Env, func: Tag) -> exception::Result<Tag> {
         #[cfg(feature = "instrument")]
         <Feature as Instrument>::instrument_event(env, func).unwrap();
 
@@ -154,9 +155,15 @@ impl Frame {
             }
             Type::Function => {
                 if let Tag::Direct(_) = func {
-                    Function::staticns_deref(env, func).2 .2(env, &mut self)?;
+                    let mut fp = Frame {
+                        argv: self.argv,
+                        func: self.func,
+                        value: self.value,
+                    };
 
-                    return Ok(self.value);
+                    Core::map_core_function(func).2(env, &mut fp)?;
+
+                    return Ok(fp.value);
                 }
 
                 match form.type_of() {

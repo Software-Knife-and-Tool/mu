@@ -6,7 +6,6 @@ use {
     crate::{
         core::{
             apply::Apply as _,
-            core_::CoreFnDef,
             direct::DirectTag,
             env::Env,
             exception::{self, Condition, Exception},
@@ -51,7 +50,6 @@ impl Gc for Namespace {
 
 #[derive(Clone)]
 pub struct Static {
-    pub functions: Option<&'static [CoreFnDef]>,
     pub hash: Option<&'static RwLock<HashMap<String, Tag>>>,
 }
 
@@ -100,7 +98,6 @@ impl Namespace {
         env: &Env,
         name: &str,
         ns_map: Option<&'static RwLock<HashMap<String, Tag>>>,
-        functab: Option<&'static [CoreFnDef]>,
     ) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
         let id = ns_ref.len();
@@ -126,14 +123,7 @@ impl Namespace {
         )
         .with_heap(env);
 
-        ns_ref.push((
-            ns,
-            name.into(),
-            Namespace::Static(Static {
-                functions: functab,
-                hash: ns_map,
-            }),
-        ));
+        ns_ref.push((ns, name.into(), Namespace::Static(Static { hash: ns_map })));
 
         Ok(ns)
     }
