@@ -58,11 +58,11 @@ impl Env {
             lexical: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),
             ns_map: RwLock::new(Vec::new()),
+            vector_cache: RwLock::new(HashMap::new()),
             #[cfg(feature = "instrument")]
             prof: RwLock::new(Vec::new()),
             #[cfg(feature = "instrument")]
             prof_on: RwLock::new(false),
-            vector_cache: RwLock::new(HashMap::new()),
         };
 
         // establish namespaces
@@ -76,7 +76,7 @@ impl Env {
         Namespace::intern_static(&env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
 
         // core symbols
-        Core::symbols(&env);
+        Core::intern_symbols(&env);
 
         #[cfg(feature = "instrument")]
         Instrument::eprintln(&env, "env: new, mu ns", true, env.mu_ns);

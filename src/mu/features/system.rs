@@ -34,8 +34,8 @@ use {
 use sysinfo_dot_h::{self};
 
 lazy_static! {
-    pub static ref SYSTEM_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref SYSTEM_FUNCTIONS: &'static [CoreFnDef] = &[
+    static ref SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    static ref FUNCTIONS: &'static [CoreFnDef] = &[
         ("exit", 1, Feature::system_exit),
         ("shell", 2, Feature::system_shell),
         ("sleep", 1, Feature::system_sleep),
@@ -52,8 +52,8 @@ pub trait System {
 impl System for Feature {
     fn feature() -> Feature {
         Feature {
-            functions: Some(&SYSTEM_FUNCTIONS),
-            symbols: Some(&SYSTEM_SYMBOLS),
+            functions: Some(&FUNCTIONS),
+            symbols: Some(&SYMBOLS),
             namespace: "feature/system".into(),
         }
     }

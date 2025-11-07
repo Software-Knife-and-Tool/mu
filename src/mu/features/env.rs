@@ -36,8 +36,8 @@ use {
 };
 
 lazy_static! {
-    pub static ref ENV_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref ENV_FUNCTIONS: &'static [CoreFnDef] = &[
+    static ref SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    static ref FUNCTIONS: &'static [CoreFnDef] = &[
         ("cache-room", 0, Feature::env_cache_room),
         ("env", 0, Feature::env_env),
         ("heap-info", 0, Feature::env_hp_info),
@@ -66,8 +66,8 @@ pub trait Env {
 impl Env for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: Some(&ENV_SYMBOLS),
-            functions: Some(&ENV_FUNCTIONS),
+            functions: Some(&FUNCTIONS),
+            symbols: Some(&SYMBOLS),
             namespace: "feature/env".into(),
         }
     }

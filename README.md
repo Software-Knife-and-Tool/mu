@@ -169,8 +169,8 @@ The `/opt/mu` directory is hardwired into several tools and the release mechanis
 
 ```
 version 0.2.10 is built with rustc 1.89.0
-version 0.2.11 is built with rustc 1.90.0
-version 0.2.12 is built with rustc 1.90.0
+version 0.2.1[12] is built with rustc 1.90.0
+version 0.2.13 is built with rustc 1.91.0
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility. Other development tools like  `valgrind` are optional.
