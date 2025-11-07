@@ -35,32 +35,24 @@ pub trait Instrument {
 
 impl Instrument for Env {
     fn eprint(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(CORE.stdio.write());
-
         eprint!("{label}: ");
-        StreamWriter::write(self, tag, verbose, stdio.2).unwrap();
+        StreamWriter::write(self, tag, verbose, CORE.stdio.2).unwrap();
     }
 
     fn eprintln(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(CORE.stdio.write());
-
         eprint!("{label}: ");
-        StreamWriter::write(self, tag, verbose, stdio.2).unwrap();
+        StreamWriter::write(self, tag, verbose, CORE.stdio.2).unwrap();
         eprintln!();
     }
 
     fn print(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(CORE.stdio.write());
-
         print!("{label}: ");
-        StreamWriter::write(self, tag, verbose, stdio.1).unwrap();
+        StreamWriter::write(self, tag, verbose, CORE.stdio.1).unwrap();
     }
 
     fn println(&self, label: &str, verbose: bool, tag: Tag) {
-        let stdio = block_on(CORE.stdio.write());
-
         print!("{label}: ");
-        StreamWriter::write(self, tag, verbose, stdio.1).unwrap();
+        StreamWriter::write(self, tag, verbose, CORE.stdio.1).unwrap();
         println!();
     }
 }

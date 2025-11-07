@@ -36,8 +36,8 @@ use {
 };
 
 lazy_static! {
-    pub static ref CORE_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref CORE_FUNCTIONS: &'static [CoreFnDef] = &[
+    static ref CORE_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    static ref CORE_FUNCTIONS: &'static [CoreFnDef] = &[
         ("core-info", 0, Feature::core_core_info),
         ("process-fds", 0, Feature::core_fds),
         ("process-mem-res", 0, Feature::core_mem_res),

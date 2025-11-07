@@ -33,16 +33,16 @@ pub trait Instrument {
 }
 
 lazy_static! {
-    pub static ref INSTRUMENT_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    pub static ref INSTRUMENT_FUNCTIONS: &'static [CoreFnDef] =
-        &[("imstrument-control", 1, Feature::instrument_control)];
+    static ref SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
+    static ref FUNCTIONS: &'static [CoreFnDef] =
+        &[("instrument-control", 1, Feature::instrument_control)];
 }
 
 impl Instrument for Feature {
     fn feature() -> Feature {
         Feature {
-            functions: Some(&INSTRUMENT_FUNCTIONS),
-            symbols: Some(&INSTRUMENT_SYMBOLS),
+            functions: Some(&FUNCTIONS),
+            symbols: Some(&SYMBOLS),
             namespace: "feature/instrument".into(),
         }
     }

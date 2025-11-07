@@ -36,7 +36,7 @@ use {
 };
 
 lazy_static! {
-    pub static ref CORE: Core = Core::new().features().stdio();
+    pub static ref CORE: Core = Core::new();
     pub static ref CORE_FUNCTIONS: &'static [CoreFnDef] = &[
         // types
         ( "eq",         2, Tag::mu_eq ),
@@ -145,9 +145,9 @@ pub type CoreFnDef = (&'static str, u16, CoreFn);
 
 pub struct Core {
     pub envs: RwLock<HashMap<u64, Env>>,
-    pub features: RwLock<Vec<Feature>>,
-    pub feature_defs: RwLock<Vec<CoreFnDef>>,
-    pub stdio: RwLock<(Tag, Tag, Tag)>,
+    pub features: Vec<Feature>,
+    pub feature_defs: Vec<CoreFnDef>,
+    pub stdio: (Tag, Tag, Tag),
     pub stream_id: RwLock<u64>,
     pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
     pub symbols: RwLock<HashMap<String, Tag>>,
@@ -161,82 +161,64 @@ impl Default for Core {
 
 impl Core {
     pub fn new() -> Self {
-        Core {
+        let mut core = Core {
             envs: RwLock::new(HashMap::new()),
-            features: RwLock::new(Vec::new()),
-            feature_defs: RwLock::new(Vec::new()),
-            stdio: RwLock::new((Tag::nil(), Tag::nil(), Tag::nil())),
-            streams: RwLock::new(HashMap::new()),
+            feature_defs: FEATURES
+                .features
+                .iter()
+                .filter(|feature| !feature.namespace.is_empty() && feature.functions.is_some())
+                .flat_map(|feature| feature.functions.unwrap().to_vec())
+                .collect::<Vec<CoreFnDef>>(),
+            features: FEATURES.features.clone(),
+            stdio: (Tag::nil(), Tag::nil(), Tag::nil()),
             stream_id: RwLock::new(0),
+            streams: RwLock::new(HashMap::new()),
             symbols: RwLock::new(HashMap::new()),
-        }
-    }
+        };
 
-    // constructors
-    pub fn features(self) -> Self {
-        let mut features = block_on(self.features.write());
-
-        *features = FEATURES.features.clone();
-
-        self
-    }
-
-    pub fn stdio(self) -> Self {
-        let mut stdio = block_on(self.stdio.write());
-
-        *stdio = (
-            StreamBuilder::new().stdin().std_build(&self).unwrap(),
-            StreamBuilder::new().stdout().std_build(&self).unwrap(),
-            StreamBuilder::new().errout().std_build(&self).unwrap(),
+        core.stdio = (
+            StreamBuilder::new().stdin().std_build(&core).unwrap(),
+            StreamBuilder::new().stdout().std_build(&core).unwrap(),
+            StreamBuilder::new().errout().std_build(&core).unwrap(),
         );
 
-        self
-    }
-
-    pub fn stdin(&self) -> Tag {
-        let stdio = block_on(self.stdio.read());
-
-        stdio.0
+        core
     }
 
     // accessors
-    pub fn stdout(&self) -> Tag {
-        let stdio = block_on(self.stdio.read());
+    pub fn stdin(&self) -> Tag {
+        self.stdio.0
+    }
 
-        stdio.1
+    pub fn stdout(&self) -> Tag {
+        self.stdio.1
     }
 
     pub fn errout(&self) -> Tag {
-        let stdio = block_on(self.stdio.read());
-
-        stdio.2
+        self.stdio.2
     }
 
     pub fn map_core_function(func: Tag) -> CoreFnDef {
         let offset = DirectTag::function_destruct(func);
+        let cf_len = CORE_FUNCTIONS.len();
 
-        if offset < CORE_FUNCTIONS.len() {
+        if offset < cf_len {
             CORE_FUNCTIONS[offset]
         } else {
-            let defs = block_on(CORE.feature_defs.read());
-
-            defs[offset - (CORE_FUNCTIONS.len() - 1)]
+            CORE.feature_defs[offset - cf_len]
         }
     }
 
     // core/feature symbols
-    pub fn symbols(env: &Env) {
+    pub fn intern_symbols(env: &Env) {
         for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
-            let (name, _, _) = desc;
-
-            Namespace::intern_static(env, env.mu_ns, (*name).into(), DirectTag::function(index))
+            Namespace::intern_static(env, env.mu_ns, (*desc.0).into(), DirectTag::function(index))
                 .unwrap();
         }
 
-        let features = block_on(CORE.features.read());
-        let mut defs = block_on(CORE.feature_defs.write());
+        let mut ndef = CORE_FUNCTIONS.len();
 
-        for feature in &*features {
+        for feature in &FEATURES.features {
             if feature.namespace.is_empty() {
                 continue;
             }
@@ -245,17 +227,10 @@ impl Core {
 
             if let Some(functions) = feature.functions {
                 for desc in functions.iter() {
-                    let (name, _, _) = *desc;
+                    Namespace::intern_static(env, ns, (desc.0).into(), DirectTag::function(ndef))
+                        .unwrap();
 
-                    Namespace::intern_static(
-                        env,
-                        ns,
-                        (*name).into(),
-                        DirectTag::function((CORE_FUNCTIONS.len() - 1) + defs.len()),
-                    )
-                    .unwrap();
-
-                    defs.push(*desc);
+                    ndef += 1
                 }
             }
         }
@@ -282,8 +257,8 @@ impl Core {
     }
 
     pub fn features_as_list(env: &Env) -> Tag {
-        let features_ref = block_on(CORE.features.read());
-        let features = features_ref
+        let features = CORE
+            .features
             .iter()
             .map(|feature| Vector::from(feature.namespace.clone()).with_heap(env))
             .collect::<Vec<Tag>>();
