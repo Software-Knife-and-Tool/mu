@@ -78,9 +78,11 @@ impl Env {
         // core symbols
         Core::intern_symbols(&env);
 
+        /*
         #[cfg(feature = "instrument")]
         Instrument::eprintln(&env, "env: new, mu ns", true, env.mu_ns);
-
+         */
+        
         env
     }
 }
