@@ -35,7 +35,7 @@ impl Gc for Namespace {
     #[allow(dead_code)]
     fn gc(&mut self, gc: &mut GcContext, env: &Env) {
         let hash_ref = block_on(match self {
-            Namespace::Static(static_) => match static_.hash {
+            Namespace::Static(static_) => match &static_.hash {
                 Some(hash) => hash.read(),
                 None => return,
             },
@@ -50,7 +50,7 @@ impl Gc for Namespace {
 
 #[derive(Clone)]
 pub struct Static {
-    pub hash: Option<&'static RwLock<HashMap<String, Tag>>>,
+    pub hash: Option<RwLock<HashMap<String, Tag>>>,
 }
 
 #[derive(Clone)]
@@ -97,7 +97,7 @@ impl Namespace {
     pub fn with_static(
         env: &Env,
         name: &str,
-        ns_map: Option<&'static RwLock<HashMap<String, Tag>>>,
+        ns_map: Option<RwLock<HashMap<String, Tag>>>,
     ) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
         let id = ns_ref.len();
@@ -152,7 +152,7 @@ impl Namespace {
         ) {
             Some(ns_cache) => {
                 let hash = block_on(match ns_cache {
-                    Namespace::Static(static_) => match static_.hash {
+                    Namespace::Static(static_) => match &static_.hash {
                         Some(hash) => hash.read(),
                         None => None?,
                     },
@@ -253,7 +253,7 @@ impl Namespace {
                     Some(ns_map) => {
                         let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
                         let mut hash = block_on(match ns_map {
-                            Namespace::Static(static_) => match static_.hash {
+                            Namespace::Static(static_) => match &static_.hash {
                                 Some(hash) => hash.write(),
                                 None => None?,
                             },
@@ -286,7 +286,7 @@ impl Namespace {
             Some(ns_map) => {
                 let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
                 let mut hash = block_on(match ns_map {
-                    Namespace::Static(static_) => match static_.hash {
+                    Namespace::Static(static_) => match &static_.hash {
                         Some(hash) => hash.write(),
                         None => None?,
                     },

@@ -66,7 +66,7 @@ impl Env {
         };
 
         // establish namespaces
-        env.mu_ns = Namespace::with_static(&env, "mu", Some(&CORE.symbols)).unwrap();
+        env.mu_ns = Namespace::with_static(&env, "mu", Some(CORE.symbols.clone())).unwrap();
         env.keyword_ns = Namespace::with_static(&env, "keyword", None).unwrap();
 
         // standard streams
@@ -82,7 +82,7 @@ impl Env {
         #[cfg(feature = "instrument")]
         Instrument::eprintln(&env, "env: new, mu ns", true, env.mu_ns);
          */
-        
+
         env
     }
 }
