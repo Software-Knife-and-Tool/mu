@@ -167,7 +167,7 @@ impl Core {
                 .features
                 .iter()
                 .filter(|feature| !feature.namespace.is_empty() && feature.functions.is_some())
-                .flat_map(|feature| feature.functions.unwrap().to_vec())
+                .flat_map(|feature| feature.functions.as_ref().unwrap().to_vec())
                 .collect::<Vec<CoreFnDef>>(),
             features: FEATURES.features.clone(),
             stdio: (Tag::nil(), Tag::nil(), Tag::nil()),
@@ -223,9 +223,10 @@ impl Core {
                 continue;
             }
 
-            let ns = Namespace::with_static(env, &feature.namespace, feature.symbols).unwrap();
+            let ns =
+                Namespace::with_static(env, &feature.namespace, feature.symbols.clone()).unwrap();
 
-            if let Some(functions) = feature.functions {
+            if let Some(functions) = &feature.functions {
                 for desc in functions.iter() {
                     Namespace::intern_static(env, ns, (desc.0).into(), DirectTag::function(ndef))
                         .unwrap();

@@ -6,7 +6,6 @@
 use {
     crate::{
         core::{
-            core_::CoreFnDef,
             direct::DirectTag,
             env,
             exception::{self},
@@ -36,14 +35,6 @@ use {
 };
 
 lazy_static! {
-    static ref SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    static ref FUNCTIONS: &'static [CoreFnDef] = &[
-        ("cache-room", 0, Feature::env_cache_room),
-        ("env", 0, Feature::env_env),
-        ("heap-info", 0, Feature::env_hp_info),
-        ("heap-room", 0, Feature::env_hp_room),
-        ("heap-size", 1, Feature::env_hp_size),
-    ];
     static ref INFOTYPE: Vec<Tag> = vec![
         Symbol::keyword("cons"),
         Symbol::keyword("func"),
@@ -66,8 +57,14 @@ pub trait Env {
 impl Env for Feature {
     fn feature() -> Feature {
         Feature {
-            functions: Some(&FUNCTIONS),
-            symbols: Some(&SYMBOLS),
+            functions: Some(vec![
+                ("cache-room", 0, Feature::env_cache_room),
+                ("env", 0, Feature::env_env),
+                ("heap-info", 0, Feature::env_hp_info),
+                ("heap-room", 0, Feature::env_hp_room),
+                ("heap-size", 1, Feature::env_hp_size),
+            ]),
+            symbols: Some(RwLock::new(HashMap::new())),
             namespace: "feature/env".into(),
         }
     }

@@ -7,7 +7,6 @@ use {
     crate::{
         core::{
             apply::Apply as _,
-            core_::CoreFnDef,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -32,17 +31,11 @@ pub trait Instrument {
     fn instrument_event(_: &Env, _: Tag) -> exception::Result<()>;
 }
 
-lazy_static! {
-    static ref SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    static ref FUNCTIONS: &'static [CoreFnDef] =
-        &[("instrument-control", 1, Feature::instrument_control)];
-}
-
 impl Instrument for Feature {
     fn feature() -> Feature {
         Feature {
-            functions: Some(&FUNCTIONS),
-            symbols: Some(&SYMBOLS),
+            functions: Some(vec![("instrument-control", 1, Feature::instrument_control)]),
+            symbols: Some(RwLock::new(HashMap::new())),
             namespace: "feature/instrument".into(),
         }
     }

@@ -8,7 +8,7 @@ use {
     crate::{
         core::{
             apply::Apply,
-            core_::{Core as Core_, CoreFnDef},
+            core_::{Core as Core_},
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -35,20 +35,6 @@ use {
     std::{collections::HashMap, sync::mpsc::channel},
 };
 
-lazy_static! {
-    static ref CORE_SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    static ref CORE_FUNCTIONS: &'static [CoreFnDef] = &[
-        ("core-info", 0, Feature::core_core_info),
-        ("process-fds", 0, Feature::core_fds),
-        ("process-mem-res", 0, Feature::core_mem_res),
-        ("process-mem-virt", 0, Feature::core_mem_virt),
-        ("process-time", 0, Feature::core_time),
-        ("time-units-per-second", 0, Feature::core_time_units),
-        ("delay", 0, Feature::core_delay),
-        ("ns-symbols", 1, Feature::core_ns_symbols),
-    ];
-}
-
 pub trait Core {
     fn feature() -> Feature;
 }
@@ -56,8 +42,17 @@ pub trait Core {
 impl Core for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: Some(&CORE_SYMBOLS),
-            functions: Some(&CORE_FUNCTIONS),
+            symbols: Some(RwLock::new(HashMap::new())),
+            functions: Some(vec![
+                ("core-info", 0, Feature::core_core_info),
+                ("process-fds", 0, Feature::core_fds),
+                ("process-mem-res", 0, Feature::core_mem_res),
+                ("process-mem-virt", 0, Feature::core_mem_virt),
+                ("process-time", 0, Feature::core_time),
+                ("time-units-per-second", 0, Feature::core_time_units),
+                ("delay", 0, Feature::core_delay),
+                ("ns-symbols", 1, Feature::core_ns_symbols),
+            ]),
             namespace: "feature/core".into(),
         }
     }
@@ -186,7 +181,7 @@ impl CoreFn for Feature {
             .unwrap();
 
         let hash_ref = block_on(match ns_map {
-            Namespace::Static(static_) => match static_.hash {
+            Namespace::Static(static_) => match &static_.hash {
                 Some(hash) => hash.read(),
                 None => {
                     fp.value = Tag::nil();

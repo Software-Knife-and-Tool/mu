@@ -91,7 +91,7 @@ impl Gc for GcContext<'_> {
 
         for (_, _, ns_cache) in &*ns_map_ref {
             let hash_ref = block_on(match ns_cache {
-                Namespace::Static(static_) => match static_.hash {
+                Namespace::Static(static_) => match &static_.hash {
                     Some(hash) => hash.read(),
                     None => return,
                 },

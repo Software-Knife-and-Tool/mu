@@ -27,9 +27,9 @@ lazy_static! {
 
 #[derive(Clone)]
 pub struct Feature {
-    pub functions: Option<&'static [CoreFnDef]>,
+    pub functions: Option<Vec<CoreFnDef>>,
     pub namespace: String,
-    pub symbols: Option<&'static RwLock<HashMap<String, Tag>>>,
+    pub symbols: Option<RwLock<HashMap<String, Tag>>>,
 }
 
 pub struct Features {

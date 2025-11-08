@@ -7,7 +7,6 @@ use {
     crate::{
         core::{
             apply::Apply as _,
-            core_::CoreFnDef,
             env::Env,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -33,18 +32,6 @@ use {
 #[cfg(not(target_os = "macos"))]
 use sysinfo_dot_h::{self};
 
-lazy_static! {
-    static ref SYMBOLS: RwLock<HashMap<String, Tag>> = RwLock::new(HashMap::new());
-    static ref FUNCTIONS: &'static [CoreFnDef] = &[
-        ("exit", 1, Feature::system_exit),
-        ("shell", 2, Feature::system_shell),
-        ("sleep", 1, Feature::system_sleep),
-        #[cfg(not(target_os = "macos"))]
-        ("sysinfo", 0, Feature::system_sysinfo),
-        ("uname", 0u16, Feature::system_uname),
-    ];
-}
-
 pub trait System {
     fn feature() -> Feature;
 }
@@ -52,8 +39,15 @@ pub trait System {
 impl System for Feature {
     fn feature() -> Feature {
         Feature {
-            functions: Some(&FUNCTIONS),
-            symbols: Some(&SYMBOLS),
+            functions: Some(vec![
+                ("exit", 1, Feature::system_exit),
+                ("shell", 2, Feature::system_shell),
+                ("sleep", 1, Feature::system_sleep),
+                #[cfg(not(target_os = "macos"))]
+                ("sysinfo", 0, Feature::system_sysinfo),
+                ("uname", 0u16, Feature::system_uname),
+            ]),
+            symbols: Some(RwLock::new(HashMap::new())),
             namespace: "feature/system".into(),
         }
     }
