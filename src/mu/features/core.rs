@@ -181,7 +181,7 @@ impl CoreFn for Feature {
             .unwrap();
 
         let hash_ref = block_on(match ns_map {
-            Namespace::Static(static_) => match &static_.hash {
+            Namespace::Static(static_) => match &static_ {
                 Some(hash) => hash.read(),
                 None => {
                     fp.value = Tag::nil();

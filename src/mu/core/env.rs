@@ -66,14 +66,13 @@ impl Env {
         };
 
         // establish namespaces
-        env.mu_ns = Namespace::with_static(&env, "mu", Some(CORE.symbols.clone())).unwrap();
+        env.mu_ns = Namespace::with_static(&env, "mu", Some(RwLock::new(HashMap::new()))).unwrap();
         env.keyword_ns = Namespace::with_static(&env, "keyword", None).unwrap();
 
         // standard streams
-        Namespace::intern_static(&env, env.mu_ns, "*standard-input*".into(), CORE.stdin()).unwrap();
-        Namespace::intern_static(&env, env.mu_ns, "*standard-output*".into(), CORE.stdout())
-            .unwrap();
-        Namespace::intern_static(&env, env.mu_ns, "*error-output*".into(), CORE.errout()).unwrap();
+        Namespace::intern_static(&env, env.mu_ns, "*standard-input*".into(), CORE.stdio.0);
+        Namespace::intern_static(&env, env.mu_ns, "*standard-output*".into(), CORE.stdio.1);
+        Namespace::intern_static(&env, env.mu_ns, "*error-output*".into(), CORE.stdio.2);
 
         // core symbols
         Core::intern_symbols(&env);
