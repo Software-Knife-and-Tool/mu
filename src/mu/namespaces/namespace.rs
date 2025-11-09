@@ -35,7 +35,7 @@ impl Gc for Namespace {
     #[allow(dead_code)]
     fn gc(&mut self, gc: &mut GcContext, env: &Env) {
         let hash_ref = block_on(match self {
-            Namespace::Static(static_) => match &static_.hash {
+            Namespace::Static(static_) => match &static_ {
                 Some(hash) => hash.read(),
                 None => return,
             },
@@ -49,13 +49,8 @@ impl Gc for Namespace {
 }
 
 #[derive(Clone)]
-pub struct Static {
-    pub hash: Option<RwLock<HashMap<String, Tag>>>,
-}
-
-#[derive(Clone)]
 pub enum Namespace {
-    Static(Static),
+    Static(Option<RwLock<HashMap<String, Tag>>>),
     Dynamic(RwLock<HashMap<String, Tag>>),
 }
 
@@ -123,7 +118,7 @@ impl Namespace {
         )
         .with_heap(env);
 
-        ns_ref.push((ns, name.into(), Namespace::Static(Static { hash: ns_map })));
+        ns_ref.push((ns, name.into(), Namespace::Static(ns_map)));
 
         Ok(ns)
     }
@@ -152,7 +147,7 @@ impl Namespace {
         ) {
             Some(ns_cache) => {
                 let hash = block_on(match ns_cache {
-                    Namespace::Static(static_) => match &static_.hash {
+                    Namespace::Static(static_) => match &static_ {
                         Some(hash) => hash.read(),
                         None => None?,
                     },
@@ -253,7 +248,7 @@ impl Namespace {
                     Some(ns_map) => {
                         let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
                         let mut hash = block_on(match ns_map {
-                            Namespace::Static(static_) => match &static_.hash {
+                            Namespace::Static(static_) => match &static_ {
                                 Some(hash) => hash.write(),
                                 None => None?,
                             },
@@ -270,7 +265,7 @@ impl Namespace {
         }
     }
 
-    pub fn intern_static(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
+    pub fn intern_static(env: &Env, ns: Tag, name: String, value: Tag) {
         let symbol = Symbol::new(env, ns, &name, value).with_heap(env);
         let ns_ref = block_on(env.ns_map.read());
 
@@ -286,19 +281,14 @@ impl Namespace {
             Some(ns_map) => {
                 let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
                 let mut hash = block_on(match ns_map {
-                    Namespace::Static(static_) => match &static_.hash {
-                        Some(hash) => hash.write(),
-                        None => None?,
-                    },
-                    Namespace::Dynamic(_) => None?,
+                    Namespace::Static(Some(hash)) => hash.write(),
+                    _ => panic!(),
                 });
 
                 hash.insert(name, symbol);
             }
-            None => None?,
+            None => panic!(),
         }
-
-        Some(symbol)
     }
 }
 

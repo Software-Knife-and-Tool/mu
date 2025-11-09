@@ -162,17 +162,17 @@ impl Mu {
 
     /// return the standard-input core stream
     pub fn std_in() -> Tag {
-        CORE.stdin()
+        CORE.stdio.0
     }
 
     /// return the standard-output core stream
     pub fn std_out() -> Tag {
-        CORE.stdout()
+        CORE.stdio.1
     }
 
     /// return the error-output core stream
     pub fn err_out() -> Tag {
-        CORE.errout()
+        CORE.stdio.2
     }
 
     /// format exception

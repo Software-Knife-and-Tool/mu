@@ -150,7 +150,6 @@ pub struct Core {
     pub stdio: (Tag, Tag, Tag),
     pub stream_id: RwLock<u64>,
     pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
-    pub symbols: RwLock<HashMap<String, Tag>>,
 }
 
 impl Default for Core {
@@ -173,7 +172,6 @@ impl Core {
             stdio: (Tag::nil(), Tag::nil(), Tag::nil()),
             stream_id: RwLock::new(0),
             streams: RwLock::new(HashMap::new()),
-            symbols: RwLock::new(HashMap::new()),
         };
 
         core.stdio = (
@@ -183,19 +181,6 @@ impl Core {
         );
 
         core
-    }
-
-    // accessors
-    pub fn stdin(&self) -> Tag {
-        self.stdio.0
-    }
-
-    pub fn stdout(&self) -> Tag {
-        self.stdio.1
-    }
-
-    pub fn errout(&self) -> Tag {
-        self.stdio.2
     }
 
     pub fn map_core_function(func: Tag) -> CoreFnDef {
@@ -213,7 +198,6 @@ impl Core {
     pub fn intern_symbols(env: &Env) {
         for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
             Namespace::intern_static(env, env.mu_ns, (*desc.0).into(), DirectTag::function(index))
-                .unwrap();
         }
 
         let mut ndef = CORE_FUNCTIONS.len();
@@ -228,8 +212,7 @@ impl Core {
 
             if let Some(functions) = &feature.functions {
                 for desc in functions.iter() {
-                    Namespace::intern_static(env, ns, (desc.0).into(), DirectTag::function(ndef))
-                        .unwrap();
+                    Namespace::intern_static(env, ns, (desc.0).into(), DirectTag::function(ndef));
 
                     ndef += 1
                 }
