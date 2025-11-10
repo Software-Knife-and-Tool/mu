@@ -35,7 +35,7 @@ pub struct Env {
     pub dynamic: RwLock<Vec<(u64, usize)>>,
 
     // namespaces
-    pub ns_map: RwLock<Vec<(Tag, String, Namespace)>>,
+    pub ns_map: RwLock<HashMap<String, (Tag, Namespace)>>,
 
     pub keyword_ns: Tag,
     pub mu_ns: Tag,
@@ -57,7 +57,7 @@ impl Env {
             keyword_ns: Tag::nil(),
             lexical: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),
-            ns_map: RwLock::new(Vec::new()),
+            ns_map: RwLock::new(HashMap::new()),
             vector_cache: RwLock::new(HashMap::new()),
             #[cfg(feature = "instrument")]
             prof: RwLock::new(Vec::new()),

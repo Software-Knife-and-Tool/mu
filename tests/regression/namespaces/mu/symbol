@@ -3,9 +3,9 @@
 (mu:boundp :foo)	:t
 (mu:boundp ())	:t
 (mu:symbol-name 'mu:*standard-input*)	"*standard-input*"
-(mu:symbol-namespace 'mu:*standard-input*)	#s(:ns #(:t 0 mu))
-(mu:symbol-namespace :std-in)	#s(:ns #(:t 1 keyword))
-(mu:symbol-namespace ())	#s(:ns #(:t 0 mu))
-(mu:symbol-namespace :nil)	#s(:ns #(:t 0 mu))
+(mu:symbol-namespace 'mu:*standard-input*)	#s(:ns #(:t mu))
+(mu:symbol-namespace :std-in)	#s(:ns #(:t keyword))
+(mu:symbol-namespace ())	#s(:ns #(:t mu))
+(mu:symbol-namespace :nil)	#s(:ns #(:t mu))
 (mu:symbol-value 'mu:*standard-input*)	#<stream: 0 :standard-input :input :open>
 (mu:make-symbol "abcde")	#:abcde

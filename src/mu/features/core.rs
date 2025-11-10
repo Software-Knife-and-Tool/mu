@@ -160,27 +160,16 @@ impl CoreFn for Feature {
 
     fn core_ns_symbols(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
-        let (stype, _) = Struct::destruct(env, ns);
+        let (stype, svec) = Struct::destruct(env, ns);
 
         if !stype.eq_(&Symbol::keyword("ns")) {
             Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
         }
 
+        let name = Vector::as_string(env, Vector::ref_(env, svec, 0).unwrap());
         let ns_ref = block_on(env.ns_map.read());
-        let ns_map = ns_ref
-            .iter()
-            .find_map(
-                |(tag, _, ns_map)| {
-                    if ns.eq_(tag) {
-                        Some(ns_map)
-                    } else {
-                        None
-                    }
-                },
-            )
-            .unwrap();
 
-        let hash_ref = block_on(match ns_map {
+        let hash_ref = block_on(match &ns_ref[&name].1 {
             Namespace::Static(static_) => match &static_ {
                 Some(hash) => hash.read(),
                 None => {

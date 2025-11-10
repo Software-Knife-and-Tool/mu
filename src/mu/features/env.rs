@@ -127,8 +127,8 @@ impl Env for Feature {
     fn ns_map(env: &env::Env) -> Tag {
         let ns_ref = block_on(env.ns_map.read());
         let vec = ns_ref
-            .iter()
-            .map(|(_, name, _)| Vector::from((*name).clone()).with_heap(env))
+            .keys()
+            .map(|name| Vector::from((*name).clone()).with_heap(env))
             .collect::<Vec<Tag>>();
 
         Cons::list(env, &vec)
