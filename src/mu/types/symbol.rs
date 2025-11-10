@@ -347,7 +347,7 @@ impl Symbol {
                     ))?
                 }
 
-                match Namespace::find(env, &ns) {
+                match Namespace::find_ns(env, &ns) {
                     Some(ns) => Ok(Namespace::intern(env, ns, name, *UNBOUND).unwrap()),
                     None => Err(Exception::new(
                         env,

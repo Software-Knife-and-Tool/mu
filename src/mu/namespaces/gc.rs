@@ -87,10 +87,10 @@ impl Gc for GcContext<'_> {
     }
 
     fn namespaces(&mut self, env: &Env) {
-        let ns_map_ref = block_on(env.ns_map.read());
+        let ns_ref = block_on(env.ns_map.read());
 
-        for (_, _, ns_cache) in &*ns_map_ref {
-            let hash_ref = block_on(match ns_cache {
+        for (_, ns_map) in ns_ref.values() {
+            let hash_ref = block_on(match ns_map {
                 Namespace::Static(static_) => match &static_ {
                     Some(hash) => hash.read(),
                     None => return,

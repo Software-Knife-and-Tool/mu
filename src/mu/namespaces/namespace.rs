@@ -15,7 +15,6 @@ use {
         },
         namespaces::gc::GcContext,
         types::{
-            fixnum::Fixnum,
             struct_::Struct,
             symbol::{Gc as _, Symbol},
             vector::Vector,
@@ -57,9 +56,8 @@ pub enum Namespace {
 impl Namespace {
     pub fn with(env: &Env, name: &str) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
-        let id = ns_ref.len();
 
-        if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
+        if ns_ref.contains_key(name) {
             drop(ns_ref);
 
             return Err(Exception::new(
@@ -70,21 +68,15 @@ impl Namespace {
             ));
         }
 
-        let ns = Struct::new(
-            env,
-            "ns",
-            vec![
-                Fixnum::with_u64_or_panic(id as u64),
-                Vector::from(name).with_heap(env),
-            ],
-        )
-        .with_heap(env);
+        let ns = Struct::new(env, "ns", vec![Vector::from(name).with_heap(env)]).with_heap(env);
 
-        ns_ref.push((
-            ns,
-            name.into(),
-            Namespace::Dynamic(RwLock::new(HashMap::<String, Tag>::new())),
-        ));
+        ns_ref.insert(
+            name.to_string(),
+            (
+                ns,
+                Namespace::Dynamic(RwLock::new(HashMap::<String, Tag>::new())),
+            ),
+        );
 
         Ok(ns)
     }
@@ -95,9 +87,8 @@ impl Namespace {
         ns_map: Option<RwLock<HashMap<String, Tag>>>,
     ) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
-        let id = ns_ref.len();
 
-        if ns_ref.iter().any(|(_, ns_name, _)| name == ns_name) {
+        if ns_ref.contains_key(name) {
             drop(ns_ref);
 
             return Err(Exception::new(
@@ -108,17 +99,9 @@ impl Namespace {
             ));
         }
 
-        let ns = Struct::new(
-            env,
-            "ns",
-            vec![
-                Fixnum::with_u64_or_panic(id as u64),
-                Vector::from(name).with_heap(env),
-            ],
-        )
-        .with_heap(env);
+        let ns = Struct::new(env, "ns", vec![Vector::from(name).with_heap(env)]).with_heap(env);
 
-        ns_ref.push((ns, name.into(), Namespace::Static(ns_map)));
+        ns_ref.insert(name.to_string(), (ns, Namespace::Static(ns_map)));
 
         Ok(ns)
     }
@@ -135,67 +118,36 @@ impl Namespace {
 
     pub fn find_symbol(env: &Env, ns: Tag, name: &str) -> Option<Tag> {
         let ns_ref = block_on(env.ns_map.read());
+        let ns_map =
+            &ns_ref[&Vector::as_string(env, Vector::ref_(env, Struct::destruct(env, ns).1, 0)?)];
 
-        match ns_ref.iter().find_map(
-            |(tag, _, ns_cache)| {
-                if ns.eq_(tag) {
-                    Some(ns_cache)
-                } else {
-                    None
-                }
+        let hash = block_on(match &ns_map.1 {
+            Namespace::Static(static_) => match &static_ {
+                Some(hash) => hash.read(),
+                None => None?,
             },
-        ) {
-            Some(ns_cache) => {
-                let hash = block_on(match ns_cache {
-                    Namespace::Static(static_) => match &static_ {
-                        Some(hash) => hash.read(),
-                        None => None?,
-                    },
-                    Namespace::Dynamic(hash) => hash.read(),
-                });
+            Namespace::Dynamic(hash) => hash.read(),
+        });
 
-                if hash.contains_key(name) {
-                    Some(hash[name])
-                } else {
-                    None
-                }
-            }
-            None => None,
+        if hash.contains_key(name) {
+            Some(hash[name])
+        } else {
+            None
         }
     }
 
-    pub fn find(env: &Env, name: &str) -> Option<Tag> {
+    pub fn find_ns(env: &Env, name: &str) -> Option<Tag> {
         let ns_ref = block_on(env.ns_map.read());
+        let ns_desc = ns_ref.get(name)?;
 
-        ns_ref
-            .iter()
-            .find_map(
-                |(tag, ns_name, _)| {
-                    if name == ns_name {
-                        Some(tag)
-                    } else {
-                        None
-                    }
-                },
-            )
-            .copied()
+        Some(ns_desc.0)
     }
 
     pub fn name(env: &Env, ns: Tag) -> String {
-        let ns_ref = block_on(env.ns_map.read());
-
-        match ns_ref.iter().find_map(
-            |(tag, ns_name, _)| {
-                if ns.eq_(tag) {
-                    Some(ns_name)
-                } else {
-                    None
-                }
-            },
-        ) {
-            Some(tag) => tag.into(),
-            None => panic!(),
-        }
+        Vector::as_string(
+            env,
+            Vector::ref_(env, Struct::destruct(env, ns).1, 0).unwrap(),
+        )
     }
 
     pub fn intern(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
@@ -236,28 +188,22 @@ impl Namespace {
                 let symbol = Symbol::new(env, ns, &name, value).with_heap(env);
                 let ns_ref = block_on(env.ns_map.read());
 
-                match ns_ref.iter().find_map(
-                    |(tag, _, ns_map)| {
-                        if ns.eq_(tag) {
-                            Some(ns_map)
-                        } else {
-                            None
-                        }
-                    },
-                ) {
-                    Some(ns_map) => {
-                        let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
-                        let mut hash = block_on(match ns_map {
-                            Namespace::Static(static_) => match &static_ {
-                                Some(hash) => hash.write(),
-                                None => None?,
-                            },
-                            Namespace::Dynamic(hash) => hash.write(),
-                        });
+                match &ns_ref[&Self::name(env, ns)].1 {
+                    Namespace::Static(static_) => match static_ {
+                        Some(hash) => {
+                            let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
 
-                        hash.insert(name, symbol);
+                            let mut hash_ref = block_on(hash.write());
+
+                            hash_ref.insert(name, symbol);
+                        }
+                        None => panic!(),
+                    },
+                    Namespace::Dynamic(hash) => {
+                        let mut hash_ref = block_on(hash.write());
+
+                        hash_ref.insert(name, symbol);
                     }
-                    None => None?,
                 }
 
                 Some(symbol)
@@ -268,26 +214,22 @@ impl Namespace {
     pub fn intern_static(env: &Env, ns: Tag, name: String, value: Tag) {
         let symbol = Symbol::new(env, ns, &name, value).with_heap(env);
         let ns_ref = block_on(env.ns_map.read());
+        let ns_name = Vector::as_string(
+            env,
+            Vector::ref_(env, Struct::destruct(env, ns).1, 0).unwrap(),
+        );
 
-        match ns_ref.iter().find_map(
-            |(tag, _, ns_map)| {
-                if ns.eq_(tag) {
-                    Some(ns_map)
-                } else {
-                    None
+        match &ns_ref[&ns_name].1 {
+            Namespace::Static(ns_map) => match &ns_map {
+                Some(hash) => {
+                    let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
+                    let mut hash_ref = block_on(hash.write());
+
+                    hash_ref.insert(name, symbol);
                 }
+                None => panic!(),
             },
-        ) {
-            Some(ns_map) => {
-                let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
-                let mut hash = block_on(match ns_map {
-                    Namespace::Static(Some(hash)) => hash.write(),
-                    _ => panic!(),
-                });
-
-                hash.insert(name, symbol);
-            }
-            None => panic!(),
+            Namespace::Dynamic(_) => panic!(),
         }
     }
 }
@@ -348,7 +290,7 @@ impl CoreFn for Namespace {
     fn mu_find_ns(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:find-namespace", &[Type::String], fp)?;
 
-        fp.value = match Self::find(env, &Vector::as_string(env, fp.argv[0])) {
+        fp.value = match Self::find_ns(env, &Vector::as_string(env, fp.argv[0])) {
             Some(ns) => ns,
             None => Tag::nil(),
         };
@@ -366,34 +308,10 @@ impl CoreFn for Namespace {
             Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?
         }
 
-        match name.type_of() {
-            Type::Vector if Vector::type_of(env, name) == Type::Char => {
-                let ns_ref = block_on(env.ns_map.read());
-                fp.value =
-                    match ns_ref.iter().find_map(
-                        |(tag, _, ns_map)| {
-                            if ns_tag.eq_(tag) {
-                                Some(ns_map)
-                            } else {
-                                None
-                            }
-                        },
-                    ) {
-                        Some(_) => {
-                            match Self::find_symbol(env, ns_tag, &Vector::as_string(env, name)) {
-                                Some(sym) => sym,
-                                None => Tag::nil(),
-                            }
-                        }
-                        None => {
-                            drop(ns_ref);
-
-                            Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?
-                        }
-                    };
-            }
-            _ => Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?,
-        }
+        fp.value = match Self::find_symbol(env, ns_tag, &Vector::as_string(env, name)) {
+            Some(sym) => sym,
+            None => Tag::nil(),
+        };
 
         Ok(())
     }
