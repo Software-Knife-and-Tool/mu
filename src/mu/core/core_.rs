@@ -16,7 +16,7 @@ use {
         features::feature::{Feature, FEATURES},
         namespaces::{
             gc::{CoreFn as _, GcContext},
-            namespace::{CoreFn as _, Namespace},
+            namespace::{CoreFn as _, Namespace, StaticSymbols},
         },
         streams::builder::StreamBuilder,
         types::{
@@ -146,7 +146,7 @@ pub type CoreFnDef = (&'static str, u16, CoreFn);
 pub struct Core {
     pub envs: RwLock<HashMap<u64, Env>>,
     pub features: Vec<Feature>,
-    pub feature_defs: Vec<CoreFnDef>,
+    pub core_defs: Vec<CoreFnDef>,
     pub stdio: (Tag, Tag, Tag),
     pub stream_id: RwLock<u64>,
     pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
@@ -162,7 +162,7 @@ impl Core {
     pub fn new() -> Self {
         let mut core = Core {
             envs: RwLock::new(HashMap::new()),
-            feature_defs: FEATURES
+            core_defs: FEATURES
                 .features
                 .iter()
                 .filter(|feature| !feature.namespace.is_empty() && feature.functions.is_some())
@@ -190,7 +190,7 @@ impl Core {
         if offset < cf_len {
             CORE_FUNCTIONS[offset]
         } else {
-            CORE.feature_defs[offset - cf_len]
+            CORE.core_defs[offset - cf_len]
         }
     }
 
@@ -200,23 +200,17 @@ impl Core {
             Namespace::intern_static(env, env.mu_ns, (*desc.0).into(), DirectTag::function(index))
         }
 
-        let mut ndef = CORE_FUNCTIONS.len();
-
         for feature in &FEATURES.features {
             if feature.namespace.is_empty() {
                 continue;
             }
 
-            let ns =
-                Namespace::with_static(env, &feature.namespace, feature.symbols.clone()).unwrap();
-
-            if let Some(functions) = &feature.functions {
-                for desc in functions.iter() {
-                    Namespace::intern_static(env, ns, (desc.0).into(), DirectTag::function(ndef));
-
-                    ndef += 1
-                }
-            }
+            Namespace::with_static_defs(
+                env,
+                &feature.namespace,
+                StaticSymbols(feature.symbols.clone(), feature.functions.clone()),
+            )
+            .unwrap();
         }
     }
 
@@ -231,29 +225,28 @@ impl Core {
     }
 
     pub fn envs_as_list(env: &Env) -> Tag {
-        let envs_ref = block_on(CORE.envs.read());
-        let envs = envs_ref
-            .keys()
-            .map(|key| Tag::from_slice(&key.to_le_bytes()))
-            .collect::<Vec<Tag>>();
-
-        Cons::list(env, &envs)
+        Cons::list(
+            env,
+            &block_on(CORE.envs.read())
+                .keys()
+                .map(|key| Tag::from_slice(&key.to_le_bytes()))
+                .collect::<Vec<Tag>>(),
+        )
     }
 
     pub fn features_as_list(env: &Env) -> Tag {
-        let features = CORE
-            .features
-            .iter()
-            .map(|feature| Vector::from(feature.namespace.clone()).with_heap(env))
-            .collect::<Vec<Tag>>();
-
-        Cons::list(env, &features)
+        Cons::list(
+            env,
+            &CORE
+                .features
+                .iter()
+                .map(|feature| Vector::from(feature.namespace.clone()).with_heap(env))
+                .collect::<Vec<Tag>>(),
+        )
     }
 
     pub fn nstreams() -> Tag {
-        let streams_ref = block_on(CORE.streams.read());
-
-        Fixnum::with_or_panic(streams_ref.len())
+        Fixnum::with_or_panic(block_on(CORE.streams.read()).len())
     }
 }
 

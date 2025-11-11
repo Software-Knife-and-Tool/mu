@@ -26,13 +26,12 @@ use {
         },
     },
     futures_lite::future::block_on,
-    futures_locks::RwLock,
     perf_monitor::{
         cpu::cpu_time,
         fd::fd_count_cur,
         mem::get_process_memory_info
     },
-    std::{collections::HashMap, sync::mpsc::channel},
+    std::{sync::mpsc::channel},
 };
 
 pub trait Core {
@@ -42,7 +41,7 @@ pub trait Core {
 impl Core for Feature {
     fn feature() -> Feature {
         Feature {
-            symbols: Some(RwLock::new(HashMap::new())),
+            symbols: None,
             functions: Some(vec![
                 ("core-info", 0, Feature::core_core_info),
                 ("process-fds", 0, Feature::core_fds),

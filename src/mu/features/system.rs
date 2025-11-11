@@ -23,10 +23,6 @@ use {
             vector::Vector,
         },
     },
-    futures_locks::RwLock,
-    std::{
-        collections::HashMap,
-    },
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -47,7 +43,7 @@ impl System for Feature {
                 ("sysinfo", 0, Feature::system_sysinfo),
                 ("uname", 0u16, Feature::system_uname),
             ]),
-            symbols: Some(RwLock::new(HashMap::new())),
+            symbols: None,
             namespace: "feature/system".into(),
         }
     }
