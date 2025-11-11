@@ -8,8 +8,6 @@ use {
         core_::CoreFnDef,
         tag::Tag
     },
-    futures_locks::RwLock,
-    std::collections::HashMap,
 };
 
 #[cfg(feature = "core")]
@@ -27,9 +25,9 @@ lazy_static! {
 
 #[derive(Clone)]
 pub struct Feature {
-    pub functions: Option<Vec<CoreFnDef>>,
     pub namespace: String,
-    pub symbols: Option<RwLock<HashMap<String, Tag>>>,
+    pub functions: Option<Vec<CoreFnDef>>,
+    pub symbols: Option<Vec<(String, Tag)>>,
 }
 
 pub struct Features {

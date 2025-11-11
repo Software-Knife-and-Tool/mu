@@ -2,15 +2,22 @@
 //  SPDX-License-Identifier: MIT
 
 //! environment bindings
+#[rustfmt::skip]
 use {
     crate::{
         core::{
             config::Config,
-            core_::{Core, CORE},
+            core_::{CORE, CORE_FUNCTIONS},
+            direct::DirectTag,
             frame::Frame,
             tag::Tag,
         },
-        namespaces::{cache::Cache, heap::Heap, namespace::Namespace},
+        namespaces::{
+            cache::Cache,
+            heap::Heap,
+            namespace::{Namespace, StaticSymbols},
+        },
+        features::feature::FEATURES,
         vectors::cache::VecCacheMap,
     },
     futures_locks::RwLock,
@@ -67,15 +74,37 @@ impl Env {
 
         // establish namespaces
         env.mu_ns = Namespace::with_static(&env, "mu", Some(RwLock::new(HashMap::new()))).unwrap();
-        env.keyword_ns = Namespace::with_static(&env, "keyword", None).unwrap();
+        env.keyword_ns =
+            Namespace::with_static_defs(&env, "keyword", StaticSymbols(None, None)).unwrap();
 
         // standard streams
         Namespace::intern_static(&env, env.mu_ns, "*standard-input*".into(), CORE.stdio.0);
         Namespace::intern_static(&env, env.mu_ns, "*standard-output*".into(), CORE.stdio.1);
         Namespace::intern_static(&env, env.mu_ns, "*error-output*".into(), CORE.stdio.2);
 
-        // core symbols
-        Core::intern_symbols(&env);
+        // mu functions
+        for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
+            Namespace::intern_static(
+                &env,
+                env.mu_ns,
+                (*desc.0).into(),
+                DirectTag::function(index),
+            )
+        }
+
+        // features
+        for feature in &FEATURES.features {
+            if feature.namespace.is_empty() {
+                continue;
+            }
+
+            Namespace::with_static_defs(
+                &env,
+                &feature.namespace,
+                StaticSymbols(feature.symbols.clone(), feature.functions.clone()),
+            )
+            .unwrap();
+        }
 
         /*
         #[cfg(feature = "instrument")]

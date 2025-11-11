@@ -21,9 +21,7 @@ use {
             vector::Vector
         },
     },
-    std::collections::HashMap,
     futures_lite::future::block_on,
-    futures_locks::RwLock,
 };
 
 pub trait Instrument {
@@ -35,7 +33,7 @@ impl Instrument for Feature {
     fn feature() -> Feature {
         Feature {
             functions: Some(vec![("instrument-control", 1, Feature::instrument_control)]),
-            symbols: Some(RwLock::new(HashMap::new())),
+            symbols: None,
             namespace: "feature/instrument".into(),
         }
     }

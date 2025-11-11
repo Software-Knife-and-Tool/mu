@@ -30,8 +30,6 @@ use {
         },
     },
     futures_lite::future::block_on,
-    futures_locks::RwLock,
-    std::collections::HashMap,
 };
 
 lazy_static! {
@@ -64,7 +62,7 @@ impl Env for Feature {
                 ("heap-room", 0, Feature::env_hp_room),
                 ("heap-size", 1, Feature::env_hp_size),
             ]),
-            symbols: Some(RwLock::new(HashMap::new())),
+            symbols: None,
             namespace: "feature/env".into(),
         }
     }

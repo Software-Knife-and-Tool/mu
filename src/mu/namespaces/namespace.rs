@@ -6,6 +6,7 @@ use {
     crate::{
         core::{
             apply::Apply as _,
+            core_::{CoreFnDef, CORE, CORE_FUNCTIONS},
             direct::DirectTag,
             env::Env,
             exception::{self, Condition, Exception},
@@ -53,6 +54,9 @@ pub enum Namespace {
     Dynamic(RwLock<HashMap<String, Tag>>),
 }
 
+#[derive(Clone)]
+pub struct StaticSymbols(pub Option<Vec<(String, Tag)>>, pub Option<Vec<CoreFnDef>>);
+
 impl Namespace {
     pub fn with(env: &Env, name: &str) -> exception::Result<Tag> {
         let mut ns_ref = block_on(env.ns_map.write());
@@ -76,6 +80,61 @@ impl Namespace {
                 ns,
                 Namespace::Dynamic(RwLock::new(HashMap::<String, Tag>::new())),
             ),
+        );
+
+        Ok(ns)
+    }
+
+    pub fn with_static_defs(env: &Env, name: &str, defs: StaticSymbols) -> exception::Result<Tag> {
+        let mut ns_ref = block_on(env.ns_map.write());
+
+        if ns_ref.contains_key(name) {
+            drop(ns_ref);
+
+            return Err(Exception::new(
+                env,
+                Condition::Type,
+                "mu:make-namespace",
+                Vector::from(name).with_heap(env),
+            ));
+        }
+
+        let ns = Struct::new(env, "ns", vec![Vector::from(name).with_heap(env)]).with_heap(env);
+        let mut ns_map = HashMap::new();
+
+        if let Some(sym_defs) = defs.0 {
+            for def in sym_defs {
+                let symbol = Symbol::new(env, ns, &def.0, def.1).with_heap(env);
+
+                ns_map.insert(def.0, symbol).unwrap();
+            }
+        }
+
+        if let Some(fn_defs) = defs.1 {
+            for def in fn_defs {
+                let name = def.0;
+
+                let (ndef, _) = CORE
+                    .core_defs
+                    .iter()
+                    .enumerate()
+                    .find(|(_, static_)| name == static_.0)
+                    .unwrap();
+                let symbol = Symbol::new(
+                    env,
+                    ns,
+                    name,
+                    DirectTag::function(ndef + CORE_FUNCTIONS.len()),
+                )
+                .with_heap(env);
+
+                ns_map.insert(name.to_string(), symbol);
+            }
+        }
+
+        ns_ref.insert(
+            name.to_string(),
+            (ns, Namespace::Static(Some(RwLock::new(ns_map)))),
         );
 
         Ok(ns)
@@ -106,7 +165,7 @@ impl Namespace {
         Ok(ns)
     }
 
-    pub fn is_namespace(env: &Env, ns: Tag) -> bool {
+    fn is_namespace(env: &Env, ns: Tag) -> bool {
         if ns.type_of() == Type::Struct {
             let (stype, _) = Struct::destruct(env, ns);
 
@@ -177,9 +236,7 @@ impl Namespace {
                         _ => panic!(),
                     } as usize;
 
-                    let mut heap_ref = block_on(env.heap.write());
-
-                    heap_ref.write_image(slices, offset);
+                    block_on(env.heap.write()).write_image(slices, offset);
 
                     Some(symbol)
                 }
@@ -189,20 +246,16 @@ impl Namespace {
                 let ns_ref = block_on(env.ns_map.read());
 
                 match &ns_ref[&Self::name(env, ns)].1 {
-                    Namespace::Static(static_) => match static_ {
-                        Some(hash) => {
-                            let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
-
-                            let mut hash_ref = block_on(hash.write());
-
-                            hash_ref.insert(name, symbol);
+                    Namespace::Static(static_) => {
+                        if let Some(hash) = static_ {
+                            block_on(hash.write()).insert(
+                                Vector::as_string(env, Symbol::destruct(env, symbol).1),
+                                symbol,
+                            );
                         }
-                        None => panic!(),
-                    },
+                    }
                     Namespace::Dynamic(hash) => {
-                        let mut hash_ref = block_on(hash.write());
-
-                        hash_ref.insert(name, symbol);
+                        block_on(hash.write()).insert(name, symbol);
                     }
                 }
 
@@ -220,15 +273,14 @@ impl Namespace {
         );
 
         match &ns_ref[&ns_name].1 {
-            Namespace::Static(ns_map) => match &ns_map {
-                Some(hash) => {
+            Namespace::Static(ns_map) => {
+                if let Some(hash) = &ns_map {
                     let name = Vector::as_string(env, Symbol::destruct(env, symbol).1);
                     let mut hash_ref = block_on(hash.write());
 
                     hash_ref.insert(name, symbol);
                 }
-                None => panic!(),
-            },
+            }
             Namespace::Dynamic(_) => panic!(),
         }
     }
