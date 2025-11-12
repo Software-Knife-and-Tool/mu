@@ -16,7 +16,7 @@ use {
         features::feature::{Feature, FEATURES},
         namespaces::{
             gc::{CoreFn as _, GcContext},
-            namespace::{CoreFn as _, Namespace, StaticSymbols},
+            namespace::{CoreFn as _, Namespace},
         },
         streams::builder::StreamBuilder,
         types::{
@@ -191,26 +191,6 @@ impl Core {
             CORE_FUNCTIONS[offset]
         } else {
             CORE.core_defs[offset - cf_len]
-        }
-    }
-
-    // core/feature symbols
-    pub fn intern_symbols(env: &Env) {
-        for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
-            Namespace::intern_static(env, env.mu_ns, (*desc.0).into(), DirectTag::function(index))
-        }
-
-        for feature in &FEATURES.features {
-            if feature.namespace.is_empty() {
-                continue;
-            }
-
-            Namespace::with_static_defs(
-                env,
-                &feature.namespace,
-                StaticSymbols(feature.symbols.clone(), feature.functions.clone()),
-            )
-            .unwrap();
         }
     }
 

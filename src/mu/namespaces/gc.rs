@@ -90,16 +90,21 @@ impl Gc for GcContext<'_> {
         let ns_ref = block_on(env.ns_map.read());
 
         for (_, ns_map) in ns_ref.values() {
-            let hash_ref = block_on(match ns_map {
-                Namespace::Static(static_) => match &static_ {
-                    Some(hash) => hash.read(),
-                    None => return,
-                },
-                Namespace::Dynamic(ref hash) => hash.read(),
-            });
+            match ns_map {
+                Namespace::Static(static_) => {
+                    if let Some(hash) = &static_ {
+                        for (_, symbol) in hash.iter() {
+                            self.mark(env, *symbol)
+                        }
+                    }
+                }
+                Namespace::Dynamic(ref hash) => {
+                    let hash_ref = block_on(hash.read());
 
-            for (_, symbol) in hash_ref.iter() {
-                self.mark(env, *symbol)
+                    for (_, symbol) in hash_ref.iter() {
+                        self.mark(env, *symbol)
+                    }
+                }
             }
         }
     }

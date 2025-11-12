@@ -8,7 +8,6 @@ use {
         core::{
             config::Config,
             core_::{CORE, CORE_FUNCTIONS},
-            direct::DirectTag,
             frame::Frame,
             tag::Tag,
         },
@@ -72,33 +71,29 @@ impl Env {
             prof_on: RwLock::new(false),
         };
 
-        // establish namespaces
-        env.mu_ns = Namespace::with_static(&env, "mu", Some(RwLock::new(HashMap::new()))).unwrap();
+        // establish runtime namespaces
         env.keyword_ns =
-            Namespace::with_static_defs(&env, "keyword", StaticSymbols(None, None)).unwrap();
+            Namespace::with_static(&env, "keyword", StaticSymbols(None, None)).unwrap();
 
-        // standard streams
-        Namespace::intern_static(&env, env.mu_ns, "*standard-input*".into(), CORE.stdio.0);
-        Namespace::intern_static(&env, env.mu_ns, "*standard-output*".into(), CORE.stdio.1);
-        Namespace::intern_static(&env, env.mu_ns, "*error-output*".into(), CORE.stdio.2);
+        env.mu_ns = Namespace::with_mu_static(
+            &env,
+            StaticSymbols(
+                Some(vec![
+                    ("*standard-input*".to_string(), CORE.stdio.0),
+                    ("*standard-output*".to_string(), CORE.stdio.1),
+                    ("*error-output*".to_string(), CORE.stdio.2),
+                ]),
+                Some(CORE_FUNCTIONS.to_vec()),
+            ),
+        );
 
-        // mu functions
-        for (index, desc) in CORE_FUNCTIONS.iter().enumerate() {
-            Namespace::intern_static(
-                &env,
-                env.mu_ns,
-                (*desc.0).into(),
-                DirectTag::function(index),
-            )
-        }
-
-        // features
+        // install feature namespaces
         for feature in &FEATURES.features {
             if feature.namespace.is_empty() {
                 continue;
             }
 
-            Namespace::with_static_defs(
+            Namespace::with_static(
                 &env,
                 &feature.namespace,
                 StaticSymbols(feature.symbols.clone(), feature.functions.clone()),
