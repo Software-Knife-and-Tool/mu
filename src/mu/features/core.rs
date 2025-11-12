@@ -168,24 +168,25 @@ impl CoreFn for Feature {
         let name = Vector::as_string(env, Vector::ref_(env, svec, 0).unwrap());
         let ns_ref = block_on(env.ns_map.read());
 
-        let hash_ref = block_on(match &ns_ref[&name].1 {
+        fp.value = match &ns_ref[&name].1 {
             Namespace::Static(static_) => match &static_ {
-                Some(hash) => hash.read(),
-                None => {
-                    fp.value = Tag::nil();
-                    return Ok(());
+                Some(hash) => {
+                    Cons::list(env, &hash.keys().map(|key| hash[key]).collect::<Vec<Tag>>())
                 }
+                None => Tag::nil(),
             },
-            Namespace::Dynamic(hash) => hash.read(),
-        });
+            Namespace::Dynamic(hash) => {
+                let hash_ref = block_on(hash.read());
 
-        fp.value = Cons::list(
-            env,
-            &hash_ref
-                .keys()
-                .map(|key| hash_ref[key])
-                .collect::<Vec<Tag>>(),
-        );
+                Cons::list(
+                    env,
+                    &hash_ref
+                        .keys()
+                        .map(|key| hash_ref[key])
+                        .collect::<Vec<Tag>>(),
+                )
+            }
+        };
 
         Ok(())
     }
