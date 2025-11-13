@@ -7,12 +7,6 @@ NTESTS ?= 10
 TMPF:=$(shell mktemp)
 BIN = ./scripts
 
-# NAMESPACES=\
-#	mu	 \
-#	frequent \
-#	common	 \
-#	core
-
 NAMESPACES=\
 	mu	 \
 	frequent \
