@@ -1,0 +1,25 @@
+
+# mu project dev makefile
+#
+.PHONY: help emacs test/base test/current test/report
+
+help:
+	@echo "mu project dev makefile -----------------"
+	@echo "    emacs - emacs adjuncts"
+	@echo "    tests/regression - run regression tests"  
+	@echo "    tests/base - run base tests"
+	@echo "    tests/current - run current tests"  
+	@echo "    tests/report - test report"  
+
+emacs:
+	@echo '((nil . ((compile-command . "cd ~/projects/mu ; make world"))))' > .dir-locals.el
+	@find src -name "*.rs" -print | etags -
+
+tests/regression:
+	@make -C tests/regression summary
+tests/base:
+	@make -C tests/performance base
+tests/current:
+	@make -C tests/performance current
+tests/report:
+	@make -C tests/performance report

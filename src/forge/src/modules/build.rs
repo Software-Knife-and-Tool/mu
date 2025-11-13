@@ -42,12 +42,11 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
+                            .arg("../target/debug/forge")
+                            .arg("../target/debug/listener")
                             .arg("../target/debug/mu-exec")
-                            .arg("../target/debug/mu-ld")
                             .arg("../target/debug/mu-server")
                             .arg("../target/debug/mu-sys")
-                            .arg("../target/debug/mu-sh")
-                            .arg("../target/debug/sysgen")
                             .arg(dist.clone())
                             .output()
                             .expect("command failed to execute");
@@ -68,12 +67,11 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
+                            .arg("../target/release/forge")
+                            .arg("../target/release/listener")
                             .arg("../target/release/mu-exec")
-                            .arg("../target/release/mu-ld")
                             .arg("../target/release/mu-server")
-                            .arg("../target/release/mu-sh")
                             .arg("../target/release/mu-sys")
-                            .arg("../target/release/sysgen")
                             .arg(dist.clone())
                             .output()
                             .expect("command failed to execute");
@@ -95,12 +93,11 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
+                            .arg("../target/release/forge")
+                            .arg("../target/release/listener")
                             .arg("../target/release/mu-exec")
-                            .arg("../target/release/mu-ld")
-                            .arg("../target/release/mu-sh")
                             .arg("../target/release/mu-server")
                             .arg("../target/release/mu-sys")
-                            .arg("../target/release/sysgen")
                             .arg(dist.clone())
                             .output()
                             .expect("command failed to execute");
