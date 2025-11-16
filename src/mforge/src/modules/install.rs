@@ -16,7 +16,7 @@ impl Install {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("forge install {home}: --verbose"),
+                    Some(_) => println!("mforge install {home}: --verbose"),
                     None => (),
                 };
 

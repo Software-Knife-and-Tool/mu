@@ -6,7 +6,7 @@ license = "MIT"
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
 [workspace]
-members = [ "src/listener", "src/mu-exec", "src/mu-server", "src/mu-sys", "src/forge" ]
+members = [ "src/listener", "src/mu-exec", "src/mu-server", "src/mu-sys", "src/mforge" ]
 resolver = "2"
 
 [lib]

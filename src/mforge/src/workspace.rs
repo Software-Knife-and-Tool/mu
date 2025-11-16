@@ -10,26 +10,26 @@ use {
 
 #[derive(Debug)]
 pub struct Workspace {
-    pub forge: PathBuf,   // forge module directory
     pub bin: PathBuf,     // workspace bin
     pub lib: PathBuf,     // workspace lib
-    pub tests: PathBuf,   // workspace tests
+    pub mforge: PathBuf,  // mforge module directory
     pub modules: PathBuf, // workspace modules
+    pub tests: PathBuf,   // workspace tests
 }
 
 impl Workspace {
     pub fn new(path: &str) -> Self {
-        let modules: PathBuf = [path, "src", "forge", "modules"].iter().collect();
+        let modules: PathBuf = [path, "src", "mforge", "modules"].iter().collect();
         let bin: PathBuf = [path, "dist"].iter().collect();
         let lib: PathBuf = [path, "dist"].iter().collect();
         let tests: PathBuf = [path, "tests"].iter().collect();
-        let forge: PathBuf = [path, ".forge"].iter().collect();
+        let mforge: PathBuf = [path, ".mforge"].iter().collect();
 
         Self {
             modules,
             bin,
             lib,
-            forge,
+            mforge,
             tests,
         }
     }
@@ -39,7 +39,7 @@ impl Workspace {
         loop {
             match Path::read_dir(&cwd) {
                 Ok(mut dir) => match dir.find(|entry| match entry {
-                    Ok(entry) => entry.file_name() == ".forge",
+                    Ok(entry) => entry.file_name() == ".mforge",
                     _ => false,
                 }) {
                     Some(_) => return Some(cwd.to_str().unwrap().to_string()),
@@ -55,17 +55,17 @@ impl Workspace {
         }
     }
 
-    fn forge_dir_exists(forge_home: &str) -> bool {
-        let forge_path = PathBuf::from(forge_home.to_owned() + "/.forge");
+    fn mforge_dir_exists(home: &str) -> bool {
+        let path = PathBuf::from(home.to_owned() + "/.mforge");
 
-        Path::exists(&forge_path)
+        Path::exists(&path)
     }
 
-    fn make_module_dirs(forge_home: &str) -> io::Result<()> {
+    fn make_module_dirs(home: &str) -> io::Result<()> {
         let module_paths = [
-            [forge_home, ".forge", "bench"],
-            [forge_home, ".forge", "regression"],
-            [forge_home, ".forge", "symbols"],
+            [home, ".mforge", "bench"],
+            [home, ".mforge", "regression"],
+            [home, ".mforge", "symbols"],
         ];
 
         for path in module_paths {
@@ -118,7 +118,7 @@ impl Workspace {
                             None => (),
                         };
 
-                        if Self::forge_dir_exists("./") {
+                        if Self::mforge_dir_exists("./") {
                             eprintln!("workspace already initted.");
                         }
 
@@ -126,7 +126,7 @@ impl Workspace {
                     }
                     Mode::Env => match Self::env() {
                         Some(env) => println!("{env}"),
-                        None => eprintln!("not in a forge workspace"),
+                        None => eprintln!("not in an mforge workspace"),
                     },
                     _ => panic!(),
                 }

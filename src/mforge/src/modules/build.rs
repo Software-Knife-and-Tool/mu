@@ -23,7 +23,7 @@ impl Build {
                 let mode = &options.modes[0];
 
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("forge build: {:?} --verbose", mode),
+                    Some(_) => println!("mforge build: {:?} --verbose", mode),
                     None => (),
                 };
 
@@ -42,7 +42,7 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/debug/forge")
+                            .arg("../target/debug/mforge")
                             .arg("../target/debug/listener")
                             .arg("../target/debug/mu-exec")
                             .arg("../target/debug/mu-server")
@@ -67,7 +67,7 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/release/forge")
+                            .arg("../target/release/mforge")
                             .arg("../target/release/listener")
                             .arg("../target/release/mu-exec")
                             .arg("../target/release/mu-server")
@@ -93,7 +93,7 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/release/forge")
+                            .arg("../target/release/mforge")
                             .arg("../target/release/listener")
                             .arg("../target/release/mu-exec")
                             .arg("../target/release/mu-server")

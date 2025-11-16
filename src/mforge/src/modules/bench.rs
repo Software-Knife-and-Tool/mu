@@ -28,7 +28,7 @@ impl Bench {
         let module = Options::add_path(&mut ws.modules.clone(), "bench");
         let core_sys = Options::add_path(&mut ws.lib.clone(), "core.sys");
         let mu_sys = Options::add_path(&mut ws.bin.clone(), "mu-sys");
-        let report = Options::add_path(&mut ws.forge.clone(), "bench");
+        let report = Options::add_path(&mut ws.mforge.clone(), "bench");
         let tests = Options::add_path(&mut ws.tests.clone(), "performance");
 
         Self {

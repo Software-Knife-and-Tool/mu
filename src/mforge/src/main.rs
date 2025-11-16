@@ -22,10 +22,10 @@ use crate::{
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn usage() {
-    println!("Usage: forge {VERSION} command [option...]");
+    println!("Usage: mforge {VERSION} command [option...]");
     println!("  command:");
     println!("    help                               ; this message");
-    println!("    version                            ; forge version");
+    println!("    version                            ; mforge version");
     println!();
 
     println!("    workspace init | env               ; manage workspace");
@@ -67,7 +67,7 @@ pub fn main() {
                     let cwd = std::env::current_dir().unwrap();
 
                     eprintln!(
-                        "error: could not find `.forge` in {:?} or any parent directory",
+                        "error: could not find `.mforge` in {:?} or any parent directory",
                         cwd.to_str().unwrap()
                     );
                     std::process::exit(-1)
@@ -78,7 +78,7 @@ pub fn main() {
             match command {
                 "help" => {
                     println!();
-                    println!("    forge: mu packaging tool");
+                    println!("    mforge: mu packaging and development tool");
                     println!();
                     usage()
                 }
