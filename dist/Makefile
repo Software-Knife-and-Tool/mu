@@ -12,7 +12,7 @@ MU = ../mu
 SRC = ../src
 TOOLS = ../tools
 
-BIN = listener forge mu-exec mu-server
+BIN = listener mforge mu-exec mu-server
 SYS = core.sys fasl.sys image.sys module.sys deftype.sys
 
 MODULES = 		\

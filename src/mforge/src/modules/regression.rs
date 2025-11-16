@@ -126,7 +126,7 @@ impl Regression {
                 None => (),
                 Some(options) => {
                     match Options::find_opt(&options, &Opt::Verbose) {
-                        Some(_) => println!("forge test: --verbose"),
+                        Some(_) => println!("mforge test: --verbose"),
                         None => (),
                     };
 
