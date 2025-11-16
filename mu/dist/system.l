@@ -112,7 +112,7 @@
 
    (mu:intern system "%module-symbols-alist"
       (:lambda (module-def)
-        ((:lambda (version ns load)           
+        ((:lambda (version ns load)
            `(,(mu:cons 'version version)
               ,(mu:cons 'ns ns)
               ,(mu:cons 'load load)))
@@ -138,7 +138,7 @@
                         (mu:write (system:%concat-strings `("(mu:make-namespace \"" ,ns "\")")) () output-stream)
                         (mu:write "((:lambda (" () output-stream)
                         (mu:write (system:%concat-strings `(,ns ")")) () output-stream)
-                        (mu:write `(mu:intern ,ns "\"%module-def\"" (:quote ,(system:%module-symbols-alist module-def))) () output-stream)  
+                        (mu:write `(mu:intern ,ns "\"%sys-def\"" ,(mu:cons :quote (system:%module-symbols-alist module-def))) () output-stream)
                         (system:%mapc
                          (:lambda (file-name)
                            (system:%load-system-file
