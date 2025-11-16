@@ -65,7 +65,7 @@ tools
 ```
 
 
-
+ 
 #### Generating the documentation
 
 ------
@@ -368,4 +368,3 @@ set enable-bracketed-paste off
 ```
 
 to your `~/.inputrc` may help. If you want to run the prelude listener as part of an interactive session:
-

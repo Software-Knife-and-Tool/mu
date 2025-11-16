@@ -110,6 +110,16 @@
          (mu:open :file :input path :t))
         (mu:symbol-value (mu:find system:system/modules module))))
 
+   (mu:intern system "%module-symbols-alist"
+      (:lambda (module-def)
+        ((:lambda (version ns load)           
+           `(,(mu:cons 'version version)
+              ,(mu:cons 'ns ns)
+              ,(mu:cons 'load load)))
+         (mu:cdr (system:%assq :version module-def))
+         (mu:cdr (system:%assq :ns module-def))
+         (mu:cdr (system:%assq :load module-def)))))
+   
    ;;;
    ;;; provide/require
    ;;;
@@ -123,24 +133,25 @@
              ()
              ((:lambda (module-def output-stream)
                 (:if module-def
-                     ((:lambda (file-list ns)
+                     ((:lambda (ns loads)
                         (mu:make-namespace ns)
                         (mu:write (system:%concat-strings `("(mu:make-namespace \"" ,ns "\")")) () output-stream)
                         (mu:write "((:lambda (" () output-stream)
                         (mu:write (system:%concat-strings `(,ns ")")) () output-stream)
+                        (mu:write `(mu:intern ,ns "\"%module-def\"" (:quote ,(system:%module-symbols-alist module-def))) () output-stream)  
                         (system:%mapc
                          (:lambda (file-name)
                            (system:%load-system-file
                             (system:%concat-strings `(,base ,module "/" ,file-name))
                             output-stream))
-                         file-list)
+                         loads)
                         (mu:write ")" () output-stream)
                         (mu:write (system:%concat-strings `("(mu:find-namespace \"" ,ns "\")")) () output-stream)
                         (mu:write ")" () output-stream) 
                         (mu:close output-stream)
                         :t)
-                      (mu:cdr (system:%assq :load module-def))
-                      (mu:cdr (system:%assq :ns module-def)))
+                      (mu:cdr (system:%assq :ns module-def))
+                      (mu:cdr (system:%assq :load module-def)))
                      (mu:raise module :open)))
               (system:%load-system-def
                (system:%concat-strings `(,base ,module "/sys.def"))
