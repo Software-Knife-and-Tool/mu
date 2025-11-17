@@ -1,0 +1,2 @@
+(mu:write ";;; repl 0.0.3" () mu:*standard-output*)
+(mu:write #\linefeed () mu:*standard-output*)

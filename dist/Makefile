@@ -12,7 +12,7 @@ MU = ../mu
 SRC = ../src
 TOOLS = ../tools
 
-BIN = listener mforge mu-exec mu-server
+BIN = repl mforge mu-exec mu-server
 SYS = core.sys fasl.sys image.sys module.sys deftype.sys
 
 MODULES = 		\
@@ -43,7 +43,7 @@ dist:
 
 	@install -m 644 $(MU)/dist/image.l $(BASE)/lib
 
-	@install -m 644 -D -t $(BASE)/lib/listener $(SRC)/listener/lib/*
+	@install -m 644 -D -t $(BASE)/lib/repl $(SRC)/repl/lib/*
 
 	@install -D -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.l
 	@install -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.def

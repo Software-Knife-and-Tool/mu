@@ -4,5 +4,5 @@
         "gc-mode": "auto"
     },       
     "namespace": "core",
-    "rc": "listener.rc"
+    "rc": "repl.rc"
 }

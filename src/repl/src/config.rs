@@ -13,18 +13,18 @@ pub enum Config {
 }
 
 impl Config {
-    // if we have a .listener in the current directory, use it.
+    // if we have a .repl in the current directory, use it.
     // otherwise, see if there's one in the home directory
     pub fn new() -> Self {
         let mut home_path = PathBuf::new();
 
         home_path.push(std::env::home_dir().unwrap().as_path());
-        home_path.push(".listener");
+        home_path.push(".repl");
 
         let mut cwd_path = PathBuf::new();
 
         cwd_path.push(std::env::current_dir().unwrap().as_path());
-        cwd_path.push(".listener");
+        cwd_path.push(".repl");
 
         match fs::read_to_string(cwd_path) {
             Ok(json) => match json::parse(&json) {
@@ -35,7 +35,7 @@ impl Config {
                 Ok(json) => match json::parse(&json) {
                     Ok(opts) => Config::Json(opts),
                     Err(_) => {
-                        eprintln!("listener: failed to parse config JSON, using null config");
+                        eprintln!("repl: failed to parse config JSON, using null config");
                         Config::None
                     }
                 },

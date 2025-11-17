@@ -16,5 +16,5 @@ use crate::{config::Config, env_::Env_};
 pub fn main() {
     let env = Env_::new(Config::new());
 
-    repl::listener(&env).expect("listener: listener error");
+    repl::repl(&env).expect("repl: listener error");
 }
