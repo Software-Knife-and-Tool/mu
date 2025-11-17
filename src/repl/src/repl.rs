@@ -5,7 +5,7 @@ use {
     mu::{Condition, Mu, Result},
 };
 
-pub fn listener(env_: &Env_) -> Result {
+pub fn repl(env_: &Env_) -> Result {
     let env = env_.env;
     let ns = env_.ns.clone();
 

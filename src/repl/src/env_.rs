@@ -16,12 +16,9 @@ impl Env_ {
     pub fn new(config: Config) -> Self {
         let env = match config.map("config") {
             Some(config) => Mu::make_env(
-                &Mu::config(Some(config))
-                    .expect("listener: can't allocate env with config {config:?}"),
+                &Mu::config(Some(config)).expect("repl: can't allocate env with config {config:?}"),
             ),
-            None => {
-                Mu::make_env(&Mu::config(None).expect("listener: can't to allocate default env"))
-            }
+            None => Mu::make_env(&Mu::config(None).expect("repl: can't allocate default env")),
         };
 
         let ns = match config.map("namespace") {
@@ -42,7 +39,7 @@ impl Env_ {
                     "prelue"
                 }
                 _ => {
-                    eprintln!("listener: unrecognized namespace: {ns}",);
+                    eprintln!("repl: unrecognized namespace: {ns}",);
                     std::process::exit(-1)
                 }
             },
@@ -76,13 +73,13 @@ impl Env_ {
         match Mu::load(env, sys.as_str()) {
             Ok(bool_) => {
                 if !bool_ {
-                    eprintln!("listener: can't load {name}");
+                    eprintln!("repl: can't load {name}");
                     std::process::exit(-1)
                 }
             }
             Err(e) => {
                 eprintln!(
-                    "listener: exception while loading {name}: {}",
+                    "repl: exception while loading {name}: {}",
                     Mu::exception_string(env, e)
                 );
                 std::process::exit(-1)
