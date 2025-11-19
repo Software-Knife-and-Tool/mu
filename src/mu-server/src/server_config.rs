@@ -119,7 +119,7 @@ impl ServerConfig {
                 }
 
                 let env = match Mu::config(Some(config)) {
-                    Some(config) => Mu::make_env(&config),
+                    Some(config) => Mu::env(&config),
                     None => {
                         eprintln!("option: configuration error");
                         std::process::exit(-1)
