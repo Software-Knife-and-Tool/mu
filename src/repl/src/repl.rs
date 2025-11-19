@@ -2,10 +2,10 @@
 //  SPDX-License-Identifier: MIT
 use {
     crate::env_::Env_,
-    mu::{Condition, Mu, Result},
+    mu::{Condition, Mu, Result, Tag},
 };
 
-pub fn repl(env_: &Env_) -> Result {
+pub fn repl(env_: &Env_) -> Result<Tag> {
     let env = env_.env;
     let ns = env_.ns.clone();
 

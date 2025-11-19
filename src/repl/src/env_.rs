@@ -15,10 +15,10 @@ pub struct Env_ {
 impl Env_ {
     pub fn new(config: Config) -> Self {
         let env = match config.map("config") {
-            Some(config) => Mu::make_env(
+            Some(config) => Mu::env(
                 &Mu::config(Some(config)).expect("repl: can't allocate env with config {config:?}"),
             ),
-            None => Mu::make_env(&Mu::config(None).expect("repl: can't allocate default env")),
+            None => Mu::env(&Mu::config(None).expect("repl: can't allocate default env")),
         };
 
         let ns = match config.map("namespace") {

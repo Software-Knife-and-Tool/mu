@@ -2,41 +2,45 @@
 //  SPDX-License-Identifier: MIT
 
 //!
-//! The mu runtime library is the implementation surface for the [`mu programming environment`] and
-//! implements the *mu*, null, and *features* namespaces.
+//! The mu runtime library is the implementation surface for the [`mu programming environment`](<https://github.com/Software-Knife-and-Tool/mu>) and
+//! provides the *mu* and *feature* namespaces.
 //!
-//! mu is an immutable, lexically scoped Lisp-1 kernel porting layer for an ascending tower of
+//! *mu* is an immutable, lexically scoped Lisp-1 runtime kernel and porting layer for an ascending tower of
 //! Lisp languages. While it is possible to do some useful application work directly in the *mu*
 //! language, *mu* defers niceties like macros, closures, and rest lambdas to libraries and
-//! compilers layered on top of it. See [`mu programming environment`] for details.
+//! compilers layered on top of it. See the [`project`](<https://github.com/Software-Knife-and-Tool/mu>)
+//! README for details.
 //!
-//! library characteristics:
-//! - mostly-safe Rust
-//! - 64 bit tagged objects
-//! - garbage collected heap
-//! - lambda compiler
-//! - multiple independent execution contexts
-//! - s-expression reader/printer
-//! - symbol namespaces
+//! [`github`](<https://github.com/Software-Knife-and-Tool/mu>)
 //!
-//! library data types:
-//!    56 bit immediate signed fixnums
-//!    Lisp-1 namespaced symbols
-//!    character, string, and byte streams
-//!    immediate ASCII characters
-//!    conses (can be immediate)
-//!    fixed arity functions
-//!    lambdas with lexical variables
-//!    general and specialized vectors
-//!    immediate strings (seven character limit)
-//!    immediate keywords (seven character limit)
-//!    immediate single float 32 bit IEEE float
-//!    structs
+//! About the library:
+//!    - mostly-safe Rust
+//!    - 64 bit tagged objects
+//!    - garbage collected heap
+//!    - lambda compiler
+//!    - multiple independent execution contexts
+//!    - thread safe
+//!    - asynchronous I/O
+//!    - s-expression reader/printer
+//!    - symbol namespaces
 //!
-//! documentation:
-//!    see doc/refcards and doc/rustdoc
+//! Data types:
+//!    - 56 bit immediate signed fixnums
+//!    - Lisp-1 namespaced symbols
+//!    - character, string, and byte streams
+//!    - immediate ASCII characters
+//!    - conses
+//!    - fixed arity functions
+//!    - lambdas with lexical variables
+//!    - specialized (byte, fixnum, single float, character) vectors
+//!    - immediate strings (seven character limit)
+//!    - immediate keywords (seven character limit)
+//!    - immediate single float 32 bit IEEE float
+//!    - structs
 //!
-//! [`mu programming environment`]: <https://github.com/Software-Knife-and-Tool/mu>
+//! [`documentation`](<https://github.com/Software-Knife-and-Tool/mu>)
+//!
+//!    see *doc/refcards* and *doc/rustdoc*
 //!
 #[macro_use]
 extern crate lazy_static;
@@ -53,55 +57,49 @@ mod types;
 mod vectors;
 
 use {
-    crate::core::{config::Config, core_::CORE, exception},
+    crate::core::{core_::CORE, exception},
     std::fs,
 };
 
-/// The library API
 ///
 /// The library API exposes these types:
 /// - Condition, enumeration of exceptional conditions
 /// - Config, Env configuration
-/// - Core, CORE runtime state
 /// - Env, execution environment
 /// - Exception, exception state
 /// - Mu, environment and API namespace
-/// - Result, specialized result for API functions that can fail
+/// - Result, specialized result for failable API functions
 /// - Tag, tagged data representation
-///   tagged data representation
+///
+/// tagged data representation
 pub type Tag = core::tag::Tag;
 /// Mu library API
 pub type Mu = core::mu::Mu;
-/// Core library state representation
-pub type Core = core::core_::Core;
-/// environment
+/// Environment
 pub type Env = core::mu::Env;
-/// exception Condition enumeration
+/// Exception condition enumeration
 pub type Condition = core::exception::Condition;
+/// Environment configuration
+pub type Config = core::config::Config;
 /// Exception representation
 pub type Exception = core::exception::Exception;
-/// Mu function Result
-pub type Result = core::exception::Result<Tag>;
+/// API function Result
+pub type Result<T> = core::exception::Result<T>;
 
 /// API namespace
 impl Mu {
-    /// core image
-    pub fn core() -> &'static Core {
-        &CORE
-    }
-
     /// version
     pub fn version() -> &'static str {
         env!("CARGO_PKG_VERSION")
     }
 
-    /// environment configuration
+    /// environment configuration constructor
     pub fn config(config: Option<String>) -> Option<Config> {
         Config::new(config)
     }
 
     /// env constructor
-    pub fn make_env(config: &Config) -> Env {
+    pub fn env(config: &Config) -> Env {
         Self::make_env_(config)
     }
 
