@@ -53,6 +53,11 @@
 (core:read (mu:open :string :input "#\\a" :t) () ())	#\a
 (core:read (mu:open :string :input "#\\ " :t) () ())	#\space
 (core:read (mu:open :string :input "#\\)" :t) () ())	#\)
+(core:read (mu:open :string :input "#\\linefeed" :t) () ())	#\linefeed
+(core:read (mu:open :string :input "#\\return" :t) () ())	#\return
+(core:read (mu:open :string :input "#\\space" :t) () ())	#\space
+(core:read (mu:open :string :input "#\\page" :t) () ())	#\page
+(core:read (mu:open :string :input "#\\tab" :t) () ())	#\tab
 (core:read (mu:open :string :input "#(:t 1 2 3)" :t) () ())	#(:t 1 2 3)
 (core:read (mu:open :string :input "#(:byte 1 2 3)" :t) () ())	#(:byte 1 2 3)
 (core:read (mu:open :string :input "#(:fixnum 1 2 3)" :t) () ())	#(:fixnum 1 2 3)
