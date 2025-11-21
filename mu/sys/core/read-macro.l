@@ -8,9 +8,46 @@
 ;;;
 ;;; sharpsign readers
 ;;;
+(mu:intern core "%read-sharp-char-extended"
+   (:lambda (ch stream)
+     ((:lambda (extended)
+        ((:lambda (char-designator)
+           (:if char-designator
+                char-designator
+                (mu:raise-from extended 'core:%read-sharp-char :type)))
+         (mu:cdr
+          (core:assq
+           (mu:symbol-name extended)
+           `(,(mu:cons "linefeed" #\linefeed)
+              ,(mu:cons "page" #\page)
+              ,(mu:cons "return" #\return)
+              ,(mu:cons "space" #\space)
+              ,(mu:cons "tab" #\tab))))))
+      (core:%read-atom ch stream))))
+
 (mu:intern core "%read-sharp-char"
    (:lambda (ch stream)
-      (mu:read-char stream () ())))
+     ((:lambda (char)
+        (:if char
+             ((:lambda (next)
+                (:if next
+                     ((:lambda (syntax)
+                        (mu:unread-char next stream)
+                        (mu:apply                       
+                         (mu:cdr
+                          (core:assq
+                           syntax
+                           `(,(mu:cons :tmacro (:lambda () char))
+                              ,(mu:cons :const (:lambda () (core:%read-sharp-char-extended char stream)))
+                              ,(mu:cons :wspace (:lambda () char))
+                              ,(mu:cons :escape ())
+                              ,(mu:cons :mescape ()))))
+                         ()))
+                      (core:%read-char-syntax next))
+                     char))
+              (mu:read-char stream () ()))                     
+      char))
+   (mu:read-char stream () ()))))
 
 (mu:intern core "%read-sharp-comment"
    (:lambda (ch stream)
