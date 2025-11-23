@@ -42,29 +42,6 @@
 ;;;
 ;;; functions
 ;;;
-(mu:intern core "%exceptionf"
-   (:lambda (stream format-string printenv exception)
-     ((:lambda (cond value source reason env)
-         (:if (core:null format-string)
-              (core:%format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
-              (core:%format stream format-string `(,cond ,value ,source ,reason)))
-         (:if (core:%and printenv env)
-              (core:%prog2
-                  (core:%format stream "env:~%" ())
-                  (core:mapc
-                   (:lambda (frame)
-                      (core:%format stream "  ~A~T(~A ~A)~%"
-                                   `(,(mu:car frame)
-                                     ,(mu:car frame)
-                                     ,(mu:cdr frame))))
-                   (mu:cdr env)))
-              ()))
-      (core:%exception-prop :cond exception)
-      (core:%exception-prop :value exception)
-      (core:%exception-prop :source exception)
-      (core:%exception-prop :reason exception)
-      (core:%exception-prop :env exception))))
-
 (mu:intern core "with-exception"
   (:lambda (handler thunk)
      (mu:with-exception
@@ -86,22 +63,14 @@
    (:lambda (exception)
       (mu:raise exception :except)))
      
-(mu:intern core "error"
-   (:lambda (format-string arg-list)
-      (core:%format mu:*error-output* format-string arg-list)
-      (mu:raise
-       (core:%make-exception :error arg-list :error "" ())
-       :except)))
-
-(mu:intern core "warn"
-   (:lambda (format-string arg-list)
-     (mu:write "WARNING: " () mu:*error-output*)
-     (core:%format mu:*error-output* format-string arg-list)
-     ()))
-
 (mu:intern core "%warn"
    (:lambda (value message)
-     (core:%format mu:*error-output* "warning: ~A [~A] ; ~S~%" `(,message ,(mu:type-of value) ,value))
+     (core:write "warning: " () mu:*error-output*)
+     (core:write message () mu:*error-output*)
+     (core:write " [" () mu:*error-output*)
+     (core:write (mu:type-of value) () mu:*error-output*)
+     (core:write "] " () mu:*error-output*)
+     (core:write value () mu:*error-output*)
      value))
 
 (mu:intern core "%raise"

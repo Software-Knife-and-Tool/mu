@@ -88,8 +88,10 @@
 (mu:intern core "gensym"
    (:lambda ()
       ((:lambda (counter)
-          (mu:write (mu:add counter 1) () core:%gensym-counter%)
-          (mu:make-symbol (core:%format () "g~X" (mu:cons counter ()))))
+         (mu:write (mu:add counter 1) () core:%gensym-counter%)
+         (mu:write "g" () core:%temp%)
+         (mu:write counter () core:%temp%)
+         (mu:make-symbol (mu:get-string core:%temp%)))
        (mu:read core:%gensym-counter% () ()))))
 
 (mu:intern core "gentemp"

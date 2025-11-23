@@ -1,0 +1,4 @@
+(format:%format () "format:%format unqualified ~A symbol arg" '(f-symbol))
+(format:%format () "format:%format qualified ~A symbol arg" '(mu:add))
+(format:%format () "format:%format ~A string arg" '("f-string"))
+(format:%format () "format:%format ~X fixnum arg" '(#xabcddcba))

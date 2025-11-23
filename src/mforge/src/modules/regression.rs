@@ -36,12 +36,12 @@ impl Regression {
         }
     }
 
-    fn test_ns(&self, _ns: &str) {
+    fn test_ns(&self, ns: &str) {
         let output = Command::new("python3")
             .arg(&Options::add_path(&mut self.module.clone(), "test-ns.py"))
             .arg(&self.mu_sys)
             .arg(&self.tests)
-            .arg("mu")
+            .arg(ns)
             .output()
             .expect("command failed to execute");
 
@@ -113,35 +113,11 @@ impl Regression {
                 };
 
                 self.test_ns("mu");
+                self.test_ns("format");
                 self.test_module("core");
 
                 Ok(())
             }
         }
     }
-
-    /*
-        pub fn test_(argv: &Vec<String>, home: &str) {
-            match Options::parse_options(argv, &[], &["verbose"]) {
-                None => (),
-                Some(options) => {
-                    match Options::find_opt(&options, &Opt::Verbose) {
-                        Some(_) => println!("mforge test: --verbose"),
-                        None => (),
-                    };
-
-                    let output = Command::new("make")
-                        .current_dir(home)
-                        .args(["-C", "tests/regression"])
-                        .arg("summary")
-                        .arg("--no-print-directory")
-                        .output()
-                        .expect("command failed to execute");
-
-                    io::stdout().write_all(&output.stdout).unwrap();
-                    io::stderr().write_all(&output.stderr).unwrap();
-                }
-            }
-    }
-        */
 }

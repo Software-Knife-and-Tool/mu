@@ -3,7 +3,6 @@ closure
 compile
 core
 exception
-format
 lambda
 lisp
 list

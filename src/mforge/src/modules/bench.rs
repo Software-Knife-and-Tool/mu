@@ -110,12 +110,14 @@ impl Bench {
                         self.run_perf("perf-group.py", "mu", "base.mu.json", ntests);
                         self.run_perf("perf-group.py", "core", "base.core.json", ntests);
                         self.run_perf("perf-group.py", "frequent", "base.frequent.json", ntests);
+                        self.run_perf("perf-group.py", "format", "base.format.json", ntests);
                         self.run_footprint("perf-footprint.py", "base.footprint.json", ntests);
                     }
                     Mode::Current => {
                         self.run_perf("perf-group.py", "mu", "current.mu.json", ntests);
                         self.run_perf("perf-group.py", "core", "current.core.json", ntests);
                         self.run_perf("perf-group.py", "frequent", "current.frequent.json", ntests);
+                        self.run_perf("perf-group.py", "format", "current.format.json", ntests);
                         self.run_footprint("perf-footprint.py", "current.footprint.json", ntests);
                     }
                     Mode::Report => {
@@ -139,7 +141,7 @@ impl Bench {
         let current_report_path = Options::add_path(&mut self.report.clone(), "current.report");
         let mut current_report_file = File::create(&current_report_path).unwrap();
 
-        for group in ["mu", "frequent", "core"] {
+        for group in ["mu", "core", "frequent", "format"] {
             let path = Options::add_path(&mut self.report.clone(), &format!("base.{group}.json"));
 
             if !path.exists() {
@@ -166,7 +168,7 @@ impl Bench {
             io::stderr().write_all(&output.stderr).unwrap();
         }
 
-        for group in ["mu", "frequent", "core"] {
+        for group in ["mu", "core", "frequent", "format"] {
             let path =
                 Options::add_path(&mut self.report.clone(), &format!("current.{group}.json"));
 

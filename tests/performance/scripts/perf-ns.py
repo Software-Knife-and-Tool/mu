@@ -15,36 +15,45 @@ mu_sys = '../../dist/mu-sys'
 with open(os.path.join('namespaces', ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
 
 def mem_virt(ns, group, line, test):
-    if ns == 'mu':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l./perf.l',
-                                 '-e (perf:mem-delta (:lambda ()' + test + ') :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+    match ns:
+        case 'mu':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l./perf.l',
+                                     '-e (perf:mem-delta (:lambda ()' + test + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'frequent':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l./perf.l',
-                                 '-e (perf:mem-delta (:lambda ()' + test + ') :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+        case 'frequent':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l./perf.l',
+                                     '-e (perf:mem-delta (:lambda ()' + test + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'core':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.sys', 
-                                 '-l./perf.l',
-                                 '-e (perf:mem-delta (:lambda () {})'.format(test) + ' :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+        case 'core':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/core.sys', 
+                                     '-l./perf.l',
+                                     '-e (perf:mem-delta (:lambda () {})'.format(test) + ' :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'common':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.sys',
-                                 '-l./perf.l',
-                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
-                                 '-e (perf:mem-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
-                                stdout=subprocess.PIPE,                 \
-                                stderr=subprocess.PIPE)
+        case 'format':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/format.sys', 
+                                     '-l./perf.l',
+                                     '-e (perf:mem-delta (:lambda () {})'.format(test) + ' :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
+
+        case 'common':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/core.sys',
+                                     '-l./perf.l',
+                                     '-q (core:%require "{}" "../../mu/modules")'.format('common'),
+                                     '-e (perf:mem-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
+                                    stdout=subprocess.PIPE,                 \
+                                    stderr=subprocess.PIPE)
 
     mem_virt = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf8')
@@ -57,36 +66,45 @@ def mem_virt(ns, group, line, test):
     return None if len(err) != 0 else mem_virt
 
 def storage(ns, group, line, test):
-    if ns == 'mu':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l./perf.l',
-                                 '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+    match ns:
+        case 'mu':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l./perf.l',
+                                     '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'frequent':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l./perf.l',
-                                 '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+        case 'frequent':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l./perf.l',
+                                     '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'core':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.sys', 
-                                 '-l./perf.l',
-                                 '-e (perf:storage-delta (:lambda () {})'.format(test) + ' :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+        case 'format':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/format.sys', 
+                                     '-l./perf.l',
+                                     '-e (perf:storage-delta (:lambda ()' + test + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'common':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.sys',
-                                 '-l./perf.l',
-                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
-                                 '-e (perf:storage-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
-                                stdout=subprocess.PIPE,                 \
-                                stderr=subprocess.PIPE)
+        case 'core':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/core.sys', 
+                                     '-l./perf.l',
+                                     '-e (perf:storage-delta (:lambda () {})'.format(test) + ' :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
+
+        case 'common':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/core.sys',
+                                     '-l./perf.l',
+                                     '-q (core:%require "{}" "../../mu/modules")'.format('common'),
+                                     '-e (perf:storage-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
+                                    stdout=subprocess.PIPE,                 \
+                                    stderr=subprocess.PIPE)
 
     storage_ = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf8')
@@ -99,36 +117,45 @@ def storage(ns, group, line, test):
     return None if len(err) != 0 else storage_
 
 def timing(ns, test):
-    if ns == 'mu':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l./perf.l',
-                                 '-e (perf:time-delta (:lambda () ' + test + ') :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+    match ns:
+        case 'mu':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l./perf.l',
+                                     '-e (perf:time-delta (:lambda () ' + test + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'frequent':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l./perf.l',
-                                 '-e (perf:time-delta (:lambda () ' + test + ') :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+        case 'frequent':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l./perf.l',
+                                     '-e (perf:time-delta (:lambda () ' + test + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'core':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.sys',
-                                 '-l./perf.l',
-                                 '-e (perf:time-delta (:lambda () {})'.format(test) + ' :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+        case 'core':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/core.sys',
+                                     '-l./perf.l',
+                                     '-e (perf:time-delta (:lambda () {})'.format(test) + ' :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
 
-    if ns == 'common':
-        proc = subprocess.Popen([mu_sys,
-                                 '-l../../dist/core.sys',
-                                 '-l./perf.l',
-                                 '-q (core:%require "{}" "../../mu/modules")'.format('common'),
-                                 '-e (perf:time-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+        case 'format':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/format.sys',
+                                     '-l./perf.l',
+                                     '-e (perf:time-delta (:lambda () {})'.format(test) + ' :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
+
+        case 'common':
+            proc = subprocess.Popen([mu_sys,
+                                     '-l../../dist/core.sys',
+                                     '-l./perf.l',
+                                     '-q (core:%require "{}" "../../mu/modules")'.format('common'),
+                                     '-e (perf:time-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
     
     time = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf8')

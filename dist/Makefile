@@ -13,12 +13,13 @@ SRC = ../src
 TOOLS = ../tools
 
 BIN = repl mforge mu-exec mu-server
-SYS = core.sys fasl.sys image.sys module.sys deftype.sys
+SYS = core.sys fasl.sys format.sys image.sys module.sys
 
 MODULES = 		\
 	common		\
 	common/describe	\
 	common/metrics	\
+	deftype		\
 	prelude		\
 	prelude/repl
 
@@ -47,6 +48,8 @@ dist:
 
 	@install -D -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.l
 	@install -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.def
+	@install -D -m 644 -t $(BASE)/lib/format $(MU)/sys/format/*.l
+	@install -m 644 -t $(BASE)/lib/core $(MU)/sys/format/*.def
 	@install -D -m 644 -t $(BASE)/lib/fasl $(MU)/sys/fasl/*.l
 	@install -m 644 -t $(BASE)/lib/fasl $(MU)/sys/fasl/*.def
 	@install -D -m 644 -t $(BASE)/lib/image $(MU)/sys/image/*.l
@@ -60,11 +63,11 @@ dist:
 	@./mu-sys -l $(MU)/dist/system.l -q '(system:require "../mu/sys/" "core")'
 	@install -m 644 ./core.sys $(BASE)/lib
 
+	@./mu-sys -l $(MU)/dist/system.l -l ./core.sys -q '(system:require "../mu/sys/" "format")'
+	@install -m 644 ./format.sys $(BASE)/lib
+
 	@./mu-sys -l $(MU)/dist/system.l -l ./core.sys -q '(system:require "../mu/sys/" "module")'
 	@install -m 644 ./module.sys $(BASE)/lib
-
-	@./mu-sys -l $(MU)/dist/system.l -l ./core.sys -q '(system:require "../mu/sys/" "deftype")'
-	@install -m 644 ./deftype.sys $(BASE)/lib
 
 	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
 	@rm -rf $(BASE) $(BIN)

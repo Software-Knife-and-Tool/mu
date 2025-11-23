@@ -12,39 +12,40 @@ with open(base + '/namespaces/' + module + '/tests') as f: group_list = f.readli
 core_arg = '-l' + core_sys
 
 def runtest(line, group, test, expected):
-    if module == 'core':
-        proc = subprocess.Popen([mu_sys,
-                                 core_arg,
-                                 '-e' + test],             \
-                                stdout=subprocess.PIPE,    \
-                                stderr=subprocess.PIPE)
+    match module:
+        case 'core':
+            proc = subprocess.Popen([mu_sys,
+                                     core_arg,
+                                     '-e' + test],             \
+                                    stdout=subprocess.PIPE,    \
+                                    stderr=subprocess.PIPE)
 
-    if module == 'common':
-        proc = subprocess.Popen([mu_sys,
-                                 core_arg,
-                                 '-l../../dist/common.fasl',
-                                 '-e (core:eval \'{})'.format(test),    \
-                                 ],                                     \
-                                stdout=subprocess.PIPE,                 \
-                                stderr=subprocess.PIPE)
+        case 'common':
+            proc = subprocess.Popen([mu_sys,
+                                     core_arg,
+                                     '-l../../dist/common.fasl',
+                                     '-e (core:eval \'{})'.format(test),    \
+                                     ],                                     \
+                                    stdout=subprocess.PIPE,                 \
+                                    stderr=subprocess.PIPE)
 
-    if module == 'module':
-        proc = subprocess.Popen([mu_sys,
-                                 core_arg,
-                                 '-l../../dist/module.sys',
-                                 '-e (core:eval \'{})'.format(test),    \
-                                 ],                                     \
-                                stdout=subprocess.PIPE,                 \
-                                stderr=subprocess.PIPE)
+        case 'module':
+            proc = subprocess.Popen([mu_sys,
+                                     core_arg,
+                                     '-l../../dist/module.sys',
+                                     '-e (core:eval \'{})'.format(test),    \
+                                     ],                                     \
+                                    stdout=subprocess.PIPE,                 \
+                                    stderr=subprocess.PIPE)
 
-    if module == 'deftype':
-        proc = subprocess.Popen([mu_sys,
-                                 core_arg,
-                                 '-l../../dist/deftype.sys',
-                                 '-e (core:eval \'{})'.format(test),    \
-                                 ],                                     \
-                                stdout=subprocess.PIPE,                 \
-                                stderr=subprocess.PIPE)
+        case 'deftype':
+            proc = subprocess.Popen([mu_sys,
+                                     core_arg,
+                                     '-l../../dist/deftype.sys',
+                                     '-e (core:eval \'{})'.format(test),    \
+                                     ],                                     \
+                                    stdout=subprocess.PIPE,                 \
+                                    stderr=subprocess.PIPE)
 
     obtained = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf-8')
