@@ -7,9 +7,10 @@ NTESTS ?= 10
 TMPF:=$(shell mktemp)
 BIN = ./scripts
 
-NAMESPACES=\
-	mu	 \
-	frequent \
+NAMESPACES=	\
+	mu	 	\
+	format		\
+	frequent 	\
 	core
 
 help: deltemp
@@ -64,6 +65,9 @@ core: deltemp
 common: deltemp
 	@python3 $(BIN)/perf-ns.py common . $(NTESTS)
 
+format: deltemp
+	@python3 $(BIN)/perf-ns.py format . $(NTESTS)
+
 namespaces: deltemp
 	@echo $(NAMESPACES)
 
@@ -74,7 +78,7 @@ base: deltemp
 	@rm -f base.report
 	@mkdir -p json
 	@for ns in $(NAMESPACES); do						\
-	    make -s $$ns > json/base.$$ns.json;					\
+	    make -s $$ns > json/base.$$ns.json --no-print-directory;		\
 	    python3 $(BIN)/report-ns.py json/base.$$ns.json >> base.report;	\
 	done
 
@@ -82,7 +86,7 @@ current: deltemp
 	@rm -f current.report
 	@mkdir -p json
 	@for ns in $(NAMESPACES); do							\
-	    make -s $$ns > json/current.$$ns.json;					\
+	    make -s $$ns > json/current.$$ns.json --no-print-directory;			\
 	    python3 $(BIN)/report-ns.py json/current.$$ns.json>> current.report;	\
 	done
 

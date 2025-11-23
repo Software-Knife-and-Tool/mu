@@ -1,0 +1,13 @@
+(format:%format :t "format:%format" ())	format:%format:nil
+(format:%format () "format:%format" ())	"format:%format"
+(format:%format :t "format:%format unqualified ~A symbol arg" '(f-symbol))	format:%format unqualified f-symbol symbol arg:nil
+(format:%format :t "format:%format unqualified ~S symbol arg" '(f-symbol))	format:%format unqualified f-symbol symbol arg:nil
+(format:%format :t "format:%format qualified ~A symbol arg" '(mu:add))	format:%format qualified mu:add symbol arg:nil
+(format:%format :t "format:%format qualified ~S symbol arg" '(mu:add))	format:%format qualified mu:add symbol arg:nil
+(format:%format :t "format:%format ~A string arg" '("f-string"))	format:%format f-string string arg:nil
+(format:%format :t "format:%format ~S string arg" '("f-string"))	format:%format "f-string" string arg:nil
+(format:%format :t "format:%format ~A fixnum arg" '(1))	format:%format 1 fixnum arg:nil
+(format:%format :t "format:%format ~S fixnum arg" '(1))	format:%format 1 fixnum arg:nil
+(format:%format :t "format:%format ~X fixnum arg" '(#xabcd))	format:%format abcd fixnum arg:nil
+(format:%format :t "format:%format ~X fixnum arg" '(-14))	format:%format -e fixnum arg:nil
+(format:%format :t "format:%format ~D fixnum arg" '(#xabc))	format:%format 2748 fixnum arg:nil

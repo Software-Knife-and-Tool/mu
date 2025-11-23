@@ -9,10 +9,23 @@ ns = sys.argv[3]
 with open(base + '/namespaces/' + ns + '/tests') as f: group_list = f.readlines()
 
 def runtest(line, group, test, expected):
-    if ns == 'mu':
-        proc = subprocess.Popen([mu_sys, '-e' + test],\
-                                stdout=subprocess.PIPE,\
-                                stderr=subprocess.PIPE)
+    match ns:
+        case 'mu':
+            proc = subprocess.Popen([
+                mu_sys,
+                '-e' + test
+            ],\
+            stdout=subprocess.PIPE,\
+            stderr=subprocess.PIPE)
+
+        case 'format':
+            proc = subprocess.Popen([
+                mu_sys,
+                '-l./dist/format.sys',
+                '-e' + test
+            ],\
+            stdout=subprocess.PIPE,\
+            stderr=subprocess.PIPE)
 
     obtained = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf-8')
@@ -26,6 +39,7 @@ def runtest(line, group, test, expected):
 
     pass_ = True if obtained == expected else False
     result = { 'expect': expected, 'obtain': obtained }
+
 
     return { 'line': line, 'exception': exception, 'pass': pass_, 'result': result }
 
