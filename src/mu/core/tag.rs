@@ -26,7 +26,7 @@ use {
         },
     },
     futures_lite::future::block_on,
-    std::{convert::From, fmt},
+    std::{convert::From, fmt, sync::LazyLock},
 };
 
 // tag storage classes
@@ -49,13 +49,13 @@ pub enum TagType {
     Async = 7,    // async heap tag
 }
 
-lazy_static! {
-    static ref NIL: Tag = DirectTag::to_tag(
+static NIL: LazyLock<Tag> = LazyLock::new(|| {
+    DirectTag::to_tag(
         (('l' as u64) << 16) | (('i' as u64) << 8) | ('n' as u64),
         DirectExt::Length(3),
-        DirectType::Keyword
-    );
-}
+        DirectType::Keyword,
+    )
+});
 
 impl fmt::Display for Tag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -79,7 +79,9 @@ impl Tag {
             Tag::Direct(tag) => tag.data(),
             Tag::Indirect(heap) => {
                 let heap_ref = block_on(env.heap.read());
-                let info = heap_ref.image_info(heap.image_id() as usize).unwrap();
+                let info = heap_ref
+                    .image_info(usize::try_from(heap.image_id()).unwrap())
+                    .unwrap();
 
                 Type::try_from(info.image_type()).unwrap() as u64
             }
@@ -113,7 +115,7 @@ impl Tag {
         let mut data: [u8; 8] = 0_u64.to_le_bytes();
 
         for (src, dst) in bits.iter().zip(data.iter_mut()) {
-            *dst = *src
+            *dst = *src;
         }
 
         let tag: u8 = (u64::from_le_bytes(data) & 0x7) as u8;
@@ -183,13 +185,16 @@ impl CoreFn for Tag {
 
             for index in (0..8).rev() {
                 u64_ <<= 8;
-                u64_ |= Fixnum::as_i64(Vector::ref_(env, arg, index as usize).unwrap()) as u64;
+                u64_ |= u64::try_from(Fixnum::as_i64(
+                    Vector::ref_(env, arg, usize::try_from(index).unwrap()).unwrap(),
+                ))
+                .unwrap();
             }
 
             fp.value = (&u64_.to_le_bytes()).into();
         } else {
-            Err(Exception::new(env, Condition::Type, "mu:unrepr", arg))?
-        };
+            Err(Exception::new(env, Condition::Type, "mu:unrepr", arg))?;
+        }
 
         Ok(())
     }

@@ -39,13 +39,17 @@ impl Gc for Vector {
             Type::Vector => match tag {
                 Tag::Indirect(image) => VectorImage {
                     type_: Tag::from_slice(
-                        heap_ref.image_slice(image.image_id() as usize).unwrap(),
+                        heap_ref
+                            .image_slice(usize::try_from(image.image_id()).unwrap())
+                            .unwrap(),
                     ),
                     length: Tag::from_slice(
-                        heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                        heap_ref
+                            .image_slice(usize::try_from(image.image_id()).unwrap() + 1)
+                            .unwrap(),
                     ),
                 },
-                _ => panic!(),
+                Tag::Direct(_) => panic!(),
             },
             _ => panic!(),
         }
@@ -92,7 +96,8 @@ impl Gc for Vector {
             Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
                 let image = Self::gc_ref_image(context, vector);
-                Fixnum::as_i64(image.length) as usize
+
+                usize::try_from(Fixnum::as_i64(image.length)).unwrap()
             }
         }
     }
@@ -107,7 +112,7 @@ impl Gc for Vector {
                     for index in 0..Self::ref_length(context, vector) {
                         let value = Self::gc_ref(context, env, vector, index).unwrap();
 
-                        context.mark(env, value)
+                        context.mark(env, value);
                     }
                 }
             }
@@ -124,6 +129,7 @@ pub trait CoreFn {
 }
 
 impl CoreFn for Vector {
+    #[allow(clippy::too_many_lines)]
     fn mu_make_vector(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("mu:make-vector", &[Type::Keyword, Type::List], fp)?;
 
@@ -132,12 +138,6 @@ impl CoreFn for Vector {
 
         fp.value = match Self::to_type(type_sym) {
             Some(vtype) => match vtype {
-                Type::Null => Err(Exception::new(
-                    env,
-                    Condition::Type,
-                    "mu:make-vector",
-                    type_sym,
-                ))?,
                 Type::T => {
                     let vec = Cons::list_iter(env, list).collect::<Vec<Tag>>();
 
@@ -163,13 +163,13 @@ impl CoreFn for Vector {
                     for (i, fx) in Cons::list_iter(env, list).enumerate() {
                         if fx.type_of() == Type::Fixnum {
                             let bit = Fixnum::as_i64(fx);
-                            if !(0..1).contains(&bit) {
-                                Err(Exception::new(env, Condition::Range, "mu:make-vector", fx))?
+                            if (0..1).contains(&bit) {
+                                bvec[i / 8] |= u8::try_from(bit).unwrap() << (7 - i % 8);
                             } else {
-                                bvec[i / 8] |= (bit as u8) << (7 - i % 8)
+                                Err(Exception::new(env, Condition::Range, "mu:make-vector", fx))?;
                             }
                         } else {
-                            Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))?
+                            Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))?;
                         }
                     }
 
@@ -180,15 +180,15 @@ impl CoreFn for Vector {
                         .map(|fx| {
                             if fx.type_of() == Type::Fixnum {
                                 let byte = Fixnum::as_i64(fx);
-                                if !(0..=255).contains(&byte) {
+                                if (0..=255).contains(&byte) {
+                                    Ok(u8::try_from(byte).unwrap())
+                                } else {
                                     Err(Exception::new(
                                         env,
                                         Condition::Range,
                                         "mu:make-vector",
                                         fx,
                                     ))?
-                                } else {
-                                    Ok(byte as u8)
                                 }
                             } else {
                                 Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))
@@ -250,11 +250,11 @@ impl CoreFn for Vector {
 
         let nth = Fixnum::as_i64(index);
 
-        if nth < 0 || nth as usize >= Self::length(env, vector) {
-            Err(Exception::new(env, Condition::Range, "mu:svref", index))?
+        if nth < 0 || usize::try_from(nth).unwrap() >= Self::length(env, vector) {
+            Err(Exception::new(env, Condition::Range, "mu:svref", index))?;
         }
 
-        fp.value = Self::ref_(env, vector, nth as usize).unwrap();
+        fp.value = Self::ref_(env, vector, usize::try_from(nth).unwrap()).unwrap();
 
         Ok(())
     }

@@ -85,13 +85,7 @@ pub fn main() {
         }
     }
 
-    let env = match Mu::config(_config) {
-        Some(config) => Mu::env(&config),
-        None => {
-            eprintln!("option: configuration error");
-            std::process::exit(-1)
-        }
-    };
+    let env = Mu::env(&Mu::config(_config));
 
     match options(std::env::args().collect()) {
         Some(opts) => {
@@ -100,7 +94,7 @@ pub fn main() {
                     ShellOpt::Eval(expr) => match Mu::eval_str(env, &expr) {
                         Ok(eval) => println!("{}", Mu::write_to_string(env, eval, true)),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(env, e));
+                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(env, &e));
                             std::process::exit(-1);
                         }
                     },
@@ -110,7 +104,7 @@ pub fn main() {
                             eprintln!(
                                 "runtime: failed to load {}, {}",
                                 &path,
-                                Mu::exception_string(env, e)
+                                Mu::exception_string(env, &e)
                             );
                             std::process::exit(-1);
                         }
@@ -118,7 +112,7 @@ pub fn main() {
                     ShellOpt::Quiet(expr) => match Mu::eval_str(env, &expr) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(env, e));
+                            eprintln!("runtime: error {}, {}", expr, Mu::exception_string(env, &e));
                             std::process::exit(-1);
                         }
                     },

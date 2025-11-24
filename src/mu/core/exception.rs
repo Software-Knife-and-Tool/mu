@@ -8,7 +8,7 @@ use {
         types::symbol::Symbol,
     },
     futures_lite::future::block_on,
-    std::fmt,
+    std::{fmt, sync::LazyLock},
 };
 
 pub type Result<T> = std::result::Result<T, Exception>;
@@ -47,8 +47,8 @@ pub enum Condition {
     ZeroDivide,
 }
 
-lazy_static! {
-    static ref CONDMAP: Vec<(Tag, Condition)> = vec![
+static CONDMAP: LazyLock<Vec<(Tag, Condition)>> = LazyLock::new(|| {
+    vec![
         (Symbol::keyword("arity"), Condition::Arity),
         (Symbol::keyword("div0"), Condition::ZeroDivide),
         (Symbol::keyword("eof"), Condition::Eof),
@@ -70,8 +70,8 @@ lazy_static! {
         (Symbol::keyword("unbound"), Condition::Unbound),
         (Symbol::keyword("under"), Condition::Under),
         (Symbol::keyword("write"), Condition::Write),
-    ];
-}
+    ]
+});
 
 impl fmt::Debug for Exception {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -87,7 +87,7 @@ impl fmt::Display for Exception {
 
 impl Exception {
     pub fn new(env: &Env, condition: Condition, symbol: &str, object: Tag) -> Self {
-        let source = Symbol::parse(env, symbol.into()).unwrap();
+        let source = Symbol::parse(env, symbol).unwrap();
 
         Exception {
             object,
@@ -115,8 +115,8 @@ impl Exception {
         }
     }
 
-    fn map_condkey(cond: Condition) -> Tag {
-        CONDMAP.iter().find(|condtab| cond == condtab.1).unwrap().0
+    fn map_condkey(cond: &Condition) -> Tag {
+        CONDMAP.iter().find(|condtab| *cond == condtab.1).unwrap().0
     }
 }
 
@@ -166,7 +166,7 @@ impl CoreFn for Exception {
         fp.value = match env.apply(thunk, Tag::nil()) {
             Ok(value) => value,
             Err(e) => {
-                let args = vec![e.object, Self::map_condkey(e.condition), e.source];
+                let args = vec![e.object, Self::map_condkey(&e.condition), e.source];
                 let value = env.apply_(handler, args)?;
                 let mut dynamic_ref = block_on(env.dynamic.write());
 

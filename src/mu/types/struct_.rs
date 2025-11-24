@@ -43,12 +43,18 @@ impl Gc for Struct {
 
         match tag {
             Tag::Indirect(image) => Struct {
-                stype: Tag::from_slice(heap_ref.image_slice(image.image_id() as usize).unwrap()),
+                stype: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(image.image_id()).unwrap())
+                        .unwrap(),
+                ),
                 vector: Tag::from_slice(
-                    heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                    heap_ref
+                        .image_slice(usize::try_from(image.image_id()).unwrap() + 1)
+                        .unwrap(),
                 ),
             },
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -58,7 +64,7 @@ impl Gc for Struct {
         if !mark {
             let vector = Self::gc_ref_image(context, struct_).vector;
 
-            context.mark(env, vector)
+            context.mark(env, vector);
         }
     }
 }
@@ -71,12 +77,18 @@ impl Struct {
 
         match tag {
             Tag::Indirect(image) => Struct {
-                stype: Tag::from_slice(heap_ref.image_slice(image.image_id() as usize).unwrap()),
+                stype: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(image.image_id()).unwrap())
+                        .unwrap(),
+                ),
                 vector: Tag::from_slice(
-                    heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                    heap_ref
+                        .image_slice(usize::try_from(image.image_id()).unwrap() + 1)
+                        .unwrap(),
                 ),
             },
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -88,15 +100,19 @@ impl Struct {
                 let heap_ref = block_on(env.heap.read());
 
                 (
-                    Tag::from_slice(heap_ref.image_slice(struct_.image_id() as usize).unwrap()),
                     Tag::from_slice(
                         heap_ref
-                            .image_slice(struct_.image_id() as usize + 1)
+                            .image_slice(usize::try_from(struct_.image_id()).unwrap())
+                            .unwrap(),
+                    ),
+                    Tag::from_slice(
+                        heap_ref
+                            .image_slice(usize::try_from(struct_.image_id()).unwrap() + 1)
                             .unwrap(),
                     ),
                 )
             }
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -139,7 +155,7 @@ impl Struct {
                 StreamWriter::write(env, Self::to_image(env, tag).vector, true, stream)?;
                 StreamWriter::write_str(env, ")", stream)
             }
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -149,7 +165,7 @@ impl Struct {
                 let vec_list = match Cons::read(env, stream) {
                     Ok(list) => {
                         if list.null_() {
-                            Err(Exception::new(env, Condition::Type, "mu:read", Tag::nil()))?
+                            Err(Exception::new(env, Condition::Type, "mu:read", Tag::nil()))?;
                         }
                         list
                     }

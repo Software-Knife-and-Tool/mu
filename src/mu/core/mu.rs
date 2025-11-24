@@ -13,7 +13,7 @@ use {
             exception::{self, Condition, Exception},
             tag::Tag,
         },
-        reader::reader_::Reader,
+        reader::read::Reader,
         streams::{builder::StreamBuilder, writer::StreamWriter},
         types::stream::Stream,
     },
@@ -94,7 +94,7 @@ impl Mu {
         let env_: &env::Env = &envs_ref[&env.as_u64()];
 
         let stream = StreamBuilder::new()
-            .string("".into())
+            .string(String::new())
             .output()
             .build(env_, &CORE)
             .unwrap();
@@ -103,7 +103,7 @@ impl Mu {
         Stream::get_string(env_, stream).unwrap()
     }
 
-    pub fn exception_string_(env: Env, ex: Exception) -> String {
+    pub fn exception_string_(env: Env, ex: &Exception) -> String {
         format!(
             "error: condition {:?} on {} raised by {}",
             ex.condition,

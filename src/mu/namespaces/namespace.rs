@@ -37,18 +37,18 @@ impl Gc for Namespace {
         match self {
             Namespace::Static(static_) => {
                 if let Some(hash) = &static_ {
-                    for (_, symbol) in hash.iter() {
-                        Symbol::mark(gc, env, *symbol)
+                    for symbol in hash.values() {
+                        Symbol::mark(gc, env, *symbol);
                     }
                 }
             }
             Namespace::Dynamic(ref hash) => {
                 let hash_ref = block_on(hash.read());
-                for (_, symbol) in hash_ref.iter() {
-                    Symbol::mark(gc, env, *symbol)
+                for symbol in hash_ref.values() {
+                    Symbol::mark(gc, env, *symbol);
                 }
             }
-        };
+        }
     }
 }
 
@@ -119,7 +119,7 @@ impl Namespace {
                 let name = def.0;
 
                 let (ndef, _) = CORE
-                    .core_defs
+                    .fn_defs
                     .iter()
                     .enumerate()
                     .find(|(_, static_)| name == static_.0)
@@ -144,9 +144,7 @@ impl Namespace {
     pub fn with_mu_static(env: &Env, defs: StaticSymbols) -> Tag {
         let mut ns_ref = block_on(env.ns_map.write());
 
-        if ns_ref.contains_key("mu") {
-            panic!()
-        }
+        assert!(!ns_ref.contains_key("mu"));
 
         let ns = Struct::new(env, "ns", vec![Vector::from("mu").with_heap(env)]).with_heap(env);
         let mut ns_map = HashMap::new();
@@ -228,48 +226,46 @@ impl Namespace {
     pub fn intern(env: &Env, ns: Tag, name: String, value: Tag) -> Option<Tag> {
         if env.keyword_ns.eq_(&ns) {
             if name.len() > DirectTag::DIRECT_STR_MAX {
-                None?
+                None?;
             }
 
             return Some(Symbol::keyword(&name));
         }
 
-        match Self::find_symbol(env, ns, &name) {
-            Some(symbol) => {
-                if Symbol::is_bound(env, symbol) {
-                    Some(symbol)
-                } else {
-                    let image = Symbol::to_image(env, symbol);
+        if let Some(symbol) = Self::find_symbol(env, ns, &name) {
+            if Symbol::is_bound(env, symbol) {
+                Some(symbol)
+            } else {
+                let image = Symbol::to_image(env, symbol);
 
-                    let slices: &[[u8; 8]] = &[
-                        image.namespace.as_slice(),
-                        image.name.as_slice(),
-                        value.as_slice(),
-                    ];
+                let slices: &[[u8; 8]] = &[
+                    image.namespace.as_slice(),
+                    image.name.as_slice(),
+                    value.as_slice(),
+                ];
 
-                    let offset = match symbol {
-                        Tag::Indirect(heap) => heap.image_id(),
-                        _ => panic!(),
-                    } as usize;
+                let offset = usize::try_from(match symbol {
+                    Tag::Indirect(heap) => heap.image_id(),
+                    Tag::Direct(_) => panic!(),
+                })
+                .unwrap();
 
-                    block_on(env.heap.write()).write_image(slices, offset);
-
-                    Some(symbol)
-                }
-            }
-            None => {
-                let symbol = Symbol::new(env, ns, &name, value).with_heap(env);
-                let ns_ref = block_on(env.ns_map.read());
-
-                match &ns_ref[&Self::name(env, ns)].1 {
-                    Namespace::Static(_) => (),
-                    Namespace::Dynamic(hash) => {
-                        block_on(hash.write()).insert(name, symbol);
-                    }
-                }
+                block_on(env.heap.write()).write_image(slices, offset);
 
                 Some(symbol)
             }
+        } else {
+            let symbol = Symbol::new(env, ns, &name, value).with_heap(env);
+            let ns_ref = block_on(env.ns_map.read());
+
+            match &ns_ref[&Self::name(env, ns)].1 {
+                Namespace::Static(_) => (),
+                Namespace::Dynamic(hash) => {
+                    block_on(hash.write()).insert(name, symbol);
+                }
+            }
+
+            Some(symbol)
         }
     }
 }
@@ -291,7 +287,7 @@ impl CoreFn for Namespace {
         let value = fp.argv[2];
 
         if !Self::is_namespace(env, ns) {
-            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
+            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?;
         }
 
         fp.value = match Self::intern(env, ns, Vector::as_string(env, name), value) {
@@ -319,7 +315,7 @@ impl CoreFn for Namespace {
                 Condition::Type,
                 "mu:namespace-name",
                 ns,
-            ))?
+            ))?;
         }
 
         fp.value = Vector::from(Self::name(env, ns)).with_heap(env);
@@ -345,7 +341,7 @@ impl CoreFn for Namespace {
         let name = fp.argv[1];
 
         if !Self::is_namespace(env, ns_tag) {
-            Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?
+            Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?;
         }
 
         fp.value = match Self::find_symbol(env, ns_tag, &Vector::as_string(env, name)) {

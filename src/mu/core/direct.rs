@@ -29,8 +29,10 @@ use {
 #[bitfield]
 #[repr(u64)]
 pub struct DirectTag {
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     #[bits = 3]
     pub tag: TagType,
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     #[bits = 2]
     pub dtype: DirectType,
     pub ext: B3,
@@ -92,7 +94,7 @@ impl DirectImage {
 
         Tag::Direct(
             DirectTag::new()
-                .with_data((tag_id << 8) | ((type_id & 0xf) as u64))
+                .with_data((tag_id << 8) | u64::from(type_id & 0xf))
                 .with_ext(ExtType::Image as u8)
                 .with_dtype(DirectType::Ext)
                 .with_tag(TagType::Direct),
@@ -112,15 +114,15 @@ impl DirectTag {
                 DirectType::String | DirectType::ByteVec | DirectType::Keyword => {
                     dtag.ext() as usize
                 }
-                _ => panic!(),
+                DirectType::Ext => panic!(),
             },
-            _ => panic!(),
+            Tag::Indirect(_) => panic!(),
         }
     }
 
     pub fn to_tag(data: u64, ext: DirectExt, tag: DirectType) -> Tag {
         let ext: u8 = match ext {
-            DirectExt::Length(size) => size as u8,
+            DirectExt::Length(size) => u8::try_from(size).unwrap(),
             DirectExt::ExtType(ext_type) => ext_type as u8,
         };
 
@@ -133,10 +135,9 @@ impl DirectTag {
         )
     }
 
-    pub fn type_of(&self) -> Type {
+    pub fn type_of(self) -> Type {
         match self.dtype() {
-            DirectType::ByteVec => Type::Vector,
-            DirectType::String => Type::Vector,
+            DirectType::ByteVec | DirectType::String => Type::Vector,
             DirectType::Keyword => Type::Keyword,
             DirectType::Ext => match ExtType::try_from(self.ext()).unwrap() {
                 ExtType::Char => Type::Char,
@@ -144,6 +145,7 @@ impl DirectTag {
                 ExtType::Fixnum => Type::Fixnum,
                 ExtType::Float => Type::Float,
                 ExtType::Function => Type::Function,
+                #[allow(clippy::cast_possible_truncation)]
                 ExtType::Image => Type::try_from(self.data() as u8).unwrap(),
                 ExtType::Stream => Type::Stream,
             },
@@ -156,18 +158,19 @@ impl DirectTag {
     pub fn is_cached(tag: Tag) -> bool {
         match tag {
             Tag::Direct(fn_) => matches!(ExtType::try_from(fn_.ext()).unwrap(), ExtType::Image),
-            _ => panic!(),
+            Tag::Indirect(_) => panic!(),
         }
     }
 
     pub fn cache_ref(tag: Tag) -> (usize, u8) {
         match tag {
             Tag::Direct(fn_) => {
-                let data = fn_.data() as usize;
+                let data = usize::try_from(fn_.data()).unwrap();
 
+                #[allow(clippy::cast_possible_truncation)]
                 (data >> 8, data as u8)
             }
-            _ => panic!(),
+            Tag::Indirect(_) => panic!(),
         }
     }
 
@@ -175,13 +178,14 @@ impl DirectTag {
         match tag {
             Tag::Direct(direct) => match direct.ext() {
                 val if val == ExtType::Image as u8 => {
-                    let data = direct.data() as usize;
+                    let data = usize::try_from(direct.data()).unwrap();
 
+                    #[allow(clippy::cast_possible_truncation)]
                     (data >> 8, data as u8)
                 }
                 _ => panic!(),
             },
-            _ => panic!(),
+            Tag::Indirect(_) => panic!(),
         }
     }
 
@@ -201,7 +205,7 @@ impl DirectTag {
             Tag::Direct(tag) if tag.dtype() == DirectType::Ext && tag.ext() == 4 => {
                 let data: u64 = tag.data();
 
-                data as usize
+                usize::try_from(data).unwrap()
             }
             _ => panic!(),
         }
@@ -215,8 +219,8 @@ impl DirectTag {
     fn sext_from_tag(tag: Tag) -> Option<u32> {
         let u64_ = tag.as_u64();
 
-        let mask_28: u64 = 0x0fffffff;
-        let mask_32: u64 = 0xffffffff;
+        let mask_28: u64 = 0x0fff_ffff;
+        let mask_32: u64 = 0xffff_ffff;
         let up_32: u64 = u64_ >> 28;
         let bot_28: u32 = (u64_ & mask_28).try_into().unwrap();
         let msb: u64 = (u64_ >> 27) & 1;
@@ -233,7 +237,7 @@ impl DirectTag {
 
         Self::sext_from_tag(cdr).map(|cdr_| {
             Self::to_tag(
-                ((car_ as u64) << 28) | cdr_ as u64,
+                (u64::from(car_) << 28) | u64::from(cdr_),
                 DirectExt::ExtType(ExtType::Cons),
                 DirectType::Ext,
             )
@@ -251,30 +255,29 @@ impl DirectTag {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.ext().try_into() {
                     Ok(ExtType::Cons) => {
-                        let mask_32: u64 = 0xffffffff;
-                        let mask_28: u64 = 0x0fffffff;
+                        let mask_32: u64 = 0xffff_ffff;
+                        let mask_28: u64 = 0x0fff_ffff;
 
-                        let mut u64_car: u64 = dtag.data() >> 28;
-                        let mut u64_cdr: u64 = dtag.data() & mask_28;
+                        let mut cons_u64: (u64, u64) = (dtag.data() >> 28, dtag.data() & mask_28);
 
-                        if ((u64_car >> 27) & 1) != 0 {
-                            u64_car |= mask_32 << 28;
+                        if ((cons_u64.0 >> 27) & 1) != 0 {
+                            cons_u64.0 |= mask_32 << 28;
                         }
 
-                        if ((u64_cdr >> 27) & 1) != 0 {
-                            u64_cdr |= mask_32 << 28;
+                        if ((cons_u64.1 >> 27) & 1) != 0 {
+                            cons_u64.1 |= mask_32 << 28;
                         }
 
                         (
-                            (&u64_car.to_le_bytes()).into(),
-                            (&u64_cdr.to_le_bytes()).into(),
+                            (&cons_u64.0.to_le_bytes()).into(),
+                            (&cons_u64.1.to_le_bytes()).into(),
                         )
                     }
                     _ => panic!(),
                 },
                 _ => panic!(),
             },
-            _ => panic!(),
+            Tag::Indirect(_) => panic!(),
         }
     }
 }

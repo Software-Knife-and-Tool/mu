@@ -44,7 +44,7 @@ impl Gc for Async {
         if !mark {
             let form = Self::ref_form(context, function);
 
-            context.mark(env, form)
+            context.mark(env, form);
         }
     }
 
@@ -54,10 +54,18 @@ impl Gc for Async {
         assert_eq!(tag.type_of(), Type::Async);
         match tag {
             Tag::Indirect(fn_) => Async {
-                arity: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                form: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+                arity: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(fn_.image_id()).unwrap())
+                        .unwrap(),
+                ),
+                form: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
+                        .unwrap(),
+                ),
             },
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 }
@@ -73,10 +81,18 @@ impl Async {
         assert_eq!(tag.type_of(), Type::Async);
         match tag {
             Tag::Indirect(fn_) => Async {
-                arity: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                form: Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+                arity: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(fn_.image_id()).unwrap())
+                        .unwrap(),
+                ),
+                form: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
+                        .unwrap(),
+                ),
             },
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -88,11 +104,19 @@ impl Async {
                 let heap_ref = block_on(env.heap.read());
 
                 (
-                    Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                    Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+                    Tag::from_slice(
+                        heap_ref
+                            .image_slice(usize::try_from(fn_.image_id()).unwrap())
+                            .unwrap(),
+                    ),
+                    Tag::from_slice(
+                        heap_ref
+                            .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
+                            .unwrap(),
+                    ),
                 )
             }
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -122,10 +146,11 @@ impl Async {
     pub fn update(env: &Env, image: &Async, func: Tag) {
         let slices: &[[u8; 8]] = &[image.arity.as_slice(), image.form.as_slice()];
 
-        let offset = match func {
+        let offset = usize::try_from(match func {
             Tag::Indirect(heap) => heap.image_id(),
-            _ => panic!(),
-        } as usize;
+            Tag::Direct(_) => panic!(),
+        })
+        .unwrap();
 
         let mut heap_ref = block_on(env.heap.write());
 
@@ -142,8 +167,7 @@ impl Async {
     pub fn image_size(env: &Env, func: Tag) -> usize {
         let form = Self::destruct(env, func).1;
         match form.type_of() {
-            Type::Null | Type::Cons => std::mem::size_of::<Async>(),
-            Type::Vector => std::mem::size_of::<Async>(),
+            Type::Null | Type::Cons | Type::Vector => std::mem::size_of::<Async>(),
             Type::Symbol => std::mem::size_of::<Fixnum>() + Symbol::image_size(env, form),
             _ => panic!(),
         }

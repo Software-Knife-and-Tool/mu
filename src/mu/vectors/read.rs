@@ -25,6 +25,7 @@ pub trait Read {
 }
 
 impl Read for Vector {
+    #[allow(clippy::too_many_lines)]
     fn read(env: &Env, syntax: char, stream: Tag) -> exception::Result<Tag> {
         match syntax {
             '"' => {
@@ -37,7 +38,7 @@ impl Read for Vector {
                             SyntaxType::Escape => match StreamReader::read_char(env, stream)? {
                                 Some(ch) => str.push(ch),
                                 None => {
-                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?
+                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?;
                                 }
                             },
                             _ => str.push(ch),
@@ -61,20 +62,25 @@ impl Read for Vector {
                             SyntaxType::Escape => match StreamReader::read_char(env, stream)? {
                                 Some(ch) => {
                                     if ch == '0' || ch == '1' {
-                                        digits.push(ch)
+                                        digits.push(ch);
                                     } else {
-                                        Err(Exception::new(env, Condition::Eof, "mu:read", stream))?
+                                        Err(Exception::new(
+                                            env,
+                                            Condition::Eof,
+                                            "mu:read",
+                                            stream,
+                                        ))?;
                                     }
                                 }
                                 None => {
-                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?
+                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?;
                                 }
                             },
                             _ => {
                                 if ch == '0' || ch == '1' {
-                                    digits.push(ch)
+                                    digits.push(ch);
                                 } else {
-                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?
+                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?;
                                 }
                             }
                         },
@@ -89,7 +95,7 @@ impl Read for Vector {
 
                 for (i, ch) in digits.chars().enumerate() {
                     if ch == '1' {
-                        bvec[i / 8] |= (1_i8) << (7 - i % 8)
+                        bvec[i / 8] |= (1_i8) << (7 - i % 8);
                     }
                 }
 
@@ -99,7 +105,7 @@ impl Read for Vector {
                 let vec_list = match Cons::read(env, stream) {
                     Ok(list) => {
                         if list.null_() {
-                            Err(Exception::new(env, Condition::Type, "mu:read", Tag::nil()))?
+                            Err(Exception::new(env, Condition::Type, "mu:read", Tag::nil()))?;
                         }
                         list
                     }
@@ -140,15 +146,15 @@ impl Read for Vector {
                                     .map(|fx| {
                                         if fx.type_of() == Type::Fixnum {
                                             let byte = Fixnum::as_i64(fx);
-                                            if !(0..=255).contains(&byte) {
+                                            if (0..=255).contains(&byte) {
+                                                Ok(u8::try_from(byte).unwrap())
+                                            } else {
                                                 Err(Exception::new(
                                                     env,
                                                     Condition::Range,
                                                     "mu:read",
                                                     fx,
                                                 ))?
-                                            } else {
-                                                Ok(byte as u8)
                                             }
                                         } else {
                                             Err(Exception::new(

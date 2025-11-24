@@ -84,13 +84,7 @@ pub fn main() {
     let mut _toc = false;
     let mut _path = String::new();
 
-    let _env = match Mu::config(None) {
-        Some(config) => Mu::env(&config),
-        None => {
-            eprintln!("option: configuration error");
-            std::process::exit(-1)
-        }
-    };
+    let _env = Mu::env(&Mu::config(None));
 
     match options(std::env::args().collect()) {
         Some(opts) => {

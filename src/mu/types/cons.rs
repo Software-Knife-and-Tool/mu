@@ -18,7 +18,7 @@ use {
             gc::{Gc as _, GcContext},
             heap::HeapRequest,
         },
-        reader::reader_::{Reader, EOL},
+        reader::read::{Reader, EOL},
         streams::writer::StreamWriter,
         types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
     },
@@ -45,10 +45,18 @@ impl Gc for Cons {
         assert_eq!(tag.type_of(), Type::Cons);
         match tag {
             Tag::Indirect(main) => Cons {
-                car: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize).unwrap()),
-                cdr: Tag::from_slice(heap_ref.image_slice(main.image_id() as usize + 1).unwrap()),
+                car: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(main.image_id()).unwrap())
+                        .unwrap(),
+                ),
+                cdr: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(main.image_id()).unwrap() + 1)
+                        .unwrap(),
+                ),
             },
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -81,7 +89,7 @@ impl Gc for Cons {
                 let cdr = Self::ref_cdr(context, cons);
 
                 context.mark(env, car);
-                context.mark(env, cdr)
+                context.mark(env, cdr);
             }
             Tag::Indirect(_) => {
                 let mark = context.mark_image(cons).unwrap();
@@ -106,8 +114,16 @@ impl Cons {
 
         match tag {
             Tag::Indirect(cons) => Self::new(
-                Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize).unwrap()),
-                Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize + 1).unwrap()),
+                Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(cons.image_id()).unwrap())
+                        .unwrap(),
+                ),
+                Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(cons.image_id()).unwrap() + 1)
+                        .unwrap(),
+                ),
             ),
             Tag::Direct(_) => panic!(),
         }
@@ -121,8 +137,16 @@ impl Cons {
                 let heap_ref = block_on(env.heap.read());
 
                 (
-                    Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize).unwrap()),
-                    Tag::from_slice(heap_ref.image_slice(cons.image_id() as usize + 1).unwrap()),
+                    Tag::from_slice(
+                        heap_ref
+                            .image_slice(usize::try_from(cons.image_id()).unwrap())
+                            .unwrap(),
+                    ),
+                    Tag::from_slice(
+                        heap_ref
+                            .image_slice(usize::try_from(cons.image_id()).unwrap() + 1)
+                            .unwrap(),
+                    ),
                 )
             }
             Tag::Direct(_) => DirectTag::cons_destruct(cons),
@@ -200,7 +224,7 @@ impl Cons {
                     match cp.type_of() {
                         Type::Cons => {
                             n += 1;
-                            cp = Self::destruct(env, cp).1
+                            cp = Self::destruct(env, cp).1;
                         }
                         Type::Null => break,
                         _ => None?,
@@ -241,30 +265,29 @@ impl Cons {
     }
 
     pub fn with_heap(&self, env: &Env) -> Tag {
-        match DirectTag::cons(self.car, self.cdr) {
-            Some(tag) => tag,
-            None => {
-                let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
-                let ha = HeapRequest {
-                    env,
-                    image,
-                    vdata: None,
-                    type_id: Type::Cons as u8,
-                };
-                let heap_ref = &mut block_on(env.heap.write());
+        if let Some(tag) = DirectTag::cons(self.car, self.cdr) {
+            tag
+        } else {
+            let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
+            let ha = HeapRequest {
+                env,
+                image,
+                vdata: None,
+                type_id: Type::Cons as u8,
+            };
+            let heap_ref = &mut block_on(env.heap.write());
 
-                match heap_ref.alloc(&ha) {
-                    Some(image_id) => {
-                        let ind = IndirectTag::new()
-                            .with_image_id(image_id as u64)
-                            .with_heap_id(1)
-                            .with_tag(TagType::Cons);
+            match heap_ref.alloc(&ha) {
+                Some(image_id) => {
+                    let ind = IndirectTag::new()
+                        .with_image_id(image_id as u64)
+                        .with_heap_id(1)
+                        .with_tag(TagType::Cons);
 
-                        Tag::Indirect(ind)
-                    }
-                    None => {
-                        panic!()
-                    }
+                    Tag::Indirect(ind)
+                }
+                None => {
+                    panic!()
                 }
             }
         }
@@ -350,7 +373,7 @@ impl Cons {
                             return Some(car);
                         }
                         nth -= 1;
-                        tail = cdr
+                        tail = cdr;
                     }
                     _ => {
                         return if nth != 0 { None } else { Some(tail) };
@@ -375,7 +398,7 @@ impl Cons {
                             return Some(tail);
                         }
                         nth -= 1;
-                        tail = Self::destruct(env, tail).1
+                        tail = Self::destruct(env, tail).1;
                     }
                     _ => {
                         return if nth != 0 { None } else { Some(tail) };
@@ -412,13 +435,13 @@ impl CoreFn for Cons {
                 let (list, cdr) = Cons::destruct(env, cons);
 
                 if cdr.null_() {
-                    fp.value = Self::append(env, &appended, list)
+                    fp.value = Self::append(env, &appended, list);
                 } else {
                     match list.type_of() {
                         Type::Null => (),
                         Type::Cons => {
                             for car in Cons::list_iter(env, list) {
-                                appended.push(car)
+                                appended.push(car);
                             }
                         }
                         _ => Err(Exception::new(env, Condition::Type, "mu:append", list))?,
@@ -488,12 +511,13 @@ impl CoreFn for Cons {
         let list = fp.argv[1];
 
         if Fixnum::as_i64(nth) < 0 {
-            Err(Exception::new(env, Condition::Type, "mu:nth", nth))?
+            Err(Exception::new(env, Condition::Type, "mu:nth", nth))?;
         }
 
         fp.value = match list.type_of() {
             Type::Null => Tag::nil(),
-            Type::Cons => match Self::nth(env, Fixnum::as_i64(nth) as usize, list) {
+            Type::Cons => match Self::nth(env, usize::try_from(Fixnum::as_i64(nth)).unwrap(), list)
+            {
                 Some(tag) => tag,
                 None => Err(Exception::new(env, Condition::Type, "mu:nth", list))?,
             },
@@ -515,10 +539,12 @@ impl CoreFn for Cons {
 
         fp.value = match list.type_of() {
             Type::Null => Tag::nil(),
-            Type::Cons => match Self::nthcdr(env, Fixnum::as_i64(nth) as usize, list) {
-                Some(tag) => tag,
-                None => Err(Exception::new(env, Condition::Type, "mu:nthcdr", list))?,
-            },
+            Type::Cons => {
+                match Self::nthcdr(env, usize::try_from(Fixnum::as_i64(nth)).unwrap(), list) {
+                    Some(tag) => tag,
+                    None => Err(Exception::new(env, Condition::Type, "mu:nthcdr", list))?,
+                }
+            }
             _ => panic!(),
         };
 

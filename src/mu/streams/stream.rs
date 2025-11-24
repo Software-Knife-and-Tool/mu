@@ -20,21 +20,15 @@ use {
 };
 
 impl SystemStream {
-    pub fn is_file(&self) -> Option<bool> {
-        match self {
-            SystemStream::Reader(_) | SystemStream::Writer(_) => Some(true),
-            _ => Some(false),
-        }
+    pub fn is_file(&self) -> bool {
+        matches!(self, SystemStream::Reader(_) | SystemStream::Writer(_))
     }
 
-    pub fn is_string(&self) -> Option<bool> {
-        match self {
-            SystemStream::String(_) => Some(true),
-            _ => Some(false),
-        }
+    pub fn is_string(&self) -> bool {
+        matches!(self, SystemStream::String(_))
     }
 
-    pub fn flush(&self) -> Option<()> {
+    pub fn flush(&self) {
         match self {
             Self::StdOutput => {
                 std::io::stdout().flush().unwrap();
@@ -43,34 +37,32 @@ impl SystemStream {
                 std::io::stderr().flush().unwrap();
             }
             _ => (),
-        };
-
-        Some(())
+        }
     }
 
-    pub fn close(&self) -> Option<()> {
+    pub fn close(&self) {
         match self {
-            Self::StdInput | Self::StdOutput | Self::StdError => (),
+            Self::StdInput | Self::StdOutput | Self::StdError | Self::String(_) => (),
             Self::Reader(file) => drop(block_on(file.read())),
             Self::Writer(file) => {
                 let mut file = block_on(file.write());
-                let _unused = block_on(async { file.flush().await });
+                let _ = block_on(async { file.flush().await });
 
-                drop(file)
+                drop(file);
             }
-            SystemStream::String(_) => (),
-        };
-
-        Some(())
+        }
     }
 
     pub fn get_string(&self) -> Option<String> {
         match self {
-            Self::StdInput | Self::StdOutput | Self::StdError => None,
-            SystemStream::Reader(_) | SystemStream::Writer(_) => None,
-            SystemStream::String(string) => {
+            Self::StdInput
+            | Self::StdOutput
+            | Self::StdError
+            | Self::Reader(_)
+            | Self::Writer(_) => None,
+            Self::String(string) => {
                 let mut string_ref = block_on(string.write());
-                let string_vec: Vec<u8> = string_ref.iter().cloned().collect();
+                let string_vec: Vec<u8> = string_ref.iter().copied().collect();
 
                 string_ref.clear();
                 Some(str::from_utf8(&string_vec).unwrap().to_owned())
@@ -88,32 +80,31 @@ impl SystemStream {
                 .build()
         };
 
-        match system_stream {
-            None => Err(Exception::new(env, Condition::Open, "mu:open", Tag::nil())),
-            Some(_) => {
-                let mut streams_ref = block_on(CORE.streams.write());
-                let mut id = block_on(CORE.stream_id.write());
-                let stream_id = *id;
+        if let Some(stream) = system_stream {
+            let mut streams_ref = block_on(CORE.streams.write());
+            let mut id = block_on(CORE.stream_id.write());
+            let stream_id = *id;
 
-                *id += 1;
+            *id += 1;
 
-                streams_ref.insert(
-                    stream_id,
-                    RwLock::new(Stream {
-                        id: stream_id,
-                        system: system_stream.unwrap(),
-                        open: true,
-                        direction: Symbol::keyword(if is_input { "input" } else { "output" }),
-                        unch: Tag::nil(),
-                    }),
-                );
+            streams_ref.insert(
+                stream_id,
+                RwLock::new(Stream {
+                    id: stream_id,
+                    system: stream,
+                    open: true,
+                    direction: Symbol::keyword(if is_input { "input" } else { "output" }),
+                    unch: Tag::nil(),
+                }),
+            );
 
-                Ok(DirectTag::to_tag(
-                    stream_id,
-                    DirectExt::ExtType(ExtType::Stream),
-                    DirectType::Ext,
-                ))
-            }
+            Ok(DirectTag::to_tag(
+                stream_id,
+                DirectExt::ExtType(ExtType::Stream),
+                DirectType::Ext,
+            ))
+        } else {
+            Err(Exception::new(env, Condition::Open, "mu:open", Tag::nil()))
         }
     }
 
@@ -125,7 +116,7 @@ impl SystemStream {
         Self::open_file(env, path, false)
     }
 
-    pub fn open_string(env: &Env, contents: &str, dir: StringDirection) -> exception::Result<Tag> {
+    pub fn open_string(env: &Env, contents: &str, dir: &StringDirection) -> exception::Result<Tag> {
         let system_stream = match dir {
             StringDirection::Input => SystemStreamBuilder::new()
                 .string(contents.into())
@@ -141,49 +132,48 @@ impl SystemStream {
                 .build(),
         };
 
-        match system_stream {
-            None => Err(Exception::new(env, Condition::Open, "env:open", Tag::nil()))?,
-            Some(_) => {
-                let mut streams_ref = block_on(CORE.streams.write());
-                let mut id = block_on(CORE.stream_id.write());
-                let stream_id = *id;
+        if let Some(stream) = system_stream {
+            let mut streams_ref = block_on(CORE.streams.write());
+            let mut id = block_on(CORE.stream_id.write());
+            let stream_id = *id;
 
-                *id += 1;
+            *id += 1;
 
-                streams_ref.insert(
-                    stream_id,
-                    RwLock::new(Stream {
-                        id: stream_id,
-                        open: true,
-                        system: system_stream.unwrap(),
-                        direction: match dir {
-                            StringDirection::Input => Symbol::keyword("input"),
-                            StringDirection::Output => Symbol::keyword("output"),
-                            StringDirection::Bidir => Symbol::keyword("bidir"),
-                        },
-                        unch: Tag::nil(),
-                    }),
-                );
+            streams_ref.insert(
+                stream_id,
+                RwLock::new(Stream {
+                    id: stream_id,
+                    open: true,
+                    system: stream,
+                    direction: match dir {
+                        StringDirection::Input => Symbol::keyword("input"),
+                        StringDirection::Output => Symbol::keyword("output"),
+                        StringDirection::Bidir => Symbol::keyword("bidir"),
+                    },
+                    unch: Tag::nil(),
+                }),
+            );
 
-                Ok(DirectTag::to_tag(
-                    stream_id,
-                    DirectExt::ExtType(ExtType::Stream),
-                    DirectType::Ext,
-                ))
-            }
+            Ok(DirectTag::to_tag(
+                stream_id,
+                DirectExt::ExtType(ExtType::Stream),
+                DirectType::Ext,
+            ))
+        } else {
+            Err(Exception::new(env, Condition::Open, "env:open", Tag::nil()))?
         }
     }
 
     pub fn open_input_string(env: &Env, path: &str) -> exception::Result<Tag> {
-        Self::open_string(env, path, StringDirection::Input)
+        Self::open_string(env, path, &StringDirection::Input)
     }
 
     pub fn open_output_string(env: &Env, path: &str) -> exception::Result<Tag> {
-        Self::open_string(env, path, StringDirection::Output)
+        Self::open_string(env, path, &StringDirection::Output)
     }
 
     pub fn open_bidir_string(env: &Env, path: &str) -> exception::Result<Tag> {
-        Self::open_string(env, path, StringDirection::Bidir)
+        Self::open_string(env, path, &StringDirection::Bidir)
     }
 
     pub fn open_std_stream(std_stream: SystemStream, core: &Core) -> exception::Result<Tag> {

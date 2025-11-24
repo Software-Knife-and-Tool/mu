@@ -19,19 +19,21 @@ use {
         },
     },
     futures_lite::future::block_on,
-    std::str,
+    std::{str, sync::LazyLock},
 };
 
-lazy_static! {
-    pub static ref VTYPEMAP: Vec<(Tag, Type)> = vec![
+// tatic COMPILER: LazyLock<Compiler> = LazyLock::new(||
+
+pub static VTYPEMAP: LazyLock<Vec<(Tag, Type)>> = LazyLock::new(|| {
+    vec![
         (Symbol::keyword("bit"), Type::Bit),
         (Symbol::keyword("byte"), Type::Byte),
         (Symbol::keyword("char"), Type::Char),
         (Symbol::keyword("fixnum"), Type::Fixnum),
         (Symbol::keyword("float"), Type::Float),
         (Symbol::keyword("t"), Type::T),
-    ];
-}
+    ]
+});
 
 #[derive(Clone)]
 pub enum Vector {
@@ -77,7 +79,8 @@ impl Vector {
             Tag::Direct(direct) => direct.ext() as usize,
             Tag::Indirect(_) => {
                 let image = Self::to_image(env, vector);
-                Fixnum::as_i64(image.length) as usize
+
+                usize::try_from(Fixnum::as_i64(image.length)).unwrap()
             }
         }
     }
@@ -107,9 +110,9 @@ impl Vector {
                 str::from_utf8(
                     heap_ref
                         .image_data_slice(
-                            image.image_id() as usize + Self::IMAGE_LEN,
+                            usize::try_from(image.image_id()).unwrap() + Self::IMAGE_LEN,
                             0,
-                            Fixnum::as_i64(vec.length) as usize,
+                            usize::try_from(Fixnum::as_i64(vec.length)).unwrap(),
                         )
                         .unwrap(),
                 )
@@ -151,12 +154,18 @@ impl Vector {
 
         match tag {
             Tag::Indirect(image) => VectorImage {
-                type_: Tag::from_slice(heap_ref.image_slice(image.image_id() as usize).unwrap()),
+                type_: Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(image.image_id()).unwrap())
+                        .unwrap(),
+                ),
                 length: Tag::from_slice(
-                    heap_ref.image_slice(image.image_id() as usize + 1).unwrap(),
+                    heap_ref
+                        .image_slice(usize::try_from(image.image_id()).unwrap() + 1)
+                        .unwrap(),
                 ),
             },
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -191,15 +200,16 @@ impl Vector {
 
                 match ivec {
                     VectorImageType::T(_) => indirect.with_heap(env),
-                    _ => match Self::cached(env, &indirect) {
-                        Some(tag) => tag,
-                        None => {
+                    _ => {
+                        if let Some(tag) = Self::cached(env, &indirect) {
+                            tag
+                        } else {
                             let tag = indirect.with_heap(env);
 
                             Self::cache(env, tag);
                             tag
                         }
-                    },
+                    }
                 }
             }
         }

@@ -3,5 +3,5 @@
 
 // reader module
 pub mod quasi;
-pub mod reader_;
+pub mod read;
 pub mod readtable;

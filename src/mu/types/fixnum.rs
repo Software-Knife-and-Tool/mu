@@ -18,12 +18,10 @@ use crate::{
 
 impl From<usize> for Tag {
     fn from(fx: usize) -> Tag {
-        if !Fixnum::is_i56(fx as i64) {
-            panic!()
-        }
+        assert!(Fixnum::is_i56(i64::try_from(fx).unwrap()));
 
         DirectTag::to_tag(
-            ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+            u64::try_from(i64::try_from(fx).unwrap() & (2_i64.pow(56) - 1)).unwrap(),
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
@@ -33,7 +31,7 @@ impl From<usize> for Tag {
 impl From<u32> for Tag {
     fn from(fx: u32) -> Tag {
         DirectTag::to_tag(
-            ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+            u64::try_from(i64::from(fx) & (2_i64.pow(56) - 1)).unwrap(),
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
@@ -43,7 +41,7 @@ impl From<u32> for Tag {
 impl From<u16> for Tag {
     fn from(fx: u16) -> Tag {
         DirectTag::to_tag(
-            ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+            u64::try_from(i64::from(fx) & (2_i64.pow(56) - 1)).unwrap(),
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
@@ -53,7 +51,7 @@ impl From<u16> for Tag {
 impl From<u8> for Tag {
     fn from(fx: u8) -> Tag {
         DirectTag::to_tag(
-            ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+            u64::try_from(i64::from(fx) & (2_i64.pow(56) - 1)).unwrap(),
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
@@ -64,7 +62,7 @@ impl From<Tag> for i64 {
     fn from(tag: Tag) -> i64 {
         assert_eq!(tag.type_of(), Type::Fixnum);
 
-        (tag.as_u64() as i64) >> 8
+        i64::try_from(tag.as_u64()).unwrap() >> 8
     }
 }
 
@@ -75,7 +73,7 @@ impl From<Tag> for usize {
         let data: i64 = tag.into();
         assert!(data >= 0);
 
-        data as usize
+        usize::try_from(data).unwrap()
     }
 }
 
@@ -85,7 +83,7 @@ impl From<Tag> for i32 {
 
         let data: i64 = tag.into();
 
-        data as i32
+        i32::try_from(data).unwrap()
     }
 }
 
@@ -95,7 +93,7 @@ impl From<Tag> for u8 {
 
         let data: i64 = tag.into();
 
-        data as u8
+        u8::try_from(data).unwrap()
     }
 }
 
@@ -114,37 +112,32 @@ impl Fixnum {
     pub fn as_i64(tag: Tag) -> i64 {
         assert_eq!(tag.type_of(), Type::Fixnum);
 
-        (tag.as_u64() as i64) >> 8
+        #[allow(clippy::cast_possible_wrap)]
+        let i64_ = tag.as_u64() as i64;
+
+        i64_ >> 8
     }
 
     pub fn with_or_panic(fx: usize) -> Tag {
-        Self::with_u64_or_panic(fx as u64)
+        Self::with_u64_or_panic(u64::try_from(fx).unwrap())
     }
 
     pub fn with_u64_or_panic(fx: u64) -> Tag {
-        match i64::try_from(fx) {
-            Err(_) => panic!(),
-            Ok(i64_) => {
-                if !Fixnum::is_i56(i64_) {
-                    panic!()
-                }
+        let i64_ = i64::try_from(fx).unwrap();
+        assert!(Fixnum::is_i56(i64_));
 
-                DirectTag::to_tag(
-                    (i64_ & (2_i64.pow(56) - 1)) as u64,
-                    DirectExt::ExtType(ExtType::Fixnum),
-                    DirectType::Ext,
-                )
-            }
-        }
+        DirectTag::to_tag(
+            u64::try_from(i64_ & (2_i64.pow(56) - 1)).unwrap(),
+            DirectExt::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        )
     }
 
     pub fn with_i64_or_panic(fx: i64) -> Tag {
-        if !Fixnum::is_i56(fx) {
-            panic!()
-        }
+        assert!(Fixnum::is_i56(fx));
 
         DirectTag::to_tag(
-            (fx & (2_i64.pow(56) - 1)) as u64,
+            u64::try_from(fx & (2_i64.pow(56) - 1)).unwrap(),
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
@@ -159,7 +152,7 @@ impl Fixnum {
                 }
 
                 Ok(DirectTag::to_tag(
-                    ((fx as i64) & (2_i64.pow(56) - 1)) as u64,
+                    u64::try_from(i64::try_from(fx).unwrap() & (2_i64.pow(56) - 1)).unwrap(),
                     DirectExt::ExtType(ExtType::Fixnum),
                     DirectType::Ext,
                 ))
@@ -202,14 +195,14 @@ impl CoreFn for Fixnum {
         };
 
         if Self::is_i56(result) {
-            fp.value = Self::with_i64_or_panic(result)
+            fp.value = Self::with_i64_or_panic(result);
         } else {
             Err(Exception::new(
                 env,
                 Condition::Over,
                 "mu:ash",
                 Cons::cons(env, fp.argv[0], fp.argv[1]),
-            ))?
+            ))?;
         }
 
         Ok(())
@@ -282,7 +275,7 @@ impl CoreFn for Fixnum {
         let fx1 = fp.argv[1];
 
         if Self::as_i64(fx1) == 0 {
-            Err(Exception::new(env, Condition::ZeroDivide, "mu:div", fx0))?
+            Err(Exception::new(env, Condition::ZeroDivide, "mu:div", fx0))?;
         }
 
         fp.value = match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
@@ -346,9 +339,9 @@ impl CoreFn for Fixnum {
             let mask = 1 << nth_bit;
 
             if val & mask == 0 {
-                val |= mask
+                val |= mask;
             } else {
-                val &= !mask
+                val &= !mask;
             }
         }
 

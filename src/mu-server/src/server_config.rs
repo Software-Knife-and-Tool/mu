@@ -118,13 +118,7 @@ impl ServerConfig {
                     }
                 }
 
-                let env = match Mu::config(Some(config)) {
-                    Some(config) => Mu::env(&config),
-                    None => {
-                        eprintln!("option: configuration error");
-                        std::process::exit(-1)
-                    }
-                };
+                let env = Mu::env(&Mu::config(Some(config)));
 
                 for opt in opts {
                     match opt.0 {
@@ -137,7 +131,7 @@ impl ServerConfig {
                                 eprintln!(
                                     "runtime: error {}, {}",
                                     opt.1,
-                                    Mu::exception_string(env, e)
+                                    Mu::exception_string(env, &e)
                                 );
                                 std::process::exit(-1);
                             }
@@ -148,7 +142,7 @@ impl ServerConfig {
                                 eprintln!(
                                     "runtime: failed to load {}, {}",
                                     &opt.1,
-                                    Mu::exception_string(env, e)
+                                    Mu::exception_string(env, &e)
                                 );
                                 std::process::exit(-1);
                             }

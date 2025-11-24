@@ -2,9 +2,9 @@
 //  SPDX-License-Identifier: MIT
 
 //! env reader readtable
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::LazyLock};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum SyntaxType {
     Constituent,
     Whitespace,
@@ -13,8 +13,8 @@ pub enum SyntaxType {
     Escape,
 }
 
-lazy_static! {
-    static ref SYNTAX_MAP: HashMap::<char, SyntaxType> = HashMap::<char, SyntaxType>::from([
+static SYNTAX_MAP: LazyLock<HashMap<char, SyntaxType>> = LazyLock::new(|| {
+    HashMap::<char, SyntaxType>::from([
         ('0', SyntaxType::Constituent),
         ('1', SyntaxType::Constituent),
         ('2', SyntaxType::Constituent),
@@ -113,8 +113,8 @@ lazy_static! {
         ('x', SyntaxType::Constituent),
         ('y', SyntaxType::Constituent),
         ('z', SyntaxType::Constituent),
-    ]);
-}
+    ])
+});
 
 impl SyntaxType {
     pub fn map_char_syntax(ch: char) -> Option<&'static SyntaxType> {

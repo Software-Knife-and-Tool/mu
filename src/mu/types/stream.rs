@@ -14,7 +14,7 @@ use {
             tag::Tag,
             type_::Type,
         },
-        reader::reader_::Reader,
+        reader::read::Reader,
         streams::{
             builder::StreamBuilder, reader::StreamReader, system::SystemStream,
             writer::StreamWriter,
@@ -47,9 +47,9 @@ impl Stream {
     pub fn write(env: &Env, tag: Tag, _: bool, stream_tag: Tag) -> exception::Result<()> {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Stream::stream_id(tag).unwrap()) {
+        match core_streams_ref.get(&Stream::stream_id(tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -97,18 +97,18 @@ impl Stream {
                 },
                 _ => panic!(),
             },
-            _ => panic!(),
+            Tag::Indirect(_) => panic!(),
         }
     }
 
     pub fn view(env: &Env, stream: Tag) -> Tag {
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Self::stream_id(stream).unwrap()) {
+        match core_streams_ref.get(&Self::stream_id(stream).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
                 let vec = vec![
-                    Fixnum::with_or_panic(stream.id as usize),
+                    Fixnum::with_or_panic(usize::try_from(stream.id).unwrap()),
                     stream.direction,
                     stream.unch,
                 ];
@@ -120,18 +120,18 @@ impl Stream {
     }
 
     pub fn is_open(stream: Tag) -> bool {
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Self::stream_id(stream).unwrap()) {
+        match core_streams_ref.get(&Self::stream_id(stream).unwrap()) {
             Some(stream_ref) => block_on(stream_ref.read()).open,
             None => panic!(),
         }
     }
 
     pub fn close(stream: Tag) {
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Self::stream_id(stream).unwrap()) {
+        match core_streams_ref.get(&Self::stream_id(stream).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -148,12 +148,12 @@ impl Stream {
                 Condition::Open,
                 "mu:get-string",
                 stream,
-            ))?
+            ))?;
         }
 
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Self::stream_id(stream).unwrap()) {
+        match core_streams_ref.get(&Self::stream_id(stream).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
@@ -286,15 +286,15 @@ impl CoreFn for Stream {
         env.argv_check("mu:flush", &[Type::Stream], fp)?;
 
         let stream_tag = fp.argv[0];
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        fp.value = match streams_ref.get(&Stream::stream_id(stream_tag)?) {
+        fp.value = match core_streams_ref.get(&Stream::stream_id(stream_tag)?) {
             Some(stream_ref) => {
                 if Stream::is_open(stream_tag) {
                     let stream = block_on(stream_ref.read());
 
                     if stream.direction.eq_(&Symbol::keyword("output")) {
-                        SystemStream::flush(&stream.system).unwrap()
+                        SystemStream::flush(&stream.system);
                     }
 
                     stream_tag
@@ -358,7 +358,7 @@ impl CoreFn for Stream {
         let stream = fp.argv[1];
 
         fp.value = match StreamReader::unread_char(env, stream, Char::as_char(env, ch))? {
-            Some(_) => panic!(),
+            Some(()) => panic!(),
             None => ch,
         };
 
@@ -383,7 +383,7 @@ impl CoreFn for Stream {
         let byte = fp.argv[0];
         let stream = fp.argv[1];
 
-        StreamWriter::write_byte(env, stream, Fixnum::as_i64(byte) as u8)?;
+        StreamWriter::write_byte(env, stream, u8::try_from(Fixnum::as_i64(byte)).unwrap())?;
         fp.value = byte;
 
         Ok(())

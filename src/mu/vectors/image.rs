@@ -52,7 +52,7 @@ impl From<Vec<Tag>> for Vector {
             length: Fixnum::with_or_panic(vec.len()),
         };
 
-        Vector::Indirect(image, VectorImageType::T(vec.to_vec()))
+        Vector::Indirect(image, VectorImageType::T(vec.clone()))
     }
 }
 
@@ -71,7 +71,7 @@ impl From<&str> for Vector {
             let mut data: [u8; 8] = 0_u64.to_le_bytes();
 
             for (src, dst) in str.as_bytes().iter().zip(data.iter_mut()) {
-                *dst = *src
+                *dst = *src;
             }
 
             Vector::Direct(DirectTag::to_tag(
@@ -98,7 +98,7 @@ impl From<&[u8]> for Vector {
             let mut data: [u8; 8] = 0_u64.to_le_bytes();
 
             for (src, dst) in bytes.to_vec().iter().zip(data.iter_mut()) {
-                *dst = *src
+                *dst = *src;
             }
 
             Vector::Direct(DirectTag::to_tag(
@@ -136,7 +136,10 @@ impl From<(Vec<i8>, usize)> for Vector {
             length: Fixnum::with_or_panic(len),
         };
 
-        let u8_slice = vec.iter().map(|i8_| *i8_ as u8).collect::<Vec<u8>>();
+        let u8_slice = vec
+            .iter()
+            .map(|i8_| u8::try_from(*i8_).unwrap())
+            .collect::<Vec<u8>>();
 
         Vector::Indirect(image, VectorImageType::Bit(u8_slice))
     }
@@ -173,6 +176,7 @@ impl VecImage for VecImageType<'_> {
         vec![image.type_.as_slice(), image.length.as_slice()]
     }
 
+    #[allow(clippy::too_many_lines)]
     fn with_heap(&self, env: &Env) -> Tag {
         let mut heap_ref = block_on(env.heap.write());
 
@@ -232,7 +236,7 @@ impl VecImage for VecImageType<'_> {
 
                 match ivec {
                     VectorImageType::T(vec) => {
-                        slices.extend(vec.iter().map(|tag| tag.as_slice()));
+                        slices.extend(vec.iter().map(Tag::as_slice));
                     }
                     _ => panic!(),
                 }
@@ -309,20 +313,23 @@ impl VecImage for VecImageType<'_> {
     fn gc_ref(context: &mut GcContext, vector: Tag, index: usize) -> Option<Tag> {
         let image = Vector::gc_ref_image(context, vector);
 
-        if index >= Fixnum::as_i64(image.length) as usize {
-            None?
+        if index >= usize::try_from(Fixnum::as_i64(image.length)).unwrap() {
+            None?;
         }
 
-        let vimage = match vector {
-            Tag::Indirect(image) => image,
-            _ => panic!(),
+        let Tag::Indirect(vimage) = vector else {
+            panic!()
         };
 
         match Vector::to_type(image.type_).unwrap() {
             Type::Byte => {
                 let slice = context
                     .heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index,
+                        1,
+                    )
                     .unwrap();
 
                 Some(slice[0].into())
@@ -330,7 +337,11 @@ impl VecImage for VecImageType<'_> {
             Type::Char => {
                 let slice = context
                     .heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index,
+                        1,
+                    )
                     .unwrap();
 
                 let ch: char = slice[0].into();
@@ -340,13 +351,21 @@ impl VecImage for VecImageType<'_> {
             Type::T => Some(Tag::from_slice(
                 context
                     .heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index * 8,
+                        8,
+                    )
                     .unwrap(),
             )),
             Type::Fixnum => {
                 let slice = context
                     .heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index * 8,
+                        8,
+                    )
                     .unwrap();
 
                 Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
@@ -356,7 +375,11 @@ impl VecImage for VecImageType<'_> {
             Type::Float => {
                 let slice = context
                     .heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 4, 4)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index * 4,
+                        4,
+                    )
                     .unwrap();
 
                 Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())
@@ -368,22 +391,24 @@ impl VecImage for VecImageType<'_> {
     fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
         let image = Vector::to_image(env, vector);
 
-        if index >= Fixnum::as_i64(image.length) as usize {
-            None?
+        if index >= usize::try_from(Fixnum::as_i64(image.length)).unwrap() {
+            None?;
         }
 
         let heap_ref = block_on(env.heap.read());
-
-        let vimage = match vector {
-            Tag::Indirect(image) => image,
-            _ => panic!(),
+        let Tag::Indirect(vimage) = vector else {
+            panic!()
         };
 
         match Vector::to_type(image.type_).unwrap() {
             Type::Bit => {
                 let byte_index = index / 8;
                 let slice = heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, byte_index, 1)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        byte_index,
+                        1,
+                    )
                     .unwrap();
 
                 let bit_index = 7 - (index % 8);
@@ -392,14 +417,22 @@ impl VecImage for VecImageType<'_> {
             }
             Type::Byte => {
                 let slice = heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index,
+                        1,
+                    )
                     .unwrap();
 
                 Some(slice[0].into())
             }
             Type::Char => {
                 let slice = heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index, 1)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index,
+                        1,
+                    )
                     .unwrap();
 
                 let ch: char = slice[0].into();
@@ -408,12 +441,20 @@ impl VecImage for VecImageType<'_> {
             }
             Type::T => Some(Tag::from_slice(
                 heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index * 8,
+                        8,
+                    )
                     .unwrap(),
             )),
             Type::Fixnum => {
                 let slice = heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 8, 8)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index * 8,
+                        8,
+                    )
                     .unwrap();
 
                 Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
@@ -422,7 +463,11 @@ impl VecImage for VecImageType<'_> {
             }
             Type::Float => {
                 let slice = heap_ref
-                    .image_data_slice(vimage.image_id() as usize + Self::IMAGE_LEN, index * 4, 4)
+                    .image_data_slice(
+                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
+                        index * 4,
+                        4,
+                    )
                     .unwrap();
 
                 Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())

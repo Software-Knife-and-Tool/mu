@@ -33,112 +33,99 @@ use {
     futures_lite::future::block_on,
     futures_locks::RwLock,
     std::collections::HashMap,
+    std::sync::LazyLock,
 };
 
-lazy_static! {
-    pub static ref CORE: Core = Core::new();
-    pub static ref CORE_FUNCTIONS: &'static [CoreFnDef] = &[
+pub static CORE: LazyLock<Core> = LazyLock::new(Core::new);
+pub static CORE_FUNCTIONS: LazyLock<&[CoreFnDef]> = LazyLock::new(|| {
+    let core_defs: &[CoreFnDef] = &[
         // types
-        ( "eq",         2, Tag::mu_eq ),
-        ( "type-of",    1, Tag::mu_typeof ),
-        ( "repr",       1, Tag::mu_repr ),
-        ( "unrepr",     1, Tag::mu_unrepr ),
-        ( "view",       1, Tag::mu_view ),
+        ("eq", 2, Tag::mu_eq),
+        ("type-of", 1, Tag::mu_typeof),
+        ("repr", 1, Tag::mu_repr),
+        ("unrepr", 1, Tag::mu_unrepr),
+        ("view", 1, Tag::mu_view),
         // conses and lists
-        ( "append",     1, Cons::mu_append ),
-        ( "car",        1, Cons::mu_car ),
-        ( "cdr",        1, Cons::mu_cdr ),
-        ( "cons",       2, Cons::mu_cons ),
-        ( "length",     1, Cons::mu_length ),
-        ( "nth",        2, Cons::mu_nth ),
-        ( "nthcdr",     2, Cons::mu_nthcdr ),
+        ("append", 1, Cons::mu_append),
+        ("car", 1, Cons::mu_car),
+        ("cdr", 1, Cons::mu_cdr),
+        ("cons", 2, Cons::mu_cons),
+        ("length", 1, Cons::mu_length),
+        ("nth", 2, Cons::mu_nth),
+        ("nthcdr", 2, Cons::mu_nthcdr),
         // compiler
-        ( "compile",    1, Compiler::mu_compile ),
-        ( "%if",        3, Compiler::mu_if),
+        ("compile", 1, Compiler::mu_compile),
+        ("%if", 3, Compiler::mu_if),
         // gc
-        ( "gc",         0, GcContext::mu_gc ),
+        ("gc", 0, GcContext::mu_gc),
         // env
-        ( "apply",      2, Env::mu_apply ),
-        ( "eval",       1, Env::mu_eval ),
-        ( "fix",        2, Env::mu_fix ),
+        ("apply", 2, Env::mu_apply),
+        ("eval", 1, Env::mu_eval),
+        ("fix", 2, Env::mu_fix),
         // exceptions
-        ( "with-exception",
-                        2, Exception::mu_with_exception ),
-        ( "raise",      2, Exception::mu_raise ),
-        ( "raise-from", 3, Exception::mu_raise_from ),
+        ("with-exception", 2, Exception::mu_with_exception),
+        ("raise", 2, Exception::mu_raise),
+        ("raise-from", 3, Exception::mu_raise_from),
         // frames
-        ( "%frame-stack",
-                        0, Frame::mu_frames ),
-        ( "%frame-pop", 1, Frame::mu_frame_pop ),
-        ( "%frame-push",
-                        1, Frame::mu_frame_push ),
-        ( "%frame-ref", 2, Frame::mu_frame_ref ),
+        ("%frame-stack", 0, Frame::mu_frames),
+        ("%frame-pop", 1, Frame::mu_frame_pop),
+        ("%frame-push", 1, Frame::mu_frame_push),
+        ("%frame-ref", 2, Frame::mu_frame_ref),
         // fixnums
-        ( "ash",        2, Fixnum::mu_ash ),
-        ( "add",        2, Fixnum::mu_fxadd ),
-        ( "sub",        2, Fixnum::mu_fxsub ),
-        ( "less-than",  2, Fixnum::mu_fxlt ),
-        ( "mul",        2, Fixnum::mu_fxmul ),
-        ( "div",        2, Fixnum::mu_fxdiv ),
-        ( "logand",     2, Fixnum::mu_logand ),
-        ( "logor",      2, Fixnum::mu_logor ),
-        ( "lognot",     1, Fixnum::mu_lognot ),
+        ("ash", 2, Fixnum::mu_ash),
+        ("add", 2, Fixnum::mu_fxadd),
+        ("sub", 2, Fixnum::mu_fxsub),
+        ("less-than", 2, Fixnum::mu_fxlt),
+        ("mul", 2, Fixnum::mu_fxmul),
+        ("div", 2, Fixnum::mu_fxdiv),
+        ("logand", 2, Fixnum::mu_logand),
+        ("logor", 2, Fixnum::mu_logor),
+        ("lognot", 1, Fixnum::mu_lognot),
         // floats
-        ( "fadd",       2, Float::mu_fladd ),
-        ( "fsub",       2, Float::mu_flsub ),
-        ( "fless-than", 2, Float::mu_fllt ),
-        ( "fmul",       2, Float::mu_flmul ),
-        ( "fdiv",       2, Float::mu_fldiv ),
+        ("fadd", 2, Float::mu_fladd),
+        ("fsub", 2, Float::mu_flsub),
+        ("fless-than", 2, Float::mu_fllt),
+        ("fmul", 2, Float::mu_flmul),
+        ("fdiv", 2, Float::mu_fldiv),
         // namespaces
-        ( "find",       2, Namespace::mu_find ),
-        ( "find-namespace",
-                        1, Namespace::mu_find_ns ),
-        ( "intern",     3, Namespace::mu_intern ),
-        ( "make-namespace",
-                        1, Namespace::mu_make_ns ),
-        ( "namespace-name",
-                        1, Namespace::mu_ns_name ),
+        ("find", 2, Namespace::mu_find),
+        ("find-namespace", 1, Namespace::mu_find_ns),
+        ("intern", 3, Namespace::mu_intern),
+        ("make-namespace", 1, Namespace::mu_make_ns),
+        ("namespace-name", 1, Namespace::mu_ns_name),
         // read/write
-        ( "read",       3, Stream::mu_read ),
-        ( "write",      3, Stream::mu_write ),
+        ("read", 3, Stream::mu_read),
+        ("write", 3, Stream::mu_write),
         // symbols
-        ( "boundp",     1, Symbol::mu_boundp ),
-        ( "make-symbol",
-                        1, Symbol::mu_symbol ),
-        ( "symbol-name",
-                        1, Symbol::mu_name ),
-        ( "symbol-namespace",
-                        1, Symbol::mu_ns ),
-        ( "symbol-value",
-                        1, Symbol::mu_value ),
+        ("boundp", 1, Symbol::mu_boundp),
+        ("make-symbol", 1, Symbol::mu_symbol),
+        ("symbol-name", 1, Symbol::mu_name),
+        ("symbol-namespace", 1, Symbol::mu_ns),
+        ("symbol-value", 1, Symbol::mu_value),
         // simple vectors
-        ( "make-vector",
-                        2, Vector::mu_make_vector ),
-        ( "svref",      2, Vector::mu_svref ),
-        ( "vector-length",
-                        1, Vector::mu_length ),
-        ( "vector-type",
-                        1, Vector::mu_type ),
+        ("make-vector", 2, Vector::mu_make_vector),
+        ("svref", 2, Vector::mu_svref),
+        ("vector-length", 1, Vector::mu_length),
+        ("vector-type", 1, Vector::mu_type),
         // structs
-        ( "make-struct",
-                        2, Struct::mu_make_struct ),
-        ( "struct-type",
-                        1, Struct::mu_struct_type ),
-        ( "struct-vec", 1, Struct::mu_struct_vector ),
+        ("make-struct", 2, Struct::mu_make_struct),
+        ("struct-type", 1, Struct::mu_struct_type),
+        ("struct-vec", 1, Struct::mu_struct_vector),
         // streams
-        ( "close",      1, Stream::mu_close ),
-        ( "flush",      1, Stream::mu_flush ),
-        ( "get-string", 1, Stream::mu_get_string ),
-        ( "open",       4, Stream::mu_open ),
-        ( "openp",      1, Stream::mu_openp ),
-        ( "read-byte",  3, Stream::mu_read_byte ),
-        ( "read-char",  3, Stream::mu_read_char ),
-        ( "unread-char",
-                        2, Stream::mu_unread_char ),
-        ( "write-byte", 2, Stream::mu_write_byte ),
-        ( "write-char", 2, Stream::mu_write_char ),
+        ("close", 1, Stream::mu_close),
+        ("flush", 1, Stream::mu_flush),
+        ("get-string", 1, Stream::mu_get_string),
+        ("open", 4, Stream::mu_open),
+        ("openp", 1, Stream::mu_openp),
+        ("read-byte", 3, Stream::mu_read_byte),
+        ("read-char", 3, Stream::mu_read_char),
+        ("unread-char", 2, Stream::mu_unread_char),
+        ("write-byte", 2, Stream::mu_write_byte),
+        ("write-char", 2, Stream::mu_write_char),
     ];
-}
+
+    core_defs
+});
 
 pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
 pub type CoreFnDef = (&'static str, u16, CoreFn);
@@ -146,7 +133,7 @@ pub type CoreFnDef = (&'static str, u16, CoreFn);
 pub struct Core {
     pub envs: RwLock<HashMap<u64, Env>>,
     pub features: Vec<Feature>,
-    pub core_defs: Vec<CoreFnDef>,
+    pub fn_defs: Vec<CoreFnDef>,
     pub stdio: (Tag, Tag, Tag),
     pub stream_id: RwLock<u64>,
     pub streams: RwLock<HashMap<u64, RwLock<Stream>>>,
@@ -162,11 +149,11 @@ impl Core {
     pub fn new() -> Self {
         let mut core = Core {
             envs: RwLock::new(HashMap::new()),
-            core_defs: FEATURES
+            fn_defs: FEATURES
                 .features
                 .iter()
                 .filter(|feature| !feature.namespace.is_empty() && feature.functions.is_some())
-                .flat_map(|feature| feature.functions.as_ref().unwrap().to_vec())
+                .flat_map(|feature| feature.functions.as_ref().unwrap().clone())
                 .collect::<Vec<CoreFnDef>>(),
             features: FEATURES.features.clone(),
             stdio: (Tag::nil(), Tag::nil(), Tag::nil()),
@@ -190,7 +177,7 @@ impl Core {
         if offset < cf_len {
             CORE_FUNCTIONS[offset]
         } else {
-            CORE.core_defs[offset - cf_len]
+            CORE.fn_defs[offset - cf_len]
         }
     }
 

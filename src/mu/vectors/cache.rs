@@ -18,14 +18,14 @@ pub type VecCacheMap = HashMap<(Type, i32), RwLock<Vec<Tag>>>;
 impl Vector {
     pub fn cache(env: &Env, vector: Tag) {
         let vtype = Self::type_of(env, vector);
-        let length = Self::length(env, vector) as i32;
+        let length = i32::try_from(Self::length(env, vector)).unwrap();
         let mut cache = block_on(env.vector_cache.write());
 
         match (*cache).get(&(vtype, length)) {
             Some(vec_map) => {
                 let mut vec = block_on(vec_map.write());
 
-                vec.push(vector)
+                vec.push(vector);
             }
             None => {
                 if (*cache)
@@ -46,10 +46,12 @@ impl Vector {
             | VecImageType::Byte(image, ivec)
             | VecImageType::Char(image, ivec)
             | VecImageType::Fixnum(image, ivec)
-            | VecImageType::Float(image, ivec) => {
-                (image.type_, Fixnum::as_i64(image.length) as i32, ivec)
-            }
-            _ => panic!(),
+            | VecImageType::Float(image, ivec) => (
+                image.type_,
+                i32::try_from(Fixnum::as_i64(image.length)).unwrap(),
+                ivec,
+            ),
+            VecImageType::T(_, _) => panic!(),
         };
 
         match (*cache).get(&(vtype.key_to_type().unwrap(), length)) {
@@ -59,12 +61,14 @@ impl Vector {
                 let tag = match ivec {
                     VectorImageType::Bit(u8_vec) => tag_vec.iter().find(|src| {
                         u8_vec.iter().enumerate().all(|(index, byte)| {
-                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
+                            i64::from(*byte)
+                                == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
                         })
                     }),
                     VectorImageType::Byte(u8_vec) => tag_vec.iter().find(|src| {
                         u8_vec.iter().enumerate().all(|(index, byte)| {
-                            *byte as i64 == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
+                            i64::from(*byte)
+                                == Fixnum::as_i64(Vector::ref_(env, **src, index).unwrap())
                         })
                     }),
                     VectorImageType::Char(string) => tag_vec
@@ -76,11 +80,12 @@ impl Vector {
                         })
                     }),
                     VectorImageType::Float(float_vec) => tag_vec.iter().find(|src| {
+                        #[allow(clippy::float_cmp)]
                         float_vec.iter().enumerate().all(|(index, float)| {
                             *float == Float::as_f32(env, Vector::ref_(env, **src, index).unwrap())
                         })
                     }),
-                    _ => panic!(),
+                    VectorImageType::T(_) => panic!(),
                 };
 
                 tag.copied()
