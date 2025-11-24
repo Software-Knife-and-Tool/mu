@@ -63,15 +63,15 @@ impl CoreFn for Feature {
         env.argv_check("system:shell", &[Type::String, Type::List], fp)?;
 
         let command = fp.argv[0];
-        let args = fp.argv[1];
+        let arg_list = fp.argv[1];
 
-        let type_check = Cons::list_iter(env, args).find(|arg| {
+        let type_check = Cons::list_iter(env, arg_list).find(|arg| {
             !matches!(arg.type_of(), Type::Vector if Vector::type_of(env, *arg) == Type::Char)
         });
 
         let argv: Vec<String> = match type_check {
             Some(arg) => Err(Exception::new(env, Condition::Type, "system:shell", arg))?,
-            None => Cons::list_iter(env, args)
+            None => Cons::list_iter(env, arg_list)
                 .map(|arg| Vector::as_string(env, arg))
                 .collect(),
         };
@@ -89,7 +89,9 @@ impl CoreFn for Feature {
                     command,
                 ))
             }
-            Ok(exit_status) => Fixnum::with_or_panic(exit_status.code().unwrap() as usize),
+            Ok(exit_status) => {
+                Fixnum::with_or_panic(usize::try_from(exit_status.code().unwrap()).unwrap())
+            }
         };
 
         Ok(())
@@ -100,7 +102,7 @@ impl CoreFn for Feature {
 
         let rc = fp.argv[0];
 
-        std::process::exit(Fixnum::as_i64(rc) as i32);
+        std::process::exit(i32::try_from(Fixnum::as_i64(rc)).unwrap());
     }
 
     fn system_sleep(env: &Env, fp: &mut Frame) -> exception::Result<()> {
@@ -108,9 +110,12 @@ impl CoreFn for Feature {
 
         fp.value = fp.argv[0];
 
-        std::thread::sleep(std::time::Duration::from_micros(
-            (1e6 * Float::as_f32(env, fp.value)) as u64,
-        ));
+        let secs: f32 = Float::as_f32(env, fp.value);
+        #[allow(clippy::cast_possible_truncation)]
+        #[allow(clippy::cast_sign_loss)]
+        let usecs: u64 = (1e6 * secs) as u64;
+
+        std::thread::sleep(std::time::Duration::from_micros(usecs));
 
         Ok(())
     }
@@ -170,27 +175,30 @@ impl CoreFn for Feature {
             Err(_) => Err(Exception::new(
                 env,
                 Condition::Type,
-                "mu/sysinfo:sysinfo",
+                "sysinfo:sysinfo",
                 Tag::nil(),
             ))?,
             Ok(sysinfo) => {
+                #[allow(clippy::cast_precision_loss)]
+                let loads0: f32 = sysinfo.loads[0] as f32;
+                #[allow(clippy::cast_precision_loss)]
+                let loads1: f32 = sysinfo.loads[1] as f32;
+                #[allow(clippy::cast_precision_loss)]
+                let loads2: f32 = sysinfo.loads[2] as f32;
+
                 let sysinfo = vec![Cons::list(
                     env,
                     &[
                         Cons::cons(
                             env,
                             Vector::from("uptime").with_heap(env),
+                            #[allow(clippy::cast_sign_loss)]
                             Fixnum::with_u64(env, sysinfo.uptime as u64)?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("loads").with_heap(env),
-                            Vector::from(vec![
-                                sysinfo.loads[0] as f32,
-                                sysinfo.loads[1] as f32,
-                                sysinfo.loads[2] as f32,
-                            ])
-                            .with_heap(env),
+                            Vector::from(vec![loads0, loads1, loads2]).with_heap(env),
                         ),
                         Cons::cons(
                             env,

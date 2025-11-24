@@ -29,17 +29,17 @@ impl StreamReader {
                 Condition::Open,
                 "mu:read-char",
                 stream_tag,
-            ))?
+            ))?;
         }
 
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
+        match core_streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    drop(streams_ref);
+                    drop(core_streams_ref);
                     drop(stream);
 
                     return Err(Exception::new(
@@ -75,17 +75,17 @@ impl StreamReader {
                 Condition::Open,
                 "mu:read-byte",
                 stream_tag,
-            ))?
+            ))?;
         }
 
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
+        match core_streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    drop(streams_ref);
+                    drop(core_streams_ref);
                     drop(stream);
 
                     return Err(Exception::new(
@@ -122,19 +122,19 @@ impl StreamReader {
                 Condition::Open,
                 "mu:unread-char",
                 stream_tag,
-            ))?
+            ))?;
         }
 
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
+        match core_streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
             Some(stream_ref) => {
                 let mut stream = block_on(stream_ref.write());
 
                 SystemStream::close(&stream.system);
 
                 if stream.direction.eq_(&Symbol::keyword("output")) {
-                    drop(streams_ref);
+                    drop(core_streams_ref);
                     drop(stream);
 
                     return Err(Exception::new(

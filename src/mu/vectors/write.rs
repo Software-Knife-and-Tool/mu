@@ -25,23 +25,23 @@ impl Write for Vector {
     fn write(env: &Env, vector: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         match vector {
             Tag::Direct(direct) => match direct.dtype() {
-                DirectType::String => match str::from_utf8(&vector.data(env).to_le_bytes()) {
-                    Ok(s) => {
-                        if escape {
-                            StreamWriter::write_str(env, "\"", stream).unwrap()
-                        }
+                DirectType::String => {
+                    let str = vector.data(env).to_le_bytes();
+                    let s = str::from_utf8(&str).unwrap();
 
-                        for nth in 0..DirectTag::length(vector) {
-                            StreamWriter::write_char(env, stream, s.as_bytes()[nth] as char)?;
-                        }
-
-                        if escape {
-                            StreamWriter::write_str(env, "\"", stream).unwrap()
-                        }
-
-                        Ok(())
+                    if escape {
+                        StreamWriter::write_str(env, "\"", stream).unwrap();
                     }
-                    Err(_) => panic!(),
+
+                    for nth in 0..DirectTag::length(vector) {
+                        StreamWriter::write_char(env, stream, s.as_bytes()[nth] as char)?;
+                    }
+
+                    if escape {
+                        StreamWriter::write_str(env, "\"", stream).unwrap();
+                    }
+
+                    Ok(())
                 },
                 DirectType::ByteVec => {
                     StreamWriter::write_str(env, "#(:byte", stream)?;
@@ -77,7 +77,7 @@ impl Write for Vector {
                     for bit in Vector::iter(env, vector) {
                         let digit = Fixnum::as_i64(bit);
 
-                        StreamWriter::write_str(env, if digit == 1 { "1" } else { "0" }, stream)?
+                        StreamWriter::write_str(env, if digit == 1 { "1" } else { "0" }, stream)?;
                     }
 
                     Ok(())

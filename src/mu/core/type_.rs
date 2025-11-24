@@ -9,6 +9,7 @@ use {
         types::symbol::Symbol,
     },
     num_enum::TryFromPrimitive,
+    std::sync::LazyLock,
 };
 
 // types
@@ -35,8 +36,8 @@ pub enum Type {
     String,
 }
 
-lazy_static! {
-    pub static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
+pub static TYPEKEYMAP: LazyLock<Vec<(Type, Tag)>> = LazyLock::new(|| {
+    vec![
         (Type::Async, Symbol::keyword("async")),
         (Type::Bit, Symbol::keyword("bit")),
         (Type::Byte, Symbol::keyword("byte")),
@@ -52,8 +53,8 @@ lazy_static! {
         (Type::Symbol, Symbol::keyword("symbol")),
         (Type::T, Symbol::keyword("t")),
         (Type::Vector, Symbol::keyword("vector")),
-    ];
-}
+    ]
+});
 
 impl Type {
     pub const NTYPES: usize = 15;

@@ -30,18 +30,19 @@ use {
         },
     },
     futures_lite::future::block_on,
+    std::sync::LazyLock,
 };
 
-lazy_static! {
-    static ref INFOTYPE: Vec<Tag> = vec![
+static INFOTYPE: LazyLock<Vec<Tag>> = LazyLock::new(|| {
+    vec![
         Symbol::keyword("cons"),
         Symbol::keyword("func"),
         Symbol::keyword("stream"),
         Symbol::keyword("struct"),
         Symbol::keyword("symbol"),
         Symbol::keyword("vector"),
-    ];
-}
+    ]
+});
 
 pub trait Env {
     fn feature() -> Feature;
@@ -97,7 +98,7 @@ impl Env for Feature {
                 Fixnum::with_or_panic(type_map.size),
                 Fixnum::with_or_panic(type_map.total),
                 Fixnum::with_or_panic(type_map.free),
-            ])
+            ]);
         }
 
         Vector::from(vec).with_heap(env)

@@ -82,6 +82,7 @@ impl ConfigBuilder {
         let npages = Self::map_json("pages", &self.json);
 
         self.npages = match npages.unwrap() {
+            #[allow(clippy::cast_possible_truncation)]
             JsonValue::Number(n) => Some(n.integer as usize),
             JsonValue::String(nstr) => Some(
                 (*(nstr.iter().collect::<String>()))
@@ -94,25 +95,25 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn build(&self) -> Option<Config> {
-        let mut config: Config = Default::default();
+    pub fn build(&self) -> Config {
+        let mut config: Config = Config::default();
 
         if self.npages.is_some() {
-            config.npages = self.npages.unwrap()
+            config.npages = self.npages.unwrap();
         }
 
         if self.gc_mode.is_some() {
-            config.gc_mode = self.gc_mode.unwrap()
+            config.gc_mode = self.gc_mode.unwrap();
         }
 
-        Some(config)
+        config
     }
 }
 
 impl Config {
-    pub fn new(conf_option: Option<String>) -> Option<Config> {
+    pub fn new(conf_option: Option<String>) -> Self {
         match conf_option {
-            None => Some(Default::default()),
+            None => Config::default(),
             Some(conf) => ConfigBuilder::new(&conf).gc_mode().npages().build(),
         }
     }

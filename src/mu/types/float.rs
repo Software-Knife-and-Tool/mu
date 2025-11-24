@@ -25,7 +25,7 @@ impl From<f32> for Tag {
     fn from(fl: f32) -> Tag {
         let bytes = fl.to_le_bytes();
         DirectTag::to_tag(
-            u32::from_le_bytes(bytes) as u64,
+            u64::from(u32::from_le_bytes(bytes)),
             DirectExt::ExtType(ExtType::Float),
             DirectType::Ext,
         )
@@ -40,7 +40,7 @@ impl Float {
         let mut fl = 0.0f32.to_le_bytes();
 
         for (dst, src) in fl.iter_mut().zip(data.iter()) {
-            *dst = *src
+            *dst = *src;
         }
         f32::from_le_bytes(fl)
     }
@@ -123,7 +123,7 @@ impl CoreFn for Float {
         let fl1 = fp.argv[1];
 
         if Self::as_f32(env, fl1) == 0.0 {
-            Err(Exception::new(env, Condition::ZeroDivide, "fl-div", fl1))?
+            Err(Exception::new(env, Condition::ZeroDivide, "fl-div", fl1))?;
         }
 
         let div = Self::as_f32(env, fl0).div(Self::as_f32(env, fl1));

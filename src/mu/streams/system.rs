@@ -66,7 +66,7 @@ impl SystemStreamBuilder {
     pub fn build(&self) -> Option<SystemStream> {
         match &self.file {
             Some(path) => match self.input {
-                Some(_) => {
+                Some(()) => {
                     let task: Option<SystemStream> = block_on(async {
                         match fs::File::open(path).await {
                             Ok(file) => {
@@ -79,7 +79,7 @@ impl SystemStreamBuilder {
                     task
                 }
                 None => match self.output {
-                    Some(_) => {
+                    Some(()) => {
                         let task: Option<SystemStream> = block_on(async {
                             match fs::File::create(path).await {
                                 Ok(file) => {
@@ -210,7 +210,7 @@ impl SystemStream {
                 let task: io::Result<()> = block_on(file_ref.write_all(&buf));
 
                 match task {
-                    Ok(_) => Ok(None),
+                    Ok(()) => Ok(None),
                     Err(_) => Err(Exception::new(
                         env,
                         Condition::Write,

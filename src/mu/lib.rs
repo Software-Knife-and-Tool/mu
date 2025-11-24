@@ -1,5 +1,6 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
+#![warn(clippy::pedantic)]
 
 //!
 //! The mu runtime library is the implementation surface for the [`mu programming environment`](<https://github.com/Software-Knife-and-Tool/mu>) and
@@ -42,9 +43,6 @@
 //!
 //!    see *doc/refcards* and *doc/rustdoc*
 //!
-#[macro_use]
-extern crate lazy_static;
-
 #[macro_use]
 extern crate modular_bitfield;
 
@@ -94,7 +92,7 @@ impl Mu {
     }
 
     /// environment configuration constructor
-    pub fn config(config: Option<String>) -> Option<Config> {
+    pub fn config(config: Option<String>) -> Config {
         Config::new(config)
     }
 
@@ -174,7 +172,7 @@ impl Mu {
     }
 
     /// format exception
-    pub fn exception_string(env: Env, ex: Exception) -> String {
+    pub fn exception_string(env: Env, ex: &Exception) -> String {
         Self::exception_string_(env, ex)
     }
 

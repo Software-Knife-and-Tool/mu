@@ -80,11 +80,11 @@ impl StreamBuilder {
 
     pub fn std_build(&self, core: &Core) -> exception::Result<Tag> {
         match self.stdin {
-            Some(_) => SystemStream::open_std_stream(SystemStream::StdInput, core),
+            Some(()) => SystemStream::open_std_stream(SystemStream::StdInput, core),
             None => match self.stdout {
-                Some(_) => SystemStream::open_std_stream(SystemStream::StdOutput, core),
+                Some(()) => SystemStream::open_std_stream(SystemStream::StdOutput, core),
                 None => match self.errout {
-                    Some(_) => SystemStream::open_std_stream(SystemStream::StdError, core),
+                    Some(()) => SystemStream::open_std_stream(SystemStream::StdError, core),
                     None => panic!(),
                 },
             },
@@ -111,11 +111,11 @@ impl StreamBuilder {
                     },
                 },
                 None => match self.stdin {
-                    Some(_) => SystemStream::open_std_stream(SystemStream::StdInput, core),
+                    Some(()) => SystemStream::open_std_stream(SystemStream::StdInput, core),
                     None => match self.stdout {
-                        Some(_) => SystemStream::open_std_stream(SystemStream::StdOutput, core),
+                        Some(()) => SystemStream::open_std_stream(SystemStream::StdOutput, core),
                         None => match self.errout {
-                            Some(_) => SystemStream::open_std_stream(SystemStream::StdError, core),
+                            Some(()) => SystemStream::open_std_stream(SystemStream::StdError, core),
                             None => {
                                 Err(Exception::new(env, Condition::Range, "mu:open", Tag::nil()))?
                             }

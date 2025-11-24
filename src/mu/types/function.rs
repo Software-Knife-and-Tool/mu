@@ -63,10 +63,18 @@ impl Gc for Function {
 
         match tag {
             Tag::Indirect(fn_) => Self::new(
-                Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+                Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(fn_.image_id()).unwrap())
+                        .unwrap(),
+                ),
+                Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
+                        .unwrap(),
+                ),
             ),
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 }
@@ -83,8 +91,16 @@ impl Function {
 
         match tag {
             Tag::Indirect(fn_) => Self::new(
-                Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+                Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(fn_.image_id()).unwrap())
+                        .unwrap(),
+                ),
+                Tag::from_slice(
+                    heap_ref
+                        .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
+                        .unwrap(),
+                ),
             ),
             Tag::Direct(_) => {
                 let (arity, form) = Self::destruct(env, tag);
@@ -110,8 +126,16 @@ impl Function {
                 let heap_ref = block_on(env.heap.read());
 
                 (
-                    Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize).unwrap()),
-                    Tag::from_slice(heap_ref.image_slice(fn_.image_id() as usize + 1).unwrap()),
+                    Tag::from_slice(
+                        heap_ref
+                            .image_slice(usize::try_from(fn_.image_id()).unwrap())
+                            .unwrap(),
+                    ),
+                    Tag::from_slice(
+                        heap_ref
+                            .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
+                            .unwrap(),
+                    ),
                 )
             }
         }
@@ -148,7 +172,7 @@ impl Function {
                 let slices: &[[u8; 8]] = &[image.arity.as_slice(), image.form.as_slice()];
                 let mut heap_ref = block_on(env.heap.write());
 
-                heap_ref.write_image(slices, heap.image_id() as usize)
+                heap_ref.write_image(slices, usize::try_from(heap.image_id()).unwrap());
             }
             Tag::Direct(_tag) => panic!(),
         }
@@ -163,8 +187,7 @@ impl Function {
 
     pub fn image_size(env: &Env, func: Tag) -> usize {
         match Function::destruct(env, func).1.type_of() {
-            Type::Null | Type::Cons => std::mem::size_of::<Function>(),
-            Type::Vector => std::mem::size_of::<Function>(),
+            Type::Null | Type::Cons | Type::Vector => std::mem::size_of::<Function>(),
             Type::Symbol => {
                 std::mem::size_of::<Fixnum>() + Symbol::image_size(env, Self::destruct(env, func).1)
             }
@@ -187,18 +210,46 @@ impl Function {
                 match form.type_of() {
                     Type::Null => (
                         "lambda".to_string(),
-                        Fixnum::as_i64(arity) as usize,
+                        usize::try_from(Fixnum::as_i64(arity)).unwrap(),
                         "()".to_string(),
                     ),
                     Type::Cons => match Cons::destruct(env, form).1.type_of() {
                         Type::Null | Type::Cons => (
                             "lambda".to_string(),
-                            Fixnum::as_i64(arity) as usize,
+                            usize::try_from(Fixnum::as_i64(arity)).unwrap(),
                             format!("{:x}", form.as_u64()),
                         ),
-                        _ => panic!(),
+                        Type::Async
+                        | Type::Bit
+                        | Type::Byte
+                        | Type::Char
+                        | Type::Fixnum
+                        | Type::Float
+                        | Type::Function
+                        | Type::Keyword
+                        | Type::Stream
+                        | Type::Struct
+                        | Type::Symbol
+                        | Type::Vector
+                        | Type::T
+                        | Type::List
+                        | Type::String => panic!(),
                     },
-                    _ => panic!(),
+                    Type::Async
+                    | Type::Bit
+                    | Type::Byte
+                    | Type::Char
+                    | Type::Fixnum
+                    | Type::Float
+                    | Type::Function
+                    | Type::Keyword
+                    | Type::Stream
+                    | Type::Struct
+                    | Type::Symbol
+                    | Type::Vector
+                    | Type::T
+                    | Type::List
+                    | Type::String => panic!(),
                 }
             }
         };

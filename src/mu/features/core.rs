@@ -97,10 +97,7 @@ impl CoreFn for Feature {
     }
 
     fn core_time(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match cpu_time() {
-            Ok(duration) => Fixnum::with_u64(env, duration.as_micros() as u64)?, // this is a u128
-            Err(_) => panic!(),
-        };
+        fp.value = Fixnum::with_u64(env, u64::try_from(cpu_time().unwrap().as_micros()).unwrap())?;
 
         Ok(())
     }
@@ -162,7 +159,7 @@ impl CoreFn for Feature {
         let (stype, svec) = Struct::destruct(env, ns);
 
         if !stype.eq_(&Symbol::keyword("ns")) {
-            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?
+            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?;
         }
 
         let name = Vector::as_string(env, Vector::ref_(env, svec, 0).unwrap());

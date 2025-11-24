@@ -41,18 +41,18 @@ impl StreamWriter {
                 Condition::Open,
                 "mu:write-char",
                 stream_tag,
-            ))?
+            ))?;
         }
 
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
+        match core_streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
             Some(stream_ref) => {
-                let stream_ = block_on(stream_ref.read());
+                let stream = block_on(stream_ref.read());
 
-                if stream_.direction.eq_(&Symbol::keyword("input")) {
-                    drop(streams_ref);
-                    drop(stream_);
+                if stream.direction.eq_(&Symbol::keyword("input")) {
+                    drop(core_streams_ref);
+                    drop(stream);
 
                     return Err(Exception::new(
                         env,
@@ -77,17 +77,17 @@ impl StreamWriter {
                 Condition::Open,
                 "mu:write-byte",
                 stream_tag,
-            ))?
+            ))?;
         }
 
-        let streams_ref = block_on(CORE.streams.read());
+        let core_streams_ref = block_on(CORE.streams.read());
 
-        match streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
+        match core_streams_ref.get(&Stream::stream_id(stream_tag).unwrap()) {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
 
                 if stream.direction.eq_(&Symbol::keyword("input")) {
-                    drop(streams_ref);
+                    drop(core_streams_ref);
                     drop(stream);
 
                     return Err(Exception::new(

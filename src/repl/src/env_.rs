@@ -15,10 +15,8 @@ pub struct Env_ {
 impl Env_ {
     pub fn new(config: Config) -> Self {
         let env = match config.map("config") {
-            Some(config) => Mu::env(
-                &Mu::config(Some(config)).expect("repl: can't allocate env with config {config:?}"),
-            ),
-            None => Mu::env(&Mu::config(None).expect("repl: can't allocate default env")),
+            Some(config) => Mu::env(&Mu::config(Some(config))),
+            None => Mu::env(&Mu::config(None)),
         };
 
         let ns = match config.map("namespace") {
@@ -52,7 +50,7 @@ impl Env_ {
                 Err(e) => {
                     eprintln!(
                         "core-cli: can't load rc file {rc}: {}",
-                        Mu::exception_string(env, e)
+                        Mu::exception_string(env, &e)
                     );
                     std::process::exit(-1)
                 }
@@ -80,7 +78,7 @@ impl Env_ {
             Err(e) => {
                 eprintln!(
                     "repl: exception while loading {name}: {}",
-                    Mu::exception_string(env, e)
+                    Mu::exception_string(env, &e)
                 );
                 std::process::exit(-1)
             }

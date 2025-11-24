@@ -92,16 +92,16 @@ impl Frame {
             lexical_ref[&id.as_u64()][offset]
                 .argv
                 .iter()
-                .map(|value| value.as_u64()),
+                .map(Tag::as_u64),
         );
     }
 
     // frame reference
-    fn frame_ref(env: &Env, id: u64, offset: usize) -> Option<Tag> {
+    fn frame_ref(env: &Env, id: u64, offset: usize) -> Tag {
         let lexical_ref = block_on(env.lexical.read());
         let frame = lexical_ref[&id].last().unwrap();
 
-        Some(frame.argv[offset])
+        frame.argv[offset]
     }
 
     // apply
@@ -110,11 +110,11 @@ impl Frame {
         <Feature as Instrument>::instrument_event(env, func).unwrap();
 
         let (arity, form) = Function::destruct(env, func);
-        let nreqs = Fixnum::as_i64(arity) as usize;
+        let nreqs = usize::try_from(Fixnum::as_i64(arity)).unwrap();
         let nargs = self.argv.len();
 
         if nargs != nreqs {
-            Err(Exception::new(env, Condition::Arity, "mu:apply", func))?
+            Err(Exception::new(env, Condition::Arity, "mu:apply", func))?;
         }
 
         match func.type_of() {
@@ -249,7 +249,7 @@ impl CoreFn for Frame {
 
         let value = Tag::nil();
 
-        Frame { func, argv, value }.frame_stack_push(env);
+        Frame { argv, func, value }.frame_stack_push(env);
 
         Ok(())
     }
@@ -260,10 +260,11 @@ impl CoreFn for Frame {
 
         env.argv_check("mu:%frame-ref", &[Type::Function, Type::Fixnum], fp)?;
 
-        fp.value = match Frame::frame_ref(env, frame.as_u64(), Fixnum::as_i64(offset) as usize) {
-            Some(tag) => tag,
-            None => return Err(Exception::new(env, Condition::Type, "mu:%frame-ref", frame)),
-        };
+        fp.value = Frame::frame_ref(
+            env,
+            frame.as_u64(),
+            usize::try_from(Fixnum::as_i64(offset)).unwrap(),
+        );
 
         Ok(())
     }

@@ -19,22 +19,22 @@ use {
         },
     },
     futures_lite::future::block_on,
-    std::collections::HashMap,
+    std::{sync::LazyLock, collections::HashMap},
 };
 
-lazy_static! {
-    pub static ref CACHETYPEMAP: Vec::<(Type, CacheId)> = vec![
+pub static CACHETYPEMAP: LazyLock<Vec<(Type, CacheId)>> = LazyLock::new(|| {
+    vec![
         (Type::Async, CacheId::Async),
         (Type::Cons, CacheId::Cons),
         (Type::Function, CacheId::Function),
         (Type::Symbol, CacheId::Symbol),
-    ];
-}
+    ]
+});
 
 #[derive(Clone)]
 pub struct Cache {
     pub tag_id: u64,
-    pub cache: HashMap<u64, DirectImage>,
+    pub image_hash: HashMap<u64, DirectImage>,
     pub type_info: [CacheTypeInfo; Cache::NCACHETYPES],
 }
 
@@ -64,7 +64,7 @@ impl Cache {
     pub fn new() -> Self {
         Cache {
             tag_id: 0,
-            cache: HashMap::new(),
+            image_hash: HashMap::new(),
             type_info: [CacheTypeInfo { size: 0, total: 0 }; Self::NCACHETYPES],
         }
     }
@@ -90,15 +90,18 @@ impl Cache {
         let mut images_ref = block_on(env.cache.write());
 
         if let DirectImage::Symbol(image) = image {
-            let hash_opt = images_ref.cache.iter().find(|(_, direct)| match direct {
-                DirectImage::Symbol(symbol) => symbol.name.eq_(&image.name),
-                _ => panic!(),
-            });
+            let hash_opt = images_ref
+                .image_hash
+                .iter()
+                .find(|(_, direct)| match direct {
+                    DirectImage::Symbol(symbol) => symbol.name.eq_(&image.name),
+                    _ => panic!(),
+                });
 
             if let Some(hash) = hash_opt {
                 return *hash.0;
             }
-        };
+        }
 
         let tag_id = images_ref.tag_id;
         let type_info = &mut images_ref.type_info;
@@ -116,7 +119,7 @@ impl Cache {
         type_info[cache_id as usize].size += image_size;
 
         images_ref.tag_id += 1;
-        images_ref.cache.insert(tag_id, image);
+        images_ref.image_hash.insert(tag_id, image);
 
         tag_id
     }
@@ -125,13 +128,13 @@ impl Cache {
         let (index, _) = DirectTag::cache_ref(tag);
         let mut image_ref = block_on(env.cache.write());
 
-        image_ref.cache.insert(index as u64, image);
+        image_ref.image_hash.insert(index as u64, image);
     }
 
     pub fn ref_(env: &Env, index: usize) -> DirectImage {
         let images_ref = block_on(env.cache.read());
 
-        images_ref.cache[&(index as u64)]
+        images_ref.image_hash[&(index as u64)]
     }
 
     pub fn type_info(env: &Env, type_: Type) -> Option<CacheTypeInfo> {

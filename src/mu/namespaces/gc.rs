@@ -52,13 +52,16 @@ impl Gc for GcContext<'_> {
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => {
-                let marked = self.heap_ref.get_image_mark(indirect.image_id() as usize);
+                let marked = self
+                    .heap_ref
+                    .get_image_mark(usize::try_from(indirect.image_id()).unwrap());
 
                 match marked {
                     None => (),
                     Some(mark) => {
                         if !mark {
-                            self.heap_ref.set_image_mark(indirect.image_id() as usize)
+                            self.heap_ref
+                                .set_image_mark(usize::try_from(indirect.image_id()).unwrap());
                         }
                     }
                 }
@@ -74,11 +77,11 @@ impl Gc for GcContext<'_> {
         for frame_vec in (*lexical_ref).values() {
             let frame_vec_ref = &frame_vec;
 
-            for frame in frame_vec_ref.iter() {
+            for frame in *frame_vec_ref {
                 self.mark(env, frame.func);
 
                 for arg in &frame.argv {
-                    self.mark(env, *arg)
+                    self.mark(env, *arg);
                 }
 
                 self.mark(env, frame.value);
@@ -93,16 +96,16 @@ impl Gc for GcContext<'_> {
             match ns_map {
                 Namespace::Static(static_) => {
                     if let Some(hash) = &static_ {
-                        for (_, symbol) in hash.iter() {
-                            self.mark(env, *symbol)
+                        for symbol in hash.values() {
+                            self.mark(env, *symbol);
                         }
                     }
                 }
                 Namespace::Dynamic(ref hash) => {
                     let hash_ref = block_on(hash.read());
 
-                    for (_, symbol) in hash_ref.iter() {
-                        self.mark(env, *symbol)
+                    for symbol in hash_ref.values() {
+                        self.mark(env, *symbol);
                     }
                 }
             }

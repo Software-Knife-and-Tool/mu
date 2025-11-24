@@ -11,7 +11,7 @@ use {
             tag::Tag,
         },
         namespaces::namespace::Namespace,
-        reader::reader_::Reader,
+        reader::read::Reader,
         streams::reader::StreamReader,
         types::{cons::Cons, symbol::Symbol},
     },
@@ -61,7 +61,7 @@ impl QuasiReader {
     pub fn read(env: &Env, _: bool, stream: Tag, _: bool) -> exception::Result<Tag> {
         let quasi = Self::new(env, stream);
         let expr = quasi.parse(env)?;
-        let form = quasi.compile(env, &expr, false)?;
+        let form = quasi.compile(env, &expr, false);
 
         Ok(Cons::list(env, &[quasi.qappend, form]))
     }
@@ -115,21 +115,21 @@ impl QuasiReader {
         Cons::list(env, &[self.cons, car, self.append_args(env, cdr)])
     }
 
-    fn compile(&self, env: &Env, expr: &QuasiExpr, recur: bool) -> exception::Result<Tag> {
+    fn compile(&self, env: &Env, expr: &QuasiExpr, recur: bool) -> Tag {
         match expr {
-            QuasiExpr::Basic(tag) => Ok(Compiler::quote(env, &Cons::cons(env, *tag, Tag::nil()))),
-            QuasiExpr::Comma(tag) => Ok(Cons::list(env, &[self.cons, *tag, Tag::nil()])),
-            QuasiExpr::CommaAt(tag) => Ok(*tag),
+            QuasiExpr::Basic(tag) => Compiler::quote(env, &Cons::cons(env, *tag, Tag::nil())),
+            QuasiExpr::Comma(tag) => Cons::list(env, &[self.cons, *tag, Tag::nil()]),
+            QuasiExpr::CommaAt(tag) => *tag,
             QuasiExpr::List(ref vec) => {
                 if vec.is_empty() {
-                    Ok(Cons::list(env, &[self.cons, Tag::nil(), Tag::nil()]))
+                    Cons::list(env, &[self.cons, Tag::nil(), Tag::nil()])
                 } else {
                     let list = vec
                         .iter()
-                        .map(|expr| self.compile(env, expr, true).unwrap())
+                        .map(|expr| self.compile(env, expr, true))
                         .collect::<Vec<Tag>>();
                     if recur {
-                        Ok(Cons::list(
+                        Cons::list(
                             env,
                             &[
                                 self.cons,
@@ -139,9 +139,9 @@ impl QuasiReader {
                                 ),
                                 Tag::nil(),
                             ],
-                        ))
+                        )
                     } else {
-                        Ok(self.append_args(env, Cons::list(env, &list)))
+                        self.append_args(env, Cons::list(env, &list))
                     }
                 }
             }
@@ -180,8 +180,9 @@ impl QuasiReader {
                 Symbol::keyword("eof"),
             ))?,
             Some(syntax) => match syntax {
-                QuasiSyntax::Atom => Ok(QuasiExpr::Basic(self.read_form(env)?)),
-                QuasiSyntax::Comma => Ok(QuasiExpr::Comma(self.read_form(env)?)),
+                QuasiSyntax::Atom | QuasiSyntax::Comma => {
+                    Ok(QuasiExpr::Comma(self.read_form(env)?))
+                }
                 QuasiSyntax::CommaAt => Err(Exception::new(
                     env,
                     Condition::Quasi,

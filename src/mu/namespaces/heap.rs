@@ -162,65 +162,63 @@ impl Heap {
 
         self.free_space -= image_size + size_of::<HeapImageInfo>();
 
-        let index = match self.alloc_free(req.type_id, (image_len * size_of::<u64>()) + vdata_size)
+        let index = if let Some(index) =
+            self.alloc_free(req.type_id, (image_len * size_of::<u64>()) + vdata_size)
         {
-            Some(index) => {
-                let data = &mut self.mmap;
-                let mut off = index * size_of::<u64>();
+            let data = &mut self.mmap;
+            let mut off = index * size_of::<u64>();
 
-                for image_slice in req.image {
-                    data[off..(off + size_of::<u64>())].copy_from_slice(image_slice);
-                    off += size_of::<u64>();
-                }
-
-                match req.vdata {
-                    Some(vdata) if vdata_size != 0 => {
-                        data[off..(off + vdata.len())].copy_from_slice(vdata);
-                    }
-                    _ => (),
-                }
-
-                index
+            for image_slice in req.image {
+                data[off..(off + size_of::<u64>())].copy_from_slice(image_slice);
+                off += size_of::<u64>();
             }
-            None => {
-                if self.alloc_barrier + image_size > self.size {
-                    None?
+
+            match req.vdata {
+                Some(vdata) if vdata_size != 0 => {
+                    data[off..(off + vdata.len())].copy_from_slice(vdata);
                 }
-
-                self.gc_allocated += image_size;
-
-                let hinfo = HeapImageInfo::new()
-                    .with_reloc(0)
-                    .with_len(image_size as u16)
-                    .with_mark(false)
-                    .with_image_type(req.type_id)
-                    .into_bytes();
-
-                let data = &mut self.mmap;
-
-                data[self.alloc_barrier..(self.alloc_barrier + 8)].copy_from_slice(&hinfo);
-                self.alloc_barrier += size_of::<HeapImageInfo>();
-
-                let index = self.alloc_barrier / size_of::<u64>();
-
-                for image_slice in req.image {
-                    data[self.alloc_barrier..(self.alloc_barrier + size_of::<u64>())]
-                        .copy_from_slice(image_slice);
-                    self.alloc_barrier += size_of::<u64>();
-                }
-
-                if vdata_size != 0 {
-                    data[self.alloc_barrier..(self.alloc_barrier + req.vdata.unwrap().len())]
-                        .copy_from_slice(req.vdata.unwrap());
-                    self.alloc_barrier += vdata_size;
-                }
-
-                self.alloc_map[req.type_id as usize].size +=
-                    (image_len * size_of::<u64>()) + vdata_size;
-                self.alloc_map[req.type_id as usize].total += 1;
-
-                index
+                _ => (),
             }
+
+            index
+        } else {
+            if self.alloc_barrier + image_size > self.size {
+                None?;
+            }
+
+            self.gc_allocated += image_size;
+
+            let hinfo = HeapImageInfo::new()
+                .with_reloc(0)
+                .with_len(u16::try_from(image_size).unwrap())
+                .with_mark(false)
+                .with_image_type(req.type_id)
+                .into_bytes();
+
+            let data = &mut self.mmap;
+
+            data[self.alloc_barrier..(self.alloc_barrier + 8)].copy_from_slice(&hinfo);
+            self.alloc_barrier += size_of::<HeapImageInfo>();
+
+            let index = self.alloc_barrier / size_of::<u64>();
+
+            for image_slice in req.image {
+                data[self.alloc_barrier..(self.alloc_barrier + size_of::<u64>())]
+                    .copy_from_slice(image_slice);
+                self.alloc_barrier += size_of::<u64>();
+            }
+
+            if vdata_size != 0 {
+                data[self.alloc_barrier..(self.alloc_barrier + req.vdata.unwrap().len())]
+                    .copy_from_slice(req.vdata.unwrap());
+                self.alloc_barrier += vdata_size;
+            }
+
+            self.alloc_map[req.type_id as usize].size +=
+                (image_len * size_of::<u64>()) + vdata_size;
+            self.alloc_map[req.type_id as usize].total += 1;
+
+            index
         };
 
         Some(index)
@@ -229,7 +227,7 @@ impl Heap {
     // try first fit
     fn alloc_free(&mut self, type_id: u8, size: usize) -> Option<usize> {
         for (index, off) in self.free_map[type_id as usize].iter().enumerate() {
-            if self.image_info(*off).unwrap().len() >= size as u16 {
+            if self.image_info(*off).unwrap().len() >= u16::try_from(size).unwrap() {
                 self.alloc_map[type_id as usize].total += 1;
 
                 return Some(self.free_map[type_id as usize].remove(index));
@@ -243,7 +241,7 @@ impl Heap {
     pub fn write_info(&mut self, info: HeapImageInfo, index: usize) {
         let off = index * size_of::<u64>();
 
-        self.mmap[(off - 8)..off].copy_from_slice(&(info.into_bytes()))
+        self.mmap[(off - 8)..off].copy_from_slice(&(info.into_bytes()));
     }
 
     // info header from heap tag
@@ -359,15 +357,15 @@ impl Gc for Heap {
         while let Some(mut info) = self.image_info(index) {
             info.set_mark(false);
             self.write_info(info, index);
-            index += (info.len() as usize) / size_of::<u64>()
+            index += (info.len() as usize) / size_of::<u64>();
         }
 
-        for type_map in self.alloc_map.iter_mut() {
-            type_map.free = 0
+        for type_map in &mut self.alloc_map {
+            type_map.free = 0;
         }
 
-        for free_map in self.free_map.iter_mut() {
-            free_map.clear()
+        for free_map in &mut self.free_map {
+            free_map.clear();
         }
     }
 
@@ -389,7 +387,7 @@ impl Gc for Heap {
         match self.image_info(index) {
             Some(mut info) => {
                 info.set_mark(true);
-                self.write_info(info, index)
+                self.write_info(info, index);
             }
             None => panic!(),
         }

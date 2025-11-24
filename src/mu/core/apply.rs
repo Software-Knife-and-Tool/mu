@@ -33,7 +33,7 @@ impl Apply for Env {
                         let n = Fixnum::as_i64(fp_arg);
 
                         if !(0..=255).contains(&n) {
-                            Err(Exception::new(self, Condition::Type, source, fp_arg))?
+                            Err(Exception::new(self, Condition::Type, source, fp_arg))?;
                         }
                     }
                     _ => Err(Exception::new(self, Condition::Type, source, fp_arg))?,
@@ -53,7 +53,7 @@ impl Apply for Env {
                 Type::T => (),
                 _ => {
                     if fp_arg_type != *arg_type {
-                        Err(Exception::new(self, Condition::Type, source, fp_arg))?
+                        Err(Exception::new(self, Condition::Type, source, fp_arg))?;
                     }
                 }
             }
@@ -158,7 +158,7 @@ impl CoreFn for Env {
             let last_value = value;
             let argv = vec![value];
 
-            value = Frame { func, argv, value }.apply(env, func)?;
+            value = Frame { argv, func, value }.apply(env, func)?;
             if last_value.eq_(&value) {
                 break value;
             }

@@ -8,6 +8,7 @@ use {
         core_::CoreFnDef,
         tag::Tag
     },
+    std::sync::LazyLock,
 };
 
 #[cfg(feature = "core")]
@@ -19,9 +20,7 @@ use crate::features::instrument::Instrument;
 #[cfg(feature = "system")]
 use crate::features::system::System;
 
-lazy_static! {
-    pub static ref FEATURES: Features = Features::new();
-}
+pub static FEATURES: LazyLock<Features> = LazyLock::new(Features::new);
 
 #[derive(Clone)]
 pub struct Feature {

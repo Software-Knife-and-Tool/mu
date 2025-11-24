@@ -5,36 +5,40 @@
 //  runtime compiler
 //
 #[rustfmt::skip]
-use crate::{
-    core::{
-        apply::Apply as _,
-        env::Env,
-        exception::{self, Condition, Exception},
-        frame::Frame,
-        tag::Tag,
-        type_::Type,
+use {
+    crate::{
+        core::{
+            apply::Apply as _,
+            env::Env,
+            exception::{self, Condition, Exception},
+            frame::Frame,
+            tag::Tag,
+            type_::Type,
+        },
+        namespaces::namespace::Namespace,
+        types::{
+            cons::Cons,
+            fixnum::Fixnum,
+            function::Function,
+            symbol::{Symbol, UNBOUND},
+        },
     },
-    namespaces::namespace::Namespace,
-    types::{
-        cons::Cons,
-        fixnum::Fixnum,
-        function::Function,
-        symbol::{Symbol, UNBOUND},
-    },
+    std::sync::LazyLock,
 };
 
-lazy_static! {
-    static ref COMPILER: Compiler = Compiler {
-        lambda: Symbol::keyword("lambda"),
-        quote: Symbol::keyword("quote"),
-        specmap: vec![
-            (Symbol::keyword("alambda"), Compiler::compile_alambda),
-            (Symbol::keyword("if"), Compiler::compile_if),
-            (Symbol::keyword("lambda"), Compiler::compile_lambda),
-            (Symbol::keyword("quote"), Compiler::compile_quote),
-        ],
-    };
-}
+static COMPILER: LazyLock<Compiler> = LazyLock::new(|| Compiler {
+    lambda: Symbol::keyword("lambda"),
+    quote: Symbol::keyword("quote"),
+    specmap: vec![
+        (Symbol::keyword("alambda"), Compiler::compile_alambda),
+        (Symbol::keyword("if"), Compiler::compile_if),
+        (Symbol::keyword("lambda"), Compiler::compile_lambda),
+        (
+            Symbol::keyword("quote"),
+            (|env: &Env, list: Tag, _: &mut LexEnv| Ok(Compiler::quote(env, &list))),
+        ),
+    ],
+});
 
 type LexEnv = Vec<(Tag, Vec<Tag>)>;
 type CompilerSpecFn = fn(&Env, Tag, &mut LexEnv) -> exception::Result<Tag>;
@@ -92,7 +96,7 @@ impl Compiler {
 
     fn compile_if(env: &Env, args: Tag, lex_env: &mut LexEnv) -> exception::Result<Tag> {
         if Cons::length(env, args) != Some(3) {
-            Err(Exception::new(env, Condition::Syntax, ":if", args))?
+            Err(Exception::new(env, Condition::Syntax, ":if", args))?;
         }
 
         let if_vec = vec![
@@ -117,10 +121,6 @@ impl Compiler {
         ];
 
         Self::compile(env, Cons::list(env, &if_vec), lex_env)
-    }
-
-    fn compile_quote(env: &Env, list: Tag, _: &mut LexEnv) -> exception::Result<Tag> {
-        Ok(Self::quote(env, &list))
     }
 
     // quoting
@@ -163,7 +163,7 @@ impl Compiler {
         let frame_symbols = |lambda: Tag| -> exception::Result<Vec<Tag>> {
             Cons::list_iter(env, lambda).try_fold(Tag::nil(), |_, symbol| {
                 if symbol.type_of() != Type::Symbol {
-                    Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?
+                    Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?;
                 }
                 Ok(Tag::nil())
             })?;

@@ -3,30 +3,32 @@
 
 // reader
 #[rustfmt::skip]
-use crate::{
-    core::{
-        apply::Apply as _,
-        compiler::Compiler,
-        direct::{DirectExt, DirectTag, DirectType},
-        env::Env,
-        exception::{self, Condition, Exception},
-        tag::{Tag},
-        type_::{Type},
+use {
+    crate::{
+        core::{
+            apply::Apply as _,
+            compiler::Compiler,
+            direct::{DirectExt, DirectTag, DirectType},
+            env::Env,
+            exception::{self, Condition, Exception},
+            tag::{Tag},
+            type_::{Type},
+        },
+        reader::{quasi::QuasiReader, readtable::SyntaxType},
+        streams::reader::StreamReader,
+        types::{
+            cons::Cons,
+            fixnum::Fixnum,
+            struct_::Struct,
+            symbol::{Symbol, SymbolImage},
+            vector::Vector
+        },
     },
-    reader::{quasi::QuasiReader, readtable::SyntaxType},
-    streams::reader::StreamReader,
-    types::{
-        cons::Cons,
-        fixnum::Fixnum,
-        struct_::Struct,
-        symbol::{Symbol, SymbolImage},
-        vector::Vector
-    },
+    std::sync::LazyLock,
 };
 
-lazy_static! {
-    pub static ref EOL: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
-}
+pub static EOL: LazyLock<Tag> =
+    LazyLock::new(|| DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword));
 
 pub trait Reader {
     fn read_atom(&self, _: char, _: Tag) -> exception::Result<Tag>;
@@ -61,12 +63,9 @@ impl Reader for Env {
             match StreamReader::read_char(self, stream)? {
                 Some(ch) => {
                     if let Some(stype) = SyntaxType::map_char_syntax(ch) {
-                        match stype {
-                            SyntaxType::Whitespace => (),
-                            _ => {
-                                StreamReader::unread_char(self, stream, ch).unwrap();
-                                break;
-                            }
+                        if stype != &SyntaxType::Whitespace {
+                            StreamReader::unread_char(self, stream, ch).unwrap();
+                            break;
                         }
                     }
                 }
@@ -190,7 +189,7 @@ impl Reader for Env {
             }
             Err(_) => match token.parse::<f32>() {
                 Ok(fl) => Ok(fl.into()),
-                Err(_) => Ok(Symbol::parse(self, token)?),
+                Err(_) => Ok(Symbol::parse(self, &token)?),
             },
         }
     }
@@ -265,7 +264,7 @@ impl Reader for Env {
                                         Condition::Type,
                                         "mu:read",
                                         namespace,
-                                    ))?
+                                    ))?;
                                 }
 
                                 let symbol = Symbol::Symbol(SymbolImage {
@@ -356,7 +355,7 @@ impl Reader for Env {
             } else {
                 Ok(eof_value)
             };
-        };
+        }
 
         match StreamReader::read_char(self, stream)? {
             None => {
@@ -395,7 +394,6 @@ impl Reader for Env {
                             self.read_comment(stream)?;
                             self.read(stream, eof_error_p, eof_value, recursivep)
                         }
-                        ',' => Err(Exception::new(self, Condition::Range, "reader", ch.into()))?,
                         _ => Err(Exception::new(self, Condition::Range, "reader", ch.into()))?,
                     },
                     _ => Err(Exception::new(self, Condition::Read, "reader", ch.into()))?,

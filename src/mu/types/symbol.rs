@@ -25,12 +25,11 @@ use {
         types::vector::Vector,
     },
     futures_lite::future::block_on,
-    std::str,
+    std::{str, sync::LazyLock},
 };
 
-lazy_static! {
-    pub static ref UNBOUND: Tag = DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword);
-}
+pub static UNBOUND: LazyLock<Tag> =
+    LazyLock::new(|| DirectTag::to_tag(0, DirectExt::Length(0), DirectType::Keyword));
 
 #[derive(Copy, Clone)]
 pub enum Symbol {
@@ -61,23 +60,23 @@ impl Gc for Symbol {
                 namespace: Tag::from_slice(
                     context
                         .heap_ref
-                        .image_slice(main.image_id() as usize)
+                        .image_slice(usize::try_from(main.image_id()).unwrap())
                         .unwrap(),
                 ),
                 name: Tag::from_slice(
                     context
                         .heap_ref
-                        .image_slice(main.image_id() as usize + 1)
+                        .image_slice(usize::try_from(main.image_id()).unwrap() + 1)
                         .unwrap(),
                 ),
                 value: Tag::from_slice(
                     context
                         .heap_ref
-                        .image_slice(main.image_id() as usize + 2)
+                        .image_slice(usize::try_from(main.image_id()).unwrap() + 2)
                         .unwrap(),
                 ),
             },
-            _ => panic!(),
+            Tag::Direct(_) => panic!(),
         }
     }
 
@@ -89,7 +88,7 @@ impl Gc for Symbol {
                     DirectExt::Length(dir.ext() as usize),
                     DirectType::String,
                 ),
-                _ => panic!(),
+                Tag::Indirect(_) => panic!(),
             },
             Type::Symbol => Self::gc_ref_image(context, symbol).name,
             _ => panic!(),
@@ -151,13 +150,19 @@ impl Symbol {
             Type::Symbol => match tag {
                 Tag::Indirect(main) => SymbolImage {
                     namespace: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize).unwrap(),
+                        heap_ref
+                            .image_slice(usize::try_from(main.image_id()).unwrap())
+                            .unwrap(),
                     ),
                     name: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 1).unwrap(),
+                        heap_ref
+                            .image_slice(usize::try_from(main.image_id()).unwrap() + 1)
+                            .unwrap(),
                     ),
                     value: Tag::from_slice(
-                        heap_ref.image_slice(main.image_id() as usize + 2).unwrap(),
+                        heap_ref
+                            .image_slice(usize::try_from(main.image_id()).unwrap() + 2)
+                            .unwrap(),
                     ),
                 },
                 Tag::Direct(_) => {
@@ -183,7 +188,7 @@ impl Symbol {
                         DirectExt::Length(dir.ext() as usize),
                         DirectType::String,
                     ),
-                    _ => panic!(),
+                    Tag::Indirect(_) => panic!(),
                 },
                 symbol,
             ),
@@ -195,7 +200,7 @@ impl Symbol {
                         DirectExt::Length(dir.ext() as usize),
                         DirectType::String,
                     ),
-                    _ => panic!(),
+                    Tag::Indirect(_) => panic!(),
                 },
                 symbol,
             ),
@@ -251,7 +256,7 @@ impl Symbol {
             Symbol::Symbol(image) => {
                 DirectImage::Symbol(*image).with_cache(env, Type::Symbol as u8)
             }
-            _ => panic!(),
+            Symbol::Keyword(_) => panic!(),
         }
     }
 
@@ -296,7 +301,7 @@ impl Symbol {
 
         let mut data: [u8; 8] = 0_u64.to_le_bytes();
         for (src, dst) in str.iter().zip(data.iter_mut()) {
-            *dst = *src
+            *dst = *src;
         }
 
         DirectTag::to_tag(
@@ -306,7 +311,7 @@ impl Symbol {
         )
     }
 
-    pub fn parse(env: &Env, token: String) -> exception::Result<Tag> {
+    pub fn parse(env: &Env, token: &str) -> exception::Result<Tag> {
         let type_check = token.chars().find(|ch| {
             !matches!(
                 SyntaxType::map_char_syntax(*ch).unwrap(),
@@ -315,7 +320,7 @@ impl Symbol {
         });
 
         if let Some(ch) = type_check {
-            Err(Exception::new(env, Condition::Range, "mu:read", ch.into()))?
+            Err(Exception::new(env, Condition::Range, "mu:read", ch.into()))?;
         }
 
         match token.find(':') {
@@ -325,8 +330,8 @@ impl Symbol {
                         env,
                         Condition::Syntax,
                         "mu:read",
-                        Vector::from(token.clone()).with_heap(env),
-                    ))?
+                        Vector::from(token).with_heap(env),
+                    ))?;
                 }
 
                 let keyword: String = token.chars().skip(1).collect();
@@ -343,8 +348,8 @@ impl Symbol {
                         env,
                         Condition::Syntax,
                         "mu:read",
-                        Vector::from(token.clone()).with_heap(env),
-                    ))?
+                        Vector::from(token).with_heap(env),
+                    ))?;
                 }
 
                 match Namespace::find_ns(env, &ns) {
@@ -357,32 +362,32 @@ impl Symbol {
                     ))?,
                 }
             }
-            None => Ok(Self::new(env, *UNBOUND, &token, *UNBOUND).with_cache(env)),
+            None => Ok(Self::new(env, *UNBOUND, token, *UNBOUND).with_cache(env)),
         }
     }
 
     pub fn write(env: &Env, symbol: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
         match symbol.type_of() {
-            Type::Null | Type::Keyword => match str::from_utf8(&symbol.data(env).to_le_bytes()) {
-                Ok(s) => {
-                    StreamWriter::write_char(env, stream, ':').unwrap();
-                    for nth in 0..DirectTag::length(symbol) {
-                        StreamWriter::write_char(env, stream, s.as_bytes()[nth] as char)?;
-                    }
+            Type::Null | Type::Keyword => {
+                let str = symbol.data(env).to_le_bytes();
+                let s = str::from_utf8(&str).unwrap();
 
-                    Ok(())
+                StreamWriter::write_char(env, stream, ':').unwrap();
+                for nth in 0..DirectTag::length(symbol) {
+                    StreamWriter::write_char(env, stream, s.as_bytes()[nth] as char)?;
                 }
-                Err(_) => panic!(),
-            },
+
+                Ok(())
+            }
             Type::Symbol => {
                 let (ns, name, _) = Self::destruct(env, symbol);
 
                 if !ns.eq_(&UNBOUND) {
                     if ns.null_() {
-                        StreamWriter::write_str(env, "#:", stream)?
+                        StreamWriter::write_str(env, "#:", stream)?;
                     } else {
                         StreamWriter::write_str(env, &Namespace::name(env, ns), stream)?;
-                        StreamWriter::write_str(env, ":", stream)?
+                        StreamWriter::write_str(env, ":", stream)?;
                     }
                 }
 
