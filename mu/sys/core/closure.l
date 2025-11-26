@@ -60,7 +60,7 @@
 (mu:intern core "%compile-closure"
    (:lambda (lambda body env)
      (:if (core:find-if (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-          (mu:raise-from lambda 'core:%compile-closure :syntax)
+          (mu:raise lambda 'core:%compile-closure :syntax)
           ((:lambda (desc)
              ((:lambda (env)
                 ((:lambda (body)
@@ -85,7 +85,7 @@
                               (mu:cons
                                `(,@(core:dropr lambda 2) ,@(core:dropl lambda (mu:sub (mu:length lambda) 1)))
                                (mu:nth (mu:sub (mu:length lambda) 1) lambda))
-                              (mu:raise-from lambda 'core:%compile-closure :syntax))
+                              (mu:raise lambda 'core:%compile-closure :syntax))
                          (mu:add 1 acc))
                     acc))
              0

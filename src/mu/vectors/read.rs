@@ -38,12 +38,12 @@ impl Read for Vector {
                             SyntaxType::Escape => match StreamReader::read_char(env, stream)? {
                                 Some(ch) => str.push(ch),
                                 None => {
-                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?;
+                                    Err(Exception::err(env, stream, Condition::Eof, "mu:read"))?;
                                 }
                             },
                             _ => str.push(ch),
                         },
-                        None => Err(Exception::new(env, Condition::Eof, "mu:read", stream))?,
+                        None => Err(Exception::err(env, stream, Condition::Eof, "mu:read"))?,
                     }
                 }
 
@@ -64,38 +64,37 @@ impl Read for Vector {
                                     if ch == '0' || ch == '1' {
                                         digits.push(ch);
                                     } else {
-                                        Err(Exception::new(
+                                        Err(Exception::err(
                                             env,
+                                            stream,
                                             Condition::Eof,
                                             "mu:read",
-                                            stream,
                                         ))?;
                                     }
                                 }
                                 None => {
-                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?;
+                                    Err(Exception::err(env, stream, Condition::Eof, "mu:read"))?;
                                 }
                             },
                             _ => {
                                 if ch == '0' || ch == '1' {
                                     digits.push(ch);
                                 } else {
-                                    Err(Exception::new(env, Condition::Eof, "mu:read", stream))?;
+                                    Err(Exception::err(env, stream, Condition::Eof, "mu:read"))?;
                                 }
                             }
                         },
                         None => {
-                            return Err(Exception::new(env, Condition::Eof, "mu:read", stream));
+                            return Err(Exception::err(env, stream, Condition::Eof, "mu:read"));
                         }
                     }
                 }
-
                 let mut vec = vec![0; digits.len().div_ceil(8)];
                 let bvec = &mut vec;
 
                 for (i, ch) in digits.chars().enumerate() {
                     if ch == '1' {
-                        bvec[i / 8] |= (1_i8) << (7 - i % 8);
+                        bvec[i / 8] |= (1_u8) << (7 - i % 8);
                     }
                 }
 
@@ -105,11 +104,11 @@ impl Read for Vector {
                 let vec_list = match Cons::read(env, stream) {
                     Ok(list) => {
                         if list.null_() {
-                            Err(Exception::new(env, Condition::Type, "mu:read", Tag::nil()))?;
+                            Err(Exception::err(env, Tag::nil(), Condition::Type, "mu:read"))?;
                         }
                         list
                     }
-                    Err(_) => Err(Exception::new(env, Condition::Syntax, "mu:read", stream))?,
+                    Err(_) => Err(Exception::err(env, stream, Condition::Syntax, "mu:read"))?,
                 };
 
                 let (vec_type, vec) = Cons::destruct(env, vec_list);
@@ -128,11 +127,11 @@ impl Read for Vector {
                                         if ch.type_of() == Type::Char {
                                             Ok(Char::as_char(env, ch))
                                         } else {
-                                            Err(Exception::new(
+                                            Err(Exception::err(
                                                 env,
+                                                ch,
                                                 Condition::Type,
                                                 "mu:read",
-                                                ch,
                                             ))?
                                         }
                                     })
@@ -149,19 +148,19 @@ impl Read for Vector {
                                             if (0..=255).contains(&byte) {
                                                 Ok(u8::try_from(byte).unwrap())
                                             } else {
-                                                Err(Exception::new(
+                                                Err(Exception::err(
                                                     env,
+                                                    fx,
                                                     Condition::Range,
                                                     "mu:read",
-                                                    fx,
                                                 ))?
                                             }
                                         } else {
-                                            Err(Exception::new(
+                                            Err(Exception::err(
                                                 env,
+                                                fx,
                                                 Condition::Type,
                                                 "mu:read",
-                                                fx,
                                             ))?
                                         }
                                     })
@@ -176,11 +175,11 @@ impl Read for Vector {
                                         if fx.type_of() == Type::Fixnum {
                                             Ok(Fixnum::as_i64(fx))
                                         } else {
-                                            Err(Exception::new(
+                                            Err(Exception::err(
                                                 env,
+                                                fx,
                                                 Condition::Type,
                                                 "mu:read",
-                                                fx,
                                             ))?
                                         }
                                     })
@@ -195,11 +194,11 @@ impl Read for Vector {
                                         if fl.type_of() == Type::Float {
                                             Ok(Float::as_f32(env, fl))
                                         } else {
-                                            Err(Exception::new(
+                                            Err(Exception::err(
                                                 env,
+                                                fl,
                                                 Condition::Type,
                                                 "mu:read",
-                                                fl,
                                             ))?
                                         }
                                     })
@@ -209,7 +208,7 @@ impl Read for Vector {
                         }
                         _ => panic!(),
                     },
-                    None => Err(Exception::new(env, Condition::Type, "mu:read", vec_type))?,
+                    None => Err(Exception::err(env, vec_type, Condition::Type, "mu:read"))?,
                 }
             }
             _ => panic!(),

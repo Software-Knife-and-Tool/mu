@@ -20,13 +20,13 @@
    (:lambda (symbol)
       (:if (mu:eq :symbol (mu:type-of symbol))
            (mu:find core:%symbol-macros/ (mu:symbol-name symbol))
-           (mu:raise-from symbol 'core:%get-symbol-macro :type))))
+           (mu:raise symbol 'core:%get-symbol-macro :type))))
 
 (mu:intern core "define-symbol-macro"
    (:lambda (symbol form)
       (:if (mu:eq :symbol (mu:type-of symbol))
            (mu:intern core:%symbol-macros/ (mu:symbol-name symbol) form)
-           (mu:raise-from symbol 'core:define-symbol-macro :type))))
+           (mu:raise symbol 'core:define-symbol-macro :type))))
 
 (core:define-symbol-macro 't :t)
 (core:define-symbol-macro 'nil :nil)

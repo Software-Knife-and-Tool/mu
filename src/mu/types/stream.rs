@@ -143,11 +143,11 @@ impl Stream {
 
     pub fn get_string(env: &Env, stream: Tag) -> exception::Result<String> {
         if !Self::is_open(stream) {
-            Err(Exception::new(
+            Err(Exception::err(
                 env,
+                stream,
                 Condition::Open,
                 "mu:get-string",
-                stream,
             ))?;
         }
 
@@ -255,7 +255,7 @@ impl CoreFn for Stream {
             } else if st_error_p.null_() {
                 Ok(Tag::nil())
             } else {
-                Err(Exception::new(env, Condition::Type, "mu:open", st_dir))?
+                Err(Exception::err(env, st_dir, Condition::Type, "mu:open"))?
             };
 
             stream?
@@ -271,12 +271,12 @@ impl CoreFn for Stream {
             } else if st_error_p.null_() {
                 Ok(Tag::nil())
             } else {
-                Err(Exception::new(env, Condition::Type, "mu:open", st_dir))?
+                Err(Exception::err(env, st_dir, Condition::Type, "mu:open"))?
             };
 
             stream?
         } else {
-            Err(Exception::new(env, Condition::Type, "mu:open", st_type))?
+            Err(Exception::err(env, st_type, Condition::Type, "mu:open"))?
         };
 
         Ok(())
@@ -329,7 +329,7 @@ impl CoreFn for Stream {
         fp.value = match StreamReader::read_char(env, stream)? {
             Some(ch) => ch.into(),
             None if eof_error_p.null_() => eof_value,
-            None => return Err(Exception::new(env, Condition::Eof, "mu:read-char", stream)),
+            None => return Err(Exception::err(env, stream, Condition::Eof, "mu:read-char")),
         };
 
         Ok(())
@@ -345,7 +345,7 @@ impl CoreFn for Stream {
         fp.value = match StreamReader::read_byte(env, stream)? {
             Some(byte) => byte.into(),
             None if eof_error_p.null_() => eof_value,
-            None => return Err(Exception::new(env, Condition::Eof, "mu:read-byte", stream)),
+            None => return Err(Exception::err(env, stream, Condition::Eof, "mu:read-byte")),
         };
 
         Ok(())

@@ -320,17 +320,17 @@ impl Symbol {
         });
 
         if let Some(ch) = type_check {
-            Err(Exception::new(env, Condition::Range, "mu:read", ch.into()))?;
+            Err(Exception::err(env, ch.into(), Condition::Range, "mu:read"))?;
         }
 
         match token.find(':') {
             Some(0) => {
                 if token.len() > DirectTag::DIRECT_STR_MAX + 1 || token.len() == 1 {
-                    Err(Exception::new(
+                    Err(Exception::err(
                         env,
+                        Vector::from(token).with_heap(env),
                         Condition::Syntax,
                         "mu:read",
-                        Vector::from(token).with_heap(env),
                     ))?;
                 }
 
@@ -344,21 +344,21 @@ impl Symbol {
                 let name = sym[1].into();
 
                 if sym.len() != 2 {
-                    Err(Exception::new(
+                    Err(Exception::err(
                         env,
+                        Vector::from(token).with_heap(env),
                         Condition::Syntax,
                         "mu:read",
-                        Vector::from(token).with_heap(env),
                     ))?;
                 }
 
                 match Namespace::find_ns(env, &ns) {
                     Some(ns) => Ok(Namespace::intern(env, ns, name, *UNBOUND).unwrap()),
-                    None => Err(Exception::new(
+                    None => Err(Exception::err(
                         env,
+                        Vector::from(sym[0]).with_heap(env),
                         Condition::Namespace,
                         "mu:read",
-                        Vector::from(sym[0]).with_heap(env),
                     ))?,
                 }
             }
@@ -416,11 +416,11 @@ impl CoreFn for Symbol {
 
         fp.value = match symbol.type_of() {
             Type::Null | Type::Keyword | Type::Symbol => Self::destruct(env, symbol).1,
-            _ => Err(Exception::new(
+            _ => Err(Exception::err(
                 env,
+                symbol,
                 Condition::Type,
                 "mu:symbol-name",
-                symbol,
             ))?,
         };
 
@@ -442,11 +442,11 @@ impl CoreFn for Symbol {
             }
             Type::Null => env.mu_ns,
             Type::Keyword => env.keyword_ns,
-            _ => Err(Exception::new(
+            _ => Err(Exception::err(
                 env,
+                symbol,
                 Condition::Type,
                 "mu:symbol-namespace",
-                symbol,
             ))?,
         };
 
@@ -461,20 +461,20 @@ impl CoreFn for Symbol {
                 if Symbol::is_bound(env, symbol) {
                     Symbol::destruct(env, symbol).2
                 } else {
-                    Err(Exception::new(
+                    Err(Exception::err(
                         env,
+                        symbol,
                         Condition::Type,
                         "mu:symbol-value",
-                        symbol,
                     ))?
                 }
             }
             Type::Keyword | Type::Null => symbol,
-            _ => Err(Exception::new(
+            _ => Err(Exception::err(
                 env,
+                symbol,
                 Condition::Type,
                 "mu:symbol-value",
-                symbol,
             ))?,
         };
 
@@ -493,7 +493,7 @@ impl CoreFn for Symbol {
                     Tag::nil()
                 }
             }
-            _ => Err(Exception::new(env, Condition::Type, "mu:boundp", symbol))?,
+            _ => Err(Exception::err(env, symbol, Condition::Type, "mu:boundp"))?,
         };
 
         Ok(())

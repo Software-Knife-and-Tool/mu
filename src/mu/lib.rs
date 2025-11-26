@@ -127,13 +127,8 @@ impl Mu {
     }
 
     /// read a mu s-expression from a core stream
-    pub fn read(
-        env: Env,
-        stream: Tag,
-        eof_error_p: bool,
-        eof_value: Tag,
-    ) -> exception::Result<Tag> {
-        Self::read_(env, stream, eof_error_p, eof_value)
+    pub fn read(env: Env, stream: Tag, err: bool, eof: Tag) -> exception::Result<Tag> {
+        Self::read_(env, stream, err, eof)
     }
 
     /// read a mu s-expression from &str

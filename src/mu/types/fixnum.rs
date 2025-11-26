@@ -145,10 +145,10 @@ impl Fixnum {
 
     pub fn with_u64(env: &Env, fx: u64) -> exception::Result<Tag> {
         match i64::try_from(fx) {
-            Err(_) => Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil())),
+            Err(_) => Err(Exception::err(env, Tag::nil(), Condition::Over, "fixnum")),
             Ok(i64_) => {
                 if !Fixnum::is_i56(i64_) {
-                    return Err(Exception::new(env, Condition::Over, "fixnum", Tag::nil()));
+                    return Err(Exception::err(env, Tag::nil(), Condition::Over, "fixnum"));
                 }
 
                 Ok(DirectTag::to_tag(
@@ -197,11 +197,11 @@ impl CoreFn for Fixnum {
         if Self::is_i56(result) {
             fp.value = Self::with_i64_or_panic(result);
         } else {
-            Err(Exception::new(
+            Err(Exception::err(
                 env,
+                Cons::cons(env, fp.argv[0], fp.argv[1]),
                 Condition::Over,
                 "mu:ash",
-                Cons::cons(env, fp.argv[0], fp.argv[1]),
             ))?;
         }
 
@@ -219,10 +219,10 @@ impl CoreFn for Fixnum {
                 if Self::is_i56(sum) {
                     Self::with_i64_or_panic(sum)
                 } else {
-                    Err(Exception::new(env, Condition::Over, "mu:add", fx0))?
+                    Err(Exception::err(env, fx0, Condition::Over, "mu:add"))?
                 }
             }
-            None => Err(Exception::new(env, Condition::Over, "mu:add", fx1))?,
+            None => Err(Exception::err(env, fx1, Condition::Over, "mu:add"))?,
         };
 
         Ok(())
@@ -239,10 +239,10 @@ impl CoreFn for Fixnum {
                 if Self::is_i56(diff) {
                     Self::with_i64_or_panic(diff)
                 } else {
-                    Err(Exception::new(env, Condition::Over, "mu:sub", fx1))?
+                    Err(Exception::err(env, fx0, Condition::Over, "mu:sub"))?
                 }
             }
-            None => Err(Exception::new(env, Condition::Over, "mu:sub", fx1))?,
+            None => Err(Exception::err(env, fx1, Condition::Over, "mu:sub"))?,
         };
 
         Ok(())
@@ -259,10 +259,10 @@ impl CoreFn for Fixnum {
                 if Self::is_i56(prod) {
                     Self::with_i64_or_panic(prod)
                 } else {
-                    Err(Exception::new(env, Condition::Over, "mu:mul", fx1))?
+                    Err(Exception::err(env, fx1, Condition::Over, "mu:mul"))?
                 }
             }
-            None => Err(Exception::new(env, Condition::Over, "mu:mul", fx1))?,
+            None => Err(Exception::err(env, fx1, Condition::Over, "mu:mul"))?,
         };
 
         Ok(())
@@ -275,7 +275,7 @@ impl CoreFn for Fixnum {
         let fx1 = fp.argv[1];
 
         if Self::as_i64(fx1) == 0 {
-            Err(Exception::new(env, Condition::ZeroDivide, "mu:div", fx0))?;
+            Err(Exception::err(env, fx0, Condition::ZeroDivide, "mu:div"))?;
         }
 
         fp.value = match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
@@ -283,10 +283,10 @@ impl CoreFn for Fixnum {
                 if Self::is_i56(div) {
                     Self::with_i64_or_panic(div)
                 } else {
-                    Err(Exception::new(env, Condition::Over, "mu:div", fx1))?
+                    Err(Exception::err(env, fx1, Condition::Over, "mu:div"))?
                 }
             }
-            None => Err(Exception::new(env, Condition::Over, "mu:div", fx1))?,
+            None => Err(Exception::err(env, fx1, Condition::Over, "mu:div"))?,
         };
 
         Ok(())

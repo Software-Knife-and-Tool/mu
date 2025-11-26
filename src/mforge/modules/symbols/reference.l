@@ -4,6 +4,8 @@
 ;;;
 ;;; symbol reference
 ;;;
+(core:load "/opt/mu/lib/format.sys")
+
 (mu:make-namespace "symbols")
 ((:lambda (symbols)
    (mu:intern symbols "reference"
@@ -12,12 +14,12 @@
            (core:mapc
             (:lambda (symbol)
               (:if (mu:boundp symbol)
-                   (core:%format stream "~A~T~A~T~S~T~A~%"
+                   (format:%format stream "~A~T~A~T~S~T~A~%"
                                  `(,(mu:symbol-name symbol)
                                    ,(core:type-of (mu:symbol-value symbol))
                                     ,(mu:symbol-value symbol)
                                     ,(mu:repr symbol)))
-                   (core:%format stream "unbound~Tunbound~T~A~Tunbound~%" `(,(mu:symbol-name symbol)))))
+                   (format:%format stream "unbound~Tunbound~T~A~Tunbound~%" `(,(mu:symbol-name symbol)))))
             (feature/core:ns-symbols (mu:find-namespace ns)))
            (mu:close stream))
          (mu:open :file :output file-name :t))

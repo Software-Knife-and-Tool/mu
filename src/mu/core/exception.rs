@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{apply::Apply as _, env::Env, frame::Frame, tag::Tag, type_::Type},
-        types::symbol::Symbol,
+        types::{symbol::Symbol, vector::Vector},
     },
     futures_lite::future::block_on,
     std::{fmt, sync::LazyLock},
@@ -15,10 +15,9 @@ pub type Result<T> = std::result::Result<T, Exception>;
 
 #[derive(Clone)]
 pub struct Exception {
-    pub object: Tag,
-    pub condition: Condition,
-    pub source: Tag,
-    pub user: Tag,
+    pub object: Tag,          // T
+    pub source: Tag,          // usually string
+    pub condition: Condition, // keyword
 }
 
 #[derive(Eq, PartialEq, Clone, Debug)]
@@ -86,23 +85,21 @@ impl fmt::Display for Exception {
 }
 
 impl Exception {
-    pub fn new(env: &Env, condition: Condition, symbol: &str, object: Tag) -> Self {
-        let source = Symbol::parse(env, symbol).unwrap();
-
+    pub fn new(object: Tag, condition: Condition, source: Tag) -> Self {
         Exception {
             object,
-            condition,
             source,
-            user: Tag::nil(),
+            condition,
         }
     }
 
-    pub fn with(condition: Condition, source: Tag, object: Tag, user: Tag) -> Self {
+    pub fn err(env: &Env, object: Tag, condition: Condition, referrer: &str) -> Self {
+        let source = Vector::from(referrer).with_heap(env);
+
         Exception {
             object,
-            condition,
             source,
-            user,
+            condition,
         }
     }
 
@@ -111,7 +108,7 @@ impl Exception {
 
         match condmap {
             Some(entry) => Ok(entry.1.clone()),
-            _ => Err(Exception::new(env, Condition::Syntax, "mu:raise", keyword)),
+            _ => Err(Exception::err(env, keyword, Condition::Syntax, "mu:raise")),
         }
     }
 
@@ -123,32 +120,19 @@ impl Exception {
 pub trait CoreFn {
     fn mu_with_exception(env: &Env, fp: &mut Frame) -> Result<()>;
     fn mu_raise(env: &Env, fp: &mut Frame) -> Result<()>;
-    fn mu_raise_from(env: &Env, fp: &mut Frame) -> Result<()>;
 }
 
 impl CoreFn for Exception {
     fn mu_raise(env: &Env, fp: &mut Frame) -> Result<()> {
-        env.argv_check("mu:raise", &[Type::T, Type::Keyword], fp)?;
+        env.argv_check("mu:raise", &[Type::T, Type::T, Type::Keyword], fp)?;
 
-        let src = fp.argv[0];
-        let condition = fp.argv[1];
-
-        match Self::map_condition(env, condition) {
-            Ok(cond) => Err(Self::new(env, cond, "mu:raise", src))?,
-            Err(_) => Err(Self::new(env, Condition::User, "mu:raise", condition))?,
-        }
-    }
-
-    fn mu_raise_from(env: &Env, fp: &mut Frame) -> Result<()> {
-        env.argv_check("mu:raise-from", &[Type::T, Type::Symbol, Type::Keyword], fp)?;
-
-        let src = fp.argv[0];
-        let symbol = fp.argv[1];
+        let obj = fp.argv[0];
+        let source = fp.argv[1];
         let condition = fp.argv[2];
 
         match Self::map_condition(env, condition) {
-            Ok(cond) => Err(Self::with(cond, symbol, src, condition))?,
-            Err(_) => Err(Self::with(Condition::User, symbol, src, condition))?,
+            Ok(cond) => Err(Self::new(obj, cond, source))?,
+            Err(_) => Err(Self::err(env, condition, Condition::User, "mu:raise"))?,
         }
     }
 

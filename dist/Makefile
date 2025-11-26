@@ -12,9 +12,9 @@ MU = ../mu
 SRC = ../src
 TOOLS = ../tools
 
-BIN = repl mforge mu-exec mu-server
+BIN = mrepl mforge mu-exec mu-server
 SYS = core.sys fasl.sys format.sys image.sys module.sys
-
+SYSTEM = system.l image.l fasl.l 
 MODULES = 		\
 	common		\
 	common/describe	\
@@ -37,6 +37,11 @@ dist:
 	    install -m 755 $$bin $(BASE)/bin;	\
 	done
 
+	@install -d $(BASE)/system
+	@for sys in $(SYSTEM); do		\
+	    install -m 644 $(MU)/dist/$$sys $(BASE)/system;	\
+	done
+
 	@install -d $(BASE)/doc/html
 	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
 	@install -m 644 $(DOCS)/refcards/*.docx $(BASE)/doc
@@ -44,7 +49,7 @@ dist:
 
 	@install -m 644 $(MU)/dist/image.l $(BASE)/lib
 
-	@install -m 644 -D -t $(BASE)/lib/repl $(SRC)/repl/lib/*
+	@install -m 644 -D -t $(BASE)/lib/mrepl $(SRC)/mrepl/lib/*
 
 	@install -D -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.l
 	@install -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.def

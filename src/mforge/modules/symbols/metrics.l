@@ -4,6 +4,8 @@
 ;;;
 ;;; symbol table
 ;;;
+(core:load "/opt/mu/lib/format.sys")
+
 (mu:make-namespace "symbols")
 ((:lambda (symbols)
    (mu:intern symbols "metrics"
@@ -11,8 +13,8 @@
         ((:lambda (stream)
            (core:mapc
             (:lambda (symbol)
-              (core:%format stream "~A~%" `(,(mu:symbol-name symbol)))
-              (core:%format stream "~A:~A~%" `(,ns ,(mu:symbol-name symbol))))
+              (format:%format stream "~A~%" `(,(mu:symbol-name symbol)))
+              (format:%format stream "~A:~A~%" `(,ns ,(mu:symbol-name symbol))))
             (feature/core:ns-symbols (mu:find-namespace ns)))
            (mu:close stream))
          (mu:open :file :output file-name :t))

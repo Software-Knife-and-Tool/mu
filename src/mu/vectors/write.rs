@@ -42,7 +42,7 @@ impl Write for Vector {
                     }
 
                     Ok(())
-                },
+                }
                 DirectType::ByteVec => {
                     StreamWriter::write_str(env, "#(:byte", stream)?;
 

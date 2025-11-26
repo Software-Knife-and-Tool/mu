@@ -25,7 +25,7 @@
                       (core:read stream () core:%eof%))))
               ()))
            (mu:open :file :input path :t))
-          (mu:raise-from path 'core:load :type))
+          (mu:raise path 'core:load :type))
      :t))
 
 ;;;
@@ -45,14 +45,14 @@
      (:if (core:streamp stream)
           ((:lambda (form)
              (:if (mu:eq form core:%read-list-eol%)
-                  (mu:raise-from stream 'core:read :syntax)
+                  (mu:raise stream 'core:read :syntax)
                   (:if (mu:eq core:%eof% form)
                        (:if eof-error
-                            (mu:raise-from stream 'core:read :eof)
+                            (mu:raise stream 'core:read :eof)
                             eof-value)
                        form)))
            (core:%read stream))
-          (mu:raise-from stream 'core:read :type))))
+          (mu:raise stream 'core:read :type))))
 
 (mu:intern core "write"
    (:lambda (form escape stream)
@@ -69,4 +69,4 @@
                             (mu:symbol-name form))
                          (mu:write form escape stream))
                (mu:write form escape stream)))
-          (mu:raise-from stream 'core:write :type))))
+          (mu:raise stream 'core:write :type))))

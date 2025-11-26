@@ -34,9 +34,9 @@
           ((:lambda (module-def)
              (:if module-def
                (mu:cdr (core:%assq :version module-def))
-               (mu:raise-from module 'module:module-version :range)))
+               (mu:raise module 'module:module-version :range)))
            (mu:symbol-value (mu:find module:modules/ module)))
-     (mu:raise-from module 'module:module-version :type))))
+     (mu:raise module 'module:module-version :type))))
 
 (mu:intern module "module-namespace"
    (:lambda (module)
@@ -44,9 +44,9 @@
           ((:lambda (module-def)
              (:if module-def
                   (mu:cdr (core:%assq :ns module-def))
-                  (mu:raise-from module 'module:module-namespace :range)))
+                  (mu:raise module 'module:module-namespace :range)))
            (mu:symbol-value (mu:find module:modules/ module)))
-     (mu:raise-from module 'module:module-namespace :type))))
+     (mu:raise module 'module:module-namespace :type))))
 
 ;;;
 ;;; utilities
@@ -70,7 +70,7 @@
                            (mu:read stream () core:%eof%))))
                    ()))
                 (mu:open :file :input path :t)))
-          (mu:raise-from path 'module:%load-module-file :type))
+          (mu:raise path 'module:%load-module-file :type))
      :t))
 
 (mu:intern module "%load-module-def"
@@ -91,7 +91,7 @@
                       (mu:read stream () core:%eof%))))
               ()))
            (mu:open :file :input path :t))
-          (mu:raise-from path 'module:%load-module-def :type))
+          (mu:raise path 'module:%load-module-def :type))
      (mu:symbol-value (mu:find module:modules/ module))))
 
 ;;;
@@ -102,8 +102,8 @@
      (:if (core:stringp module)
           (:if (core:listp property-list)
               (mu:intern core:modules/ module property-list)
-              (mu:raise-from property-list 'core:provide :type))
-          (mu:raise-from module 'module:provide :type))))
+              (mu:raise property-list 'core:provide :type))
+          (mu:raise module 'module:provide :type))))
 
 (mu:intern module "require"
    (:lambda (module)
@@ -130,11 +130,11 @@
                         (mu:cdr (core:%assq :require module-def))
                         (mu:cdr (core:%assq :load module-def))
                         (mu:cdr (core:%assq :ns module-def)))
-                       (mu:raise-from module 'core:require :open)))
+                       (mu:raise module 'core:require :open)))
                   (core:%load-module-def
                    (core:%string-concat `("/opt/mu/modules/" ,module "/mod.def"))
                    module)))
-          (mu:raise-from module 'module:require :type))))
+          (mu:raise module 'module:require :type))))
 
 (mu:intern module "%require"
    (:lambda (module base)
@@ -161,8 +161,8 @@
                         (mu:cdr (core:%assq :require module-def))
                         (mu:cdr (core:%assq :load module-def))
                         (mu:cdr (core:%assq :ns module-def)))
-                       (mu:raise-from module 'core:require :open)))
+                       (mu:raise module 'core:require :open)))
                   (core:%load-module-def
                    (core:%string-concat `(,base "/" ,module "/mod.def"))
                    module)))
-          (mu:raise-from module 'core:%require :type))))
+          (mu:raise module 'core:%require :type))))

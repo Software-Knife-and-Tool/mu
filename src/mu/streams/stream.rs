@@ -104,7 +104,7 @@ impl SystemStream {
                 DirectType::Ext,
             ))
         } else {
-            Err(Exception::new(env, Condition::Open, "mu:open", Tag::nil()))
+            Err(Exception::err(env, Tag::nil(), Condition::Open, "mu:open"))
         }
     }
 
@@ -160,7 +160,7 @@ impl SystemStream {
                 DirectType::Ext,
             ))
         } else {
-            Err(Exception::new(env, Condition::Open, "env:open", Tag::nil()))?
+            Err(Exception::err(env, Tag::nil(), Condition::Open, "env:open"))?
         }
     }
 

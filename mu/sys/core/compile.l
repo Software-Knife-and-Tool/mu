@@ -15,7 +15,7 @@
 (mu:intern core "%special-lambda"
    (:lambda (form env)
      (:if (mu:eq 0 (mu:length form))
-          (mu:raise-from form 'core:%special-lambda :syntax)
+          (mu:raise form 'core:%special-lambda :syntax)
           (core:%compile-closure (mu:nth 1 form) (mu:nthcdr 2 form) env))))
 
 ;;;
@@ -24,11 +24,11 @@
 (mu:intern core "%special-macro"
    (:lambda (form env)
      (:if (mu:eq 1 (mu:length form))
-          (mu:raise-from form 'core:%compile-macro-call :syntax)
+          (mu:raise form 'core:%compile-macro-call :syntax)
           ((:lambda (symbol)
              (:if (core:symbolp symbol)
                   (core:%defmacro symbol (core:%compile-closure (mu:nth 2 form) (mu:nthcdr 3 form) env))
-                  (mu:raise-from symbol 'core:%special-macro :type))
+                  (mu:raise symbol 'core:%special-macro :type))
              (mu:cons :quote symbol))
            (mu:nth 1 form)))))
 
@@ -49,7 +49,7 @@
               (:if (mu:eq 3 length)
                    core:%nilf
                    (mu:compile `(:lambda () ,(core:%compile (mu:nth 3 form) env)))))
-        (mu:raise-from form 'core:%special-if :arity)))
+        (mu:raise form 'core:%special-if :arity)))
       (mu:length form))))
 
 ;;;
@@ -207,7 +207,7 @@
                                    ,(core:%compile-lambda-arg-list func arg-list env))
                                  `(mu:apply ,func ,(core:%compile-arg-list arg-list env)))
                             `(mu:apply ,func ,(core:%compile-arg-list arg-list env)))
-                       (mu:raise-from func 'core:%compile-funcall :type)))
+                       (mu:raise func 'core:%compile-funcall :type)))
                 (core:%compile function-form env))
                (:if (mu:boundp function-form)
                     ((:lambda (func)
@@ -220,9 +220,9 @@
                                         ,(core:%closure-prop :mu func)
                                         ,(core:%compile-lambda-arg-list func arg-list env))
                                       `(mu:apply ,func ,(core:%compile-arg-list arg-list env)))
-                                 (mu:raise-from func 'core:%compile-funcall :type))))
+                                 (mu:raise func 'core:%compile-funcall :type))))
                      (mu:symbol-value function-form))
-                    (mu:raise-from function-form 'core:%compile-funcall :unbound))))))
+                    (mu:raise function-form 'core:%compile-funcall :unbound))))))
 
 (mu:intern core "%compile"
    (:lambda (form env)
@@ -250,7 +250,7 @@
                                  (%lambda   . core:%special-lambda)))))
                             (:if (core:consp function-form)
                                  (core:%compile-funcall function-form arg-list env)
-                                 (mu:raise-from form 'core:%compile :syntax)))))
+                                 (mu:raise form 'core:%compile :syntax)))))
                 (mu:car form)
                 (mu:cdr form))
                form))))

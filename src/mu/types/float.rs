@@ -75,7 +75,7 @@ impl CoreFn for Float {
 
         let sum = Self::as_f32(env, fl0).add(Self::as_f32(env, fl1));
         fp.value = if sum.is_nan() {
-            Err(Exception::new(env, Condition::Over, "mu:fl-add", fl1))?
+            Err(Exception::err(env, fl1, Condition::Over, "mu:fl-add"))?
         } else {
             sum.into()
         };
@@ -91,7 +91,7 @@ impl CoreFn for Float {
 
         let diff = Self::as_f32(env, fl0).sub(Self::as_f32(env, fl1));
         fp.value = if diff.is_nan() {
-            Err(Exception::new(env, Condition::Under, "mu:fl-sub", fl1))?
+            Err(Exception::err(env, fl1, Condition::Under, "mu:fl-sub"))?
         } else {
             diff.into()
         };
@@ -108,7 +108,7 @@ impl CoreFn for Float {
         let prod = Self::as_f32(env, fl0).mul(Self::as_f32(env, fl1));
 
         fp.value = if prod.is_nan() {
-            Err(Exception::new(env, Condition::Over, "mu:fl-mul", fl1))?
+            Err(Exception::err(env, fl1, Condition::Over, "mu:fl-mul"))?
         } else {
             prod.into()
         };
@@ -123,12 +123,12 @@ impl CoreFn for Float {
         let fl1 = fp.argv[1];
 
         if Self::as_f32(env, fl1) == 0.0 {
-            Err(Exception::new(env, Condition::ZeroDivide, "fl-div", fl1))?;
+            Err(Exception::err(env, fl1, Condition::ZeroDivide, "fl-div"))?;
         }
 
         let div = Self::as_f32(env, fl0).div(Self::as_f32(env, fl1));
         fp.value = if div.is_nan() {
-            Err(Exception::new(env, Condition::Under, "mu:fl-div", fl1))?
+            Err(Exception::err(env, fl1, Condition::Under, "mu:fl-div"))?
         } else {
             div.into()
         };

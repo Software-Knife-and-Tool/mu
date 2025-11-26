@@ -114,7 +114,7 @@ impl Frame {
         let nargs = self.argv.len();
 
         if nargs != nreqs {
-            Err(Exception::new(env, Condition::Arity, "mu:apply", func))?;
+            Err(Exception::err(env, func, Condition::Arity, "mu:apply"))?;
         }
 
         match func.type_of() {
@@ -124,7 +124,7 @@ impl Frame {
 
                     self.apply(env, value)
                 } else {
-                    Err(Exception::new(env, Condition::Unbound, "mu:apply", func))?
+                    Err(Exception::err(env, func, Condition::Unbound, "mu:apply"))?
                 }
             }
             Type::Async => {
@@ -185,7 +185,7 @@ impl Frame {
                     _ => panic!(),
                 }
             }
-            _ => Err(Exception::new(env, Condition::Type, "mu:apply", func))?,
+            _ => Err(Exception::err(env, func, Condition::Type, "mu:apply"))?,
         }
     }
 }
@@ -238,11 +238,11 @@ impl CoreFn for Frame {
 
         let (func, av) = Cons::destruct(env, fp.argv[0]);
         if func.type_of() != Type::Function {
-            return Err(Exception::new(env, Condition::Type, "mu:%frame-push", func));
+            return Err(Exception::err(env, func, Condition::Type, "mu:%frame-push"));
         }
 
         if av.type_of() != Type::Vector {
-            return Err(Exception::new(env, Condition::Type, "mu:%frame-push", av));
+            return Err(Exception::err(env, av, Condition::Type, "mu:%frame-push"));
         }
 
         let argv = Vector::iter(env, av).collect::<Vec<Tag>>();

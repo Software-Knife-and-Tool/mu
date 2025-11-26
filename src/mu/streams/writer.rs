@@ -36,11 +36,11 @@ impl StreamWriter {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            Err(Exception::new(
+            Err(Exception::err(
                 env,
+                stream_tag,
                 Condition::Open,
                 "mu:write-char",
-                stream_tag,
             ))?;
         }
 
@@ -54,11 +54,11 @@ impl StreamWriter {
                     drop(core_streams_ref);
                     drop(stream);
 
-                    return Err(Exception::new(
+                    return Err(Exception::err(
                         env,
+                        stream_tag,
                         Condition::Type,
                         "mu:write-char",
-                        stream_tag,
                     ));
                 }
 
@@ -72,11 +72,11 @@ impl StreamWriter {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            Err(Exception::new(
+            Err(Exception::err(
                 env,
+                stream_tag,
                 Condition::Open,
                 "mu:write-byte",
-                stream_tag,
             ))?;
         }
 
@@ -90,11 +90,11 @@ impl StreamWriter {
                     drop(core_streams_ref);
                     drop(stream);
 
-                    return Err(Exception::new(
+                    return Err(Exception::err(
                         env,
+                        stream_tag,
                         Condition::Type,
                         "mu:write-byte",
-                        stream_tag,
                     ));
                 }
 

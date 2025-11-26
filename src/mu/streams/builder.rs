@@ -105,7 +105,7 @@ impl StreamBuilder {
                         None => match self.bidir {
                             Some(_) => SystemStream::open_bidir_string(env, contents),
                             None => {
-                                Err(Exception::new(env, Condition::Range, "mu:open", Tag::nil()))?
+                                Err(Exception::err(env, Tag::nil(), Condition::Range, "mu:open"))?
                             }
                         },
                     },
@@ -117,7 +117,7 @@ impl StreamBuilder {
                         None => match self.errout {
                             Some(()) => SystemStream::open_std_stream(SystemStream::StdError, core),
                             None => {
-                                Err(Exception::new(env, Condition::Range, "mu:open", Tag::nil()))?
+                                Err(Exception::err(env, Tag::nil(), Condition::Range, "mu:open"))?
                             }
                         },
                     },

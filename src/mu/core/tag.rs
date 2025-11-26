@@ -193,7 +193,7 @@ impl CoreFn for Tag {
 
             fp.value = (&u64_.to_le_bytes()).into();
         } else {
-            Err(Exception::new(env, Condition::Type, "mu:unrepr", arg))?;
+            Err(Exception::err(env, arg, Condition::Type, "mu:unrepr"))?;
         }
 
         Ok(())
@@ -228,7 +228,7 @@ impl CoreFn for Tag {
             Type::Struct => Struct::view(env, tag),
             Type::Vector => Vector::view(env, tag),
             Type::Symbol | Type::Null | Type::Keyword => Symbol::view(env, tag),
-            _ => Err(Exception::new(env, Condition::Type, "mu:view", tag))?,
+            _ => Err(Exception::err(env, tag, Condition::Type, "mu:view"))?,
         };
 
         Ok(())
