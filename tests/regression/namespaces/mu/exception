@@ -1,4 +1,4 @@
-(mu:with-exception (:lambda (obj cond src) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:raise () :except)))	:except:except
-(mu:with-exception (:lambda (obj cond src) (mu:write obj () mu:*standard-output*)) (:lambda () (mu:raise 1 :except)))	11
+(mu:with-exception (:lambda (obj cond src) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:raise () 'mu:test :type)))	:type:type
+(mu:with-exception (:lambda (obj cond src) (mu:write obj () mu:*standard-output*)) (:lambda () (mu:raise 1 'mu:test :type)))	11
 (mu:with-exception (:lambda (obj cond src) (mu:write cond () mu:*standard-output*)) (:lambda () (mu:div 1 0)))	:div0:div0
 (mu:with-exception (:lambda (obj cond src) (mu:write obj () mu:*standard-output*)) (:lambda () 1))	1

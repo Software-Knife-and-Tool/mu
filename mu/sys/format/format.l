@@ -44,7 +44,7 @@
                                       (mu:vector-length hexstr)))
                                    (mu:get-string str-stream)))
                                 (mu:open :string :output "" :t)))
-                          (mu:raise-from fx 'format:%format :type)))
+                          (mu:raise fx 'format:%format :type)))
                    (mu:car arg-list))))
       ,(mu:cons #\D
                 (:lambda (dest arg-list)
@@ -52,7 +52,7 @@
                        ((:lambda ()
                         (mu:write (mu:car arg-list) () dest)
                         (mu:cdr arg-list)))
-                       (mu:raise-from (mu:car arg-list) 'format:%format :type))))
+                       (mu:raise (mu:car arg-list) 'format:%format :type))))
       ,(mu:cons #\T
                 (:lambda (dest arg-list)
                   (mu:write-char #\tab dest)
@@ -74,7 +74,7 @@
     ((:lambda (fn)
        (:if fn
             (mu:apply fn (mu:cons dest (mu:cons arg-list ())))
-            (mu:raise-from dir 'format:%format :range)))
+            (mu:raise dir 'format:%format :range)))
      (mu:cdr
       (mu:car
        (mu:fix
@@ -131,6 +131,6 @@
                                mu:*standard-output*
                                (:if (mu:eq :stream (mu:type-of stream))
                                     stream
-                                    (mu:raise-from stream 'format:%format :type))))))
-               (mu:raise-from arg-list 'format:%format :type))
-          (mu:raise-from format-string 'format:%format :type))))
+                                    (mu:raise stream 'format:%format :type))))))
+               (mu:raise arg-list 'format:%format :type))
+          (mu:raise format-string 'format:%format :type))))

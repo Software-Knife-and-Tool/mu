@@ -70,7 +70,7 @@ impl CoreFn for Feature {
         });
 
         let argv: Vec<String> = match type_check {
-            Some(arg) => Err(Exception::new(env, Condition::Type, "system:shell", arg))?,
+            Some(arg) => Err(Exception::err(env, arg, Condition::Type, "system:shell"))?,
             None => Cons::list_iter(env, arg_list)
                 .map(|arg| Vector::as_string(env, arg))
                 .collect(),
@@ -82,11 +82,11 @@ impl CoreFn for Feature {
 
         fp.value = match status {
             Err(_) => {
-                return Err(Exception::new(
+                return Err(Exception::err(
                     env,
+                    command,
                     Condition::Open,
                     "system:shell",
-                    command,
                 ))
             }
             Ok(exit_status) => {
@@ -123,11 +123,11 @@ impl CoreFn for Feature {
     fn system_uname(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match nix::sys::utsname::uname() {
             Err(_) => {
-                return Err(Exception::new(
+                return Err(Exception::err(
                     env,
+                    Tag::nil(),
                     Condition::Type,
                     "system:uname",
-                    Tag::nil(),
                 ))
             }
             Ok(info) => {
@@ -172,11 +172,11 @@ impl CoreFn for Feature {
     #[cfg(not(target_os = "macos"))]
     fn system_sysinfo(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match sysinfo_dot_h::try_collect() {
-            Err(_) => Err(Exception::new(
+            Err(_) => Err(Exception::err(
                 env,
+                Tag::nil(),
                 Condition::Type,
                 "sysinfo:sysinfo",
-                Tag::nil(),
             ))?,
             Ok(sysinfo) => {
                 #[allow(clippy::cast_precision_loss)]

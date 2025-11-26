@@ -165,11 +165,11 @@ impl Struct {
                 let vec_list = match Cons::read(env, stream) {
                     Ok(list) => {
                         if list.null_() {
-                            Err(Exception::new(env, Condition::Type, "mu:read", Tag::nil()))?;
+                            Err(Exception::err(env, Tag::nil(), Condition::Type, "mu:read"))?;
                         }
                         list
                     }
-                    Err(_) => Err(Exception::new(env, Condition::Syntax, "mu:read", stream))?,
+                    Err(_) => Err(Exception::err(env, stream, Condition::Syntax, "mu:read"))?,
                 };
 
                 let (stype, vec) = Cons::destruct(env, vec_list);
@@ -179,10 +179,10 @@ impl Struct {
                         stype,
                         Cons::list_iter(env, vec).collect::<Vec<Tag>>(),
                     )),
-                    _ => Err(Exception::new(env, Condition::Type, "mu:read", stype))?,
+                    _ => Err(Exception::err(env, stype, Condition::Type, "mu:read"))?,
                 }
             }
-            _ => Err(Exception::new(env, Condition::Eof, "mu:read", stream))?,
+            _ => Err(Exception::err(env, stream, Condition::Eof, "mu:read"))?,
         }
     }
 

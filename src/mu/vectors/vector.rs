@@ -149,7 +149,7 @@ impl CoreFn for Vector {
                             if ch.type_of() == Type::Char {
                                 Ok(Char::as_char(env, ch))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", ch))?
+                                Err(Exception::err(env, ch, Condition::Type, "mu:make-vector"))?
                             }
                         })
                         .collect();
@@ -166,10 +166,10 @@ impl CoreFn for Vector {
                             if (0..1).contains(&bit) {
                                 bvec[i / 8] |= u8::try_from(bit).unwrap() << (7 - i % 8);
                             } else {
-                                Err(Exception::new(env, Condition::Range, "mu:make-vector", fx))?;
+                                Err(Exception::err(env, fx, Condition::Range, "mu:make-vector"))?;
                             }
                         } else {
-                            Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))?;
+                            Err(Exception::err(env, fx, Condition::Type, "mu:make-vector"))?;
                         }
                     }
 
@@ -183,15 +183,15 @@ impl CoreFn for Vector {
                                 if (0..=255).contains(&byte) {
                                     Ok(u8::try_from(byte).unwrap())
                                 } else {
-                                    Err(Exception::new(
+                                    Err(Exception::err(
                                         env,
+                                        fx,
                                         Condition::Range,
                                         "mu:make-vector",
-                                        fx,
                                     ))?
                                 }
                             } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))
+                                Err(Exception::err(env, fx, Condition::Type, "mu:make-vector"))
                             }
                         })
                         .collect();
@@ -204,7 +204,7 @@ impl CoreFn for Vector {
                             if fx.type_of() == Type::Fixnum {
                                 Ok(Fixnum::as_i64(fx))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fx))?
+                                Err(Exception::err(env, fx, Condition::Type, "mu:make-vector"))?
                             }
                         })
                         .collect();
@@ -217,25 +217,25 @@ impl CoreFn for Vector {
                             if fl.type_of() == Type::Float {
                                 Ok(Float::as_f32(env, fl))
                             } else {
-                                Err(Exception::new(env, Condition::Type, "mu:make-vector", fl))?
+                                Err(Exception::err(env, fl, Condition::Type, "mu:make-vector"))?
                             }
                         })
                         .collect();
 
                     Vector::from(vec?).with_heap(env)
                 }
-                _ => Err(Exception::new(
+                _ => Err(Exception::err(
                     env,
+                    type_sym,
                     Condition::Type,
                     "mu:make-vector",
-                    type_sym,
                 ))?,
             },
-            None => Err(Exception::new(
+            None => Err(Exception::err(
                 env,
+                type_sym,
                 Condition::Type,
                 "mu:make-vector",
-                type_sym,
             ))?,
         };
 
@@ -251,7 +251,7 @@ impl CoreFn for Vector {
         let nth = Fixnum::as_i64(index);
 
         if nth < 0 || usize::try_from(nth).unwrap() >= Self::length(env, vector) {
-            Err(Exception::new(env, Condition::Range, "mu:svref", index))?;
+            Err(Exception::err(env, index, Condition::Range, "mu:svref"))?;
         }
 
         fp.value = Self::ref_(env, vector, usize::try_from(nth).unwrap()).unwrap();

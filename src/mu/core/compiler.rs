@@ -96,7 +96,7 @@ impl Compiler {
 
     fn compile_if(env: &Env, args: Tag, lex_env: &mut LexEnv) -> exception::Result<Tag> {
         if Cons::length(env, args) != Some(3) {
-            Err(Exception::new(env, Condition::Syntax, ":if", args))?;
+            Err(Exception::err(env, args, Condition::Syntax, ":if"))?;
         }
 
         let if_vec = vec![
@@ -155,7 +155,7 @@ impl Compiler {
             .find(|spec| name.eq_(&spec.0))
         {
             Some(spec) => spec.1(env, args, lex_env),
-            None => Err(Exception::new(env, Condition::Syntax, "mu:compile", args))?,
+            None => Err(Exception::err(env, args, Condition::Syntax, "mu:compile"))?,
         }
     }
 
@@ -163,7 +163,7 @@ impl Compiler {
         let frame_symbols = |lambda: Tag| -> exception::Result<Vec<Tag>> {
             Cons::list_iter(env, lambda).try_fold(Tag::nil(), |_, symbol| {
                 if symbol.type_of() != Type::Symbol {
-                    Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?;
+                    Err(Exception::err(env, symbol, Condition::Type, "mu:compile"))?;
                 }
                 Ok(Tag::nil())
             })?;
@@ -172,7 +172,7 @@ impl Compiler {
 
             for symbol in Cons::list_iter(env, lambda) {
                 match symvec.iter().rev().position(|lex| symbol.eq_(lex)) {
-                    Some(_) => Err(Exception::new(env, Condition::Syntax, "mu:compile", symbol))?,
+                    Some(_) => Err(Exception::err(env, symbol, Condition::Syntax, "mu:compile"))?,
                     _ => symvec.push(symbol),
                 }
             }
@@ -186,10 +186,10 @@ impl Compiler {
 
                 match cons.0.type_of() {
                     Type::Null | Type::Cons => cons,
-                    _ => Err(Exception::new(env, Condition::Type, "mu:compile", form))?,
+                    _ => Err(Exception::err(env, form, Condition::Type, "mu:compile"))?,
                 }
             }
-            _ => Err(Exception::new(env, Condition::Syntax, "mu:compile", form))?,
+            _ => Err(Exception::err(env, form, Condition::Syntax, "mu:compile"))?,
         };
 
         Ok((lambda, body, frame_symbols(lambda)?))
@@ -233,7 +233,7 @@ impl Compiler {
 
                     Ok(sym_ref)
                 }
-                None => Err(Exception::new(env, Condition::Type, "mu:compile", symbol))?,
+                None => Err(Exception::err(env, symbol, Condition::Type, "mu:compile"))?,
             }
         } else {
             Ok(symbol)
@@ -256,7 +256,7 @@ impl Compiler {
 
                             match fn_.type_of() {
                                 Type::Function => Ok(Cons::cons(env, fn_, args)),
-                                _ => Err(Exception::new(env, Condition::Type, "mu:compile", func)),
+                                _ => Err(Exception::err(env, func, Condition::Type, "mu:compile")),
                             }
                         } else {
                             Ok(Cons::cons(env, func, args))
@@ -269,10 +269,10 @@ impl Compiler {
 
                         match fn_.type_of() {
                             Type::Function => Ok(Cons::cons(env, fn_, arglist)),
-                            _ => Err(Exception::new(env, Condition::Type, "mu:compile", func)),
+                            _ => Err(Exception::err(env, func, Condition::Type, "mu:compile")),
                         }
                     }
-                    _ => Err(Exception::new(env, Condition::Type, "mu:compile", func)),
+                    _ => Err(Exception::err(env, func, Condition::Type, "mu:compile")),
                 }
             }
             _ => Ok(expr),

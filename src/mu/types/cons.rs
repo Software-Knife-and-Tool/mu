@@ -313,7 +313,7 @@ impl Cons {
                     if EOL.eq_(&eol) {
                         Ok(cdr)
                     } else {
-                        Err(Exception::new(env, Condition::Eof, "mu:read", stream))?
+                        Err(Exception::err(env, stream, Condition::Eof, "mu:read"))?
                     }
                 }
             }
@@ -444,7 +444,7 @@ impl CoreFn for Cons {
                                 appended.push(car);
                             }
                         }
-                        _ => Err(Exception::new(env, Condition::Type, "mu:append", list))?,
+                        _ => Err(Exception::err(env, list, Condition::Type, "mu:append"))?,
                     }
                 }
             }
@@ -496,7 +496,7 @@ impl CoreFn for Cons {
             Type::Null => Fixnum::with_or_panic(0),
             Type::Cons => match Cons::length(env, list) {
                 Some(len) => Fixnum::with_or_panic(len),
-                None => return Err(Exception::new(env, Condition::Type, "mu:length", list)),
+                None => return Err(Exception::err(env, list, Condition::Type, "mu:length")),
             },
             _ => panic!(),
         };
@@ -511,7 +511,7 @@ impl CoreFn for Cons {
         let list = fp.argv[1];
 
         if Fixnum::as_i64(nth) < 0 {
-            Err(Exception::new(env, Condition::Type, "mu:nth", nth))?;
+            Err(Exception::err(env, nth, Condition::Type, "mu:nth"))?;
         }
 
         fp.value = match list.type_of() {
@@ -519,7 +519,7 @@ impl CoreFn for Cons {
             Type::Cons => match Self::nth(env, usize::try_from(Fixnum::as_i64(nth)).unwrap(), list)
             {
                 Some(tag) => tag,
-                None => Err(Exception::new(env, Condition::Type, "mu:nth", list))?,
+                None => Err(Exception::err(env, list, Condition::Type, "mu:nth"))?,
             },
             _ => panic!(),
         };
@@ -534,7 +534,7 @@ impl CoreFn for Cons {
         let list = fp.argv[1];
 
         if Fixnum::as_i64(nth) < 0 {
-            return Err(Exception::new(env, Condition::Type, "mu:nthcdr", nth))?;
+            return Err(Exception::err(env, nth, Condition::Type, "mu:nthcdr"))?;
         }
 
         fp.value = match list.type_of() {
@@ -542,7 +542,7 @@ impl CoreFn for Cons {
             Type::Cons => {
                 match Self::nthcdr(env, usize::try_from(Fixnum::as_i64(nth)).unwrap(), list) {
                     Some(tag) => tag,
-                    None => Err(Exception::new(env, Condition::Type, "mu:nthcdr", list))?,
+                    None => Err(Exception::err(env, list, Condition::Type, "mu:nthcdr"))?,
                 }
             }
             _ => panic!(),

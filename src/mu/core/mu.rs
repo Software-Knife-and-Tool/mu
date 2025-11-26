@@ -112,11 +112,11 @@ impl Mu {
         )
     }
 
-    pub fn err_(env: Env, cond: Condition, reason: &str, obj: Tag) -> exception::Result<bool> {
+    pub fn err_(env: Env, cond: Condition, source: &str, obj: Tag) -> exception::Result<bool> {
         let envs_ref = block_on(CORE.envs.read());
         let env_: &env::Env = &envs_ref[&env.as_u64()];
 
-        Err(Exception::new(env_, cond, reason, obj))
+        Err(Exception::err(env_, obj, cond, source))
     }
 }
 

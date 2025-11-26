@@ -23,9 +23,9 @@
           ((:lambda (symbol)
              (:if (core:null symbol)
                   (mu:intern core:%types/ name (mu:make-struct :<type> (core:%list2 name properties)))
-                  (mu:raise-from symbol 'core:%deftype :unbound)))
+                  (mu:raise symbol 'core:%deftype :unbound)))
            (mu:find core:%types/ name))
-          (mu:raise-from properties 'core:%deftype :type))))
+          (mu:raise properties 'core:%deftype :type))))
 
 (mu:intern core "%type-predicate"
    (:lambda (type value)
@@ -60,7 +60,7 @@
                         ((:lambda (type value)
                            (:if (core:%type-predicate type value)
                                 property-def
-                                (mu:raise-from property-value 'core:%make-type :type)))
+                                (mu:raise property-value 'core:%make-type :type)))
                          (mu:cdr property-def)
                          (mu:cdr property-value))
                         ()))
@@ -75,7 +75,7 @@
            (:if (core:keywordp prop-name)
                 (core:assq prop-name (mu:svref (mu:struct-vec struct) 1))
                 (mu:%raise struct 'core:%type-prop :type))
-           (mu:raise-from prop-name 'core:%type-prop :range))))
+           (mu:raise prop-name 'core:%type-prop :range))))
 
 ;;;
 ;;; deftype deftype

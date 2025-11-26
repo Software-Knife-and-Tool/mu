@@ -159,7 +159,7 @@ impl CoreFn for Feature {
         let (stype, svec) = Struct::destruct(env, ns);
 
         if !stype.eq_(&Symbol::keyword("ns")) {
-            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?;
+            Err(Exception::err(env, ns, Condition::Type, "mu:intern"))?;
         }
 
         let name = Vector::as_string(env, Vector::ref_(env, svec, 0).unwrap());

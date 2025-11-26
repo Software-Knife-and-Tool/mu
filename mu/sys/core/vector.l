@@ -56,21 +56,21 @@
    (:lambda (list)
      (:if (core:listp list)
           (mu:make-vector (core:%specialized-vector-type list) list)
-          (mu:raise-from list 'core:make-vector :type))))
+          (mu:raise list 'core:make-vector :type))))
 
 (mu:intern core "vector-slice"
    (:lambda (vector start length)
      (:if (core:vectorp vector)
           (:if (core:fixnump start)
                (:if (core:%or (core:minusp start) (mu:less-than (core:vector-length vector) start))
-                    (mu:raise-from start 'core:vector-slice :range)
+                    (mu:raise start 'core:vector-slice :range)
                     (:if (core:fixnump length)
                          (:if (core:%or (core:minusp length) (mu:less-than (core:vector-length vector) length))
-                              (mu:raise-from length 'core:vector-slice :range)
+                              (mu:raise length 'core:vector-slice :range)
                               (core:%make-vector vector (mu:cons start length) ()))
-                         (mu:raise-from start 'core:vector-slice :type)))
-               (mu:raise-from length 'core:vector-slice :type))
-          (mu:raise-from vector 'core:vector-slice :type))))
+                         (mu:raise start 'core:vector-slice :type)))
+               (mu:raise length 'core:vector-slice :type))
+          (mu:raise vector 'core:vector-slice :type))))
 
 (mu:intern core "vector-length"
    (:lambda (vector)
@@ -80,7 +80,7 @@
                (:if (mu:eq :vector (mu:type-of vector))
                     (mu:vector-length vector)
                     (mu:cdr (core:%vector-prop :disp vector))))
-          (mu:raise-from vector 'core:vector-length :type))))
+          (mu:raise vector 'core:vector-length :type))))
 
 (mu:intern core "vector-type"
    (:lambda (vector)
@@ -90,14 +90,14 @@
                (:if (mu:eq :vector (mu:type-of vector))
                     (mu:vector-type vector)
                     (mu:vector-type (core:%vector-prop :base vector))))
-          (mu:raise-from vector 'core:vector-type :type))))
+          (mu:raise vector 'core:vector-type :type))))
 
 (mu:intern core "vector-ref"
    (:lambda (vector nth)
      (:if (core:vectorp vector)
           (:if (core:fixnump nth)
                (:if (core:%or (core:minusp nth) (mu:less-than (core:vector-length vector) nth))
-                    (mu:raise-from nth 'core:vector-ref :range)
+                    (mu:raise nth 'core:vector-ref :range)
                     (:if (core:bit-vector-p vector)
                          ((:lambda (nth-byte offset)
                             ((:lambda (byte)
@@ -113,8 +113,8 @@
                                  (mu:svref base (mu:add start nth)))
                                (core:%vector-prop :base vector)
                                (mu:car (core:%vector-prop :disp vector))))))
-                    (mu:raise-from nth 'core:vector-ref :type))
-          (mu:raise-from vector 'core:vector-ref :type))))
+                    (mu:raise nth 'core:vector-ref :type))
+          (mu:raise vector 'core:vector-ref :type))))
 
 ;;;
 ;;; write

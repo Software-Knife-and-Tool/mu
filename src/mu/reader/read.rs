@@ -89,7 +89,7 @@ impl Reader for Env {
                         break;
                     }
                 }
-                None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
+                None => Err(Exception::err(self, stream, Condition::Eof, "mu:read"))?,
             }
         }
 
@@ -113,11 +113,11 @@ impl Reader for Env {
                                     break;
                                 }
                             }
-                            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
+                            None => Err(Exception::err(self, stream, Condition::Eof, "mu:read"))?,
                         }
                     }
                 }
-                None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
+                None => Err(Exception::err(self, stream, Condition::Eof, "mu:read"))?,
             }
         }
 
@@ -140,9 +140,9 @@ impl Reader for Env {
                         StreamReader::unread_char(self, stream, ch).unwrap();
                         break;
                     }
-                    _ => Err(Exception::new(self, Condition::Range, "mu:read", stream))?,
+                    _ => Err(Exception::err(self, stream, Condition::Range, "mu:read"))?,
                 },
-                None => Err(Exception::new(self, Condition::Range, "mu:read", stream))?,
+                None => Err(Exception::err(self, stream, Condition::Range, "mu:read"))?,
             }
         }
 
@@ -168,9 +168,9 @@ impl Reader for Env {
                         StreamReader::unread_char(self, stream, ch).unwrap();
                         break;
                     }
-                    _ => Err(Exception::new(self, Condition::Range, "mu:read", ch.into()))?,
+                    _ => Err(Exception::err(self, ch.into(), Condition::Range, "mu:read"))?,
                 },
-                None => Err(Exception::new(self, Condition::Range, "mu:read", ch.into()))?,
+                None => Err(Exception::err(self, ch.into(), Condition::Range, "mu:read"))?,
             }
         }
 
@@ -179,11 +179,11 @@ impl Reader for Env {
                 if Fixnum::is_i56(fx) {
                     Ok(Fixnum::with_i64_or_panic(fx))
                 } else {
-                    Err(Exception::new(
+                    Err(Exception::err(
                         self,
+                        Vector::from(token).with_heap(self),
                         Condition::Over,
                         "mu:read",
-                        Vector::from(token).with_heap(self),
                     ))?
                 }
             }
@@ -216,16 +216,16 @@ impl Reader for Env {
                                         "space" => Ok(Some(' '.into())),
                                         "page" => Ok(Some('\x0c'.into())),
                                         "return" => Ok(Some('\r'.into())),
-                                        _ => Err(Exception::new(
+                                        _ => Err(Exception::err(
                                             self,
+                                            Vector::from(phrase).with_heap(self),
                                             Condition::Type,
                                             "mu:read",
-                                            Vector::from(phrase).with_heap(self),
                                         ))?,
                                     }
                                 }
                                 None => {
-                                    Err(Exception::new(self, Condition::Eof, "mu:read", stream))?
+                                    Err(Exception::err(self, stream, Condition::Eof, "mu:read"))?
                                 }
                             }
                         }
@@ -234,11 +234,11 @@ impl Reader for Env {
                             Ok(Some(ch.into()))
                         }
                     },
-                    None => Err(Exception::new(self, Condition::Syntax, "mu:read", stream))?,
+                    None => Err(Exception::err(self, stream, Condition::Syntax, "mu:read"))?,
                 },
                 None => Ok(Some(ch.into())),
             },
-            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
+            None => Err(Exception::err(self, stream, Condition::Eof, "mu:read"))?,
         }
     }
 
@@ -259,11 +259,11 @@ impl Reader for Env {
                                 let (namespace, name, value) = Symbol::destruct(self, atom);
 
                                 if namespace.null_() {
-                                    Err(Exception::new(
+                                    Err(Exception::err(
                                         self,
+                                        namespace,
                                         Condition::Type,
                                         "mu:read",
-                                        namespace,
                                     ))?;
                                 }
 
@@ -276,10 +276,10 @@ impl Reader for Env {
 
                                 Ok(Some(symbol))
                             }
-                            _ => Err(Exception::new(self, Condition::Type, "mu:read", atom))?,
+                            _ => Err(Exception::err(self, atom, Condition::Type, "mu:read"))?,
                         }
                     }
-                    None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
+                    None => Err(Exception::err(self, stream, Condition::Eof, "mu:read"))?,
                 },
                 '.' => Ok(Some(self.eval(self.read(
                     stream,
@@ -304,32 +304,32 @@ impl Reader for Env {
                                 if Fixnum::is_i56(fx) {
                                     Ok(Some(Fixnum::with_i64_or_panic(fx)))
                                 } else {
-                                    Err(Exception::new(
+                                    Err(Exception::err(
                                         self,
+                                        Vector::from(hex).with_heap(self),
                                         Condition::Over,
                                         "mu:read",
-                                        Vector::from(hex).with_heap(self),
                                     ))?
                                 }
                             }
-                            Err(_) => Err(Exception::new(
+                            Err(_) => Err(Exception::err(
                                 self,
+                                ch.into(),
                                 Condition::Syntax,
                                 "mu:read",
-                                ch.into(),
                             ))?,
                         }
                     }
-                    Err(_) => Err(Exception::new(
+                    Err(_) => Err(Exception::err(
                         self,
+                        ch.into(),
                         Condition::Syntax,
                         "mu:read",
-                        ch.into(),
                     ))?,
                 },
-                _ => Err(Exception::new(self, Condition::Type, "mu:read", ch.into()))?,
+                _ => Err(Exception::err(self, ch.into(), Condition::Type, "mu:read"))?,
             },
-            None => Err(Exception::new(self, Condition::Eof, "mu:read", stream))?,
+            None => Err(Exception::err(self, stream, Condition::Eof, "mu:read"))?,
         }
     }
 
@@ -351,7 +351,7 @@ impl Reader for Env {
 
         if self.read_ws(stream)?.is_none() {
             return if eof_error_p {
-                Err(Exception::new(self, Condition::Eof, "reader", stream))
+                Err(Exception::err(self, stream, Condition::Eof, "reader"))
             } else {
                 Ok(eof_value)
             };
@@ -360,7 +360,7 @@ impl Reader for Env {
         match StreamReader::read_char(self, stream)? {
             None => {
                 if eof_error_p {
-                    Err(Exception::new(self, Condition::Eof, "mu:read", stream))?
+                    Err(Exception::err(self, stream, Condition::Eof, "mu:read"))?
                 } else {
                     Ok(eof_value)
                 }
@@ -373,7 +373,7 @@ impl Reader for Env {
                             Some(tag) => Ok(tag),
                             None => self.read(stream, eof_error_p, eof_value, recursivep),
                         },
-                        _ => Err(Exception::new(self, Condition::Type, "reader", ch.into()))?,
+                        _ => Err(Exception::err(self, ch.into(), Condition::Type, "reader"))?,
                     },
                     SyntaxType::Tmacro => match ch {
                         '`' => QuasiReader::read(self, false, stream, false),
@@ -387,18 +387,18 @@ impl Reader for Env {
                             if recursivep {
                                 Ok(*EOL)
                             } else {
-                                Err(Exception::new(self, Condition::Syntax, "reader", stream))?
+                                Err(Exception::err(self, stream, Condition::Syntax, "reader"))?
                             }
                         }
                         ';' => {
                             self.read_comment(stream)?;
                             self.read(stream, eof_error_p, eof_value, recursivep)
                         }
-                        _ => Err(Exception::new(self, Condition::Range, "reader", ch.into()))?,
+                        _ => Err(Exception::err(self, ch.into(), Condition::Range, "reader"))?,
                     },
-                    _ => Err(Exception::new(self, Condition::Read, "reader", ch.into()))?,
+                    _ => Err(Exception::err(self, ch.into(), Condition::Read, "reader"))?,
                 },
-                _ => Err(Exception::new(self, Condition::Read, "reader", ch.into()))?,
+                _ => Err(Exception::err(self, ch.into(), Condition::Read, "reader"))?,
             },
         }
     }

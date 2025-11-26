@@ -68,11 +68,11 @@ impl Namespace {
         if ns_ref.contains_key(name) {
             drop(ns_ref);
 
-            return Err(Exception::new(
+            return Err(Exception::err(
                 env,
+                Vector::from(name).with_heap(env),
                 Condition::Type,
                 "mu:make-namespace",
-                Vector::from(name).with_heap(env),
             ));
         }
 
@@ -95,11 +95,11 @@ impl Namespace {
         if ns_ref.contains_key(name) {
             drop(ns_ref);
 
-            return Err(Exception::new(
+            return Err(Exception::err(
                 env,
+                Vector::from(name).with_heap(env),
                 Condition::Type,
                 "mu:make-namespace",
-                Vector::from(name).with_heap(env),
             ));
         }
 
@@ -287,12 +287,12 @@ impl CoreFn for Namespace {
         let value = fp.argv[2];
 
         if !Self::is_namespace(env, ns) {
-            Err(Exception::new(env, Condition::Type, "mu:intern", ns))?;
+            Err(Exception::err(env, ns, Condition::Type, "mu:intern"))?;
         }
 
         fp.value = match Self::intern(env, ns, Vector::as_string(env, name), value) {
             Some(ns) => ns,
-            None => Err(Exception::new(env, Condition::Range, "mu:intern", name))?,
+            None => Err(Exception::err(env, name, Condition::Range, "mu:intern"))?,
         };
 
         Ok(())
@@ -310,11 +310,11 @@ impl CoreFn for Namespace {
         let ns = fp.argv[0];
 
         if !Self::is_namespace(env, ns) {
-            Err(Exception::new(
+            Err(Exception::err(
                 env,
+                ns,
                 Condition::Type,
                 "mu:namespace-name",
-                ns,
             ))?;
         }
 
@@ -341,7 +341,7 @@ impl CoreFn for Namespace {
         let name = fp.argv[1];
 
         if !Self::is_namespace(env, ns_tag) {
-            Err(Exception::new(env, Condition::Type, "mu:find", ns_tag))?;
+            Err(Exception::err(env, ns_tag, Condition::Type, "mu:find"))?;
         }
 
         fp.value = match Self::find_symbol(env, ns_tag, &Vector::as_string(env, name)) {

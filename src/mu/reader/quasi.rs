@@ -75,11 +75,11 @@ impl QuasiReader {
                 '(' => Ok(Some(QuasiSyntax::ListStart)),
                 ')' => Ok(Some(QuasiSyntax::ListEnd)),
                 ',' => match StreamReader::read_char(env, self.stream)? {
-                    None => Err(Exception::new(
+                    None => Err(Exception::err(
                         env,
+                        Symbol::keyword("eof"),
                         Condition::Stream,
                         "mu:read",
-                        Symbol::keyword("eof"),
                     )),
                     Some(ch) => {
                         if ch == '@' {
@@ -153,11 +153,11 @@ impl QuasiReader {
 
         loop {
             match self.read_syntax(env)? {
-                None => Err(Exception::new(
+                None => Err(Exception::err(
                     env,
+                    Symbol::keyword("eof"),
                     Condition::Stream,
                     "mu:read",
-                    Symbol::keyword("eof"),
                 ))?,
                 Some(syntax) => match syntax {
                     QuasiSyntax::Atom => expanded.push(QuasiExpr::Basic(self.read_form(env)?)),
@@ -173,27 +173,27 @@ impl QuasiReader {
 
     fn parse(&self, env: &Env) -> exception::Result<QuasiExpr> {
         match self.read_syntax(env)? {
-            None => Err(Exception::new(
+            None => Err(Exception::err(
                 env,
+                Symbol::keyword("eof"),
                 Condition::Stream,
                 "mu:read",
-                Symbol::keyword("eof"),
             ))?,
             Some(syntax) => match syntax {
                 QuasiSyntax::Atom | QuasiSyntax::Comma => {
                     Ok(QuasiExpr::Comma(self.read_form(env)?))
                 }
-                QuasiSyntax::CommaAt => Err(Exception::new(
+                QuasiSyntax::CommaAt => Err(Exception::err(
                     env,
-                    Condition::Quasi,
-                    "mu:read",
                     Symbol::keyword(",@"),
-                ))?,
-                QuasiSyntax::ListEnd => Err(Exception::new(
-                    env,
                     Condition::Quasi,
                     "mu:read",
+                ))?,
+                QuasiSyntax::ListEnd => Err(Exception::err(
+                    env,
                     Symbol::keyword(")"),
+                    Condition::Quasi,
+                    "mu:read",
                 ))?,
                 QuasiSyntax::ListStart => {
                     let expr = self.parse_list(env)?;

@@ -134,11 +134,11 @@ impl SystemStream {
                             Ok(Some(buf[0]))
                         }
                     }
-                    Err(_) => Err(Exception::new(
+                    Err(_) => Err(Exception::err(
                         env,
+                        Tag::nil(),
                         Condition::Read,
                         "mu:read-byte",
-                        Tag::nil(),
                     )),
                 }
             }
@@ -154,11 +154,11 @@ impl SystemStream {
                             Ok(Some(buf[0]))
                         }
                     }
-                    Err(_) => Err(Exception::new(
+                    Err(_) => Err(Exception::err(
                         env,
+                        Tag::nil(),
                         Condition::Read,
                         "mu:read-byte",
-                        Tag::nil(),
                     )),
                 }
             }
@@ -184,11 +184,11 @@ impl SystemStream {
 
                 match task {
                     Ok(_) => Ok(None),
-                    Err(_) => Err(Exception::new(
+                    Err(_) => Err(Exception::err(
                         env,
+                        Tag::nil(),
                         Condition::Write,
                         "mu:write-byte",
-                        Tag::nil(),
                     ))?,
                 }
             }
@@ -197,11 +197,11 @@ impl SystemStream {
 
                 match task {
                     Ok(_) => Ok(None),
-                    Err(_) => Err(Exception::new(
+                    Err(_) => Err(Exception::err(
                         env,
+                        Tag::nil(),
                         Condition::Write,
                         "mu:write-byte",
-                        Tag::nil(),
                     ))?,
                 }
             }
@@ -211,11 +211,11 @@ impl SystemStream {
 
                 match task {
                     Ok(()) => Ok(None),
-                    Err(_) => Err(Exception::new(
+                    Err(_) => Err(Exception::err(
                         env,
+                        Tag::nil(),
                         Condition::Write,
                         "mu:write-byte",
-                        Tag::nil(),
                     ))?,
                 }
             }

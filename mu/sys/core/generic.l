@@ -21,7 +21,7 @@
                (mu:eq prop generic-prop))
             '(:name :impls))
            (core:%type-prop prop generic)
-           (mu:raise-from prop 'core:%generic-prop :range))))
+           (mu:raise prop 'core:%generic-prop :range))))
 
 (mu:intern core "%make-generic"
    (:lambda (name impls)
@@ -43,8 +43,8 @@
              ((:lambda (type-function)
                 (:if type-function
                      (core:apply type-function args)
-                     (mu:raise-from type-function 'core:%apply-generic :type)))
+                     (mu:raise type-function 'core:%apply-generic :type)))
               (mu:cdr (core:find-if (:lambda (impl) (core:%typep object (mu:car impl))) impls))))
            (mu:car args)
            (mu:cdr (core:%generic-prop :impls generic)))
-          (mu:raise-from generic 'core:%apply-generic :type))))
+          (mu:raise generic 'core:%apply-generic :type))))

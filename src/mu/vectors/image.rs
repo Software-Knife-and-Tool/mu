@@ -127,8 +127,8 @@ impl From<Vec<i64>> for Vector {
     }
 }
 
-impl From<(Vec<i8>, usize)> for Vector {
-    fn from(vec_def: (Vec<i8>, usize)) -> Vector {
+impl From<(Vec<u8>, usize)> for Vector {
+    fn from(vec_def: (Vec<u8>, usize)) -> Vector {
         let (vec, len) = vec_def;
 
         let image = VectorImage {
@@ -136,12 +136,7 @@ impl From<(Vec<i8>, usize)> for Vector {
             length: Fixnum::with_or_panic(len),
         };
 
-        let u8_slice = vec
-            .iter()
-            .map(|i8_| u8::try_from(*i8_).unwrap())
-            .collect::<Vec<u8>>();
-
-        Vector::Indirect(image, VectorImageType::Bit(u8_slice))
+        Vector::Indirect(image, VectorImageType::Bit(vec))
     }
 }
 

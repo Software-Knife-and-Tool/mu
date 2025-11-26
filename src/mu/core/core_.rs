@@ -64,8 +64,7 @@ pub static CORE_FUNCTIONS: LazyLock<&[CoreFnDef]> = LazyLock::new(|| {
         ("fix", 2, Env::mu_fix),
         // exceptions
         ("with-exception", 2, Exception::mu_with_exception),
-        ("raise", 2, Exception::mu_raise),
-        ("raise-from", 3, Exception::mu_raise_from),
+        ("raise", 3, Exception::mu_raise),
         // frames
         ("%frame-stack", 0, Frame::mu_frames),
         ("%frame-pop", 1, Frame::mu_frame_pop),

@@ -14,7 +14,7 @@
         ((:lambda (char-designator)
            (:if char-designator
                 char-designator
-                (mu:raise-from extended 'core:%read-sharp-char :type)))
+                (mu:raise extended 'core:%read-sharp-char :type)))
          (mu:cdr
           (core:assq
            (mu:symbol-name extended)
@@ -58,11 +58,11 @@
               loop
               ((:lambda (ch)
                  (:if (core:null ch)
-                      (mu:raise-from stream 'core:%read-sharp-comment :eof)
+                      (mu:raise stream 'core:%read-sharp-comment :eof)
                       (:if (mu:eq ch #\|)
                            ((:lambda (ch)
                               (:if (core:null ch)
-                                   (mu:raise-from stream 'core:%read-sharp-comment :eof)
+                                   (mu:raise stream 'core:%read-sharp-comment :eof)
                                    (:if (mu:eq ch #\#)
                                         stream
                                         (core:null loop))))
@@ -76,7 +76,7 @@
       ((:lambda (type)
           (:if (core:keywordp type)
                (mu:make-vector type (core:%read-list #\( stream))
-               (mu:raise-from type 'core:%read-sharp-vector :range)))
+               (mu:raise type 'core:%read-sharp-vector :range)))
           (core:%read stream))))
 
 (mu:intern core "%read-byte-bits"
@@ -102,7 +102,7 @@
                                         ,@(mu:logor
                                            (:if (mu:eq #\1 ch) 1 0)
                                            (mu:mul byte 2)))
-                                      (mu:raise-from ch 'core:%read-sharp-bit-vector :range))))
+                                      (mu:raise ch 'core:%read-sharp-bit-vector :range))))
                           (core:%read-char-syntax ch))))
                   (mu:read-char stream () ()))))
           (mu:car loop)
@@ -139,9 +139,9 @@
              ((:lambda (symbol)
                 (:if (mu:eq :symbol (mu:type-of symbol))
                      (mu:make-symbol (mu:symbol-name symbol))
-                     (mu:raise-from symbol 'core:%read-sharp-colon :type)))
+                     (mu:raise symbol 'core:%read-sharp-colon :type)))
               (core:%read-atom ch stream))              
-             (mu:raise-from stream 'core:%read-sharp-colon :eof)))
+             (mu:raise stream 'core:%read-sharp-colon :eof)))
      (mu:read-char stream () ()))))
 
 (mu:intern core "%read-sharp-number"
@@ -213,7 +213,7 @@
                                    (core:%prog2
                                       (mu:unread-char #\) stream)
                                       dotted)
-                                   (mu:raise-from () 'core:%read-list :syntax)))
+                                   (mu:raise () 'core:%read-list :syntax)))
                             (core:foldr mu:cons (core:%read stream) loop))
                            `(,@loop ,el))
                       `(,@loop ,el))))
@@ -289,13 +289,13 @@
                    (mu:symbol-value macro-symbol)
                    ()))
            (mu:find core:%char-macros/ (mu:make-vector :char (mu:cons char ()))))
-          (mu:raise-from char 'core:get-macro-character :type))))
+          (mu:raise char 'core:get-macro-character :type))))
 
 (mu:intern core "set-macro-character"
    (:lambda (char func non-terminating)
       (:if (core:charp char)
          (:if (core:functionp func)
               (mu:intern core:%char-macros/ (mu:make-vector :char (mu:cons char ())) (mu:cons func non-terminating))
-              (mu:raise-from func 'core:set-macro-character :type))
-         (mu:raise-from char 'core:set-macro-character :type))
+              (mu:raise func 'core:set-macro-character :type))
+         (mu:raise char 'core:set-macro-character :type))
       :t))

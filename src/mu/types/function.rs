@@ -217,7 +217,7 @@ impl Function {
                         Type::Null | Type::Cons => (
                             "lambda".to_string(),
                             usize::try_from(Fixnum::as_i64(arity)).unwrap(),
-                            format!("{:x}", form.as_u64()),
+                            format!("#x{:x}", form.as_u64()),
                         ),
                         Type::Async
                         | Type::Bit

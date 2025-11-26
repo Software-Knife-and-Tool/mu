@@ -24,11 +24,11 @@ impl StreamReader {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            Err(Exception::new(
+            Err(Exception::err(
                 env,
+                stream_tag,
                 Condition::Open,
                 "mu:read-char",
-                stream_tag,
             ))?;
         }
 
@@ -42,11 +42,11 @@ impl StreamReader {
                     drop(core_streams_ref);
                     drop(stream);
 
-                    return Err(Exception::new(
+                    return Err(Exception::err(
                         env,
+                        stream_tag,
                         Condition::Stream,
                         "mu:read-char",
-                        stream_tag,
                     ));
                 }
 
@@ -70,11 +70,11 @@ impl StreamReader {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            Err(Exception::new(
+            Err(Exception::err(
                 env,
+                stream_tag,
                 Condition::Open,
                 "mu:read-byte",
-                stream_tag,
             ))?;
         }
 
@@ -88,11 +88,11 @@ impl StreamReader {
                     drop(core_streams_ref);
                     drop(stream);
 
-                    return Err(Exception::new(
+                    return Err(Exception::err(
                         env,
+                        stream_tag,
                         Condition::Stream,
                         "mu:read-byte",
-                        stream_tag,
                     ));
                 }
 
@@ -117,11 +117,11 @@ impl StreamReader {
         assert_eq!(stream_tag.type_of(), Type::Stream);
 
         if !Stream::is_open(stream_tag) {
-            Err(Exception::new(
+            Err(Exception::err(
                 env,
+                stream_tag,
                 Condition::Open,
                 "mu:unread-char",
-                stream_tag,
             ))?;
         }
 
@@ -137,11 +137,11 @@ impl StreamReader {
                     drop(core_streams_ref);
                     drop(stream);
 
-                    return Err(Exception::new(
+                    return Err(Exception::err(
                         env,
+                        stream_tag,
                         Condition::Type,
                         "mu:unread-char",
-                        stream_tag,
                     ));
                 }
 
@@ -150,11 +150,11 @@ impl StreamReader {
 
                     Ok(None)
                 } else {
-                    Err(Exception::new(
+                    Err(Exception::err(
                         env,
+                        stream.unch,
                         Condition::Stream,
                         "mu:unread-char",
-                        stream.unch,
                     ))
                 }
             }

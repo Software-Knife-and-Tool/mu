@@ -33,27 +33,27 @@ impl Apply for Env {
                         let n = Fixnum::as_i64(fp_arg);
 
                         if !(0..=255).contains(&n) {
-                            Err(Exception::new(self, Condition::Type, source, fp_arg))?;
+                            Err(Exception::err(self, fp_arg, Condition::Type, source))?;
                         }
                     }
-                    _ => Err(Exception::new(self, Condition::Type, source, fp_arg))?,
+                    _ => Err(Exception::err(self, fp_arg, Condition::Type, source))?,
                 },
                 Type::List => match fp_arg_type {
                     Type::Cons | Type::Null => (),
-                    _ => Err(Exception::new(self, Condition::Type, source, fp_arg))?,
+                    _ => Err(Exception::err(self, fp_arg, Condition::Type, source))?,
                 },
                 Type::String => match fp_arg_type {
                     Type::Vector => {
                         if Vector::type_of(self, fp.argv[index]) != Type::Char {
-                            Err(Exception::new(self, Condition::Type, source, fp_arg))?;
+                            Err(Exception::err(self, fp_arg, Condition::Type, source))?;
                         }
                     }
-                    _ => Err(Exception::new(self, Condition::Type, source, fp_arg))?,
+                    _ => Err(Exception::err(self, fp_arg, Condition::Type, source))?,
                 },
                 Type::T => (),
                 _ => {
                     if fp_arg_type != *arg_type {
-                        Err(Exception::new(self, Condition::Type, source, fp_arg))?;
+                        Err(Exception::err(self, fp_arg, Condition::Type, source))?;
                     }
                 }
             }
@@ -95,21 +95,21 @@ impl Apply for Env {
 
                             match fn_.type_of() {
                                 Type::Function => self.apply(fn_, args),
-                                _ => Err(Exception::new(self, Condition::Type, "mu:eval", func))?,
+                                _ => Err(Exception::err(self, func, Condition::Type, "mu:eval"))?,
                             }
                         } else {
-                            Err(Exception::new(self, Condition::Unbound, "mu:eval", func))?
+                            Err(Exception::err(self, func, Condition::Unbound, "mu:eval"))?
                         }
                     }
                     Type::Function => self.apply(func, args),
-                    _ => Err(Exception::new(self, Condition::Type, "mu:eval", func))?,
+                    _ => Err(Exception::err(self, func, Condition::Type, "mu:eval"))?,
                 }
             }
             Type::Symbol => {
                 if Symbol::is_bound(self, expr) {
                     Ok(Symbol::destruct(self, expr).2)
                 } else {
-                    Err(Exception::new(self, Condition::Unbound, "mu:eval", expr))?
+                    Err(Exception::err(self, expr, Condition::Unbound, "mu:eval"))?
                 }
             }
             _ => Ok(expr),
