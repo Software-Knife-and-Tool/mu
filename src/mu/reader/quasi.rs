@@ -180,9 +180,7 @@ impl QuasiReader {
                 "mu:read",
             ))?,
             Some(syntax) => match syntax {
-                QuasiSyntax::Atom | QuasiSyntax::Comma => {
-                    Ok(QuasiExpr::Comma(self.read_form(env)?))
-                }
+                QuasiSyntax::Comma => Ok(QuasiExpr::Comma(self.read_form(env)?)),
                 QuasiSyntax::CommaAt => Err(Exception::err(
                     env,
                     Symbol::keyword(",@"),
@@ -209,7 +207,9 @@ impl QuasiReader {
                         _ => Ok(expr),
                     }
                 }
-                QuasiSyntax::Quasi => Ok(QuasiExpr::Basic(self.read_form(env)?)),
+                QuasiSyntax::Atom | QuasiSyntax::Quasi => {
+                    Ok(QuasiExpr::Basic(self.read_form(env)?))
+                }
             },
         }
     }
