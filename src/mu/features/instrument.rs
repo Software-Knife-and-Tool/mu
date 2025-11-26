@@ -87,11 +87,11 @@ impl CoreFn for Feature {
 
             fp.value = Vector::from(prof_vec).with_heap(env)
         } else {
-            return Err(Exception::new(
+            return Err(Exception::err(
                 env,
+                cmd,
                 Condition::Range,
                 "profile:prof_control",
-                cmd,
             ));
         }
 
