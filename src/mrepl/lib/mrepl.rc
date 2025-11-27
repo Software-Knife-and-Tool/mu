@@ -1,2 +1,53 @@
-(mu:write ";;; repl 0.0.3" () mu:*standard-output*)
-(mu:write #\linefeed () mu:*standard-output*)
+(core:load "/opt/mu/lib/format.sys")
+
+(mu:make-namespace "repl")
+((:lambda (repl eof)
+   (mu:intern repl "map-symbol"
+      (:lambda (form)
+         ((:lambda (symbol)
+             (:if symbol
+                  (format:%format () "~A" `(,symbol))
+                  (format:%format () "~A" `(,form))))
+          (core:find-if
+             (:lambda (sym)
+                (:if (mu:eq form (mu:symbol-value sym))
+                     (mu:symbol-name sym)
+                     ()))
+             (feature/core:ns-symbols (mu:find-namespace "mu"))))))
+
+   (mu:intern repl "print-exception"
+      (:lambda (ex verbose)
+          (:if verbose
+               ((:lambda (props)
+                   ((:lambda (fn)
+                     (format:%format :t "exception: on ~A~%" `(,(repl:map-symbol fn)))
+                     (format:%format :t "  with ~A" `(,(mu:cdr (core:assq :cond props))))
+                     (format:%format :t " by ~A; ~A~%" `(,(mu:cdr (core:assq :source props)) ,(mu:cdr (core:assq :reason props)))))
+                    (mu:car (mu:cdr (core:assq :value props)))))
+                   (mu:svref (mu:struct-vec ex) 1))
+               (format:%format :t "exception: ~A" `(,ex)))))
+
+   (mu:intern repl "repl"
+      (:lambda ()
+        (format:%format :t ";;; repl listener 0.0.2~%" ())
+        (format:%format :t ";;; ^D to exit to namespace listener~%" ())
+        (mu:fix
+         (:lambda (loop)
+           (format:%format :t "mrepl> " ())
+           (mu:flush mu:*standard-output*)
+           ((:lambda (form)
+              (:if (mu:eq eof form)
+                   loop
+                   (core:with-exception
+                     (:lambda (ex)
+                         (repl:print-exception ex :t)
+                         (core:null loop))
+                     (:lambda ()
+                       (format:%format :t "~A~%" `(,(mu:eval (core:compile form))))
+                       (core:null loop)))))
+            (core:read mu:*standard-input* () eof)))
+         ())))
+   
+   (repl:repl))
+ (mu:find-namespace "repl")
+ (mu:make-symbol "%eof%"))

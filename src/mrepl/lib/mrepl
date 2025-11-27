@@ -1,8 +1,9 @@
 {
-    "config": { 
+    "config": {
         "pages": "2048",
         "gc-mode": "auto"
-    },       
+    },
     "namespace": "core",
-    "rc": "repl.rc"
+    "system": [ "/opt/mu/system/system.l" ],
+    "rc": "/home/putnamjm/.mrepl.rc"
 }
