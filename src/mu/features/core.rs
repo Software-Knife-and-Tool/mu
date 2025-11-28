@@ -49,7 +49,7 @@ impl Core for Feature {
                 ("process-mem-virt", 0, Feature::core_mem_virt),
                 ("process-time", 0, Feature::core_time),
                 ("time-units-per-second", 0, Feature::core_time_units),
-                ("delay", 0, Feature::core_delay),
+                ("sleep", 1, Feature::core_sleep),
                 ("ns-symbols", 1, Feature::core_ns_symbols),
             ]),
             namespace: "feature/core".into(),
@@ -59,7 +59,7 @@ impl Core for Feature {
 
 pub trait CoreFn {
     fn core_core_info(_: &Env, _: &mut Frame) -> exception::Result<()>;
-    fn core_delay(_: &Env, _: &mut Frame) -> exception::Result<()>;
+    fn core_sleep(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn core_fds(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn core_mem_res(_: &Env, _: &mut Frame) -> exception::Result<()>;
     fn core_mem_virt(_: &Env, _: &mut Frame) -> exception::Result<()>;
@@ -69,7 +69,7 @@ pub trait CoreFn {
 }
 
 impl CoreFn for Feature {
-    fn core_delay(env: &Env, fp: &mut Frame) -> exception::Result<()> {
+    fn core_sleep(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("%core:delay", &[Type::Fixnum], fp)?;
 
         let delay = Fixnum::as_i64(fp.argv[0]);
@@ -91,19 +91,23 @@ impl CoreFn for Feature {
     fn core_fds(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let fds = fd_count_cur().unwrap();
 
-        fp.value = Fixnum::with_u64(env, fds as u64)?;
+        fp.value = Fixnum::with_u64(env, fds as u64, "core:core")?;
 
         Ok(())
     }
 
     fn core_time(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::with_u64(env, u64::try_from(cpu_time().unwrap().as_micros()).unwrap())?;
+        fp.value = Fixnum::with_u64(
+            env,
+            u64::try_from(cpu_time().unwrap().as_micros()).unwrap(),
+            "core:core",
+        )?;
 
         Ok(())
     }
 
     fn core_time_units(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::with_u64(env, 1000)?;
+        fp.value = Fixnum::with_u64(env, 1000, "coree:core")?;
 
         Ok(())
     }
@@ -111,7 +115,7 @@ impl CoreFn for Feature {
     fn core_mem_res(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vmem_info = get_process_memory_info().unwrap().resident_set_size;
 
-        fp.value = Fixnum::with_u64(env, vmem_info * 4)?;
+        fp.value = Fixnum::with_u64(env, vmem_info * 4, "core:core")?;
 
         Ok(())
     }
@@ -119,7 +123,7 @@ impl CoreFn for Feature {
     fn core_mem_virt(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let vmem_info = get_process_memory_info().unwrap().virtual_memory_size;
 
-        fp.value = Fixnum::with_u64(env, vmem_info * 4)?;
+        fp.value = Fixnum::with_u64(env, vmem_info * 4, "core:core")?;
 
         Ok(())
     }
@@ -145,7 +149,7 @@ impl CoreFn for Feature {
             Cons::cons(
                 env,
                 Vector::from("streams").with_heap(env),
-                Core_::nstreams(),
+                Core_::nstreams(env),
             ),
         ];
 

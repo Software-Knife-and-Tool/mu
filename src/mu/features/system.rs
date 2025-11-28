@@ -89,9 +89,10 @@ impl CoreFn for Feature {
                     "system:shell",
                 ))
             }
-            Ok(exit_status) => {
-                Fixnum::with_or_panic(usize::try_from(exit_status.code().unwrap()).unwrap())
-            }
+            Ok(exit_status) => match exit_status.code() {
+                Some(rc) => Fixnum::etry_from(env, rc, "system:shell")?,
+                None => Fixnum::etry_from(env, -1, "system:shell")?,
+            },
         };
 
         Ok(())
@@ -100,9 +101,7 @@ impl CoreFn for Feature {
     fn system_exit(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         env.argv_check("system:exit", &[Type::Fixnum], fp)?;
 
-        let rc = fp.argv[0];
-
-        std::process::exit(i32::try_from(Fixnum::as_i64(rc)).unwrap());
+        std::process::exit(i32::from(fp.argv[0]));
     }
 
     fn system_sleep(env: &Env, fp: &mut Frame) -> exception::Result<()> {
@@ -111,9 +110,19 @@ impl CoreFn for Feature {
         fp.value = fp.argv[0];
 
         let secs: f32 = Float::as_f32(env, fp.value);
+
+        if secs.is_sign_negative() {
+            Err(Exception::err(
+                env,
+                fp.value,
+                Condition::Range,
+                "system:sleep",
+            ))?;
+        }
+
         #[allow(clippy::cast_possible_truncation)]
         #[allow(clippy::cast_sign_loss)]
-        let usecs: u64 = (1e6 * secs) as u64;
+        let usecs: u64 = 1_000_000 * (secs.abs().round() as u64);
 
         std::thread::sleep(std::time::Duration::from_micros(usecs));
 
@@ -122,14 +131,12 @@ impl CoreFn for Feature {
 
     fn system_uname(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match nix::sys::utsname::uname() {
-            Err(_) => {
-                return Err(Exception::err(
-                    env,
-                    Tag::nil(),
-                    Condition::Type,
-                    "system:uname",
-                ))
-            }
+            Err(_) => Err(Exception::err(
+                env,
+                Tag::nil(),
+                Condition::Type,
+                "system:uname",
+            ))?,
             Ok(info) => {
                 let uname = vec![Cons::list(
                     env,
@@ -192,8 +199,7 @@ impl CoreFn for Feature {
                         Cons::cons(
                             env,
                             Vector::from("uptime").with_heap(env),
-                            #[allow(clippy::cast_sign_loss)]
-                            Fixnum::with_u64(env, sysinfo.uptime as u64)?,
+                            Fixnum::etry_from(env, sysinfo.uptime, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
@@ -203,32 +209,32 @@ impl CoreFn for Feature {
                         Cons::cons(
                             env,
                             Vector::from("totalram").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.totalram)?,
+                            Fixnum::with_u64(env, sysinfo.totalram, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("freeram").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.freeram)?,
+                            Fixnum::with_u64(env, sysinfo.freeram, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("sharedram").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.sharedram)?,
+                            Fixnum::with_u64(env, sysinfo.sharedram, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("bufferram").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.bufferram)?,
+                            Fixnum::with_u64(env, sysinfo.bufferram, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("totalswap").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.totalswap)?,
+                            Fixnum::with_u64(env, sysinfo.totalswap, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("freeswap").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.freeswap)?,
+                            Fixnum::with_u64(env, sysinfo.freeswap, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
@@ -238,12 +244,12 @@ impl CoreFn for Feature {
                         Cons::cons(
                             env,
                             Vector::from("totalhigh").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.totalhigh)?,
+                            Fixnum::with_u64(env, sysinfo.totalhigh, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("freehigh").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.freehigh)?,
+                            Fixnum::with_u64(env, sysinfo.freehigh, "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,

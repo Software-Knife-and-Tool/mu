@@ -211,8 +211,8 @@ impl Core {
         )
     }
 
-    pub fn nstreams() -> Tag {
-        Fixnum::with_or_panic(block_on(CORE.streams.read()).len())
+    pub fn nstreams(env: &Env) -> Tag {
+        Fixnum::with_usize(env, block_on(CORE.streams.read()).len()).unwrap()
     }
 }
 

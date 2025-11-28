@@ -49,7 +49,7 @@ impl From<Vec<Tag>> for Vector {
     fn from(vec: Vec<Tag>) -> Vector {
         let image = VectorImage {
             type_: Symbol::keyword("t"),
-            length: Fixnum::with_or_panic(vec.len()),
+            length: Fixnum::with_usize_or_panic(vec.len()),
         };
 
         Vector::Indirect(image, VectorImageType::T(vec.clone()))
@@ -63,7 +63,7 @@ impl From<&str> for Vector {
         if len > DirectTag::DIRECT_STR_MAX {
             let image = VectorImage {
                 type_: Symbol::keyword("char"),
-                length: Fixnum::with_or_panic(str.len()),
+                length: Fixnum::with_usize_or_panic(str.len()),
             };
 
             Vector::Indirect(image, VectorImageType::Char(str.into()))
@@ -90,7 +90,7 @@ impl From<&[u8]> for Vector {
         if len > DirectTag::DIRECT_STR_MAX {
             let image = VectorImage {
                 type_: Symbol::keyword("byte"),
-                length: Fixnum::with_or_panic(bytes.len()),
+                length: Fixnum::with_usize_or_panic(bytes.len()),
             };
 
             Vector::Indirect(image, VectorImageType::Byte(bytes.to_vec()))
@@ -120,7 +120,7 @@ impl From<Vec<i64>> for Vector {
     fn from(vec: Vec<i64>) -> Vector {
         let image = VectorImage {
             type_: Symbol::keyword("fixnum"),
-            length: Fixnum::with_or_panic(vec.len()),
+            length: Fixnum::with_usize_or_panic(vec.len()),
         };
 
         Vector::Indirect(image, VectorImageType::Fixnum(vec.clone()))
@@ -133,7 +133,7 @@ impl From<(Vec<u8>, usize)> for Vector {
 
         let image = VectorImage {
             type_: Symbol::keyword("bit"),
-            length: Fixnum::with_or_panic(len),
+            length: Fixnum::with_usize_or_panic(len),
         };
 
         Vector::Indirect(image, VectorImageType::Bit(vec))
@@ -150,7 +150,7 @@ impl From<Vec<f32>> for Vector {
     fn from(vec: Vec<f32>) -> Vector {
         let image = VectorImage {
             type_: Symbol::keyword("float"),
-            length: Fixnum::with_or_panic(vec.len()),
+            length: Fixnum::with_usize_or_panic(vec.len()),
         };
 
         Vector::Indirect(image, VectorImageType::Float(vec.clone()))

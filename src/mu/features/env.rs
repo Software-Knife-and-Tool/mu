@@ -95,9 +95,9 @@ impl Env for Feature {
 
             vec.extend(vec![
                 *htype,
-                Fixnum::with_or_panic(type_map.size),
-                Fixnum::with_or_panic(type_map.total),
-                Fixnum::with_or_panic(type_map.free),
+                Fixnum::with_usize(env, type_map.size).unwrap(),
+                Fixnum::with_usize(env, type_map.total).unwrap(),
+                Fixnum::with_usize(env, type_map.free).unwrap(),
             ]);
         }
 
@@ -114,8 +114,8 @@ impl Env for Feature {
                 None => (),
                 Some(type_map) => vec.extend(vec![
                     *htype,
-                    Fixnum::with_or_panic(type_map.size),
-                    Fixnum::with_or_panic(type_map.total),
+                    Fixnum::with_usize(env, type_map.size).unwrap(),
+                    Fixnum::with_usize(env, type_map.total).unwrap(),
                 ]),
             }
         }
@@ -172,7 +172,7 @@ impl CoreFn for Feature {
     }
 
     fn env_hp_size(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Fixnum::with_or_panic(<Feature as Env>::image_size(env, fp.argv[0]));
+        fp.value = Fixnum::with_usize(env, <Feature as Env>::image_size(env, fp.argv[0])).unwrap();
 
         Ok(())
     }

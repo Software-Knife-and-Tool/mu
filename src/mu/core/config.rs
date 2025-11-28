@@ -134,7 +134,7 @@ impl Config {
                 .with_heap(env),
                 Cons::new(
                     Vector::from("npages").with_heap(env),
-                    Fixnum::with_or_panic(env.config.npages),
+                    Fixnum::with_usize(env, env.config.npages).unwrap(),
                 )
                 .with_heap(env),
             ],

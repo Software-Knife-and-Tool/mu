@@ -55,7 +55,7 @@ impl Compiler {
         let (lambda, body, symbols) = Self::lambda(env, form)?;
 
         let function = Function::new(
-            Fixnum::with_or_panic(Cons::length(env, lambda).unwrap()),
+            Fixnum::with_usize(env, Cons::length(env, lambda).unwrap()).unwrap(),
             Tag::nil(),
         );
 
@@ -77,7 +77,7 @@ impl Compiler {
         let (lambda, body, symbols) = Self::lambda(env, form)?;
 
         let function = Function::new(
-            Fixnum::with_or_panic(Cons::length(env, lambda).unwrap()),
+            Fixnum::with_usize(env, Cons::length(env, lambda).unwrap()).unwrap(),
             Tag::nil(),
         );
 
@@ -226,7 +226,10 @@ impl Compiler {
                             )
                             .2;
 
-                            Cons::list(env, &[frame_ref, tag, Fixnum::with_or_panic(nth)])
+                            Cons::list(
+                                env,
+                                &[frame_ref, tag, Fixnum::with_usize(env, nth).unwrap()],
+                            )
                         }
                         None => symbol,
                     };

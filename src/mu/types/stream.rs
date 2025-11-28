@@ -108,7 +108,7 @@ impl Stream {
             Some(stream_ref) => {
                 let stream = block_on(stream_ref.read());
                 let vec = vec![
-                    Fixnum::with_or_panic(usize::try_from(stream.id).unwrap()),
+                    Fixnum::with_usize(env, usize::try_from(stream.id).unwrap()).unwrap(),
                     stream.direction,
                     stream.unch,
                 ];

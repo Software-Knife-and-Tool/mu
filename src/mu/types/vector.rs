@@ -87,7 +87,7 @@ impl Vector {
 
     pub fn view(env: &Env, vector: Tag) -> Tag {
         let vec = vec![
-            Fixnum::with_or_panic(Self::length(env, vector)),
+            Fixnum::with_usize(env, Self::length(env, vector)).unwrap(),
             Self::type_of(env, vector).map_typesym(),
         ];
 
