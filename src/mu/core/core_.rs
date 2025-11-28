@@ -14,10 +14,8 @@ use {
             tag::{CoreFn as _, Tag},
         },
         features::feature::{Feature, FEATURES},
-        namespaces::{
-            gc::{CoreFn as _, GcContext},
-            namespace::{CoreFn as _, Namespace},
-        },
+        gc::gc_::{CoreFn as _, GcContext},
+        namespaces::namespace::{CoreFn as _, Namespace},
         streams::builder::StreamBuilder,
         types::{
             cons::{Cons, CoreFn as _},

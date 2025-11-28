@@ -3,7 +3,6 @@
 
 // namespaces
 pub mod cache;
-pub mod gc;
 pub mod heap;
 pub mod namespace;
 
@@ -25,32 +24,4 @@ use {
         },
         namespaces::{heap::Heap, cache::Cache},
     },
-    // super::{heap::Heap, cache::Cache},
 };
-
-/*
-pub enum Space {
-    Heap,
-    Cache
-}
-
-impl Space for Heap {
-    fn allocate(&self) -> Tag {
-        Tag::nil()
-    }
-}
-
-impl Space for Cache {
-    fn allocate(&self) -> Tag {
-        Tag::nil()
-    }
-}
-
-pub trait Space {
-    fn allocate(&self) -> Tag;
-
-    fn alloc<T: Default>(env: &Env, space: Space) -> Tag {
-        .allocate()
-    }
-}
-*/

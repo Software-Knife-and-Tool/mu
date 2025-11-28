@@ -5,19 +5,18 @@
 #![allow(dead_code)]
 use crate::{
     core::{env::Env, exception, frame::Frame, tag::Tag, type_::Type},
+    gc::{
+        async_::Gc as _, cons::Gc as _, function::Gc as _, struct_::Gc as _, symbol::Gc as _,
+        vector::Gc as _,
+    },
     namespaces::{
         heap::{Gc as _, Heap},
         namespace::Namespace,
     },
     types::{
-        async_::{Async, Gc as _},
-        cons::{Cons, Gc as _},
-        function::{Function, Gc as _},
-        struct_::{Gc as _, Struct},
-        symbol::{Gc as _, Symbol},
+        async_::Async, cons::Cons, function::Function, struct_::Struct, symbol::Symbol,
         vector::Vector,
     },
-    vectors::vector::Gc as _,
 };
 
 use futures_lite::future::block_on;
