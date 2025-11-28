@@ -28,10 +28,32 @@ impl From<usize> for Tag {
     }
 }
 
+impl From<i64> for Tag {
+    fn from(fx: i64) -> Tag {
+        assert!(Fixnum::is_i56(fx));
+
+        DirectTag::to_tag(
+            u64::try_from(fx & (2_i64.pow(56) - 1)).unwrap(),
+            DirectExt::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        )
+    }
+}
+
+impl From<i32> for Tag {
+    fn from(fx: i32) -> Tag {
+        DirectTag::to_tag(
+            u64::try_from(i64::from(fx)).unwrap(),
+            DirectExt::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        )
+    }
+}
+
 impl From<u32> for Tag {
     fn from(fx: u32) -> Tag {
         DirectTag::to_tag(
-            u64::try_from(i64::from(fx) & (2_i64.pow(56) - 1)).unwrap(),
+            u64::from(fx),
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
@@ -41,7 +63,7 @@ impl From<u32> for Tag {
 impl From<u16> for Tag {
     fn from(fx: u16) -> Tag {
         DirectTag::to_tag(
-            u64::try_from(i64::from(fx) & (2_i64.pow(56) - 1)).unwrap(),
+            u64::from(fx),
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
@@ -51,7 +73,7 @@ impl From<u16> for Tag {
 impl From<u8> for Tag {
     fn from(fx: u8) -> Tag {
         DirectTag::to_tag(
-            u64::try_from(i64::from(fx) & (2_i64.pow(56) - 1)).unwrap(),
+            u64::from(fx),
             DirectExt::ExtType(ExtType::Fixnum),
             DirectType::Ext,
         )
@@ -60,18 +82,15 @@ impl From<u8> for Tag {
 
 impl From<Tag> for i64 {
     fn from(tag: Tag) -> i64 {
-        assert_eq!(tag.type_of(), Type::Fixnum);
+        let data: i64 = tag.into();
 
-        i64::try_from(tag.as_u64()).unwrap() >> 8
+        data >> 8
     }
 }
 
 impl From<Tag> for usize {
     fn from(tag: Tag) -> usize {
-        assert_eq!(tag.type_of(), Type::Fixnum);
-
         let data: i64 = tag.into();
-        assert!(data >= 0);
 
         usize::try_from(data).unwrap()
     }
@@ -79,8 +98,6 @@ impl From<Tag> for usize {
 
 impl From<Tag> for i32 {
     fn from(tag: Tag) -> i32 {
-        assert_eq!(tag.type_of(), Type::Fixnum);
-
         let data: i64 = tag.into();
 
         i32::try_from(data).unwrap()
@@ -89,8 +106,6 @@ impl From<Tag> for i32 {
 
 impl From<Tag> for u8 {
     fn from(tag: Tag) -> u8 {
-        assert_eq!(tag.type_of(), Type::Fixnum);
-
         let data: i64 = tag.into();
 
         u8::try_from(data).unwrap()
@@ -118,11 +133,27 @@ impl Fixnum {
         i64_ >> 8
     }
 
-    pub fn with_or_panic(fx: usize) -> Tag {
-        Self::with_u64_or_panic(u64::try_from(fx).unwrap())
+    // specialized convert generic
+    pub fn etry_from<T: Clone>(env: &Env, fx: T, source: &str) -> exception::Result<Tag>
+    where
+        i64: From<T>,
+        Tag: From<T>,
+    {
+        let i64_ = i64::from(fx.clone());
+
+        if Fixnum::is_i56(i64_) {
+            Ok(fx.into())
+        } else {
+            Err(Exception::err(
+                env,
+                Vector::from(i64_.to_string()).with_heap(env),
+                Condition::Over,
+                source,
+            ))?
+        }
     }
 
-    pub fn with_u64_or_panic(fx: u64) -> Tag {
+    pub fn with_usize_or_panic(fx: usize) -> Tag {
         let i64_ = i64::try_from(fx).unwrap();
         assert!(Fixnum::is_i56(i64_));
 
@@ -143,12 +174,42 @@ impl Fixnum {
         )
     }
 
-    pub fn with_u64(env: &Env, fx: u64) -> exception::Result<Tag> {
+    pub fn with_usize(env: &Env, fx: usize) -> exception::Result<Tag> {
+        #[allow(clippy::cast_possible_wrap)]
+        if !Fixnum::is_i56(fx as i64) {
+            return Err(Exception::err(env, Tag::nil(), Condition::Over, "fixnum"));
+        }
+
+        Ok(DirectTag::to_tag(
+            u64::try_from(i64::try_from(fx).unwrap() & (2_i64.pow(56) - 1)).unwrap(),
+            DirectExt::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        ))
+    }
+
+    pub fn with_i64(env: &Env, fx: i64) -> exception::Result<Tag> {
+        if !Fixnum::is_i56(fx) {
+            return Err(Exception::err(env, Tag::nil(), Condition::Over, "fixnum"));
+        }
+
+        Ok(DirectTag::to_tag(
+            u64::try_from(fx & (2_i64.pow(56) - 1)).unwrap(),
+            DirectExt::ExtType(ExtType::Fixnum),
+            DirectType::Ext,
+        ))
+    }
+
+    pub fn with_u64(env: &Env, fx: u64, source: &str) -> exception::Result<Tag> {
         match i64::try_from(fx) {
             Err(_) => Err(Exception::err(env, Tag::nil(), Condition::Over, "fixnum")),
             Ok(i64_) => {
                 if !Fixnum::is_i56(i64_) {
-                    return Err(Exception::err(env, Tag::nil(), Condition::Over, "fixnum"));
+                    Err(Exception::err(
+                        env,
+                        Vector::from(i64_.to_string()).with_heap(env),
+                        Condition::Over,
+                        source,
+                    ))?;
                 }
 
                 Ok(DirectTag::to_tag(
@@ -195,7 +256,7 @@ impl CoreFn for Fixnum {
         };
 
         if Self::is_i56(result) {
-            fp.value = Self::with_i64_or_panic(result);
+            fp.value = Self::with_i64(env, result).unwrap();
         } else {
             Err(Exception::err(
                 env,
@@ -217,7 +278,7 @@ impl CoreFn for Fixnum {
         fp.value = match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
             Some(sum) => {
                 if Self::is_i56(sum) {
-                    Self::with_i64_or_panic(sum)
+                    Self::with_i64(env, sum).unwrap()
                 } else {
                     Err(Exception::err(env, fx0, Condition::Over, "mu:add"))?
                 }
@@ -237,7 +298,7 @@ impl CoreFn for Fixnum {
         fp.value = match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
             Some(diff) => {
                 if Self::is_i56(diff) {
-                    Self::with_i64_or_panic(diff)
+                    Self::with_i64(env, diff).unwrap()
                 } else {
                     Err(Exception::err(env, fx0, Condition::Over, "mu:sub"))?
                 }
@@ -257,7 +318,7 @@ impl CoreFn for Fixnum {
         fp.value = match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
             Some(prod) => {
                 if Self::is_i56(prod) {
-                    Self::with_i64_or_panic(prod)
+                    Self::with_i64(env, prod).unwrap()
                 } else {
                     Err(Exception::err(env, fx1, Condition::Over, "mu:mul"))?
                 }
@@ -281,7 +342,7 @@ impl CoreFn for Fixnum {
         fp.value = match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
             Some(div) => {
                 if Self::is_i56(div) {
-                    Self::with_i64_or_panic(div)
+                    Self::with_i64(env, div).unwrap()
                 } else {
                     Err(Exception::err(env, fx1, Condition::Over, "mu:div"))?
                 }
@@ -313,7 +374,7 @@ impl CoreFn for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = Self::with_i64_or_panic(Self::as_i64(fx0) & Self::as_i64(fx1));
+        fp.value = Self::with_i64(env, Self::as_i64(fx0) & Self::as_i64(fx1))?;
 
         Ok(())
     }
@@ -324,7 +385,7 @@ impl CoreFn for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = Self::with_i64_or_panic(Self::as_i64(fx0) | Self::as_i64(fx1));
+        fp.value = Self::with_i64(env, Self::as_i64(fx0) | Self::as_i64(fx1))?;
 
         Ok(())
     }
@@ -345,7 +406,7 @@ impl CoreFn for Fixnum {
             }
         }
 
-        fp.value = Self::with_i64_or_panic(val);
+        fp.value = Self::with_i64(env, val)?;
 
         Ok(())
     }

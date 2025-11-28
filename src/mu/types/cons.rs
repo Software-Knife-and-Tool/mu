@@ -493,9 +493,9 @@ impl CoreFn for Cons {
         let list = fp.argv[0];
 
         fp.value = match list.type_of() {
-            Type::Null => Fixnum::with_or_panic(0),
+            Type::Null => Fixnum::with_u64(env, 0, "mu:length").unwrap(),
             Type::Cons => match Cons::length(env, list) {
-                Some(len) => Fixnum::with_or_panic(len),
+                Some(len) => Fixnum::with_usize(env, len).unwrap(),
                 None => return Err(Exception::err(env, list, Condition::Type, "mu:length")),
             },
             _ => panic!(),

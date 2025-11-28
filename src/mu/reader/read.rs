@@ -177,7 +177,7 @@ impl Reader for Env {
         match token.parse::<i64>() {
             Ok(fx) => {
                 if Fixnum::is_i56(fx) {
-                    Ok(Fixnum::with_i64_or_panic(fx))
+                    Ok(Fixnum::with_i64(self, fx).unwrap())
                 } else {
                     Err(Exception::err(
                         self,
@@ -302,7 +302,7 @@ impl Reader for Env {
                         match i64::from_str_radix(&hex, 16) {
                             Ok(fx) => {
                                 if Fixnum::is_i56(fx) {
-                                    Ok(Some(Fixnum::with_i64_or_panic(fx)))
+                                    Ok(Some(Fixnum::with_i64(self, fx).unwrap()))
                                 } else {
                                     Err(Exception::err(
                                         self,

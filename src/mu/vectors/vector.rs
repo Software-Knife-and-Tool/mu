@@ -274,7 +274,7 @@ impl CoreFn for Vector {
 
         let vector = fp.argv[0];
 
-        fp.value = Fixnum::with_or_panic(Self::length(env, vector));
+        fp.value = Fixnum::with_usize_or_panic(Self::length(env, vector));
 
         Ok(())
     }
