@@ -11,9 +11,8 @@ use {
             tag::{Tag, TagType},
             type_::Type,
         },
-        namespaces::{gc::GcContext, heap::HeapRequest},
+        namespaces::heap::HeapRequest,
         types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
-        vectors::vector::Gc as _,
     },
     futures_lite::future::block_on,
     std::str,
@@ -163,7 +162,6 @@ pub trait VecImage {
     fn image(_: &VectorImage) -> Vec<[u8; 8]>;
     fn with_heap(&self, _: &Env) -> Tag;
     fn ref_(_: &Env, _: Tag, _: usize) -> Option<Tag>;
-    fn gc_ref(_: &mut GcContext, _: Tag, _: usize) -> Option<Tag>;
 }
 
 impl VecImage for VecImageType<'_> {
@@ -303,84 +301,6 @@ impl VecImage for VecImageType<'_> {
                 .with_heap_id(1)
                 .with_tag(TagType::Vector),
         )
-    }
-
-    fn gc_ref(context: &mut GcContext, vector: Tag, index: usize) -> Option<Tag> {
-        let image = Vector::gc_ref_image(context, vector);
-
-        if index >= usize::try_from(Fixnum::as_i64(image.length)).unwrap() {
-            None?;
-        }
-
-        let Tag::Indirect(vimage) = vector else {
-            panic!()
-        };
-
-        match Vector::to_type(image.type_).unwrap() {
-            Type::Byte => {
-                let slice = context
-                    .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
-                        index,
-                        1,
-                    )
-                    .unwrap();
-
-                Some(slice[0].into())
-            }
-            Type::Char => {
-                let slice = context
-                    .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
-                        index,
-                        1,
-                    )
-                    .unwrap();
-
-                let ch: char = slice[0].into();
-
-                Some(ch.into())
-            }
-            Type::T => Some(Tag::from_slice(
-                context
-                    .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
-                        index * 8,
-                        8,
-                    )
-                    .unwrap(),
-            )),
-            Type::Fixnum => {
-                let slice = context
-                    .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
-                        index * 8,
-                        8,
-                    )
-                    .unwrap();
-
-                Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
-                    slice[0..8].try_into().unwrap(),
-                )))
-            }
-            Type::Float => {
-                let slice = context
-                    .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap() + Self::IMAGE_LEN,
-                        index * 4,
-                        4,
-                    )
-                    .unwrap();
-
-                Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())
-            }
-            _ => panic!(),
-        }
     }
 
     fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {

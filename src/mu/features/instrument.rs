@@ -82,7 +82,13 @@ impl CoreFn for Feature {
         } else if cmd.eq_(&Symbol::keyword("get")) {
             let prof_vec = (*profile_map_ref)
                 .iter()
-                .map(|item| Cons::cons(env, item.0, Fixnum::with_u64(env, item.1, "instrument:control").unwrap()))
+                .map(|item| {
+                    Cons::cons(
+                        env,
+                        item.0,
+                        Fixnum::with_u64(env, item.1, "instrument:control").unwrap(),
+                    )
+                })
                 .collect::<Vec<Tag>>();
 
             fp.value = Vector::from(prof_vec).with_heap(env)

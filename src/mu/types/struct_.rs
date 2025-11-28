@@ -13,10 +13,7 @@ use {
             tag::{Tag, TagType},
             type_::Type,
         },
-        namespaces::{
-            gc::{Gc as _, GcContext},
-            heap::HeapRequest,
-        },
+        namespaces::heap::HeapRequest,
         streams::{reader::StreamReader, writer::StreamWriter},
         types::{cons::Cons, symbol::Symbol, vector::Vector},
     },
@@ -28,45 +25,6 @@ use {
 pub struct Struct {
     pub stype: Tag,
     pub vector: Tag,
-}
-
-pub trait Gc {
-    fn gc_ref_image(_: &mut GcContext, tag: Tag) -> Self;
-    fn mark(_: &mut GcContext, env: &Env, struct_: Tag);
-}
-
-impl Gc for Struct {
-    fn gc_ref_image(context: &mut GcContext, tag: Tag) -> Self {
-        assert_eq!(tag.type_of(), Type::Struct);
-
-        let heap_ref = &context.heap_ref;
-
-        match tag {
-            Tag::Indirect(image) => Struct {
-                stype: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(image.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                vector: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(image.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-            },
-            Tag::Direct(_) => panic!(),
-        }
-    }
-
-    fn mark(context: &mut GcContext, env: &Env, struct_: Tag) {
-        let mark = context.mark_image(struct_).unwrap();
-
-        if !mark {
-            let vector = Self::gc_ref_image(context, struct_).vector;
-
-            context.mark(env, vector);
-        }
-    }
 }
 
 impl Struct {

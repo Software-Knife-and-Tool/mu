@@ -14,43 +14,12 @@ use {
             tag::Tag,
             type_::Type,
         },
-        namespaces::gc::GcContext,
-        types::{
-            struct_::Struct,
-            symbol::{Gc as _, Symbol},
-            vector::Vector,
-        },
+        types::{struct_::Struct, symbol::Symbol, vector::Vector},
     },
     futures_lite::future::block_on,
     futures_locks::RwLock,
     std::{collections::HashMap, str},
 };
-
-pub trait Gc {
-    #[allow(dead_code)]
-    fn gc(&mut self, _: &mut GcContext, _: &Env);
-}
-
-impl Gc for Namespace {
-    #[allow(dead_code)]
-    fn gc(&mut self, gc: &mut GcContext, env: &Env) {
-        match self {
-            Namespace::Static(static_) => {
-                if let Some(hash) = &static_ {
-                    for symbol in hash.values() {
-                        Symbol::mark(gc, env, *symbol);
-                    }
-                }
-            }
-            Namespace::Dynamic(ref hash) => {
-                let hash_ref = block_on(hash.read());
-                for symbol in hash_ref.values() {
-                    Symbol::mark(gc, env, *symbol);
-                }
-            }
-        }
-    }
-}
 
 #[derive(Clone)]
 pub enum Namespace {

@@ -48,6 +48,7 @@ extern crate modular_bitfield;
 
 mod core;
 mod features;
+mod gc;
 mod namespaces;
 mod reader;
 mod streams;
