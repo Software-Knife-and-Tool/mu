@@ -84,11 +84,10 @@ impl Read for Vector {
                                 }
                             }
                         },
-                        None => {
-                            return Err(Exception::err(env, stream, Condition::Eof, "mu:read"));
-                        }
+                        None => Err(Exception::err(env, stream, Condition::Eof, "mu:read"))?,
                     }
                 }
+
                 let mut vec = vec![0; digits.len().div_ceil(8)];
                 let bvec = &mut vec;
 

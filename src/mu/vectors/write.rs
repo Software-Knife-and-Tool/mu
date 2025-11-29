@@ -26,15 +26,15 @@ impl Write for Vector {
         match vector {
             Tag::Direct(direct) => match direct.dtype() {
                 DirectType::String => {
-                    let str = vector.data(env).to_le_bytes();
-                    let s = str::from_utf8(&str).unwrap();
+                    let bytes = vector.data(env).to_le_bytes();
+                    let str = str::from_utf8(&bytes).unwrap();
 
                     if escape {
                         StreamWriter::write_str(env, "\"", stream).unwrap();
                     }
 
                     for nth in 0..DirectTag::length(vector) {
-                        StreamWriter::write_char(env, stream, s.as_bytes()[nth] as char)?;
+                        StreamWriter::write_char(env, stream, str.as_bytes()[nth] as char)?;
                     }
 
                     if escape {
