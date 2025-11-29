@@ -33,31 +33,17 @@ impl Gc for Vector {
             panic!()
         };
 
+        let slice =
+            usize::try_from(vimage.image_id()).unwrap() + <VecImageType<'_> as VecImage>::IMAGE_LEN;
+
         match Vector::to_type(image.type_).unwrap() {
             Type::Byte => {
-                let slice = context
-                    .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap()
-                            + <VecImageType<'_> as VecImage>::IMAGE_LEN,
-                        index,
-                        1,
-                    )
-                    .unwrap();
+                let slice = context.heap_ref.image_data_slice(slice, index, 1).unwrap();
 
                 Some(slice[0].into())
             }
             Type::Char => {
-                let slice = context
-                    .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap()
-                            + <VecImageType<'_> as VecImage>::IMAGE_LEN,
-                        index,
-                        1,
-                    )
-                    .unwrap();
-
+                let slice = context.heap_ref.image_data_slice(slice, index, 1).unwrap();
                 let ch: char = slice[0].into();
 
                 Some(ch.into())
@@ -65,23 +51,13 @@ impl Gc for Vector {
             Type::T => Some(Tag::from_slice(
                 context
                     .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap()
-                            + <VecImageType<'_> as VecImage>::IMAGE_LEN,
-                        index * 8,
-                        8,
-                    )
+                    .image_data_slice(slice, index * 8, 8)
                     .unwrap(),
             )),
             Type::Fixnum => {
                 let slice = context
                     .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap()
-                            + <VecImageType<'_> as VecImage>::IMAGE_LEN,
-                        index * 8,
-                        8,
-                    )
+                    .image_data_slice(slice, index * 8, 8)
                     .unwrap();
 
                 Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
@@ -91,12 +67,7 @@ impl Gc for Vector {
             Type::Float => {
                 let slice = context
                     .heap_ref
-                    .image_data_slice(
-                        usize::try_from(vimage.image_id()).unwrap()
-                            + <VecImageType<'_> as VecImage>::IMAGE_LEN,
-                        index * 4,
-                        4,
-                    )
+                    .image_data_slice(slice, index * 4, 4)
                     .unwrap();
 
                 Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())
@@ -106,22 +77,17 @@ impl Gc for Vector {
     }
 
     fn gc_ref_image(context: &mut GcContext, tag: Tag) -> VectorImage {
-        let heap_ref = &context.heap_ref;
-
         match tag.type_of() {
             Type::Vector => match tag {
-                Tag::Indirect(image) => VectorImage {
-                    type_: Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(image.image_id()).unwrap())
-                            .unwrap(),
-                    ),
-                    length: Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(image.image_id()).unwrap() + 1)
-                            .unwrap(),
-                    ),
-                },
+                Tag::Indirect(image) => {
+                    let heap_ref = &context.heap_ref;
+                    let slice = usize::try_from(image.image_id()).unwrap();
+
+                    VectorImage {
+                        type_: Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                        length: Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                    }
+                }
                 Tag::Direct(_) => panic!(),
             },
             _ => panic!(),

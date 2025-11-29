@@ -31,21 +31,16 @@ impl Struct {
     pub fn to_image(env: &Env, tag: Tag) -> Self {
         assert_eq!(tag.type_of(), Type::Struct);
 
-        let heap_ref = block_on(env.heap.read());
-
         match tag {
-            Tag::Indirect(image) => Struct {
-                stype: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(image.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                vector: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(image.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-            },
+            Tag::Indirect(image) => {
+                let heap_ref = block_on(env.heap.read());
+                let slice = usize::try_from(image.image_id()).unwrap();
+
+                Self {
+                    stype: Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    vector: Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                }
+            }
             Tag::Direct(_) => panic!(),
         }
     }
@@ -56,18 +51,11 @@ impl Struct {
         match struct_ {
             Tag::Indirect(struct_) => {
                 let heap_ref = block_on(env.heap.read());
+                let slice = usize::try_from(struct_.image_id()).unwrap();
 
                 (
-                    Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(struct_.image_id()).unwrap())
-                            .unwrap(),
-                    ),
-                    Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(struct_.image_id()).unwrap() + 1)
-                            .unwrap(),
-                    ),
+                    Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
                 )
             }
             Tag::Direct(_) => panic!(),

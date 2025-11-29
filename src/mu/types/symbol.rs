@@ -66,27 +66,18 @@ impl Symbol {
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> SymbolImage {
-        let heap_ref = block_on(env.heap.read());
-
         match tag.type_of() {
             Type::Symbol => match tag {
-                Tag::Indirect(main) => SymbolImage {
-                    namespace: Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(main.image_id()).unwrap())
-                            .unwrap(),
-                    ),
-                    name: Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(main.image_id()).unwrap() + 1)
-                            .unwrap(),
-                    ),
-                    value: Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(main.image_id()).unwrap() + 2)
-                            .unwrap(),
-                    ),
-                },
+                Tag::Indirect(main) => {
+                    let heap_ref = block_on(env.heap.read());
+                    let slice = usize::try_from(main.image_id()).unwrap();
+
+                    SymbolImage {
+                        namespace: Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                        name: Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                        value: Tag::from_slice(heap_ref.image_slice(slice + 2).unwrap()),
+                    }
+                }
                 Tag::Direct(_) => {
                     let image = Cache::ref_(env, DirectTag::cache_ref(tag).0);
 

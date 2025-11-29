@@ -42,21 +42,16 @@ impl Function {
     pub fn to_image(env: &Env, tag: Tag) -> Self {
         assert_eq!(tag.type_of(), Type::Function);
 
-        let heap_ref = block_on(env.heap.read());
-
         match tag {
-            Tag::Indirect(fn_) => Self::new(
-                Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(fn_.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-            ),
+            Tag::Indirect(fn_) => {
+                let heap_ref = block_on(env.heap.read());
+                let slice = usize::try_from(fn_.image_id()).unwrap();
+
+                Self::new(
+                    Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                )
+            }
             Tag::Direct(_) => {
                 let (arity, form) = Self::destruct(env, tag);
 
@@ -79,18 +74,11 @@ impl Function {
             }
             Tag::Indirect(fn_) => {
                 let heap_ref = block_on(env.heap.read());
+                let slice = usize::try_from(fn_.image_id()).unwrap();
 
                 (
-                    Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(fn_.image_id()).unwrap())
-                            .unwrap(),
-                    ),
-                    Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
-                            .unwrap(),
-                    ),
+                    Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
                 )
             }
         }

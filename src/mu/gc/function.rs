@@ -41,21 +41,16 @@ impl Gc for Function {
     fn gc_ref_image(context: &mut GcContext, tag: Tag) -> Self {
         assert_eq!(tag.type_of(), Type::Function);
 
-        let heap_ref = &context.heap_ref;
-
         match tag {
-            Tag::Indirect(fn_) => Self::new(
-                Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(fn_.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-            ),
+            Tag::Indirect(fn_) => {
+                let heap_ref = &context.heap_ref;
+                let slice = usize::try_from(fn_.image_id()).unwrap();
+
+                Self::new(
+                    Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                )
+            }
             Tag::Direct(_) => panic!(),
         }
     }
