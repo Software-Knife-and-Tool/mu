@@ -25,26 +25,15 @@ impl Gc for Symbol {
         assert_eq!(tag.type_of(), Type::Symbol);
 
         match tag {
-            Tag::Indirect(main) => SymbolImage {
-                namespace: Tag::from_slice(
-                    context
-                        .heap_ref
-                        .image_slice(usize::try_from(main.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                name: Tag::from_slice(
-                    context
-                        .heap_ref
-                        .image_slice(usize::try_from(main.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-                value: Tag::from_slice(
-                    context
-                        .heap_ref
-                        .image_slice(usize::try_from(main.image_id()).unwrap() + 2)
-                        .unwrap(),
-                ),
-            },
+            Tag::Indirect(main) => {
+                let slice = usize::try_from(main.image_id()).unwrap();
+
+                SymbolImage {
+                    namespace: Tag::from_slice(context.heap_ref.image_slice(slice).unwrap()),
+                    name: Tag::from_slice(context.heap_ref.image_slice(slice + 1).unwrap()),
+                    value: Tag::from_slice(context.heap_ref.image_slice(slice + 2).unwrap()),
+                }
+            }
             Tag::Direct(_) => panic!(),
         }
     }

@@ -30,22 +30,18 @@ impl Gc for Async {
     }
 
     fn gc_ref_image(context: &mut GcContext, tag: Tag) -> Self {
-        let heap_ref = &context.heap_ref;
-
         assert_eq!(tag.type_of(), Type::Async);
+
         match tag {
-            Tag::Indirect(fn_) => Async {
-                arity: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(fn_.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                form: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-            },
+            Tag::Indirect(fn_) => {
+                let heap_ref = &context.heap_ref;
+                let slice = usize::try_from(fn_.image_id()).unwrap();
+
+                Async {
+                    arity: Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    form: Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                }
+            }
             Tag::Direct(_) => panic!(),
         }
     }

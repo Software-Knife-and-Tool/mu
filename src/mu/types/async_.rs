@@ -30,22 +30,18 @@ impl Async {
     }
 
     pub fn to_image(env: &Env, tag: Tag) -> Self {
-        let heap_ref = block_on(env.heap.read());
-
         assert_eq!(tag.type_of(), Type::Async);
+
         match tag {
-            Tag::Indirect(fn_) => Async {
-                arity: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(fn_.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                form: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-            },
+            Tag::Indirect(fn_) => {
+                let heap_ref = block_on(env.heap.read());
+                let slice = usize::try_from(fn_.image_id()).unwrap();
+
+                Self {
+                    arity: Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    form: Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                }
+            }
             Tag::Direct(_) => panic!(),
         }
     }
@@ -56,18 +52,11 @@ impl Async {
         match func {
             Tag::Indirect(fn_) => {
                 let heap_ref = block_on(env.heap.read());
+                let slice = usize::try_from(fn_.image_id()).unwrap();
 
                 (
-                    Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(fn_.image_id()).unwrap())
-                            .unwrap(),
-                    ),
-                    Tag::from_slice(
-                        heap_ref
-                            .image_slice(usize::try_from(fn_.image_id()).unwrap() + 1)
-                            .unwrap(),
-                    ),
+                    Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
                 )
             }
             Tag::Direct(_) => panic!(),

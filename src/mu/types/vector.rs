@@ -150,21 +150,16 @@ impl Vector {
     pub fn to_image(env: &Env, tag: Tag) -> VectorImage {
         assert_eq!(tag.type_of(), Type::Vector);
 
-        let heap_ref = block_on(env.heap.read());
-
         match tag {
-            Tag::Indirect(image) => VectorImage {
-                type_: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(image.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                length: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(image.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-            },
+            Tag::Indirect(image) => {
+                let heap_ref = block_on(env.heap.read());
+                let slice = usize::try_from(image.image_id()).unwrap();
+
+                VectorImage {
+                    type_: Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    length: Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                }
+            }
             Tag::Direct(_) => panic!(),
         }
     }

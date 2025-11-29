@@ -17,22 +17,17 @@ pub trait Gc {
 
 impl Gc for Cons {
     fn gc_ref_image(context: &GcContext, tag: Tag) -> Self {
-        let heap_ref = &context.heap_ref;
-
         assert_eq!(tag.type_of(), Type::Cons);
+
         match tag {
-            Tag::Indirect(main) => Cons {
-                car: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(main.image_id()).unwrap())
-                        .unwrap(),
-                ),
-                cdr: Tag::from_slice(
-                    heap_ref
-                        .image_slice(usize::try_from(main.image_id()).unwrap() + 1)
-                        .unwrap(),
-                ),
-            },
+            Tag::Indirect(main) => {
+                let heap_ref = &context.heap_ref;
+                let slice = usize::try_from(main.image_id()).unwrap();
+                Cons {
+                    car: Tag::from_slice(heap_ref.image_slice(slice).unwrap()),
+                    cdr: Tag::from_slice(heap_ref.image_slice(slice + 1).unwrap()),
+                }
+            }
             Tag::Direct(_) => panic!(),
         }
     }
