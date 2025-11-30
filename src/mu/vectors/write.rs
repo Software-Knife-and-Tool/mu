@@ -57,8 +57,8 @@ impl Write for Vector {
                 }
                 _ => panic!(),
             },
-            Tag::Indirect(_) => match Self::vec_type_of(env, vector) {
-                VectorType::Char(_) => {
+            Tag::Indirect(_) => match Self::type_of(env, vector) {
+                VectorType::Char => {
                     if escape {
                         StreamWriter::write_str(env, "\"", stream)?;
                     }
@@ -73,7 +73,7 @@ impl Write for Vector {
 
                     Ok(())
                 }
-                VectorType::Bit(_) => {
+                VectorType::Bit => {
                     StreamWriter::write_str(env, "#*", stream)?;
 
                     for bit in Vector::iter(env, vector) {

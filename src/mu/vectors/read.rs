@@ -114,15 +114,15 @@ impl Read for Vector {
 
                 match VECTYPEMAP.iter().copied().find(|tab| vec_type.eq_(&tab.0)) {
                     Some(tab) => match tab.1 {
-                        VectorType::Bit(_) => {
+                        VectorType::Bit => {
                             panic!()
                         }
-                        VectorType::T(_) => {
+                        VectorType::T => {
                             let vec = Cons::list_iter(env, vec).collect::<Vec<Tag>>();
 
                             Ok(Vector::from(vec).with_heap(env))
                         }
-                        VectorType::Char(_) => {
+                        VectorType::Char => {
                             let vec: exception::Result<String> =
                                 Cons::list_iter(env, Cons::destruct(env, vec_list).1)
                                     .map(|ch| {
@@ -141,7 +141,7 @@ impl Read for Vector {
 
                             Ok(Vector::from(vec?).with_heap(env))
                         }
-                        VectorType::Byte(_) => {
+                        VectorType::Byte => {
                             let vec: exception::Result<Vec<u8>> =
                                 Cons::list_iter(env, Cons::destruct(env, vec_list).1)
                                     .map(|fx| {
@@ -170,7 +170,7 @@ impl Read for Vector {
 
                             Ok(Vector::from(vec?).with_heap(env))
                         }
-                        VectorType::Fixnum(_) => {
+                        VectorType::Fixnum => {
                             let vec: exception::Result<Vec<i64>> =
                                 Cons::list_iter(env, Cons::destruct(env, vec_list).1)
                                     .map(|fx| {
@@ -189,7 +189,7 @@ impl Read for Vector {
 
                             Ok(Vector::from(vec?).with_heap(env))
                         }
-                        VectorType::Float(_) => {
+                        VectorType::Float => {
                             let vec: exception::Result<Vec<f32>> =
                                 Cons::list_iter(env, Cons::destruct(env, vec_list).1)
                                     .map(|fl| {

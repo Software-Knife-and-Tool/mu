@@ -66,7 +66,7 @@ impl CoreFn for Feature {
         let arg_list = fp.argv[1];
 
         let type_check = Cons::list_iter(env, arg_list).find(|arg| {
-            !matches!(arg.type_of(), Type::Vector if Vector::vec_type_of(env, *arg) == VectorType::Char(Type::Char))
+            !matches!(arg.type_of(), Type::Vector if Vector::type_of(env, *arg) == VectorType::Char)
         });
 
         let argv: Vec<String> = match type_check {

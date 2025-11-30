@@ -263,37 +263,37 @@ impl VecImage for VecImageType<'_> {
 
         let heap_ref = block_on(env.heap.read());
 
-        match Vector::to_vectype(image.type_).unwrap() {
-            VectorType::Bit(_) => {
+        match Vector::to_type(image.type_).unwrap() {
+            VectorType::Bit => {
                 let slice = heap_ref.image_data_slice(len, index / 8, 1)?;
                 let bit_index = 7 - (index % 8);
 
                 Some(((slice[0] >> bit_index) & 1).into())
             }
-            VectorType::Byte(_) => {
+            VectorType::Byte => {
                 let slice = heap_ref.image_data_slice(len, index, 1)?;
 
                 Some(slice[0].into())
             }
-            VectorType::Char(_) => {
+            VectorType::Char => {
                 let slice = heap_ref.image_data_slice(len, index, 1)?;
                 let ch: char = slice[0].into();
 
                 Some(ch.into())
             }
-            VectorType::T(_) => Some(Tag::from_slice(heap_ref.image_data_slice(
+            VectorType::T => Some(Tag::from_slice(heap_ref.image_data_slice(
                 len,
                 index * 8,
                 8,
             )?)),
-            VectorType::Fixnum(_) => {
+            VectorType::Fixnum => {
                 let slice = heap_ref.image_data_slice(len, index * 8, 8)?;
 
                 Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
                     slice[0..8].try_into().unwrap(),
                 )))
             }
-            VectorType::Float(_) => {
+            VectorType::Float => {
                 let slice = heap_ref.image_data_slice(len, index * 4, 4)?;
 
                 Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())
