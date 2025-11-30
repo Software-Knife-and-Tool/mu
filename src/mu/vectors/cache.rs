@@ -17,7 +17,7 @@ pub type VecCacheMap = HashMap<(Type, i32), RwLock<Vec<Tag>>>;
 
 impl Vector {
     pub fn cache(env: &Env, vector: Tag) {
-        let vtype = Self::type_of(env, vector);
+        let vtype = *Self::vec_type_of(env, vector);
         let length = i32::try_from(Self::length(env, vector)).unwrap();
         let mut cache = block_on(env.vector_cache.write());
 

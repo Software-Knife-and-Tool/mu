@@ -9,10 +9,12 @@ use {
             env::Env,
             exception,
             tag::Tag,
-            type_::Type,
         },
         streams::writer::StreamWriter,
-        types::{fixnum::Fixnum, vector::Vector},
+        types::{
+            fixnum::Fixnum,
+            vector::{Vector, VectorType},
+        },
     },
     std::str,
 };
@@ -55,8 +57,8 @@ impl Write for Vector {
                 }
                 _ => panic!(),
             },
-            Tag::Indirect(_) => match Self::type_of(env, vector) {
-                Type::Char => {
+            Tag::Indirect(_) => match Self::vec_type_of(env, vector) {
+                VectorType::Char(_) => {
                     if escape {
                         StreamWriter::write_str(env, "\"", stream)?;
                     }
@@ -71,7 +73,7 @@ impl Write for Vector {
 
                     Ok(())
                 }
-                Type::Bit => {
+                VectorType::Bit(_) => {
                     StreamWriter::write_str(env, "#*", stream)?;
 
                     for bit in Vector::iter(env, vector) {

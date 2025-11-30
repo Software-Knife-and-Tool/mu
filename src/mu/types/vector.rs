@@ -19,11 +19,10 @@ use {
         },
     },
     futures_lite::future::block_on,
-    std::{str, sync::LazyLock},
+    std::{ops::Deref, str, sync::LazyLock},
 };
 
-// tatic COMPILER: LazyLock<Compiler> = LazyLock::new(||
-
+/*
 pub static VTYPEMAP: LazyLock<Vec<(Tag, Type)>> = LazyLock::new(|| {
     vec![
         (Symbol::keyword("bit"), Type::Bit),
@@ -34,6 +33,18 @@ pub static VTYPEMAP: LazyLock<Vec<(Tag, Type)>> = LazyLock::new(|| {
         (Symbol::keyword("t"), Type::T),
     ]
 });
+*/
+
+pub static VECTYPEMAP: LazyLock<Vec<(Tag, VectorType)>> = LazyLock::new(|| {
+    vec![
+        (Symbol::keyword("bit"), VectorType::Bit(Type::Bit)),
+        (Symbol::keyword("byte"), VectorType::Byte(Type::Byte)),
+        (Symbol::keyword("char"), VectorType::Char(Type::Char)),
+        (Symbol::keyword("fixnum"), VectorType::Fixnum(Type::Fixnum)),
+        (Symbol::keyword("float"), VectorType::Float(Type::Float)),
+        (Symbol::keyword("t"), VectorType::T(Type::T)),
+    ]
+});
 
 #[derive(Clone)]
 pub enum Vector {
@@ -41,38 +52,78 @@ pub enum Vector {
     Indirect(VectorImage, VectorImageType),
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub enum VectorType {
+    Bit(Type),
+    Byte(Type),
+    Char(Type),
+    Fixnum(Type),
+    Float(Type),
+    T(Type),
+}
+
+impl Deref for VectorType {
+    type Target = Type;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            VectorType::Bit(type_)
+            | VectorType::Byte(type_)
+            | VectorType::Char(type_)
+            | VectorType::Fixnum(type_)
+            | VectorType::Float(type_)
+            | VectorType::T(type_) => type_,
+        }
+    }
+}
+
 impl Vector {
     const IMAGE_LEN: usize = 2; // heap words in image
 
-    pub fn to_type(keyword: Tag) -> Option<Type> {
-        VTYPEMAP
+    pub fn to_vectype(keyword: Tag) -> Option<VectorType> {
+        VECTYPEMAP
             .iter()
-            .copied()
             .find(|tab| keyword.eq_(&tab.0))
             .map(|tab| tab.1)
     }
 
-    pub fn type_of(env: &Env, vector: Tag) -> Type {
+    pub fn vec_type_of(env: &Env, vector: Tag) -> VectorType {
         match vector {
             Tag::Direct(direct) => match direct.dtype() {
-                DirectType::String => Type::Char,
-                DirectType::ByteVec => Type::Byte,
+                DirectType::String => VectorType::Char(Type::Char),
+                DirectType::ByteVec => VectorType::Byte(Type::Byte),
                 _ => panic!(),
             },
             Tag::Indirect(_) => {
                 let image = Self::to_image(env, vector);
 
-                match VTYPEMAP
-                    .iter()
-                    .copied()
-                    .find(|desc| image.type_.eq_(&desc.0))
-                {
+                match VECTYPEMAP.iter().find(|desc| image.type_.eq_(&desc.0)) {
                     Some(desc) => desc.1,
                     None => panic!(),
                 }
             }
         }
     }
+
+    /*
+        pub fn type_of(env: &Env, vector: Tag) -> Type {
+            match vector {
+                Tag::Direct(direct) => match direct.dtype() {
+                    DirectType::String => Type::Char,
+                    DirectType::ByteVec => Type::Byte,
+                    _ => panic!(),
+                },
+                Tag::Indirect(_) => {
+                    let image = Self::to_image(env, vector);
+
+                    match VTYPEMAP.iter().find(|desc| image.type_.eq_(&desc.0)) {
+                        Some(desc) => desc.1,
+                        None => panic!(),
+                    }
+                }
+            }
+    }
+        */
 
     pub fn length(env: &Env, vector: Tag) -> usize {
         match vector {
@@ -86,9 +137,11 @@ impl Vector {
     }
 
     pub fn view(env: &Env, vector: Tag) -> Tag {
+        let type_ = *Self::vec_type_of(env, vector);
+
         let vec = vec![
             Fixnum::with_usize(env, Self::length(env, vector)).unwrap(),
-            Self::type_of(env, vector).map_typesym(),
+            type_.map_typesym(),
         ];
 
         Vector::from(vec).with_heap(env)
@@ -169,10 +222,10 @@ impl Vector {
             Tag::Direct(_) => std::mem::size_of::<DirectTag>(),
             Tag::Indirect(_) => {
                 let len = Self::length(env, vector);
-                let size = match Self::type_of(env, vector) {
-                    Type::Byte | Type::Char => 1,
-                    Type::Fixnum | Type::Float | Type::T => 8,
-                    _ => panic!(),
+                let size = match Self::vec_type_of(env, vector) {
+                    VectorType::Bit(_) => panic!(),
+                    VectorType::Byte(_) | VectorType::Char(_) => 1,
+                    VectorType::Fixnum(_) | VectorType::Float(_) | VectorType::T(_) => 8,
                 };
 
                 std::mem::size_of::<VectorImage>() + (size * len)

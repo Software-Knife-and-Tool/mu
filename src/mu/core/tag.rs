@@ -22,7 +22,7 @@ use {
             stream::Stream,
             struct_::Struct,
             symbol::Symbol,
-            vector::Vector,
+            vector::{Vector, VectorType},
         },
     },
     futures_lite::future::block_on,
@@ -180,7 +180,9 @@ impl CoreFn for Tag {
     fn mu_unrepr(env: &Env, fp: &mut Frame) -> exception::Result<()> {
         let arg = fp.argv[0];
 
-        if Vector::type_of(env, arg) == Type::Byte && Vector::length(env, arg) == 8 {
+        if Vector::vec_type_of(env, arg) == VectorType::Byte(Type::Byte)
+            && Vector::length(env, arg) == 8
+        {
             let mut u64_: u64 = 0;
 
             for index in (0..8).rev() {

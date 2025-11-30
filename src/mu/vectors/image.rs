@@ -12,7 +12,11 @@ use {
             type_::Type,
         },
         namespaces::heap::HeapRequest,
-        types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
+        types::{
+            fixnum::Fixnum,
+            symbol::Symbol,
+            vector::{Vector, VectorType},
+        },
     },
     futures_lite::future::block_on,
     std::str,
@@ -245,6 +249,8 @@ impl VecImage for VecImageType<'_> {
     }
 
     fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
+        assert!(vector.type_of() == Type::Vector);
+
         let Tag::Indirect(vimage) = vector else {
             panic!()
         };
@@ -257,42 +263,41 @@ impl VecImage for VecImageType<'_> {
 
         let heap_ref = block_on(env.heap.read());
 
-        match Vector::to_type(image.type_).unwrap() {
-            Type::Bit => {
+        match Vector::to_vectype(image.type_).unwrap() {
+            VectorType::Bit(_) => {
                 let slice = heap_ref.image_data_slice(len, index / 8, 1)?;
                 let bit_index = 7 - (index % 8);
 
                 Some(((slice[0] >> bit_index) & 1).into())
             }
-            Type::Byte => {
+            VectorType::Byte(_) => {
                 let slice = heap_ref.image_data_slice(len, index, 1)?;
 
                 Some(slice[0].into())
             }
-            Type::Char => {
+            VectorType::Char(_) => {
                 let slice = heap_ref.image_data_slice(len, index, 1)?;
                 let ch: char = slice[0].into();
 
                 Some(ch.into())
             }
-            Type::T => Some(Tag::from_slice(heap_ref.image_data_slice(
+            VectorType::T(_) => Some(Tag::from_slice(heap_ref.image_data_slice(
                 len,
                 index * 8,
                 8,
             )?)),
-            Type::Fixnum => {
+            VectorType::Fixnum(_) => {
                 let slice = heap_ref.image_data_slice(len, index * 8, 8)?;
 
                 Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
                     slice[0..8].try_into().unwrap(),
                 )))
             }
-            Type::Float => {
+            VectorType::Float(_) => {
                 let slice = heap_ref.image_data_slice(len, index * 4, 4)?;
 
                 Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())
             }
-            _ => panic!(),
         }
     }
 }
