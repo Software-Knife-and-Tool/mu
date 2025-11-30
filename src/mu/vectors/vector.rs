@@ -36,14 +36,14 @@ impl CoreFn for Vector {
         let type_sym = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match Self::to_vectype(type_sym) {
+        fp.value = match Self::to_type(type_sym) {
             Some(vtype) => match vtype {
-                VectorType::T(_) => {
+                VectorType::T => {
                     let vec = Cons::list_iter(env, list).collect::<Vec<Tag>>();
 
                     Vector::from(vec).with_heap(env)
                 }
-                VectorType::Char(_) => {
+                VectorType::Char => {
                     let vec: exception::Result<String> = Cons::list_iter(env, list)
                         .map(|ch| {
                             if ch.type_of() == Type::Char {
@@ -56,7 +56,7 @@ impl CoreFn for Vector {
 
                     Vector::from(vec?).with_heap(env)
                 }
-                VectorType::Bit(_) => {
+                VectorType::Bit => {
                     let mut vec = vec![0; Cons::length(env, list).unwrap().div_ceil(8)];
                     let bvec = &mut vec;
 
@@ -75,7 +75,7 @@ impl CoreFn for Vector {
 
                     Vector::from(vec).with_heap(env)
                 }
-                VectorType::Byte(_) => {
+                VectorType::Byte => {
                     let vec: exception::Result<Vec<u8>> = Cons::list_iter(env, list)
                         .map(|fx| {
                             if fx.type_of() == Type::Fixnum {
@@ -98,7 +98,7 @@ impl CoreFn for Vector {
 
                     Vector::from(vec?).with_heap(env)
                 }
-                VectorType::Fixnum(_) => {
+                VectorType::Fixnum => {
                     let vec: exception::Result<Vec<i64>> = Cons::list_iter(env, list)
                         .map(|fx| {
                             if fx.type_of() == Type::Fixnum {
@@ -111,7 +111,7 @@ impl CoreFn for Vector {
 
                     Vector::from(vec?).with_heap(env)
                 }
-                VectorType::Float(_) => {
+                VectorType::Float => {
                     let vec: exception::Result<Vec<f32>> = Cons::list_iter(env, list)
                         .map(|fl| {
                             if fl.type_of() == Type::Float {
@@ -158,7 +158,7 @@ impl CoreFn for Vector {
 
         let vector = fp.argv[0];
 
-        fp.value = Self::vec_type_of(env, vector).map_typesym();
+        fp.value = Self::type_of(env, vector).map_type().map_typesym();
 
         Ok(())
     }
