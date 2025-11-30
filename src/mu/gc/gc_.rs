@@ -27,7 +27,6 @@ pub struct GcContext<'a> {
 
 pub trait Gc {
     fn gc(_: &Env) -> exception::Result<bool>;
-    //    fn gc_with_context(&mut self, _: &Env) -> exception::Result<bool>;
     fn lexicals(&mut self, _: &Env);
     fn mark(&mut self, _: &Env, tag: Tag);
     fn mark_image(&mut self, _: Tag) -> Option<bool>;

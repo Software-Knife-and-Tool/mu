@@ -7,7 +7,7 @@ use crate::{
     gc::gc_::{Gc as _, GcContext},
     types::{
         fixnum::Fixnum,
-        vector::{Vector, VTYPEMAP},
+        vector::{Vector, VectorType},
     },
     vectors::image::{VecImage, VecImageType, VectorImage},
 };
@@ -16,7 +16,7 @@ pub trait Gc {
     fn gc_image_ref(_: &mut GcContext, _: Tag, _: usize) -> Option<Tag>;
     fn gc_ref_image(_: &mut GcContext, _: Tag) -> VectorImage;
     fn gc_ref(_: &mut GcContext, _: &Env, _: Tag, _: usize) -> Option<Tag>;
-    fn ref_type_of(_: &mut GcContext, _: Tag) -> Type;
+    fn ref_type_of(_: &Env, _: Tag) -> Type;
     fn ref_length(_: &mut GcContext, _: Tag) -> usize;
     fn mark(_: &mut GcContext, _: &Env, _: Tag);
 }
@@ -36,43 +36,41 @@ impl Gc for Vector {
         let slice =
             usize::try_from(vimage.image_id()).unwrap() + <VecImageType<'_> as VecImage>::IMAGE_LEN;
 
-        match Vector::to_type(image.type_).unwrap() {
-            Type::Byte => {
-                let slice = context.heap_ref.image_data_slice(slice, index, 1).unwrap();
+        match Vector::to_vectype(image.type_).unwrap() {
+            VectorType::Bit(_) => {
+                let slice = context.heap_ref.image_data_slice(slice, index / 8, 1)?;
+                let bit_index = 7 - (index % 8);
+
+                Some(((slice[0] >> bit_index) & 1).into())
+            }
+            VectorType::Byte(_) => {
+                let slice = context.heap_ref.image_data_slice(slice, index, 1)?;
 
                 Some(slice[0].into())
             }
-            Type::Char => {
-                let slice = context.heap_ref.image_data_slice(slice, index, 1).unwrap();
+            VectorType::Char(_) => {
+                let slice = context.heap_ref.image_data_slice(slice, index, 1)?;
                 let ch: char = slice[0].into();
 
                 Some(ch.into())
             }
-            Type::T => Some(Tag::from_slice(
-                context
-                    .heap_ref
-                    .image_data_slice(slice, index * 8, 8)
-                    .unwrap(),
-            )),
-            Type::Fixnum => {
-                let slice = context
-                    .heap_ref
-                    .image_data_slice(slice, index * 8, 8)
-                    .unwrap();
+            VectorType::T(_) => Some(Tag::from_slice(context.heap_ref.image_data_slice(
+                slice,
+                index * 8,
+                8,
+            )?)),
+            VectorType::Fixnum(_) => {
+                let slice = context.heap_ref.image_data_slice(slice, index * 8, 8)?;
 
                 Some(Fixnum::with_i64_or_panic(i64::from_le_bytes(
                     slice[0..8].try_into().unwrap(),
                 )))
             }
-            Type::Float => {
-                let slice = context
-                    .heap_ref
-                    .image_data_slice(slice, index * 4, 4)
-                    .unwrap();
+            VectorType::Float(_) => {
+                let slice = context.heap_ref.image_data_slice(slice, index * 4, 4)?;
 
                 Some(f32::from_le_bytes(slice[0..4].try_into().unwrap()).into())
             }
-            _ => panic!(),
         }
     }
 
@@ -108,25 +106,14 @@ impl Gc for Vector {
         }
     }
 
-    fn ref_type_of(context: &mut GcContext, vector: Tag) -> Type {
+    fn ref_type_of(env: &Env, vector: Tag) -> Type {
         match vector {
             Tag::Direct(direct) => match direct.dtype() {
                 DirectType::String => Type::Char,
                 DirectType::ByteVec => Type::Byte,
                 _ => panic!(),
             },
-            Tag::Indirect(_) => {
-                let image = Self::gc_ref_image(context, vector);
-
-                match VTYPEMAP
-                    .iter()
-                    .copied()
-                    .find(|desc| image.type_.eq_(&desc.0))
-                {
-                    Some(desc) => desc.1,
-                    None => panic!(),
-                }
-            }
+            Tag::Indirect(_) => *Vector::vec_type_of(env, vector),
         }
     }
 
@@ -147,7 +134,7 @@ impl Gc for Vector {
             Tag::Indirect(_) => {
                 let marked = context.mark_image(vector).unwrap();
 
-                if !marked && Self::ref_type_of(context, vector) == Type::T {
+                if !marked && Self::ref_type_of(env, vector) == Type::T {
                     for index in 0..Self::ref_length(context, vector) {
                         let value = Self::gc_ref(context, env, vector, index).unwrap();
 

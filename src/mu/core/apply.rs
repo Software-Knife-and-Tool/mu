@@ -11,7 +11,12 @@ use crate::{
         tag::Tag,
         type_::Type,
     },
-    types::{cons::Cons, fixnum::Fixnum, symbol::Symbol, vector::Vector},
+    types::{
+        cons::Cons,
+        fixnum::Fixnum,
+        symbol::Symbol,
+        vector::{Vector, VectorType},
+    },
 };
 
 pub trait Apply {
@@ -43,11 +48,10 @@ impl Apply for Env {
                     _ => Err(Exception::err(self, fp_arg, Condition::Type, source))?,
                 },
                 Type::String => match fp_arg_type {
-                    Type::Vector => {
-                        if Vector::type_of(self, fp.argv[index]) != Type::Char {
-                            Err(Exception::err(self, fp_arg, Condition::Type, source))?;
-                        }
-                    }
+                    Type::Vector => match Vector::vec_type_of(self, fp.argv[index]) {
+                        VectorType::Char(_) => (),
+                        _ => Err(Exception::err(self, fp_arg, Condition::Type, source))?,
+                    },
                     _ => Err(Exception::err(self, fp_arg, Condition::Type, source))?,
                 },
                 Type::T => (),

@@ -16,7 +16,7 @@ use crate::{
         cons::Cons,
         fixnum::Fixnum,
         float::Float,
-        vector::{Vector, VTYPEMAP},
+        vector::{Vector, VectorType, VECTYPEMAP},
     },
 };
 
@@ -112,14 +112,17 @@ impl Read for Vector {
 
                 let (vec_type, vec) = Cons::destruct(env, vec_list);
 
-                match VTYPEMAP.iter().copied().find(|tab| vec_type.eq_(&tab.0)) {
+                match VECTYPEMAP.iter().copied().find(|tab| vec_type.eq_(&tab.0)) {
                     Some(tab) => match tab.1 {
-                        Type::T => {
+                        VectorType::Bit(_) => {
+                            panic!()
+                        }
+                        VectorType::T(_) => {
                             let vec = Cons::list_iter(env, vec).collect::<Vec<Tag>>();
 
                             Ok(Vector::from(vec).with_heap(env))
                         }
-                        Type::Char => {
+                        VectorType::Char(_) => {
                             let vec: exception::Result<String> =
                                 Cons::list_iter(env, Cons::destruct(env, vec_list).1)
                                     .map(|ch| {
@@ -138,7 +141,7 @@ impl Read for Vector {
 
                             Ok(Vector::from(vec?).with_heap(env))
                         }
-                        Type::Byte => {
+                        VectorType::Byte(_) => {
                             let vec: exception::Result<Vec<u8>> =
                                 Cons::list_iter(env, Cons::destruct(env, vec_list).1)
                                     .map(|fx| {
@@ -167,7 +170,7 @@ impl Read for Vector {
 
                             Ok(Vector::from(vec?).with_heap(env))
                         }
-                        Type::Fixnum => {
+                        VectorType::Fixnum(_) => {
                             let vec: exception::Result<Vec<i64>> =
                                 Cons::list_iter(env, Cons::destruct(env, vec_list).1)
                                     .map(|fx| {
@@ -186,7 +189,7 @@ impl Read for Vector {
 
                             Ok(Vector::from(vec?).with_heap(env))
                         }
-                        Type::Float => {
+                        VectorType::Float(_) => {
                             let vec: exception::Result<Vec<f32>> =
                                 Cons::list_iter(env, Cons::destruct(env, vec_list).1)
                                     .map(|fl| {
@@ -205,7 +208,6 @@ impl Read for Vector {
 
                             Ok(Vector::from(vec?).with_heap(env))
                         }
-                        _ => panic!(),
                     },
                     None => Err(Exception::err(env, vec_type, Condition::Type, "mu:read"))?,
                 }
