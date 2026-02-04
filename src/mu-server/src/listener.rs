@@ -4,7 +4,7 @@
 //! runtime loader/listener
 use mu::{Condition, Env, Mu};
 
-pub fn _listener(env: Env, _config: &str) {
+pub fn _listener(env: &Env, _config: &str) {
     let eval_string = Mu::eval_str(env, &"(mu:open :string :output \"\")".to_string()).unwrap();
 
     let eof_value = Mu::eval_str(env, &"(env:symbol \"eof\")".to_string()).unwrap();

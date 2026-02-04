@@ -7,14 +7,12 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-mod config;
-mod env_;
 mod repl;
 
-use crate::{config::Config, env_::Env_};
+use mu::{Config, Mu};
 
 pub fn main() {
-    let env = Env_::new(Config::new());
+    let env = Mu::env(&Config::new(None));
 
-    repl::repl(&env).expect("repl: listener error");
+    repl::repl(&env, "mu".to_string()).expect("repl: listener error");
 }

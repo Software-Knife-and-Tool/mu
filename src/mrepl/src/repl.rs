@@ -1,14 +1,11 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 use {
-    crate::env_::Env_,
+    mu::Env,
     mu::{Condition, Mu, Result, Tag},
 };
 
-pub fn repl(env_: &Env_) -> Result<Tag> {
-    let env = env_.env;
-    let ns = env_.ns.clone();
-
+pub fn repl(env: &Env, ns: String) -> Result<Tag> {
     let eof_value = Mu::eval_str(env, "'%eof%")?;
     let flush_form = Mu::compile(env, Mu::read_str(env, "(mu:flush mu:*standard-output*)")?)?;
 
