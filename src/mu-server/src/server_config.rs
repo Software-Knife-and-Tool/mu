@@ -125,24 +125,24 @@ impl ServerConfig {
                         OptType::Config => (),
                         OptType::Ping => ping = true,
                         OptType::Socket => socket = opt.1.to_string(),
-                        OptType::Eval => match Mu::eval_str(env, &opt.1) {
+                        OptType::Eval => match Mu::eval_str(&env, &opt.1) {
                             Ok(_) => (),
                             Err(e) => {
                                 eprintln!(
                                     "runtime: error {}, {}",
                                     opt.1,
-                                    Mu::exception_string(env, &e)
+                                    Mu::exception_string(&env, &e)
                                 );
                                 std::process::exit(-1);
                             }
                         },
-                        OptType::Load => match Mu::load(env, &opt.1) {
+                        OptType::Load => match Mu::load(&env, &opt.1) {
                             Ok(_) => (),
                             Err(e) => {
                                 eprintln!(
                                     "runtime: failed to load {}, {}",
                                     &opt.1,
-                                    Mu::exception_string(env, &e)
+                                    Mu::exception_string(&env, &e)
                                 );
                                 std::process::exit(-1);
                             }

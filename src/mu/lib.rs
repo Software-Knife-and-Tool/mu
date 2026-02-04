@@ -1,6 +1,10 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 #![warn(clippy::pedantic)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::must_use_candidate)]
+#![allow(unused_results)]
 
 //!
 //! The mu runtime library is the implementation surface for the [`mu programming environment`](<https://github.com/Software-Knife-and-Tool/mu>) and
@@ -55,11 +59,6 @@ mod streams;
 mod types;
 mod vectors;
 
-use {
-    crate::core::{core_::CORE, exception},
-    std::fs,
-};
-
 ///
 /// The library API exposes these types:
 /// - Condition, enumeration of exceptional conditions
@@ -69,13 +68,12 @@ use {
 /// - Mu, environment and API namespace
 /// - Result, specialized result for failable API functions
 /// - Tag, tagged data representation
-///
+///   tagged data representation
+pub type Mu = mu::Mu;
 /// tagged data representation
 pub type Tag = core::tag::Tag;
-/// Mu library API
-pub type Mu = core::mu::Mu;
 /// Environment
-pub type Env = core::mu::Env;
+pub type Env = core::env::Env;
 /// Exception condition enumeration
 pub type Condition = core::exception::Condition;
 /// Environment configuration
@@ -86,115 +84,187 @@ pub type Exception = core::exception::Exception;
 pub type Result<T> = core::exception::Result<T>;
 
 /// API namespace
-impl Mu {
-    /// version
-    pub fn version() -> &'static str {
-        env!("CARGO_PKG_VERSION")
-    }
+pub mod mu {
+    use {
+        crate::{
+            core::{
+                apply::Apply,
+                compiler::Compiler,
+                config::Config,
+                core_::CORE,
+                env::Env,
+                exception::{self, Condition, Exception},
+                tag::Tag,
+            },
+            reader::read::Reader,
+            streams::{builder::StreamBuilder, writer::StreamWriter},
+            types::stream::Stream,
+        },
+        std::fs,
+    };
 
-    /// environment configuration constructor
-    pub fn config(config: Option<String>) -> Config {
-        Config::new(config)
-    }
+    pub struct Mu;
 
-    /// env constructor
-    pub fn env(config: &Config) -> Env {
-        Self::make_env_(config)
-    }
+    impl Mu {
+        /// version
+        pub fn version() -> &'static str {
+            env!("CARGO_PKG_VERSION")
+        }
 
-    /// apply a function to a list of arguments
-    pub fn apply(env: Env, func: Tag, args: Tag) -> exception::Result<Tag> {
-        Self::apply_(env, func, args)
-    }
+        /// Environment configuration constructor
+        pub fn config(config: Option<String>) -> Config {
+            Config::new(config)
+        }
 
-    /// compile an s-expression
-    pub fn compile(env: Env, expr: Tag) -> exception::Result<Tag> {
-        Self::compile_(env, expr)
-    }
+        /// env constructor
+        pub fn env(config: &Config) -> Env {
+            Env::new(config)
+        }
 
-    /// test tagged s-expressions for strict equality
-    pub fn eq(tag: Tag, tag1: Tag) -> bool {
-        tag.eq_(&tag1)
-    }
+        /// apply a function to a list of arguments
+        pub fn apply(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
+            Apply::apply(env, func, args)
+        }
 
-    /// evaluate an s-expression
-    pub fn eval(env: Env, expr: Tag) -> exception::Result<Tag> {
-        Self::eval_(env, expr)
-    }
+        /// compile an s-expression
+        pub fn compile(env: &Env, expr: Tag) -> exception::Result<Tag> {
+            Compiler::compile(env, expr, &mut vec![])
+        }
 
-    /// eval &str
-    pub fn eval_str(env: Env, expr: &str) -> exception::Result<Tag> {
-        Self::eval(env, Self::compile(env, Self::read_str(env, expr)?)?)
-    }
+        /// test tagged s-expressions for strict equality
+        pub fn eq(tag: Tag, tag1: Tag) -> bool {
+            tag.eq_(&tag1)
+        }
 
-    /// read a mu s-expression from a core stream
-    pub fn read(env: Env, stream: Tag, err: bool, eof: Tag) -> exception::Result<Tag> {
-        Self::read_(env, stream, err, eof)
-    }
+        /// evaluate an s-expression
+        pub fn eval(env: &Env, expr: Tag) -> exception::Result<Tag> {
+            Apply::eval(env, expr)
+        }
 
-    /// read a mu s-expression from &str
-    pub fn read_str(env: Env, str: &str) -> exception::Result<Tag> {
-        Self::read_str_(env, str)
-    }
+        /// eval &str
+        pub fn eval_str(env: &Env, expr: &str) -> exception::Result<Tag> {
+            Self::eval(env, Self::compile(env, Self::read_str(env, expr)?)?)
+        }
 
-    /// write a mu s-expression to a core stream
-    pub fn write(env: Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        Self::write_(env, expr, escape, stream)
-    }
+        /// read a mu s-expression from a core stream
+        pub fn read(env: &Env, stream: Tag, err: bool, eof: Tag) -> exception::Result<Tag> {
+            Self::read_(env, stream, err, eof)
+        }
 
-    /// write a mu &str to a core stream
-    pub fn write_str(env: Env, str: &str, stream: Tag) -> exception::Result<()> {
-        Self::write_str_(env, str, stream)
-    }
+        /// read a mu s-expression from &str
+        pub fn read_str(env: &Env, str: &str) -> exception::Result<Tag> {
+            Self::read_str_(env, str)
+        }
 
-    /// write a mu s-expression to a String
-    pub fn write_to_string(env: Env, expr: Tag, esc: bool) -> String {
-        Self::write_to_string_(env, expr, esc)
-    }
+        /// write a mu s-expression to a core stream
+        pub fn write(env: &Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+            Self::write_(env, expr, escape, stream)
+        }
 
-    /// return the standard-input core stream
-    pub fn std_in() -> Tag {
-        CORE.stdio.0
-    }
+        /// write a mu &str to a core stream
+        pub fn write_str(env: &Env, str: &str, stream: Tag) -> exception::Result<()> {
+            Self::write_str_(env, str, stream)
+        }
 
-    /// return the standard-output core stream
-    pub fn std_out() -> Tag {
-        CORE.stdio.1
-    }
+        /// write a mu s-expression to a String
+        pub fn write_to_string(env: &Env, expr: Tag, esc: bool) -> String {
+            Self::write_to_string_(env, expr, esc)
+        }
 
-    /// return the error-output core stream
-    pub fn err_out() -> Tag {
-        CORE.stdio.2
-    }
+        /// return the standard-input core stream
+        pub fn std_in() -> Tag {
+            CORE.stdio.0
+        }
 
-    /// format exception
-    pub fn exception_string(env: Env, ex: &Exception) -> String {
-        Self::exception_string_(env, ex)
-    }
+        /// return the standard-output core stream
+        pub fn std_out() -> Tag {
+            CORE.stdio.1
+        }
 
-    /// load source file
-    pub fn load(env: Env, file_path: &str) -> exception::Result<bool> {
-        if fs::metadata(file_path).is_ok() {
-            let load_form = format!("(mu:open :file :input \"{file_path}\" :t)");
-            let istream = Self::eval(env, Self::read_str(env, &load_form)?)?;
-            let eof_value = Self::eval(env, Self::read_str(env, "(mu:make-symbol \"eof\")")?)?;
+        /// return the error-output core stream
+        pub fn err_out() -> Tag {
+            CORE.stdio.2
+        }
 
-            loop {
-                let form = Self::read_(env, istream, false, eof_value)?;
+        /// format exception
+        pub fn exception_string(env: &Env, ex: &Exception) -> String {
+            Self::exception_string_(env, ex)
+        }
 
-                if Self::eq(form, eof_value) {
-                    break Ok(true);
+        /// load source file
+        pub fn load(env: &Env, file_path: &str) -> exception::Result<bool> {
+            if fs::metadata(file_path).is_ok() {
+                let load_form = format!("(mu:open :file :input \"{file_path}\" :t)");
+                let istream = Self::eval(env, Self::read_str(env, &load_form)?)?;
+                let eof_value = Self::eval(env, Self::read_str(env, "(mu:make-symbol \"eof\")")?)?;
+
+                loop {
+                    let form = Self::read_(env, istream, false, eof_value)?;
+
+                    if Self::eq(form, eof_value) {
+                        break Ok(true);
+                    }
+
+                    Self::eval(env, Self::compile(env, form)?)?;
                 }
-
-                Self::eval(env, Self::compile(env, form)?)?;
+            } else {
+                Self::err_(
+                    env,
+                    Condition::Open,
+                    "load",
+                    Self::read_str(env, &format!("\"{file_path}\""))?,
+                )
             }
-        } else {
-            Self::err_(
-                env,
-                Condition::Open,
-                "load",
-                Self::read_str(env, &format!("\"{file_path}\""))?,
+        }
+
+        pub fn read_(
+            env: &Env,
+            stream: Tag,
+            eof_error_p: bool,
+            eof_value: Tag,
+        ) -> exception::Result<Tag> {
+            env.read(stream, eof_error_p, eof_value, false)
+        }
+
+        pub fn read_str_(env: &Env, str: &str) -> exception::Result<Tag> {
+            let stream = StreamBuilder::new()
+                .string(str.into())
+                .input()
+                .build(env, &CORE)?;
+
+            env.read(stream, true, Tag::nil(), false)
+        }
+
+        pub fn write_(env: &Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+            StreamWriter::write(env, expr, escape, stream)
+        }
+
+        pub fn write_str_(env: &Env, str: &str, stream: Tag) -> exception::Result<()> {
+            StreamWriter::write_str(env, str, stream)
+        }
+
+        pub fn write_to_string_(env: &Env, expr: Tag, esc: bool) -> String {
+            let stream = StreamBuilder::new()
+                .string(String::new())
+                .output()
+                .build(env, &CORE)
+                .unwrap();
+
+            StreamWriter::write(env, expr, esc, stream).unwrap();
+            Stream::get_string(env, stream).unwrap()
+        }
+
+        pub fn exception_string_(env: &Env, ex: &Exception) -> String {
+            format!(
+                "error: condition {:?} on {} raised by {}",
+                ex.condition,
+                Self::write_to_string(env, ex.object, true),
+                Self::write_to_string(env, ex.source, true),
             )
+        }
+
+        pub fn err_(env: &Env, cond: Condition, source: &str, obj: Tag) -> exception::Result<bool> {
+            Err(Exception::err(env, obj, cond, source))
         }
     }
 }

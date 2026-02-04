@@ -313,7 +313,7 @@ pub trait CoreFn {
 
 impl CoreFn for Cons {
     fn mu_append(env: &Env, fp: &mut Frame) -> exception::Result<()> {
-        env.argv_check("mu:car", &[Type::List], fp)?;
+        env.argv_check("mu:append", &[Type::List], fp)?;
 
         let lists = fp.argv[0];
 

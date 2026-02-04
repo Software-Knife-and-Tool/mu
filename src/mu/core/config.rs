@@ -49,7 +49,7 @@ impl ConfigBuilder {
         }
     }
 
-    pub fn map_json(term: &str, json: &JsonValue) -> Option<JsonValue> {
+    fn map_json(term: &str, json: &JsonValue) -> Option<JsonValue> {
         match json {
             JsonValue::Object(object) => object
                 .iter()
@@ -62,7 +62,7 @@ impl ConfigBuilder {
         }
     }
 
-    pub fn gc_mode(&mut self) -> &mut Self {
+    fn gc_mode(&mut self) -> &mut Self {
         let mode = Self::map_json("gc-mode", &self.json);
 
         self.gc_mode = match mode {
@@ -78,7 +78,7 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn npages(&mut self) -> &mut Self {
+    fn npages(&mut self) -> &mut Self {
         let npages = Self::map_json("pages", &self.json);
 
         self.npages = match npages.unwrap() {
@@ -95,15 +95,15 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn build(&self) -> Config {
+    fn build(&self) -> Config {
         let mut config: Config = Config::default();
 
-        if self.npages.is_some() {
-            config.npages = self.npages.unwrap();
+        if let Some(npages) = self.npages {
+            config.npages = npages;
         }
 
-        if self.gc_mode.is_some() {
-            config.gc_mode = self.gc_mode.unwrap();
+        if let Some(gc_mode) = self.gc_mode {
+            config.gc_mode = gc_mode;
         }
 
         config
