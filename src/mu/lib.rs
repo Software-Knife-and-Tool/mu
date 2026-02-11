@@ -5,6 +5,7 @@
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::must_use_candidate)]
 #![allow(unused_results)]
+#![cfg(not(doctest))]
 
 //! # Mu
 //!
@@ -107,34 +108,6 @@ pub mod mu {
 
     /// the Mu namespace
     pub struct Mu;
-
-            /// Create an Env configuration from a JSON string.
-        ///
-        /// returns an initialized Config struct, see CONFIG.md for
-        /// details. a Config is needed to create an Env to operate
-        /// the interesting parts of the API.
-        ///
-        /// # Panics
-        ///
-        /// will panic for unrecognized config keywords.
-        /// (think about an mforge config string checker)
-        ///
-        /// # Examples
-        ///
-        /// ```
-        /// // create an Env configuration. the JSON string argument
-        /// // is an Option<String>, None returns the library default
-        /// // configuration.
-        ///
-        /// use mu::{Mu, Config};
-        ///
-        /// // capture default Config
-        ///
-        /// let config: Config = Mu::config(None);
-        /// ```
-        pub fn config(config: Option<String>) -> Config {
-            Config::new(config)
-        }
 
     /// About the Mu API
     ///
