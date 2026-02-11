@@ -132,7 +132,7 @@ pub mod mu {
     ///       evaluation, and printing of mu forms from/to Rust strings And
     ///       core streams.
     ///
-    /// #Example
+    /// # Example
     ///
     /// ```
     /// use mu::{Mu, Env, Exception, Condition, Config};
@@ -167,7 +167,7 @@ pub mod mu {
         pub fn nil() -> Tag {
             Tag::nil()
         }
-        
+
         /// Create an Env configuration from a JSON string.
         ///
         /// returns an initialized Config struct, see CONFIG.md for
@@ -279,7 +279,7 @@ pub mod mu {
         pub fn eval(env: &Env, expr: Tag) -> exception::Result<Tag> {
             Apply::eval(env, Self::compile(env, expr)?)
         }
-        
+
         /// Read a mu form from a str, compile and evaluate it.
         ///
         /// returns a tagged mu form Result.
@@ -328,7 +328,7 @@ pub mod mu {
         pub fn read(env: &Env, stream: Tag, err: bool, eof: Tag) -> exception::Result<Tag> {
             env.read(stream, err, eof, false)
         }
-            
+
         /// Read a mu tagged form from a &str.
         ///
         /// returns a mu tagged form Result. leaks a string stream.
@@ -417,7 +417,7 @@ pub mod mu {
             StreamWriter::write(env, expr, esc, stream).unwrap();
             Stream::get_string(env, stream).unwrap()
         }
-        
+
         /// Return Env's standard-input core stream binding.
         ///
         /// returns a mu tagged form.
