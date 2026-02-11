@@ -173,7 +173,8 @@ The `/opt/mu` directory is hardwired into several tools and the release mechanis
 ```
 version 0.2.10 is built with rustc 1.89.0
 version 0.2.11 and 0.2.12 are built with rustc 1.90.0
-version 0.2.13, 0.2.14, and 0.2.15 are built with rustc 1.91.1
+version 0.2.13 and 0.2.14 are built with rustc 1.91.1
+version 0.2.15 is built with rustc 1.93.0
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility.
@@ -294,11 +295,11 @@ Profiling is nascent and will be expanded in future releases.
 
 The *mu* distribution includes a tool for running and interacting with the system. 
 
-The  *repl* binary is part of a release, found at `/opt/mu/bin/repl`.
+The *mrepl* binary is part of a release, found at `/opt/mu/bin/mrepl`.
 
-*repl*  has no command line arguments. It is configured by an optional JSON file, *.repl*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/repl`.
+*mrepl*  has no command line arguments. It is configured by an optional JSON file, *.mrepl*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *rc* argument supplies the name of a file to load on startup. Examples of both of these files can be found in `/opt/mu/lib/mrepl`.
 
-*repl* will run without either of *.repl* or an rc file.
+*mrepl* will run without either of *.mrepl* or an rc file.
 
 ```
 {
@@ -370,7 +371,7 @@ The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory 
 ```
 /opt/mu/bin
 ├── mforge		# development tool
-├── repl		# runtime binary, stdio repl
+├── mrepl		# runtime binary, stdio repl
 ├── mu-exec		# image executor
 ├── mu-server	# runtime binary, socket repl
 └── mu-sys		# runtime binary
@@ -392,26 +393,3 @@ OPTIONS:
   [file ...]           load source file(s)
 ```
 
-
-
-#### System Configuration
-
-------
-
-The *mu* runtime can be configured to use a variable number of system resources, currently the number of pages of memory allocated to the heap at startup. The behavior of the garbage collector can also be specified, though garbage collection control is still mostly unimplemented.
-
- The *-c* option to the various runtimes is a JSON string of named attribute values:
-
-```
-npages:	number				pages of virtual memory for the heap
-gc-mode: "none" | "auto"	how the garbage collector operates
-```
-
-Usage: (*mu-server*, *mu-ld*, and *mu-exec* have similar options)
-
-```
-mu-sys -c '{ "pages": 256, "gc-mode": "none" }'		
-									256 heap pages, garbage collection disabled
-mu-sys -c '{ "pages": 1024, "gc-mode": "auto" }'
-									default configuration
-```

@@ -7,7 +7,7 @@ help:
 	@echo "mu project makefile -----------------"
 	@echo "    world - compile for release and build distribution"
 	@echo "    release - compile for release"
-	@echo "	   dist - build distribution (needed for testing debug builds)"
+	@echo "    dist - build distribution (needed for testing debug builds)"
 	@echo "    install - install distribution system-wide (may need sudo)"
 	@echo "    uninstall - uninstall distribution system-wide (may need sudo)"
 

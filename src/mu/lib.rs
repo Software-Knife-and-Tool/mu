@@ -6,8 +6,9 @@
 #![allow(clippy::must_use_candidate)]
 #![allow(unused_results)]
 
+//! # Mu
 //!
-//! The mu runtime library is the implementation surface for the [`mu programming environment`](<https://github.com/Software-Knife-and-Tool/mu>) and
+//! The *mu* library is the implementation surface for the [`mu programming environment`](<https://github.com/Software-Knife-and-Tool/mu>) and
 //! provides the *mu* and *feature* namespaces.
 //!
 //! *mu* is an immutable, lexically scoped Lisp-1 runtime kernel and porting layer for an ascending tower of
@@ -27,6 +28,7 @@
 //!    - thread safe
 //!    - asynchronous I/O
 //!    - s-expression reader/printer
+//!    - quasiquote reader syntax
 //!    - symbol namespaces
 //!
 //! Data types:
@@ -103,130 +105,274 @@ pub mod mu {
         std::fs,
     };
 
+    /// the Mu namespace
     pub struct Mu;
 
-    impl Mu {
-        /// version
-        pub fn version() -> &'static str {
-            env!("CARGO_PKG_VERSION")
-        }
-
-        /// Environment configuration constructor
+            /// Create an Env configuration from a JSON string.
+        ///
+        /// returns an initialized Config struct, see CONFIG.md for
+        /// details. a Config is needed to create an Env to operate
+        /// the interesting parts of the API.
+        ///
+        /// # Panics
+        ///
+        /// will panic for unrecognized config keywords.
+        /// (think about an mforge config string checker)
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// // create an Env configuration. the JSON string argument
+        /// // is an Option<String>, None returns the library default
+        /// // configuration.
+        ///
+        /// use mu::{Mu, Config};
+        ///
+        /// // capture default Config
+        ///
+        /// let config: Config = Mu::config(None);
+        /// ```
         pub fn config(config: Option<String>) -> Config {
             Config::new(config)
         }
 
-        /// env constructor
+    /// About the Mu API
+    ///
+    /// Using the API:
+    ///
+    ///   1. create an Env configuration.
+    ///
+    ///      - from a JSON string
+    ///      - the default
+    ///
+    ///      see CONFIG.md for details. a Config is needed to create
+    ///      an Env to operate the interesting parts of the API.
+    ///
+    ///    2. create an Env from that Config for use in subsequent API
+    ///       calls.
+    ///
+    ///    3. Many API functions return a specialized Result. The Err return
+    ///       supplies an Exception that can be printed with the supplied
+    ///       convenience function.
+    ///
+    ///    4. The API supports the reading, compilation of special forms,
+    ///       evaluation, and printing of mu forms from/to Rust strings And
+    ///       core streams.
+    ///
+    /// #Example
+    ///
+    /// ```
+    /// use mu::{Mu, Env, Exception, Condition, Config};
+    ///
+    /// // capture default Config
+    /// let config: Config = Mu::config(None);
+    ///
+    /// // capture default Env
+    /// let env: Env = Mu::env(config);
+    /// ```
+    impl Mu {
+        /// Returns the library version as a &str.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // capture library semver string
+        /// let version: &str = Mu::version();
+        /// ```
+        pub fn version() -> &'static str {
+            env!("CARGO_PKG_VERSION")
+        }
+
+        /// Returns the nil tagged mu form.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // capture ()
+        /// let nil: Tag = Mu::nil();
+        /// ```
+        pub fn nil() -> Tag {
+            Tag::nil()
+        }
+        
+        /// Create an Env configuration from a JSON string.
+        ///
+        /// returns an initialized Config struct, see CONFIG.md for
+        /// details. a Config is needed to create an Env to operate
+        /// the interesting parts of the API.
+        ///
+        /// # Panics
+        ///
+        /// will panic for unrecognized config keywords.
+        /// (think about an mforge config string checker)
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // create an Env configuration. the JSON string argument
+        /// // is an Option<String>, None returns the library default
+        /// // configuration.
+        ///
+        /// // capture default Config
+        /// let config: Config = Mu::config(None);
+        /// ```
+        pub fn config(config: Option<String>) -> Config {
+            Config::new(config)
+        }
+
+        /// Create an Env from a Config.
+        ///
+        /// returns an Env struct.
+        ///
+        /// # Panics
+        ///
+        /// will panic for a variety of reasons, mostly heap-related
+        /// allocation and initialization problems.
+        ///
+        /// # Example
+        ///
+        /// create an Env with the library default configuration.
+        ///
+        /// ```
+        /// // capture default Env
+        /// let env: Env = Mu::env(Mu::config(None));
+        /// ```
         pub fn env(config: &Config) -> Env {
             Env::new(config)
         }
 
-        /// apply a function to a list of arguments
-        pub fn apply(env: &Env, func: Tag, args: Tag) -> exception::Result<Tag> {
-            Apply::apply(env, func, args)
-        }
-
-        /// compile an s-expression
+        /// Compile a tagged mu form to a tagged form Result.
+        ///
+        /// returns a tagged mu form Result.
+        ///
+        /// # Panics
+        ///
+        /// will panic for internal consistency problems or a heap exhausted condition.
+        ///
+        /// # Example
+        ///
+        /// Read a lambda definition and compile it to a function..
+        ///
+        /// ```
+        /// // capture identity anonymous function
+        /// let identity: Tag = Mu::compile(env, Mu::read_str(env, "(:lambda (a) a)").umwrap()).unwrap();
+        /// ```
         pub fn compile(env: &Env, expr: Tag) -> exception::Result<Tag> {
             Compiler::compile(env, expr, &mut vec![])
         }
 
-        /// test tagged s-expressions for strict equality
+        /// Test two compiled mu forms for identity.
+        ///
+        /// returns a bool.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // affirm () eq itself
+        /// let nil: Tag = Mu::nil(env);
+        /// let is_eq: bool = Mu::eq(nil, nil);
+        ///
+        /// assert(is_eq);
+        /// ```
         pub fn eq(tag: Tag, tag1: Tag) -> bool {
             tag.eq_(&tag1)
         }
 
-        /// evaluate an s-expression
+        /// Compile and evaluate a mu form.
+        ///
+        /// returns a tagged mu form Result.
+        ///
+        /// Note: only special forms and forms containing special forms
+        /// require prior compilation. Compiling function calls and
+        /// constant forms simply returns the form at a slight mu
+        /// function call overhead.
+        ///
+        /// # Errors
+        ///
+        /// - compile exception
+        /// - eval exception
+        ///
+        /// # Panics
+        ///
+        /// will panic for a variety of reasons, mostly heap-related
+        /// allocation and internal consistency problems.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // capture mu fixnum form 2 by calling mu add function
+        /// let two: Tag = Mu::eval(Mu::read_str(env, "(mu:add 1 1)").unwrap()).unwrap();
+        /// ```
         pub fn eval(env: &Env, expr: Tag) -> exception::Result<Tag> {
-            Apply::eval(env, expr)
+            Apply::eval(env, Self::compile(env, expr)?)
         }
-
-        /// eval &str
+        
+        /// Read a mu form from a str, compile and evaluate it.
+        ///
+        /// returns a tagged mu form Result.
+        ///
+        /// # Errors
+        ///
+        /// - reader exception
+        /// - compiler exception
+        /// - eval exception
+        ///
+        /// # Panics
+        ///
+        /// will panic for a variety of reasons, mostly heap-related
+        /// allocation and internal consistency problems.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // compute 2 and capture fixnum tag
+        /// let two = Mu::eval_str(env, "(mu:add 1 1)").unwrap();
+        /// ```
         pub fn eval_str(env: &Env, expr: &str) -> exception::Result<Tag> {
-            Self::eval(env, Self::compile(env, Self::read_str(env, expr)?)?)
+            Self::eval(env, Self::read_str(env, expr)?)
         }
 
-        /// read a mu s-expression from a core stream
+        /// Read a mu form from a core stream.
+        ///
+        /// returns a tagged mu form Result. Optionally assert exception on stream EOF.
+        ///
+        /// # Errors
+        ///
+        /// - stream exception
+        /// - reader exception
+        ///
+        /// # Panics
+        ///
+        /// will panic for a variety of reasons, mostly heap-related
+        /// allocation and initialization problems.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // read a form from stdin and capture it
+        /// let form = Mu::read(env, Mu::std_in(env), true, Mu::nil()).unwrap();
+        /// ```
         pub fn read(env: &Env, stream: Tag, err: bool, eof: Tag) -> exception::Result<Tag> {
-            Self::read_(env, stream, err, eof)
+            env.read(stream, err, eof, false)
         }
-
-        /// read a mu s-expression from &str
+            
+        /// Read a mu tagged form from a &str.
+        ///
+        /// returns a mu tagged form Result. leaks a string stream.
+        /// (persistant string streamn vaeiant?)
+        ///
+        /// # Panics
+        ///
+        /// will panic for a variety of reasons, mostly heap-related
+        /// allocation and core consistency problems.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // capture the mu car symbol
+        /// let car: Tag = Mu::read_str(env, "mu:car").unwrap();
+        /// ```
         pub fn read_str(env: &Env, str: &str) -> exception::Result<Tag> {
-            Self::read_str_(env, str)
-        }
-
-        /// write a mu s-expression to a core stream
-        pub fn write(env: &Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-            Self::write_(env, expr, escape, stream)
-        }
-
-        /// write a mu &str to a core stream
-        pub fn write_str(env: &Env, str: &str, stream: Tag) -> exception::Result<()> {
-            Self::write_str_(env, str, stream)
-        }
-
-        /// write a mu s-expression to a String
-        pub fn write_to_string(env: &Env, expr: Tag, esc: bool) -> String {
-            Self::write_to_string_(env, expr, esc)
-        }
-
-        /// return the standard-input core stream
-        pub fn std_in() -> Tag {
-            CORE.stdio.0
-        }
-
-        /// return the standard-output core stream
-        pub fn std_out() -> Tag {
-            CORE.stdio.1
-        }
-
-        /// return the error-output core stream
-        pub fn err_out() -> Tag {
-            CORE.stdio.2
-        }
-
-        /// format exception
-        pub fn exception_string(env: &Env, ex: &Exception) -> String {
-            Self::exception_string_(env, ex)
-        }
-
-        /// load source file
-        pub fn load(env: &Env, file_path: &str) -> exception::Result<bool> {
-            if fs::metadata(file_path).is_ok() {
-                let load_form = format!("(mu:open :file :input \"{file_path}\" :t)");
-                let istream = Self::eval(env, Self::read_str(env, &load_form)?)?;
-                let eof_value = Self::eval(env, Self::read_str(env, "(mu:make-symbol \"eof\")")?)?;
-
-                loop {
-                    let form = Self::read_(env, istream, false, eof_value)?;
-
-                    if Self::eq(form, eof_value) {
-                        break Ok(true);
-                    }
-
-                    Self::eval(env, Self::compile(env, form)?)?;
-                }
-            } else {
-                Self::err_(
-                    env,
-                    Condition::Open,
-                    "load",
-                    Self::read_str(env, &format!("\"{file_path}\""))?,
-                )
-            }
-        }
-
-        pub fn read_(
-            env: &Env,
-            stream: Tag,
-            eof_error_p: bool,
-            eof_value: Tag,
-        ) -> exception::Result<Tag> {
-            env.read(stream, eof_error_p, eof_value, false)
-        }
-
-        pub fn read_str_(env: &Env, str: &str) -> exception::Result<Tag> {
             let stream = StreamBuilder::new()
                 .string(str.into())
                 .input()
@@ -235,15 +381,60 @@ pub mod mu {
             env.read(stream, true, Tag::nil(), false)
         }
 
-        pub fn write_(env: &Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
+        /// Write a mu tagged form to a core stream..
+        ///
+        /// returns the argument in a Result.
+        ///
+        /// # Panic
+        ///
+        /// - stream exception
+        /// - writer exception
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // write :nil to stdout, capture ()
+        /// let nil: Tag = Mu::write(env, Mu::nil(), false, Mu::std_out()).unwrap();
+        /// ```
+        pub fn write(env: &Env, expr: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
             StreamWriter::write(env, expr, escape, stream)
         }
 
-        pub fn write_str_(env: &Env, str: &str, stream: Tag) -> exception::Result<()> {
+        /// Write a mu tagged form to a core stream..
+        ///
+        /// returns () in a Result.
+        ///
+        /// # Panics
+        ///
+        /// - stream exception
+        /// - writer exception
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // write "foo" to stdout
+        /// Mu::write_str(env, "foo", Mu::std_out()).unwrap();
+        /// ```
+        pub fn write_str(env: &Env, str: &str, stream: Tag) -> exception::Result<()> {
             StreamWriter::write_str(env, str, stream)
         }
 
-        pub fn write_to_string_(env: &Env, expr: Tag, esc: bool) -> String {
+        /// Write a mu tagged form to a String.
+        ///
+        /// returns a String. leaks a string stream.
+        ///
+        /// # Panics
+        ///
+        /// will panic for a variety of reasons, mostly heap-related
+        /// allocation and initialization problems.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // write a mu tagged string to a String with quotes.
+        /// let quoted_string = Mu::write_to_string(env, Mu::read_str(env, "\"astring\"").unwrap(), true);
+        /// ```
+        pub fn write_to_string(env: &Env, expr: Tag, esc: bool) -> String {
             let stream = StreamBuilder::new()
                 .string(String::new())
                 .output()
@@ -253,8 +444,50 @@ pub mod mu {
             StreamWriter::write(env, expr, esc, stream).unwrap();
             Stream::get_string(env, stream).unwrap()
         }
+        
+        /// Return Env's standard-input core stream binding.
+        ///
+        /// returns a mu tagged form.
+        ///
+        /// ```
+        /// let std_in = Mu::std_in(env);
+        /// ```
+        pub fn std_in() -> Tag {
+            CORE.stdio.0
+        }
 
-        pub fn exception_string_(env: &Env, ex: &Exception) -> String {
+        /// Return Env's standard-output core stream binding.
+        ///
+        /// returns a mu tagged form.
+        ///
+        /// ```
+        /// let std_out = Mu::std_out(env);
+        /// ```
+        pub fn std_out() -> Tag {
+            CORE.stdio.1
+        }
+
+        /// Return Env's error-out core stream binding.
+        ///
+        /// returns a mu tagged form.
+        ///
+        /// ```
+        /// let err_out = Mu::err_out(env);
+        /// ```
+        pub fn err_out() -> Tag {
+            CORE.stdio.2
+        }
+
+        /// Create a string from an Exception.
+        ///
+        /// returns a String
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// eprintln!("{}", Mu::exception_string(env: &Envl, ex: &Exception));
+        /// ```
+        pub fn exception_string(env: &Env, ex: &Exception) -> String {
             format!(
                 "error: condition {:?} on {} raised by {}",
                 ex.condition,
@@ -263,8 +496,44 @@ pub mod mu {
             )
         }
 
-        pub fn err_(env: &Env, cond: Condition, source: &str, obj: Tag) -> exception::Result<bool> {
-            Err(Exception::err(env, obj, cond, source))
+        /// Load a file by filename.
+        ///
+        /// returns a speecialized Result of type bool.
+        ///
+        /// # Panic
+        ///
+        /// will panic for a variety of reasons, mostly heap-related
+        /// allocation and initialization problems.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// // load foo.l, return true for success
+        /// Mu::load(env, "foo.l").unwrap();
+        /// ```
+        pub fn load(env: &Env, file_path: &str) -> exception::Result<bool> {
+            if fs::metadata(file_path).is_ok() {
+                let load_form = format!("(mu:open :file :input \"{file_path}\" :t)");
+                let istream = Self::eval(env, Self::read_str(env, &load_form)?)?;
+                let eof_value = Self::eval(env, Self::read_str(env, "(mu:make-symbol \"eof\")")?)?;
+
+                loop {
+                    let form = Self::read(env, istream, false, eof_value)?;
+
+                    if Self::eq(form, eof_value) {
+                        break Ok(true);
+                    }
+
+                    Self::eval(env, Self::compile(env, form)?)?;
+                }
+            } else {
+                Err(Exception::err(
+                    env,
+                    Self::read_str(env, &format!("\"{file_path}\""))?,
+                    Condition::Open,
+                    "load",
+                ))?
+            }
         }
     }
 }
