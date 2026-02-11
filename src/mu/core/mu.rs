@@ -24,12 +24,6 @@ pub type Env = Tag;
 pub struct Mu;
 
 impl Mu {
-    pub fn make_env_(config: &Config) -> Env {
-        let env = env::Env::new(config);
-
-        Core::add_env(env)
-    }
-
     pub fn apply_(env: Env, func: Tag, args: Tag) -> exception::Result<Tag> {
         let envs_ref = block_on(CORE.envs.read());
         let env_: &env::Env = &envs_ref[&env.as_u64()];

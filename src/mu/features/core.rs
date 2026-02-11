@@ -143,11 +143,6 @@ impl CoreFn for Feature {
             ),
             Cons::cons(
                 env,
-                Vector::from("envs").with_heap(env),
-                Core_::envs_as_list(env),
-            ),
-            Cons::cons(
-                env,
                 Vector::from("streams").with_heap(env),
                 Core_::nstreams(env),
             ),

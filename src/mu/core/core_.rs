@@ -128,7 +128,6 @@ pub type CoreFn = fn(&Env, &mut Frame) -> exception::Result<()>;
 pub type CoreFnDef = (&'static str, u16, CoreFn);
 
 pub struct Core {
-    pub envs: RwLock<HashMap<u64, Env>>,
     pub features: Vec<Feature>,
     pub fn_defs: Vec<CoreFnDef>,
     pub stdio: (Tag, Tag, Tag),
@@ -145,7 +144,6 @@ impl Default for Core {
 impl Core {
     pub fn new() -> Self {
         let mut core = Core {
-            envs: RwLock::new(HashMap::new()),
             fn_defs: FEATURES
                 .features
                 .iter()
@@ -176,26 +174,6 @@ impl Core {
         } else {
             CORE.fn_defs[offset - cf_len]
         }
-    }
-
-    pub fn add_env(env: Env) -> Tag {
-        let mut envs_ref = block_on(CORE.envs.write());
-        let envs_len = envs_ref.len();
-        let id = Symbol::keyword(&format!("{envs_len:06x}"));
-
-        envs_ref.insert(id.as_u64(), env);
-
-        id
-    }
-
-    pub fn envs_as_list(env: &Env) -> Tag {
-        Cons::list(
-            env,
-            &block_on(CORE.envs.read())
-                .keys()
-                .map(|key| Tag::from_slice(&key.to_le_bytes()))
-                .collect::<Vec<Tag>>(),
-        )
     }
 
     pub fn features_as_list(env: &Env) -> Tag {
