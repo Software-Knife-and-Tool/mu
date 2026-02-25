@@ -1,5 +1,6 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
+#![allow(dead_code)]
 use {
     crate::options::{Mode, Opt, Options},
     std::{

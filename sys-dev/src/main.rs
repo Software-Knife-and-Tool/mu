@@ -8,9 +8,6 @@ mod workspace;
 use crate::{
     modules::{
         bench::Bench,
-        check::Check,
-        clean::Clean,
-     //   install::Install,
         commit::Commit,
         regression::Regression,
         symbols::Symbols,
@@ -29,8 +26,7 @@ pub fn usage() {
     println!();
     println!("    workspace init | env               ; manage workspace");
     println!();
-    println!("    dist                               ; build distribution");
-    println!("    check     --config=string          ; check config string");
+    //    println!("    dist                               ; build distribution");
     println!("    bench     base | current | report | clean [--ntests=number] [--all]");
     println!("                                       ; benchmark test suite");
     println!("    regression                         ; regression test suite");
@@ -56,7 +52,7 @@ pub fn main() {
 
     match command {
         "precommit" => Commit::commit(&argv),
-        "check" => Check::check(&argv, ""),
+        //        "check" => Check::check(&argv, ""),
         "version" => Options::version(),
         "workspace" => Workspace::workspace(&argv),
         _ => {
@@ -82,7 +78,7 @@ pub fn main() {
                     usage()
                 }
                 "bench" => Bench::new(&ws).bench(&argv).unwrap(),
-                "dist" => Clean::clean(&argv, &home),
+                //              "dist" => Clean::clean(&argv, &home),
                 "symbols" => Symbols::new(&ws).symbols(&argv).unwrap(),
                 "regression" => Regression::new(&ws).regression(&argv).unwrap(),
                 _ => {

@@ -20,7 +20,7 @@ pub struct Workspace {
 impl Workspace {
     pub fn new(path: &str) -> Self {
         let modules: PathBuf = [path, "sys-dev", "modules"].iter().collect();
-        let bin: PathBuf = [path, "dist"].iter().collect();
+        let bin: PathBuf = [path, "target", "release"].iter().collect();
         let lib: PathBuf = [path, "dist"].iter().collect();
         let tests: PathBuf = [path, "tests"].iter().collect();
         let sysdev: PathBuf = [path, ".sys-dev"].iter().collect();
