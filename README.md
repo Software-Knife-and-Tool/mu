@@ -243,23 +243,20 @@ The *mu* distribution includes tools for configuring and development of the syst
 The  *sys-dev* command is part of a release, found at `/opt/mu/bin/sys-dev`.
 
 ```
-Usage: sys-dev 0.0.18 command [option...]
+Usage: sys-dev 0.0.20 command [option...]
   command:
     help                               ; this message
     version                            ; sys-dev version
 
     workspace init | env               ; manage workspace
-    build     release | profile | debug
-                                       ; build mu system, release default
+
     bench     base | current | report | clean [--ntests=number] [--all]
                                        ; benchmark test suite
     regression                         ; regression test suite
     symbols   reference | crossref | metrics [--namespace=name]
                                        ; symbol reports, namespace 
                                        ; defaults to mu
-    install                            ; (sudo) install mu system-wide
-    clean                              ; clean all artifacts
-    commit                             ; fmt and clippy, pre-commit checking
+    precommit                          ; fmt and clippy, pre-commit checking
 
   general options:
     --verbose                          ; verbose operation
@@ -279,10 +276,10 @@ As you make changes, you can verify correctness and note any performance regress
 Deviations of 20% or so in timing are normal, any changes in storage consumption or a persistent change in timing of an individual test significantly above 20% should be examined.
 
 ```
- sys-dev build release				# build the release version 
- sys-dev regression					# run the regression tests
+ cargo build --release --workspace	# build the release version 
+ sys-dev regression			# run the regression tests
  sys-dev bench current [--ntests=50]	# bench current build
- sys-dev bench report [--all]			# print
+ sys-dev bench report [--all]		# print metric changes
 ```
 
 The `symbols` command prints a list of the symbols in various namespaces and their types.
