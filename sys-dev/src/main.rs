@@ -8,10 +8,10 @@ mod workspace;
 use crate::{
     modules::{
         bench::Bench,
-        build::Build,
+        check::Check,
         clean::Clean,
+     //   install::Install,
         commit::Commit,
-        install::Install,
         regression::Regression,
         symbols::Symbols,
     },
@@ -22,23 +22,21 @@ use crate::{
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn usage() {
-    println!("Usage: mforge {VERSION} command [option...]");
+    println!("Usage: sys-dev {VERSION} command [option...]");
     println!("  command:");
     println!("    help                               ; this message");
-    println!("    version                            ; mforge version");
+    println!("    version                            ; sys-dev version");
     println!();
-
     println!("    workspace init | env               ; manage workspace");
-    println!("    build     release | profile | debug");
-    println!("                                       ; build mu system, release default");
+    println!();
+    println!("    dist                               ; build distribution");
+    println!("    check     --config=string          ; check config string");
     println!("    bench     base | current | report | clean [--ntests=number] [--all]");
     println!("                                       ; benchmark test suite");
     println!("    regression                         ; regression test suite");
     println!("    symbols   reference | crossref | metrics [--namespace=name]");
     println!("                                       ; symbol reports, namespace defaults to mu");
-    println!("    install                            ; (sudo) install mu system-wide");
-    println!("    clean                              ; clean all artifacts");
-    println!("    commit                             ; fmt and clippy, pre-commit checking");
+    println!("    precommit                          ; fmt and clippy, pre-commit checking");
     println!();
     println!("  general options:");
     println!("    --verbose                          ; verbose operation");
@@ -57,7 +55,8 @@ pub fn main() {
     let command = argv[1].as_str();
 
     match command {
-        "commit" => Commit::commit(&argv),
+        "precommit" => Commit::commit(&argv),
+        "check" => Check::check(&argv, ""),
         "version" => Options::version(),
         "workspace" => Workspace::workspace(&argv),
         _ => {
@@ -67,7 +66,7 @@ pub fn main() {
                     let cwd = std::env::current_dir().unwrap();
 
                     eprintln!(
-                        "error: could not find `.mforge` in {:?} or any parent directory",
+                        "error: could not find `.sys-dev` in {:?} or any parent directory",
                         cwd.to_str().unwrap()
                     );
                     std::process::exit(-1)
@@ -78,14 +77,12 @@ pub fn main() {
             match command {
                 "help" => {
                     println!();
-                    println!("    mforge: mu packaging and development tool");
+                    println!("    sys-dev: mu packaging and development tool");
                     println!();
                     usage()
                 }
                 "bench" => Bench::new(&ws).bench(&argv).unwrap(),
-                "build" => Build::build(&argv, &home),
-                "clean" => Clean::clean(&argv, &home),
-                "install" => Install::install(&argv, &home),
+                "dist" => Clean::clean(&argv, &home),
                 "symbols" => Symbols::new(&ws).symbols(&argv).unwrap(),
                 "regression" => Regression::new(&ws).regression(&argv).unwrap(),
                 _ => {

@@ -18,11 +18,6 @@ dist:
 
 release:
 	@cargo build --release --workspace
-	@cp target/release/mforge dist
-	@cp target/release/mrepl dist
-	@cp target/release/mu-exec dist
-	@cp target/release/mu-server dist
-	@cp target/release/mu-sys dist
 
 install:
 	@make -C ./dist -f install.mk install --no-print-directory

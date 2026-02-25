@@ -10,11 +10,12 @@ ns = sys.argv[1]
 ns_path = sys.argv[2]
 ntests = sys.argv[3]
 
-mu_sys = '../../dist/mu-sys'
-
 with open(os.path.join('namespaces', ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
 
 def mem_virt(ns, group, line, test):
+    mu_sys = '../../target/release/mu-sys'
+    core_sys = '../../dist/core.sys'
+
     match ns:
         case 'mu':
             proc = subprocess.Popen([mu_sys,
@@ -32,7 +33,7 @@ def mem_virt(ns, group, line, test):
 
         case 'core':
             proc = subprocess.Popen([mu_sys,
-                                     '-l../../dist/core.sys', 
+                                     '-l' + core_sys, 
                                      '-l./perf.l',
                                      '-e (perf:mem-delta (:lambda () {})'.format(test) + ' :nil)'],\
                                     stdout=subprocess.PIPE,\
@@ -48,7 +49,7 @@ def mem_virt(ns, group, line, test):
 
         case 'common':
             proc = subprocess.Popen([mu_sys,
-                                     '-l../../dist/core.sys',
+                                     '-l' + core_sys,
                                      '-l./perf.l',
                                      '-q (core:%require "{}" "../../mu/modules")'.format('common'),
                                      '-e (perf:mem-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
@@ -62,10 +63,13 @@ def mem_virt(ns, group, line, test):
 
     if len(err) != 0:
         print(f'exception: {ns}/{group}:{line:<5} {err}', file=sys.stderr)
-    
+        
     return None if len(err) != 0 else mem_virt
 
 def storage(ns, group, line, test):
+    mu_sys = '../../target/release/mu-sys'
+    core_sys = '../../dist/core.sys'
+
     match ns:
         case 'mu':
             proc = subprocess.Popen([mu_sys,
@@ -91,7 +95,7 @@ def storage(ns, group, line, test):
 
         case 'core':
             proc = subprocess.Popen([mu_sys,
-                                     '-l../../dist/core.sys', 
+                                     '-l' + core_sys, 
                                      '-l./perf.l',
                                      '-e (perf:storage-delta (:lambda () {})'.format(test) + ' :nil)'],\
                                     stdout=subprocess.PIPE,\
@@ -99,11 +103,11 @@ def storage(ns, group, line, test):
 
         case 'common':
             proc = subprocess.Popen([mu_sys,
-                                     '-l../../dist/core.sys',
+                                     '-l' + core_sys,
                                      '-l./perf.l',
                                      '-q (core:%require "{}" "../../mu/modules")'.format('common'),
                                      '-e (perf:storage-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\
-                                    stdout=subprocess.PIPE,                 \
+                                    stdout=subprocess.PIPE,\
                                     stderr=subprocess.PIPE)
 
     storage_ = proc.stdout.read()[:-1].decode('utf8')
@@ -117,6 +121,9 @@ def storage(ns, group, line, test):
     return None if len(err) != 0 else storage_
 
 def timing(ns, test):
+    mu_sys = '../../target/release/mu-sys'
+    core_sys = '../../dist/core.sys'
+
     match ns:
         case 'mu':
             proc = subprocess.Popen([mu_sys,
@@ -134,7 +141,7 @@ def timing(ns, test):
 
         case 'core':
             proc = subprocess.Popen([mu_sys,
-                                     '-l../../dist/core.sys',
+                                     '-l' + core_sys,
                                      '-l./perf.l',
                                      '-e (perf:time-delta (:lambda () {})'.format(test) + ' :nil)'],\
                                     stdout=subprocess.PIPE,\
@@ -150,7 +157,7 @@ def timing(ns, test):
 
         case 'common':
             proc = subprocess.Popen([mu_sys,
-                                     '-l../../dist/core.sys',
+                                     '-l' + core.sys,
                                      '-l./perf.l',
                                      '-q (core:%require "{}" "../../mu/modules")'.format('common'),
                                      '-e (perf:time-delta (:lambda () (core:eval \'{})'.format(test) + ') :nil)'],\

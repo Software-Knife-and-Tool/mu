@@ -8,7 +8,7 @@ import subprocess
 
 ntests = sys.argv[1]
 
-mu_cmd = '../../dist/mu-sys'
+mu_cmd = '../../target/release/mu-sys'
 time_cmd = 'time'
 format = '"%S %U %e %M %w %Z'
 

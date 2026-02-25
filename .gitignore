@@ -1,14 +1,15 @@
 *.out
 *.sys
 *.fasl
-.mforge
+.sys-dev
 .dir-locals.el
 TAGS
 Cargo.lock
 dist/mu*.tgz
 dist/mu-*
-dist/forge
 dist/*.l
+dist/*.fasl
+dist/*.sys
 dist/VERSION
 doc/rustdoc
 tools/valgrind/*.report

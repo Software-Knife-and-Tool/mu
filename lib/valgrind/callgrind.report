@@ -1,0 +1,365 @@
+==85929== Callgrind, a call-graph generating cache profiler
+==85929== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==85929== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+==85929== Command: ../../dist/mu-sys -q ((:lambda\ (g)\ (mu:apply\ g\ (mu:cons\ g\ (mu:cons\ 101010101\ (mu:cons\ 11011\ ())))))\ (:lambda\ (g\ a\ b)\ (:if\ (mu:eq\ 0\ b)\ a\ (mu:apply\ g\ (mu:cons\ g\ (mu:cons\ b\ (mu:cons\ (mu:sub\ a\ (mu:mul\ b\ (mu:div\ a\ b)))\ ())))))))\ 
+==85929== 
+==85929== For interactive control, run 'callgrind_control -h'.
+==85929== 
+==85929== Events    : Ir
+==85929== Collected : 2337830
+==85929== 
+==85929== I   refs:      2,337,830
+--------------------------------------------------------------------------------
+Profile data file 'callgrind.out.85929' (creator: callgrind-3.25.1)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 426067
+Trigger: Program termination
+Profiled target:  ../../dist/mu-sys -q ((:lambda (g) (mu:apply g (mu:cons g (mu:cons 101010101 (mu:cons 11011 ()))))) (:lambda (g a b) (:if (mu:eq 0 b) a (mu:apply g (mu:cons g (mu:cons b (mu:cons (mu:sub a (mu:mul b (mu:div a b))) ())))))))  (PID 85929, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                 
+--------------------------------------------------------------------------------
+2,337,830 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                file:function
+--------------------------------------------------------------------------------
+303,621 (12.99%)  ???:futures_lite::future::block_on [/vol/projects/mu/dist/mu-sys]
+185,846 ( 7.95%)  ???:core::hash::BuildHasher::hash_one [/vol/projects/mu/dist/mu-sys]
+159,311 ( 6.81%)  ???:futures_locks::rwlock::RwLock<T>::unlock_reader [/vol/projects/mu/dist/mu-sys]
+150,745 ( 6.45%)  ???:mu::core::tag::Tag::type_of [/vol/projects/mu/dist/mu-sys]
+106,727 ( 4.57%)  ???:<core::hash::sip::Hasher<S> as core::hash::Hasher>::write [/vol/projects/mu/dist/mu-sys]
+ 77,070 ( 3.30%)  ./elf/./elf/dl-lookup.c:do_lookup_x [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 70,720 ( 3.03%)  ???:futures_locks::rwlock::RwLock<T>::unlock_writer [/vol/projects/mu/dist/mu-sys]
+ 49,088 ( 2.10%)  ???:mu::types::cons::Cons::destruct [/vol/projects/mu/dist/mu-sys]
+ 46,420 ( 1.99%)  ./stdio-common/./stdio-common/vfscanf-internal.c:__vfscanf_internal [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 40,050 ( 1.71%)  ???:mu::streams::reader::StreamReader::read_char [/vol/projects/mu/dist/mu-sys]
+ 36,992 ( 1.58%)  ???:core::ptr::drop_in_place<<alloc::collections::vec_deque::drain::Drain<T,A> as core::ops::drop::Drop>::drop::DropGuard<futures_channel::oneshot::Sender<()>,alloc::alloc::Global>> [/vol/projects/mu/dist/mu-sys]
+ 36,846 ( 1.58%)  ???:mu::types::stream::Stream::is_open [/vol/projects/mu/dist/mu-sys]
+ 36,447 ( 1.56%)  ???:mu::namespaces::heap::Heap::alloc [/vol/projects/mu/dist/mu-sys]
+ 35,103 ( 1.50%)  ???:<mu::core::env::Env as mu::core::apply::Apply>::apply'2 [/vol/projects/mu/dist/mu-sys]
+ 29,817 ( 1.28%)  ???:mu::types::vector::Vector::with_heap [/vol/projects/mu/dist/mu-sys]
+ 29,388 ( 1.26%)  ./elf/../sysdeps/x86_64/dl-machine.h:_dl_relocate_object_no_relro
+ 26,560 ( 1.14%)  ./elf/./elf/dl-lookup.c:_dl_lookup_symbol_x [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 25,581 ( 1.09%)  ./elf/./elf/dl-reloc.c:_dl_relocate_object_no_relro [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 24,113 ( 1.03%)  ./string/../sysdeps/x86_64/multiarch/../multiarch/strcmp-sse2.S:strcmp [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 23,098 ( 0.99%)  ./stdlib/../stdlib/strtol_l.c:____strtoul_l_internal [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 22,962 ( 0.98%)  ./elf/../sysdeps/generic/dl-new-hash.h:_dl_lookup_symbol_x
+ 22,487 ( 0.96%)  ???:_rjem_je_arena_cache_bin_fill_small [/vol/projects/mu/dist/mu-sys]
+ 22,019 ( 0.94%)  ???:_rjem_sdallocx [/vol/projects/mu/dist/mu-sys]
+ 21,061 ( 0.90%)  ???:mu::core::frame::Frame::apply'2 [/vol/projects/mu/dist/mu-sys]
+ 20,524 ( 0.88%)  ???:_rjem_malloc [/vol/projects/mu/dist/mu-sys]
+ 19,376 ( 0.83%)  ???:mu::reader::readtable::SyntaxType::map_char_syntax [/vol/projects/mu/dist/mu-sys]
+ 17,923 ( 0.77%)  ???:<mu::core::env::Env as mu::core::apply::Apply>::eval'2 [/vol/projects/mu/dist/mu-sys]
+ 17,797 ( 0.76%)  ./elf/./elf/dl-lookup.c:check_match [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 17,408 ( 0.74%)  ???:core::ptr::drop_in_place<alloc::collections::vec_deque::drain::Drain<futures_channel::oneshot::Sender<()>>> [/vol/projects/mu/dist/mu-sys]
+ 17,041 ( 0.73%)  ./elf/./elf/do-rel.h:_dl_relocate_object_no_relro
+ 15,808 ( 0.68%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockReadFut<mu::namespaces::heap::Heap>> [/vol/projects/mu/dist/mu-sys]
+ 15,498 ( 0.66%)  ???:_rjem_je_edata_heap_remove_first [/vol/projects/mu/dist/mu-sys]
+ 15,446 ( 0.66%)  ???:base_alloc_impl [/vol/projects/mu/dist/mu-sys]
+ 14,868 ( 0.64%)  ???:mu::types::vector::Vector::to_image [/vol/projects/mu/dist/mu-sys]
+ 13,861 ( 0.59%)  ???:core::str::converts::from_utf8 [/vol/projects/mu/dist/mu-sys]
+ 13,854 ( 0.59%)  ???:<mu::core::env::Env as mu::reader::read::Reader>::read_atom [/vol/projects/mu/dist/mu-sys]
+ 13,002 ( 0.56%)  ???:mu::core::core_::Core::map_core_function [/vol/projects/mu/dist/mu-sys]
+ 12,932 ( 0.55%)  ???:mu::streams::reader::StreamReader::unread_char [/vol/projects/mu/dist/mu-sys]
+ 12,784 ( 0.55%)  ???:mu::core::direct::DirectTag::cons_destruct [/vol/projects/mu/dist/mu-sys]
+ 11,772 ( 0.50%)  ???:mu::types::vector::Vector::as_string [/vol/projects/mu/dist/mu-sys]
+ 11,564 ( 0.49%)  ???:<mu::core::env::Env as mu::core::apply::Apply>::argv_check [/vol/projects/mu/dist/mu-sys]
+ 11,312 ( 0.48%)  ???:mu::streams::system::SystemStream::read_byte [/vol/projects/mu/dist/mu-sys]
+ 10,764 ( 0.46%)  ???:<mu::core::frame::Frame as mu::core::frame::CoreFn>::mu_frame_ref [/vol/projects/mu/dist/mu-sys]
+ 10,764 ( 0.46%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockReadFut<std::collections::hash::map::HashMap<u64,futures_locks::rwlock::RwLock<mu::types::stream::Stream>>>> [/vol/projects/mu/dist/mu-sys]
+ 10,715 ( 0.46%)  ???:hashbrown::map::HashMap<K,V,S,A>::insert [/vol/projects/mu/dist/mu-sys]
+ 10,011 ( 0.43%)  ???:mu::types::cons::Cons::with_heap [/vol/projects/mu/dist/mu-sys]
+  9,921 ( 0.42%)  ./elf/./elf/dl-version.c:_dl_check_map_versions [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+  9,862 ( 0.42%)  ???:hashbrown::raw::RawTable<T,A>::reserve_rehash [/vol/projects/mu/dist/mu-sys]
+  9,480 ( 0.41%)  ???:mu::types::function::Function::destruct [/vol/projects/mu/dist/mu-sys]
+  9,444 ( 0.40%)  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  9,122 ( 0.39%)  ???:_rjem_je_sc_data_init [/vol/projects/mu/dist/mu-sys]
+  8,809 ( 0.38%)  ???:_rjem_je_eset_fit [/vol/projects/mu/dist/mu-sys]
+  7,894 ( 0.34%)  ???:mu::types::symbol::Symbol::to_image [/vol/projects/mu/dist/mu-sys]
+  7,388 ( 0.32%)  ???:<alloc::string::String as core::iter::traits::collect::FromIterator<&char>>::from_iter [/vol/projects/mu/dist/mu-sys]
+  7,046 ( 0.30%)  ./nptl/./nptl/pthread_mutex_trylock.c:pthread_mutex_trylock@@GLIBC_2.34 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  7,009 ( 0.30%)  ./elf/./elf/dl-tunables.c:__GI___tunables_init [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+  6,925 ( 0.30%)  ???:extent_recycle [/vol/projects/mu/dist/mu-sys]
+  6,285 ( 0.27%)  ???:<std::collections::hash::map::HashMap<K,V,S> as core::iter::traits::collect::FromIterator<(K,V)>>::from_iter [/vol/projects/mu/dist/mu-sys]
+  6,014 ( 0.26%)  ???:<alloc::vec::Vec<T> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<T,I>>::from_iter [/vol/projects/mu/dist/mu-sys]
+  5,872 ( 0.25%)  ???:_rjem_je_edata_heap_new [/vol/projects/mu/dist/mu-sys]
+  5,768 ( 0.25%)  ???:mu::types::symbol::Symbol::new [/vol/projects/mu/dist/mu-sys]
+  5,755 ( 0.25%)  ./nptl/./nptl/pthread_mutex_unlock.c:pthread_mutex_unlock@@GLIBC_2.2.5 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  5,747 ( 0.25%)  ???:_rjem_je_sz_boot [/vol/projects/mu/dist/mu-sys]
+  5,671 ( 0.24%)  ???:<mu::vectors::image::VecImageType as mu::vectors::image::VecImage>::with_heap [/vol/projects/mu/dist/mu-sys]
+  5,616 ( 0.24%)  ???:do_rallocx [/vol/projects/mu/dist/mu-sys]
+  5,562 ( 0.24%)  ???:_rjem_je_eset_init [/vol/projects/mu/dist/mu-sys]
+  5,421 ( 0.23%)  ???:_rjem_je_arena_ralloc [/vol/projects/mu/dist/mu-sys]
+  5,382 ( 0.23%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockReadFut<mu::types::stream::Stream>> [/vol/projects/mu/dist/mu-sys]
+  5,382 ( 0.23%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockWriteFut<mu::types::stream::Stream>> [/vol/projects/mu/dist/mu-sys]
+  5,325 ( 0.23%)  ???:_rjem_je_emap_update_edata_state [/vol/projects/mu/dist/mu-sys]
+  5,222 ( 0.22%)  ./string/../sysdeps/x86_64/multiarch/memcmp-avx2-movbe.S:__memcmp_avx2_movbe [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  5,204 ( 0.22%)  ???:mu::types::cons::Cons::read'2 [/vol/projects/mu/dist/mu-sys]
+  5,032 ( 0.22%)  ???:<mu::core::env::Env as mu::reader::read::Reader>::read'2 [/vol/projects/mu/dist/mu-sys]
+  4,848 ( 0.21%)  ???:mu::namespaces::namespace::Namespace::find_symbol [/vol/projects/mu/dist/mu-sys]
+  4,339 ( 0.19%)  ???:mu_sys::main [/vol/projects/mu/dist/mu-sys]
+  4,312 ( 0.18%)  ???:mu::types::symbol::Symbol::with_heap [/vol/projects/mu/dist/mu-sys]
+  4,293 ( 0.18%)  ???:<core::str::pattern::CharSearcher as core::str::pattern::Searcher>::next_match [/vol/projects/mu/dist/mu-sys]
+  4,140 ( 0.18%)  ./libio/./libio/genops.c:_IO_sputbackc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  4,111 ( 0.18%)  ???:mu::vectors::image::<impl core::convert::From<&str> for mu::types::vector::Vector>::from [/vol/projects/mu/dist/mu-sys]
+  4,028 ( 0.17%)  ???:_rjem_je_emap_split_prepare [/vol/projects/mu/dist/mu-sys]
+  3,861 ( 0.17%)  ???:mu::types::symbol::Symbol::destruct [/vol/projects/mu/dist/mu-sys]
+  3,783 ( 0.16%)  ???:_rjem_je_arena_ralloc_no_move [/vol/projects/mu/dist/mu-sys]
+  3,762 ( 0.16%)  ???:extent_split_impl.isra.0 [/vol/projects/mu/dist/mu-sys]
+  3,630 ( 0.16%)  ???:alloc::raw_vec::RawVecInner<A>::finish_grow [/vol/projects/mu/dist/mu-sys]
+  3,576 ( 0.15%)  ???:<mu::core::env::Env as mu::reader::read::Reader>::read_ws [/vol/projects/mu/dist/mu-sys]
+  3,484 ( 0.15%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockWriteFut<mu::namespaces::heap::Heap>> [/vol/projects/mu/dist/mu-sys]
+  3,448 ( 0.15%)  ???:_rjem_je_emap_remap [/vol/projects/mu/dist/mu-sys]
+  3,367 ( 0.14%)  ./libio/./libio/iogetdelim.c:getdelim [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  3,302 ( 0.14%)  ./elf/../sysdeps/x86/dl-cacheinfo.h:intel_check_word.constprop.0 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+  3,247 ( 0.14%)  ???:mu::core::compiler::Compiler::compile'2 [/vol/projects/mu/dist/mu-sys]
+  3,230 ( 0.14%)  ???:_rjem_je_eset_insert [/vol/projects/mu/dist/mu-sys]
+  3,133 ( 0.13%)  ???:mu::core::frame::Frame::frame_stack_push [/vol/projects/mu/dist/mu-sys]
+  3,096 ( 0.13%)  ???:<mu::vectors::image::VecImageType as mu::vectors::image::VecImage>::ref_ [/vol/projects/mu/dist/mu-sys]
+  2,975 ( 0.13%)  ???:mu::core::compiler::Compiler::list'2 [/vol/projects/mu/dist/mu-sys]
+  2,929 ( 0.13%)  ???:mu::namespaces::namespace::Namespace::with_static [/vol/projects/mu/dist/mu-sys]
+  2,775 ( 0.12%)  ???:_rjem_je_eset_remove [/vol/projects/mu/dist/mu-sys]
+  2,679 ( 0.11%)  ???:_rjem_je_malloc_mutex_init [/vol/projects/mu/dist/mu-sys]
+  2,626 ( 0.11%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockWriteFut<alloc::collections::vec_deque::VecDeque<u8>>> [/vol/projects/mu/dist/mu-sys]
+  2,577 ( 0.11%)  ???:_rjem_je_ecache_alloc_grow [/vol/projects/mu/dist/mu-sys]
+  2,566 ( 0.11%)  ???:_rjem_je_pa_alloc [/vol/projects/mu/dist/mu-sys]
+  2,515 ( 0.11%)  ./elf/./elf/dl-tunables.h:__GI___tunables_init
+  2,364 ( 0.10%)  ???:mu::core::frame::Frame::frame_stack_len [/vol/projects/mu/dist/mu-sys]
+  2,332 ( 0.10%)  ???:<mu::core::env::Env as mu::core::apply::CoreFn>::mu_apply'2 [/vol/projects/mu/dist/mu-sys]
+  2,280 ( 0.10%)  ./elf/./elf/dl-load.c:_dl_map_object_from_fd [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+  2,257 ( 0.10%)  ???:arena_slab_alloc [/vol/projects/mu/dist/mu-sys]
+  2,230 ( 0.10%)  ???:_rjem_je_sz_psz_quantize_ceil [/vol/projects/mu/dist/mu-sys]
+  2,207 ( 0.09%)  ./string/../sysdeps/x86_64/multiarch/memchr-avx2.S:__memchr_avx2 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  2,138 ( 0.09%)  ???:_rjem_je_malloc_default [/vol/projects/mu/dist/mu-sys]
+  2,131 ( 0.09%)  ???:_rjem_je_edata_heap_insert [/vol/projects/mu/dist/mu-sys]
+  2,120 ( 0.09%)  ???:mu::core::tag::Tag::data [/vol/projects/mu/dist/mu-sys]
+  2,100 ( 0.09%)  ???:_rjem_je_sz_psz_quantize_floor [/vol/projects/mu/dist/mu-sys]
+  2,017 ( 0.09%)  ./elf/./elf/dl-cache.c:_dl_cache_libcmp [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+  1,995 ( 0.09%)  ./nptl/./nptl/pthread_mutex_init.c:pthread_mutex_init@@GLIBC_2.2.5 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  1,992 ( 0.09%)  ./elf/../bits/stdlib-bsearch.h:intel_check_word.constprop.0
+  1,908 ( 0.08%)  ???:_rjem_je_emap_register_interior [/vol/projects/mu/dist/mu-sys]
+  1,908 ( 0.08%)  ???:mu::streams::stream::<impl mu::streams::system::SystemStream>::close [/vol/projects/mu/dist/mu-sys]
+  1,873 ( 0.08%)  ???:core::num::dec2flt::<impl core::str::traits::FromStr for f32>::from_str [/vol/projects/mu/dist/mu-sys]
+  1,834 ( 0.08%)  ???:core::ptr::drop_in_place<std::collections::hash::map::HashMap<alloc::string::String,mu::core::tag::Tag>> [/vol/projects/mu/dist/mu-sys]
+  1,792 ( 0.08%)  ???:alloc::raw_vec::RawVecInner<A>::reserve::do_reserve_and_handle [/vol/projects/mu/dist/mu-sys]
+  1,786 ( 0.08%)  ???:pac_alloc_real [/vol/projects/mu/dist/mu-sys]
+  1,774 ( 0.08%)  ???:mu::types::vector::Vector::type_of [/vol/projects/mu/dist/mu-sys]
+  1,762 ( 0.08%)  ???:_rjem_je_tcache_boot [/vol/projects/mu/dist/mu-sys]
+  1,740 ( 0.07%)  ???:mu::core::frame::Frame::frame_stack_pop [/vol/projects/mu/dist/mu-sys]
+  1,710 ( 0.07%)  ./libio/./libio/strops.c:_IO_str_init_static_internal [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  1,710 ( 0.07%)  ./stdio-common/./stdio-common/isoc23_sscanf.c:__isoc23_sscanf [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  1,700 ( 0.07%)  ???:hashbrown::raw::RawTableInner::fallible_with_capacity [/vol/projects/mu/dist/mu-sys]
+  1,634 ( 0.07%)  ???:_rjem_je_emap_split_commit [/vol/projects/mu/dist/mu-sys]
+  1,634 ( 0.07%)  ???:pac_alloc_impl [/vol/projects/mu/dist/mu-sys]
+  1,521 ( 0.07%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockReadFut<std::collections::hash::map::HashMap<u64,alloc::vec::Vec<mu::core::frame::Frame>>>> [/vol/projects/mu/dist/mu-sys]
+  1,488 ( 0.06%)  ???:mu::types::struct_::Struct::destruct [/vol/projects/mu/dist/mu-sys]
+  1,421 ( 0.06%)  ./elf/./elf/dl-deps.c:_dl_map_object_deps [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+  1,414 ( 0.06%)  ./string/../sysdeps/x86_64/multiarch/strlen-avx2.S:__strlen_avx2 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  1,392 ( 0.06%)  ???:mu::namespaces::namespace::Namespace::intern [/vol/projects/mu/dist/mu-sys]
+  1,314 ( 0.06%)  ./elf/./elf/rtld.c:dl_main [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+  1,290 ( 0.06%)  ./elf/../sysdeps/generic/ldsodefs.h:do_lookup_x
+  1,287 ( 0.06%)  ???:_rjem_realloc [/vol/projects/mu/dist/mu-sys]
+  1,263 ( 0.05%)  ???:__popcountdi2 [/vol/projects/mu/dist/mu-sys]
+  1,253 ( 0.05%)  ???:core::ptr::drop_in_place<mu::types::vector::Vector> [/vol/projects/mu/dist/mu-sys]
+  1,238 ( 0.05%)  ./malloc/./malloc/malloc.c:_int_malloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  1,237 ( 0.05%)  ./nptl/./nptl/pthread_getattr_np.c:pthread_getattr_np@@GLIBC_2.32 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  1,209 ( 0.05%)  ???:_rjem_je_edata_cache_get [/vol/projects/mu/dist/mu-sys]
+  1,184 ( 0.05%)  ???:core::ptr::drop_in_place<alloc::collections::vec_deque::VecDeque<futures_channel::oneshot::Sender<()>>> [/vol/projects/mu/dist/mu-sys]
+  1,157 ( 0.05%)  ./libio/./libio/genops.c:_IO_no_init [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  1,132 ( 0.05%)  ./elf/./elf/dl-misc.c:_dl_name_match_p [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+  1,106 ( 0.05%)  ./libio/./libio/genops.c:_IO_old_init [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  1,089 ( 0.05%)  ???:malloc_init_hard_a0_locked [/vol/projects/mu/dist/mu-sys]
+  1,080 ( 0.05%)  ./stdio-common/../include/scratch_buffer.h:__vfscanf_internal
+  1,054 ( 0.05%)  ./elf/../sysdeps/generic/dl-protected.h:do_lookup_x
+  1,034 ( 0.04%)  ???:<mu::types::fixnum::Fixnum as mu::types::fixnum::CoreFn>::mu_fxdiv [/vol/projects/mu/dist/mu-sys]
+  1,028 ( 0.04%)  ???:mu_sys::options [/vol/projects/mu/dist/mu-sys]
+  1,008 ( 0.04%)  ???:mu::namespaces::namespace::Namespace::find_ns [/vol/projects/mu/dist/mu-sys]
+    999 ( 0.04%)  ???:_rjem_je_edata_heap_remove [/vol/projects/mu/dist/mu-sys]
+    991 ( 0.04%)  ./elf/./elf/get-dynamic-info.h:_dl_map_object_from_fd
+    988 ( 0.04%)  ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:__memset_avx2_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    988 ( 0.04%)  ???:_rjem_je_tcache_bin_flush_stashed [/vol/projects/mu/dist/mu-sys]
+    988 ( 0.04%)  ???:tcache_init.isra.0 [/vol/projects/mu/dist/mu-sys]
+    957 ( 0.04%)  ???:_rjem_je_arena_choose_hard [/vol/projects/mu/dist/mu-sys]
+    936 ( 0.04%)  ???:<mu::types::cons::Cons as mu::types::cons::CoreFn>::mu_cons [/vol/projects/mu/dist/mu-sys]
+    917 ( 0.04%)  ???:<core::iter::adapters::flatten::FlatMap<I,U,F> as core::iter::traits::iterator::Iterator>::next [/vol/projects/mu/dist/mu-sys]
+    906 ( 0.04%)  ./libio/./libio/genops.c:_IO_setb [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    897 ( 0.04%)  ???:_rjem_je_base_alloc_edata [/vol/projects/mu/dist/mu-sys]
+    884 ( 0.04%)  ???:_rjem_je_tcache_alloc_small_hard [/vol/projects/mu/dist/mu-sys]
+    880 ( 0.04%)  ???:mu::core::core_::Core::new [/vol/projects/mu/dist/mu-sys]
+    869 ( 0.04%)  ???:<mu::types::fixnum::Fixnum as mu::types::fixnum::CoreFn>::mu_fxsub [/vol/projects/mu/dist/mu-sys]
+    862 ( 0.04%)  ???:mu::core::dynamic::Dynamic::dynamic_push [/vol/projects/mu/dist/mu-sys]
+    859 ( 0.04%)  ???:_rjem_je_bin_info_boot [/vol/projects/mu/dist/mu-sys]
+    851 ( 0.04%)  ???:<mu::core::compiler::Compiler as mu::core::compiler::CoreFn>::mu_if'2 [/vol/projects/mu/dist/mu-sys]
+    841 ( 0.04%)  ./elf/../sysdeps/generic/ldsodefs.h:_dl_relocate_object_no_relro
+    836 ( 0.04%)  ???:<mu::types::fixnum::Fixnum as mu::types::fixnum::CoreFn>::mu_fxmul [/vol/projects/mu/dist/mu-sys]
+    814 ( 0.03%)  ???:_rjem_je_edata_heap_first [/vol/projects/mu/dist/mu-sys]
+    798 ( 0.03%)  ???:_rjem_je_ecache_alloc [/vol/projects/mu/dist/mu-sys]
+    787 ( 0.03%)  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:mempcpy [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    781 ( 0.03%)  ./malloc/./malloc/malloc.c:__ptmalloc_init
+    780 ( 0.03%)  ???:_rjem_je_hook_invoke_alloc [/vol/projects/mu/dist/mu-sys]
+    751 ( 0.03%)  ./elf/./elf/dl-object.c:_dl_new_object [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    741 ( 0.03%)  ./nptl/./nptl/pthread_mutexattr_settype.c:pthread_mutexattr_settype@@GLIBC_2.34 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    702 ( 0.03%)  ???:_rjem_je_hook_invoke_dalloc [/vol/projects/mu/dist/mu-sys]
+    698 ( 0.03%)  ???:mu::core::compiler::Compiler::lambda [/vol/projects/mu/dist/mu-sys]
+    687 ( 0.03%)  ???:_rjem_je_pages_boot [/vol/projects/mu/dist/mu-sys]
+    684 ( 0.03%)  ???:_rjem_je_bin_init [/vol/projects/mu/dist/mu-sys]
+    677 ( 0.03%)  ./elf/./elf/dl-tunables.c:__tunable_get_val [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    677 ( 0.03%)  ???:_rjem_je_bitmap_init [/vol/projects/mu/dist/mu-sys]
+    670 ( 0.03%)  ???:_rjem_je_base_new [/vol/projects/mu/dist/mu-sys]
+    656 ( 0.03%)  ???:_rjem_je_cache_bin_init [/vol/projects/mu/dist/mu-sys]
+    650 ( 0.03%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockWriteFut<alloc::vec::Vec<(u64,usize)>>> [/vol/projects/mu/dist/mu-sys]
+    650 ( 0.03%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockWriteFut<std::collections::hash::map::HashMap<u64,alloc::vec::Vec<mu::core::frame::Frame>>>> [/vol/projects/mu/dist/mu-sys]
+    646 ( 0.03%)  ???:alloc::raw_vec::RawVec<T,A>::grow_one [/vol/projects/mu/dist/mu-sys]
+    637 ( 0.03%)  ./nptl/./nptl/libc-cleanup.c:__libc_cleanup_push_defer [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    630 ( 0.03%)  ./stdio-common/../libio/strfile.h:__isoc23_sscanf
+    630 ( 0.03%)  ./stdio-common/./stdio-common/printf-parse.h:__vfscanf_internal
+    624 ( 0.03%)  ???:mu::types::vector::Vector::ref_ [/vol/projects/mu/dist/mu-sys]
+    612 ( 0.03%)  ./elf/./dl-find_object.h:_dl_find_object_from_map [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    596 ( 0.03%)  ./elf/./elf/dl-minimal-malloc.c:__minimal_malloc [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    591 ( 0.03%)  ./elf/./elf/dl-cache.c:_dl_load_cache_lookup [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    586 ( 0.03%)  ???:_rjem_je_arena_boot [/vol/projects/mu/dist/mu-sys]
+    580 ( 0.02%)  ./misc/../sysdeps/unix/sysv/linux/mmap64.c:mmap [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    576 ( 0.02%)  ???:mu::types::fixnum::Fixnum::with_i64 [/vol/projects/mu/dist/mu-sys]
+    576 ( 0.02%)  ???:std::sys::sync::once::futex::Once::call [/vol/projects/mu/dist/mu-sys]
+    575 ( 0.02%)  ???:mu::core::dynamic::Dynamic::dynamic_pop [/vol/projects/mu/dist/mu-sys]
+    559 ( 0.02%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockReadFut<std::collections::hash::map::HashMap<(mu::core::type_::Type,i32),futures_locks::rwlock::RwLock<alloc::vec::Vec<mu::core::tag::Tag>>>>> [/vol/projects/mu/dist/mu-sys]
+    559 ( 0.02%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockWriteFut<std::collections::hash::map::HashMap<(mu::core::type_::Type,i32),futures_locks::rwlock::RwLock<alloc::vec::Vec<mu::core::tag::Tag>>>>> [/vol/projects/mu/dist/mu-sys]
+    536 ( 0.02%)  ./elf/./elf/dl-hwcaps_split.c:_dl_hwcaps_split_masked [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    528 ( 0.02%)  ./string/../sysdeps/x86_64/multiarch/../multiarch/strchr-sse2.S:index [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    502 ( 0.02%)  ./string/../sysdeps/x86_64/multiarch/../multiarch/strlen-sse2.S:strlen [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    500 ( 0.02%)  ./string/../sysdeps/x86_64/multiarch/../multiarch/memset-vec-unaligned-erms.S:memset [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    491 ( 0.02%)  ???:_rjem_je_decay_init [/vol/projects/mu/dist/mu-sys]
+    490 ( 0.02%)  ./nptl/./nptl/libc-cleanup.c:__libc_cleanup_pop_restore [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    480 ( 0.02%)  ./elf/../sysdeps/x86/dl-cacheinfo.h:handle_intel.constprop.0 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    472 ( 0.02%)  ???:_rjem_je_nstime_copy [/vol/projects/mu/dist/mu-sys]
+    468 ( 0.02%)  ./elf/./elf/dl-load.c:_dl_lookup_map [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    468 ( 0.02%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockReadFut<std::collections::hash::map::HashMap<alloc::string::String,(mu::core::tag::Tag,mu::namespaces::namespace::Namespace)>>> [/vol/projects/mu/dist/mu-sys]
+    450 ( 0.02%)  ./stdlib/../stdlib/strtol.c:__strtoul_internal [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    444 ( 0.02%)  ???:_rjem_je_extent_commit_zero [/vol/projects/mu/dist/mu-sys]
+    429 ( 0.02%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockReadFut<alloc::vec::Vec<mu::core::tag::Tag>>> [/vol/projects/mu/dist/mu-sys]
+    429 ( 0.02%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockWriteFut<alloc::vec::Vec<mu::core::tag::Tag>>> [/vol/projects/mu/dist/mu-sys]
+    405 ( 0.02%)  ./elf/./dl-map-segments.h:_dl_map_object_from_fd
+    389 ( 0.02%)  ./elf/./elf/dl-load.c:open_verify.constprop.0 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    384 ( 0.02%)  ./elf/./elf/dl-load.c:open_path [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    384 ( 0.02%)  ./elf/./elf/rtld.c:_dl_start [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    381 ( 0.02%)  ???:_rjem_je_arena_new [/vol/projects/mu/dist/mu-sys]
+    378 ( 0.02%)  ./elf/./get-dynamic-info.h:dl_main
+    362 ( 0.02%)  ???:__cpu_indicator_init [/usr/lib/x86_64-linux-gnu/libgcc_s.so.1]
+    356 ( 0.02%)  ./elf/./elf/dl-load.c:_dl_map_new_object [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    354 ( 0.02%)  ???:mu::core::compiler::Compiler::compile_lambda [/vol/projects/mu/dist/mu-sys]
+    338 ( 0.01%)  ???:core::ptr::drop_in_place<futures_locks::rwlock::RwLockReadFut<mu::namespaces::cache::Cache>> [/vol/projects/mu/dist/mu-sys]
+    332 ( 0.01%)  ./elf/./elf/dl-sort-maps.c:_dl_sort_maps [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    314 ( 0.01%)  ./elf/./dl-tls_block_align.h:_dl_allocate_tls_storage
+    308 ( 0.01%)  ./elf/./elf/dl-load.c:_dl_init_paths [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    308 ( 0.01%)  ./elf/./elf/dl-sort-maps.c:dfs_traversal.part.0 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    300 ( 0.01%)  ???:_rjem_je_edata_heap_empty [/vol/projects/mu/dist/mu-sys]
+    298 ( 0.01%)  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:memcpy [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    298 ( 0.01%)  ???:<mu::core::tag::Tag as mu::core::tag::CoreFn>::mu_eq [/vol/projects/mu/dist/mu-sys]
+    292 ( 0.01%)  ./misc/./misc/getauxval.c:getauxval [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    290 ( 0.01%)  ???:std::env::args [/vol/projects/mu/dist/mu-sys]
+    288 ( 0.01%)  ???:_rjem_je_div_init [/vol/projects/mu/dist/mu-sys]
+    288 ( 0.01%)  ???:mu::streams::stream::<impl mu::streams::system::SystemStream>::open_std_stream [/vol/projects/mu/dist/mu-sys]
+    287 ( 0.01%)  ./stdlib/./stdlib/getenv.c:getenv [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    285 ( 0.01%)  ???:mu::types::cons::Cons::nth [/vol/projects/mu/dist/mu-sys]
+    278 ( 0.01%)  ???:mu::core::compiler::Compiler::compile_if [/vol/projects/mu/dist/mu-sys]
+    271 ( 0.01%)  ./elf/./get-dynamic-info.h:_dl_start
+    270 ( 0.01%)  ???:mu::types::fixnum::Fixnum::with_usize [/vol/projects/mu/dist/mu-sys]
+    268 ( 0.01%)  ./elf/./elf/dl-lookup-direct.c:_dl_lookup_direct [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    265 ( 0.01%)  ???:mu::vectors::image::<impl core::convert::From<alloc::vec::Vec<mu::core::tag::Tag>> for mu::types::vector::Vector>::from [/vol/projects/mu/dist/mu-sys]
+    264 ( 0.01%)  ./elf/./elf/dl-catch.c:_dl_catch_exception [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    262 ( 0.01%)  ???:mu::core::compiler::Compiler::compile_lambda'2 [/vol/projects/mu/dist/mu-sys]
+    258 ( 0.01%)  ./elf/../sysdeps/x86/dl-cacheinfo.h:init_cpu_features.constprop.0
+    258 ( 0.01%)  ???:mu::core::compiler::Compiler::list [/vol/projects/mu/dist/mu-sys]
+    254 ( 0.01%)  ./elf/./elf/dl-init.c:call_init.part.0 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    252 ( 0.01%)  ./string/../string/strcspn.c:strcspn [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    252 ( 0.01%)  ???:mu::types::function::Function::to_image [/vol/projects/mu/dist/mu-sys]
+    251 ( 0.01%)  ./elf/./elf/dl-minimal.c:strsep [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    250 ( 0.01%)  ./elf/./elf/dl-find_object.c:_dlfo_process_initial [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    244 ( 0.01%)  ./elf/./elf/dl-fini.c:_dl_fini [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    244 ( 0.01%)  ???:base_block_alloc.isra.0 [/vol/projects/mu/dist/mu-sys]
+    242 ( 0.01%)  ./elf/./elf/dl-environ.c:_dl_next_ld_env_entry [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    240 ( 0.01%)  ./elf/./elf/dl-tunables.c:__GI___tunable_set_val [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+    240 ( 0.01%)  ???:mu::types::struct_::Struct::new [/vol/projects/mu/dist/mu-sys]
+    238 ( 0.01%)  ./malloc/./malloc/malloc.c:free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    234 ( 0.01%)  ???:_rjem_je_edata_avail_first [/vol/projects/mu/dist/mu-sys]
+    229 ( 0.01%)  ./elf/./elf/dl-hwcaps.c:_dl_important_hwcaps [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+
+--------------------------------------------------------------------------------
+The following files chosen for auto-annotation could not be found:
+--------------------------------------------------------------------------------
+  ./elf/../bits/stdlib-bsearch.h
+  ./elf/../sysdeps/generic/dl-new-hash.h
+  ./elf/../sysdeps/generic/dl-protected.h
+  ./elf/../sysdeps/generic/ldsodefs.h
+  ./elf/../sysdeps/x86/dl-cacheinfo.h
+  ./elf/../sysdeps/x86_64/dl-machine.h
+  ./elf/./dl-find_object.h
+  ./elf/./dl-map-segments.h
+  ./elf/./dl-tls_block_align.h
+  ./elf/./elf/dl-cache.c
+  ./elf/./elf/dl-catch.c
+  ./elf/./elf/dl-deps.c
+  ./elf/./elf/dl-environ.c
+  ./elf/./elf/dl-find_object.c
+  ./elf/./elf/dl-fini.c
+  ./elf/./elf/dl-hwcaps.c
+  ./elf/./elf/dl-hwcaps_split.c
+  ./elf/./elf/dl-init.c
+  ./elf/./elf/dl-load.c
+  ./elf/./elf/dl-lookup-direct.c
+  ./elf/./elf/dl-lookup.c
+  ./elf/./elf/dl-minimal-malloc.c
+  ./elf/./elf/dl-minimal.c
+  ./elf/./elf/dl-misc.c
+  ./elf/./elf/dl-object.c
+  ./elf/./elf/dl-reloc.c
+  ./elf/./elf/dl-sort-maps.c
+  ./elf/./elf/dl-tunables.c
+  ./elf/./elf/dl-tunables.h
+  ./elf/./elf/dl-version.c
+  ./elf/./elf/do-rel.h
+  ./elf/./elf/get-dynamic-info.h
+  ./elf/./elf/rtld.c
+  ./elf/./get-dynamic-info.h
+  ./libio/./libio/genops.c
+  ./libio/./libio/iogetdelim.c
+  ./libio/./libio/strops.c
+  ./malloc/./malloc/malloc.c
+  ./misc/../sysdeps/unix/sysv/linux/mmap64.c
+  ./misc/./misc/getauxval.c
+  ./nptl/./nptl/libc-cleanup.c
+  ./nptl/./nptl/pthread_getattr_np.c
+  ./nptl/./nptl/pthread_mutex_init.c
+  ./nptl/./nptl/pthread_mutex_trylock.c
+  ./nptl/./nptl/pthread_mutex_unlock.c
+  ./nptl/./nptl/pthread_mutexattr_settype.c
+  ./stdio-common/../include/scratch_buffer.h
+  ./stdio-common/../libio/strfile.h
+  ./stdio-common/./stdio-common/isoc23_sscanf.c
+  ./stdio-common/./stdio-common/printf-parse.h
+  ./stdio-common/./stdio-common/vfscanf-internal.c
+  ./stdlib/../stdlib/strtol.c
+  ./stdlib/../stdlib/strtol_l.c
+  ./stdlib/./stdlib/getenv.c
+  ./string/../string/strcspn.c
+  ./string/../sysdeps/x86_64/multiarch/../multiarch/memset-vec-unaligned-erms.S
+  ./string/../sysdeps/x86_64/multiarch/../multiarch/strchr-sse2.S
+  ./string/../sysdeps/x86_64/multiarch/../multiarch/strcmp-sse2.S
+  ./string/../sysdeps/x86_64/multiarch/../multiarch/strlen-sse2.S
+  ./string/../sysdeps/x86_64/multiarch/memchr-avx2.S
+  ./string/../sysdeps/x86_64/multiarch/memcmp-avx2-movbe.S
+  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S
+  ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S
+  ./string/../sysdeps/x86_64/multiarch/strlen-avx2.S
+

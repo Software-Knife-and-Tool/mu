@@ -16,7 +16,7 @@ impl Clean {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mforge clean: --verbose"),
+                    Some(_) => println!("sys-dev clean: --verbose"),
                     None => (),
                 };
 
@@ -30,7 +30,7 @@ impl Clean {
                         let cwd = std::env::current_dir().unwrap();
 
                         eprintln!(
-                            "error: could not find `.mforge` in {:?} or any parent directory",
+                            "error: could not find `.sys-dev` in {:?} or any parent directory",
                             cwd.to_str().unwrap()
                         );
                         return;

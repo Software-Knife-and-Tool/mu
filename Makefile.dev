@@ -1,7 +1,7 @@
 
 # mu project dev makefile
 #
-.PHONY: help emacs test/base test/current test/report
+.PHONY: help emacs tests/base tests/regression tests/current tests/report
 
 help:
 	@echo "mu project dev makefile -----------------"
