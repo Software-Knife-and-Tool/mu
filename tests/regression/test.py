@@ -6,34 +6,38 @@ ns = sys.argv[1]
 base = sys.argv[2]
 test = sys.argv[3]
 
+mu_sys = '../../target/release/mu-sys'
 with open("namespaces/" + base + '/' + ns + '/' + test) as f: test_source = f.readlines()
 
 def runtest(line, test, expected):
+    mu_sys = '../../target/release/mu-sys'
+    core_sys = '../../dist/core.sys'
+    
     if ns == 'mu':
-        proc = subprocess.Popen(['../../dist/mu-sys',
+        proc = subprocess.Popen([mu_sys,
                                  '-e' + test],             \
                                 stdout=subprocess.PIPE,    \
                                 stderr=subprocess.PIPE)
 
     if ns == 'core':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu_sys,
+                                 '-l' + core_sys,
                                  '-e' + test],             \
                                 stdout=subprocess.PIPE,    \
                                 stderr=subprocess.PIPE)
 
     if ns == 'common':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
-                                 '-l../../dist/common.fasl',
+        proc = subprocess.Popen([mu-sys,
+                                 '-l' + core_sys,
+                                 '-l../../dist/common.fasl,
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
 
     if ns == 'format':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu_sys,
+                                 '-l' + core.sys,
                                  '-l../../dist/format.sys',
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
@@ -41,8 +45,8 @@ def runtest(line, test, expected):
                                 stderr=subprocess.PIPE)
 
     if ns == 'module':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu-sys,
+                                 '-l' + core_sys,
                                  '-l../../dist/module.sys',
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
@@ -50,8 +54,8 @@ def runtest(line, test, expected):
                                 stderr=subprocess.PIPE)
 
     if ns == 'deftype':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu_sys,
+                                 '-l' + core_sys,
                                  '-l../../dist/deftype.sys',
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \

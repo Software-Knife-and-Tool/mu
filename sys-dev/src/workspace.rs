@@ -12,24 +12,24 @@ use {
 pub struct Workspace {
     pub bin: PathBuf,     // workspace bin
     pub lib: PathBuf,     // workspace lib
-    pub mforge: PathBuf,  // mforge module directory
+    pub sysdev: PathBuf,  // sys-dev module directory
     pub modules: PathBuf, // workspace modules
     pub tests: PathBuf,   // workspace tests
 }
 
 impl Workspace {
     pub fn new(path: &str) -> Self {
-        let modules: PathBuf = [path, "src", "mforge", "modules"].iter().collect();
+        let modules: PathBuf = [path, "sys-dev", "modules"].iter().collect();
         let bin: PathBuf = [path, "dist"].iter().collect();
         let lib: PathBuf = [path, "dist"].iter().collect();
         let tests: PathBuf = [path, "tests"].iter().collect();
-        let mforge: PathBuf = [path, ".mforge"].iter().collect();
+        let sysdev: PathBuf = [path, ".sys-dev"].iter().collect();
 
         Self {
             modules,
             bin,
             lib,
-            mforge,
+            sysdev,
             tests,
         }
     }
@@ -39,7 +39,7 @@ impl Workspace {
         loop {
             match Path::read_dir(&cwd) {
                 Ok(mut dir) => match dir.find(|entry| match entry {
-                    Ok(entry) => entry.file_name() == ".mforge",
+                    Ok(entry) => entry.file_name() == ".sys-dev",
                     _ => false,
                 }) {
                     Some(_) => return Some(cwd.to_str().unwrap().to_string()),
@@ -55,17 +55,17 @@ impl Workspace {
         }
     }
 
-    fn mforge_dir_exists(home: &str) -> bool {
-        let path = PathBuf::from(home.to_owned() + "/.mforge");
+    fn sysdev_dir_exists(home: &str) -> bool {
+        let path = PathBuf::from(home.to_owned() + "/.sys-dev");
 
         Path::exists(&path)
     }
 
     fn make_module_dirs(home: &str) -> io::Result<()> {
         let module_paths = [
-            [home, ".mforge", "bench"],
-            [home, ".mforge", "regression"],
-            [home, ".mforge", "symbols"],
+            [home, ".sys-dev", "bench"],
+            [home, ".sys-dev", "regression"],
+            [home, ".sys-dev", "symbols"],
         ];
 
         for path in module_paths {
@@ -118,7 +118,7 @@ impl Workspace {
                             None => (),
                         };
 
-                        if Self::mforge_dir_exists("./") {
+                        if Self::sysdev_dir_exists("./") {
                             eprintln!("workspace already initted.");
                         }
 
@@ -126,7 +126,7 @@ impl Workspace {
                     }
                     Mode::Env => match Self::env() {
                         Some(env) => println!("{env}"),
-                        None => eprintln!("not in an mforge workspace"),
+                        None => eprintln!("not in a sys-dev workspace`"),
                     },
                     _ => panic!(),
                 }

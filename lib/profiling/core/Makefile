@@ -5,7 +5,7 @@
 
 TMPF:=$(shell mktemp)
 BIN = ./scripts
-MU_SYS = ../../../dist/mu-sys
+MU_SYS = ../../../target/release/mu-sys
 
 help:
 	@echo "core library profiling makefile -----------------"

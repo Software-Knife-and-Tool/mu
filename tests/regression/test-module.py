@@ -8,16 +8,21 @@ base = sys.argv[2]
 with open(base + '/' + module + '/tests') as f: group_list = f.readlines()
 
 def runtest(line, group, test, expected):
+    mu_sys = '../../target/release/mu-sys'
+    core_sys = '../../dist/core.sys'
+
+    core_sys = '../../dist/core.sys'
+
     if module == 'core':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu_sys,
+                                 '-l' + core_sys,
                                  '-e' + test],             \
                                 stdout=subprocess.PIPE,    \
                                 stderr=subprocess.PIPE)
 
     if module == 'common':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu_sys,
+                                 '-l' + core_sys,
                                  '-l../../dist/common.fasl',
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
@@ -25,8 +30,8 @@ def runtest(line, group, test, expected):
                                 stderr=subprocess.PIPE)
 
     if module == 'format':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu_sys,
+                                 '-l' + core_sys,
                                  '-l../../dist/format.sys',
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
@@ -34,8 +39,8 @@ def runtest(line, group, test, expected):
                                 stderr=subprocess.PIPE)
 
     if module == 'module':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu_sys,
+                                 '-l' + core_sys,
                                  '-l../../dist/module.sys',
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \
@@ -43,8 +48,8 @@ def runtest(line, group, test, expected):
                                 stderr=subprocess.PIPE)
 
     if module == 'deftype':
-        proc = subprocess.Popen(['../../dist/mu-sys',
-                                 '-l../../dist/core.sys',
+        proc = subprocess.Popen([mu_sys,
+                                 '-l' + core_sys,
                                  '-l../../dist/deftype.sys',
                                  '-e (core:eval \'{})'.format(test),    \
                                  ],                                     \

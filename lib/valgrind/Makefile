@@ -4,7 +4,7 @@
 PHONY: clean
 VALGRIND='((:lambda (g) (mu:apply g (mu:cons g (mu:cons 101010101 (mu:cons 11011 ()))))) (:lambda (g a b) (:if (mu:eq 0 b) a (mu:apply g (mu:cons g (mu:cons b (mu:cons (mu:sub a (mu:mul b (mu:div a b))) ()))))))) '
 
-MU_SYS = ../../dist/mu-sys
+MU_SYS = ../../target/release/mu-sys
 
 help:
 	@echo "valgrind makefile -----------------"

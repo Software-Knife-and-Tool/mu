@@ -14,5 +14,5 @@ use mu::{Config, Mu};
 pub fn main() {
     let env = Mu::env(&Config::new(None));
 
-    repl::repl(&env, "mu".to_string()).expect("repl: listener error");
+    repl::repl(&env, "mu".to_string()).expect("mu-repl: listener error");
 }

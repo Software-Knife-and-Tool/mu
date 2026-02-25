@@ -5,16 +5,60 @@
 
 VERSION := $(shell cargo pkgid | sed 's/.*#//')
 
-BASE = ./mu
+# src
+# ├── lib
+# │   ├── dist
+# │   ├── modules
+# │   │   ├── codegen
+# │   │   ├── common
+# │   │   ├── deftype
+# │   │   └── prelude
+# │   │       └── repl
+# │   └── sys
+# │       ├── core
+# │       ├── fasl
+# │       ├── format
+# │       ├── image
+# │       └── module
+# ├── mu
+# ├── mu-exec
+# ├── mu-repl
+# ├── mu-server
+# └── mu-sys
+#
+# mu
+# ├── bin
+# ├── doc
+# │   └── html
+# ├── lib
+# │   ├── core
+# │   ├── fasl
+# │   ├── format
+# │   ├── image
+# │   └── mrepl
+# ├── modules
+# │   ├── common
+# │   │   ├── describe
+# │   │   └── metrics
+# │   ├── deftype
+# │   └── prelude
+# │       └── repl
+# └── system
+#
+
+RELEASE = ../target/release
+MU = ./mu
 DIST = ../dist
 DOCS = ../doc
-MU = ../mu
 SRC = ../src
-TOOLS = ../tools
+LIB = ../src/lib
 
-BIN = mrepl mforge mu-exec mu-server
+BIN = mu-sys mu-exec mu-server mu-repl sys-dev
+
 SYS = core.sys fasl.sys format.sys image.sys module.sys
-SYSTEM = system.l image.l fasl.l 
+
+SYSTEM = system.l image.l fasl.l
+
 MODULES = 		\
 	common		\
 	common/describe	\
@@ -26,56 +70,44 @@ MODULES = 		\
 dist:
 	@echo $(VERSION) > VERSION
 
-	@install -d $(BASE)	
-	@install -d $(BASE)/bin
-	@install -d $(BASE)/doc
-	@install -d $(BASE)/lib
-	@install -d $(BASE)/modules
+	@install -d $(MU)	$(MU)/bin $(MU)/doc $(MU)/lib $(MU)/modules $(MU)/system
 
-	@install -m 755 mu-sys $(BASE)/bin
-	@for bin in $(BIN); do			\
-	    install -m 755 $$bin $(BASE)/bin;	\
+	@for bin in $(BIN); do					\
+	    install -m 755 $(RELEASE)/$$bin $(MU)/bin;	\
 	done
 
-	@install -d $(BASE)/system
-	@for sys in $(SYSTEM); do		\
-	    install -m 644 $(MU)/dist/$$sys $(BASE)/system;	\
+	@for sys in $(SYSTEM); do					\
+	    install -m 644 $(LIB)/dist/$$sys $(MU)/system;	\
 	done
 
-	@install -d $(BASE)/doc/html
-	@install -m 644 $(DOCS)/refcards/*.pdf $(BASE)/doc
-	@install -m 644 $(DOCS)/refcards/*.docx $(BASE)/doc
-	@install -m 644 $(DOCS)/reference/html/*.html $(BASE)/doc/html
+	@install -d $(MU)/doc/html
+	@install -m 644 $(DOCS)/refcards/*.pdf $(MU)/doc
+	@install -m 644 $(DOCS)/refcards/*.docx $(MU)/doc
+	@install -m 644 $(DOCS)/reference/html/*.html $(MU)/doc/html
 
-	@install -m 644 $(MU)/dist/image.l $(BASE)/lib
+	@install -m 644 -D -t $(MU)/lib/mrepl $(SRC)/mu-repl/lib/*
 
-	@install -m 644 -D -t $(BASE)/lib/mrepl $(SRC)/mrepl/lib/*
-
-	@install -D -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.l
-	@install -m 644 -t $(BASE)/lib/core $(MU)/sys/core/*.def
-	@install -D -m 644 -t $(BASE)/lib/format $(MU)/sys/format/*.l
-	@install -m 644 -t $(BASE)/lib/core $(MU)/sys/format/*.def
-	@install -D -m 644 -t $(BASE)/lib/fasl $(MU)/sys/fasl/*.l
-	@install -m 644 -t $(BASE)/lib/fasl $(MU)/sys/fasl/*.def
-	@install -D -m 644 -t $(BASE)/lib/image $(MU)/sys/image/*.l
-	@install -m 644 -t $(BASE)/lib/image $(MU)/sys/image/*.def
+	@install -D -m 644 -t $(MU)/lib/core $(LIB)/sys/core/*.l $(LIB)/sys/core/*.def
+	@install -D -m 644 -t $(MU)/lib/format $(LIB)/sys/format/*.l $(LIB)/sys/format/*.def
+	@install -D -m 644 -t $(MU)/lib/fasl $(LIB)/sys/fasl/*.l $(LIB)/sys/fasl/*.def
+	@install -D -m 644 -t $(MU)/lib/image $(LIB)/sys/image/*.l $(LIB)/sys/image/*.def
 
 	@for module in $(MODULES); do	\
-	    install -D -m 644 -t $(BASE)/modules/$$module $(MU)/modules/$$module/*.l;		\
-	    install -D -m 644 -t $(BASE)/modules/$$module $(MU)/modules/$$module/mod.def;	\
+	    install -D -m 644 -t $(MU)/modules/$$module $(LIB)/modules/$$module/*.l;	\
+	    install -D -m 644 -t $(MU)/modules/$$module $(LIB)/modules/$$module/mod.def;	\
 	done
 
-	@./mu-sys -l $(MU)/dist/system.l -q '(system:require "../mu/sys/" "core")'
-	@install -m 644 ./core.sys $(BASE)/lib
+	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -q '(system:require "../src/lib/sys/" "core")'
+	@install -m 644 ./core.sys $(MU)/lib
 
-	@./mu-sys -l $(MU)/dist/system.l -l ./core.sys -q '(system:require "../mu/sys/" "format")'
-	@install -m 644 ./format.sys $(BASE)/lib
+	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -l ./core.sys -q '(system:require "../src/lib/sys/" "format")'
+	@install -m 644 ./format.sys $(MU)/lib
 
-	@./mu-sys -l $(MU)/dist/system.l -l ./core.sys -q '(system:require "../mu/sys/" "module")'
-	@install -m 644 ./module.sys $(BASE)/lib
+	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -l ./core.sys -q '(system:require "../src/lib/sys/" "module")'
+	@install -m 644 ./module.sys $(MU)/lib
 
-	@tar --owner=root --group=root -czf $(BASE)-$(VERSION).tgz $(BASE)
-	@rm -rf $(BASE) $(BIN)
+	@tar --owner=root --group=root -czf $(MU)-$(VERSION).tgz $(MU)
+	@rm -rf $(MU) $(BIN)
 
 clean:
-	@rm -rf $(BASE)-*.tgz $(BASE) core.sys $(BIN)
+	@rm -rf $(MU)-*.tgz $(MU) core.sys $(BIN)

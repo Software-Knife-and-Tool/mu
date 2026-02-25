@@ -1,12 +1,12 @@
 [package]
 name = "mu"
-version = "0.2.15"
+version = "0.2.16"
 edition = "2021"
 license = "MIT" 
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
 [workspace]
-members = [ "src/mrepl", "src/mu-exec", "src/mu-server", "src/mu-sys", "src/mforge" ]
+members = [ "sys-dev", "src/mu-repl", "src/mu-exec", "src/mu-server", "src/mu-sys" ]
 resolver = "2"
 
 [lib]
@@ -48,6 +48,23 @@ page_size = "0.6"
 perf_monitor = "0.2"
 smol = "2.0"
 timer = "0.2"
+
+[lints.clippy]
+single_match = "warn"
+single_match_else = "warn"
+needless_match = "warn"
+needless_late_init = "warn"
+redundant_pattern_matching = "warn"
+redundant_pattern = "warn"
+redundant_guards = "warn"
+collapsible_match = "warn"
+match_single_binding = "warn"
+match_same_arms = "warn"
+match_ref_pats = "warn"
+match_bool = "warn"
+needless_bool = "deny"
+# unwrap_used = "warn"
+# expect_used = "warn"
 
 [target.'cfg(not(target_os = "macos"))'.dependencies]
 sysinfo_dot_h = "0.2"

@@ -28,7 +28,7 @@ impl Bench {
         let module = Options::add_path(&mut ws.modules.clone(), "bench");
         let core_sys = Options::add_path(&mut ws.lib.clone(), "core.sys");
         let mu_sys = Options::add_path(&mut ws.bin.clone(), "mu-sys");
-        let report = Options::add_path(&mut ws.mforge.clone(), "bench");
+        let report = Options::add_path(&mut ws.sysdev.clone(), "bench");
         let tests = Options::add_path(&mut ws.tests.clone(), "performance");
 
         Self {
@@ -92,7 +92,7 @@ impl Bench {
 
                 let ntests = match Options::opt_value(&options, &Opt::Ntests("".to_string())) {
                     Some(n) => n.parse().unwrap(),
-                    None => 20usize,
+                    None => 50usize,
                 };
 
                 if Options::find_opt(&options, &Opt::Verbose).is_some() {

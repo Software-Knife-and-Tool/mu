@@ -16,7 +16,7 @@ impl Commit {
             None => (),
             Some(options) => {
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mforge commit: --verbose"),
+                    Some(_) => println!("sys-dev commit: --verbose"),
                     None => (),
                 };
 

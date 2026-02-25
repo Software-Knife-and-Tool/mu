@@ -8,10 +8,10 @@ use {
     },
 };
 
-pub struct Build {}
+pub struct Check;
 
-impl Build {
-    pub fn build(argv: &Vec<String>, home: &str) {
+impl Check {
+    pub fn check(argv: &Vec<String>, home: &str) {
         match Options::parse_options(argv, &["debug", "release", "profile"], &["verbose"]) {
             None => (),
             Some(options) => {
@@ -23,7 +23,7 @@ impl Build {
                 let mode = &options.modes[0];
 
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("mforge build: {:?} --verbose", mode),
+                    Some(_) => println!("sys-dev build: {:?} --verbose", mode),
                     None => (),
                 };
 
@@ -42,7 +42,7 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/debug/mforge")
+                            .arg("../target/debug/sys-dev")
                             .arg("../target/debug/mrepl")
                             .arg("../target/debug/mu-exec")
                             .arg("../target/debug/mu-server")
@@ -67,7 +67,7 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/release/mforge")
+                            .arg("../target/release/sys-dev")
                             .arg("../target/release/mrepl")
                             .arg("../target/release/mu-exec")
                             .arg("../target/release/mu-server")
@@ -93,7 +93,7 @@ impl Build {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/release/mforge")
+                            .arg("../target/release/sys-dev")
                             .arg("../target/release/mrepl")
                             .arg("../target/release/mu-exec")
                             .arg("../target/release/mu-server")

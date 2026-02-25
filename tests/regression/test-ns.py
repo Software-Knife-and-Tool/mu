@@ -8,8 +8,11 @@ base = sys.argv[2]
 with open(base + '/' + ns + '/tests') as f: group_list = f.readlines()
 
 def runtest(line, group, test, expected):
+    mu_sys = '../../target/release/mu-sys'
+    core_sys = '../../dist/core.sys'
+
     if ns == 'mu':
-        proc = subprocess.Popen(['../../dist/mu-sys', '-e' + test],\
+        proc = subprocess.Popen([mu_sys, '-e' + test],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
