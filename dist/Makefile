@@ -35,7 +35,7 @@ VERSION := $(shell cargo pkgid | sed 's/.*#//')
 # │   ├── fasl
 # │   ├── format
 # │   ├── image
-# │   └── mrepl
+# │   └── mu-repl
 # ├── modules
 # │   ├── common
 # │   │   ├── describe
@@ -85,7 +85,7 @@ dist:
 	@install -m 644 $(DOCS)/refcards/*.docx $(MU)/doc
 	@install -m 644 $(DOCS)/reference/html/*.html $(MU)/doc/html
 
-	@install -m 644 -D -t $(MU)/lib/mrepl $(SRC)/mu-repl/lib/*
+	@install -m 644 -D -t $(MU)/lib/mu-repl $(SRC)/mu-repl/lib/*
 
 	@install -D -m 644 -t $(MU)/lib/core $(LIB)/sys/core/*.l $(LIB)/sys/core/*.def
 	@install -D -m 644 -t $(MU)/lib/format $(LIB)/sys/format/*.l $(LIB)/sys/format/*.def
