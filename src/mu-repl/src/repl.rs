@@ -11,6 +11,10 @@ pub fn repl(env: &Env, ns: String) -> Result<Tag> {
 
     let read_form = match ns.as_str() {
         "mu" => Mu::read_str(env, "(mu:compile (mu:read mu:*standard-input* () '%eof%))")?,
+        "core" => Mu::read_str(
+            env,
+            "(mu:compile (core:read mu:*standard-input* () '%eof%))",
+        )?,
         _ => Mu::read_str(
             env,
             "(core:compile (core:read mu:*standard-input* () '%eof%))",
