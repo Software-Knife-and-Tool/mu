@@ -13,33 +13,26 @@ mod repl;
 use {config::Config, mu::Mu, std::fs};
 
 pub fn main() {
-    let rc_path: Option<String> = if fs::metadata("./.mu-repl").is_ok() {
-        Some("./.mu-repl".to_string())
-    } else if fs::metadata("~/.mu-repl").is_ok() {
-        Some("~/.mu-repl".to_string())
+    let rc_path: Option<String> = if fs::metadata("./.sys-repl").is_ok() {
+        Some("./.sys-repl".to_string())
+    } else if fs::metadata("~/.sys-repl").is_ok() {
+        Some("~/.sys-repl".to_string())
     } else {
         None
     };
 
     let config_json: Option<String> = match rc_path {
-        Some(path) => Some(fs::read_to_string(path).expect("mu-load: failed to read .mu-repl")),
+        Some(path) => Some(fs::read_to_string(path).expect("mu-load: failed to read .sys-repl")),
         None => None,
     };
 
     let config = Config::new(config_json);
     let env = Mu::env(&config.config);
 
-    match config.rc {
-        Some(path) => {
-            Mu::load(&env, &path).expect("mu-repl: failed to load rc file");
-        }
-        None => (),
-    };
-
     match config.load {
         Some(vec) => {
             for path in vec {
-                Mu::load(&env, &path).expect("mu-repl: failed to load file");
+                Mu::load(&env, &path).expect("sys-repl: failed to load file");
             }
         }
         None => (),
@@ -48,7 +41,7 @@ pub fn main() {
     let ns = match config.ns {
         Some(ns) => match ns.as_str() {
             "core" => {
-                Mu::load(&env, "/opt/mu/lib/core.sys").expect("mu-repl: failed to load core.sys");
+                Mu::load(&env, "/opt/mu/lib/core.sys").expect("sys-repl: failed to load core.sys");
                 ns
             }
             _ => ns,
@@ -56,5 +49,5 @@ pub fn main() {
         None => "mu".to_string(),
     };
 
-    repl::repl(&env, ns).expect("mu-repl: listener error");
+    repl::repl(&env, ns).expect("sys-repl: listener error");
 }

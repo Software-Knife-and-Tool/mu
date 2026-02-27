@@ -10,7 +10,6 @@ use {
 #[derive(Debug, Clone)]
 pub struct Config {
     pub config: MuConfig,
-    pub rc: Option<String>,
     pub ns: Option<String>,
     pub load: Option<Vec<String>>,
 }
@@ -19,7 +18,6 @@ impl Default for Config {
     fn default() -> Config {
         Config {
             config: MuConfig::default(),
-            rc: None,
             ns: None,
             load: None,
         }
@@ -71,18 +69,6 @@ impl ConfigBuilder {
         self
     }
 
-    fn rc(&mut self) -> &mut Self {
-        let rc = Self::map_json("rc", &self.json);
-
-        self.config.rc = match rc {
-            Some(JsonValue::String(rc)) => Some(rc.iter().collect::<String>()),
-            None => None,
-            _ => panic!("rc: config string format"),
-        };
-
-        self
-    }
-
     fn ns(&mut self) -> &mut Self {
         let ns = Self::map_json("namespace", &self.json);
 
@@ -118,7 +104,6 @@ impl ConfigBuilder {
     fn build(&self) -> Config {
         Config {
             config: self.config.config.clone(),
-            rc: self.config.rc.clone(),
             ns: self.config.ns.clone(),
             load: self.config.load.clone(),
         }
@@ -129,7 +114,7 @@ impl Config {
     pub fn new(conf_option: Option<String>) -> Self {
         match conf_option {
             None => Config::default(),
-            Some(conf) => ConfigBuilder::new(&conf).config().ns().rc().load().build(),
+            Some(conf) => ConfigBuilder::new(&conf).config().ns().load().build(),
         }
     }
 }

@@ -33,7 +33,7 @@
         (format:%format :t ";;; ^D to exit to namespace listener~%" ())
         (mu:fix
          (:lambda (loop)
-           (format:%format :t "mu-repl> " ())
+           (format:%format :t "sys-repl> " ())
            (mu:flush mu:*standard-output*)
            ((:lambda (form)
               (:if (mu:eq eof form)
