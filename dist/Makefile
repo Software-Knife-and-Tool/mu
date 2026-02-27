@@ -5,27 +5,6 @@
 
 VERSION := $(shell cargo pkgid | sed 's/.*#//')
 
-# src
-# ├── lib
-# │   ├── dist
-# │   ├── modules
-# │   │   ├── codegen
-# │   │   ├── common
-# │   │   ├── deftype
-# │   │   └── prelude
-# │   │       └── repl
-# │   └── sys
-# │       ├── core
-# │       ├── fasl
-# │       ├── format
-# │       ├── image
-# │       └── module
-# ├── mu
-# ├── mu-exec
-# ├── mu-repl
-# ├── mu-server
-# └── mu-sys
-#
 # mu
 # ├── bin
 # ├── doc
@@ -35,7 +14,6 @@ VERSION := $(shell cargo pkgid | sed 's/.*#//')
 # │   ├── fasl
 # │   ├── format
 # │   ├── image
-# │   └── mu-repl
 # ├── modules
 # │   ├── common
 # │   │   ├── describe
@@ -53,7 +31,7 @@ DOCS = ../doc
 SRC = ../src
 LIB = ../src/lib
 
-BIN = mu-sys mu-exec mu-server mu-repl sys-dev
+BIN = mu-sys mu-exec mu-server sys-repl sys-dev
 
 SYS = core.sys fasl.sys format.sys image.sys module.sys
 
@@ -70,13 +48,13 @@ MODULES = 		\
 dist:
 	@echo $(VERSION) > VERSION
 
-	@install -d $(MU)	$(MU)/bin $(MU)/doc $(MU)/lib $(MU)/modules $(MU)/system
+	@install -d $(MU) $(MU)/bin $(MU)/doc $(MU)/lib $(MU)/modules $(MU)/system
 
-	@for bin in $(BIN); do					\
+	@for bin in $(BIN); do				\
 	    install -m 755 $(RELEASE)/$$bin $(MU)/bin;	\
 	done
 
-	@for sys in $(SYSTEM); do					\
+	@for sys in $(SYSTEM); do				\
 	    install -m 644 $(LIB)/dist/$$sys $(MU)/system;	\
 	done
 
@@ -84,8 +62,6 @@ dist:
 	@install -m 644 $(DOCS)/refcards/*.pdf $(MU)/doc
 	@install -m 644 $(DOCS)/refcards/*.docx $(MU)/doc
 	@install -m 644 $(DOCS)/reference/html/*.html $(MU)/doc/html
-
-	@install -m 644 -D -t $(MU)/lib/mu-repl $(SRC)/mu-repl/lib/*
 
 	@install -D -m 644 -t $(MU)/lib/core $(LIB)/sys/core/*.l $(LIB)/sys/core/*.def
 	@install -D -m 644 -t $(MU)/lib/format $(LIB)/sys/format/*.l $(LIB)/sys/format/*.def
