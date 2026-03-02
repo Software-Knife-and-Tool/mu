@@ -3,7 +3,7 @@
 #
 .PHONY: dist clean release
 
-VERSION := $(shell cargo pkgid | sed 's/.*#//')
+VERSION := $(shell cargo pkgid | sed 's/.*\///' | sed 's/#.*@/-/')
 
 # mu
 # ├── bin
@@ -24,8 +24,9 @@ VERSION := $(shell cargo pkgid | sed 's/.*#//')
 # └── system
 #
 
+PACKAGE = system-lisp
 RELEASE = ../target/release
-MU = ./mu
+
 DIST = ../dist
 DOCS = ../doc
 SRC = ../src
@@ -48,42 +49,42 @@ MODULES = 		\
 dist:
 	@echo $(VERSION) > VERSION
 
-	@install -d $(MU) $(MU)/bin $(MU)/doc $(MU)/lib $(MU)/modules $(MU)/system
+	@install -d $(PACKAGE) $(PACKAGE)/bin $(PACKAGE)/doc $(PACKAGE)/lib $(PACKAGE)/modules $(PACKAGE)/system
 
 	@for bin in $(BIN); do				\
-	    install -m 755 $(RELEASE)/$$bin $(MU)/bin;	\
+	    install -m 755 $(RELEASE)/$$bin $(PACKAGE)/bin;	\
 	done
 
 	@for sys in $(SYSTEM); do				\
-	    install -m 644 $(LIB)/dist/$$sys $(MU)/system;	\
+	    install -m 644 $(LIB)/dist/$$sys $(PACKAGE)/system;	\
 	done
 
-	@install -d $(MU)/doc/html
-	@install -m 644 $(DOCS)/refcards/*.pdf $(MU)/doc
-	@install -m 644 $(DOCS)/refcards/*.docx $(MU)/doc
-	@install -m 644 $(DOCS)/reference/html/*.html $(MU)/doc/html
+	@install -d $(PACKAGE)/doc/html
+	@install -m 644 $(DOCS)/refcards/*.pdf $(PACKAGE)/doc
+	@install -m 644 $(DOCS)/refcards/*.docx $(PACKAGE)/doc
+	@install -m 644 $(DOCS)/reference/html/*.html $(PACKAGE)/doc/html
 
-	@install -D -m 644 -t $(MU)/lib/core $(LIB)/sys/core/*.l $(LIB)/sys/core/*.def
-	@install -D -m 644 -t $(MU)/lib/format $(LIB)/sys/format/*.l $(LIB)/sys/format/*.def
-	@install -D -m 644 -t $(MU)/lib/fasl $(LIB)/sys/fasl/*.l $(LIB)/sys/fasl/*.def
-	@install -D -m 644 -t $(MU)/lib/image $(LIB)/sys/image/*.l $(LIB)/sys/image/*.def
+	@install -D -m 644 -t $(PACKAGE)/lib/core $(LIB)/sys/core/*.l $(LIB)/sys/core/*.def
+	@install -D -m 644 -t $(PACKAGE)/lib/format $(LIB)/sys/format/*.l $(LIB)/sys/format/*.def
+	@install -D -m 644 -t $(PACKAGE)/lib/fasl $(LIB)/sys/fasl/*.l $(LIB)/sys/fasl/*.def
+	@install -D -m 644 -t $(PACKAGE)/lib/image $(LIB)/sys/image/*.l $(LIB)/sys/image/*.def
 
 	@for module in $(MODULES); do	\
-	    install -D -m 644 -t $(MU)/modules/$$module $(LIB)/modules/$$module/*.l;	\
-	    install -D -m 644 -t $(MU)/modules/$$module $(LIB)/modules/$$module/mod.def;	\
+	    install -D -m 644 -t $(PACKAGE)/modules/$$module $(LIB)/modules/$$module/*.l;	\
+	    install -D -m 644 -t $(PACKAGE)/modules/$$module $(LIB)/modules/$$module/mod.def;	\
 	done
 
 	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -q '(system:require "../src/lib/sys/" "core")'
-	@install -m 644 ./core.sys $(MU)/lib
+	@install -m 644 ./core.sys $(PACKAGE)/lib
 
 	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -l ./core.sys -q '(system:require "../src/lib/sys/" "format")'
-	@install -m 644 ./format.sys $(MU)/lib
+	@install -m 644 ./format.sys $(PACKAGE)/lib
 
 	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -l ./core.sys -q '(system:require "../src/lib/sys/" "module")'
-	@install -m 644 ./module.sys $(MU)/lib
+	@install -m 644 ./module.sys $(PACKAGE)/lib
 
-	@tar --owner=root --group=root -czf $(MU)-$(VERSION).tgz $(MU)
-	@rm -rf $(MU) $(BIN)
+	@tar --owner=root --group=root -czf $(VERSION).tgz ./$(PACKAGE)
+	@rm -rf $(PACKAGE) $(BIN)
 
 clean:
-	@rm -rf $(MU)-*.tgz $(MU) core.sys $(BIN)
+	@rm -rf $(VERSION).tgz $(PACKAGE) core.sys $(BIN)

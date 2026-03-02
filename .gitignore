@@ -5,8 +5,8 @@
 .dir-locals.el
 TAGS
 Cargo.lock
-dist/mu*.tgz
-dist/mu-*
+dist/system-lisp*.tgz
+dist/system-lisp-*
 dist/*.l
 dist/*.fasl
 dist/*.sys

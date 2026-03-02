@@ -5,7 +5,7 @@
 ;;;
 ;;; cross reference
 ;;;
-(core:load "/opt/mu/lib/format.sys")
+(core:load "/opt/system-lisp/lib/format.sys")
 
 (mu:make-namespace "symbols")
 ((:lambda (symbols)
