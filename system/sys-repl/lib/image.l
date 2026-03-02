@@ -123,7 +123,7 @@
                      (image:%mapc
                       (:lambda (file-name)
                         (image:%load-module-file
-                         (image:%concat-strings `("/opt/mu/modules/" ,module "/" ,file-name))
+                         (image:%concat-strings `("/opt/system-lisp/modules/" ,module "/" ,file-name))
                          (mu:cdr (image:%assq :lang module-def))))
                       files)
                      :t)
@@ -131,5 +131,5 @@
                    (mu:cdr (image:%assq :load module-def)))
                   (mu:raise module :open)))
            (image:%load-module-def
-            (image:%concat-strings `("/opt/mu/modules/" ,module "/mod.def"))
+            (image:%concat-strings `("/opt/system-lisp/modules/" ,module "/mod.def"))
             module)))))

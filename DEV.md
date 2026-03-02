@@ -104,7 +104,7 @@ After cloning the *mu* repository, the *mu* system can be built and installed wi
 % make world
 ```
 
-Having built the distribution, install it in `/opt/mu`.
+Having built the distribution, install it in `/opt/system-lisp`.
 
 ```
 % sudo make install

@@ -41,7 +41,7 @@ pub fn main() {
     let ns = match config.ns {
         Some(ns) => match ns.as_str() {
             "core" => {
-                Mu::load(&env, "/opt/mu/lib/core.sys").expect("sys-repl: failed to load core.sys");
+                Mu::load(&env, "/opt/system-lisp/lib/core.sys").expect("sys-repl: failed to load core.sys");
                 ns
             }
             _ => ns,

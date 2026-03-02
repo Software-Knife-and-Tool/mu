@@ -123,7 +123,7 @@
                           (core:%mapc
                            (:lambda (file-name)
                              (module:%load-module-file
-                              (core:%string-concat `("/opt/mu/modules/" ,module "/" ,file-name))
+                              (core:%string-concat `("/opt/system-lisp/modules/" ,module "/" ,file-name))
                               (mu:cdr (core:%assq :lang module-def))))
                            files)
                           :t)
@@ -132,7 +132,7 @@
                         (mu:cdr (core:%assq :ns module-def)))
                        (mu:raise module 'core:require :open)))
                   (core:%load-module-def
-                   (core:%string-concat `("/opt/mu/modules/" ,module "/mod.def"))
+                   (core:%string-concat `("/opt/system-lisp/modules/" ,module "/mod.def"))
                    module)))
           (mu:raise module 'module:require :type))))
 

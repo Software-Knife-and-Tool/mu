@@ -6,7 +6,7 @@
 ;;;
 
 ;;;
-;;; (prelude:load "/opt/mu/mu/arm-codegen/codegen.l" ())
+;;; (prelude:load "/opt/system-lisp/mu/arm-codegen/codegen.l" ())
 ;;; (arm:assemble-file (core:open :file :input "arm.s"))
 ;;;
 

@@ -132,10 +132,10 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 
 ------
 
- The release is installed in `/opt/mu`. 
+ The release is installed in `/opt/system-lisp`. 
 
 ```
-/opt/mu
+/opt/system-lisp
 ├── bin
 ├── doc
 │   └── html
@@ -160,7 +160,7 @@ To install a release from the github repository
 cat mu-x.y.z.tgz | (cd / ; sudo tar --no-same-owner -xzf -)
 ```
 
-The `/opt/mu` directory is hardwired into several tools and the release mechanism, changing it would require significant alteration of parts of the system. 
+The `/opt/system-lisp` directory is hardwired into several tools and the release mechanism, changing it would require significant alteration of parts of the system. 
 
   
 
@@ -190,7 +190,7 @@ After cloning the *mu* repository, the *mu* system can be built and installed wi
 % make world
 ```
 
-Having built the distribution, install it in `/opt/mu`.
+Having built the distribution, install it in `/opt/system-lisp`.
 
 ```
 % sudo make install
@@ -237,7 +237,7 @@ The *sysinfo* feature is disabled on *macOS* builds.
 
 The *mu* distribution includes tools for configuring and development of the system.  Some additional development tools are provided and a guide to them is found in `DEV.md`.
 
-The  *sys-dev* command is part of a release, found at `/opt/mu/bin/sys-dev`.
+The  *sys-dev* command is part of a release, found at `/opt/system-lisp/bin/sys-dev`.
 
 ```
 Usage: sys-dev 0.0.20 command [option...]
@@ -289,7 +289,7 @@ Profiling is nascent and will be expanded in future releases.
 
 ------
 
-The *mu* distribution includes a tool for running and interacting with the system. The *sys-repl* binary is part of the release, found at `/opt/mu/bin/sys-repl`.
+The *mu* distribution includes a tool for running and interacting with the system. The *sys-repl* binary is part of the release, found at `/opt/system-lisp/bin/sys-repl`.
 
 *sys-repl* has no command line arguments. It is configured by an optional JSON file, *.sys-repl*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *load* argument supplies a list of the names of files to load on startup. The *namespace* argument, currently limited to `xfcore` or `mu` (the default) tells *sys-repl* to run in the indicated namespace.
 
@@ -358,10 +358,10 @@ In specific, `report` produces a summary of significant performance changes (dif
 
 ------
 
-The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory contains the binaries for running the system. The command line options for these utilities are documented in `doc/refcards/utilities.[docx,pdf]`
+The *mu* binaries and libraries are installed in `/opt/system-lisp`. The `bin` directory contains the binaries for running the system. The command line options for these utilities are documented in `doc/refcards/utilities.[docx,pdf]`
 
 ```
-/opt/mu/bin
+/opt/system-lisp/bin
 ├── sys-dev		# development tool
 ├── sys-repl		# runtime binary, stdio repl
 ├── mu-exec		# image executor

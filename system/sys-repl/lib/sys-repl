@@ -4,6 +4,6 @@
         "gc-mode": "auto"
     },
     "namespace": "core",
-    "system": [ "/opt/mu/system/system.l" ],
+    "system": [ "/opt/system-lisp/system/system.l" ],
     "rc": "/home/putnamjm/.sys-repl.rc"
 }
