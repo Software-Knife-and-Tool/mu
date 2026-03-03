@@ -15,7 +15,7 @@ pub struct Rc {
     pub options: Option<Vec<String>>,
     pub reader: Option<String>,
     pub require: Option<Vec<String>>,
-    pub sys: Option<Vec<String>>,
+    pub lib: Option<Vec<String>>,
 }
 
 impl Default for Rc {
@@ -27,7 +27,7 @@ impl Default for Rc {
             options: None,
             reader: None,
             require: None,
-            sys: None,
+            lib: None,
         }
     }
 }
@@ -158,20 +158,20 @@ impl RcBuilder {
         self
     }
 
-    fn sys(&mut self) -> &mut Self {
-        let arg = Self::map_json("sys", &self.json);
+    fn lib(&mut self) -> &mut Self {
+        let arg = Self::map_json("lib", &self.json);
 
-        self.rc.sys = match arg {
+        self.rc.lib = match arg {
             Some(JsonValue::Array(vec)) => Some(
                 vec.iter()
                     .map(|s| match s {
                         JsonValue::String(vec) => vec.iter().collect::<String>(),
-                        _ => panic!("rc: {s:?} sys format"),
+                        _ => panic!("rc: {s:?} lib format"),
                     })
                     .collect::<Vec<String>>(),
             ),
             None => None,
-            _ => panic!("rc: {arg:?} sys format"),
+            _ => panic!("rc: {arg:?} lib format"),
         };
 
         self
@@ -193,7 +193,7 @@ impl Rc {
                 .options()
                 .reader()
                 .require()
-                .sys()
+                .lib()
                 .build(),
         }
     }

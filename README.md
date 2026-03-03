@@ -289,18 +289,22 @@ Profiling is nascent and will be expanded in future releases.
 
 ------
 
-The *mu* distribution includes a tool for running and interacting with the system. The *sys-repl* binary is part of the release, found at `/opt/system-lisp/bin/sys-repl`.
+The distribution includes a command line tool for running and interacting with the system. The *sys-repl* binary is part of the release, found at `/opt/system-lisp/bin/sys-repl`.
 
-*sys-repl* has no command line arguments. It is configured by an optional JSON file, *.sys-repl*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *load* argument supplies a list of the names of files to load on startup. The *namespace* argument, currently limited to `xfcore` or `mu` (the default) tells *sys-repl* to run in the indicated namespace.
+*sys-repl* has no command line arguments. It is configured by an optional JSON file, *.sys-replrc*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *load* argument supplies a list of the names of files to load on startup using the *loader* function. The *reader* argument, currently limited to `core` or `mu` (the default) tells *sys-repl* to run in the indicated namespace and use the associated reader. *require* is a list of modules to be loaded by core:require, and *lib* is a list of *.sys* modules to be loaded from the release *lib* directory. *options* contains a list of *sys-repl* options (of which there are none as of 0.0.5). All arguments are optional.  
 
 ```
 {
+    "options": [ ],
     "config": {
-    	"pages": "2048",
-    	"gc-mode": "auto"
+        "pages": "2048",
+        "gc-mode": "auto"
     },
-    "namespace": "mu",
-    "load": [ "file"... ]
+    "lib": [ "core.sys" ],
+    "reader": "core",
+    "require": [ ],
+    "loader": "core:load",
+    "load": [ ]
 }
 ```
 
