@@ -111,7 +111,7 @@ impl RcBuilder {
     fn options(&mut self) -> &mut Self {
         let arg = Self::map_json("options", &self.json);
 
-        self.rc.load = match arg {
+        self.rc.options = match arg {
             Some(JsonValue::Array(vec)) => Some(
                 vec.iter()
                     .map(|s| match s {
@@ -195,6 +195,16 @@ impl Rc {
                 .require()
                 .lib()
                 .build(),
+        }
+    }
+
+    pub fn option(&self, opt: &str) -> bool {
+        match &self.options {
+            Some(vec) => match vec.iter().find(|string| *string == opt) {
+                Some(_) => true,
+                None => false,
+            },
+            None => false,
         }
     }
 }
