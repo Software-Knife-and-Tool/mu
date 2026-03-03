@@ -6,9 +6,10 @@
 use {
     crate::{
         core::{
+            apply::Apply,
             direct::DirectTag,
             env,
-            exception::{self},
+            exception::{self, Exception, Condition},
             frame::Frame,
             indirect::IndirectTag,
             tag::{Tag},
@@ -16,6 +17,7 @@ use {
         },
         features::feature::Feature,
         namespaces::{
+            namespace::Namespace,
             cache::Cache,
             heap::HeapTypeInfo,
         },
@@ -62,6 +64,7 @@ impl Env for Feature {
                 ("heap-info", 0, Feature::env_hp_info),
                 ("heap-room", 0, Feature::env_hp_room),
                 ("heap-size", 1, Feature::env_hp_size),
+                ("namespace", 1, Feature::env_namespace),
             ]),
             symbols: None,
             namespace: "feature/env".into(),
@@ -140,6 +143,7 @@ pub trait CoreFn {
     fn env_hp_info(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_room(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
     fn env_hp_size(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
+    fn env_namespace(_: &env::Env, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl CoreFn for Feature {
@@ -198,6 +202,24 @@ impl CoreFn for Feature {
                 ),
             ],
         );
+
+        Ok(())
+    }
+
+    fn env_namespace(env: &env::Env, fp: &mut Frame) -> exception::Result<()> {
+        env.argv_check("feature/env::namespace", &[Type::String], fp)?;
+
+        let symbols = match Namespace::symbols(env, &Vector::as_string(env, fp.argv[0])) {
+            Some(symbols) => symbols,
+            None => Err(Exception::err(
+                env,
+                fp.argv[0],
+                Condition::Range,
+                "feature/env:env",
+            ))?,
+        };
+
+        fp.value = Cons::list(env, &symbols);
 
         Ok(())
     }

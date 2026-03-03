@@ -185,6 +185,23 @@ impl Namespace {
         Some(ns_desc.0)
     }
 
+    pub fn symbols(env: &Env, name: &str) -> Option<Vec<Tag>> {
+        let ns_ref = block_on(env.ns_map.read());
+        let ns_desc = ns_ref.get(name)?;
+
+        match &ns_desc.1 {
+            Namespace::Static(static_) => match &static_ {
+                Some(hash) => Some(hash.values().copied().collect::<Vec<Tag>>()),
+                None => None?,
+            },
+            Namespace::Dynamic(hash) => {
+                let hash_ref = block_on(hash.read());
+
+                Some(hash_ref.values().copied().collect::<Vec<Tag>>())
+            }
+        }
+    }
+
     pub fn name(env: &Env, ns: Tag) -> String {
         Vector::as_string(
             env,
