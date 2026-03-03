@@ -1,0 +1,11 @@
+{
+    "sys-repl": [ ],
+    "config": {
+        "pages": "2048",
+        "gc-mode": "auto"
+    },
+    "sys": [ "core" ],
+    "require": [ ],
+    "loader": "core:load",
+    "load": [ ]
+}

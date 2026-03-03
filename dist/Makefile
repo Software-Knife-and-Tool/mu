@@ -31,6 +31,7 @@ DIST = ../dist
 DOCS = ../doc
 SRC = ../src
 LIB = ../src/lib
+UTILS = ../system
 
 BIN = mu-sys mu-exec mu-server sys-repl sys-dev
 
@@ -51,7 +52,7 @@ dist:
 
 	@install -d $(PACKAGE) $(PACKAGE)/bin $(PACKAGE)/doc $(PACKAGE)/lib $(PACKAGE)/modules $(PACKAGE)/system
 
-	@for bin in $(BIN); do				\
+	@for bin in $(BIN); do					\
 	    install -m 755 $(RELEASE)/$$bin $(PACKAGE)/bin;	\
 	done
 
@@ -68,6 +69,7 @@ dist:
 	@install -D -m 644 -t $(PACKAGE)/lib/format $(LIB)/sys/format/*.l $(LIB)/sys/format/*.def
 	@install -D -m 644 -t $(PACKAGE)/lib/fasl $(LIB)/sys/fasl/*.l $(LIB)/sys/fasl/*.def
 	@install -D -m 644 -t $(PACKAGE)/lib/image $(LIB)/sys/image/*.l $(LIB)/sys/image/*.def
+	@install -D -m 644 -t $(PACKAGE)/lib/sys-repl $(UTILS)/sys-repl/lib/sys-replrc
 
 	@for module in $(MODULES); do	\
 	    install -D -m 644 -t $(PACKAGE)/modules/$$module $(LIB)/modules/$$module/*.l;	\
@@ -83,8 +85,14 @@ dist:
 	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -l ./core.sys -q '(system:require "../src/lib/sys/" "module")'
 	@install -m 644 ./module.sys $(PACKAGE)/lib
 
+#	@$(RELEASE)/mu-sys -l $(LIB)/dist/image.l -l ./core.sys -q '(system:require "../src/lib/sys/" "image")'
+#	@install -m 644 ./image.sys $(PACKAGE)/lib
+
+#	@$(RELEASE)/mu-sys -l $(LIB)/dist/fasl.l -l ./core.sys -q '(system:require "../src/lib/sys/" "fasl")'
+#	@install -m 644 ./fasl.sys $(PACKAGE)/lib
+
 	@tar --owner=root --group=root -czf $(VERSION).tgz ./$(PACKAGE)
 	@rm -rf $(PACKAGE) $(BIN)
 
 clean:
-	@rm -rf $(VERSION).tgz $(PACKAGE) core.sys $(BIN)
+	@rm -rf $(VERSION).tgz $(PACKAGE) core.sys format.sys module.sys $(BIN)
