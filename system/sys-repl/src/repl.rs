@@ -6,18 +6,18 @@ use {
 };
 
 pub fn repl(env: &Env, ns: String) -> Result<Tag> {
-    let eof_value = Mu::eval_str(env, "'%eof%")?;
+    let eof_value = Mu::eval_str(env, ":%eof%")?;
     let flush_form = Mu::compile(env, Mu::read_str(env, "(mu:flush mu:*standard-output*)")?)?;
 
     let read_form = match ns.as_str() {
-        "mu" => Mu::read_str(env, "(mu:compile (mu:read mu:*standard-input* () '%eof%))")?,
+        "mu" => Mu::read_str(env, "(mu:compile (mu:read mu:*standard-input* () :%eof%))")?,
         "core" => Mu::read_str(
             env,
-            "(mu:compile (core:read mu:*standard-input* () '%eof%))",
+            "(mu:compile (core:read mu:*standard-input* () :%eof%))",
         )?,
         _ => Mu::read_str(
             env,
-            "(core:compile (core:read mu:*standard-input* () '%eof%))",
+            "(core:compile (core:read mu:*standard-input* () :%eof%))",
         )?,
     };
 

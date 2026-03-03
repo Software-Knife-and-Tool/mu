@@ -58,7 +58,9 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
                         Mu::load(&env, &path).expect(&format!("sys-repl: failed to load {path}"));
                     }
                     _ => {
-                        println!("loading: {path}");
+                        if rc.option("verbose") {
+                            println!("sys-repl: loading: {path}")
+                        }
                         Mu::eval_str(&env, &format!("(core:load \"{path}\")"))
                             .expect(&format!("sys-repl: failed to load {path}"));
                     }
