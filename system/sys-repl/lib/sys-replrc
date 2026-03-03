@@ -1,10 +1,10 @@
 {
-    "sys-repl": [ ],
+    "options": [ ],
     "config": {
         "pages": "2048",
         "gc-mode": "auto"
     },
-    "sys": [ "core" ],
+    "lib": [ "core" ],
     "require": [ ],
     "loader": "core:load",
     "load": [ ]

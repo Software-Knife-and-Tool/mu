@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: Copyright 2026 James M. Putnam (putnamjm.design@gmail.com)
-// SPDX-License-Identifier: MIT
+//  SPDX-FileCopyrightText: Copyright 2026 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-License-Identifier: MIT
 #[cfg(not(target_env = "msvc"))]
 use tikv_jemallocator::Jemalloc;
 
@@ -24,11 +24,12 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
         None => "mu",
     };
 
-    match &rc.sys {
+    match &rc.lib {
         Some(vec) => {
             for sys in vec {
-                Mu::load(&env, &("/opt/system-lisp/lib/".to_owned() + &sys))
-                    .expect(&format!("sys-repl: failed to load /opt/mu/lib/{sys}"));
+                Mu::load(&env, &("/opt/system-lisp/lib/".to_owned() + &sys)).expect(&format!(
+                    "sys-repl: failed to load /opt/system-lisp/lib/{sys}"
+                ));
             }
         }
         None => (),
