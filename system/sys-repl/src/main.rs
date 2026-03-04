@@ -27,9 +27,16 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
     match &rc.lib {
         Some(vec) => {
             for sys in vec {
-                Mu::load(&env, &("/opt/system-lisp/lib/".to_owned() + &sys)).expect(&format!(
-                    "sys-repl: failed to load /opt/system-lisp/lib/{sys}"
-                ));
+                match Mu::load(&env, &("/opt/system-lisp/lib/".to_owned() + &sys)) {
+                    Ok(_) => (),
+                    Err(ex) => {
+                        eprintln!(
+                            "sys-repl: failed to load /opt/system-lisp/lib/{sys}, {}",
+                            Mu::exception_string(&env, &ex)
+                        );
+                        std::process::exit(-1)
+                    }
+                }
             }
         }
         None => (),
@@ -38,8 +45,16 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
     match &rc.require {
         Some(vec) => {
             for module in vec {
-                Mu::eval_str(&env, &format!("(core:require \"{module}\")"))
-                    .expect(&format!("sys-repl: failed to load module {module}"));
+                match Mu::eval_str(&env, &format!("(core:require \"{module}\")")) {
+                    Ok(_) => (),
+                    Err(ex) => {
+                        eprintln!(
+                            "sys-repl: failed to load module {module}, {}",
+                            Mu::exception_string(&env, &ex)
+                        );
+                        std::process::exit(-1)
+                    }
+                }
             }
         }
         None => (),
@@ -54,15 +69,30 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
         Some(vec) => {
             for path in vec {
                 match loader {
-                    "mu" => {
-                        Mu::load(&env, &path).expect(&format!("sys-repl: failed to load {path}"));
-                    }
+                    "mu" => match Mu::load(&env, &path) {
+                        Ok(_) => (),
+                        Err(ex) => {
+                            eprintln!(
+                                "sys-repl: failed to load {path}, {}",
+                                Mu::exception_string(&env, &ex)
+                            );
+                            std::process::exit(-1)
+                        }
+                    },
                     _ => {
                         if rc.option("verbose") {
                             println!("sys-repl: loading: {path}")
                         }
-                        Mu::eval_str(&env, &format!("(core:load \"{path}\")"))
-                            .expect(&format!("sys-repl: failed to load {path}"));
+                        match Mu::eval_str(&env, &format!("(core:load \"{path}\")")) {
+                            Ok(_) => (),
+                            Err(ex) => {
+                                eprintln!(
+                                    "sys-repl: failed to load {path}, {}",
+                                    Mu::exception_string(&env, &ex)
+                                );
+                                std::process::exit(-1)
+                            }
+                        }
                     }
                 }
             }
