@@ -7,8 +7,8 @@ with open(sys.argv[1]) as f: test_results = json.load(f)
 module = test_results['module']
 groups = test_results['results']
 
-print(f'Test Summary: {module}    {datetime.now()}')
-print('-----------------------')
+# print(f'Test Summary: {module}    {datetime.now()}')
+# print('-----------------------')
 
 test_total = 0
 test_fails = 0

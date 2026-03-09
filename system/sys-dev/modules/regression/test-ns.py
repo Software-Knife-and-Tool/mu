@@ -18,15 +18,6 @@ def runtest(line, group, test, expected):
             stdout=subprocess.PIPE,\
             stderr=subprocess.PIPE)
 
-        case 'format':
-            proc = subprocess.Popen([
-                mu_sys,
-                '-l./dist/format.sys',
-                '-e' + test
-            ],\
-            stdout=subprocess.PIPE,\
-            stderr=subprocess.PIPE)
-
     obtained = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf-8')
 
