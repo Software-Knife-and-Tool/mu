@@ -19,7 +19,6 @@ world: release dist
 
 dist:
 	@make -C dist TARGET_FEATURE="" --no-print-directory
-
 release:
 	@cargo build --release --workspace
 
@@ -38,6 +37,5 @@ tests/report:
 
 install:
 	@make -C ./dist -f install.mk install --no-print-directory
-
 uninstall:
 	@make -C ./dist -f install.mk uninstall --no-print-directory

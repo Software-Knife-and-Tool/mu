@@ -11,8 +11,6 @@ def runtest(line, group, test, expected):
     mu_sys = '../../target/release/mu-sys'
     core_sys = '../../dist/core.sys'
 
-    core_sys = '../../dist/core.sys'
-
     if module == 'core':
         proc = subprocess.Popen([mu_sys,
                                  '-l' + core_sys,

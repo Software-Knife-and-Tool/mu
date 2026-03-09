@@ -1,14 +1,14 @@
 import json
 import sys
 from datetime import datetime
-
+\
 with open(sys.argv[1]) as f: test_results = json.load(f)
 
 ns = test_results['ns']
 groups = test_results['results']
 
-print(f'Test Summary: {ns}    {datetime.now()}')
-print('-----------------------')
+# print(f'Test Summary: {ns}    {datetime.now()}')
+# print('-----------------------')
 
 test_total = 0
 test_fails = 0

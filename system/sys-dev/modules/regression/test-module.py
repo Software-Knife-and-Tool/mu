@@ -9,9 +9,9 @@ base = sys.argv[4]
 
 with open(base + '/namespaces/' + module + '/tests') as f: group_list = f.readlines()
 
-core_arg = '-l' + core_sys
-
 def runtest(line, group, test, expected):
+    core_arg = '-l' + core_sys
+
     match module:
         case 'core':
             proc = subprocess.Popen([mu_sys,
@@ -23,7 +23,7 @@ def runtest(line, group, test, expected):
         case 'common':
             proc = subprocess.Popen([mu_sys,
                                      core_arg,
-                                     '-l../../dist/common.fasl',
+                                     '-l./dist/common.fasl',
                                      '-e (core:eval \'{})'.format(test),    \
                                      ],                                     \
                                     stdout=subprocess.PIPE,                 \
@@ -32,16 +32,24 @@ def runtest(line, group, test, expected):
         case 'module':
             proc = subprocess.Popen([mu_sys,
                                      core_arg,
-                                     '-l../../dist/module.sys',
+                                     '-l./dist/module.sys',
                                      '-e (core:eval \'{})'.format(test),    \
                                      ],                                     \
                                     stdout=subprocess.PIPE,                 \
                                     stderr=subprocess.PIPE)
-
+        case 'format':
+            proc = subprocess.Popen([mu_sys,
+                                     core_arg,
+                                     '-l./dist/format.sys',
+                                     '-e (core:eval \'{})'.format(test),    \
+                                     ],                                     \
+                                    stdout=subprocess.PIPE,                 \
+                                    stderr=subprocess.PIPE)
+            
         case 'deftype':
             proc = subprocess.Popen([mu_sys,
                                      core_arg,
-                                     '-l../../dist/deftype.sys',
+                                     '-l./dist/deftype.sys',
                                      '-e (core:eval \'{})'.format(test),    \
                                      ],                                     \
                                     stdout=subprocess.PIPE,                 \
