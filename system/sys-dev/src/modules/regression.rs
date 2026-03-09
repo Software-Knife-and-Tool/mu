@@ -113,8 +113,9 @@ impl Regression {
                 };
 
                 self.test_ns("mu");
-                self.test_ns("format");
                 self.test_module("core");
+                self.test_ns("format");
+                // nself.test_module("deftype");
 
                 Ok(())
             }

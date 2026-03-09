@@ -11,7 +11,7 @@ core_sys = sys.argv[2]
 ntests = sys.argv[3]
 
 core_arg = '-l' + core_sys
-time_cmd = 'time'
+time_cmd = '/usr/bin/time'
 format = '"%S %U %e %M %w %Z'
 
 def times():

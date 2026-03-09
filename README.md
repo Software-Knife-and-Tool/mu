@@ -157,7 +157,7 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 To install a release from the github repository
 
 ```
-cat mu-x.y.z.tgz | (cd / ; sudo tar --no-same-owner -xzf -)
+cat system-lisp-x.y.z.tgz | (cd /opt ; sudo tar --no-same-owner -xzf -)
 ```
 
 The `/opt/system-lisp` directory is hardwired into several tools and the release mechanism, changing it would require significant alteration of parts of the system. 
@@ -174,17 +174,19 @@ version 0.2.11 and 0.2.12 are built with rustc 1.90.0
 version 0.2.13 and 0.2.14 are built with rustc 1.91.1
 version 0.2.15 is built with rustc 1.93.0
 version 0.2.16 is built with rustc 1.93.1
+version 0.2.16 is built with rustc 1.94.0
 ```
 
-The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility.
+The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility. The instructions below assume a developmentt system with `apt` package management.
 
-Tests, performance, tools, and regression metrics require some version of `python 3`.
+Tests, performance, tools, and regression metrics require some version of `python 3` and `/usr/bin/time`.
 
 ```
-git clone https://github.com/Software-Knife-and-Tool/mu.git
+sudo apt install time
+git clone https://github.com/Software-Knife-and-Tool/system-lisp.git
 ```
 
-After cloning the *mu* repository, the *mu* system can be built and installed with the supplied makefile. The *world* target builds a release version of the system and the *sys-dev* development tool.  `make` with no arguments prints the available targets. 
+After cloning the *system-lisp* repository, the system can be built and installed with the supplied makefile. The *world* target builds a release version of the system and the *sys-dev* development tool.  `make` with no arguments prints the available targets. 
 
 ```
 % make world
@@ -202,9 +204,7 @@ Having built and installed `mu`,  establish the current directory as a `sys-dev`
 % sys-dev workspace init
 ```
 
-Subsequent builds and packaging of the system are facilitated with *sys-dev*. See the *Tools* section below for usage instructions.
-
-Note: the *sys-dev* and *makefile* installation mechanisms do not remove the installation directory before writing it and changes to directory structure and files will accumulate.
+Note: the *makefile* installation mechanism does not remove the installation directory before writing it and changes to directory structure and files will accumulate.
 
 
 
@@ -235,9 +235,9 @@ The *sysinfo* feature is disabled on *macOS* builds.
 
 ------
 
-The *mu* distribution includes tools for configuring and development of the system.  Some additional development tools are provided and a guide to them is found in `DEV.md`.
+The *system-lisp* distribution includes tools for configuring and development of the system.  Some additional development tools are provided and a guide to them is found in `DEV.md`.
 
-The  *sys-dev* command is part of a release, found at `/opt/system-lisp/bin/sys-dev`.
+The *sys-dev* command is part of a release, found at `/opt/system-lisp/bin/sys-dev`.
 
 ```
 Usage: sys-dev 0.0.20 command [option...]
@@ -260,7 +260,7 @@ Usage: sys-dev 0.0.20 command [option...]
     --recipe                           ; show recipe
 ```
 
-`sys-dev` is styled after `cargo` and fulfills many of the same needs. While the help message should be relatively explanatory, the general development workflow is something like this. Note that in this version **=** is mandatory for options with arguments.
+`sys-dev` is styled after `cargo` and fulfills many of the same functions. While the help message should be relatively explanatory, the general development workflow is something like this. Note that in this version **=** is mandatory for options with arguments.
 
 Before making any changes, you should establish a performance baseline.
 
