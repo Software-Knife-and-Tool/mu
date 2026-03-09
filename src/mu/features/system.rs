@@ -1,6 +1,6 @@
 //  SPDX-FileCopyrightText: Copyright 2024 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
-
+#![allow(clippy::useless_conversion)]
 //! system feature
 #[rustfmt::skip]
 use {
@@ -209,32 +209,32 @@ impl CoreFn for Feature {
                         Cons::cons(
                             env,
                             Vector::from("totalram").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.totalram, "system:sysinfo")?,
+                            Fixnum::with_u64(env, sysinfo.totalram.into(), "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("freeram").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.freeram, "system:sysinfo")?,
+                            Fixnum::with_u64(env, sysinfo.freeram.into(), "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("sharedram").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.sharedram, "system:sysinfo")?,
+                            Fixnum::with_u64(env, sysinfo.sharedram.into(), "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("bufferram").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.bufferram, "system:sysinfo")?,
+                            Fixnum::with_u64(env, sysinfo.bufferram.into(), "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("totalswap").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.totalswap, "system:sysinfo")?,
+                            Fixnum::with_u64(env, sysinfo.totalswap.into(), "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("freeswap").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.freeswap, "system:sysinfo")?,
+                            Fixnum::with_u64(env, sysinfo.freeswap.into(), "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
@@ -244,12 +244,12 @@ impl CoreFn for Feature {
                         Cons::cons(
                             env,
                             Vector::from("totalhigh").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.totalhigh, "system:sysinfo")?,
+                            Fixnum::with_u64(env, sysinfo.totalhigh.into(), "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,
                             Vector::from("freehigh").with_heap(env),
-                            Fixnum::with_u64(env, sysinfo.freehigh, "system:sysinfo")?,
+                            Fixnum::with_u64(env, sysinfo.freehigh.into(), "system:sysinfo")?,
                         ),
                         Cons::cons(
                             env,

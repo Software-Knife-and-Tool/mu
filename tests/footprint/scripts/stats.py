@@ -9,7 +9,7 @@ import subprocess
 ntests = sys.argv[1]
 
 mu_cmd = '../../target/release/mu-sys'
-time_cmd = 'time'
+time_cmd = '/usr/bin/time'
 format = '"%S %U %e %M %w %Z'
 
 def times():

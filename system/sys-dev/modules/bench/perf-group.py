@@ -34,6 +34,14 @@ def mem_virt(ns, group, line, test):
                                     stdout=subprocess.PIPE,\
                                     stderr=subprocess.PIPE)
 
+        case 'deftype':
+            proc = subprocess.Popen([mu_sys,
+                                     perf_arg,
+                                     '-l./dist/deftype.sys',
+                                     '-e (perf:mem-delta (:lambda ()' + test + ') :nil)'],\
+                                    stdout=subprocess.PIPE,\
+                                    stderr=subprocess.PIPE)
+
         case 'format':
             proc = subprocess.Popen([mu_sys,
                                      perf_arg,

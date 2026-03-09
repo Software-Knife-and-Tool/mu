@@ -35,7 +35,7 @@ UTILS = ../system
 
 BIN = mu-sys mu-exec mu-server sys-repl sys-dev
 
-SYS = core.sys fasl.sys format.sys image.sys module.sys
+# SYS = deftype.sys core.sys fasl.sys format.sys image.sys module.sys
 
 SYSTEM = system.l image.l fasl.l
 
@@ -85,9 +85,11 @@ dist:
 	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -l ./core.sys -q '(system:require "../src/lib/sys/" "module")'
 	@install -m 644 ./module.sys $(PACKAGE)/lib
 
+	@$(RELEASE)/mu-sys -l $(LIB)/dist/system.l -l ./core.sys -q '(system:require "../src/lib/modules/" "deftype")'
+	@install -m 644 ./deftype.sys $(PACKAGE)/lib
+
 #	@$(RELEASE)/mu-sys -l $(LIB)/dist/image.l -l ./core.sys -q '(system:require "../src/lib/sys/" "image")'
 #	@install -m 644 ./image.sys $(PACKAGE)/lib
-
 #	@$(RELEASE)/mu-sys -l $(LIB)/dist/fasl.l -l ./core.sys -q '(system:require "../src/lib/sys/" "fasl")'
 #	@install -m 644 ./fasl.sys $(PACKAGE)/lib
 
