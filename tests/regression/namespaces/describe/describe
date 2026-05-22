@@ -1,0 +1,11 @@
+(describe:%char #\a :t)	char: (8 bytes) :char :format 8b ASCII character immediate :value a:nil
+(describe:%cons () :t)	cons: (8 bytes) :cons :length 0 :value :nil:nil
+(describe:%fixnum 1234 :t)	fixnum: (8 bytes) :fixnum :format: 56b signed integer immediate :value 1234:nil
+(describe:%float 0.1234 :t)	float: (8 bytes) :float :format: 32b IEEE single float immediate :value 0.1234:nil
+(describe:%function mu:add :t)	mu function: (18 bytes) :func :arity 2 :body (:native . 25):nil
+(describe:%string "abcde" :t)	string: (8 bytes) :vector char :format: unsigned 8b character vector :length 5 :value abcde:nil
+(describe:%string "abcdefgh" :t)	string: (26 bytes) :vector char :format: unsigned 8b character vector :length 8 :value abcdefgh:nil
+(describe:%struct (mu:find-namespace "mu") :t)	struct: (44 bytes) :struct :type :ns :props #(:t mu):nil
+(describe:%symbol 'mu:add :t)	symbol: (45 bytes) :symbol symbol :ns "mu" :name add value: #<function :core 2 #x1980>:nil
+(describe:%symbol :keyword :t)	symbol: (8 bytes) :symbol keyword :ns keyword :name keyword :value: :keyword:nil
+(describe:%vector #(:t 1 2) :t)	vector: (34 bytes) :vector :format: :t :length 2 :elements #(:t 1 2):nil

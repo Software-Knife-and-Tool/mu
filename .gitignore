@@ -2,6 +2,7 @@
 *.sys
 *.fasl
 .sys-dev
+.sys-replrc
 .dir-locals.el
 TAGS
 Cargo.lock

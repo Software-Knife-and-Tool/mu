@@ -1,39 +1,45 @@
-Namespace Test Summary:
------------------------
 mu         backquote      total: 37       pass: 36       fail: 1        exceptions: 0       
 mu         compile        total: 8        pass: 8        fail: 0        exceptions: 0       
-mu         core           total: 56       pass: 56       fail: 0        exceptions: 0       
+mu         core           total: 38       pass: 38       fail: 0        exceptions: 0       
 mu         exception      total: 4        pass: 4        fail: 0        exceptions: 0       
-mu         future         total: 9        pass: 9        fail: 0        exceptions: 0       
 mu         list           total: 24       pass: 24       fail: 0        exceptions: 0       
-mu         namespace      total: 11       pass: 11       fail: 0        exceptions: 0       
+mu         namespace      total: 4        pass: 4        fail: 0        exceptions: 0       
 mu         number         total: 41       pass: 41       fail: 0        exceptions: 0       
-mu         reader         total: 56       pass: 56       fail: 0        exceptions: 0       
+mu         reader         total: 57       pass: 57       fail: 0        exceptions: 0       
 mu         special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
 mu         stream         total: 9        pass: 9        fail: 0        exceptions: 0       
 mu         struct         total: 7        pass: 7        fail: 0        exceptions: 0       
-mu         symbol         total: 10       pass: 10       fail: 0        exceptions: 0       
+mu         symbol         total: 11       pass: 11       fail: 0        exceptions: 0       
 mu         vector         total: 23       pass: 23       fail: 0        exceptions: 0       
------------------------
-mu                        total: 306      pass: 305      fail: 1        exceptions: 0         
+mu                        total: 274      pass: 273      fail: 1        exceptions: 0         
 
-Namespace Test Summary:
------------------------
-core       backquote      total: 37       pass: 25       fail: 10       exceptions: 2       
-core       closure        total: 1        pass: 1        fail: 0        exceptions: 0       
-core       compile        total: 22       pass: 22       fail: 0        exceptions: 0       
-core       prelude        total: 13       pass: 13       fail: 0        exceptions: 0       
-core       exception      total: 7        pass: 7        fail: 0        exceptions: 0       
-core       format         total: 15       pass: 15       fail: 0        exceptions: 0       
-core       lambda         total: 25       pass: 25       fail: 0        exceptions: 0       
-core       list           total: 61       pass: 61       fail: 0        exceptions: 0       
-core       macro          total: 13       pass: 13       fail: 0        exceptions: 0       
-core       reader         total: 66       pass: 66       fail: 0        exceptions: 0       
-core       stream         total: 4        pass: 4        fail: 0        exceptions: 0       
-core       string         total: 2        pass: 2        fail: 0        exceptions: 0       
-core       symbol         total: 3        pass: 3        fail: 0        exceptions: 0       
-core       types          total: 42       pass: 42       fail: 0        exceptions: 0       
-core       vector         total: 25       pass: 25       fail: 0        exceptions: 0       
------------------------
-core                      total: 336      pass: 324      fail: 10       exceptions: 2         
+core           backquote  total: 37       pass: 36       fail: 1        exceptions: 0       
+core           closure    total: 3        pass: 3        fail: 0        exceptions: 0       
+core           compile    total: 22       pass: 22       fail: 0        exceptions: 0       
+core           core       total: 19       pass: 19       fail: 0        exceptions: 0       
+core           exception  total: 6        pass: 6        fail: 0        exceptions: 0       
+core           lambda     total: 48       pass: 48       fail: 0        exceptions: 0       
+core           lisp       total: 32       pass: 32       fail: 0        exceptions: 0       
+core           list       total: 61       pass: 61       fail: 0        exceptions: 0       
+core           macro      total: 14       pass: 14       fail: 0        exceptions: 0       
+core           prelude    total: 12       pass: 12       fail: 0        exceptions: 0       
+core           reader     total: 71       pass: 71       fail: 0        exceptions: 0       
+core           stream     total: 4        pass: 4        fail: 0        exceptions: 0       
+core           string     total: 2        pass: 2        fail: 0        exceptions: 0       
+core           symbol     total: 7        pass: 7        fail: 0        exceptions: 0       
+core           types      total: 12       pass: 12       fail: 0        exceptions: 0       
+core           vector     total: 25       pass: 25       fail: 0        exceptions: 0       
+core                      total: 375      pass: 374      fail: 1        exceptions: 0         
+
+module         module     total: 2        pass: 2        fail: 0        exceptions: 0       
+module                    total: 2        pass: 2        fail: 0        exceptions: 0         
+
+deftype        deftype    total: 44       pass: 44       fail: 0        exceptions: 0       
+deftype                   total: 44       pass: 44       fail: 0        exceptions: 0         
+
+format         format     total: 13       pass: 13       fail: 0        exceptions: 0       
+format                    total: 13       pass: 13       fail: 0        exceptions: 0         
+
+describe       describe   total: 12       pass: 10       fail: 2        exceptions: 0       
+describe                  total: 12       pass: 10       fail: 2        exceptions: 0         
 
