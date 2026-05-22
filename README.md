@@ -60,7 +60,7 @@ Most of our core computational frameworks are built on static systems and are fr
 - *mu-sys*, minimal POSIX command suitable for containers
 - *telerin*, a native code compiler
 - *sys-dev* , a cargo-like development and packaging utility
-- *sys-repl* , a configurable interactive tool for exzploration and debugging 
+- *sys-repl* , a configurable interactive tool for exploration and debugging 
 - small and simple installation
 - add interactivity and extensibility to application implementations
 - Rust FFI system
@@ -242,7 +242,7 @@ The *system-lisp* distribution includes tools for configuring and development of
 The *sys-dev* command is found at `/opt/system-lisp/bin/sys-dev`.
 
 ```
-Usage: sys-dev 0.0.20 command [option...]
+Usage: sys-dev 0.0.21 command [option...]
   command:
     help                               ; this message
     version                            ; sys-dev version

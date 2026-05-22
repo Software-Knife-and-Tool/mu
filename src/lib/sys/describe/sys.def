@@ -6,7 +6,7 @@
 ;;;
 (system:provide
  "describe"
- '((:version . "0.0.1")
+ '((:version . "0.0.2")
    (:ns      . "describe")
    (:load    . (
                 "describe.l"

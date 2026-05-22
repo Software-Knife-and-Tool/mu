@@ -44,6 +44,16 @@ def runtest(line, test, expected):
                                 stdout=subprocess.PIPE,                 \
                                 stderr=subprocess.PIPE)
 
+    if ns == 'describe':
+        proc = subprocess.Popen([mu-sys,
+                                 '-l' + core_sys,
+                                 '-l../../dist/format.sys',
+                                 '-l../../dist/describe.sys,
+                                 '-e (core:eval \'{})'.format(test),    \
+                                 ],                                     \
+                                stdout=subprocess.PIPE,                 \
+                                stderr=subprocess.PIPE)
+                                 
     if ns == 'module':
         proc = subprocess.Popen([mu-sys,
                                  '-l' + core_sys,

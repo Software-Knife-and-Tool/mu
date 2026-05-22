@@ -45,7 +45,17 @@ def runtest(line, group, test, expected):
                                      ],                                     \
                                     stdout=subprocess.PIPE,                 \
                                     stderr=subprocess.PIPE)
-            
+
+        case 'describe':
+            proc = subprocess.Popen([mu_sys,
+                                     core_arg,
+                                     '-l./dist/format.sys',
+                                     '-l./dist/describe.sys',
+                                     '-e (core:eval \'{})'.format(test),    \
+                                     ],                                     \
+                                    stdout=subprocess.PIPE,                 \
+                                    stderr=subprocess.PIPE)
+
         case 'deftype':
             proc = subprocess.Popen([mu_sys,
                                      core_arg,
