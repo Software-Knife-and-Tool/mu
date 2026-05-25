@@ -13,11 +13,11 @@
            (core:mapc
             (:lambda (symbol)
               (:if (mu:boundp symbol)
-                   (core:%format stream "~A~T~A~T~S~%"
+                   (format:%format stream "~A~T~A~T~S~%"
                                  `(,(mu:symbol-name symbol)
                                     ,(core:type-of (mu:symbol-value symbol))
                                     ,(mu:symbol-value symbol)))
-                   (core:%format stream "unbound~Tunbound~T~A~%" `(,(mu:symbol-name symbol)))))
+                   (format:%format stream "unbound~Tunbound~T~A~%" `(,(mu:symbol-name symbol)))))
             (feature/env:symbols (mu:find-namespace "core")))
            (mu:close stream))
          (mu:open :file :output file-name :t))
