@@ -8,4 +8,4 @@ lite-json = "0.2"
 mu = { path = "../.." }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = "0.6"
+tikv-jemallocator = "0.7"

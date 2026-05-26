@@ -351,7 +351,11 @@ pub mod mu {
                 .input()
                 .build(env, &CORE)?;
 
-            env.read(stream, true, Tag::nil(), false)
+            let res = env.read(stream, true, Tag::nil(), false);
+
+            Stream::close(stream);
+
+            res
         }
 
         /// Write a mu tagged form to a core stream..
@@ -415,7 +419,11 @@ pub mod mu {
                 .unwrap();
 
             StreamWriter::write(env, expr, esc, stream).unwrap();
-            Stream::get_string(env, stream).unwrap()
+            let value = Stream::get_string(env, stream).unwrap();
+
+            Stream::close(stream);
+
+            value
         }
 
         /// Return Env's standard-input core stream binding.

@@ -58,7 +58,7 @@ Most of our core computational frameworks are built on static systems and are fr
 
 - *mu*, a small, configurable runtime library and language
 - *mu-sys*, minimal POSIX command suitable for containers
-- *telerin*, a native code compiler
+- *procyon*, a native code compiler
 - *sys-dev* , a cargo-like development and packaging utility
 - *sys-repl* , a configurable interactive tool for exploration and debugging 
 - small and simple installation
