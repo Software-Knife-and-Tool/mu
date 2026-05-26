@@ -76,4 +76,4 @@ needless_bool = "deny"
 sysinfo_dot_h = "0.2"
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = "0.6"
+tikv-jemallocator = "0.7"
