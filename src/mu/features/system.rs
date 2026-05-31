@@ -87,7 +87,7 @@ impl CoreFn for Feature {
                     command,
                     Condition::Open,
                     "system:shell",
-                ))
+                ));
             }
             Ok(exit_status) => match exit_status.code() {
                 Some(rc) => Fixnum::etry_from(env, rc, "system:shell")?,

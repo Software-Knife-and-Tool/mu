@@ -28,7 +28,7 @@ impl Gc for Namespace {
                     }
                 }
             }
-            Namespace::Dynamic(ref hash) => {
+            Namespace::Dynamic(hash) => {
                 let hash_ref = block_on(hash.read());
                 for symbol in hash_ref.values() {
                     Symbol::mark(gc, env, *symbol);

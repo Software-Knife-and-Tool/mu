@@ -8,7 +8,7 @@ use {
         exception::{self, Condition, Exception},
         tag::Tag,
     },
-    futures_lite::{future::block_on, AsyncReadExt, AsyncWriteExt},
+    futures_lite::{AsyncReadExt, AsyncWriteExt, future::block_on},
     futures_locks::RwLock,
     smol::{
         fs,

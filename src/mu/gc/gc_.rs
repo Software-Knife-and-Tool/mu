@@ -97,7 +97,7 @@ impl Gc for GcContext<'_> {
                         }
                     }
                 }
-                Namespace::Dynamic(ref hash) => {
+                Namespace::Dynamic(hash) => {
                     let hash_ref = block_on(hash.read());
 
                     for symbol in hash_ref.values() {

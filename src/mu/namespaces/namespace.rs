@@ -6,7 +6,7 @@ use {
     crate::{
         core::{
             apply::Apply as _,
-            core_::{CoreFnDef, CORE, CORE_FUNCTIONS},
+            core_::{CORE, CORE_FUNCTIONS, CoreFnDef},
             direct::DirectTag,
             env::Env,
             exception::{self, Condition, Exception},

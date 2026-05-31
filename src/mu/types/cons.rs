@@ -15,7 +15,7 @@ use {
             type_::Type,
         },
         namespaces::heap::HeapRequest,
-        reader::read::{Reader, EOL},
+        reader::read::{EOL, Reader},
         streams::writer::StreamWriter,
         types::{fixnum::Fixnum, symbol::Symbol, vector::Vector},
     },
