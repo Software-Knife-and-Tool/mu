@@ -1,7 +1,7 @@
 [package]
 name = "mu"
-version = "0.2.20"
-edition = "2021"
+version = "0.2.21"
+edition = "2024"
 license = "MIT" 
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 

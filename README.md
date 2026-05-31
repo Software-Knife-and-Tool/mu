@@ -4,13 +4,13 @@
 
 <img src="https://github.com/Software-Knife-and-Tool/mu/blob/main/.github/mu.png?raw=true" width="20%" height="%20">
 
-# *system-lisp* - a programming environment
+# *mu* - a lisp programming environment
 
 ### Under heavy development 
 
-###### version 0.2.20
+###### version 0.2.21
 
-*system-lisp* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
+*mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to persistent POSIX environments.
 
 *mu* is a Lisp-1 namespaced programming language with Common Lisp idioms and macro system.
 
@@ -58,7 +58,7 @@ Most of our core computational frameworks are built on static systems and are fr
 
 - *mu*, a small, configurable runtime library and language
 - *mu-sys*, minimal POSIX command suitable for containers
-- *procyon*, a native code compiler
+- *procyon*, a native code compiler (see *mu-tools*)
 - *sys-dev* , a cargo-like development and packaging utility
 - *sys-repl* , a configurable interactive tool for exploration and debugging 
 - small and simple installation
@@ -71,17 +71,16 @@ Most of our core computational frameworks are built on static systems and are fr
 
 
 
-#### State of the *system-lisp* system
+#### State of the *mu* system
 
 ------
 
-*system-lisp* is a work in progress and under heavy development.
+*mu* is a work in progress and under heavy development.
 
-*system-lisp* runtime builds are targeted to:
+*mu* runtime builds are targeted to:
 
 - x86-64 and AArch-64 Linux distributions
 - x86-64 WSL
-- Docker Ubuntu and Alpine containers
 
 Current binary releases on github are Linux x86-64, other architectures will follow.
 
@@ -95,11 +94,11 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 *mu* is an immutable, namespaced Lisp-1 that borrows heavily from *Scheme*, but is more closely related to the Common Lisp family of languages. *mu* syntax and constructs will be familiar to the traditional Lisp programmer. 
 
-The *mu* runtime kernel is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file and random user selected features may have unsafe implementations.)
+The *mu* runtime kernel is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file and user selected features may have unsafe implementations.)
 
-The runtime implements 64 bit tagged pointers, is available as a crate, and extends a Rust API for embedded applications. The runtime is primarily a resource allocator and evaluator for the *mu* kernel language. *mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
+The runtime implements 64 bit tagged pointers, is available as a crate, and extends a Rust API for embedded applications. The runtime is primarily a resource allocator and evaluator for the *mu* kernel language. *mu* provides fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
 
-The *mu* 2-LISP system is organized as a stack of compilers, culminating in the *terlerin* native code compiler.
+The *mu* 2-LISP system is organized as a stack of compilers, culminating in the *procyon* native code compiler.
 
 The *core* library provides *rest* lambdas, *closures*, expanded types, *macros*, and a reader/compiler for those forms.
 
@@ -132,10 +131,10 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 
 ------
 
- The release is installed in `/opt/system-lisp`. 
+ The release is installed in `/opt/mu`. 
 
 ```
-/opt/system-lisp
+/opt/mu
 ├── bin
 ├── doc
 │   └── html
@@ -155,13 +154,13 @@ Once built, the *html* for the *reference* material is installed in *doc/referen
 └── system
 ```
 
-To install a release from the github repository
+To install a release from the github repository:
 
 ```
-cat system-lisp-x.y.z.tgz | (cd /opt ; sudo tar --no-same-owner -xzf -)
+cat mu-x.y.z.tgz | (cd /opt ; sudo tar --no-same-owner -xzf -)
 ```
 
-The `/opt/system-lisp` directory is hardwired into several tools and the release mechanism, changing it would require significant alteration of parts of the system. 
+The `/opt/mu` directory is hardwired into several tools and the release mechanism, changing it would require significant alteration of parts of the system. 
 
   
 
@@ -170,13 +169,9 @@ The `/opt/system-lisp` directory is hardwired into several tools and the release
 ------
 
 ```
-version 0.2.10 is built with rustc 1.89.0
-version 0.2.11 and 0.2.12 are built with rustc 1.90.0
-version 0.2.13 and 0.2.14 are built with rustc 1.91.1
-version 0.2.15 is built with rustc 1.93.0
-version 0.2.16 is built with rustc 1.93.1
-version 0.2.17 and 0.2.18 are built with rustc 1.94.0
+version 0.2.18 is built with rustc 1.94.0
 version 0.2.19 and 0.2.20 are built with rustc 1.95.0
+version 0.2.21 is built with rustc 1.96.0
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility. The instructions below assume a developmentt system with `apt` package management.
@@ -185,22 +180,22 @@ Tests, performance, tools, and regression metrics require some version of `pytho
 
 ```
 sudo apt install time
-git clone https://github.com/Software-Knife-and-Tool/system-lisp.git
+git clone https://github.com/Software-Knife-and-Tool/mu.git
 ```
 
-After cloning the *system-lisp* repository, the system can be built and installed with the supplied makefile. The *world* target builds a release version of the system and the *sys-dev* development tool.  `make` with no arguments prints the available targets. 
+After cloning the *mu* repository, the system can be built and installed with the supplied makefile. The *world* target builds a release version of the system and the *sys-dev* development tool.  `make` with no arguments prints the available targets. 
 
 ```
 % make world
 ```
 
-Having built the distribution, install it in `/opt/system-lisp`.
+Having built the distribution, install it in `/opt/mu`.
 
 ```
 % sudo make install
 ```
 
-Having built and installed `system-lisp`,  establish the current directory as a `sys-dev`  workspace.
+Having built and installed `mu`,  establish the current directory as a `sys-dev`  workspace.
 
 ```
 % sys-dev workspace init
@@ -237,9 +232,9 @@ The *sysinfo* feature is disabled on *macOS* builds.
 
 ------
 
-The *system-lisp* distribution includes tools for configuring and development of the system..
+The *mu* distribution includes tools for configuring and development of the system..
 
-The *sys-dev* command is found at `/opt/system-lisp/bin/sys-dev`.
+The *sys-dev* command is found at `/opt/mu/bin/sys-dev`.
 
 ```
 Usage: sys-dev 0.0.21 command [option...]
@@ -291,9 +286,9 @@ Profiling is nascent and will be expanded in future releases.
 
 ------
 
-The distribution includes a command line tool for running and interacting with the system. The *sys-repl* binary is part of the release, found at `/opt/system-lisp/bin/sys-repl`.
+The distribution includes a command line tool for running and interacting with the system. The *sys-repl* binary is part of the release, found at `/opt/mu/bin/sys-repl`.
 
-*sys-repl* has no command line arguments. It is configured by an optional JSON file, *.sys-replrc*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *load* argument supplies a list of the names of files to load on startup using the *loader* function. The *reader* argument, currently limited to `core` or `mu` (the default) tells *sys-repl* to run in the indicated namespace and use the associated reader. *require* is a list of modules to be loaded by core:require, and *lib* is a list of *.sys* modules to be loaded from the release *lib* directory. *options* contains a list of *sys-repl* options (of which there are none as of 0.0.5). All arguments are optional.  
+*sys-repl* has no command line arguments. It is configured by an optional JSON file, *.sys-replrc*, which is expected to be in either the current directory or the user's home directory. The *config* argument supplies a *mu* environment configuration string (see **System Configuration** for details), and the *load* argument supplies a list of the names of files to load on startup using the *loader* function. The *reader* argument, currently limited to `core` or `mu` (the default) tells *sys-repl* to run in the indicated namespace and use the associated reader. *require* is a list of modules to be loaded by *core:require*, and *lib* is a list of *.sys* modules to be loaded from the release *lib* directory. *options* contains a list of *sys-repl* options (of which there are none as of 0.0.5). All arguments are optional.  
 
 ```
 {
@@ -364,10 +359,10 @@ In specific, `report` produces a summary of significant performance changes (dif
 
 ------
 
-The *mu* binaries and libraries are installed in `/opt/system-lisp`. The `bin` directory contains the binaries for running the system. The command line options for these utilities are documented in `doc/refcards/utilities.[docx,pdf]`
+The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory contains the binaries for running the system. The command line options for these utilities are documented in `doc/refcards/utilities.[docx,pdf]`
 
 ```
-/opt/system-lisp/bin
+/opt/mu/bin
 ├── sys-dev		# development tool
 ├── sys-repl		# runtime binary, stdio repl
 ├── mu-exec		# image executor

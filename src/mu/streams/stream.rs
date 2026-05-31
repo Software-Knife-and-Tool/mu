@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{
-            core_::{Core, CORE},
+            core_::{CORE, Core},
             direct::{DirectExt, DirectTag, DirectType, ExtType},
             env::Env,
             exception::{self, Condition, Exception},
@@ -14,7 +14,7 @@ use {
         streams::system::{StringDirection, SystemStream, SystemStreamBuilder},
         types::{stream::Stream, symbol::Symbol},
     },
-    futures_lite::{future::block_on, AsyncWriteExt},
+    futures_lite::{AsyncWriteExt, future::block_on},
     futures_locks::RwLock,
     std::{io::Write, str},
 };

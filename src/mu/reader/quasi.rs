@@ -120,7 +120,7 @@ impl QuasiReader {
             QuasiExpr::Basic(tag) => Compiler::quote(env, &Cons::cons(env, *tag, Tag::nil())),
             QuasiExpr::Comma(tag) => Cons::list(env, &[self.cons, *tag, Tag::nil()]),
             QuasiExpr::CommaAt(tag) => *tag,
-            QuasiExpr::List(ref vec) => {
+            QuasiExpr::List(vec) => {
                 if vec.is_empty() {
                     Cons::list(env, &[self.cons, Tag::nil(), Tag::nil()])
                 } else {

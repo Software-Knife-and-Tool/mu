@@ -13,7 +13,7 @@ use {
             frame::{CoreFn as _, Frame},
             tag::{CoreFn as _, Tag},
         },
-        features::feature::{Feature, FEATURES},
+        features::feature::{FEATURES, Feature},
         gc::gc_::{CoreFn as _, GcContext},
         namespaces::namespace::{CoreFn as _, Namespace},
         streams::builder::StreamBuilder,

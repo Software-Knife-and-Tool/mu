@@ -6,7 +6,7 @@
 VERSION = `cat ./VERSION`
 
 ROOT = /opt
-BASE = system-lisp
+BASE = mu
 
 help:
 	@echo install - install $(BASE) in $(ROOT)/$(BASE) (needs sudo)

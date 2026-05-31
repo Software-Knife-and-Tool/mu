@@ -3,29 +3,29 @@
 #
 .PHONY: dist clean release
 
-VERSION := $(shell cargo pkgid | sed 's/.*\///' | sed 's/#.*@/-/')
+VERSION := $(shell cargo pkgid | sed 's/.*\///' | sed 's/#/-/')
 
 # mu
 # ├── bin
 # ├── doc
-# │   └── html
+# │   └── html
 # ├── lib
-# │   ├── core
-# │   ├── describe
-# │   ├── fasl
-# │   ├── format
-# │   ├── image
+# │   ├── core
+# │   ├── describe
+# │   ├── fasl
+# │   ├── format
+# │   ├── image
+# │   └── sys-repl
 # ├── modules
-# │   ├── common
-# │   │   ├── describe
-# │   │   └── metrics
-# │   ├── deftype
-# │   └── prelude
-# │       └── repl
+# │   ├── common
+# │   │   ├── describe
+# │   │   └── metrics
+# │   ├── deftype
+# │   └── prelude
+# │       └── repl
 # └── system
-#
 
-PACKAGE = system-lisp
+PACKAGE = mu
 RELEASE = ../target/release
 
 DIST = ../dist

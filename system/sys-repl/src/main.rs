@@ -27,11 +27,11 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
     match &rc.lib {
         Some(vec) => {
             for sys in vec {
-                match Mu::load(&env, &("/opt/system-lisp/lib/".to_owned() + &sys)) {
+                match Mu::load(&env, &("/opt/mu/lib/".to_owned() + &sys)) {
                     Ok(_) => (),
                     Err(ex) => {
                         eprintln!(
-                            "sys-repl: failed to load /opt/system-lisp/lib/{sys}, {}",
+                            "sys-repl: failed to load /opt/mu/lib/{sys}, {}",
                             Mu::exception_string(&env, &ex)
                         );
                         std::process::exit(-1)

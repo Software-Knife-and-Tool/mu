@@ -16,7 +16,7 @@ use crate::{
         cons::Cons,
         fixnum::Fixnum,
         float::Float,
-        vector::{Vector, VectorType, VECTYPEMAP},
+        vector::{VECTYPEMAP, Vector, VectorType},
     },
 };
 
