@@ -62,11 +62,11 @@ impl Reader for Env {
         loop {
             match StreamReader::read_char(self, stream)? {
                 Some(ch) => {
-                    if let Some(stype) = SyntaxType::map_char_syntax(ch) {
-                        if stype != &SyntaxType::Whitespace {
-                            StreamReader::unread_char(self, stream, ch).unwrap();
-                            break;
-                        }
+                    if let Some(stype) = SyntaxType::map_char_syntax(ch)
+                        && stype != &SyntaxType::Whitespace
+                    {
+                        StreamReader::unread_char(self, stream, ch).unwrap();
+                        break;
                     }
                 }
                 None => return Ok(None),

@@ -424,7 +424,7 @@ impl CoreFn for Cons {
         let list = fp.argv[1];
 
         if Fixnum::as_i64(nth) < 0 {
-            return Err(Exception::err(env, nth, Condition::Type, "mu:nthcdr"))?;
+            Err(Exception::err(env, nth, Condition::Type, "mu:nthcdr"))?;
         }
 
         fp.value = match list.type_of() {
