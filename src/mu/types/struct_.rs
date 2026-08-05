@@ -46,7 +46,7 @@ impl Struct {
     }
 
     pub fn destruct(env: &Env, struct_: Tag) -> (Tag, Tag) {
-        assert!(struct_.type_of() == Type::Struct);
+        assert_eq!(struct_.type_of(), Type::Struct);
 
         match struct_ {
             Tag::Indirect(struct_) => {

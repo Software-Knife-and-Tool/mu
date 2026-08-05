@@ -1,6 +1,6 @@
 [package]
 name = "mu"
-version = "0.2.21"
+version = "0.2.22"
 edition = "2024"
 license = "MIT" 
 authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
@@ -27,6 +27,7 @@ core = []
 env = []           # needed for testing, common
 system = []
 socket = []
+ffi = []
 
 [profile.dev]
 opt-level = 0

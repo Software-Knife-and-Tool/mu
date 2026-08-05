@@ -249,7 +249,7 @@ impl VecImage for VecImageType<'_> {
     }
 
     fn ref_(env: &Env, vector: Tag, index: usize) -> Option<Tag> {
-        assert!(vector.type_of() == Type::Vector);
+        assert_eq!(vector.type_of(), Type::Vector);
 
         let Tag::Indirect(vimage) = vector else {
             panic!()

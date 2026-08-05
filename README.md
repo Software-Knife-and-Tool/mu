@@ -8,7 +8,7 @@
 
 ### Under heavy development 
 
-###### version 0.2.21
+###### version 0.2.22
 
 *mu* is a Lisp-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to persistent POSIX environments.
 
@@ -172,6 +172,7 @@ The `/opt/mu` directory is hardwired into several tools and the release mechanis
 version 0.2.18 is built with rustc 1.94.0
 version 0.2.19 and 0.2.20 are built with rustc 1.95.0
 version 0.2.21 is built with rustc 1.96.0
+version 0.2.22 is built with rustc 1.97.1
 ```
 
 The *mu* runtime is a native code program that must be built for the target CPU architecture. The runtime build system requires only a `rust` development environment, `rust-fmt`, `clippy` and the  GNU `make` utility. The instructions below assume a developmentt system with `apt` package management.
@@ -221,7 +222,7 @@ Currently supported features by namespace:
  feature/env:			env-info heap-info heap-size heap-room cache-room load symbols
  feature/system:		uname shell exit sysinfo
  feature/socket:        [not wholly implemented]
-
+ feature/ffi:    	    [not wholly implemented]
 ```
 
 The *sysinfo* feature is disabled on *macOS* builds.

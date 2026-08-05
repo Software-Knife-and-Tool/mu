@@ -61,7 +61,7 @@ impl Function {
     }
 
     pub fn destruct(env: &Env, func: Tag) -> (Tag, Tag) {
-        assert!(func.type_of() == Type::Function);
+        assert_eq!(func.type_of(), Type::Function);
 
         match func {
             Tag::Direct(_) => {

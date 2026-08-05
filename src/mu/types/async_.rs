@@ -47,7 +47,7 @@ impl Async {
     }
 
     pub fn destruct(env: &Env, func: Tag) -> (Tag, Tag) {
-        assert!(func.type_of() == Type::Async);
+        assert_eq!(func.type_of(), Type::Async);
 
         match func {
             Tag::Indirect(fn_) => {
