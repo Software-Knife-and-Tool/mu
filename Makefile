@@ -23,7 +23,7 @@ release:
 	@cargo build --release --workspace
 
 emacs:
-	@echo '((nil . ((compile-command . "cd ~/projects/system-lisp ; make world"))))' > .dir-locals.el
+	@echo '((nil . ((compile-command . "cd ~/projects/mu ; make world"))))' > .dir-locals.el
 	@find src -name "*.rs" -print | etags -
 
 tests/regression:

@@ -4,7 +4,7 @@
 ;;;
 ;;; symbol table
 ;;;
-(core:load "/opt/system-lisp/lib/format.sys")
+(core:load "/opt/mu/lib/format.sys")
 
 (mu:make-namespace "symbols")
 ((:lambda (symbols)
