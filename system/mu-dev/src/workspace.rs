@@ -12,18 +12,18 @@ use {
 pub struct Workspace {
     pub bin: PathBuf,     // workspace bin
     pub lib: PathBuf,     // workspace lib
-    pub sysdev: PathBuf,  // sys-dev module directory
+    pub sysdev: PathBuf,  // mu-dev module directory
     pub modules: PathBuf, // workspace modules
     pub tests: PathBuf,   // workspace tests
 }
 
 impl Workspace {
     pub fn new(path: &str) -> Self {
-        let modules: PathBuf = [path, "system", "sys-dev", "modules"].iter().collect();
+        let modules: PathBuf = [path, "system", "mu-dev", "modules"].iter().collect();
         let bin: PathBuf = [path, "target", "release"].iter().collect();
         let lib: PathBuf = [path, "dist"].iter().collect();
         let tests: PathBuf = [path, "tests"].iter().collect();
-        let sysdev: PathBuf = [path, ".sys-dev"].iter().collect();
+        let sysdev: PathBuf = [path, ".mu-dev"].iter().collect();
 
         Self {
             modules,
@@ -39,7 +39,7 @@ impl Workspace {
         loop {
             match Path::read_dir(&cwd) {
                 Ok(mut dir) => match dir.find(|entry| match entry {
-                    Ok(entry) => entry.file_name() == ".sys-dev",
+                    Ok(entry) => entry.file_name() == ".mu-dev",
                     _ => false,
                 }) {
                     Some(_) => return Some(cwd.to_str().unwrap().to_string()),
@@ -56,16 +56,16 @@ impl Workspace {
     }
 
     fn sysdev_dir_exists(home: &str) -> bool {
-        let path = PathBuf::from(home.to_owned() + "/.sys-dev");
+        let path = PathBuf::from(home.to_owned() + "/.mu-dev");
 
         Path::exists(&path)
     }
 
     fn make_module_dirs(home: &str) -> io::Result<()> {
         let module_paths = [
-            [home, ".sys-dev", "bench"],
-            [home, ".sys-dev", "regression"],
-            [home, ".sys-dev", "symbols"],
+            [home, ".mu-dev", "bench"],
+            [home, ".mu-dev", "regression"],
+            [home, ".mu-dev", "symbols"],
         ];
 
         for path in module_paths {
@@ -126,7 +126,7 @@ impl Workspace {
                     }
                     Mode::Env => match Self::env() {
                         Some(env) => println!("{env}"),
-                        None => eprintln!("not in a sys-dev workspace`"),
+                        None => eprintln!("not in a mu-dev workspace`"),
                     },
                     _ => panic!(),
                 }

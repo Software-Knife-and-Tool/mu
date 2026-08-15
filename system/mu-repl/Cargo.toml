@@ -1,5 +1,5 @@
 [package]
-name = "sys-repl"
+name = "mu-repl"
 version = "0.0.8"
 edition = "2021"
 

@@ -15,7 +15,7 @@ VERSION := $(shell cargo pkgid | sed 's/.*\///' | sed 's/#/-/')
 # │   ├── fasl
 # │   ├── format
 # │   ├── image
-# │   └── sys-repl
+# │   └── mu-repl
 # ├── modules
 # │   ├── common
 # │   │   ├── describe
@@ -34,7 +34,7 @@ SRC = ../src
 LIB = ../src/lib
 UTILS = ../system
 
-BIN = mu-sys mu-exec mu-server sys-repl sys-dev
+BIN = mu-sys mu-exec mu-server mu-repl mu-dev
 
 # SYS = deftype.sys core.sys fasl.sys format.sys image.sys module.sys
 
@@ -71,7 +71,7 @@ dist:
 	@install -D -m 644 -t $(PACKAGE)/lib/format $(LIB)/sys/format/*.l $(LIB)/sys/format/*.def
 	@install -D -m 644 -t $(PACKAGE)/lib/fasl $(LIB)/sys/fasl/*.l $(LIB)/sys/fasl/*.def
 	@install -D -m 644 -t $(PACKAGE)/lib/image $(LIB)/sys/image/*.l $(LIB)/sys/image/*.def
-	@install -D -m 644 -t $(PACKAGE)/lib/sys-repl $(UTILS)/sys-repl/lib/sys-replrc
+	@install -D -m 644 -t $(PACKAGE)/lib/mu-repl $(UTILS)/mu-repl/lib/mu-replrc
 
 	@for module in $(MODULES); do	\
 	    install -D -m 644 -t $(PACKAGE)/modules/$$module $(LIB)/modules/$$module/*.l;	\
