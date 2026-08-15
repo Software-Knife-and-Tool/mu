@@ -31,7 +31,7 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
                     Ok(_) => (),
                     Err(ex) => {
                         eprintln!(
-                            "sys-repl: failed to load /opt/mu/lib/{sys}, {}",
+                            "mu-repl: failed to load /opt/mu/lib/{sys}, {}",
                             Mu::exception_string(&env, &ex)
                         );
                         std::process::exit(-1)
@@ -49,7 +49,7 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
                     Ok(_) => (),
                     Err(ex) => {
                         eprintln!(
-                            "sys-repl: failed to load module {module}, {}",
+                            "mu-repl: failed to load module {module}, {}",
                             Mu::exception_string(&env, &ex)
                         );
                         std::process::exit(-1)
@@ -73,7 +73,7 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
                         Ok(_) => (),
                         Err(ex) => {
                             eprintln!(
-                                "sys-repl: failed to load {path}, {}",
+                                "mu-repl: failed to load {path}, {}",
                                 Mu::exception_string(&env, &ex)
                             );
                             std::process::exit(-1)
@@ -81,13 +81,13 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
                     },
                     _ => {
                         if rc.option("verbose") {
-                            println!("sys-repl: loading: {path}")
+                            println!("mu-repl: loading: {path}")
                         }
                         match Mu::eval_str(&env, &format!("(core:load \"{path}\")")) {
                             Ok(_) => (),
                             Err(ex) => {
                                 eprintln!(
-                                    "sys-repl: failed to load {path}, {}",
+                                    "mu-repl: failed to load {path}, {}",
                                     Mu::exception_string(&env, &ex)
                                 );
                                 std::process::exit(-1)
@@ -105,10 +105,9 @@ fn rc_(env: &Env, rc: &Rc) -> (String, Option<Vec<String>>) {
 
 pub fn main() {
     let mut config_json = None;
-    for path in vec!["./.sys-replrc", "~/.sys-replrc"] {
+    for path in vec!["./.mu-replrc", "~/.mu-replrc"] {
         if fs::metadata(path).is_ok() {
-            config_json =
-                Some(fs::read_to_string(path).expect("mu-load: failed to read .sys-repl"));
+            config_json = Some(fs::read_to_string(path).expect("mu-load: failed to read .mu-repl"));
         }
     }
 
@@ -116,5 +115,5 @@ pub fn main() {
     let env = Mu::env(&rc.config);
 
     let (reader, _) = rc_(&env, &rc);
-    repl::repl(&env, reader).expect("sys-repl: listener error");
+    repl::repl(&env, reader).expect("mu-repl: listener error");
 }

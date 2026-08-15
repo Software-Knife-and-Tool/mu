@@ -7,8 +7,8 @@ authors = ["James M. Putnam <putnamjm.design@gmail.com>"]
 
 [workspace]
 members = [
-    "system/sys-dev",
-    "system/sys-repl",
+    "system/mu-dev",
+    "system/mu-repl",
     "src/mu-exec",
     "src/mu-server",
     "src/mu-sys"

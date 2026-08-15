@@ -19,10 +19,10 @@ use crate::{
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn usage() {
-    println!("Usage: sys-dev {VERSION} command [option...]");
+    println!("Usage: mu-dev {VERSION} command [option...]");
     println!("  command:");
     println!("    help                               ; this message");
-    println!("    version                            ; sys-dev version");
+    println!("    version                            ; mu-dev version");
     println!();
     println!("    workspace init | env               ; manage workspace");
     println!();
@@ -62,7 +62,7 @@ pub fn main() {
                     let cwd = std::env::current_dir().unwrap();
 
                     eprintln!(
-                        "error: could not find `.sys-dev` in {:?} or any parent directory",
+                        "error: could not find `.mu-dev` in {:?} or any parent directory",
                         cwd.to_str().unwrap()
                     );
                     std::process::exit(-1)
@@ -73,7 +73,7 @@ pub fn main() {
             match command {
                 "help" => {
                     println!();
-                    println!("    sys-dev: mu packaging and development tool");
+                    println!("    mu-dev: mu packaging and development tool");
                     println!();
                     usage()
                 }

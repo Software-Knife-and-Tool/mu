@@ -24,7 +24,7 @@ impl Check {
                 let mode = &options.modes[0];
 
                 match Options::find_opt(&options, &Opt::Verbose) {
-                    Some(_) => println!("sys-dev build: {:?} --verbose", mode),
+                    Some(_) => println!("mu-dev build: {:?} --verbose", mode),
                     None => (),
                 };
 
@@ -43,7 +43,7 @@ impl Check {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/debug/sys-dev")
+                            .arg("../target/debug/mu-dev")
                             .arg("../target/debug/mrepl")
                             .arg("../target/debug/mu-exec")
                             .arg("../target/debug/mu-server")
@@ -68,7 +68,7 @@ impl Check {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/release/sys-dev")
+                            .arg("../target/release/mu-dev")
                             .arg("../target/release/mrepl")
                             .arg("../target/release/mu-exec")
                             .arg("../target/release/mu-server")
@@ -94,7 +94,7 @@ impl Check {
 
                         let output = Command::new("cp")
                             .current_dir(dist.clone())
-                            .arg("../target/release/sys-dev")
+                            .arg("../target/release/mu-dev")
                             .arg("../target/release/mrepl")
                             .arg("../target/release/mu-exec")
                             .arg("../target/release/mu-server")
