@@ -13,9 +13,9 @@ dist/*.fasl
 dist/*.sys
 dist/VERSION
 doc/rustdoc
-tools/valgrind/*.report
-tools/profiling/core/*.report
-tools/profiling/core/prof.data*
+lib/valgrind/*.report
+lib/profiling/core/*.report
+lib/profiling/core/prof.data*
 tests/*/*.report
 tests/*/json/
 tests/performance/*.summary
