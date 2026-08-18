@@ -371,7 +371,7 @@ The *mu* binaries and libraries are installed in `/opt/mu`. The `bin` directory 
 └── mu-sys		# runtime binary
 ```
 
-`mu-sys` is the base runtime utility.
+`mu-sys` is the base runtime utility. `mu-sys` has a single feature switch, `pause`, which is disabled by default. If `pause` is enabled, `mu-sys` will print its PID and wait for a return on stdin before initializing the `mu` environment and processing the command line. This is to aid profiling.
 
 
 ```

@@ -13,7 +13,10 @@ static GLOBAL: Jemalloc = Jemalloc;
 use {
     getopt::Opt,
     mu::{Condition, Env, Mu, Result, Tag},
-    std::{fs, io::Write},
+    std::{
+        fs,
+        io::{self, Write},
+    },
 };
 
 #[derive(Debug, PartialEq)]
@@ -27,7 +30,11 @@ enum ShellOpt {
 const _VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn options(argv: Vec<String>) -> Option<Vec<ShellOpt>> {
+    #[cfg(feature = "pause")]
+    let mut opts = getopt::Parser::new(&argv, "pc:e:l:q:");
+    #[cfg(not(feature = "pause"))]
     let mut opts = getopt::Parser::new(&argv, "c:e:l:q:");
+
     let mut optv = Vec::new();
 
     loop {
@@ -83,6 +90,23 @@ pub fn main() {
             eprintln!("option: error");
             std::process::exit(-1)
         }
+    }
+
+    #[cfg(feature = "pause")]
+    match std::env::args()
+        .collect::<Vec<String>>()
+        .iter()
+        .find(|switch| *switch == "p")
+    {
+        Some(_) => {
+            let pid = std::process::id();
+            println!("mu-perf: {pid}, press return to continue");
+
+            for _line in io::stdin().lines() {
+                break;
+            }
+        }
+        None => (),
     }
 
     let env = Mu::env(&Mu::config(_config));
