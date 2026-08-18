@@ -3,6 +3,10 @@ name = "mu-sys"
 version = "0.0.2"
 edition = "2021"
 
+[features]
+default = [ ]
+pause = []
+
 [dependencies]
 getopt = "1.1"
 mu = { path = "../.." }
